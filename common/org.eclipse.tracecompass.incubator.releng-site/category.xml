@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description>
+      Nightly builds of Trace Compass project.
+   </description>
+   <feature url="features/org.eclipse.tracecompass.incubator.callstack_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.callstack" version="0.0.1.qualifier">
+      <category name="Generic CallStack Analyses"/>
+   </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.lttng.callstack.context_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.lttng.callstack.context" version="0.0.1.qualifier">
+      <category name="Generic CallStack Analyses"/>
+   </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.perf.profiling_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.perf.profiling" version="0.0.1.qualifier">
+      <category name="Generic CallStack Analyses"/>
+   </feature>
+   <category-def name="Generic CallStack Analyses" label="Generic Callstack Analyses"/>
+</site>

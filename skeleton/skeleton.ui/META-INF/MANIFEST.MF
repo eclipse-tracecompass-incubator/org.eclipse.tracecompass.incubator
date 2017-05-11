@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %Bundle-Name
+Bundle-Vendor: %Bundle-Vendor
+Bundle-SymbolicName: org.eclipse.tracecompass.incubator.{%skeleton}.ui;singleton:=true
+Bundle-Version: 0.0.1.qualifier
+Bundle-Localization: plugin
+Bundle-Activator: org.eclipse.tracecompass.incubator.internal.{%skeleton}.ui.Activator
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.tracecompass.common.core,
+ org.eclipse.tracecompass.incubator.{%skeleton}.core
+Export-Package: org.eclipse.tracecompass.incubator.internal.{%skeleton}.ui;x-internal:=true
