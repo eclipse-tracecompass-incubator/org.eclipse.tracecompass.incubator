@@ -12,6 +12,13 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.incubator.analysis.core,
  org.junit,
  org.eclipse.tracecompass.tmf.core.tests,
- org.eclipse.tracecompass.tmf.core
+ org.eclipse.tracecompass.tmf.core,
+ org.eclipse.tracecompass.tmf.ctf.core,
+ org.eclipse.tracecompass.lttng2.kernel.core,
+ org.eclipse.tracecompass.analysis.os.linux.core,
+ org.eclipse.tracecompass.lttng2.kernel.core.tests,
+ org.eclipse.tracecompass.testtraces.tracecompass-test-traces-ctf
 Export-Package: org.eclipse.tracecompass.incubator.analysis.core.tests,
+ org.eclipse.tracecompass.incubator.analysis.core.tests.aspects,
  org.eclipse.tracecompass.incubator.analysis.core.tests.model
+Import-Package: com.google.common.collect
