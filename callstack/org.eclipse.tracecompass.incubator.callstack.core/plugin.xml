@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.tracecompass.tmf.analysis.xml.core.xsd">
+      <xsdfile
+            file="xsd_files/xmlCallstack.xsd">
+      </xsdfile>
+      <schemaParser
+            class="org.eclipse.tracecompass.incubator.internal.callstack.core.xml.callstack.CallstackXmlSchemaParser">
+      </schemaParser>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.callstack.core.lttng2.ust.LttngUstCallStackAnalysis"
+            id="org.eclipse.tracecompass.incubator.callstack.core.lttng.ust"
+            name="%analysis.callstack.ust">
+         <tracetype
+               class="org.eclipse.tracecompass.lttng2.ust.core.trace.LttngUstTrace">
+         </tracetype>
+      </module>
+   </extension>
+</plugin>

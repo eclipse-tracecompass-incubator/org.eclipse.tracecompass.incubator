@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallStackAnalysisStub"
+            id="org.eclipse.tracecompass.incubator.callstack.analysis.test"
+            name="Test Callstack">
+         <tracetype
+               class="org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.TmfXmlTraceStub">
+         </tracetype>
+      </module>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.analysis.xml.core.files">
+      <xmlfile
+            file="test_xml_files/test_callstack.xml">
+      </xmlfile>
+   </extension>
+
+</plugin>

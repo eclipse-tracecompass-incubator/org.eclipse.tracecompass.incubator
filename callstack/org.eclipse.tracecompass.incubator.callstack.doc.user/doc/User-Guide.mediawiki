@@ -1,0 +1,8 @@
+
+= Table of Contents =
+
+__TOC__
+
+= Overview =
+
+The Generic callstack plugin provides the possibility to describe a callstack
