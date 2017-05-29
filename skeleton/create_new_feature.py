@@ -57,6 +57,10 @@ def moveActivator(moveTo, suffix, id):
     shutil.move(moveTo + '.' + suffix + '/src/Activator.java', moveTo + '.' + suffix + '/src/org/eclipse/tracecompass/incubator/internal/' + id.replace('.', '/') + '/' + suffix)
     shutil.move(moveTo + '.' + suffix + '/src/package-info.java', moveTo + '.' + suffix + '/src/org/eclipse/tracecompass/incubator/internal/' + id.replace('.', '/') + '/' + suffix)
 
+def moveActivatorTest(moveTo, suffix, id):
+    os.makedirs(moveTo + '.' + suffix + '/src/org/eclipse/tracecompass/incubator/' + id.replace('.', '/') + '/' + suffix.replace('.', '/'))
+    shutil.move(moveTo + '.' + suffix + '/src/ActivatorTest.java', moveTo + '.' + suffix + '/src/org/eclipse/tracecompass/incubator/' + id.replace('.', '/') + '/' + suffix.replace('.', '/'))
+
 def updatePom(baseDir, destDir, id, moduleStr):
     # Does a pom.xml exists in the destination directory?
     destPom = destDir + "/pom.xml"
@@ -88,7 +92,8 @@ def copyDirs(fullname, dir, noUi, noHelp):
     pomModule += pomModuleStr.replace(idPlaceholder, id).replace("{%suffix}", ".core")
     
     copyAndUpdate(baseDir + '/skeleton.core.tests', moveTo + '.core.tests', fullname, id)
-    os.makedirs(moveTo + '.core.tests/src')
+    moveActivatorTest(moveTo, "core.tests", id)
+    pomModule += pomModuleStr.replace(idPlaceholder, id).replace("{%suffix}", ".core.tests")
 
     if not(noUi):
         copyAndUpdate(baseDir + '/skeleton.ui', moveTo + '.ui', fullname, id)
