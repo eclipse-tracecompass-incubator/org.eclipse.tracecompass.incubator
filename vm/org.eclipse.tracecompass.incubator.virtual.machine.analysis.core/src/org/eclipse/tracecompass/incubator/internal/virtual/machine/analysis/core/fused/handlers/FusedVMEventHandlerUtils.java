@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.Attributes;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
@@ -26,10 +26,11 @@ import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
+ * Utility methods to retrieve information from either the events or the state
+ * system
+ *
  * @author Cédric Biancheri
  */
 public class FusedVMEventHandlerUtils {
@@ -38,11 +39,11 @@ public class FusedVMEventHandlerUtils {
     }
 
     private static int getNodeCPUs(ITmfStateSystemBuilder ssb) {
-        return ssb.getQuarkAbsoluteAndAdd(Attributes.CPUS);
+        return ssb.getQuarkAbsoluteAndAdd(FusedAttributes.CPUS);
     }
 
     private static int getNodeThreads(ITmfStateSystemBuilder ssb, String machineName) {
-        return ssb.getQuarkAbsoluteAndAdd(Attributes.THREADS, machineName);
+        return ssb.getQuarkAbsoluteAndAdd(FusedAttributes.THREADS, machineName);
     }
 
     /**
@@ -53,7 +54,7 @@ public class FusedVMEventHandlerUtils {
      * @return the quark
      */
     public static int getNodeMachines(ITmfStateSystemBuilder ssb) {
-        return ssb.getQuarkAbsoluteAndAdd(Attributes.MACHINES);
+        return ssb.getQuarkAbsoluteAndAdd(FusedAttributes.MACHINES);
     }
 
     /**
@@ -83,10 +84,10 @@ public class FusedVMEventHandlerUtils {
          * Shortcut for the "current thread" attribute node. It requires
          * querying the current CPU's current thread.
          */
-        int quark = ss.getQuarkRelativeAndAdd(getCurrentCPUNode(cpuNumber, ss), Attributes.CURRENT_THREAD);
+        int quark = ss.getQuarkRelativeAndAdd(getCurrentCPUNode(cpuNumber, ss), FusedAttributes.CURRENT_THREAD);
         ITmfStateValue value = ss.queryOngoingState(quark);
         int thread = value.isNull() ? -1 : value.unboxInt();
-        quark = ss.getQuarkRelativeAndAdd(getCurrentCPUNode(cpuNumber, ss), Attributes.MACHINE_NAME);
+        quark = ss.getQuarkRelativeAndAdd(getCurrentCPUNode(cpuNumber, ss), FusedAttributes.MACHINE_NAME);
         value = ss.queryOngoingState(quark);
         String machineName = value.unboxStr();
         return ss.getQuarkRelativeAndAdd(getNodeThreads(ss, machineName), buildThreadAttributeName(thread, cpuNumber));
@@ -95,17 +96,17 @@ public class FusedVMEventHandlerUtils {
     /**
      * Build the thread attribute name.
      *
-     * For all threads except "0" this is the string representation of the threadId.
-     * For thread "0" which is the idle thread and can be running concurrently on multiple
-     * CPUs, append "_cpuId".
+     * For all threads except "0" this is the string representation of the
+     * threadId. For thread "0" which is the idle thread and can be running
+     * concurrently on multiple CPUs, append "_cpuId".
      *
      * @param threadId
-     *              the thread id
+     *            the thread id
      * @param cpuId
-     *              the cpu id
+     *            the cpu id
      *
-     * @return the thread attribute name
-     *         null if the threadId is zero and the cpuId is null
+     * @return the thread attribute name null if the threadId is zero and the
+     *         cpuId is null
      */
     public static @Nullable String buildThreadAttributeName(int threadId, @Nullable Integer cpuId) {
 
@@ -113,7 +114,7 @@ public class FusedVMEventHandlerUtils {
             if (cpuId == null) {
                 return null;
             }
-            return Attributes.THREAD_0_PREFIX + String.valueOf(cpuId);
+            return FusedAttributes.THREAD_0_PREFIX + String.valueOf(cpuId);
         }
 
         return String.valueOf(threadId);
@@ -129,7 +130,7 @@ public class FusedVMEventHandlerUtils {
      * @return the IRQ node quark
      */
     public static int getNodeIRQs(int cpuNumber, ITmfStateSystemBuilder ss) {
-        return ss.getQuarkAbsoluteAndAdd(Attributes.CPUS, Integer.toString(cpuNumber), Attributes.IRQS);
+        return ss.getQuarkAbsoluteAndAdd(FusedAttributes.CPUS, Integer.toString(cpuNumber), FusedAttributes.IRQS);
     }
 
     /**
@@ -142,23 +143,6 @@ public class FusedVMEventHandlerUtils {
      */
     public static long getTimestamp(ITmfEvent event) {
         return event.getTimestamp().toNanos();
-    }
-
-    /**
-     * Get CPU
-     *
-     * @param event
-     *            The event containing the cpu
-     *
-     * @return the CPU number (null for not set)
-     */
-    public static @Nullable Integer getCpu(ITmfEvent event) {
-        Integer cpuObj = TmfTraceUtils.resolveIntEventAspectOfClassForEvent(event.getTrace(), TmfCpuAspect.class, event);
-        if (cpuObj == null) {
-            /* We couldn't find any CPU information, ignore this event */
-            return null;
-        }
-        return cpuObj;
     }
 
     /**
@@ -183,7 +167,7 @@ public class FusedVMEventHandlerUtils {
         int quark;
         ITmfStateValue value;
 
-        quark = ssb.getQuarkRelativeAndAdd(currentThreadNode, Attributes.SYSTEM_CALL);
+        quark = ssb.getQuarkRelativeAndAdd(currentThreadNode, FusedAttributes.SYSTEM_CALL);
         if (ssb.queryOngoingState(quark).isNull()) {
             /* We were in user mode before the interruption */
             value = StateValues.PROCESS_STATUS_RUN_USERMODE_VALUE;
@@ -191,7 +175,7 @@ public class FusedVMEventHandlerUtils {
             /* We were previously in kernel mode */
             value = StateValues.PROCESS_STATUS_RUN_SYSCALL_VALUE;
         }
-        quark = ssb.getQuarkRelativeAndAdd(currentThreadNode, Attributes.STATUS);
+        quark = ssb.getQuarkRelativeAndAdd(currentThreadNode, FusedAttributes.STATUS);
         ssb.modifyAttribute(timestamp, value, quark);
     }
 
@@ -215,7 +199,7 @@ public class FusedVMEventHandlerUtils {
         int quark;
         int currentCPUNode = getCurrentCPUNode(cpuNumber, ssb);
 
-        quark = ssb.getQuarkRelativeAndAdd(currentCPUNode, Attributes.STATUS);
+        quark = ssb.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
         ITmfStateValue value = getCpuStatus(ssb, currentCPUNode);
         ssb.modifyAttribute(timestamp, value, quark);
     }
@@ -244,7 +228,7 @@ public class FusedVMEventHandlerUtils {
     private static ITmfStateValue getCpuStatus(ITmfStateSystemBuilder ssb, int cpuQuark) {
 
         /* Check if there is a IRQ running */
-        int irqQuarks = ssb.getQuarkRelativeAndAdd(cpuQuark, Attributes.IRQS);
+        int irqQuarks = ssb.getQuarkRelativeAndAdd(cpuQuark, FusedAttributes.IRQS);
         List<Integer> irqs = ssb.getSubAttributes(irqQuarks, false);
         for (Integer quark : irqs) {
             final ITmfStateValue irqState = ssb.queryOngoingState(quark.intValue());
@@ -254,7 +238,7 @@ public class FusedVMEventHandlerUtils {
         }
 
         /* Check if there is a soft IRQ running */
-        int softIrqQuarks = ssb.getQuarkRelativeAndAdd(cpuQuark, Attributes.SOFT_IRQS);
+        int softIrqQuarks = ssb.getQuarkRelativeAndAdd(cpuQuark, FusedAttributes.SOFT_IRQS);
         List<Integer> softIrqs = ssb.getSubAttributes(softIrqQuarks, false);
         for (Integer quark : softIrqs) {
             final ITmfStateValue softIrqState = ssb.queryOngoingState(quark.intValue());
@@ -267,7 +251,7 @@ public class FusedVMEventHandlerUtils {
          * Check if there is a thread running. If not, report IDLE. If there is,
          * report the running state of the thread (usermode or system call).
          */
-        int currentThreadQuark = ssb.getQuarkRelativeAndAdd(cpuQuark, Attributes.CURRENT_THREAD);
+        int currentThreadQuark = ssb.getQuarkRelativeAndAdd(cpuQuark, FusedAttributes.CURRENT_THREAD);
         ITmfStateValue currentThreadState = ssb.queryOngoingState(currentThreadQuark);
         if (currentThreadState.isNull()) {
             return TmfStateValue.nullValue();
@@ -276,12 +260,10 @@ public class FusedVMEventHandlerUtils {
         if (tid == 0) {
             return StateValues.CPU_STATUS_IDLE_VALUE;
         }
-        int currentMachineQuark = ssb.getQuarkRelativeAndAdd(cpuQuark, Attributes.MACHINE_NAME);
+        int currentMachineQuark = ssb.getQuarkRelativeAndAdd(cpuQuark, FusedAttributes.MACHINE_NAME);
         String machineName = ssb.queryOngoingState(currentMachineQuark).unboxStr();
-        int threadSystemCallQuark = ssb.getQuarkRelativeAndAdd(getNodeThreads(ssb, machineName), Integer.toString(tid), Attributes.SYSTEM_CALL);
-        return (ssb.queryOngoingState(threadSystemCallQuark).isNull() ?
-                StateValues.CPU_STATUS_RUN_USERMODE_VALUE :
-                StateValues.CPU_STATUS_RUN_SYSCALL_VALUE);
+        int threadSystemCallQuark = ssb.getQuarkRelativeAndAdd(getNodeThreads(ssb, machineName), Integer.toString(tid), FusedAttributes.SYSTEM_CALL);
+        return (ssb.queryOngoingState(threadSystemCallQuark).isNull() ? StateValues.CPU_STATUS_RUN_USERMODE_VALUE : StateValues.CPU_STATUS_RUN_SYSCALL_VALUE);
     }
 
     /**
@@ -294,7 +276,7 @@ public class FusedVMEventHandlerUtils {
      * @return the quark
      */
     public static int getMachineCPUsNode(ITmfStateSystemBuilder ssq, String machineName) {
-        return ssq.getQuarkAbsoluteAndAdd(Attributes.MACHINES, machineName, Attributes.CPUS);
+        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.MACHINES, machineName, FusedAttributes.CPUS);
     }
 
     /**
@@ -307,7 +289,7 @@ public class FusedVMEventHandlerUtils {
      * @return the quark
      */
     public static int getMachinepCPUsNode(ITmfStateSystemBuilder ssq, String machineName) {
-        return ssq.getQuarkAbsoluteAndAdd(Attributes.MACHINES, machineName, Attributes.PCPUS);
+        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.MACHINES, machineName, FusedAttributes.PCPUS);
     }
 
     /**
@@ -318,11 +300,11 @@ public class FusedVMEventHandlerUtils {
      * @return the threads quark
      */
     public static int getNodeThreads(ITmfStateSystemBuilder ss) {
-        return ss.getQuarkAbsoluteAndAdd(Attributes.THREADS);
+        return ss.getQuarkAbsoluteAndAdd(FusedAttributes.THREADS);
     }
 
-    public static int saveContainerThreadID(ITmfStateSystemBuilder ss, int quark,int tid) {
-        return ss.getQuarkRelativeAndAdd(quark, Attributes.THREADS, Integer.toString(tid));
+    public static int saveContainerThreadID(ITmfStateSystemBuilder ss, int quark, int tid) {
+        return ss.getQuarkRelativeAndAdd(quark, FusedAttributes.THREADS, Integer.toString(tid));
     }
 
     /**
@@ -335,12 +317,12 @@ public class FusedVMEventHandlerUtils {
      * @return the Soft IRQ node quark
      */
     public static int getNodeSoftIRQs(int cpuNumber, ITmfStateSystemBuilder ss) {
-        return ss.getQuarkAbsoluteAndAdd(Attributes.CPUS, Integer.toString(cpuNumber), Attributes.SOFT_IRQS);
+        return ss.getQuarkAbsoluteAndAdd(FusedAttributes.CPUS, Integer.toString(cpuNumber), FusedAttributes.SOFT_IRQS);
     }
 
     public static List<Long> getProcessNSIDs(ITmfStateSystemBuilder ss, Integer processQuark, long timestamp) {
         List<Long> namespaces = new LinkedList<>();
-        List<Integer> listQuarks = ss.getQuarks(processQuark, Attributes.NS_MAX_LEVEL);
+        List<Integer> listQuarks = ss.getQuarks(processQuark, FusedAttributes.NS_MAX_LEVEL);
         if (listQuarks.isEmpty()) {
             return namespaces;
         }
@@ -351,15 +333,15 @@ public class FusedVMEventHandlerUtils {
             int nsMaxLevel = interval.getStateValue().unboxInt();
             if (nsMaxLevel != 1) {
                 int actualLevel = 1;
-                int virtualTIDQuark = ss.getQuarkRelative(processQuark, Attributes.VTID);
+                int virtualTIDQuark = ss.getQuarkRelative(processQuark, FusedAttributes.VTID);
                 actualLevel++;
-                int namespaceIDQuark = ss.getQuarkRelative(virtualTIDQuark, Attributes.NS_INUM);
+                int namespaceIDQuark = ss.getQuarkRelative(virtualTIDQuark, FusedAttributes.NS_INUM);
                 long namespaceID = ss.querySingleState(timestamp, namespaceIDQuark).getStateValue().unboxLong();
                 namespaces.add(namespaceID);
                 while (actualLevel < nsMaxLevel) {
-                    virtualTIDQuark = ss.getQuarkRelative(virtualTIDQuark, Attributes.VTID);
+                    virtualTIDQuark = ss.getQuarkRelative(virtualTIDQuark, FusedAttributes.VTID);
                     actualLevel++;
-                    namespaceIDQuark = ss.getQuarkRelative(virtualTIDQuark, Attributes.NS_INUM);
+                    namespaceIDQuark = ss.getQuarkRelative(virtualTIDQuark, FusedAttributes.NS_INUM);
                     namespaceID = ss.querySingleState(timestamp, namespaceIDQuark).getStateValue().unboxLong();
                     namespaces.add(namespaceID);
                 }
@@ -370,7 +352,6 @@ public class FusedVMEventHandlerUtils {
         }
         return namespaces;
     }
-
 
     // Method for debug purpose
     // Transform timestamp to something readable: hh:mm:ss
@@ -401,7 +382,5 @@ public class FusedVMEventHandlerUtils {
         str.append(formatNs(time));
         return str.toString();
     }
-
-
 
 }

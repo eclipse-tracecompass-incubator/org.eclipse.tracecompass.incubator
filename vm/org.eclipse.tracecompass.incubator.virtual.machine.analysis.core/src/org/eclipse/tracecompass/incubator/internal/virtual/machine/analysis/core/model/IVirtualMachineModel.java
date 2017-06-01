@@ -28,6 +28,19 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 public interface IVirtualMachineModel {
 
     /**
+     * This value corresponds to the root namespace ID, as defined in the linux source code linux/include/linux/proc_ns.h
+     *
+     * <pre>
+     * enum {
+     *    [...]
+     *    PROC_PID_INIT_INO   = 0xEFFFFFFCU,
+     *    [...]
+     * };
+     * </pre>
+     */
+    long ROOT_NAMESPACE = 4026531836L;
+
+    /**
      * Get the machine that ran this event
      *
      * @param event

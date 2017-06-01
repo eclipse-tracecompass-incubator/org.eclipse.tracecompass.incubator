@@ -14,8 +14,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.Attributes;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVirtualMachineStateProvider;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualCPU;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.StateValues;
@@ -24,6 +23,8 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedE
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * @author Cédric Biancheri
@@ -36,7 +37,7 @@ public class SoftIrqExitHandler extends VMKernelEventHandler {
 
     @Override
     public void handleEvent(ITmfStateSystemBuilder ss, ITmfEvent event) {
-        Integer cpu = FusedVMEventHandlerUtils.getCpu(event);
+        Integer cpu = TmfTraceUtils.resolveIntEventAspectOfClassForEvent(event.getTrace(), TmfCpuAspect.class, event);
         if (cpu == null) {
             return;
         }
@@ -79,7 +80,7 @@ public class SoftIrqExitHandler extends VMKernelEventHandler {
          */
         boolean modify = true;
         if (host != null) {
-            int machineNameQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, Attributes.MACHINE_NAME);
+            int machineNameQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.MACHINE_NAME);
             try {
                 modify = ss.querySingleState(timestamp, machineNameQuark).getStateValue().unboxStr().equals(host.getTraceName());
             } catch (StateSystemDisposedException e) {
@@ -91,7 +92,7 @@ public class SoftIrqExitHandler extends VMKernelEventHandler {
         FusedVMEventHandlerUtils.setProcessToRunning(timestamp, currentThreadNode, ss);
 
         /* Set the CPU status back to "busy" or "idle" */
-        quark = ss.getQuarkRelativeAndAdd(currentCPUNode, Attributes.STATUS);
+        quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
         ITmfStateValue value = cpuObject.getStateBeforeIRQ();
         cpuObject.setCurrentState(value);
         if (modify) {

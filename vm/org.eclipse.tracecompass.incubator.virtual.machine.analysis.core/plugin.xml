@@ -14,7 +14,7 @@
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.VirtualMachineCpuAnalysis"
             automatic="false"
-            id="org.eclipse.tracecompass.extension.virtual.machine.analysis.core.VirtualMachineAnalysisModule"
+            id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.VirtualMachineAnalysisModule"
             name="%vm.analysis">
             <tracetype
                   applies="true"
@@ -24,7 +24,7 @@
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVirtualMachineAnalysis"
             automatic="false"
-            id="org.eclipse.tracecompass.extension.virtual.machine.analysis.FusedVirtualMachineAnalysis"
+            id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.FusedVirtualMachineAnalysis"
             name="%vm.analysis.fused">
          <tracetype
                applies="true"

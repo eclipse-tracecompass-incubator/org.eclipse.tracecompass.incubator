@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -83,7 +84,7 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
         /* If there is only one trace we consider it as a host */
         if (exp.getTraces().size() == 1) {
             ITmfTrace trace = exp.getTraces().get(0);
-            AddKnownMachine(VirtualMachine.newHostMachine(trace.getHostId(), trace.getName()));
+            addKnownMachine(VirtualMachine.newHostMachine(trace.getHostId(), String.valueOf(trace.getName())));
         }
     }
 
@@ -226,8 +227,7 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
         final String eventName = event.getName();
         VirtualMachine host = fKnownMachines.get(event.getTrace().getHostId());
         switch (eventName) {
-        case QemuKvmStrings.VMSYNC_GH_HOST:
-        {
+        case QemuKvmStrings.VMSYNC_GH_HOST: {
             if (!eventName.equals(QemuKvmStrings.VMSYNC_GH_HOST)) {
                 return;
             }
@@ -288,8 +288,7 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
         }
             break;
         case QemuKvmStrings.KVM_ENTRY:
-        case QemuKvmStrings.KVM_X86_ENTRY:
-        {
+        case QemuKvmStrings.KVM_X86_ENTRY: {
             String hostId = event.getTrace().getHostId();
             long ts = event.getTimestamp().getValue();
             Integer cpu = TmfTraceUtils.resolveIntEventAspectOfClassForEvent(event.getTrace(), TmfCpuAspect.class, event);
@@ -337,7 +336,7 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
      */
     public @Nullable HostThread getHostThreadFromVm(VirtualMachine virtualMachine) {
         for (Entry<HostThread, VirtualMachine> entry : fTidToVm.entrySet()) {
-            if (virtualMachine.getVmUid() == entry.getValue().getVmUid()) {
+            if (virtualMachine.getVmUid() == Objects.requireNonNull(entry.getValue()).getVmUid()) {
                 return entry.getKey();
             }
         }
@@ -354,7 +353,7 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
      */
     public @Nullable HostThread getHostThreadFromVCpu(VirtualCPU virtualCPU) {
         for (Entry<HostThread, VirtualCPU> entry : fTidToVcpu.entrySet()) {
-            VirtualCPU vcpu = entry.getValue();
+            VirtualCPU vcpu = Objects.requireNonNull(entry.getValue());
             if (vcpu.getVm().getHostId().equals(virtualCPU.getVm().getHostId()) && vcpu.getCpuId() == virtualCPU.getCpuId()) {
                 return entry.getKey();
             }
@@ -373,6 +372,9 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
      */
     public @Nullable Long getPhysicalCpuFromVcpu(VirtualMachine virtualMachine, VirtualCPU vcpu) {
         Long pcpu = fVirtualToPhysicalCpu.get(virtualMachine, vcpu);
+        if (pcpu == null) {
+            return null;
+        }
         VirtualMachine parent = virtualMachine.getParent();
         if (parent != null && parent.isGuest()) {
             pcpu = fVirtualToPhysicalCpu.get(parent, VirtualCPU.getVirtualCPU(parent, pcpu));
@@ -392,9 +394,9 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
     }
 
     /**
-     * @param v
+     * @param v The virtual machine to add
      */
-    public void AddKnownMachine(VirtualMachine v) {
+    public void addKnownMachine(VirtualMachine v) {
         fKnownMachines.put(v.getHostId(), v);
     }
 

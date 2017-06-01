@@ -10,8 +10,7 @@
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.handlers;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.Attributes;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVirtualMachineStateProvider;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualCPU;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.StateValues;
@@ -20,6 +19,8 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedE
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * @author Cédric Biancheri
@@ -32,7 +33,7 @@ public class SysEntryHandler extends VMKernelEventHandler {
 
     @Override
     public void handleEvent(ITmfStateSystemBuilder ss, ITmfEvent event) {
-        Integer cpu = FusedVMEventHandlerUtils.getCpu(event);
+        Integer cpu = TmfTraceUtils.resolveIntEventAspectOfClassForEvent(event.getTrace(), TmfCpuAspect.class, event);
         if (cpu == null) {
             return;
         }
@@ -49,13 +50,13 @@ public class SysEntryHandler extends VMKernelEventHandler {
         }
         /* Assign the new system call to the process */
         int currentThreadNode = FusedVMEventHandlerUtils.getCurrentThreadNode(cpu, ss);
-        int quark = ss.getQuarkRelativeAndAdd(currentThreadNode, Attributes.SYSTEM_CALL);
+        int quark = ss.getQuarkRelativeAndAdd(currentThreadNode, FusedAttributes.SYSTEM_CALL);
         ITmfStateValue value = TmfStateValue.newValueString(event.getName());
         long timestamp = FusedVMEventHandlerUtils.getTimestamp(event);
         ss.modifyAttribute(timestamp, value, quark);
 
         /* Put the process in system call mode */
-        quark = ss.getQuarkRelativeAndAdd(currentThreadNode, Attributes.STATUS);
+        quark = ss.getQuarkRelativeAndAdd(currentThreadNode, FusedAttributes.STATUS);
         value = StateValues.PROCESS_STATUS_RUN_SYSCALL_VALUE;
         ss.modifyAttribute(timestamp, value, quark);
 
@@ -68,7 +69,7 @@ public class SysEntryHandler extends VMKernelEventHandler {
          */
         boolean modify = true;
         if (host != null) {
-            int machineNameQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, Attributes.MACHINE_NAME);
+            int machineNameQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.MACHINE_NAME);
             try {
                 modify = ss.querySingleState(timestamp, machineNameQuark).getStateValue().unboxStr().equals(host.getTraceName());
             } catch (StateSystemDisposedException e) {
@@ -76,7 +77,7 @@ public class SysEntryHandler extends VMKernelEventHandler {
             }
         }
 
-        quark = ss.getQuarkRelativeAndAdd(currentCPUNode, Attributes.STATUS);
+        quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
         value = StateValues.CPU_STATUS_RUN_SYSCALL_VALUE;
         if (modify) {
             ss.modifyAttribute(timestamp, value, quark);

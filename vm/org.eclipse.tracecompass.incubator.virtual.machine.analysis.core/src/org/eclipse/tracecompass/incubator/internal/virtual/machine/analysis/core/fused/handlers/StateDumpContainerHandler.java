@@ -10,8 +10,7 @@
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.handlers;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.Attributes;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVirtualMachineStateProvider;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.LinuxValues;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
@@ -20,9 +19,12 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
- * Handler for the process statedump event
+ * Handler for the process statedump event. It initializes the processes'
+ * namespaces and inserts the process in their proper namespace(s)
  *
  * @author Cédric Biancheri
  */
@@ -38,7 +40,6 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
     private static final String STATUS_FIELD = "status"; //$NON-NLS-1$
     private static final String NS_LEVEL_FIELD = "ns_level"; //$NON-NLS-1$
     private static final String NS_INUM_FIELD = "ns_inum"; //$NON-NLS-1$
-
 
     /**
      * Constructor with a layout
@@ -71,7 +72,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
      * @return The quark of the deepest level
      */
     public static int createLevels(ITmfStateSystemBuilder ss, ITmfEvent event) {
-        Integer cpu = FusedVMEventHandlerUtils.getCpu(event);
+        Integer cpu = TmfTraceUtils.resolveIntEventAspectOfClassForEvent(event.getTrace(), TmfCpuAspect.class, event);
         ITmfEventField content = event.getContent();
         Long tid = content.getFieldValue(Long.class, TID_FIELD);
         Long vtid = content.getFieldValue(Long.class, VTID_FIELD);
@@ -80,34 +81,31 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
             return ITmfStateSystem.INVALID_ATTRIBUTE;
         }
         long ts = event.getTimestamp().getValue();
-        String machineName = event.getTrace().getName();
+        String traceName = event.getTrace().getName();
         String threadAttributeName = FusedVMEventHandlerUtils.buildThreadAttributeName(tid.intValue(), cpu);
         if (threadAttributeName == null) {
             return ITmfStateSystem.INVALID_ATTRIBUTE;
         }
-        int threadNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineName, threadAttributeName);
-        int layerNode = threadNode;
-        ITmfStateValue value;
+        int threadNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), traceName, threadAttributeName);
+        int layerQuark = threadNode;
         for (int i = 0; i < nsLevel; i++) {
             /* While we can go deeper we create an other level */
-            layerNode = ss.getQuarkRelativeAndAdd(layerNode, Attributes.VTID);
+            layerQuark = ss.getQuarkRelativeAndAdd(layerQuark, FusedAttributes.VTID);
             if (i + 1 == nsLevel) {
                 /*
                  * If the next layer is the last we can add the info contained
                  * in the event
                  */
-                value = TmfStateValue.newValueInt(vtid.intValue());
-                ss.modifyAttribute(ts, value, layerNode);
+                ss.modifyAttribute(ts, TmfStateValue.newValueInt(vtid.intValue()), layerQuark);
             }
-            ss.getQuarkRelativeAndAdd(layerNode, Attributes.VPPID);
-            int quark = ss.getQuarkRelativeAndAdd(layerNode, Attributes.NS_LEVEL);
+            ss.getQuarkRelativeAndAdd(layerQuark, FusedAttributes.VPPID);
+            int quark = ss.getQuarkRelativeAndAdd(layerQuark, FusedAttributes.NS_LEVEL);
             if (ss.queryOngoingState(quark).isNull()) {
                 /* If the value didn't exist previously, set it */
-                value = TmfStateValue.newValueInt(i + 1);
-                ss.modifyAttribute(ts, value, quark);
+                ss.modifyAttribute(ts, TmfStateValue.newValueInt(i + 1), quark);
             }
         }
-        return layerNode;
+        return layerQuark;
     }
 
     /**
@@ -121,7 +119,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
      *            The quark of the last level
      */
     public static void fillLevel(ITmfStateSystemBuilder ss, ITmfEvent event, int layerNode) {
-        Integer cpu = FusedVMEventHandlerUtils.getCpu(event);
+        Integer cpu = TmfTraceUtils.resolveIntEventAspectOfClassForEvent(event.getTrace(), TmfCpuAspect.class, event);
         ITmfEventField content = event.getContent();
         long ts = event.getTimestamp().getValue();
         int quark;
@@ -155,7 +153,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
          * Set the max level, only at level 0. This can be useful to know the
          * depth of the hierarchy.
          */
-        quark = ss.getQuarkRelativeAndAdd(threadNode, Attributes.NS_MAX_LEVEL);
+        quark = ss.getQuarkRelativeAndAdd(threadNode, FusedAttributes.NS_MAX_LEVEL);
         if (ss.queryOngoingState(quark).isNull()) {
             /*
              * Events are coming from the deepest layers first so no need to
@@ -169,7 +167,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
         /*
          * Set the process' status. Only for level 0.
          */
-        quark = ss.getQuarkRelativeAndAdd(threadNode, Attributes.STATUS);
+        quark = ss.getQuarkRelativeAndAdd(threadNode, FusedAttributes.STATUS);
         if (ss.queryOngoingState(quark).isNull()) {
             switch (status.intValue()) {
             case LinuxValues.STATEDUMP_PROCESS_STATUS_WAIT_CPU:
@@ -193,14 +191,14 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
         /*
          * Set the process' name. Only for level 0.
          */
-        quark = ss.getQuarkRelativeAndAdd(threadNode, Attributes.EXEC_NAME);
+        quark = ss.getQuarkRelativeAndAdd(threadNode, FusedAttributes.EXEC_NAME);
         if (ss.queryOngoingState(quark).isNull()) {
             /* If the value didn't exist previously, set it */
             value = TmfStateValue.newValueString(name);
             ss.modifyAttribute(ts, value, quark);
         }
 
-        String attributePpid = Attributes.PPID;
+        String attributePpid = FusedAttributes.PPID;
         /* Prepare the level if we are not in the root namespace */
         if (nsLevel != 0) {
             attributePpid = "VPPID"; //$NON-NLS-1$
@@ -210,7 +208,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
         quark = ss.getQuarkRelativeAndAdd(layerNode, attributePpid);
         ITmfStateValue valuePpid;
         if (ss.queryOngoingState(quark).isNull()) {
-            if (vpid == vtid) {
+            if (vpid.equals(vtid)) {
                 /* We have a process. Use the 'PPID' field. */
                 value = TmfStateValue.newValueInt(vppid.intValue());
                 valuePpid = TmfStateValue.newValueInt(ppid.intValue());
@@ -224,7 +222,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
             ss.modifyAttribute(ts, value, quark);
             if (nsLevel != 0) {
                 /* Set also for the root layer */
-                quark = ss.getQuarkRelativeAndAdd(threadNode, Attributes.PPID);
+                quark = ss.getQuarkRelativeAndAdd(threadNode, FusedAttributes.PPID);
                 if (ss.queryOngoingState(quark).isNull()) {
                     ss.modifyAttribute(ts, valuePpid, quark);
                 }
@@ -232,7 +230,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
         }
 
         /* Set the namespace level */
-        quark = ss.getQuarkRelativeAndAdd(layerNode, Attributes.NS_LEVEL);
+        quark = ss.getQuarkRelativeAndAdd(layerNode, FusedAttributes.NS_LEVEL);
         if (ss.queryOngoingState(quark).isNull()) {
             /* If the value didn't exist previously, set it */
             value = TmfStateValue.newValueInt(nsLevel.intValue());
@@ -240,7 +238,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
         }
 
         /* Set the namespace identification number */
-        quark = ss.getQuarkRelativeAndAdd(layerNode, Attributes.NS_INUM);
+        quark = ss.getQuarkRelativeAndAdd(layerNode, FusedAttributes.NS_INUM);
         if (ss.queryOngoingState(quark).isNull()) {
             /* If the value didn't exist previously, set it */
             value = TmfStateValue.newValueLong(nsInum);
@@ -248,10 +246,10 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
         }
 
         /* Save the namespace id somewhere so it can be reused */
-        quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, Attributes.CONTAINERS, Long.toString(nsInum));
+        quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, FusedAttributes.CONTAINERS, Long.toString(nsInum));
 
         /* Save the tid in the container. We also keep the vtid */
-        quark = ss.getQuarkRelativeAndAdd(quark, Attributes.THREADS, String.valueOf(tid));
+        quark = ss.getQuarkRelativeAndAdd(quark, FusedAttributes.THREADS, String.valueOf(tid));
         ss.modifyAttribute(ts, TmfStateValue.newValueInt(vtid.intValue()), quark);
 
         if (nsLevel != maxLevel - 1) {
@@ -260,17 +258,17 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
              * of the namespace one layer deeper. We are going to tell him we
              * found his father. That will make him happy.
              */
-            quark = ss.getQuarkRelativeAndAdd(layerNode, Attributes.VTID, Attributes.NS_INUM);
+            quark = ss.getQuarkRelativeAndAdd(layerNode, FusedAttributes.VTID, FusedAttributes.NS_INUM);
             Long childNSInum = ss.queryOngoingState(quark).unboxLong();
             if (childNSInum > 0) {
-                quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, Attributes.CONTAINERS, Long.toString(childNSInum), Attributes.PARENT);
+                quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, FusedAttributes.CONTAINERS, Long.toString(childNSInum), FusedAttributes.PARENT);
                 ss.modifyAttribute(ss.getStartTime(), TmfStateValue.newValueLong(nsInum), quark);
             }
         }
 
         if (nsLevel == 0) {
             /* Root namespace => no parent */
-            quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, Attributes.CONTAINERS, Long.toString(nsInum), Attributes.PARENT);
+            quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, FusedAttributes.CONTAINERS, Long.toString(nsInum), FusedAttributes.PARENT);
             ss.modifyAttribute(ss.getStartTime(), TmfStateValue.newValueLong(-1), quark);
         }
 

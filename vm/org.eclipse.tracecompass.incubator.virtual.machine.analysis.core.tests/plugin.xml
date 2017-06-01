@@ -6,10 +6,10 @@
       <type
             category="org.eclipse.linuxtools.tmf.core.tests.category"
             event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
-            id="org.eclipse.tracecompass.extension.virtual.machine.analysis.vm.trace.stub"
+            id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.vm.trace.stub"
             isDirectory="false"
             name="VM XML Kernel Trace Stub"
-            trace_type="org.eclipse.tracecompass.extension.virtual.machine.analysis.core.tests.shared.trace.VmXmlKernelTraceStub">
+            trace_type="org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.trace.VmXmlKernelTraceStub">
       </type>
    </extension> 
 </plugin>

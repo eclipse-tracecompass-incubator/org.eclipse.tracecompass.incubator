@@ -15,7 +15,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.Attributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
@@ -27,14 +26,14 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 /**
  * @author Cédric Biancheri
  */
-public class FusedVMInformationProvider {
+public final class FusedVMInformationProvider {
 
     private FusedVMInformationProvider() {
     }
 
     public static List<String> getMachinesTraced(ITmfStateSystem ssq) {
         List<String> list = new LinkedList<>();
-        List<Integer> machinesQuarks = ssq.getQuarks(Attributes.MACHINES, "*"); //$NON-NLS-1$
+        List<Integer> machinesQuarks = ssq.getQuarks(FusedAttributes.MACHINES, "*"); //$NON-NLS-1$
         for (Integer machineQuark : machinesQuarks) {
             String machineName = ssq.getAttributeName(machineQuark);
             list.add(machineName);
@@ -43,13 +42,13 @@ public class FusedVMInformationProvider {
     }
 
     public static Integer getNbCPUs(ITmfStateSystem ssq, String machineName) {
-        List<Integer> vCpuquarks = ssq.getQuarks(Attributes.MACHINES, machineName, Attributes.CPUS, "*"); //$NON-NLS-1$
+        List<Integer> vCpuquarks = ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.CPUS, "*"); //$NON-NLS-1$
         return vCpuquarks.size();
     }
 
     public static List<String> getMachineContainers(ITmfStateSystem ssq, String machineName) {
         List<String> containers = new LinkedList<>();
-        List<Integer> containersQuark = ssq.getQuarks(Attributes.MACHINES, machineName, Attributes.CONTAINERS, "*");
+        List<Integer> containersQuark = ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.CONTAINERS, "*");
         for (Integer containerQuark : containersQuark) {
             containers.add(ssq.getAttributeName(containerQuark));
         }
@@ -57,12 +56,12 @@ public class FusedVMInformationProvider {
     }
 
     public static List<Integer> getMachineContainersQuarks(ITmfStateSystem ssq, String machineName) {
-        return ssq.getQuarks(Attributes.MACHINES, machineName, Attributes.CONTAINERS, "*");
+        return ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.CONTAINERS, "*");
     }
 
     public static int getContainerQuark(ITmfStateSystem ssq, String machineName, String containerID) {
         try {
-            return ssq.getQuarkAbsolute(Attributes.MACHINES, machineName, Attributes.CONTAINERS, containerID);
+            return ssq.getQuarkAbsolute(FusedAttributes.MACHINES, machineName, FusedAttributes.CONTAINERS, containerID);
         } catch (AttributeNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -71,12 +70,12 @@ public class FusedVMInformationProvider {
     }
 
     public static int getNodeThreadsAndAdd(ITmfStateSystemBuilder ssq) {
-        return ssq.getQuarkAbsoluteAndAdd(Attributes.THREADS);
+        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.THREADS);
     }
 
     public static int getNodeThreads(ITmfStateSystem ssq) {
         try {
-            return ssq.getQuarkAbsolute(Attributes.THREADS);
+            return ssq.getQuarkAbsolute(FusedAttributes.THREADS);
         } catch (AttributeNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -87,7 +86,7 @@ public class FusedVMInformationProvider {
     public static @Nullable ITmfStateValue getTypeMachine(ITmfStateSystem ssq, String machineName) {
         int quark;
         try {
-            quark = ssq.getQuarkAbsolute(Attributes.MACHINES, machineName);
+            quark = ssq.getQuarkAbsolute(FusedAttributes.MACHINES, machineName);
             return ssq.querySingleState(ssq.getStartTime(), quark).getStateValue();
         } catch (AttributeNotFoundException e) {
             // TODO Auto-generated catch block
@@ -100,37 +99,37 @@ public class FusedVMInformationProvider {
     }
 
     public static int saveContainerThreadID(ITmfStateSystemBuilder ss, int quark, int tid) {
-        return ss.getQuarkRelativeAndAdd(quark, Attributes.THREADS, Integer.toString(tid));
+        return ss.getQuarkRelativeAndAdd(quark, FusedAttributes.THREADS, Integer.toString(tid));
     }
 
     public static int getMachineCPUsNode(ITmfStateSystemBuilder ssq, String machineName) {
-        return ssq.getQuarkAbsoluteAndAdd(Attributes.MACHINES, machineName, Attributes.CPUS);
+        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.MACHINES, machineName, FusedAttributes.CPUS);
     }
 
     public static int getNodeIRQs(ITmfStateSystemBuilder ssq) {
-        return ssq.getQuarkAbsoluteAndAdd(Attributes.IRQS);
+        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.IRQS);
     }
 
     public static int getNodeSoftIRQs(ITmfStateSystemBuilder ssq) {
-        return ssq.getQuarkAbsoluteAndAdd(Attributes.SOFT_IRQS);
+        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.SOFT_IRQS);
     }
 
     public static int getNodeNsInum(ITmfStateSystem ssq, long time, String machineName, int threadID) throws AttributeNotFoundException, StateSystemDisposedException {
-        int quark = ssq.getQuarkRelative(FusedVMInformationProvider.getNodeThreads(ssq), machineName, Integer.toString(threadID), Attributes.NS_MAX_LEVEL);
+        int quark = ssq.getQuarkRelative(FusedVMInformationProvider.getNodeThreads(ssq), machineName, Integer.toString(threadID), FusedAttributes.NS_MAX_LEVEL);
         ITmfStateInterval interval = ssq.querySingleState(time, quark);
         quark = ssq.getQuarkRelative(FusedVMInformationProvider.getNodeThreads(ssq), machineName, Integer.toString(threadID));
         int nsMaxLevel = interval.getStateValue().unboxInt();
         for (int i = 1; i < nsMaxLevel; i++) {
-            quark = ssq.getQuarkRelative(quark, Attributes.VTID);
+            quark = ssq.getQuarkRelative(quark, FusedAttributes.VTID);
         }
-        return ssq.getQuarkRelative(quark, Attributes.NS_INUM);
+        return ssq.getQuarkRelative(quark, FusedAttributes.NS_INUM);
     }
 
     public static Long getParentContainer(ITmfStateSystem ssq, int containerQuark) {
         int parentContainerIDQuark;
         Long parentContainerID = null;
         try {
-            parentContainerIDQuark = ssq.getQuarkRelative(containerQuark, Attributes.PARENT);
+            parentContainerIDQuark = ssq.getQuarkRelative(containerQuark, FusedAttributes.PARENT);
             parentContainerID = ssq.querySingleState(ssq.getStartTime(), parentContainerIDQuark).getStateValue().unboxLong();
 
         } catch (AttributeNotFoundException | StateSystemDisposedException e) {
@@ -143,7 +142,7 @@ public class FusedVMInformationProvider {
     public static String getParentMachineName(ITmfStateSystem ssq, String machineName) {
         String parentName = ""; //$NON-NLS-1$
         try {
-            int parentNameQuark = ssq.getQuarkAbsolute(Attributes.MACHINES, machineName, Attributes.PARENT);
+            int parentNameQuark = ssq.getQuarkAbsolute(FusedAttributes.MACHINES, machineName, FusedAttributes.PARENT);
             parentName = ssq.querySingleState(ssq.getStartTime(), parentNameQuark).getStateValue().unboxStr();
         } catch (AttributeNotFoundException | StateSystemDisposedException e) {
             // TODO Auto-generated catch block
@@ -152,7 +151,7 @@ public class FusedVMInformationProvider {
         return parentName;
     }
 
-    public static List<String> getPCpusUsedByMachine(ITmfStateSystem ssq, String machineName) {
+    public static List<String> getPhysicalCpusUsedByMachine(ITmfStateSystem ssq, String machineName) {
         List<String> pcpus = new LinkedList<>();
         List<Integer> pCpuquarks = new LinkedList<>();
         ITmfStateValue type = getTypeMachine(ssq, machineName);
@@ -160,9 +159,9 @@ public class FusedVMInformationProvider {
             return pcpus;
         }
         if ((type.unboxInt() & StateValues.MACHINE_GUEST) == StateValues.MACHINE_GUEST) {
-            pCpuquarks = ssq.getQuarks(Attributes.MACHINES, machineName, Attributes.PCPUS, "*"); //$NON-NLS-1$
+            pCpuquarks = ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.PCPUS, "*"); //$NON-NLS-1$
         } else if (type.unboxInt() == StateValues.MACHINE_HOST) {
-            pCpuquarks = ssq.getQuarks(Attributes.MACHINES, machineName, Attributes.CPUS, "*"); //$NON-NLS-1$
+            pCpuquarks = ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.CPUS, "*"); //$NON-NLS-1$
         }
         for (Integer quark : pCpuquarks) {
             pcpus.add(ssq.getAttributeName(quark));
@@ -170,9 +169,23 @@ public class FusedVMInformationProvider {
         return pcpus;
     }
 
+    public static List<String> getCpusUsedByMachine(ITmfStateSystem ssq, String machineName) {
+        List<String> cpus = new LinkedList<>();
+        List<Integer> cpuQuarks = new LinkedList<>();
+        ITmfStateValue type = getTypeMachine(ssq, machineName);
+        if (type == null) {
+            return cpus;
+        }
+        cpuQuarks = ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.CPUS, "*"); //$NON-NLS-1$
+        for (Integer quark : cpuQuarks) {
+            cpus.add(ssq.getAttributeName(quark));
+        }
+        return cpus;
+    }
+
     public static List<String> getPCpusUsedByContainer(ITmfStateSystem ssq, int quark) {
         List<String> pcpus = new LinkedList<>();
-        List<Integer> pCpusQuarks = ssq.getQuarks(quark, Attributes.PCPUS, "*");
+        List<Integer> pCpusQuarks = ssq.getQuarks(quark, FusedAttributes.PCPUS, "*");
         for (int pCpuqQuark : pCpusQuarks) {
             pcpus.add(ssq.getAttributeName(pCpuqQuark));
         }
@@ -206,7 +219,7 @@ public class FusedVMInformationProvider {
         // append the Milliseconds, MicroSeconds and NanoSeconds as specified in
         // the Resolution
         str.append(formatNs(time));
-        return str.toString();
+        return String.valueOf(str);
     }
 
     /**
@@ -230,7 +243,7 @@ public class FusedVMInformationProvider {
             if (cpuId == null) {
                 return null;
             }
-            return Attributes.THREAD_0_PREFIX + String.valueOf(cpuId);
+            return FusedAttributes.THREAD_0_PREFIX + String.valueOf(cpuId);
         }
 
         return String.valueOf(threadId);

@@ -55,7 +55,7 @@ import com.google.common.collect.TreeMultimap;
 public class VirtualMachineCpuAnalysis extends TmfStateSystemAnalysisModule {
 
     /** The ID of this analysis module */
-    public static final String ID = "org.eclipse.tracecompass.extension.virtual.machine.analysis.core.VirtualMachineAnalysisModule"; //$NON-NLS-1$
+    public static final String ID = "org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.VirtualMachineAnalysisModule"; //$NON-NLS-1$
 
     // TODO: Update with event layout when requirements are back */
     static final Set<String> REQUIRED_EVENTS = ImmutableSet.of(

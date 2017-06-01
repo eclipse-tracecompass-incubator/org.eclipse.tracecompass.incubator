@@ -14,8 +14,7 @@ import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 import java.util.List;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.Attributes;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVirtualMachineStateProvider;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualCPU;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.LinuxValues;
@@ -26,19 +25,29 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * @author Cédric Biancheri
  */
 public class SchedSwitchHandler extends VMKernelEventHandler {
 
+    /**
+     * Constructor
+     *
+     * @param layout
+     *            The event layout of the trace being analysed by this handler
+     * @param sp
+     *            The state provider
+     */
     public SchedSwitchHandler(IKernelAnalysisEventLayout layout, FusedVirtualMachineStateProvider sp) {
         super(layout, sp);
     }
 
     @Override
     public void handleEvent(ITmfStateSystemBuilder ss, ITmfEvent event) {
-        Integer cpu = FusedVMEventHandlerUtils.getCpu(event);
+        Integer cpu = TmfTraceUtils.resolveIntEventAspectOfClassForEvent(event.getTrace(), TmfCpuAspect.class, event);
         if (cpu == null) {
             return;
         }
@@ -54,7 +63,6 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
             }
         }
 
-
         ITmfEventField content = event.getContent();
         Integer prevTid = ((Long) content.getField(getLayout().fieldPrevTid()).getValue()).intValue();
         Long prevState = checkNotNull((Long) content.getField(getLayout().fieldPrevState()).getValue());
@@ -67,12 +75,11 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
         String formerThreadAttributeName = FusedVMEventHandlerUtils.buildThreadAttributeName(prevTid, cpu);
         String currenThreadAttributeName = FusedVMEventHandlerUtils.buildThreadAttributeName(nextTid, cpu);
 
-
         int nodeThreads = FusedVMEventHandlerUtils.getNodeThreads(ss);
         int formerThreadNode = ss.getQuarkRelativeAndAdd(nodeThreads, machineName, formerThreadAttributeName);
         int newCurrentThreadNode = ss.getQuarkRelativeAndAdd(nodeThreads, machineName, currenThreadAttributeName);
-        int currentMachineQuark = ss.getQuarkAbsoluteAndAdd(Attributes.MACHINES, machineName);
-        int machineContainerQuark = ss.getQuarkRelativeAndAdd(currentMachineQuark, Attributes.CONTAINERS);
+        int currentMachineQuark = ss.getQuarkAbsoluteAndAdd(FusedAttributes.MACHINES, machineName);
+        int machineContainerQuark = ss.getQuarkRelativeAndAdd(currentMachineQuark, FusedAttributes.CONTAINERS);
 
         long timestamp = FusedVMEventHandlerUtils.getTimestamp(event);
         /* Set the status of the process that got scheduled out. */
@@ -88,8 +95,8 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
         setNewProcessPio(ss, nextPrio, newCurrentThreadNode, timestamp);
 
         /* Make sure the PPID and system_call sub-attributes exist */
-        ss.getQuarkRelativeAndAdd(newCurrentThreadNode, Attributes.SYSTEM_CALL);
-        ss.getQuarkRelativeAndAdd(newCurrentThreadNode, Attributes.PPID);
+        ss.getQuarkRelativeAndAdd(newCurrentThreadNode, FusedAttributes.SYSTEM_CALL);
+        ss.getQuarkRelativeAndAdd(newCurrentThreadNode, FusedAttributes.PPID);
 
         /* Set the current scheduled process on the relevant CPU */
         int currentCPUNode = FusedVMEventHandlerUtils.getCurrentCPUNode(cpu, ss);
@@ -99,7 +106,7 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
          * running machine on this pcpu then we do not modify the state system.
          */
         boolean modify = true;
-        int machineNameQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, Attributes.MACHINE_NAME);
+        int machineNameQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.MACHINE_NAME);
         try {
             modify = ss.querySingleState(timestamp, machineNameQuark).getStateValue().unboxStr().equals(machineName);
         } catch (StateSystemDisposedException e) {
@@ -116,7 +123,7 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
             List<Long> namespaces = FusedVMEventHandlerUtils.getProcessNSIDs(ss, newCurrentThreadNode, timestamp);
 
             for (Long namespace : namespaces) {
-                ss.getQuarkRelativeAndAdd(machineContainerQuark, namespace.toString(), Attributes.PCPUS, cpu.toString());
+                ss.getQuarkRelativeAndAdd(machineContainerQuark, namespace.toString(), FusedAttributes.PCPUS, cpu.toString());
             }
         }
 
@@ -124,17 +131,17 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
         cpuObject.setCurrentThread(stateProcess);
     }
 
-    private static void setOldProcessStatus(ITmfStateSystemBuilder ss, Long prevState, Integer formerThreadNode, long timestamp)  {
+    private static void setOldProcessStatus(ITmfStateSystemBuilder ss, Long prevState, Integer formerThreadNode, long timestamp) {
         ITmfStateValue value;
         /*
-         * Empirical observations and look into the linux code have
-         * shown that the TASK_STATE_MAX flag is used internally and
-         * |'ed with other states, most often the running state, so it
-         * is ignored from the prevState value.
+         * Empirical observations and look into the linux code have shown that
+         * the TASK_STATE_MAX flag is used internally and |'ed with other
+         * states, most often the running state, so it is ignored from the
+         * prevState value.
          *
-         * Since Linux 4.1, the TASK_NOLOAD state was created and
-         * TASK_STATE_MAX is now 2048. We use TASK_NOLOAD as the new max
-         * because it does not modify the displayed state value.
+         * Since Linux 4.1, the TASK_NOLOAD state was created and TASK_STATE_MAX
+         * is now 2048. We use TASK_NOLOAD as the new max because it does not
+         * modify the displayed state value.
          */
         int state = (int) (prevState & (LinuxValues.TASK_NOLOAD - 1));
 
@@ -147,7 +154,7 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
         } else {
             value = StateValues.PROCESS_STATUS_WAIT_UNKNOWN_VALUE;
         }
-        int quark = ss.getQuarkRelativeAndAdd(formerThreadNode, Attributes.STATUS);
+        int quark = ss.getQuarkRelativeAndAdd(formerThreadNode, FusedAttributes.STATUS);
         ss.modifyAttribute(timestamp, value, quark);
 
     }
@@ -171,7 +178,7 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
         ITmfStateValue value;
         if (nextTid > 0) {
             /* Check if the entering process is in kernel or user mode */
-            quark = ss.getQuarkRelativeAndAdd(newCurrentThreadNode, Attributes.SYSTEM_CALL);
+            quark = ss.getQuarkRelativeAndAdd(newCurrentThreadNode, FusedAttributes.SYSTEM_CALL);
             ITmfStateValue queryOngoingState = ss.queryOngoingState(quark);
             if (queryOngoingState.isNull()) {
                 value = StateValues.CPU_STATUS_RUN_USERMODE_VALUE;
@@ -179,13 +186,13 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
                 value = StateValues.CPU_STATUS_RUN_SYSCALL_VALUE;
             }
             if (modify) {
-                quark = ss.getQuarkRelativeAndAdd(currentCPUNode, Attributes.STATUS);
+                quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
                 ss.modifyAttribute(timestamp, value, quark);
             }
         } else {
             value = StateValues.CPU_STATUS_IDLE_VALUE;
             if (modify) {
-                quark = ss.getQuarkRelativeAndAdd(currentCPUNode, Attributes.STATUS);
+                quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
                 ss.modifyAttribute(timestamp, value, quark);
             }
         }
@@ -196,7 +203,7 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
     private static ITmfStateValue setCpuProcess(ITmfStateSystemBuilder ss, Integer nextTid, long timestamp, int currentCPUNode, boolean modify) {
         int quark;
         ITmfStateValue value;
-        quark = ss.getQuarkRelativeAndAdd(currentCPUNode, Attributes.CURRENT_THREAD);
+        quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.CURRENT_THREAD);
         value = TmfStateValue.newValueInt(nextTid);
         if (modify) {
             ss.modifyAttribute(timestamp, value, quark);
@@ -207,7 +214,7 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
     private static void setNewProcessPio(ITmfStateSystemBuilder ss, Integer nextPrio, Integer newCurrentThreadNode, long timestamp) {
         int quark;
         ITmfStateValue value;
-        quark = ss.getQuarkRelativeAndAdd(newCurrentThreadNode, Attributes.PRIO);
+        quark = ss.getQuarkRelativeAndAdd(newCurrentThreadNode, FusedAttributes.PRIO);
         value = TmfStateValue.newValueInt(nextPrio);
         ss.modifyAttribute(timestamp, value, quark);
     }
@@ -215,7 +222,7 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
     private static void setNewProcessExecName(ITmfStateSystemBuilder ss, String nextProcessName, Integer newCurrentThreadNode, long timestamp) {
         int quark;
         ITmfStateValue value;
-        quark = ss.getQuarkRelativeAndAdd(newCurrentThreadNode, Attributes.EXEC_NAME);
+        quark = ss.getQuarkRelativeAndAdd(newCurrentThreadNode, FusedAttributes.EXEC_NAME);
         value = TmfStateValue.newValueString(nextProcessName);
         ss.modifyAttribute(timestamp, value, quark);
     }

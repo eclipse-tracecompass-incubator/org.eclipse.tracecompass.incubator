@@ -34,11 +34,20 @@ public final class VirtualMachine {
     private final String fHostId;
     private int fType;
     private final String fTraceName;
-    @Nullable private VirtualMachine fParent;
-    private HashSet<VirtualMachine> children = new HashSet<>();
-    private HashSet<HostThread> threadsWaitingForNextLayer = new HashSet<>();
-    private HashSet<HostThread> threadsReadyForNextLayer = new HashSet<>();
+    private @Nullable VirtualMachine fParent;
+    private HashSet<VirtualMachine> fChildren = new HashSet<>();
+    private HashSet<HostThread> fThreadsWaitingForNextLayer = new HashSet<>();
+    private HashSet<HostThread> fThreadsReadyForNextLayer = new HashSet<>();
 
+    /**
+     * Create an unknown machine for a host
+     *
+     * @param hostId
+     *            The ID of the host
+     * @param traceName
+     *            The name of the trace
+     * @return A virtual machine
+     */
     public static VirtualMachine newUnknownMachine(String hostId, String traceName) {
         return new VirtualMachine(UNKNOWN, hostId, -1, traceName);
     }
@@ -191,7 +200,7 @@ public final class VirtualMachine {
      * @return the children
      */
     public HashSet<VirtualMachine> getChildren() {
-        return children;
+        return fChildren;
     }
 
     /**
@@ -201,7 +210,7 @@ public final class VirtualMachine {
      *            the child to add
      */
     public void addChild(VirtualMachine child) {
-        children.add(child);
+        fChildren.add(child);
     }
 
     /**
@@ -240,8 +249,8 @@ public final class VirtualMachine {
      *            the thread
      */
     public void addThreadWaitingForNextLayer(HostThread hostThread) {
-        threadsWaitingForNextLayer.add(hostThread);
-        threadsReadyForNextLayer.remove(hostThread);
+        fThreadsWaitingForNextLayer.add(hostThread);
+        fThreadsReadyForNextLayer.remove(hostThread);
     }
 
     /**
@@ -253,7 +262,7 @@ public final class VirtualMachine {
      * @return true if the thread was ready
      */
     public boolean isThreadWaitingForNextLayer(HostThread hostThread) {
-        return threadsWaitingForNextLayer.contains(hostThread);
+        return fThreadsWaitingForNextLayer.contains(hostThread);
     }
 
     /**
@@ -263,8 +272,8 @@ public final class VirtualMachine {
      *            the thread
      */
     public void makeThreadReadyForNextLayer(HostThread hostThread) {
-        if (threadsWaitingForNextLayer.remove(hostThread)) {
-            threadsReadyForNextLayer.add(hostThread);
+        if (fThreadsWaitingForNextLayer.remove(hostThread)) {
+            fThreadsReadyForNextLayer.add(hostThread);
         }
     }
 
@@ -276,7 +285,7 @@ public final class VirtualMachine {
      * @return
      */
     public boolean isThreadReadyForNextLayer(HostThread hostThread) {
-        return threadsReadyForNextLayer.contains(hostThread);
+        return fThreadsReadyForNextLayer.contains(hostThread);
     }
 
     /**
@@ -286,7 +295,7 @@ public final class VirtualMachine {
      *            the thread
      */
     public void removeThreadFromReadyForNextLayerSet(HostThread hostThread) {
-        threadsReadyForNextLayer.remove(hostThread);
+        fThreadsReadyForNextLayer.remove(hostThread);
     }
 
 }

@@ -39,7 +39,7 @@ public final class VirtualCPU {
     /* Current thread of the cpu. */
     private ITmfStateValue fCurrentThread;
     private ITmfStateValue fStateBeforeIRQ;
-    @Nullable private VirtualCPU fNextLayerVCPU;
+    private @Nullable VirtualCPU fNextLayerVCPU;
 
     /**
      * Return the virtual CPU for to the virtual machine and requested CPU ID
@@ -148,7 +148,7 @@ public final class VirtualCPU {
     }
 
     /**
-     * @param fStateBeforeIRQ
+     * @param state
      *            the stateBeforeIRQ to set
      */
     public void setStateBeforeIRQ(ITmfStateValue state) {

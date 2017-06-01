@@ -56,7 +56,7 @@ import com.google.common.collect.Multimap;
 public class VirtualMachineView extends AbstractTimeGraphView {
 
     /** View ID. */
-    public static final String ID = "org.eclipse.tracecompass.lttng2.analysis.vm.ui.vmview"; //$NON-NLS-1$
+    public static final String ID = "org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.vm.ui.vmview"; //$NON-NLS-1$
 
     private static final String[] COLUMN_NAMES = new String[] {
             Messages.VmView_stateTypeName

@@ -4,8 +4,8 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.fusedvmview.FusedVirtualMachineView"
-            id="org.eclipse.tracecompass.extension.internal.virtual.machine.analysis.ui.views.fusedvmview"
+            class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vresources.VirtualResourcesView"
+            id="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.virtualresources"
             name="%view.fused.name"
             restorable="true">
       </view>
@@ -13,7 +13,7 @@
             allowMultiple="false"
             category="org.eclipse.linuxtools.tmf.ui.views.category"
             class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vcpuview.VirtualMachineView"
-            id="org.eclipse.tracecompass.extension.internal.virtual.machine.analysis.vm.ui.vmview"
+            id="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.vm.ui.vmview"
             name="%vcpuview.name"
             restorable="true">
       </view>
@@ -22,16 +22,16 @@
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <output
             class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
-            id="org.eclipse.tracecompass.extension.internal.virtual.machine.analysis.vm.ui.vmview">
+            id="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.vm.ui.vmview">
          <analysisId
-               id="org.eclipse.tracecompass.extension.virtual.machine.analysis.core.VirtualMachineAnalysisModule">
+               id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.VirtualMachineAnalysisModule">
          </analysisId>
       </output>
       <output
             class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
-            id="org.eclipse.tracecompass.extension.internal.virtual.machine.analysis.ui.views.fusedvmview">
+            id="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.virtualresources">
          <analysisId
-               id="org.eclipse.tracecompass.extension.virtual.machine.analysis.FusedVirtualMachineAnalysis">
+               id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.FusedVirtualMachineAnalysis">
          </analysisId>
       </output>
    </extension>

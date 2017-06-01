@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.handlers.FusedVirtualMachineStateProvider;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.Messages;
 import org.eclipse.tracecompass.tmf.core.analysis.requirements.TmfAbstractAnalysisRequirement;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
@@ -33,7 +34,7 @@ import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 public class FusedVirtualMachineAnalysis extends TmfStateSystemAnalysisModule {
 
     /** The ID of this analysis module */
-    public static final String ID = "org.eclipse.tracecompass.extension.virtual.machine.analysis.FusedVirtualMachineAnalysis"; //$NON-NLS-1$
+    public static final String ID = "org.eclipse.tracecompass.incubator.virtual.machine.analysis.FusedVirtualMachineAnalysis"; //$NON-NLS-1$
 
     /*
      * TODO: Decide which events should be mandatory for the analysis, once the
@@ -85,7 +86,7 @@ public class FusedVirtualMachineAnalysis extends TmfStateSystemAnalysisModule {
 
     @Override
     protected @NonNull ITmfStateProvider createStateProvider() {
-        ITmfTrace trace = checkNotNull(getTrace());
+        ITmfTrace trace = getTrace();
         if (!(trace instanceof TmfExperiment)) {
             throw new IllegalStateException();
         }

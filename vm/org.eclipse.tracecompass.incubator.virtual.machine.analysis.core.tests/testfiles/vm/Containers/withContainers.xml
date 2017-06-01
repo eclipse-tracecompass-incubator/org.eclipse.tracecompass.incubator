@@ -1,0 +1,187 @@
+<trace>
+<set_aspects>
+<field name="cpu" value="1" type="int" />
+</set_aspects>
+<event timestamp="1" name="sched_switch">
+<field name="cpu" value="0" type="int" />
+<field name="prev_comm" value="any" type="string" />
+<field name="prev_tid" value="30" type="long" />
+<field name="prev_prio" value="20" type="long" />
+<field name="prev_state" value="0" type="long" />
+<field name="next_comm" value="lttng-sessiond" type="string" />
+<field name="next_tid" value="31" type="long" />
+<field name="next_prio" value="20" type="long" />
+</event>
+<event timestamp="4" name="lttng_statedump_process_state">
+<field name="cpu" value="0" type="int" />
+<field name="tid" value="40" type="long" />
+<field name="vtid" value="1" type="long" />
+<field name="pid" value="40" type="long" />
+<field name="vpid" value="1" type="long" />
+<field name="ppid" value="30" type="long" />
+<field name="vppid" value="0" type="long" />
+<field name="name" value="init" type="string" />
+<field name="type" value="0" type="long" />
+<field name="status" value="5" type="long" />
+<field name="ns_level" value="1" type="long" />
+<field name="ns_inum" value="654321" type="long" />
+</event>
+<event timestamp="4" name="sched_switch">
+<field name="cpu" value="1" type="int" />
+<field name="prev_comm" value="lxc-start" type="string" />
+<field name="prev_tid" value="41" type="long" />
+<field name="prev_prio" value="20" type="long" />
+<field name="prev_state" value="0" type="long" />
+<field name="next_comm" value="init" type="string" />
+<field name="next_tid" value="42" type="long" />
+<field name="next_prio" value="20" type="long" />
+</event>
+<event timestamp="6" name="lttng_statedump_process_state">
+<field name="cpu" value="0" type="int" />
+<field name="tid" value="40" type="long" />
+<field name="vtid" value="40" type="long" />
+<field name="pid" value="40" type="long" />
+<field name="vpid" value="40" type="long" />
+<field name="ppid" value="30" type="long" />
+<field name="vppid" value="30" type="long" />
+<field name="name" value="init" type="string" />
+<field name="type" value="0" type="long" />
+<field name="status" value="5" type="long" />
+<field name="ns_level" value="0" type="long" />
+<field name="ns_inum" value="4026531836" type="long" />
+</event>
+<event timestamp="10" name="lttng_statedump_process_state">
+<field name="cpu" value="0" type="int" />
+<field name="tid" value="41" type="long" />
+<field name="vtid" value="2" type="long" />
+<field name="pid" value="41" type="long" />
+<field name="vpid" value="2" type="long" />
+<field name="ppid" value="40" type="long" />
+<field name="vppid" value="1" type="long" />
+<field name="name" value="lxc-start" type="string" />
+<field name="type" value="0" type="long" />
+<field name="status" value="5" type="long" />
+<field name="ns_level" value="1" type="long" />
+<field name="ns_inum" value="654321" type="long" />
+</event>
+<event timestamp="11" name="lttng_statedump_process_state">
+<field name="cpu" value="0" type="int" />
+<field name="tid" value="41" type="long" />
+<field name="vtid" value="41" type="long" />
+<field name="pid" value="41" type="long" />
+<field name="vpid" value="41" type="long" />
+<field name="ppid" value="40" type="long" />
+<field name="vppid" value="40" type="long" />
+<field name="name" value="lxc-start" type="string" />
+<field name="type" value="0" type="long" />
+<field name="status" value="5" type="long" />
+<field name="ns_level" value="0" type="long" />
+<field name="ns_inum" value="4026531836" type="long" />
+</event>
+<event timestamp="13" name="lttng_statedump_process_state">
+<field name="cpu" value="0" type="int" />
+<field name="tid" value="42" type="long" />
+<field name="vtid" value="1" type="long" />
+<field name="pid" value="42" type="long" />
+<field name="vpid" value="1" type="long" />
+<field name="ppid" value="41" type="long" />
+<field name="vppid" value="0" type="long" />
+<field name="name" value="init" type="string" />
+<field name="type" value="0" type="long" />
+<field name="status" value="5" type="long" />
+<field name="ns_level" value="2" type="long" />
+<field name="ns_inum" value="987654" type="long" />
+</event>
+<event timestamp="14" name="lttng_statedump_process_state">
+<field name="cpu" value="0" type="int" />
+<field name="tid" value="42" type="long" />
+<field name="vtid" value="3" type="long" />
+<field name="pid" value="42" type="long" />
+<field name="vpid" value="3" type="long" />
+<field name="ppid" value="41" type="long" />
+<field name="vppid" value="2" type="long" />
+<field name="name" value="init" type="string" />
+<field name="type" value="0" type="long" />
+<field name="status" value="5" type="long" />
+<field name="ns_level" value="1" type="long" />
+<field name="ns_inum" value="654321" type="long" />
+</event>
+<event timestamp="15" name="lttng_statedump_process_state">
+<field name="cpu" value="0" type="int" />
+<field name="tid" value="42" type="long" />
+<field name="vtid" value="42" type="long" />
+<field name="pid" value="42" type="long" />
+<field name="vpid" value="42" type="long" />
+<field name="ppid" value="41" type="long" />
+<field name="vppid" value="41" type="long" />
+<field name="name" value="init" type="string" />
+<field name="type" value="0" type="long" />
+<field name="status" value="5" type="long" />
+<field name="ns_level" value="0" type="long" />
+<field name="ns_inum" value="4026531836" type="long" />
+</event>
+<event timestamp="17" name="sched_switch">
+<field name="cpu" value="1" type="int" />
+<field name="prev_comm" value="init" type="string" />
+<field name="prev_tid" value="42" type="long" />
+<field name="prev_prio" value="20" type="long" />
+<field name="prev_state" value="0" type="long" />
+<field name="next_comm" value="lxc-start" type="string" />
+<field name="next_tid" value="41" type="long" />
+<field name="next_prio" value="20" type="long" />
+</event>
+<event timestamp="24" name="sched_switch">
+<field name="cpu" value="1" type="int" />
+<field name="prev_comm" value="lxc-start" type="string" />
+<field name="prev_tid" value="41" type="long" />
+<field name="prev_prio" value="20" type="long" />
+<field name="prev_state" value="0" type="long" />
+<field name="next_comm" value="init" type="string" />
+<field name="next_tid" value="42" type="long" />
+<field name="next_prio" value="20" type="long" />
+</event>
+<event timestamp="25" name="sched_process_fork">
+<field name="cpu" value="1" type="int" />
+<field name="parent_comm" value="init" type="string" />
+<field name="parent_tid" value="42" type="long" />
+<field name="parent_pid" value="42" type="long" />
+<field name="parent_ns_inum" value="987654" type="long" />
+<field name="child_comm" value="myapp" type="string" />
+<field name="child_tid" value="43" type="long" />
+<field name="child_pid" value="43" type="long" />
+<field name="vtids" value="43,4,2" type="longArray" />
+<field name="child_ns_inum" value="987654" type="long" />
+</event>
+<event timestamp="30" name="sched_switch">
+<field name="cpu" value="0" type="int" />
+<field name="prev_comm" value="lttng-sessiond" type="string" />
+<field name="prev_tid" value="31" type="long" />
+<field name="prev_prio" value="20" type="long" />
+<field name="prev_state" value="0" type="long" />
+<field name="next_comm" value="myapp" type="string" />
+<field name="next_tid" value="43" type="long" />
+<field name="next_prio" value="20" type="long" />
+</event>
+<event timestamp="30" name="sched_process_fork">
+<field name="cpu" value="1" type="int" />
+<field name="parent_comm" value="init" type="string" />
+<field name="parent_tid" value="42" type="long" />
+<field name="parent_pid" value="42" type="long" />
+<field name="parent_ns_inum" value="987654" type="long" />
+<field name="child_comm" value="myapp2" type="string" />
+<field name="child_tid" value="44" type="long" />
+<field name="child_pid" value="44" type="long" />
+<field name="vtids" value="44,5,3" type="longArray" />
+<field name="child_ns_inum" value="987654" type="long" />
+</event>
+<event timestamp="35" name="sched_switch">
+<field name="cpu" value="0" type="int" />
+<field name="prev_comm" value="myapp" type="string" />
+<field name="prev_tid" value="43" type="long" />
+<field name="prev_prio" value="20" type="long" />
+<field name="prev_state" value="0" type="long" />
+<field name="next_comm" value="myapp2" type="string" />
+<field name="next_tid" value="44" type="long" />
+<field name="next_prio" value="20" type="long" />
+</event>
+</trace>
