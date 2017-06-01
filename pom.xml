@@ -275,6 +275,7 @@
   <modules>
     <module>common</module>
     <module>callstack</module>
+    <module>vm</module>
   </modules>
 
   <build>

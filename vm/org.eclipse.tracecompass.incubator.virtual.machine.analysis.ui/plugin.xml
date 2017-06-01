@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            category="org.eclipse.linuxtools.tmf.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vcpuview.VirtualMachineView"
+            id="org.eclipse.tracecompass.extension.internal.virtual.machine.analysis.vm.ui.vmview"
+            name="%vcpuview.name"
+            restorable="true">
+      </view>
+   </extension>
+      <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.extension.internal.virtual.machine.analysis.vm.ui.vmview">
+         <analysisId
+               id="org.eclipse.tracecompass.extension.virtual.machine.analysis.core.VirtualMachineAnalysisModule">
+         </analysisId>
+      </output>
+   </extension>
+</plugin>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <experiment
+            experiment_type="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.trace.VirtualMachineExperiment"
+            id="org.eclipse.tracecompass.extension.virtual.machine.analysis.VirtualMachineExperiment"
+            name="%vm.experiment">
+      </experiment>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.VirtualMachineCpuAnalysis"
+            automatic="false"
+            id="org.eclipse.tracecompass.extension.virtual.machine.analysis.core.VirtualMachineAnalysisModule"
+            name="%vm.analysis">
+            <tracetype
+                  applies="true"
+                  class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.trace.VirtualMachineExperiment">
+            </tracetype>
+      </module>
+   </extension>
+</plugin>
