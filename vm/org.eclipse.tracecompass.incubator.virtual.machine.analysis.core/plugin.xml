@@ -21,5 +21,15 @@
                   class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.trace.VirtualMachineExperiment">
             </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVirtualMachineAnalysis"
+            automatic="false"
+            id="org.eclipse.tracecompass.extension.virtual.machine.analysis.FusedVirtualMachineAnalysis"
+            name="%vm.analysis.fused">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.trace.VirtualMachineExperiment">
+         </tracetype>
+      </module>
    </extension>
 </plugin>
