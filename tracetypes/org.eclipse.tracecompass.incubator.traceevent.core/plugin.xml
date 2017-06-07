@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <category
+            id="org.eclipse.tracecompass.traceevent.core.traceevent"
+            name="Trace Event Format">
+      </category>
+      <type
+            category="org.eclipse.tracecompass.traceevent.core.traceevent"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.traceevent.core.trace"
+            isDirectory="false"
+            name="Generic Trace Event Trace"
+            trace_type="org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace">
+      </type>
+   </extension>
+
+</plugin>

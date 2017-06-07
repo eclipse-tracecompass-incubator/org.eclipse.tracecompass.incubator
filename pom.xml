@@ -276,6 +276,7 @@
     <module>common</module>
     <module>callstack</module>
     <module>vm</module>
+    <module>tracetypes</module>
   </modules>
 
   <build>
