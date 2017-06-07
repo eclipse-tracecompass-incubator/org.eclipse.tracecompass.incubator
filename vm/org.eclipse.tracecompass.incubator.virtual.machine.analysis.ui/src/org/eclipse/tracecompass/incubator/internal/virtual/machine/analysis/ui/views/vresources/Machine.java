@@ -9,312 +9,185 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vresources;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.StateValues;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 
 /**
+ * Represents a machine in the ui
+ *
+ * TODO: Move this class to the model
+ *
  * @author Cedric Biancheri
  */
+@NonNullByDefault
 public class Machine {
 
-    private String machineName;
-    private Machine host = null;
-    private Boolean highlighted;
-    private float heightFactory;
-    private Set<Processor> cpus = new HashSet<>();
-    private Set<Processor> pcpus = new HashSet<>();
-    private Set<Machine> containers = new HashSet<>();
-    private Set<Machine> virtualMachines = new HashSet<>();
-    private ITmfStateValue typeMachine;
+    private String fMachineName;
+    private @Nullable Machine fHost = null;
+    private Set<Processor> fCpus = new HashSet<>();
+    private Set<Processor> fPcpus = new HashSet<>();
+    private Set<Machine> fContainers = new HashSet<>();
+    private Set<Machine> fVirtualMachines = new HashSet<>();
+    private ITmfStateValue fMachineType;
 
-//    public Machine(String name) {
-//        machineName = name;
-//        highlighted = true;
-//    }
-
-    public Machine(String name, @NonNull ITmfStateValue type) {
-        machineName = name;
-        highlighted = true;
-        heightFactory = VirtualResourcePresentationProvider.FULL_HEIGHT;
-        typeMachine = type;
+    /**
+     * Constructor
+     *
+     * @param name
+     *            Name of the machine
+     * @param type
+     *            The type state value of the machine
+     */
+    public Machine(String name, ITmfStateValue type) {
+        this(name, type, Collections.emptyList());
     }
 
-    public Machine(String name, Integer nbCPUs, @NonNull ITmfStateValue type) {
-        machineName = name;
-        highlighted = true;
-        heightFactory = VirtualResourcePresentationProvider.FULL_HEIGHT;
-        typeMachine = type;
-        for (Integer i = 0; i < nbCPUs; i++) {
-            cpus.add(new Processor(i.toString(), this));
-        }
-    }
-
-    public Machine(String name, @NonNull ITmfStateValue type, List<String> pcpus) {
-        machineName = name;
-        highlighted = true;
-        heightFactory = VirtualResourcePresentationProvider.FULL_HEIGHT;
-        typeMachine = type;
+    /**
+     * Constructor of a machine
+     *
+     * @param name
+     *            The name of the machine
+     * @param type
+     *            The type of machine
+     * @param pcpus
+     *            The list of CPUs used by this machine
+     */
+    public Machine(String name, ITmfStateValue type, List<String> pcpus) {
+        fMachineName = name;
+        fMachineType = type;
         for (String pcpu : pcpus) {
-            this.pcpus.add(new Processor(pcpu, this));
+            fPcpus.add(new Processor(pcpu, this));
         }
     }
 
-    public static Machine createContainer(String name, Machine host) {
-        Machine container = new Machine(name, 0, StateValues.MACHINE_CONTAINER_VALUE);
-        container.setHost(host);
+    /**
+     * Create a container in this machine with the CPUs sent in parameter. The
+     * container will have the current machine as host and it will be added to
+     * the container list.
+     *
+     * @param name
+     *            The name of the container
+     * @param physCpus
+     *            The list of physical cpus IDs
+     * @return The newly created container.
+     */
+    public Machine createContainer(String name, List<String> physCpus) {
+        Machine container = new Machine(name, StateValues.MACHINE_CONTAINER_VALUE, physCpus);
+        container.setHost(this);
+        fContainers.add(container);
         return container;
     }
 
+    /**
+     * Get the name of this machine
+     *
+     * @return The name of the machine
+     */
     public String getMachineName() {
-        return machineName;
+        return fMachineName;
     }
 
-    public float getHeightFactory() {
-        return heightFactory;
+    /**
+     * Set the machine on which this machine is running
+     *
+     * @param host
+     *            the host
+     */
+    public void setHost(Machine host) {
+        fHost = host;
     }
 
-    public ITmfStateValue getTypeMachine() {
-        return typeMachine;
+    /**
+     * Return the machine on which this one runs, if it is not the physical
+     * machine
+     *
+     * @return The host machine if it is not the physical machine
+     */
+    public @Nullable Machine getHost() {
+        return fHost;
     }
 
-    public void setHost(Machine h) {
-        host = h;
+    /**
+     * Get the containers running on this machine
+     *
+     * @return The collection of containers
+     */
+    public Collection<Machine> getContainers() {
+        return fContainers;
     }
 
-    public Machine getHost() {
-        return host;
+    /**
+     * Get the guest virtual machines running on this machine
+     *
+     * @return The collection of guest virtual machines
+     */
+    public Collection<Machine> getVirtualMachines() {
+        return fVirtualMachines;
     }
 
-    public Set<Machine> getContainers() {
-        return containers;
-    }
-
-    public Set<Machine> getVirtualMachines() {
-        return virtualMachines;
-    }
-
+    /**
+     * Add a CPU
+     *
+     * @param cpu
+     *            The CPU number
+     */
     public void addCpu(String cpu) {
-        cpus.add(new Processor(cpu, this));
+        fCpus.add(new Processor(cpu, this));
     }
 
+    /**
+     * Add a physical CPU
+     *
+     * @param pcpu
+     *            The physical CPU number
+     */
     public void addPCpu(String pcpu) {
-        pcpus.add(new Processor(pcpu, this));
+        fPcpus.add(new Processor(pcpu, this));
     }
 
-    public void addContainer(Machine machine) {
-        if ((machine.getTypeMachine().unboxInt() & StateValues.MACHINE_CONTAINER) != StateValues.MACHINE_CONTAINER) {
-            return;
-        }
-        containers.add(machine);
-    }
-
+    /**
+     * Add a virtual machine on this host
+     *
+     * @param machine
+     *            The machine to add as a guest
+     */
     public void addVirtualMachine(Machine machine) {
-        if ((machine.getTypeMachine().unboxInt() & StateValues.MACHINE_GUEST) != StateValues.MACHINE_GUEST) {
+        if ((machine.fMachineType.unboxInt() & StateValues.MACHINE_GUEST) != StateValues.MACHINE_GUEST) {
             return;
         }
-        virtualMachines.add(machine);
+        fVirtualMachines.add(machine);
     }
 
-    public Boolean isHighlighted() {
-        return highlighted;
+    /**
+     * Get the CPUs used by this machine, virtual or physical depending on which
+     * type of machine this is
+     *
+     * @return The CPUs used by this machine
+     */
+    public Collection<Processor> getCpus() {
+        return fCpus;
     }
 
-    public void setHighlightedWithAllCpu(Boolean b) {
-        highlighted = b;
-        if (b) {
-            heightFactory = VirtualResourcePresentationProvider.FULL_HEIGHT;
-        } else {
-            heightFactory = VirtualResourcePresentationProvider.REDUCED_HEIGHT;
-        }
-        for (Processor p : cpus) {
-            p.setHighlighted(b);
-        }
-    }
-
-    public void setHighlightedWithAllContainers(Boolean b) {
-        highlighted = b;
-        if (b){
-            heightFactory = VirtualResourcePresentationProvider.FULL_HEIGHT;
-        } else {
-            heightFactory = VirtualResourcePresentationProvider.REDUCED_HEIGHT;
-        }
-        for (Machine c : containers) {
-            c.setHighlighted(b);
-        }
-    }
-
-    public void setHighlighted(Boolean b) {
-        highlighted = b;
-    }
-
-    public void setHighlightedCpu(int cpu, Boolean b) {
-        for (Processor p : getCpus()) {
-            if (Integer.parseInt(p.getNumber()) == cpu) {
-                p.setHighlighted(b);
-                if (b) {
-                    setHighlighted(b);
-                } else {
-                    setHighlighted(isOneCpuHighlighted());
-                }
-            }
-        }
-    }
-
-    public Set<Processor> getCpus() {
-        return cpus;
-    }
-
-    public Set<Processor> getPCpus() {
-        return pcpus;
-    }
-
-    public Boolean isCpuHighlighted(String p) {
-        for (Processor proc : cpus) {
-            if (p.equals(proc.toString())) {
-                return proc.isHighlighted();
-            }
-        }
-        return false;
-    }
-
-    public Boolean isCpuHighlighted(int p) {
-        for (Processor proc : cpus) {
-            if (p == Integer.parseInt(proc.toString())) {
-                return proc.isHighlighted();
-            }
-        }
-        return false;
-    }
-
-    public Boolean areAllCpusHighlighted() {
-        Boolean res = true;
-        for (Processor p : getCpus()) {
-            res &= p.isHighlighted();
-        }
-        return res;
-    }
-
-    public Boolean areAllCpusNotHighlighted() {
-        Boolean res = true;
-        for (Processor p : getCpus()) {
-            res &= !p.isHighlighted();
-        }
-        return res;
-    }
-
-    public Boolean isOneCpuHighlighted() {
-        Boolean res = false;
-        for (Processor p : getCpus()) {
-            if (p.isHighlighted()) {
-                return true;
-            }
-        }
-        return res;
-    }
-
-    public void setHighlightedContainer(String c, Boolean b) {
-        for (Machine container : getContainers()) {
-            if (container.getMachineName().equals(c)) {
-                container.setHighlighted(b);
-                if (b) {
-                    setHighlighted(b);
-                } else {
-                    setHighlighted(isOneContainerHighlighted());
-                }
-            }
-        }
-    }
-
-    public Boolean isContainerHighlighted(String c) {
-        if (c == null) {
-            return false;
-        }
-        for (Machine container : getContainers()) {
-            if (c.equals(container.getMachineName())) {
-                return container.isHighlighted();
-            }
-        }
-        return false;
-    }
-
-    public Boolean isContainerHighlighted(long c) {
-        for (Machine container : getContainers()) {
-            if (c == Long.parseLong(container.getMachineName())) {
-                return container.isHighlighted();
-            }
-        }
-        return false;
-    }
-
-    public Boolean areAllContainersHighlighted() {
-        Boolean res = true;
-        for (Machine container : getContainers()) {
-            res &= container.isHighlighted();
-        }
-        return res;
-    }
-
-    public Boolean areAllContainersNotHighlighted() {
-        Boolean res = true;
-        for (Machine container : getContainers()) {
-            res &= !container.isHighlighted();
-        }
-        return res;
-    }
-
-    public Boolean isOneContainerHighlighted() {
-        Boolean res = false;
-        for (Machine container : getContainers()) {
-            if (container.isHighlighted()) {
-                return true;
-            }
-        }
-        return res;
-    }
-
-    public Boolean cpusNodeIsGrayed() {
-        return !areAllCpusHighlighted() && isOneCpuHighlighted();
-    }
-
-    public Boolean containersNodeIsGrayed() {
-        return !areAllContainersHighlighted() && isOneContainerHighlighted();
-    }
-
-    public Boolean isGrayed() {
-        return !(areAllCpusHighlighted() && areAllContainersHighlighted()) && (isOneCpuHighlighted() || isOneContainerHighlighted());
-    }
-
-    public Boolean isChecked() {
-        return isOneContainerHighlighted() || isOneCpuHighlighted();
+    /**
+     * Get the physical CPUs on the host used by this machine
+     *
+     * @return The physical CPUs of the host used by this machine
+     */
+    public Collection<Processor> getPhysicalCpus() {
+        return fPcpus;
     }
 
     @Override
     public String toString() {
-        return machineName;
+        return fMachineName + (fHost != null ? " in " + fHost : ""); //$NON-NLS-1$//$NON-NLS-2$
     }
 
-    public void displayMachine() {
-        displayMachineRec(0);
-    }
-
-    private void displayMachineRec(int nbTab) {
-        String tab = "";
-        for (int i = 0; i < nbTab; i++) {
-            tab += "\t";
-        }
-        System.out.println(tab + "Machine: " + this);
-        System.out.println(tab + "\tVMs of " + this +  ":");
-        for (Machine vm : getVirtualMachines()) {
-            vm.displayMachineRec(nbTab + 2);
-        }
-        System.out.println(tab + "\tContainers of " + this +  ":");
-        for (Machine container : getContainers()) {
-            container.displayMachineRec(nbTab + 2);
-        }
-    }
 }

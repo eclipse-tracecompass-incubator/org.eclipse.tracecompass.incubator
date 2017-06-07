@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 École Polytechnique de Montréal
+ * Copyright (c) 2016-2017 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -19,8 +19,15 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 
 /**
+ * An entry for the Virtual Resources View
+ *
+ * TODO: Instead of using the Type enum and doing ifs on it in the view, maybe
+ * use different sub-classes and methods to retrieve the events
+ *
  * @author Cedric Biancheri
+ * @author Geneviève Bastien
  */
+@SuppressWarnings("restriction")
 public class VirtualResourceEntry extends TimeGraphEntry implements Comparable<ITimeGraphEntry> {
 
     /** Type of resource */

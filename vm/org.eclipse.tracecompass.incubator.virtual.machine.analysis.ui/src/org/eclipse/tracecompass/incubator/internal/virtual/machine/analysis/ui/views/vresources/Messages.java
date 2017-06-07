@@ -20,6 +20,11 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = Messages.class.getPackage().getName() + ".messages"; //$NON-NLS-1$
 
+    public static String FusedVMView_TooltipVirtualMachine;
+    public static String FusedVMView_TooltipVirtualCpu;
+    public static String FusedVMView_TooltipRecVtid;
+    public static String FusedVMView_TooltipRecContainer;
+
     public static String FusedVMView_stateTypeName;
     public static String FusedVMView_multipleStates;
     public static String FusedVMView_nextResourceActionNameText;
@@ -40,11 +45,14 @@ public class Messages extends NLS {
     public static String FusedVMView_ButtonHoverProcessSelectedTID;
     public static String FusedVMView_SelectMachineActionNameText;
     public static String FusedVMView_SelectMachineActionToolTipText;
-    public static String FusedVMView_SELECT_MACHINE;
     public static String FusedVMView_ButtonContainerSelected;
     public static String FusedVMView_ContainersEntry;
     public static String FusedVMView_VirtualMachinesEntry;
     public static String FusedVMView_PhysicalCpusEntry;
+
+    public static String SelectMachineDialog_Title;
+    public static String SelectMachineDialog_SelectMachineMessage;
+    public static String SelectMachineDialog_CpuText;
 
     static {
         // initialize resource bundle

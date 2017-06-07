@@ -93,6 +93,8 @@ public class SimpleContainersTestCase extends VmTestCase {
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "42"), TmfStateValue.newValueInt(3));
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "43"), TmfStateValue.newValueInt(4));
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "44"), TmfStateValue.newValueInt(5));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.PCPUS, "0"), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.PCPUS, "1"), TmfStateValue.nullValue());
 
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "40"), TmfStateValue.newValueInt(40));
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "41"), TmfStateValue.newValueInt(41));
@@ -103,6 +105,8 @@ public class SimpleContainersTestCase extends VmTestCase {
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.THREADS, "42"), TmfStateValue.newValueInt(1));
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.THREADS, "43"), TmfStateValue.newValueInt(2));
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.THREADS, "44"), TmfStateValue.newValueInt(3));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.PCPUS, "0"), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.PCPUS, "1"), TmfStateValue.nullValue());
 
         // Check the 'Threads' sub-tree and VTID informations
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "40", FusedAttributes.NS_MAX_LEVEL), TmfStateValue.newValueInt(2));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 École Polytechnique de Montréal
+ * Copyright (c) 2016-2017 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -10,13 +10,14 @@
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vresources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -69,6 +70,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.TimeForma
  * traces and containers
  *
  * @author Cedric Biancheri
+ * @author Geneviève Bastien
  */
 public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
 
@@ -79,25 +81,22 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
             Messages.FusedVMView_stateTypeName
     };
 
-    // Timeout between updates in the build thread in ms
-    private static final long BUILD_UPDATE_TIMEOUT = 500;
-
     /** Button to select a machine to highlight */
     private final Action fHighlightMachine = new Action(Messages.FusedVMView_ButtonMachineSelected, IAction.AS_CHECK_BOX) {
         @Override
         public void run() {
-            VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
-            Map<String, Machine> highlightedMachines = presentationProvider.getHighlightedMachines();
-            Machine machine = highlightedMachines.get(presentationProvider.getSelectedMachine());
-            if (machine == null) {
-                setChecked(!isChecked());
-                return;
-            }
-            machine.setHighlightedWithAllCpu(isChecked());
-            machine.setHighlightedWithAllContainers(isChecked());
-            fHighlightCPU.setChecked(isChecked());
-            fHighlightContainer.setChecked(isChecked());
-            presentationProvider.destroyTimeEventHighlight();
+//            VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
+//            Map<String, Machine> highlightedMachines = presentationProvider.getHighlightedMachines();
+//            Machine machine = highlightedMachines.get(presentationProvider.getSelectedMachine());
+//            if (machine == null) {
+//                setChecked(!isChecked());
+//                return;
+//            }
+//            machine.setHighlightedWithAllCpu(isChecked());
+//            machine.setHighlightedWithAllContainers(isChecked());
+//            fHighlightCPU.setChecked(isChecked());
+//            fHighlightContainer.setChecked(isChecked());
+//            presentationProvider.destroyTimeEventHighlight();
             refresh();
         }
     };
@@ -106,16 +105,16 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
     private final Action fHighlightCPU = new Action(Messages.FusedVMView_ButtonCPUSelected, IAction.AS_CHECK_BOX) {
         @Override
         public void run() {
-            VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
-            Map<String, Machine> highlightedMachines = presentationProvider.getHighlightedMachines();
-            Machine machine = highlightedMachines.get(presentationProvider.getSelectedMachine());
-            if (machine == null) {
-                setChecked(!isChecked());
-                return;
-            }
-            machine.setHighlightedCpu(presentationProvider.getSelectedCpu(), isChecked());
-            fHighlightMachine.setChecked(machine.isOneCpuHighlighted());
-            presentationProvider.destroyTimeEventHighlight();
+//            VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
+//            Map<String, Machine> highlightedMachines = presentationProvider.getHighlightedMachines();
+//            Machine machine = highlightedMachines.get(presentationProvider.getSelectedMachine());
+//            if (machine == null) {
+//                setChecked(!isChecked());
+//                return;
+//            }
+//            machine.setHighlightedCpu(presentationProvider.getSelectedCpu(), isChecked());
+//            fHighlightMachine.setChecked(machine.isOneCpuHighlighted());
+//            presentationProvider.destroyTimeEventHighlight();
             refresh();
         }
     };
@@ -130,7 +129,7 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
             } else {
                 presentationProvider.removeHighlightedThread();
             }
-            presentationProvider.destroyTimeEventHighlight();
+            presentationProvider.resetTimeEventHighlight();
             refresh();
         }
     };
@@ -139,17 +138,17 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
     private final Action fHighlightContainer = new Action(Messages.FusedVMView_ButtonContainerSelected, IAction.AS_CHECK_BOX) {
         @Override
         public void run() {
-            VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
-            Map<String, Machine> highlightedMachines = presentationProvider.getHighlightedMachines();
-            Machine machine = highlightedMachines.get(presentationProvider.getSelectedMachine());
-            String container = presentationProvider.getSelectedContainer();
-            if (machine == null) {
-                setChecked(!isChecked());
-                return;
-            }
-            machine.setHighlightedContainer(container, isChecked());
-            fHighlightMachine.setChecked(machine.isOneContainerHighlighted());
-            presentationProvider.destroyTimeEventHighlight();
+//            VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
+//            Map<String, Machine> highlightedMachines = presentationProvider.getHighlightedMachines();
+//            Machine machine = highlightedMachines.get(presentationProvider.getSelectedMachine());
+//            String container = presentationProvider.getSelectedContainer();
+//            if (machine == null) {
+//                setChecked(!isChecked());
+//                return;
+//            }
+//            machine.setHighlightedContainer(container, isChecked());
+//            fHighlightMachine.setChecked(machine.isOneContainerHighlighted());
+//            presentationProvider.destroyTimeEventHighlight();
             refresh();
         }
     };
@@ -275,14 +274,14 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
             if ((e.stateMask & SWT.SHIFT) != 0) {
                 VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
                 presentationProvider.modifySelectedThreadAlpha(e.count);
-                presentationProvider.destroyTimeEventHighlight();
+                presentationProvider.resetTimeEventHighlight();
                 refresh();
             }
         }
     };
 
-    private Machine fPhysicalMachine;
-    private HashMap<String, Machine> fMachines;
+    private final Map<ITmfTrace, Machine> fPhysicalMachines = new HashMap<>();
+    private Map<String, Machine> fMachines;
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -395,272 +394,186 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         /* All machines should are highlighted by default. */
         /* Remove highlighted machines from other analysis. */
         VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
-        presentationProvider.destroyHightlightedMachines();
+        presentationProvider.setSelectedElements(Collections.emptySet());
 
         fMachines = new HashMap<>();
-        fPhysicalMachine = createHierarchy(ssq);
+        // TODO: In an experiment, there can be multiple host machines
+        Machine physicalMachine = createHierarchy(ssq);
 
-        if (fPhysicalMachine == null) {
+        if (physicalMachine == null) {
             return;
         }
+        fPhysicalMachines.put(trace, physicalMachine);
 
-        Map<Integer, VirtualResourceEntry> entryMap = new HashMap<>();
         TimeGraphEntry traceEntry = null;
 
         long startTime = ssq.getStartTime();
         long start = startTime;
         setStartTime(Math.min(getStartTime(), startTime));
-        boolean complete = false;
-        while (!complete) {
-            if (monitor.isCanceled()) {
-                return;
-            }
-            complete = ssq.waitUntilBuilt(BUILD_UPDATE_TIMEOUT);
-            if (ssq.isCancelled()) {
-                return;
-            }
-            long end = ssq.getCurrentEndTime();
-            if (start == end && !complete) {
-                // when complete execute one last time regardless of end time
-                continue;
-            }
-            long endTime = end + 1;
-            setEndTime(Math.max(getEndTime(), endTime));
 
-            List<Integer> machinesQuarks = ssq.getQuarks(FusedAttributes.MACHINES, "*"); //$NON-NLS-1$
-            String hostName = null;
-            for (int quark : machinesQuarks) {
-                try {
-                    if (ssq.querySingleState(trace.getStartTime().getValue(), quark).getStateValue().unboxInt() == StateValues.MACHINE_HOST) {
-                        hostName = ssq.getAttributeName(quark);
-                    }
-                } catch (StateSystemDisposedException e) {
-                    e.printStackTrace();
+        // FIXME: Here would start the while(!complete) loop
+        if (monitor.isCanceled()) {
+            return;
+        }
+        long end = ssq.getCurrentEndTime();
+        long endTime = end + 1;
+        setEndTime(Math.max(getEndTime(), endTime));
+
+        List<Integer> machinesQuarks = ssq.getQuarks(FusedAttributes.MACHINES, "*"); //$NON-NLS-1$
+        String hostName = null;
+        for (int quark : machinesQuarks) {
+            try {
+                if (ssq.querySingleState(trace.getStartTime().getValue(), quark).getStateValue().unboxInt() == StateValues.MACHINE_HOST) {
+                    hostName = ssq.getAttributeName(quark);
                 }
+            } catch (StateSystemDisposedException e) {
+                e.printStackTrace();
             }
-
-            if (traceEntry == null) {
-                traceEntry = new VirtualResourceEntry(trace, hostName, startTime, endTime, Type.VM, 0);
-                traceEntry.sortChildren(ENTRY_COMPARATOR);
-                List<TimeGraphEntry> entryList = Collections.singletonList(traceEntry);
-                addToEntryList(parentTrace, ssq, entryList);
-            } else {
-                traceEntry.updateEndTime(endTime);
-            }
-
-            List<Integer> cpuQuarks = ssq.getQuarks(FusedAttributes.CPUS, "*"); //$NON-NLS-1$
-            getFusedVMViewPresentationProvider().getHighlightedMachines().put(fPhysicalMachine.getMachineName(), fPhysicalMachine);
-            createCpuEntriesWithQuark(trace, ssq, entryMap, traceEntry, startTime, endTime, cpuQuarks);
-
-            /* Create entries for machines and containers */
-            createMachineAndContainerEntries(trace, ssq, entryMap, fPhysicalMachine, traceEntry, startTime, endTime);
-
-            if (parentTrace.equals(getTrace())) {
-                refresh();
-            }
-            final List<? extends ITimeGraphEntry> traceEntryChildren = traceEntry.getChildren();
-            final long resolution = Math.max(1, (endTime - ssq.getStartTime()) / getDisplayWidth());
-            final long qStart = start;
-            final long qEnd = end;
-            queryFullStates(ssq, qStart, qEnd, resolution, monitor, new IQueryHandler() {
-                @Override
-                public void handle(List<List<ITmfStateInterval>> fullStates, List<ITmfStateInterval> prevFullState) {
-                    for (ITimeGraphEntry child : traceEntryChildren) {
-                        if (!populateEventsRecursively(fullStates, prevFullState, child).isOK()) {
-                            return;
-                        }
-                    }
-                }
-
-                private IStatus populateEventsRecursively(@NonNull List<List<ITmfStateInterval>> fullStates, @Nullable List<ITmfStateInterval> prevFullState, ITimeGraphEntry entry) {
-                    if (monitor.isCanceled()) {
-                        return Status.CANCEL_STATUS;
-                    }
-                    if (entry instanceof TimeGraphEntry) {
-                        TimeGraphEntry timeGraphEntry = (TimeGraphEntry) entry;
-                        List<ITimeEvent> eventList = getEventList(timeGraphEntry, ssq, fullStates, prevFullState, monitor);
-                        if (eventList != null) {
-                            for (ITimeEvent event : eventList) {
-                                timeGraphEntry.addEvent(event);
-                            }
-                        }
-                    }
-                    for (ITimeGraphEntry child : entry.getChildren()) {
-                        IStatus status = populateEventsRecursively(fullStates, prevFullState, child);
-                        if (!status.isOK()) {
-                            return status;
-                        }
-                    }
-                    return Status.OK_STATUS;
-                }
-            });
-
-            start = end;
         }
 
+        traceEntry = new VirtualResourceEntry(trace, hostName, startTime, endTime, Type.VM, 0);
+        traceEntry.sortChildren(ENTRY_COMPARATOR);
+        List<@NonNull TimeGraphEntry> entryList = Collections.singletonList(traceEntry);
+        addToEntryList(parentTrace, ssq, entryList);
+
+        createPhysicalCpuEntries(trace, ssq, traceEntry, startTime, endTime);
+
+        /* Create entries for machines and containers */
+        createMachineAndContainerEntries(trace, ssq, physicalMachine, traceEntry, startTime, endTime);
+
+        if (parentTrace.equals(getTrace())) {
+            refresh();
+        }
+        final List<? extends ITimeGraphEntry> traceEntryChildren = traceEntry.getChildren();
+        final long resolution = Math.max(1, (endTime - ssq.getStartTime()) / getDisplayWidth());
+        final long qStart = start;
+        final long qEnd = end;
+        queryFullStates(ssq, qStart, qEnd, resolution, monitor, new IQueryHandler() {
+            @Override
+            public void handle(List<List<ITmfStateInterval>> fullStates, List<ITmfStateInterval> prevFullState) {
+                for (ITimeGraphEntry child : traceEntryChildren) {
+                    if (!populateEventsRecursively(fullStates, prevFullState, child).isOK()) {
+                        return;
+                    }
+                }
+            }
+
+            private IStatus populateEventsRecursively(@NonNull List<List<ITmfStateInterval>> fullStates, @Nullable List<ITmfStateInterval> prevFullState, ITimeGraphEntry entry) {
+                if (monitor.isCanceled()) {
+                    return Status.CANCEL_STATUS;
+                }
+                if (entry instanceof TimeGraphEntry) {
+                    TimeGraphEntry timeGraphEntry = (TimeGraphEntry) entry;
+                    List<ITimeEvent> eventList = getEventList(timeGraphEntry, ssq, fullStates, prevFullState, monitor);
+                    if (eventList != null) {
+                        for (ITimeEvent event : eventList) {
+                            timeGraphEntry.addEvent(event);
+                        }
+                    }
+                }
+                for (ITimeGraphEntry child : entry.getChildren()) {
+                    IStatus status = populateEventsRecursively(fullStates, prevFullState, child);
+                    if (!status.isOK()) {
+                        return status;
+                    }
+                }
+                return Status.OK_STATUS;
+            }
+        });
+
+        start = end;
     }
 
-    private void createCpuEntriesWithQuark(@NonNull ITmfTrace trace, final ITmfStateSystem ssq, Map<Integer, VirtualResourceEntry> entryMap, TimeGraphEntry traceEntry, long startTime, long endTime, List<Integer> cpuQuarks) {
-        Integer cpusQuark = ssq.getQuarks(FusedAttributes.CPUS).get(0);
-        VirtualResourceEntry physicalCpusEntry = entryMap.get(cpusQuark);
-        if (physicalCpusEntry == null) {
-            physicalCpusEntry = new VirtualResourceEntry(cpusQuark, trace, Messages.FusedVMView_PhysicalCpusEntry, startTime, endTime, Type.NULL, cpusQuark);
-            entryMap.put(cpusQuark, physicalCpusEntry);
-            traceEntry.addChild(physicalCpusEntry);
-        } else {
-            physicalCpusEntry.updateEndTime(endTime);
-        }
+    private void createPhysicalCpuEntries(@NonNull ITmfTrace trace, final ITmfStateSystem ssq, TimeGraphEntry traceEntry, long startTime, long endTime) {
+        List<Integer> cpuQuarks = ssq.getQuarks(FusedAttributes.CPUS, "*"); //$NON-NLS-1$
+        int cpusQuark = ssq.optQuarkAbsolute(FusedAttributes.CPUS);
+        VirtualResourceEntry physicalCpusEntry = new VirtualResourceEntry(cpusQuark, trace, Messages.FusedVMView_PhysicalCpusEntry, startTime, endTime, Type.NULL, cpusQuark);
+        traceEntry.addChild(physicalCpusEntry);
+
         for (Integer cpuQuark : cpuQuarks) {
-            final @NonNull String cpuName = ssq.getAttributeName(cpuQuark);
+            String cpuName = ssq.getAttributeName(cpuQuark);
             int cpu = Integer.parseInt(cpuName);
-            VirtualResourceEntry cpuEntry = entryMap.get(cpuQuark);
-            if (cpuEntry == null) {
-                VirtualResourceEntry newCpuEntry = new VirtualResourceEntry(cpuQuark, trace, startTime, endTime, Type.CPU, cpu);
-                cpuEntry = newCpuEntry;
-                entryMap.put(cpuQuark, cpuEntry);
-                physicalCpusEntry.addChild(cpuEntry);
-                Display.getDefault().asyncExec(() -> {
-                    getTimeGraphViewer().setExpandedState(newCpuEntry, false);
-                });
-            } else {
-                cpuEntry.updateEndTime(endTime);
-            }
+            VirtualResourceEntry cpuEntry = new VirtualResourceEntry(cpuQuark, trace, startTime, endTime, Type.CPU, cpu);
+            physicalCpusEntry.addChild(cpuEntry);
+
             List<Integer> irqQuarks = ssq.getQuarks(FusedAttributes.CPUS, cpuName, FusedAttributes.IRQS, "*"); //$NON-NLS-1$
-            createCpuInterruptEntryWithQuark(trace, ssq, entryMap, startTime, endTime, physicalCpusEntry, cpuEntry, irqQuarks, Type.IRQ);
+            createCpuInterruptEntryWithQuark(trace, ssq, startTime, endTime, cpuEntry, irqQuarks, Type.IRQ);
             List<Integer> softIrqQuarks = ssq.getQuarks(FusedAttributes.CPUS, cpuName, FusedAttributes.SOFT_IRQS, "*"); //$NON-NLS-1$
-            createCpuInterruptEntryWithQuark(trace, ssq, entryMap, startTime, endTime, physicalCpusEntry, cpuEntry, softIrqQuarks, Type.SOFT_IRQ);
+            createCpuInterruptEntryWithQuark(trace, ssq, startTime, endTime, cpuEntry, softIrqQuarks, Type.SOFT_IRQ);
+
+            Display.getDefault().asyncExec(() -> {
+                getTimeGraphViewer().setExpandedState(cpuEntry, false);
+            });
         }
     }
 
-    private void createMachineAndContainerEntries(@NonNull ITmfTrace trace, final ITmfStateSystem ssq, Map<Integer, VirtualResourceEntry> entryMap, Machine machine, TimeGraphEntry machineEntry, long startTime, long endTime) {
-        Set<Machine> vms = machine.getVirtualMachines();
-        Set<Machine> containers = machine.getContainers();
-        Set<Processor> pcpus = machine.getPCpus();
+    private void createMachineAndContainerEntries(@NonNull ITmfTrace trace, final ITmfStateSystem ssq, Machine machine, TimeGraphEntry parentEntry, long startTime, long endTime) {
+        Machine physicalMachine = fPhysicalMachines.get(trace);
+        Collection<Machine> vms = machine.getVirtualMachines();
+        Collection<Machine> containers = machine.getContainers();
+        Collection<Processor> pcpus = machine.getPhysicalCpus();
 
         if (!vms.isEmpty()) {
-            VirtualResourceEntry virtualMachinesEntry = entryMap.get(3 * vms.hashCode());
-            if (virtualMachinesEntry == null) {
-                virtualMachinesEntry = new VirtualResourceEntry(0, trace, Messages.FusedVMView_VirtualMachinesEntry, startTime, endTime, Type.NULL, 3 * vms.hashCode());
-                entryMap.put(3 * vms.hashCode(), virtualMachinesEntry);
-                machineEntry.addChild(virtualMachinesEntry);
-            } else {
-                virtualMachinesEntry.updateEndTime(endTime);
-            }
+            VirtualResourceEntry virtualMachinesEntry = new VirtualResourceEntry(0, trace, Messages.FusedVMView_VirtualMachinesEntry, startTime, endTime, Type.NULL, 3 * vms.hashCode());
+            parentEntry.addChild(virtualMachinesEntry);
+
             for (Machine vm : vms) {
-                VirtualResourceEntry virtualMachineEntry = entryMap.get(vm.hashCode());
-                if (virtualMachineEntry == null) {
-                    virtualMachineEntry = new VirtualResourceEntry(0, trace, vm.getMachineName(), startTime, endTime, Type.VM, vm.hashCode());
-                    getFusedVMViewPresentationProvider().getHighlightedMachines().put(vm.getMachineName(), vm);
-                    entryMap.put(vm.hashCode(), virtualMachineEntry);
-                    virtualMachinesEntry.addChild(virtualMachineEntry);
-                } else {
-                    virtualMachineEntry.updateEndTime(endTime);
-                }
-                createMachineAndContainerEntries(trace, ssq, entryMap, vm, virtualMachineEntry, startTime, endTime);
+                VirtualResourceEntry virtualMachineEntry = new VirtualResourceEntry(0, trace, vm.getMachineName(), startTime, endTime, Type.VM, vm.hashCode());
+                virtualMachinesEntry.addChild(virtualMachineEntry);
+                createMachineAndContainerEntries(trace, ssq, vm, virtualMachineEntry, startTime, endTime);
             }
         }
 
         if (!containers.isEmpty()) {
-            VirtualResourceEntry containersEntry = entryMap.get(3 * containers.hashCode());
-            if (containersEntry == null) {
-                containersEntry = new VirtualResourceEntry(0, trace, Messages.FusedVMView_ContainersEntry, startTime, endTime, Type.NULL, 3 * containers.hashCode());
+            VirtualResourceEntry containersEntry = new VirtualResourceEntry(0, trace, Messages.FusedVMView_ContainersEntry, startTime, endTime, Type.NULL, 3 * containers.hashCode());
+            parentEntry.addChild(containersEntry);
 
-                entryMap.put(3 * containers.hashCode(), containersEntry);
-                machineEntry.addChild(containersEntry);
-            } else {
-                containersEntry.updateEndTime(endTime);
-            }
             for (Machine container : containers) {
-                VirtualResourceEntry containerEntry = entryMap.get(container.hashCode());
-                if (containerEntry == null) {
-                    containerEntry = new VirtualResourceEntry(0, trace, container.getMachineName(), startTime, endTime, Type.CONTAINER, container.hashCode());
-                    getFusedVMViewPresentationProvider().getHighlightedMachines().put(container.getMachineName(), container);
-                    entryMap.put(container.hashCode(), containerEntry);
-                    containersEntry.addChild(containerEntry);
-                } else {
-                    containerEntry.updateEndTime(endTime);
-                }
-                createMachineAndContainerEntries(trace, ssq, entryMap, container, containerEntry, startTime, endTime);
+                VirtualResourceEntry containerEntry = new VirtualResourceEntry(0, trace, container.getMachineName(), startTime, endTime, Type.CONTAINER, container.hashCode());
+                containersEntry.addChild(containerEntry);
+                createMachineAndContainerEntries(trace, ssq, container, containerEntry, startTime, endTime);
             }
         }
 
-        if (!pcpus.isEmpty() && !(machine == fPhysicalMachine)) {
-            VirtualResourceEntry pCpusEntry = entryMap.get(3 * pcpus.hashCode());
-            if (pCpusEntry == null) {
-                pCpusEntry = new VirtualResourceEntry(0, trace, Messages.FusedVMView_PhysicalCpusEntry, startTime, endTime, Type.NULL, 3 * pcpus.hashCode());
-                entryMap.put(3 * pcpus.hashCode(), pCpusEntry);
-                machineEntry.addChild(pCpusEntry);
-            } else {
-                pCpusEntry.updateEndTime(endTime);
-            }
+        if (!pcpus.isEmpty() && (machine != physicalMachine)) {
+            VirtualResourceEntry pCpusEntry = new VirtualResourceEntry(0, trace, Messages.FusedVMView_PhysicalCpusEntry, startTime, endTime, Type.NULL, 3 * pcpus.hashCode());
+            parentEntry.addChild(pCpusEntry);
+
             for (Processor p : pcpus) {
-                VirtualResourceEntry pCpuEntry = entryMap.get(p.hashCode());
-                if (pCpuEntry == null) {
-                    List<Integer> list = ssq.getQuarks(FusedAttributes.CPUS, p.getNumber());
-                    if (list.isEmpty()) {
-                        return;
-                    }
-                    int pCpuQuark = list.get(0);
-                    Type type = Type.NULL;
-                    Type typeMachine = ((VirtualResourceEntry) machineEntry).getType();
-                    if (typeMachine == Type.VM) {
-                        type = Type.PCPU_VM;
-                    } else if (typeMachine == Type.CONTAINER) {
-                        type = Type.PCPU_CONTAINER;
-                    }
-                    pCpuEntry = new VirtualResourceEntry(pCpuQuark, trace, startTime, endTime, type, Integer.parseInt(p.getNumber()));
-                    entryMap.put(p.hashCode(), pCpuEntry);
-                    pCpusEntry.addChild(pCpuEntry);
-                } else {
-                    pCpuEntry.updateEndTime(endTime);
+                List<Integer> list = ssq.getQuarks(FusedAttributes.CPUS, String.valueOf(p.getNumber()));
+                if (list.isEmpty()) {
+                    return;
                 }
+                int pCpuQuark = list.get(0);
+                Type type = Type.NULL;
+                Type typeMachine = ((VirtualResourceEntry) parentEntry).getType();
+                if (typeMachine == Type.VM) {
+                    type = Type.PCPU_VM;
+                } else if (typeMachine == Type.CONTAINER) {
+                    type = Type.PCPU_CONTAINER;
+                }
+                VirtualResourceEntry pCpuEntry = new VirtualResourceEntry(pCpuQuark, trace, startTime, endTime, type, p.getNumber());
+                pCpusEntry.addChild(pCpuEntry);
             }
         }
-
     }
 
-    /**
+    /*
      * Create and add execution contexts to a cpu entry. Also creates an
      * aggregate entry in the root trace entry. The execution context is
      * basically what the cpu is doing in its execution stack. It can be in an
      * IRQ, Soft IRQ. MCEs, NMIs, Userland and Kernel execution is not yet
      * supported.
-     *
-     * @param trace
-     *            the trace
-     * @param ssq
-     *            the state system
-     * @param entryMap
-     *            the entry map
-     * @param startTime
-     *            the start time in nanoseconds
-     * @param endTime
-     *            the end time in nanoseconds
-     * @param traceEntry
-     *            the trace timegraph entry
-     * @param cpuEntry
-     *            the cpu timegraph entry (the entry under the trace entry
-     * @param childrenQuarks
-     *            the quarks to add to cpu entry
-     * @param type
-     *            the type of entry being added
      */
     private static void createCpuInterruptEntryWithQuark(@NonNull ITmfTrace trace,
-            final ITmfStateSystem ssq, Map<Integer, VirtualResourceEntry> entryMap,
-            long startTime, long endTime,
-            TimeGraphEntry traceEntry, VirtualResourceEntry cpuEntry,
+            final ITmfStateSystem ssq,
+            long startTime, long endTime, VirtualResourceEntry cpuEntry,
             List<Integer> childrenQuarks, Type type) {
         for (Integer quark : childrenQuarks) {
             final @NonNull String resourceName = ssq.getAttributeName(quark);
             int resourceId = Integer.parseInt(resourceName);
-            VirtualResourceEntry interruptEntry = entryMap.get(quark);
-            if (interruptEntry == null) {
-                interruptEntry = new VirtualResourceEntry(quark, trace, startTime, endTime, type, resourceId);
-                entryMap.put(quark, interruptEntry);
-                cpuEntry.addChild(interruptEntry);
-            } else {
-                interruptEntry.updateEndTime(endTime);
-            }
+            VirtualResourceEntry interruptEntry = new VirtualResourceEntry(quark, trace, startTime, endTime, type, resourceId);
+            cpuEntry.addChild(interruptEntry);
         }
     }
 
@@ -671,19 +584,19 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         int quark = fusedVMViewEntry.getQuark();
 
         if (fusedVMViewEntry.getType().equals(Type.CPU)) {
-            return createCpuEventsList(entry, ssq, fullStates, prevFullState, monitor, quark, Type.CPU);
+            return getCpuEventsList(entry, ssq, fullStates, prevFullState, monitor, quark, Type.CPU);
         } else if ((fusedVMViewEntry.getType().equals(Type.IRQ) || fusedVMViewEntry.getType().equals(Type.SOFT_IRQ)) && (quark >= 0)) {
-            return createIrqEventsList(entry, fullStates, prevFullState, monitor, quark);
+            return getIrqEventsList(entry, fullStates, prevFullState, monitor, quark);
         } else if (fusedVMViewEntry.getType().equals(Type.PCPU_VM)) {
-            return createCpuEventsList(entry, ssq, fullStates, prevFullState, monitor, quark, Type.PCPU_VM);
+            return getCpuEventsList(entry, ssq, fullStates, prevFullState, monitor, quark, Type.PCPU_VM);
         } else if (fusedVMViewEntry.getType().equals(Type.PCPU_CONTAINER)) {
-            return createCpuEventsList(entry, ssq, fullStates, prevFullState, monitor, quark, Type.PCPU_CONTAINER);
+            return getCpuEventsList(entry, ssq, fullStates, prevFullState, monitor, quark, Type.PCPU_CONTAINER);
         }
 
         return null;
     }
 
-    private List<ITimeEvent> createCpuEventsList(TimeGraphEntry entry, ITmfStateSystem ssq, List<List<ITmfStateInterval>> fullStates, List<ITmfStateInterval> prevFullState, IProgressMonitor monitor, int quark, Type type) {
+    private List<ITimeEvent> getCpuEventsList(TimeGraphEntry entry, ITmfStateSystem ssq, List<List<ITmfStateInterval>> fullStates, List<ITmfStateInterval> prevFullState, IProgressMonitor monitor, int quark, Type type) {
         List<ITimeEvent> eventList;
         int statusQuark;
         int machineQuark;
@@ -709,14 +622,14 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         ITmfStateInterval lastMachineInterval = prevFullState == null || machineQuark >= prevFullState.size() ? null : prevFullState.get(machineQuark);
         ITmfStateInterval lastCurrentThreadInterval = prevFullState == null || currentThreadQuark >= prevFullState.size() ? null : prevFullState.get(currentThreadQuark);
         long lastStatusStartTime = lastStatusInterval == null ? -1 : lastStatusInterval.getStartTime();
-        long lastStatusEndTime = lastStatusInterval == null ? -1 : lastStatusInterval.getEndTime() + 1;
+        long lastStatusEndTime = lastStatusInterval == null ? Long.MAX_VALUE : lastStatusInterval.getEndTime() + 1;
         long lastMachineStartTime = lastMachineInterval == null ? -1 : lastMachineInterval.getStartTime();
-        long lastMachineEndTime = lastMachineInterval == null ? -1 : lastMachineInterval.getEndTime() + 1;
+        long lastMachineEndTime = lastMachineInterval == null ? Long.MAX_VALUE : lastMachineInterval.getEndTime() + 1;
         long lastCurrentThreadStartTime = lastCurrentThreadInterval == null ? -1 : lastCurrentThreadInterval.getStartTime();
-        long lastCurrentThreadEndTime = lastCurrentThreadInterval == null ? -1 : lastCurrentThreadInterval.getEndTime() + 1;
+        long lastCurrentThreadEndTime = lastCurrentThreadInterval == null ? Long.MAX_VALUE : lastCurrentThreadInterval.getEndTime() + 1;
         /* So we intersect the three intervals. */
-        long lastStartTime = max(lastStatusStartTime, max(lastMachineStartTime, lastCurrentThreadStartTime));
-        long lastEndTime = min(lastStatusEndTime, min(lastMachineEndTime, lastCurrentThreadEndTime));
+        long lastStartTime = Math.max(lastStatusStartTime, Math.max(lastMachineStartTime, lastCurrentThreadStartTime));
+        long lastEndTime = Math.min(lastStatusEndTime, Math.min(lastMachineEndTime, lastCurrentThreadEndTime));
         for (List<ITmfStateInterval> fullState : fullStates) {
             if (monitor.isCanceled()) {
                 return null;
@@ -744,6 +657,10 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
             } else if (type.equals(Type.PCPU_CONTAINER)) {
                 /* Get the entry of the machine containing the container */
                 VirtualResourceEntry machineEntry = (VirtualResourceEntry) entry.getParent();
+                if (machineEntry == null) {
+                    System.out.println("null");
+                    continue;
+                }
                 while (machineEntry.getType() != Type.VM) {
                     machineEntry = (VirtualResourceEntry) machineEntry.getParent();
                 }
@@ -773,8 +690,8 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
             }
 
             int status = statusInterval.getStateValue().unboxInt();
-            long time = max(statusInterval.getStartTime(), max(machineInterval.getStartTime(), currentThreadInterval.getStartTime()));
-            long duration = min(statusInterval.getEndTime(), min(machineInterval.getEndTime(), currentThreadInterval.getEndTime())) - time + 1;
+            long time = Math.max(statusInterval.getStartTime(), Math.max(machineInterval.getStartTime(), currentThreadInterval.getStartTime()));
+            long duration = Math.min(statusInterval.getEndTime(), Math.min(machineInterval.getEndTime(), currentThreadInterval.getEndTime())) - time + 1;
             if (time == lastStartTime) {
                 continue;
             }
@@ -790,26 +707,6 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
             lastEndTime = time + duration;
         }
         return eventList;
-    }
-
-    private static long min(long a, long b) {
-        if (a == -1) {
-            return b;
-        } else if (b == -1) {
-            return a;
-        } else {
-            return a < b ? a : b;
-        }
-    }
-
-    private static long max(long a, long b) {
-        if (a == -1) {
-            return b;
-        } else if (b == -1) {
-            return a;
-        } else {
-            return a < b ? b : a;
-        }
     }
 
     /**
@@ -835,7 +732,7 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         return false;
     }
 
-    private static List<ITimeEvent> createIrqEventsList(TimeGraphEntry entry, List<List<ITmfStateInterval>> fullStates, List<ITmfStateInterval> prevFullState, IProgressMonitor monitor, int quark) {
+    private static List<ITimeEvent> getIrqEventsList(TimeGraphEntry entry, List<List<ITmfStateInterval>> fullStates, List<ITmfStateInterval> prevFullState, IProgressMonitor monitor, int quark) {
         List<ITimeEvent> eventList;
         eventList = new ArrayList<>(fullStates.size());
         ITmfStateInterval lastInterval = prevFullState == null || quark >= prevFullState.size() ? null : prevFullState.get(quark);
@@ -884,7 +781,7 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         IAction selectMachineAction = getSelectMachineAction();
         selectMachineAction.setText(Messages.FusedVMView_selectMachineText);
         selectMachineAction.setToolTipText(Messages.FusedVMView_selectMachineText);
-//        manager.add(selectMachineAction);
+        manager.add(selectMachineAction);
 //        manager.add(new Separator());
 //        manager.add(fHighlightMachine);
 //        manager.add(fHighlightCPU);
@@ -983,17 +880,17 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
      * Sets the checked state of the buttons
      */
     private void updateButtonsSelection() {
-        VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
-        Map<String, Machine> highlightedMachines = presentationProvider.getHighlightedMachines();
-        Machine machine = highlightedMachines.get(presentationProvider.getSelectedMachine());
-        if (machine == null) {
-            return;
-        }
-
-        fHighlightMachine.setChecked(machine.isHighlighted());
-        fHighlightCPU.setChecked(machine.isCpuHighlighted(presentationProvider.getSelectedCpu()));
-        fHighlightProcess.setChecked(presentationProvider.isThreadSelected(machine.getMachineName(), presentationProvider.getSelectedThreadID()));
-        fHighlightContainer.setChecked(machine.isContainerHighlighted(presentationProvider.getSelectedContainer()));
+//        VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
+//        Map<String, Machine> highlightedMachines = presentationProvider.getHighlightedMachines();
+//        Machine machine = highlightedMachines.get(presentationProvider.getSelectedMachine());
+//        if (machine == null) {
+//            return;
+//        }
+//
+//        fHighlightMachine.setChecked(machine.isHighlighted());
+//        fHighlightCPU.setChecked(machine.isCpuHighlighted(presentationProvider.getSelectedCpu()));
+//        fHighlightProcess.setChecked(presentationProvider.isThreadSelected(machine.getMachineName(), presentationProvider.getSelectedThreadID()));
+//        fHighlightContainer.setChecked(machine.isContainerHighlighted(presentationProvider.getSelectedContainer()));
     }
 
     /**
@@ -1006,10 +903,30 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
             fSelectMachineAction = new Action() {
                 @Override
                 public void run() {
-                    selectMachine();
                     VirtualResourcePresentationProvider presentationProvider = (VirtualResourcePresentationProvider) getPresentationProvider();
-                    presentationProvider.destroyTimeEventHighlight();
-                    redraw();
+
+                    Control dataViewer = getTimeGraphViewer().getControl();
+                    if (dataViewer == null || dataViewer.isDisposed()) {
+                        return;
+                    }
+                    ITmfTrace trace = getTrace();
+                    if (trace == null) {
+                        return;
+                    }
+                    Machine physicalMachine = fPhysicalMachines.get(trace);
+                    if (physicalMachine == null) {
+                        return;
+                    }
+                    SelectMachineDialog dialog = new SelectMachineDialog(dataViewer.getShell());
+                    dialog.setInput(Collections.singleton(physicalMachine));
+                    dialog.setInitialSelections(presentationProvider.getSelectedElements().toArray());
+                    dialog.open();
+                    Object[] result = dialog.getResult();
+                    if (result != null) {
+                        presentationProvider.setSelectedElements(Arrays.asList(result));
+                        presentationProvider.resetTimeEventHighlight();
+                        redraw();
+                    }
                 }
             };
             fSelectMachineAction.setText(Messages.FusedVMView_SelectMachineActionNameText);
@@ -1017,18 +934,6 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         }
 
         return fSelectMachineAction;
-    }
-
-    /**
-     * Method called when the user clicks on the select machine button.
-     */
-    public void selectMachine() {
-        Control dataViewer = getTimeGraphViewer().getControl();
-        if (dataViewer == null || dataViewer.isDisposed()) {
-            return;
-        }
-
-        SelectMachineDialog.open(dataViewer.getShell(), getFusedVMViewPresentationProvider());
     }
 
     @Override
@@ -1095,9 +1000,6 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
 
     private static void createContainersHierarchyForMachine(@NonNull ITmfStateSystem ssq, Machine m) {
         String machineName = m.getMachineName();
-        if (machineName == null) {
-            return;
-        }
         List<Integer> containersQuarks = FusedVMInformationProvider.getMachineContainersQuarks(ssq, machineName);
         /* Look for not nested containers */
         for (Integer quark : containersQuarks) {
@@ -1105,8 +1007,7 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
             if (parentContainer == IVirtualMachineModel.ROOT_NAMESPACE) {
                 String containerName = ssq.getAttributeName(quark);
                 List<String> pCpus = FusedVMInformationProvider.getPCpusUsedByContainer(ssq, quark);
-                Machine container = new Machine(containerName, StateValues.MACHINE_CONTAINER_VALUE, pCpus);
-                m.addContainer(container);
+                Machine container = m.createContainer(containerName, pCpus);
                 /* Continue construction for these containers */
                 createContainersHierarchyForContainer(ssq, container, containersQuarks);
             }
@@ -1120,8 +1021,7 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
                 /* We found a child */
                 String childName = ssq.getAttributeName(quark);
                 List<String> pCpus = FusedVMInformationProvider.getPCpusUsedByContainer(ssq, quark);
-                Machine child = new Machine(childName, StateValues.MACHINE_CONTAINER_VALUE, pCpus);
-                container.addContainer(child);
+                Machine child = container.createContainer(childName, pCpus);
                 /* Look for child's childs */
                 createContainersHierarchyForContainer(ssq, child, containersQuarks);
             }
@@ -1136,9 +1036,9 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
      */
     @TmfSignalHandler
     public void threadSelected(TmfThreadSelectedSignal signal) {
-        signal.getThreadId();
+        int threadId = signal.getThreadId();
         VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
-        presentationProvider.setSelectedThread(signal.getHostId(), signal.getThreadId());
+        presentationProvider.setSelectedThread(signal.getHostId(), threadId);
 
         updateButtonsSelection();
         updateToolTipTexts();

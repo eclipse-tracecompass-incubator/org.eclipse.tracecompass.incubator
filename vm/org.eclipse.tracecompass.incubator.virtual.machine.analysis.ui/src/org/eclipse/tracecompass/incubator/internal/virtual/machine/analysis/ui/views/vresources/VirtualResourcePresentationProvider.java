@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 École Polytechnique de Montréal
+ * Copyright (c) 2016-2017 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -9,6 +9,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vresources;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,6 +42,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEventStyleStrings;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
@@ -48,9 +51,13 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.Resolution;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.TimeFormat;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
+
 /**
  * @author Cedric Biancheri
- *
+ * @author Geneviève Bastien
  */
 public class VirtualResourcePresentationProvider extends TimeGraphPresentationProvider {
 
@@ -62,16 +69,14 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
     private Color fColorGray;
     private Integer fAverageCharWidth;
     private volatile Object selectedFusedVMViewEntry;
-    private volatile Object selectedControlFLowViewEntry;
     private String selectedMachine;
     private Thread selectedThread;
     private int selectedCpu;
     private String selectedContainer;
-    private Map<Thread, Thread> highlightedTreads = new HashMap<>();
-    private Map<String, Machine> highlightedMachines = new HashMap<>();
-
-    // private final Map<ITimeEvent, Boolean> fTimeEventHighlight = new
-    // HashMap<>();
+    private Map<Thread, Thread> fHighlightedThreads = new HashMap<>();
+    private Map<String, Machine> fHighlightedMachines = new HashMap<>();
+    private Multimap<String, Processor> fHighlightedCpus = HashMultimap.create();
+    private Collection<Object> fSelectedElements = Collections.emptyList();
 
     private final Map<ITimeEvent, Float> fTimeEventHighlight = new HashMap<>();
 
@@ -136,9 +141,9 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
             return threadName;
         }
 
-//        public float getHeightFactor() {
-//            return fHeight;
-//        }
+        // public float getHeightFactor() {
+        // return fHeight;
+        // }
     }
 
     private enum State {
@@ -223,7 +228,7 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
          * those events.
          */
         return INVISIBLE;
-//         return TRANSPARENT;
+        // return TRANSPARENT;
     }
 
     @Override
@@ -253,175 +258,179 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
     public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event, long hoverTime) {
 
         Map<String, String> retMap = new LinkedHashMap<>();
-        if (event instanceof TimeEvent && ((TimeEvent) event).hasValue()) {
+        if (!(event instanceof TimeEvent && ((TimeEvent) event).hasValue())) {
+            return retMap;
+        }
 
-            TimeEvent tcEvent = (TimeEvent) event;
-            VirtualResourceEntry entry = (VirtualResourceEntry) event.getEntry();
+        TimeEvent tcEvent = (TimeEvent) event;
+        VirtualResourceEntry entry = (VirtualResourceEntry) event.getEntry();
 
-            if (tcEvent.hasValue()) {
-                ITmfTrace exp = entry.getTrace();
-                ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystem(exp, FusedVirtualMachineAnalysis.ID);
-                if (ss == null) {
-                    return retMap;
-                }
+        ITmfTrace exp = entry.getTrace();
+        ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystem(exp, FusedVirtualMachineAnalysis.ID);
+        if (ss == null) {
+            return retMap;
+        }
 
-                /* Here we get the name of the host or the vm. */
-                int cpuQuark = entry.getQuark();
-                String machineName = null;
-                try {
-                    ITmfStateInterval interval;
-                    int machineNameQuark = ss.getQuarkRelative(cpuQuark, FusedAttributes.MACHINE_NAME);
-                    interval = ss.querySingleState(hoverTime, machineNameQuark);
-                    ITmfStateValue value = interval.getStateValue();
-                    machineName = value.unboxStr();
-                    retMap.put("Virtual Machine", machineName);
+        /* Here we get the name of the host or the vm. */
+        int cpuQuark = entry.getQuark();
+        String machineName = null;
+        try {
+            ITmfStateInterval interval;
+            List<ITmfStateInterval> fullState = ss.queryFullState(hoverTime);
+            int machineNameQuark = ss.optQuarkRelative(cpuQuark, FusedAttributes.MACHINE_NAME);
+            if (machineNameQuark != ITmfStateSystem.INVALID_ATTRIBUTE) {
+                interval = fullState.get(machineNameQuark);
+                ITmfStateValue value = interval.getStateValue();
+                machineName = value.unboxStr();
+                retMap.put(Messages.FusedVMView_TooltipVirtualMachine, machineName);
+            }
 
-                    int conditionQuark = ss.getQuarkRelative(cpuQuark, FusedAttributes.CONDITION);
-                    interval = ss.querySingleState(hoverTime, conditionQuark);
-                    value = interval.getStateValue();
-                    int condition = value.unboxInt();
-                    if (condition == StateValues.CONDITION_IN_VM) {
-                        int machineVCpuQuark = ss.getQuarkRelative(cpuQuark, FusedAttributes.VIRTUAL_CPU);
-                        interval = ss.querySingleState(hoverTime, machineVCpuQuark);
+            int conditionQuark = ss.optQuarkRelative(cpuQuark, FusedAttributes.CONDITION);
+            if (conditionQuark != ITmfStateSystem.INVALID_ATTRIBUTE) {
+                interval = fullState.get(conditionQuark);
+                ITmfStateValue value = interval.getStateValue();
+                int condition = value.unboxInt();
+                if (condition == StateValues.CONDITION_IN_VM) {
+                    int machineVCpuQuark = ss.optQuarkRelative(cpuQuark, FusedAttributes.VIRTUAL_CPU);
+                    if (machineVCpuQuark != ITmfStateSystem.INVALID_ATTRIBUTE) {
+                        interval = fullState.get(machineVCpuQuark);
                         value = interval.getStateValue();
                         int vcpu = value.unboxInt();
-                        retMap.put("Virtual CPU", String.valueOf(vcpu));
+                        retMap.put(Messages.FusedVMView_TooltipVirtualCpu, String.valueOf(vcpu));
                     }
-                } catch (AttributeNotFoundException e) {
-                    // Activator.getDefault().logError("Error in
-                    // FusedVMViewPresentationProvider", e); //$NON-NLS-1$
-                } catch (StateSystemDisposedException e) {
-                    /* Ignored */
-                }
-
-                // Check for IRQ or Soft_IRQ type
-                if (entry.getType().equals(Type.IRQ) || entry.getType().equals(Type.SOFT_IRQ)) {
-
-                    // Get CPU of IRQ or SoftIRQ and provide it for the tooltip
-                    // display
-                    int cpu = tcEvent.getValue();
-                    if (cpu >= 0) {
-                        retMap.put(Messages.FusedVMView_attributeCpuName, String.valueOf(cpu));
-                    }
-                }
-
-                // Check for type CPU
-                else if (entry.getType().equals(Type.CPU) || entry.getType().equals(Type.PCPU_VM) || entry.getType().equals(Type.PCPU_CONTAINER)) {
-                    int status = tcEvent.getValue();
-
-                    if (status == StateValues.CPU_STATUS_IRQ) {
-                        // In IRQ state get the IRQ that caused the interruption
-                        int cpu = entry.getId();
-
-                        try {
-                            List<ITmfStateInterval> fullState = ss.queryFullState(event.getTime());
-                            List<Integer> irqQuarks = ss.getQuarks(FusedAttributes.CPUS, Integer.toString(cpu), FusedAttributes.IRQS, "*"); //$NON-NLS-1$
-
-                            for (int irqQuark : irqQuarks) {
-                                if (fullState.get(irqQuark).getStateValue().unboxInt() == cpu) {
-                                    ITmfStateInterval value = ss.querySingleState(event.getTime(), irqQuark);
-                                    if (!value.getStateValue().isNull()) {
-                                        int irq = Integer.parseInt(ss.getAttributeName(irqQuark));
-                                        retMap.put(Messages.FusedVMView_attributeIrqName, String.valueOf(irq));
-                                    }
-                                    break;
-                                }
-                            }
-                        } catch (TimeRangeException | StateValueTypeException e) {
-                            Activator.getDefault().logError("Error in FusedVMViewPresentationProvider, timestamp: " + FusedVMInformationProvider.formatTime(event.getTime()), e); //$NON-NLS-1$
-                        } catch (StateSystemDisposedException e) {
-                            /* Ignored */
-                        }
-                    } else if (status == StateValues.CPU_STATUS_SOFTIRQ) {
-                        // In SOFT_IRQ state get the SOFT_IRQ that caused the
-                        // interruption
-                        int cpu = entry.getId();
-
-                        try {
-                            List<ITmfStateInterval> fullState = ss.queryFullState(event.getTime());
-                            List<Integer> softIrqQuarks = ss.getQuarks(FusedAttributes.CPUS, Integer.toString(cpu), FusedAttributes.SOFT_IRQS, "*"); //$NON-NLS-1$
-
-                            for (int softIrqQuark : softIrqQuarks) {
-                                if (fullState.get(softIrqQuark).getStateValue().unboxInt() == cpu) {
-                                    ITmfStateInterval value = ss.querySingleState(event.getTime(), softIrqQuark);
-                                    if (!value.getStateValue().isNull()) {
-                                        int softIrq = Integer.parseInt(ss.getAttributeName(softIrqQuark));
-                                        retMap.put(Messages.FusedVMView_attributeSoftIrqName, String.valueOf(softIrq));
-                                    }
-                                    break;
-                                }
-                            }
-                        } catch (TimeRangeException | StateValueTypeException e) {
-                            Activator.getDefault().logError("Error in FusedVMViewPresentationProvider, timestamp: " + FusedVMInformationProvider.formatTime(event.getTime()), e); //$NON-NLS-1$
-                        } catch (StateSystemDisposedException e) {
-                            /* Ignored */
-                        }
-                    } else if (status == StateValues.CPU_STATUS_RUN_USERMODE || status == StateValues.CPU_STATUS_RUN_SYSCALL) {
-                        // In running state get the current tid
-
-                        try {
-                            retMap.put(Messages.FusedVMView_attributeHoverTime, Utils.formatTime(hoverTime, TimeFormat.CALENDAR, Resolution.NANOSEC));
-                            cpuQuark = entry.getQuark();
-                            int currentThreadQuark = ss.getQuarkRelative(cpuQuark, FusedAttributes.CURRENT_THREAD);
-                            ITmfStateInterval interval = ss.querySingleState(hoverTime, currentThreadQuark);
-                            if (!interval.getStateValue().isNull()) {
-                                ITmfStateValue value = interval.getStateValue();
-                                int currentThreadId = value.unboxInt();
-                                retMap.put(Messages.FusedVMView_attributeTidName, Integer.toString(currentThreadId));
-
-                                /*
-                                 * Special case for tid == 0, there is no
-                                 * NS_MAX_LEVEL node. So we look at tid 1. It
-                                 * should not be inside a container.
-                                 */
-                                int saveTID = currentThreadId;
-                                if (currentThreadId == 0) {
-                                    currentThreadId++;
-                                }
-                                int nsMaxLevelQuark = ss.getQuarkAbsolute(FusedAttributes.THREADS, machineName, Integer.toString(currentThreadId), FusedAttributes.NS_MAX_LEVEL);
-                                currentThreadId = saveTID;
-                                interval = ss.querySingleState(hoverTime, nsMaxLevelQuark);
-                                int nsMaxLevel = interval.getStateValue().unboxInt();
-                                if (nsMaxLevel != 1) {
-                                    int actualLevel = 1;
-                                    int virtualTIDQuark = ss.getQuarkAbsolute(FusedAttributes.THREADS, machineName, Integer.toString(currentThreadId), FusedAttributes.VTID);
-                                    actualLevel++;
-                                    while (actualLevel < nsMaxLevel) {
-                                        virtualTIDQuark = ss.getQuarkRelative(virtualTIDQuark, FusedAttributes.VTID);
-                                        actualLevel++;
-                                    }
-                                    int vtid = ss.querySingleState(hoverTime, virtualTIDQuark).getStateValue().unboxInt();
-                                    int namespaceIDQuark = ss.getQuarkRelative(virtualTIDQuark, FusedAttributes.NS_INUM);
-                                    long namespaceID = ss.querySingleState(hoverTime, namespaceIDQuark).getStateValue().unboxLong();
-                                    retMap.put("> vTID", Integer.toString(vtid));
-                                    retMap.put("> Container", Long.toString(namespaceID));
-                                }
-
-                                int execNameQuark = ss.getQuarkAbsolute(FusedAttributes.THREADS, machineName, Integer.toString(currentThreadId), FusedAttributes.EXEC_NAME);
-                                interval = ss.querySingleState(hoverTime, execNameQuark);
-                                if (!interval.getStateValue().isNull()) {
-                                    value = interval.getStateValue();
-                                    retMap.put(Messages.FusedVMView_attributeProcessName, value.unboxStr());
-                                }
-                                if (status == StateValues.CPU_STATUS_RUN_SYSCALL) {
-                                    int syscallQuark = ss.getQuarkAbsolute(FusedAttributes.THREADS, machineName, Integer.toString(currentThreadId), FusedAttributes.SYSTEM_CALL);
-                                    interval = ss.querySingleState(hoverTime, syscallQuark);
-                                    if (!interval.getStateValue().isNull()) {
-                                        value = interval.getStateValue();
-                                        retMap.put(Messages.FusedVMView_attributeSyscallName, value.unboxStr());
-                                    }
-                                }
-                            }
-
-                        } catch (AttributeNotFoundException | TimeRangeException | StateValueTypeException e) {
-                            Activator.getDefault().logError("Error in FusedVMViewPresentationProvider, timestamp: " + FusedVMInformationProvider.formatTime(event.getTime()), e); //$NON-NLS-1$
-                        } catch (StateSystemDisposedException e) {
-                            /* Ignored */
-                        }
-                    }
-
                 }
             }
+
+            // Check for IRQ or Soft_IRQ type
+            if (entry.getType().equals(Type.IRQ) || entry.getType().equals(Type.SOFT_IRQ)) {
+
+                // Get CPU of IRQ or SoftIRQ and provide it for the tooltip
+                // display
+                int cpu = tcEvent.getValue();
+                if (cpu >= 0) {
+                    retMap.put(Messages.FusedVMView_attributeCpuName, String.valueOf(cpu));
+                }
+            }
+
+            // Check for type CPU
+            else if (entry.getType().equals(Type.CPU) || entry.getType().equals(Type.PCPU_VM) || entry.getType().equals(Type.PCPU_CONTAINER)) {
+                int status = tcEvent.getValue();
+
+                if (status == StateValues.CPU_STATUS_IRQ) {
+                    // In IRQ state get the IRQ that caused the interruption
+                    int cpu = entry.getId();
+
+                    List<Integer> irqQuarks = ss.getQuarks(FusedAttributes.CPUS, Integer.toString(cpu), FusedAttributes.IRQS, "*"); //$NON-NLS-1$
+
+                    for (int irqQuark : irqQuarks) {
+                        if (fullState.get(irqQuark).getStateValue().unboxInt() == cpu) {
+                            ITmfStateInterval value = fullState.get(irqQuark);
+                            if (!value.getStateValue().isNull()) {
+                                int irq = Integer.parseInt(ss.getAttributeName(irqQuark));
+                                retMap.put(Messages.FusedVMView_attributeIrqName, String.valueOf(irq));
+                            }
+                            break;
+                        }
+                    }
+
+                } else if (status == StateValues.CPU_STATUS_SOFTIRQ) {
+                    // In SOFT_IRQ state get the SOFT_IRQ that caused the
+                    // interruption
+                    int cpu = entry.getId();
+
+                    List<Integer> softIrqQuarks = ss.getQuarks(FusedAttributes.CPUS, Integer.toString(cpu), FusedAttributes.SOFT_IRQS, "*"); //$NON-NLS-1$
+
+                    for (int softIrqQuark : softIrqQuarks) {
+                        if (fullState.get(softIrqQuark).getStateValue().unboxInt() == cpu) {
+                            ITmfStateInterval value = fullState.get(softIrqQuark);
+                            if (!value.getStateValue().isNull()) {
+                                int softIrq = Integer.parseInt(ss.getAttributeName(softIrqQuark));
+                                retMap.put(Messages.FusedVMView_attributeSoftIrqName, String.valueOf(softIrq));
+                            }
+                            break;
+                        }
+                    }
+
+                } else if (status == StateValues.CPU_STATUS_RUN_USERMODE || status == StateValues.CPU_STATUS_RUN_SYSCALL) {
+                    // In running state get the current tid
+
+                    retMap.put(Messages.FusedVMView_attributeHoverTime, Utils.formatTime(hoverTime, TimeFormat.CALENDAR, Resolution.NANOSEC));
+                    cpuQuark = entry.getQuark();
+                    int currentThreadQuark = ss.optQuarkRelative(cpuQuark, FusedAttributes.CURRENT_THREAD);
+                    if (currentThreadQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                        return retMap;
+                    }
+                    interval = fullState.get(currentThreadQuark);
+                    if (!interval.getStateValue().isNull()) {
+                        ITmfStateValue value = interval.getStateValue();
+                        int currentThreadId = value.unboxInt();
+                        retMap.put(Messages.FusedVMView_attributeTidName, Integer.toString(currentThreadId));
+
+                        /*
+                         * Special case for tid == 0, there is no NS_MAX_LEVEL
+                         * node. So we look at tid 1. It should not be inside a
+                         * container.
+                         */
+                        int saveTID = currentThreadId;
+                        if (currentThreadId == 0) {
+                            currentThreadId++;
+                        }
+                        int nsMaxLevelQuark = ss.optQuarkAbsolute(FusedAttributes.THREADS, machineName, Integer.toString(currentThreadId), FusedAttributes.NS_MAX_LEVEL);
+                        if (nsMaxLevelQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                            return retMap;
+                        }
+                        currentThreadId = saveTID;
+                        interval = fullState.get(nsMaxLevelQuark);
+                        int nsMaxLevel = interval.getStateValue().unboxInt();
+                        if (nsMaxLevel > 1) {
+                            int actualLevel = 1;
+                            int virtualTIDQuark = ss.optQuarkAbsolute(FusedAttributes.THREADS, machineName, Integer.toString(currentThreadId), FusedAttributes.VTID);
+                            if (virtualTIDQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                                return retMap;
+                            }
+                            actualLevel++;
+                            while (actualLevel < nsMaxLevel) {
+                                virtualTIDQuark = ss.optQuarkRelative(virtualTIDQuark, FusedAttributes.VTID);
+                                if (virtualTIDQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                                    break;
+                                }
+                                actualLevel++;
+                            }
+                            int vtid = fullState.get(virtualTIDQuark).getStateValue().unboxInt();
+                            int namespaceIDQuark = ss.optQuarkRelative(virtualTIDQuark, FusedAttributes.NS_INUM);
+                            if (namespaceIDQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                                return retMap;
+                            }
+                            long namespaceID = fullState.get(namespaceIDQuark).getStateValue().unboxLong();
+                            retMap.put(Messages.FusedVMView_TooltipRecVtid, Integer.toString(vtid));
+                            retMap.put(Messages.FusedVMView_TooltipRecContainer, Long.toString(namespaceID));
+                        }
+
+                        int execNameQuark = ss.optQuarkAbsolute(FusedAttributes.THREADS, machineName, Integer.toString(currentThreadId), FusedAttributes.EXEC_NAME);
+                        if (execNameQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                            return retMap;
+                        }
+                        interval = fullState.get(execNameQuark);
+                        if (!interval.getStateValue().isNull()) {
+                            value = interval.getStateValue();
+                            retMap.put(Messages.FusedVMView_attributeProcessName, value.unboxStr());
+                        }
+                        if (status == StateValues.CPU_STATUS_RUN_SYSCALL) {
+                            int syscallQuark = ss.optQuarkAbsolute(FusedAttributes.THREADS, machineName, Integer.toString(currentThreadId), FusedAttributes.SYSTEM_CALL);
+                            if (syscallQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                                return retMap;
+                            }
+                            interval = fullState.get(syscallQuark);
+                            if (!interval.getStateValue().isNull()) {
+                                value = interval.getStateValue();
+                                retMap.put(Messages.FusedVMView_attributeSyscallName, value.unboxStr());
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (StateSystemDisposedException e) {
+            /* Ignored */
         }
 
         return retMap;
@@ -562,210 +571,123 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
 
     /**
      * Says for a specific event if the related machine is highlighted
+     *
+     * @throws StateSystemDisposedException
      */
-//    private boolean isMachineHighlighted(ITimeEvent event) {
-//        Map<String, Machine> map = getHighlightedMachines();
-//        boolean allDim = true;
-//        boolean allHighlighted = true;
-//        for (Machine m : map.values()) {
-//            if (m.isHighlighted()) {
-//                allDim = false;
-//            } else {
-//                allHighlighted = false;
-//            }
-//        }
-//        if (allDim) {
-//            return false;
-//        } else if (allHighlighted) {
-//            return true;
-//        }
-//        VirtualResourceEntry entry = (VirtualResourceEntry) event.getEntry();
-//        ITmfTrace trace = entry.getTrace();
-//        ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystem(trace, FusedVirtualMachineAnalysis.ID);
-//        int cpuQuark = entry.getQuark();
-//        long time = event.getTime();
-//        if (ss == null) {
-//            return false;
-//        }
-//
-//        String machineName = null;
-//        try {
-//            ITmfStateInterval interval;
-//            int machineNameQuark = ss.getQuarkRelative(cpuQuark, FusedAttributes.MACHINE_NAME);
-//            interval = ss.querySingleState(time, machineNameQuark);
-//            ITmfStateValue value = interval.getStateValue();
-//            machineName = value.unboxStr();
-//        } catch (AttributeNotFoundException e) {
-////             Activator.getDefault().logError("Error in FusedVMViewPresentationProvider, timestamp: " + FusedVMInformationProvider.formatTime(event.getTime()), e); //$NON-NLS-1$
-//            /* Can happen for events at the beginning of the trace */
-//        } catch (StateSystemDisposedException e) {
-//            /* Ignored */
-//        }
-//
-//        Machine machine = map.get(machineName);
-//        if (machine == null) {
-//            return false;
-//        }
-//        return machine.isHighlighted();
-//    }
-//
-//    /**
-//     * Says for a specific event if the related cpu is highlighted
-//     */
-//    private boolean isCpuHighlighted(ITimeEvent event) {
-//        Map<String, Machine> map = getHighlightedMachines();
-//        VirtualResourceEntry entry = (VirtualResourceEntry) event.getEntry();
-//        ITmfTrace trace = entry.getTrace();
-//        ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystem(trace, FusedVirtualMachineAnalysis.ID);
-//        int cpuQuark = entry.getQuark();
-//        long time = event.getTime();
-//        if (ss == null) {
-//            return false;
-//        }
-//
-//        try {
-//            ITmfStateInterval interval;
-//            int machineNameQuark = ss.getQuarkRelative(cpuQuark, FusedAttributes.MACHINE_NAME);
-//            interval = ss.querySingleState(time, machineNameQuark);
-//            ITmfStateValue value = interval.getStateValue();
-//            String machineName = value.unboxStr();
-//
-//            int conditionQuark = ss.getQuarkRelative(cpuQuark, FusedAttributes.CONDITION);
-//            interval = ss.querySingleState(time, conditionQuark);
-//            if (!interval.getStateValue().isNull()) {
-//                ITmfStateValue valueInVM = interval.getStateValue();
-//                int cpu;
-//                int inVM = valueInVM.unboxInt();
-//                switch (inVM) {
-//                case StateValues.CONDITION_IN_VM:
-//                    int machineVCpuQuark = ss.getQuarkRelative(cpuQuark, FusedAttributes.VIRTUAL_CPU);
-//                    interval = ss.querySingleState(time, machineVCpuQuark);
-//                    value = interval.getStateValue();
-//                    cpu = value.unboxInt();
-//                    break;
-//                case StateValues.CONDITION_OUT_VM:
-//                    cpu = Integer.parseInt(ss.getAttributeName(cpuQuark));
-//                    break;
-//                default:
-//                    return true;
-//                }
-//                Machine machine = map.get(machineName);
-//                if (machine != null) {
-//                    return machine.isCpuHighlighted(Integer.toString(cpu));
-//                }
-//            }
-//        } catch (AttributeNotFoundException e) {
-////            Activator.getDefault().logError("Error in FusedVMViewPresentationProvider, timestamp: " + FusedVMInformationProvider.formatTime(event.getTime()), e); //$NON-NLS-1$
-//            /* Can happen for events at the beginning of the trace */
-//        } catch (StateSystemDisposedException e) {
-//            /* Ignored */
-//        }
-//        return false;
-//    }
-//
-//    private boolean isContainerHighlighted(ITimeEvent event) {
-//        Map<String, Machine> map = getHighlightedMachines();
-//        VirtualResourceEntry entry = (VirtualResourceEntry) event.getEntry();
-//        ITmfTrace trace = entry.getTrace();
-//        ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystem(trace, FusedVirtualMachineAnalysis.ID);
-//        int cpuQuark = entry.getQuark();
-//        long time = event.getTime();
-//        if (ss == null) {
-//            return false;
-//        }
-//        String machineName = null;
-//        String nsID = null;
-//        try {
-//            ITmfStateInterval interval;
-//            int machineNameQuark = ss.getQuarkRelative(cpuQuark, FusedAttributes.MACHINE_NAME);
-//            interval = ss.querySingleState(time, machineNameQuark);
-//            ITmfStateValue value = interval.getStateValue();
-//            machineName = value.unboxStr();
-//            int quark = ss.getQuarkRelative(cpuQuark, FusedAttributes.CURRENT_THREAD);
-//            interval = ss.querySingleState(time, quark);
-//            int tid = interval.getStateValue().unboxInt();
-//            // quark =
-//            // ss.getQuarkRelative(FusedVMInformationProvider.getNodeThreads(ss),
-//            // machineName, Integer.toString(tid), "ns_max_level");
-//            // interval = ss.querySingleState(time, quark);
-//            // quark =
-//            // ss.getQuarkRelative(FusedVMInformationProvider.getNodeThreads(ss),
-//            // machineName, Integer.toString(tid));
-//            // int nsMaxLevel = interval.getStateValue().unboxInt();
-//            // for (int i = 1; i < nsMaxLevel; i++) {
-//            // quark = ss.getQuarkRelative(quark, "VTID");
-//            // }
-//            // quark = ss.getQuarkRelative(quark, "ns_inum");
-//            if (tid == 0) {
-//                /* We don't have infos about nsInum for tid 0 so we look at 1 */
-//                tid = 1;
-//            }
-//            quark = FusedVMInformationProvider.getNodeNsInum(ss, time, machineName, tid);
-//            nsID = Long.toString(ss.querySingleState(time, quark).getStateValue().unboxLong());
-//        } catch (AttributeNotFoundException e) {
-////            Activator.getDefault().logError("Error in FusedVMViewPresentationProvider, timestamp: " + FusedVMInformationProvider.formatTime(event.getTime()), e); //$NON-NLS-1$
-//            /* Can happen for events at the beginning of the trace */
-//        } catch (StateSystemDisposedException e) {
-//            /* Ignored */
-//        }
-//        Machine machine = map.get(machineName);
-//        if (machine == null || nsID == null) {
-//            return false;
-//        }
-//        if (machine.isContainerHighlighted(nsID)) {
-//            return true;
-//        }
-//        return false;
-//    }
-//
-//    /**
-//     * Says for a specific event if the related process is highlighted
-//     */
-//    private float isProcessHighlighted(ITimeEvent event) {
-//        if (highlightedTreads.isEmpty()) {
-//            // return false;
-//            return REDUCED_HEIGHT;
-//        }
-//
-//        VirtualResourceEntry entry = (VirtualResourceEntry) event.getEntry();
-//        ITmfTrace trace = entry.getTrace();
-//        ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystem(trace, FusedVirtualMachineAnalysis.ID);
-//        int cpuQuark = entry.getQuark();
-//        long time = event.getTime();
-//        if (ss == null) {
-//            // return false;
-//            return REDUCED_HEIGHT;
-//        }
-//        try {
-//            ITmfStateInterval interval;
-//            int machineNameQuark = ss.getQuarkRelative(cpuQuark, FusedAttributes.MACHINE_NAME);
-//            int currentThreadQuark = ss.getQuarkRelative(cpuQuark, FusedAttributes.CURRENT_THREAD);
-//            interval = ss.querySingleState(time, machineNameQuark);
-//            ITmfStateValue value = interval.getStateValue();
-//            String machineName = value.unboxStr();
-//
-//            interval = ss.querySingleState(time, currentThreadQuark);
-//            value = interval.getStateValue();
-//            int currentThreadID = value.unboxInt();
-//
-//            // return highlightedTreads.containsValue(new Thread(machineName,
-//            // currentThreadID));
-//            Thread t = highlightedTreads.get(new Thread(machineName, currentThreadID));
-//            if (t != null) {
-//                return t.getHeightFactory();
-//            }
-//            return REDUCED_HEIGHT;
-//
-//        } catch (AttributeNotFoundException e) {
-////            Activator.getDefault().logError("Error in FusedVMViewPresentationProvider, timestamp: " + FusedVMInformationProvider.formatTime(event.getTime()), e); //$NON-NLS-1$
-//            /* Can happen for events at the beginning of the trace */
-//        } catch (StateSystemDisposedException e) {
-//            /* Ignored */
-//        }
-//
-//        // return false;
-//        return REDUCED_HEIGHT;
-//    }
+    private boolean isMachineAndCpuHighlighted(ITimeEvent event) throws StateSystemDisposedException {
+        Map<String, Machine> map = getHighlightedMachines();
+        if (map.isEmpty()) {
+            return true;
+        }
+
+        // Get the machine of this event
+        VirtualResourceEntry entry = (VirtualResourceEntry) event.getEntry();
+        ITmfTrace trace = entry.getTrace();
+        ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystem(trace, FusedVirtualMachineAnalysis.ID);
+        int cpuQuark = entry.getQuark();
+        // Query the state system at the end of this event, as we may have more
+        // information at this time than at the beginning
+        long time = event.getTime() + event.getDuration() - 1;
+        if (ss == null) {
+            return false;
+        }
+
+        List<String> allMachines = FusedVMInformationProvider.getAllMachines(ss, Integer.valueOf(ss.getAttributeName(cpuQuark)), time);
+        allMachines.retainAll(map.keySet());
+
+        for (String machineName : allMachines) {
+            Machine highlighted = map.get(machineName);
+            // See if the cpu is selected
+            Collection<Processor> highlightedCpus = getHighlightedCpusFor(machineName);
+
+            // If the machine is selected, and no specific processor is, return
+            // true
+            if (highlighted != null && highlightedCpus.isEmpty()) {
+                return true;
+            }
+            // Otherwise look at the specific processor
+
+            // Get the CPU of this event
+            int conditionQuark = ss.optQuarkRelative(cpuQuark, FusedAttributes.CONDITION);
+            if (conditionQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                return false;
+            }
+            ITmfStateInterval interval = ss.querySingleState(time, conditionQuark);
+            if (!interval.getStateValue().isNull()) {
+                ITmfStateValue valueInVM = interval.getStateValue();
+                int cpu = -1;
+                int inVM = valueInVM.unboxInt();
+                switch (inVM) {
+                case StateValues.CONDITION_IN_VM:
+                    int machineVCpuQuark = ss.optQuarkRelative(cpuQuark, FusedAttributes.VIRTUAL_CPU);
+                    if (machineVCpuQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                        return false;
+                    }
+                    interval = ss.querySingleState(time, machineVCpuQuark);
+                    ITmfStateValue value = interval.getStateValue();
+                    cpu = value.unboxInt();
+                    break;
+                case StateValues.CONDITION_OUT_VM:
+                    cpu = Integer.parseInt(ss.getAttributeName(cpuQuark));
+                    break;
+                default:
+                    return true;
+                }
+                if (cpu != -1) {
+                    for (Processor proc : highlightedCpus) {
+                        if (proc.getNumber() == cpu) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Says for a specific event if the related process is highlighted
+     *
+     * @throws StateSystemDisposedException
+     */
+    private boolean isProcessHighlighted(ITimeEvent event) throws StateSystemDisposedException {
+        if (fHighlightedThreads.isEmpty()) {
+            return false;
+        }
+
+        VirtualResourceEntry entry = (VirtualResourceEntry) event.getEntry();
+        ITmfTrace trace = entry.getTrace();
+        ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystem(trace, FusedVirtualMachineAnalysis.ID);
+        int cpuQuark = entry.getQuark();
+        long time = event.getTime();
+        if (ss == null) {
+            // return false;
+            return false;
+        }
+        ITmfStateInterval interval;
+        int machineNameQuark = ss.optQuarkRelative(cpuQuark, FusedAttributes.MACHINE_NAME);
+        int currentThreadQuark = ss.optQuarkRelative(cpuQuark, FusedAttributes.CURRENT_THREAD);
+        if (machineNameQuark == ITmfStateSystem.INVALID_ATTRIBUTE || currentThreadQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+            return false;
+        }
+        interval = ss.querySingleState(time, machineNameQuark);
+        ITmfStateValue value = interval.getStateValue();
+        String machineName = value.unboxStr();
+
+        interval = ss.querySingleState(time, currentThreadQuark);
+        value = interval.getStateValue();
+        int currentThreadID = value.unboxInt();
+
+        // return highlightedTreads.containsValue(new Thread(machineName,
+        // currentThreadID));
+        Thread t = fHighlightedThreads.get(new Thread(machineName, currentThreadID));
+        if (t != null) {
+            return true;
+        }
+        return false;
+
+    }
 
     //
     // Getters, setter, and some short useful methods
@@ -788,25 +710,6 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
      */
     public Object getSelectedFusedVMViewEntry() {
         return selectedFusedVMViewEntry;
-    }
-
-    /**
-     * Sets the selected entry in Control Flow View
-     *
-     * @param o
-     *            the ControlFLowView entry selected
-     */
-    public void setSelectedControlFlowViewEntry(Object o) {
-        selectedControlFLowViewEntry = o;
-    }
-
-    /**
-     * Gets the selected entry in Control Flow View
-     *
-     * @return the selectedControlFLowViewEntry
-     */
-    public Object getSelectedControlFlowViewEntry() {
-        return selectedControlFLowViewEntry;
     }
 
     /**
@@ -881,7 +784,7 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
     public void setSelectedThread(String machineName, int threadID) {
         // selectedThread = new Thread(machineName, threadID, threadName);
         Thread t = new Thread(machineName, threadID, String.valueOf(threadID));
-        selectedThread = highlightedTreads.get(t);
+        selectedThread = fHighlightedThreads.get(t);
         if (selectedThread == null) {
             selectedThread = t;
         }
@@ -912,7 +815,7 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
      * @return the highlightedTreads
      */
     public Map<Thread, Thread> getHighlightedTreads() {
-        return highlightedTreads;
+        return fHighlightedThreads;
     }
 
     /**
@@ -924,61 +827,86 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
      *         threads
      */
     public boolean isThreadSelected(String machineName, int tid) {
-        return highlightedTreads.containsValue(new Thread(machineName, tid));
+        return fHighlightedThreads.containsValue(new Thread(machineName, tid));
     }
 
     /**
      * Adds the selected thread to the list of highlighted threads
      */
     public void addHighlightedThread() {
-        highlightedTreads.put(selectedThread, selectedThread);
+        fHighlightedThreads.put(selectedThread, selectedThread);
     }
 
     /**
      * Removes the selected thread of the list of highlighted threads
      */
     public void removeHighlightedThread() {
-        highlightedTreads.remove(selectedThread);
+        fHighlightedThreads.remove(selectedThread);
     }
 
-    public Map<String, Machine> getHighlightedMachines() {
-        return highlightedMachines;
+    private Map<String, Machine> getHighlightedMachines() {
+        return fHighlightedMachines;
     }
 
-    public void destroyHightlightedMachines() {
-        highlightedMachines.clear();
+    private Collection<Processor> getHighlightedCpusFor(String machine) {
+        return fHighlightedCpus.get(machine);
     }
 
-    public void destroyTimeEventHighlight() {
+    /**
+     * Resets the time event highlights
+     */
+    public void resetTimeEventHighlight() {
         fTimeEventHighlight.clear();
     }
 
-    // TODO: Uncomment this
-//    @Override
-//    public Map<String, Object> getSpecificEventStyle(ITimeEvent event) {
-//        float heightFactor = FULL_HEIGHT;
-//        Float b = fTimeEventHighlight.get(event);
-//        if (b != null) {
-//            return ImmutableMap.of(ITimeEventStyleStrings.heightFactor(), b);
-//        }
-//        Type typeEntry = ((VirtualResourceEntry) event.getEntry()).getType();
-//        if (typeEntry == Type.IRQ || typeEntry == Type.SOFT_IRQ) {
-//            heightFactor = FULL_HEIGHT;
-//        } else {
-//            heightFactor = isProcessHighlighted(event);
-//            if ((isMachineHighlighted(event) && isCpuHighlighted(event)) || isContainerHighlighted(event)) {
-//                heightFactor = FULL_HEIGHT;
-//            }
-//        }
-//        fTimeEventHighlight.put(event, heightFactor);
-//        return ImmutableMap.of(ITimeEventStyleStrings.heightFactor(), heightFactor);
-//    }
+    @Override
+    public Map<String, Object> getSpecificEventStyle(ITimeEvent event) {
+        float heightFactor = FULL_HEIGHT;
+        Float b = fTimeEventHighlight.get(event);
+        if (b != null) {
+            return ImmutableMap.of(ITimeEventStyleStrings.heightFactor(), b);
+        }
+        try {
+            Type typeEntry = ((VirtualResourceEntry) event.getEntry()).getType();
+            if (typeEntry == Type.IRQ || typeEntry == Type.SOFT_IRQ) {
+                heightFactor = FULL_HEIGHT;
+            } else {
+                if (isProcessHighlighted(event) || isMachineAndCpuHighlighted(event)) {
+                    heightFactor = FULL_HEIGHT;
+                } else {
+                    heightFactor = REDUCED_HEIGHT;
+                }
+            }
+        } catch (StateSystemDisposedException e) {
+            heightFactor = FULL_HEIGHT;
+        }
+        fTimeEventHighlight.put(event, heightFactor);
+        return ImmutableMap.of(ITimeEventStyleStrings.heightFactor(), heightFactor);
+    }
 
     public void modifySelectedThreadAlpha(int delta) {
         if (selectedThread != null) {
-            selectedThread.modifyHeight(delta/100);
+            selectedThread.modifyHeight(delta / 100);
         }
+    }
 
+    Collection<Object> getSelectedElements() {
+        return fSelectedElements;
+    }
+
+    void setSelectedElements(Collection<Object> elements) {
+        fSelectedElements = elements;
+        fHighlightedMachines.clear();
+        fHighlightedCpus.clear();
+        for (Object obj : elements) {
+            if (obj instanceof Machine) {
+                Machine machine = (Machine) obj;
+                fHighlightedMachines.put(machine.getMachineName(), machine);
+            } else if (obj instanceof Processor) {
+                Processor processor = (Processor) obj;
+                fHighlightedCpus.put(processor.getMachine().getMachineName(), processor);
+            }
+        }
     }
 
 }

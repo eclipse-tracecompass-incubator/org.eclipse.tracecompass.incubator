@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 École Polytechnique de Montréal
+ * Copyright (c) 2016-2017 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -10,6 +10,8 @@
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +26,10 @@ import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 
 /**
+ * Utility methods to retrieve information from the virtual machine analysis
+ *
  * @author Cédric Biancheri
+ * @author Geneviève Bastien
  */
 public final class FusedVMInformationProvider {
 
@@ -137,6 +142,119 @@ public final class FusedVMInformationProvider {
             e.printStackTrace();
         }
         return parentContainerID;
+    }
+
+    /**
+     * Get the list of machine names, sorted from the closest to hardware to
+     * most virtual, that were involved on a given CPU at a certain time
+     *
+     * @param ssq
+     *            The state system used by this analysis
+     * @param physicalCpu
+     *            The number of the physical processor to query
+     * @param time
+     *            The time at which to query the machines
+     * @return The list of machine names involved on the CPU at the requested
+     *         time. The list of sorted from the physical machine to the most
+     *         virtual layer.
+     */
+    public static List<String> getAllMachines(ITmfStateSystem ssq, int physicalCpu, long time) {
+        List<String> machines = new ArrayList<>();
+        // We'll need a few values, so query the full state at the time and get
+        // the values from there
+        try {
+            List<ITmfStateInterval> states = ssq.queryFullState(time);
+            // Get the thread on the CPU
+            int quarkCurrentThread = ssq.optQuarkAbsolute(FusedAttributes.CPUS, String.valueOf(physicalCpu), FusedAttributes.CURRENT_THREAD);
+            if (quarkCurrentThread == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                return machines;
+            }
+            int tid = states.get(quarkCurrentThread).getStateValue().unboxInt();
+            if (tid < 0) {
+                return machines;
+            }
+            int quarkCurrentMachine = ssq.optQuarkAbsolute(FusedAttributes.CPUS, String.valueOf(physicalCpu), FusedAttributes.MACHINE_NAME);
+            if (quarkCurrentMachine == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                return machines;
+            }
+            ITmfStateValue stateValue = states.get(quarkCurrentMachine).getStateValue();
+            if (stateValue.isNull()) {
+                return machines;
+            }
+            machines.add(stateValue.unboxStr());
+
+            // Follow this thread's namespaces
+            machines.addAll(getContainersOf(ssq, stateValue.unboxStr(), tid, states));
+
+            // Follow the CPU through virtual machines
+            int quarkCpuState = ssq.optQuarkAbsolute(FusedAttributes.CPUS, String.valueOf(physicalCpu), FusedAttributes.CONDITION);
+            int quarkVirtualCpu = ssq.optQuarkAbsolute(FusedAttributes.CPUS, String.valueOf(physicalCpu), FusedAttributes.VIRTUAL_CPU);
+
+            if (quarkCpuState == ITmfStateSystem.INVALID_ATTRIBUTE || quarkVirtualCpu == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                return machines;
+            }
+            int vmCondition = states.get(quarkCpuState).getStateValue().unboxInt();
+            if (vmCondition == StateValues.CONDITION_IN_VM) {
+                machines.addAll(0, getParentMachines(ssq, stateValue.unboxStr(), states.get(quarkVirtualCpu).getStateValue().unboxInt(), states));
+            }
+
+        } catch (StateSystemDisposedException e) {
+            // Nothing to do, about to be disposed
+        }
+
+        return machines;
+    }
+
+    private static Collection<String> getParentMachines(ITmfStateSystem ssq, String machine, int vcpu, List<ITmfStateInterval> states) {
+        List<String> machines = new ArrayList<>();
+        int machineQuark = ssq.optQuarkAbsolute(FusedAttributes.MACHINES, machine);
+        if (machineQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+            return machines;
+        }
+        int quarkParent = ssq.optQuarkRelative(machineQuark, FusedAttributes.PARENT);
+        int quarkVCpu = ssq.optQuarkRelative(machineQuark, FusedAttributes.CPUS, String.valueOf(vcpu));
+        if (quarkParent == ITmfStateSystem.INVALID_ATTRIBUTE || quarkVCpu == ITmfStateSystem.INVALID_ATTRIBUTE) {
+            return machines;
+        }
+        ITmfStateValue parentValue = states.get(quarkParent).getStateValue();
+        if (parentValue.isNull()) {
+            return machines;
+        }
+        machines.add(parentValue.unboxStr());
+        ITmfStateValue vcpuValue = states.get(quarkVCpu).getStateValue();
+        if (vcpuValue.isNull()) {
+            return machines;
+        }
+        machines.addAll(getContainersOf(ssq, parentValue.unboxStr(), vcpuValue.unboxInt(), states));
+        return machines;
+    }
+
+    private static List<String> getContainersOf(ITmfStateSystem ssq, String machine, int tid, List<ITmfStateInterval> states) {
+        List<String> containers = new ArrayList<>();
+        int threadQuark = ssq.optQuarkAbsolute(FusedAttributes.THREADS, machine, String.valueOf(tid));
+        if (threadQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+            return containers;
+        }
+        int quarkMaxLv = ssq.optQuarkRelative(threadQuark, FusedAttributes.NS_MAX_LEVEL);
+        if (quarkMaxLv == ITmfStateSystem.INVALID_ATTRIBUTE) {
+            return containers;
+        }
+        int maxLv = states.get(quarkMaxLv).getStateValue().unboxInt();
+        // Start at lv 1, as level 0 is the main host
+        for (int i = 1; i < maxLv; i++) {
+            threadQuark = ssq.optQuarkRelative(threadQuark, FusedAttributes.VTID);
+            int inumQuark = ssq.optQuarkRelative(threadQuark, FusedAttributes.NS_INUM);
+            if (threadQuark == ITmfStateSystem.INVALID_ATTRIBUTE || inumQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                break;
+            }
+            ITmfStateValue inumValue = states.get(inumQuark).getStateValue();
+            if (inumValue.isNull()) {
+                continue;
+            }
+            containers.add(String.valueOf(inumValue.unboxLong()));
+        }
+
+        return containers;
     }
 
     public static String getParentMachineName(ITmfStateSystem ssq, String machineName) {

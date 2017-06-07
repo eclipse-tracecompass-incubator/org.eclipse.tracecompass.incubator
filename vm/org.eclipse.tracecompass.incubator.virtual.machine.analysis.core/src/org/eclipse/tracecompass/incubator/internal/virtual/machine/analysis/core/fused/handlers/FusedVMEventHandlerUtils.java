@@ -10,19 +10,17 @@
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.handlers;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.StateValues;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
-import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
-import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -320,35 +318,41 @@ public class FusedVMEventHandlerUtils {
         return ss.getQuarkAbsoluteAndAdd(FusedAttributes.CPUS, Integer.toString(cpuNumber), FusedAttributes.SOFT_IRQS);
     }
 
-    public static List<Long> getProcessNSIDs(ITmfStateSystemBuilder ss, Integer processQuark, long timestamp) {
-        List<Long> namespaces = new LinkedList<>();
-        List<Integer> listQuarks = ss.getQuarks(processQuark, FusedAttributes.NS_MAX_LEVEL);
-        if (listQuarks.isEmpty()) {
+    /**
+     * Get the namespaces for a thread
+     *
+     * @param ss
+     *            The state system
+     * @param threadQuark
+     *            The quark of the thread
+     * @return The list of namespaces the thread is part of
+     */
+    public static List<Long> getProcessNSIDs(ITmfStateSystemBuilder ss, int threadQuark) {
+        List<Long> namespaces = new ArrayList<>();
+        int maxLvQuark = ss.optQuarkRelative(threadQuark, FusedAttributes.NS_MAX_LEVEL);
+        if (maxLvQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
             return namespaces;
         }
-        int nsMaxLevelQuark = listQuarks.get(0);
-        ITmfStateInterval interval;
-        try {
-            interval = ss.querySingleState(timestamp, nsMaxLevelQuark);
-            int nsMaxLevel = interval.getStateValue().unboxInt();
-            if (nsMaxLevel != 1) {
-                int actualLevel = 1;
-                int virtualTIDQuark = ss.getQuarkRelative(processQuark, FusedAttributes.VTID);
-                actualLevel++;
-                int namespaceIDQuark = ss.getQuarkRelative(virtualTIDQuark, FusedAttributes.NS_INUM);
-                long namespaceID = ss.querySingleState(timestamp, namespaceIDQuark).getStateValue().unboxLong();
-                namespaces.add(namespaceID);
-                while (actualLevel < nsMaxLevel) {
-                    virtualTIDQuark = ss.getQuarkRelative(virtualTIDQuark, FusedAttributes.VTID);
-                    actualLevel++;
-                    namespaceIDQuark = ss.getQuarkRelative(virtualTIDQuark, FusedAttributes.NS_INUM);
-                    namespaceID = ss.querySingleState(timestamp, namespaceIDQuark).getStateValue().unboxLong();
-                    namespaces.add(namespaceID);
+        ITmfStateValue value;
+        value = ss.queryOngoingState(maxLvQuark);
+        int nsMaxLevel = value.unboxInt();
+        if (nsMaxLevel > 1) {
+            int currentLevel = 1;
+            int vtidQuark = threadQuark;
+            while (currentLevel < nsMaxLevel) {
+                vtidQuark = ss.optQuarkRelative(vtidQuark, FusedAttributes.VTID);
+                if (vtidQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                    return namespaces;
                 }
-
+                int namespaceIDQuark = ss.optQuarkRelative(vtidQuark, FusedAttributes.NS_INUM);
+                if (namespaceIDQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                    return namespaces;
+                }
+                currentLevel++;
+                long namespaceID = ss.queryOngoingState(namespaceIDQuark).unboxLong();
+                namespaces.add(namespaceID);
             }
-        } catch (StateSystemDisposedException | AttributeNotFoundException e) {
-            e.printStackTrace();
+
         }
         return namespaces;
     }

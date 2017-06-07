@@ -120,7 +120,7 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
 
         /* Remember the cpu used by the namespaces containing the next thread */
         if (nextTid != 0) {
-            List<Long> namespaces = FusedVMEventHandlerUtils.getProcessNSIDs(ss, newCurrentThreadNode, timestamp);
+            List<Long> namespaces = FusedVMEventHandlerUtils.getProcessNSIDs(ss, newCurrentThreadNode);
 
             for (Long namespace : namespaces) {
                 ss.getQuarkRelativeAndAdd(machineContainerQuark, namespace.toString(), FusedAttributes.PCPUS, cpu.toString());

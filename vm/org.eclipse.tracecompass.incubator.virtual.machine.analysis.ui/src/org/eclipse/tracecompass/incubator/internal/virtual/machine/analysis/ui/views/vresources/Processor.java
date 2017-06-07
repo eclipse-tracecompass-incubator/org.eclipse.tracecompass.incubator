@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 École Polytechnique de Montréal
+ * Copyright (c) 2016-2017 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -9,44 +9,56 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vresources;
 
-/**
- * @author Cedric Biancheri
- */
-public class Processor {
-    private String n;
-    private Boolean highlighted;
-    private Machine machine;
-    private float heightFactory;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
-    public Processor(String p, Machine m){
-        n = p;
-        highlighted = true;
-        heightFactory = VirtualResourcePresentationProvider.FULL_HEIGHT;
-        machine = m;
+/**
+ * Represents a processor in a virtual environment
+ *
+ * TODO: Move this class to the model
+ *
+ * @author Cedric Biancheri
+ * @author Geneviève Bastien
+ */
+@NonNullByDefault
+public class Processor {
+
+    private final int fProcNo;
+    private Machine fMachine;
+
+    /**
+     * Constructor
+     *
+     * @param p
+     *            The processor number
+     * @param m
+     *            The machine this processor belongs to
+     */
+    public Processor(String p, Machine m) {
+        fProcNo = Integer.parseInt(p);
+        fMachine = m;
     }
 
     @Override
-    public String toString(){
-        return n;
+    public String toString() {
+        return String.valueOf(fProcNo);
     }
 
-    public Boolean isHighlighted(){
-        return highlighted;
-    }
-
-    public void setHighlighted(Boolean b) {
-        highlighted = b;
-    }
-
+    /**
+     * Get the machine this processor belongs to
+     *
+     * @return The machine
+     */
     public Machine getMachine() {
-        return machine;
+        return fMachine;
     }
 
-    public String getNumber() {
-        return n;
+    /**
+     * Get the processor number
+     *
+     * @return The processor number
+     */
+    public int getNumber() {
+        return fProcNo;
     }
 
-    public float getHeightFactory() {
-        return heightFactory;
-    }
 }
