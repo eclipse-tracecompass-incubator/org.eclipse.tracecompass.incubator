@@ -157,6 +157,12 @@ final class SortingJob extends Job {
             List<BufferedInputStream> parsers = new ArrayList<>();
             int i = 0;
             for (File traceling : tracelings) {
+
+                /*
+                 * This resource is added to a priority queue and then removed
+                 * at the very end.
+                 */
+                @SuppressWarnings("resource")
                 BufferedInputStream createParser = new BufferedInputStream(new FileInputStream(traceling));
                 while (data != '{') {
                     data = (char) parser.read();

@@ -28,6 +28,7 @@
     <module>org.eclipse.tracecompass.incubator.traceevent</module>
     <module>org.eclipse.tracecompass.incubator.traceevent.core</module>
     <module>org.eclipse.tracecompass.incubator.traceevent.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.traceevent.ui</module>
     <!-- insert modules here -->
   </modules>
 
