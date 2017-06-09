@@ -16,5 +16,19 @@
             trace_type="org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack.TraceEventCallstackAnalysis"
+            automatic="true"
+            icon="icons/callstack_view.gif"
+            id="org.eclipse.tracecompass.incubator.traceevent.analysis.callstack"
+            name="%callstack.name">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace">
+         </tracetype>
+      </module>
+   </extension>
 
 </plugin>

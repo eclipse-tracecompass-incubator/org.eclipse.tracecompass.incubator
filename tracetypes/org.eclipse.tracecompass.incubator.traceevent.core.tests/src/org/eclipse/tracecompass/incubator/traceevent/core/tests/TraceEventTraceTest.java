@@ -101,6 +101,51 @@ public class TraceEventTraceTest {
         testTrace(path, nbEvents, startTime, endTime);
     }
 
+    /**
+     * Test async begin and end trace
+     *
+     * @throws TmfTraceException
+     *             should not happen
+     */
+    @Test
+    public void testAsyncBeginEnd() throws TmfTraceException {
+        String path = "traces/async_begin_end.json";
+        int nbEvents = 23;
+        ITmfTimestamp startTime = TmfTimestamp.fromMicros(50);
+        ITmfTimestamp endTime = TmfTimestamp.fromMicros(900);
+        testTrace(path, nbEvents, startTime, endTime);
+    }
+
+    /**
+     * Test a "big" trace
+     *
+     * @throws TmfTraceException
+     *             should not happen
+     */
+    @Test
+    public void testBigTrace() throws TmfTraceException {
+        String path = "traces/big_trace.json";
+        int nbEvents = 1866;
+        ITmfTimestamp startTime = TmfTimestamp.fromMicros(438877834451L);
+        ITmfTimestamp endTime = TmfTimestamp.fromMicros(438881451344L);
+        testTrace(path, nbEvents, startTime, endTime);
+    }
+
+    /**
+     * Test a chromeOs system trace
+     *
+     * @throws TmfTraceException
+     *             should not happen
+     */
+    @Test
+    public void testChromeosTrace() throws TmfTraceException {
+        String path = "traces/chromeos_system_trace.json";
+        int nbEvents = 36;
+        ITmfTimestamp startTime = TmfTimestamp.fromNanos(0);
+        ITmfTimestamp endTime = TmfTimestamp.fromMicros(5443672642443L);
+        testTrace(path, nbEvents, startTime, endTime);
+    }
+
     private static void testTrace(String path, int nbEvents, ITmfTimestamp startTime, ITmfTimestamp endTime) throws TmfTraceException {
         ITmfTrace trace = new TraceEventTrace();
         try {
@@ -121,8 +166,8 @@ public class TraceEventTraceTest {
             }
             assertEquals(nbEvents, count);
             assertEquals(nbEvents, trace.getNbEvents());
-            assertEquals(startTime, trace.getStartTime());
-            assertEquals(endTime, trace.getEndTime());
+            assertEquals(startTime.toNanos(), trace.getStartTime().toNanos());
+            assertEquals(endTime.toNanos(), trace.getEndTime().toNanos());
         } finally {
             trace.dispose();
         }

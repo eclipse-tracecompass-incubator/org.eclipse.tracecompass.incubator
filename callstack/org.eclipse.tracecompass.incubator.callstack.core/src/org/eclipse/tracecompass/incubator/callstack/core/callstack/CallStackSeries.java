@@ -69,10 +69,8 @@ public class CallStackSeries {
         public int getThreadId(long time) {
             ITmfStateInterval interval = fInterval;
             int tid = fLastThreadId;
-            if (interval != null) {
-                if (time >= interval.getStartTime() && time <= interval.getEndTime()) {
-                    return fLastThreadId;
-                }
+            if (interval != null && interval.intersects(time)) {
+                return fLastThreadId;
             }
             try {
                 interval = fSs.querySingleState(time, fQuark);
@@ -192,8 +190,8 @@ public class CallStackSeries {
     }
 
     /**
-     * This class will resolve the thread ID provider by the value of a
-     * attribute at a given depth
+     * This class will resolve the thread ID provider by the value of a attribute at
+     * a given depth
      */
     public static final class AttributeValueThreadResolver implements IThreadIdResolver {
 
@@ -203,8 +201,8 @@ public class CallStackSeries {
          * Constructor
          *
          * @param level
-         *            The depth of the element whose value will be used to
-         *            retrieve the thread ID
+         *            The depth of the element whose value will be used to retrieve the
+         *            thread ID
          */
         public AttributeValueThreadResolver(int level) {
             fLevel = level;
@@ -234,8 +232,8 @@ public class CallStackSeries {
     }
 
     /**
-     * This class will resolve the thread ID provider by the value of a
-     * attribute at a given depth
+     * This class will resolve the thread ID provider by the value of a attribute at
+     * a given depth
      */
     public static final class AttributeNameThreadResolver implements IThreadIdResolver {
 
@@ -245,8 +243,8 @@ public class CallStackSeries {
          * Constructor
          *
          * @param level
-         *            The depth of the element whose value will be used to
-         *            retrieve the thread ID
+         *            The depth of the element whose value will be used to retrieve the
+         *            thread ID
          */
         public AttributeNameThreadResolver(int level) {
             fLevel = level;
@@ -276,8 +274,8 @@ public class CallStackSeries {
     }
 
     /**
-     * This class will resolve the thread ID from the CPU on which the callstack
-     * was running at a given time
+     * This class will resolve the thread ID from the CPU on which the callstack was
+     * running at a given time
      */
     public static final class CpuResolver implements IThreadIdResolver {
 
@@ -287,8 +285,7 @@ public class CallStackSeries {
          * Constructor
          *
          * @param path
-         *            The path relative to the leaf element that will contain
-         *            the CPU ID
+         *            The path relative to the leaf element that will contain the CPU ID
          */
         public CpuResolver(String[] path) {
             fPath = path;
@@ -318,12 +315,12 @@ public class CallStackSeries {
      *            The state system containing this call stack
      * @param patternPaths
      *            The patterns for the different levels of the callstack in the
-     *            state system. Any further level path is relative to the
-     *            previous one.
+     *            state system. Any further level path is relative to the previous
+     *            one.
      * @param symbolKeyLevelIndex
      *            The index in the list of the list to be used as a key to the
-     *            symbol provider. The data at this level must be an integer,
-     *            for instance a process ID
+     *            symbol provider. The data at this level must be an integer, for
+     *            instance a process ID
      * @param name
      *            A name for this callstack
      * @param hostId
@@ -367,8 +364,8 @@ public class CallStackSeries {
     }
 
     /**
-     * Get a group descriptor that describes the aggregation of all groups of
-     * the series
+     * Get a group descriptor that describes the aggregation of all groups of the
+     * series
      *
      * @return The group descriptor for all series
      */

@@ -113,7 +113,8 @@ public class CallStack {
                     return Collections.EMPTY_LIST;
                 }
                 if (!callInterval.getStateValue().isNull()) {
-                    callList.add(CalledFunctionFactory.create(callInterval.getStartTime(), callInterval.getEndTime() + 1, depth, callInterval.getStateValue(), getSymbolKeyAt(callInterval.getStartTime()), getThreadId(callInterval.getStartTime()),
+                    int threadId = getThreadId(callInterval.getStartTime());
+                    callList.add(CalledFunctionFactory.create(callInterval.getStartTime(), callInterval.getEndTime() + 1, depth, callInterval.getStateValue(), getSymbolKeyAt(callInterval.getStartTime()), threadId,
                             null, ModelManager.getModelFor(fHostId)));
                 }
             }
@@ -253,7 +254,7 @@ public class CallStack {
 
     /**
      * Get the ID of the thread running this callstack at time t. This method is
-     * used in conjonction with other trace data to get the time spent on the
+     * used in conjunction with other trace data to get the time spent on the
      * CPU for this call.
      *
      * @param time
