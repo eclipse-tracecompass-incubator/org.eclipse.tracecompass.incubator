@@ -30,7 +30,8 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 @NonNullByDefault
 public class Machine {
 
-    private String fMachineName;
+    private final String fMachineName;
+    private final String fHostId;
     private @Nullable Machine fHost = null;
     private Set<Processor> fCpus = new HashSet<>();
     private Set<Processor> fPcpus = new HashSet<>();
@@ -43,11 +44,13 @@ public class Machine {
      *
      * @param name
      *            Name of the machine
+     * @param hostId
+     *            The host ID of the machine
      * @param type
      *            The type state value of the machine
      */
-    public Machine(String name, ITmfStateValue type) {
-        this(name, type, Collections.emptyList());
+    public Machine(String name, String hostId, ITmfStateValue type) {
+        this(name, hostId, type, Collections.emptyList());
     }
 
     /**
@@ -55,14 +58,17 @@ public class Machine {
      *
      * @param name
      *            The name of the machine
+     * @param hostId
+     *            The host ID of the machine
      * @param type
      *            The type of machine
      * @param pcpus
      *            The list of CPUs used by this machine
      */
-    public Machine(String name, ITmfStateValue type, List<String> pcpus) {
+    public Machine(String name, String hostId, ITmfStateValue type, Collection<String> pcpus) {
         fMachineName = name;
         fMachineType = type;
+        fHostId = hostId;
         for (String pcpu : pcpus) {
             fPcpus.add(new Processor(pcpu, this));
         }
@@ -75,12 +81,14 @@ public class Machine {
      *
      * @param name
      *            The name of the container
+     * @param hostId
+     *            The host ID of the machine
      * @param physCpus
      *            The list of physical cpus IDs
      * @return The newly created container.
      */
-    public Machine createContainer(String name, List<String> physCpus) {
-        Machine container = new Machine(name, StateValues.MACHINE_CONTAINER_VALUE, physCpus);
+    public Machine createContainer(String name, String hostId, List<String> physCpus) {
+        Machine container = new Machine(name, hostId, StateValues.MACHINE_CONTAINER_VALUE, physCpus);
         container.setHost(this);
         fContainers.add(container);
         return container;
@@ -93,6 +101,15 @@ public class Machine {
      */
     public String getMachineName() {
         return fMachineName;
+    }
+
+    /**
+     * Get the ID of the host trace
+     *
+     * @return The host ID of the trace this machine was described in
+     */
+    public String getHostId() {
+        return fHostId;
     }
 
     /**

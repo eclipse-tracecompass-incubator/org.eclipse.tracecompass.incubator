@@ -71,7 +71,7 @@ public class SysEntryHandler extends VMKernelEventHandler {
         if (host != null) {
             int machineNameQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.MACHINE_NAME);
             try {
-                modify = ss.querySingleState(timestamp, machineNameQuark).getStateValue().unboxStr().equals(host.getTraceName());
+                modify = ss.querySingleState(timestamp, machineNameQuark).getStateValue().unboxStr().equals(host.getHostId());
             } catch (StateSystemDisposedException e) {
                 e.printStackTrace();
             }

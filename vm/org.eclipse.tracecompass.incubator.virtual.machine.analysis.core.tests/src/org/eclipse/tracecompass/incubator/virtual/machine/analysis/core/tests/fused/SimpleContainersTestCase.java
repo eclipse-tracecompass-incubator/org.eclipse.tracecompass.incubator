@@ -32,7 +32,7 @@ import com.google.common.collect.ImmutableList;
  */
 public class SimpleContainersTestCase extends VmTestCase {
 
-    private static final ITmfStateValue CONTAINER_SV_STRING = TmfStateValue.newValueString(VmTraces.ONE_CONTAINER.getFileName());
+    private static final ITmfStateValue CONTAINER_SV_STRING = TmfStateValue.newValueString(VmTraces.ONE_CONTAINER.getHostId());
     private static final long NS_LV0 = 4026531836L;
     private static final long NS_LV1 = 654321;
     private static final long NS_LV2 = 987654;
@@ -77,89 +77,89 @@ public class SimpleContainersTestCase extends VmTestCase {
 
         // Check the 'Machines' sub-tree towards the end of the trace
         PunctualInfo oneInfo = new PunctualInfo(34L);
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CPUS, "0"), TmfStateValue.nullValue());
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CPUS, "1"), TmfStateValue.nullValue());
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.PARENT), TmfStateValue.nullValue());
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS), TmfStateValue.nullValue());
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1)), TmfStateValue.nullValue());
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0)), TmfStateValue.nullValue());
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2)), TmfStateValue.nullValue());
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.PARENT), TmfStateValue.newValueLong(NS_LV0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.PARENT), TmfStateValue.newValueLong(-1L));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.PARENT), TmfStateValue.newValueLong(NS_LV1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CPUS, "0"), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CPUS, "1"), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.PARENT), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1)), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0)), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2)), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.PARENT), TmfStateValue.newValueLong(NS_LV0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.PARENT), TmfStateValue.newValueLong(-1L));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.PARENT), TmfStateValue.newValueLong(NS_LV1));
 
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "40"), TmfStateValue.newValueInt(1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "41"), TmfStateValue.newValueInt(2));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "42"), TmfStateValue.newValueInt(3));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "43"), TmfStateValue.newValueInt(4));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "44"), TmfStateValue.newValueInt(5));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.PCPUS, "0"), TmfStateValue.nullValue());
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.PCPUS, "1"), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "40"), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "41"), TmfStateValue.newValueInt(2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "42"), TmfStateValue.newValueInt(3));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "43"), TmfStateValue.newValueInt(4));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.THREADS, "44"), TmfStateValue.newValueInt(5));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.PCPUS, "0"), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV1), FusedAttributes.PCPUS, "1"), TmfStateValue.nullValue());
 
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "40"), TmfStateValue.newValueInt(40));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "41"), TmfStateValue.newValueInt(41));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "42"), TmfStateValue.newValueInt(42));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "43"), TmfStateValue.newValueInt(43));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "44"), TmfStateValue.newValueInt(44));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "40"), TmfStateValue.newValueInt(40));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "41"), TmfStateValue.newValueInt(41));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "42"), TmfStateValue.newValueInt(42));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "43"), TmfStateValue.newValueInt(43));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV0), FusedAttributes.THREADS, "44"), TmfStateValue.newValueInt(44));
 
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.THREADS, "42"), TmfStateValue.newValueInt(1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.THREADS, "43"), TmfStateValue.newValueInt(2));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.THREADS, "44"), TmfStateValue.newValueInt(3));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.PCPUS, "0"), TmfStateValue.nullValue());
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.MACHINES, VmTraces.ONE_CONTAINER.getFileName(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.PCPUS, "1"), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.THREADS, "42"), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.THREADS, "43"), TmfStateValue.newValueInt(2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.THREADS, "44"), TmfStateValue.newValueInt(3));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.PCPUS, "0"), TmfStateValue.nullValue());
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.ONE_CONTAINER.getHostId(), FusedAttributes.CONTAINERS, String.valueOf(NS_LV2), FusedAttributes.PCPUS, "1"), TmfStateValue.nullValue());
 
         // Check the 'Threads' sub-tree and VTID informations
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "40", FusedAttributes.NS_MAX_LEVEL), TmfStateValue.newValueInt(2));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "40", FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "40", FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "40", FusedAttributes.VTID), TmfStateValue.newValueInt(1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "40", FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "40", FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "40", FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "40", FusedAttributes.NS_MAX_LEVEL), TmfStateValue.newValueInt(2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "40", FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "40", FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "40", FusedAttributes.VTID), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "40", FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "40", FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "40", FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(1));
 
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "41", FusedAttributes.NS_MAX_LEVEL), TmfStateValue.newValueInt(2));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "41", FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "41", FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "41", FusedAttributes.VTID), TmfStateValue.newValueInt(2));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "41", FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "41", FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "41", FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "41", FusedAttributes.NS_MAX_LEVEL), TmfStateValue.newValueInt(2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "41", FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "41", FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "41", FusedAttributes.VTID), TmfStateValue.newValueInt(2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "41", FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "41", FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "41", FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(1));
 
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "42", FusedAttributes.NS_MAX_LEVEL), TmfStateValue.newValueInt(3));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "42", FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "42", FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "42", FusedAttributes.VTID), TmfStateValue.newValueInt(3));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "42", FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(2));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "42", FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "42", FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "42", FusedAttributes.VTID, FusedAttributes.VTID), TmfStateValue.newValueInt(1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "42", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "42", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV2));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "42", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "42", FusedAttributes.NS_MAX_LEVEL), TmfStateValue.newValueInt(3));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "42", FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "42", FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "42", FusedAttributes.VTID), TmfStateValue.newValueInt(3));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "42", FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "42", FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "42", FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "42", FusedAttributes.VTID, FusedAttributes.VTID), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "42", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "42", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "42", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(2));
 
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "43", FusedAttributes.NS_MAX_LEVEL), TmfStateValue.newValueInt(3));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "43", FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "43", FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "43", FusedAttributes.VTID), TmfStateValue.newValueInt(4));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "43", FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(3));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "43", FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "43", FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "43", FusedAttributes.VTID, FusedAttributes.VTID), TmfStateValue.newValueInt(2));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "43", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "43", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV2));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "43", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "43", FusedAttributes.NS_MAX_LEVEL), TmfStateValue.newValueInt(3));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "43", FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "43", FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "43", FusedAttributes.VTID), TmfStateValue.newValueInt(4));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "43", FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(3));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "43", FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "43", FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "43", FusedAttributes.VTID, FusedAttributes.VTID), TmfStateValue.newValueInt(2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "43", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "43", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "43", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(2));
 
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "44", FusedAttributes.NS_MAX_LEVEL), TmfStateValue.newValueInt(3));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "44", FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "44", FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(0));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "44", FusedAttributes.VTID), TmfStateValue.newValueInt(5));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "44", FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(3));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "44", FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "44", FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "44", FusedAttributes.VTID, FusedAttributes.VTID), TmfStateValue.newValueInt(3));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "44", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(1));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "44", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV2));
-        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getFileName(), "44", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "44", FusedAttributes.NS_MAX_LEVEL), TmfStateValue.newValueInt(3));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "44", FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "44", FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(0));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "44", FusedAttributes.VTID), TmfStateValue.newValueInt(5));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "44", FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(3));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "44", FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "44", FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "44", FusedAttributes.VTID, FusedAttributes.VTID), TmfStateValue.newValueInt(3));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "44", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.VPPID), TmfStateValue.newValueInt(1));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "44", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_INUM), TmfStateValue.newValueLong(NS_LV2));
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.THREADS, VmTraces.ONE_CONTAINER.getHostId(), "44", FusedAttributes.VTID, FusedAttributes.VTID, FusedAttributes.NS_LEVEL), TmfStateValue.newValueInt(2));
 
         info.add(oneInfo);
 

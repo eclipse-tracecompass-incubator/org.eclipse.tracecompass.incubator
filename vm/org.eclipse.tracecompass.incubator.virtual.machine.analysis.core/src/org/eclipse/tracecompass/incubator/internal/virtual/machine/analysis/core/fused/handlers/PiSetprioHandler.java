@@ -48,14 +48,14 @@ public class PiSetprioHandler extends VMKernelEventHandler {
         ITmfEventField content = event.getContent();
         Integer tid = ((Long) content.getField(getLayout().fieldTid()).getValue()).intValue();
         Integer prio = ((Long) content.getField(getLayout().fieldNewPrio()).getValue()).intValue();
-        String machineName = event.getTrace().getName();
+        String machineHost = event.getTrace().getHostId();
 
         String threadAttributeName = FusedVMEventHandlerUtils.buildThreadAttributeName(tid, cpu);
         if (threadAttributeName == null) {
             return;
         }
 
-        Integer updateThreadNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineName, threadAttributeName);
+        Integer updateThreadNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineHost, threadAttributeName);
 
         /* Set the current prio for the new process */
         int quark = ss.getQuarkRelativeAndAdd(updateThreadNode, FusedAttributes.PRIO);

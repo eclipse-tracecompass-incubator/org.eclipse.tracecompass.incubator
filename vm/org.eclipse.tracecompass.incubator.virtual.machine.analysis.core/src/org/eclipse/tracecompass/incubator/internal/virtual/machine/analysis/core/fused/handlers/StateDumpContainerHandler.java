@@ -81,12 +81,12 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
             return ITmfStateSystem.INVALID_ATTRIBUTE;
         }
         long ts = event.getTimestamp().getValue();
-        String traceName = event.getTrace().getName();
+        String hostId = event.getTrace().getHostId();
         String threadAttributeName = FusedVMEventHandlerUtils.buildThreadAttributeName(tid.intValue(), cpu);
         if (threadAttributeName == null) {
             return ITmfStateSystem.INVALID_ATTRIBUTE;
         }
-        int threadNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), traceName, threadAttributeName);
+        int threadNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), hostId, threadAttributeName);
         int layerQuark = threadNode;
         for (int i = 0; i < nsLevel; i++) {
             /* While we can go deeper we create an other level */
@@ -124,7 +124,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
         long ts = event.getTimestamp().getValue();
         int quark;
         ITmfStateValue value;
-        String machineName = event.getTrace().getName();
+        String hostId = event.getTrace().getHostId();
         Long tid = content.getFieldValue(Long.class, TID_FIELD);
         Long pid = content.getFieldValue(Long.class, PID_FIELD);
         Long ppid = content.getFieldValue(Long.class, PPID_FIELD);
@@ -147,7 +147,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
             return;
         }
 
-        int threadNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineName, threadAttributeName);
+        int threadNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), hostId, threadAttributeName);
 
         /*
          * Set the max level, only at level 0. This can be useful to know the
@@ -246,7 +246,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
         }
 
         /* Save the namespace id somewhere so it can be reused */
-        quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, FusedAttributes.CONTAINERS, Long.toString(nsInum));
+        quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getMachinesNode(ss), hostId, FusedAttributes.CONTAINERS, Long.toString(nsInum));
 
         /* Save the tid in the container. We also keep the vtid */
         quark = ss.getQuarkRelativeAndAdd(quark, FusedAttributes.THREADS, String.valueOf(tid));
@@ -261,14 +261,14 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
             quark = ss.getQuarkRelativeAndAdd(layerNode, FusedAttributes.VTID, FusedAttributes.NS_INUM);
             Long childNSInum = ss.queryOngoingState(quark).unboxLong();
             if (childNSInum > 0) {
-                quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, FusedAttributes.CONTAINERS, Long.toString(childNSInum), FusedAttributes.PARENT);
+                quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getMachinesNode(ss), hostId, FusedAttributes.CONTAINERS, Long.toString(childNSInum), FusedAttributes.PARENT);
                 ss.modifyAttribute(ss.getStartTime(), TmfStateValue.newValueLong(nsInum), quark);
             }
         }
 
         if (nsLevel == 0) {
             /* Root namespace => no parent */
-            quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, FusedAttributes.CONTAINERS, Long.toString(nsInum), FusedAttributes.PARENT);
+            quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getMachinesNode(ss), hostId, FusedAttributes.CONTAINERS, Long.toString(nsInum), FusedAttributes.PARENT);
             ss.modifyAttribute(ss.getStartTime(), TmfStateValue.newValueLong(-1), quark);
         }
 

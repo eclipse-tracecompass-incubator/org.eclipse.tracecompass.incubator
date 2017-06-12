@@ -42,7 +42,11 @@ public enum VmTestExperiment {
     /**
      * Virtual machine experiment: 1 guest, 1 host, guest has a container
      */
-    QEMU_CONTAINER(VmTraces.HOST_QEMUKVM_CONTAINER, VmTraces.GUEST_QEMUKVM_CONTAINER);
+    QEMU_CONTAINER(VmTraces.HOST_QEMUKVM_CONTAINER, VmTraces.GUEST_QEMUKVM_CONTAINER),
+    /**
+     * Virtual machine experiment: 1 guest, 1 host, guest has a container
+     */
+    TWO_HOSTS(VmTraces.HOST_ONE_QEMUKVM, VmTraces.GUEST_ONE_QEMUKVM, VmTraces.ONE_CONTAINER);
 
     private @NonNull Set<VmTraces> fTraces = new HashSet<>();
 

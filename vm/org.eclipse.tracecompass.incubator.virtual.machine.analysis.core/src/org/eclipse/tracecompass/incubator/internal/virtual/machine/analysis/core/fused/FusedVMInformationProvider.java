@@ -24,6 +24,7 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundExc
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
+import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 
 /**
  * Utility methods to retrieve information from the virtual machine analysis
@@ -36,9 +37,17 @@ public final class FusedVMInformationProvider {
     private FusedVMInformationProvider() {
     }
 
-    public static List<String> getMachinesTraced(ITmfStateSystem ssq) {
+    /**
+     * Get the list of host IDs of the machines traced. The machines correspond
+     * to either physical machines or virtual machines running their own kernel.
+     *
+     * @param ssq
+     *            The state system
+     * @return The list of machines traced.
+     */
+    public static Collection<String> getMachinesTraced(ITmfStateSystem ssq) {
         List<String> list = new LinkedList<>();
-        List<Integer> machinesQuarks = ssq.getQuarks(FusedAttributes.MACHINES, "*"); //$NON-NLS-1$
+        List<Integer> machinesQuarks = ssq.getQuarks(FusedAttributes.HOSTS, "*"); //$NON-NLS-1$
         for (Integer machineQuark : machinesQuarks) {
             String machineName = ssq.getAttributeName(machineQuark);
             list.add(machineName);
@@ -46,32 +55,68 @@ public final class FusedVMInformationProvider {
         return list;
     }
 
-    public static Integer getNbCPUs(ITmfStateSystem ssq, String machineName) {
-        List<Integer> vCpuquarks = ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.CPUS, "*"); //$NON-NLS-1$
+    /**
+     * Get the number of CPUs available to a machine. If the machine is a
+     * virtual machine, it will return the number of virtual CPUs
+     *
+     * @param ssq
+     *            The state system
+     * @param hostId
+     *            The host ID of the machine
+     * @return The number of CPUs available to the machine
+     */
+    public static int getNbCPUs(ITmfStateSystem ssq, String hostId) {
+        List<Integer> vCpuquarks = ssq.getQuarks(FusedAttributes.HOSTS, hostId, FusedAttributes.CPUS, "*"); //$NON-NLS-1$
         return vCpuquarks.size();
     }
 
-    public static List<String> getMachineContainers(ITmfStateSystem ssq, String machineName) {
+    /**
+     * Get the list of containers on a machine.
+     *
+     * @param ssq
+     *            The state system
+     * @param hostId
+     *            The host ID of the machine for which to retrieve the
+     *            containers
+     * @return The list of container names
+     */
+    public static List<String> getMachineContainers(ITmfStateSystem ssq, String hostId) {
         List<String> containers = new LinkedList<>();
-        List<Integer> containersQuark = ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.CONTAINERS, "*");
+        List<Integer> containersQuark = ssq.getQuarks(FusedAttributes.HOSTS, hostId, FusedAttributes.CONTAINERS, "*");
         for (Integer containerQuark : containersQuark) {
             containers.add(ssq.getAttributeName(containerQuark));
         }
         return containers;
     }
 
-    public static List<Integer> getMachineContainersQuarks(ITmfStateSystem ssq, String machineName) {
-        return ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.CONTAINERS, "*");
+    /**
+     * Get the quark for the container description of a machine
+     *
+     * @param ssq
+     *            The state system
+     * @param hostId
+     *            The host ID of the machine for which to retrieve the
+     *            containers
+     * @return The quarks for the containers
+     */
+    public static Collection<Integer> getMachineContainersQuarks(ITmfStateSystem ssq, String hostId) {
+        return ssq.getQuarks(FusedAttributes.HOSTS, hostId, FusedAttributes.CONTAINERS, "*"); //$NON-NLS-1$
     }
 
-    public static int getContainerQuark(ITmfStateSystem ssq, String machineName, String containerID) {
-        try {
-            return ssq.getQuarkAbsolute(FusedAttributes.MACHINES, machineName, FusedAttributes.CONTAINERS, containerID);
-        } catch (AttributeNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return -1;
+    /**
+     * Get the quarkf or a given container of a machine
+     *
+     * @param ssq
+     *            The state system
+     * @param hostId
+     *            The host ID of the machine containing the container
+     * @param containerID
+     *            The ID of the container
+     * @return The quark for the container or
+     *         {@link ITmfStateSystem#INVALID_ATTRIBUTE} if it is not found
+     */
+    public static int getContainerQuark(ITmfStateSystem ssq, String hostId, String containerID) {
+        return ssq.optQuarkAbsolute(FusedAttributes.HOSTS, hostId, FusedAttributes.CONTAINERS, containerID);
     }
 
     public static int getNodeThreadsAndAdd(ITmfStateSystemBuilder ssq) {
@@ -88,35 +133,27 @@ public final class FusedVMInformationProvider {
         return -1;
     }
 
-    public static @Nullable ITmfStateValue getTypeMachine(ITmfStateSystem ssq, String machineName) {
+    /**
+     * Get the type of a machine
+     *
+     * @param ssq
+     *            The state system
+     * @param hostId
+     *            The host ID of the machine
+     * @return The state value corresponding to this machine's type
+     */
+    public static ITmfStateValue getTypeMachine(ITmfStateSystem ssq, String hostId) {
         int quark;
         try {
-            quark = ssq.getQuarkAbsolute(FusedAttributes.MACHINES, machineName);
+            quark = ssq.optQuarkAbsolute(FusedAttributes.HOSTS, hostId);
+            if (quark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                return TmfStateValue.nullValue();
+            }
             return ssq.querySingleState(ssq.getStartTime(), quark).getStateValue();
-        } catch (AttributeNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (StateSystemDisposedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // About to close, ignore
         }
-        return null;
-    }
-
-    public static int saveContainerThreadID(ITmfStateSystemBuilder ss, int quark, int tid) {
-        return ss.getQuarkRelativeAndAdd(quark, FusedAttributes.THREADS, Integer.toString(tid));
-    }
-
-    public static int getMachineCPUsNode(ITmfStateSystemBuilder ssq, String machineName) {
-        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.MACHINES, machineName, FusedAttributes.CPUS);
-    }
-
-    public static int getNodeIRQs(ITmfStateSystemBuilder ssq) {
-        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.IRQS);
-    }
-
-    public static int getNodeSoftIRQs(ITmfStateSystemBuilder ssq) {
-        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.SOFT_IRQS);
+        return TmfStateValue.nullValue();
     }
 
     public static int getNodeNsInum(ITmfStateSystem ssq, long time, String machineName, int threadID) throws AttributeNotFoundException, StateSystemDisposedException {
@@ -132,14 +169,15 @@ public final class FusedVMInformationProvider {
 
     public static Long getParentContainer(ITmfStateSystem ssq, int containerQuark) {
         int parentContainerIDQuark;
-        Long parentContainerID = null;
+        long parentContainerID = -1;
         try {
-            parentContainerIDQuark = ssq.getQuarkRelative(containerQuark, FusedAttributes.PARENT);
-            parentContainerID = ssq.querySingleState(ssq.getStartTime(), parentContainerIDQuark).getStateValue().unboxLong();
+            parentContainerIDQuark = ssq.optQuarkRelative(containerQuark, FusedAttributes.PARENT);
+            if (parentContainerIDQuark != ITmfStateSystem.INVALID_ATTRIBUTE) {
+                parentContainerID = ssq.querySingleState(ssq.getStartTime(), parentContainerIDQuark).getStateValue().unboxLong();
+            }
 
-        } catch (AttributeNotFoundException | StateSystemDisposedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (StateSystemDisposedException e) {
+            // Nothing to do, about to be disposed
         }
         return parentContainerID;
     }
@@ -205,9 +243,9 @@ public final class FusedVMInformationProvider {
         return machines;
     }
 
-    private static Collection<String> getParentMachines(ITmfStateSystem ssq, String machine, int vcpu, List<ITmfStateInterval> states) {
+    private static Collection<String> getParentMachines(ITmfStateSystem ssq, String hostId, int vcpu, List<ITmfStateInterval> states) {
         List<String> machines = new ArrayList<>();
-        int machineQuark = ssq.optQuarkAbsolute(FusedAttributes.MACHINES, machine);
+        int machineQuark = ssq.optQuarkAbsolute(FusedAttributes.HOSTS, hostId);
         if (machineQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
             return machines;
         }
@@ -257,29 +295,49 @@ public final class FusedVMInformationProvider {
         return containers;
     }
 
-    public static String getParentMachineName(ITmfStateSystem ssq, String machineName) {
-        String parentName = ""; //$NON-NLS-1$
+    /**
+     * Get the parent machine's host ID
+     *
+     * @param ssq
+     *            The state system
+     * @param hostId
+     *            The host ID of the machine for which to get the parent
+     * @return The parent's host ID
+     */
+    public static String getParentMachineHostId(ITmfStateSystem ssq, String hostId) {
+        String parentHostId = ""; //$NON-NLS-1$
         try {
-            int parentNameQuark = ssq.getQuarkAbsolute(FusedAttributes.MACHINES, machineName, FusedAttributes.PARENT);
-            parentName = ssq.querySingleState(ssq.getStartTime(), parentNameQuark).getStateValue().unboxStr();
-        } catch (AttributeNotFoundException | StateSystemDisposedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            int parenthostQuark = ssq.optQuarkAbsolute(FusedAttributes.HOSTS, hostId, FusedAttributes.PARENT);
+            if (parenthostQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                return parentHostId;
+            }
+            parentHostId = ssq.querySingleState(ssq.getStartTime(), parenthostQuark).getStateValue().unboxStr();
+        } catch (StateSystemDisposedException e) {
+            // About to be disposed, ignore
         }
-        return parentName;
+        return parentHostId;
     }
 
-    public static List<String> getPhysicalCpusUsedByMachine(ITmfStateSystem ssq, String machineName) {
+    /**
+     * Get the physical CPUs used by a machine
+     *
+     * @param ssq
+     *            The state system
+     * @param hostId
+     *            The host ID of the machine to get the physical CPUs for
+     * @return The physical CPUs used by the machine
+     */
+    public static Collection<String> getPhysicalCpusUsedByMachine(ITmfStateSystem ssq, String hostId) {
         List<String> pcpus = new LinkedList<>();
         List<Integer> pCpuquarks = new LinkedList<>();
-        ITmfStateValue type = getTypeMachine(ssq, machineName);
-        if (type == null) {
+        ITmfStateValue type = getTypeMachine(ssq, hostId);
+        if (type.isNull()) {
             return pcpus;
         }
         if ((type.unboxInt() & StateValues.MACHINE_GUEST) == StateValues.MACHINE_GUEST) {
-            pCpuquarks = ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.PCPUS, "*"); //$NON-NLS-1$
+            pCpuquarks = ssq.getQuarks(FusedAttributes.HOSTS, hostId, FusedAttributes.PCPUS, "*"); //$NON-NLS-1$
         } else if (type.unboxInt() == StateValues.MACHINE_HOST) {
-            pCpuquarks = ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.CPUS, "*"); //$NON-NLS-1$
+            pCpuquarks = ssq.getQuarks(FusedAttributes.HOSTS, hostId, FusedAttributes.CPUS, "*"); //$NON-NLS-1$
         }
         for (Integer quark : pCpuquarks) {
             pcpus.add(ssq.getAttributeName(quark));
@@ -287,14 +345,24 @@ public final class FusedVMInformationProvider {
         return pcpus;
     }
 
-    public static List<String> getCpusUsedByMachine(ITmfStateSystem ssq, String machineName) {
+    /**
+     * Get the CPUs used by a machine. If the machine is virtual, this will be
+     * the list of virtual CPUs used by the machine.
+     *
+     * @param ssq
+     *            The state system
+     * @param hostId
+     *            The host ID of the machine to get the CPUs for
+     * @return The CPUs, virtual if the machine is a guest, used by the machine.
+     */
+    public static Collection<String> getCpusUsedByMachine(ITmfStateSystem ssq, String hostId) {
         List<String> cpus = new LinkedList<>();
         List<Integer> cpuQuarks = new LinkedList<>();
-        ITmfStateValue type = getTypeMachine(ssq, machineName);
-        if (type == null) {
+        ITmfStateValue type = getTypeMachine(ssq, hostId);
+        if (type.isNull()) {
             return cpus;
         }
-        cpuQuarks = ssq.getQuarks(FusedAttributes.MACHINES, machineName, FusedAttributes.CPUS, "*"); //$NON-NLS-1$
+        cpuQuarks = ssq.getQuarks(FusedAttributes.HOSTS, hostId, FusedAttributes.CPUS, "*"); //$NON-NLS-1$
         for (Integer quark : cpuQuarks) {
             cpus.add(ssq.getAttributeName(quark));
         }
@@ -365,6 +433,29 @@ public final class FusedVMInformationProvider {
         }
 
         return String.valueOf(threadId);
+    }
+
+    /**
+     * Get a friendly name for the machine corresponding to the host. This will
+     * typically be the trace name
+     *
+     * @param ssq
+     *            The state system to query
+     * @param machineHost
+     *            The host ID of the machine
+     * @return The friendly name for this machine
+     */
+    public static String getMachineName(ITmfStateSystem ssq, String machineHost) {
+        int machineNameQuark = ssq.optQuarkAbsolute(FusedAttributes.HOSTS, machineHost, FusedAttributes.MACHINE_NAME);
+        if (machineNameQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+            return machineHost;
+        }
+        try {
+            return ssq.querySingleState(ssq.getStartTime(), machineNameQuark).getStateValue().unboxStr();
+        } catch (StateSystemDisposedException e) {
+            /* About to close, ignore */
+        }
+        return machineHost;
     }
 
 }

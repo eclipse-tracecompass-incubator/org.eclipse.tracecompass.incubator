@@ -51,8 +51,8 @@ public class FusedVMEventHandlerUtils {
      *            the state system
      * @return the quark
      */
-    public static int getNodeMachines(ITmfStateSystemBuilder ssb) {
-        return ssb.getQuarkAbsoluteAndAdd(FusedAttributes.MACHINES);
+    static int getMachinesNode(ITmfStateSystemBuilder ssb) {
+        return ssb.getQuarkAbsoluteAndAdd(FusedAttributes.HOSTS);
     }
 
     /**
@@ -64,7 +64,7 @@ public class FusedVMEventHandlerUtils {
      *            the state system
      * @return the quark
      */
-    public static int getCurrentCPUNode(Integer cpuNumber, ITmfStateSystemBuilder ss) {
+    static int getCurrentCPUNode(Integer cpuNumber, ITmfStateSystemBuilder ss) {
         return ss.getQuarkRelativeAndAdd(getNodeCPUs(ss), cpuNumber.toString());
     }
 
@@ -265,29 +265,32 @@ public class FusedVMEventHandlerUtils {
     }
 
     /**
-     * Get Machine CPUs node
+     * Get a machine CPUs node. This node corresponds to the CPUs available to
+     * the machine, ie in the case of a virtual machine, the virtual CPUs.
      *
      * @param ssq
      *            the state system
-     * @param machineName
-     *            the machine's name
+     * @param hostId
+     *            the host ID of the machine
      * @return the quark
      */
-    public static int getMachineCPUsNode(ITmfStateSystemBuilder ssq, String machineName) {
-        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.MACHINES, machineName, FusedAttributes.CPUS);
+    public static int getMachineCPUsNode(ITmfStateSystemBuilder ssq, String hostId) {
+        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.HOSTS, hostId, FusedAttributes.CPUS);
     }
 
     /**
-     * Get Machine pCPUs node
+     * Get a machine pCPUs node. This node corresponds to the physical CPUs used
+     * by the machine, ie, in the case of a virtual machine, the CPUs on the
+     * host machine.
      *
      * @param ssq
      *            the state system
-     * @param machineName
-     *            the machine's name
+     * @param hostId
+     *            the host ID of the machine
      * @return the quark
      */
-    public static int getMachinepCPUsNode(ITmfStateSystemBuilder ssq, String machineName) {
-        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.MACHINES, machineName, FusedAttributes.PCPUS);
+    public static int getMachinepCPUsNode(ITmfStateSystemBuilder ssq, String hostId) {
+        return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.HOSTS, hostId, FusedAttributes.PCPUS);
     }
 
     /**

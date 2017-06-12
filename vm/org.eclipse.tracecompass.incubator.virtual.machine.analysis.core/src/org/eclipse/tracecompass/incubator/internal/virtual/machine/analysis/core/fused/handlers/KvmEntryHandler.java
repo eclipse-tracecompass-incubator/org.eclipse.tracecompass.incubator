@@ -85,7 +85,7 @@ public class KvmEntryHandler extends VMKernelEventHandler {
                  * If not already done, associate the TID in the host corresponding to
                  * the vCPU inside the state system.
                  */
-                int quarkVCPUs = FusedVMEventHandlerUtils.getMachineCPUsNode(ss, nextLayerVM.getTraceName());
+                int quarkVCPUs = FusedVMEventHandlerUtils.getMachineCPUsNode(ss, nextLayerVM.getHostId());
                 int quarkVCPU = ss.getQuarkRelativeAndAdd(quarkVCPUs, nextLayerVCPU.getCpuId().toString());
                 if (ss.queryOngoingState(quarkVCPU).isNull()) {
                     ss.modifyAttribute(sp.getStartTime(), TmfStateValue.newValueInt(thread), quarkVCPU);
@@ -156,7 +156,7 @@ public class KvmEntryHandler extends VMKernelEventHandler {
              * If not already done, associate the TID in the host corresponding to
              * the vCPU inside the state system. We only do that if we are not going to the next layer.
              */
-            int quarkVCPUs = FusedVMEventHandlerUtils.getMachineCPUsNode(ss, virtualMachine.getTraceName());
+            int quarkVCPUs = FusedVMEventHandlerUtils.getMachineCPUsNode(ss, virtualMachine.getHostId());
             int quarkVCPU = ss.getQuarkRelativeAndAdd(quarkVCPUs, vcpu.getCpuId().toString());
             if (ss.queryOngoingState(quarkVCPU).isNull()) {
                 ss.modifyAttribute(timestamp, TmfStateValue.newValueInt(thread), quarkVCPU);
@@ -165,7 +165,7 @@ public class KvmEntryHandler extends VMKernelEventHandler {
         /* Now we put this vcpu on the pcpu. */
 
         /* Remember that this VM is using this pcpu. */
-        int quarkPCPUs = FusedVMEventHandlerUtils.getMachinepCPUsNode(ss, virtualMachine.getTraceName());
+        int quarkPCPUs = FusedVMEventHandlerUtils.getMachinepCPUsNode(ss, virtualMachine.getHostId());
         ss.getQuarkRelativeAndAdd(quarkPCPUs, cpu.toString());
 
         Integer currentVCpu = vcpu.getCpuId().intValue();
@@ -179,7 +179,7 @@ public class KvmEntryHandler extends VMKernelEventHandler {
          * Set the name of the VM that will run just after the kvm_entry
          */
         int machineNameQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.MACHINE_NAME);
-        value = TmfStateValue.newValueString(virtualMachine.getTraceName());
+        value = TmfStateValue.newValueString(virtualMachine.getHostId());
         ss.modifyAttribute(timestamp, value, machineNameQuark);
 
         /*

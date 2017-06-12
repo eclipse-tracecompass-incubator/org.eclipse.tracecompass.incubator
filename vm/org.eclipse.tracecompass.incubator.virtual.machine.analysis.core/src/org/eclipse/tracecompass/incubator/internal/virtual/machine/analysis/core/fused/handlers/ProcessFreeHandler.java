@@ -42,7 +42,7 @@ public class ProcessFreeHandler extends VMKernelEventHandler {
             }
         }
         Integer tid = ((Long) event.getContent().getField(getLayout().fieldTid()).getValue()).intValue();
-        String machineName = event.getTrace().getName();
+        String machineHost = event.getTrace().getHostId();
 
         String threadAttributeName = FusedVMEventHandlerUtils.buildThreadAttributeName(tid, cpu);
         if (threadAttributeName == null) {
@@ -52,7 +52,7 @@ public class ProcessFreeHandler extends VMKernelEventHandler {
         /*
          * Remove the process and all its sub-attributes from the current state
          */
-        int quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineName, tid.toString());
+        int quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineHost, tid.toString());
         ss.removeAttribute(FusedVMEventHandlerUtils.getTimestamp(event), quark);
     }
 }

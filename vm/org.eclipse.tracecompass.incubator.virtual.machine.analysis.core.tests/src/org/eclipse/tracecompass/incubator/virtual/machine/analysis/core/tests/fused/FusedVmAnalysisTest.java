@@ -74,6 +74,8 @@ public class FusedVmAnalysisTest {
                 { VmTestExperiment.ONE_QEMUKVM.name(), new OneQemuKvmFusedTestCase() },
                 { VmTestExperiment.ONE_CONTAINER.name(), new SimpleContainersTestCase() },
                 { VmTestExperiment.QEMU_CONTAINER.name(), new QemuContainerTestCase() },
+                // TODO: Support experiment with multiple physical machines
+//                { VmTestExperiment.TWO_HOSTS.name(), new TwoHostsTestCase() },
         });
     }
 

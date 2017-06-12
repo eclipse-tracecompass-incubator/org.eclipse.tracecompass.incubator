@@ -26,6 +26,8 @@ import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInform
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
+import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
+import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.IVirtualMachineModel;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualCPU;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
@@ -99,17 +101,13 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
          */
         /* Try to get the virtual machine from the event */
         String eventName = event.getName();
-        String traceName = event.getTrace().getName();
-        if (traceName == null) {
-            traceName = "Unknown trace"; //$NON-NLS-1$
-        }
         if (eventName.startsWith(KVM)) {
             /* Only the host machine has kvm_* events, so this is a host */
             if (machine != null) {
                 machine.setHost();
                 return machine;
             }
-            machine = VirtualMachine.newHostMachine(hostId, traceName);
+            machine = VirtualMachine.newHostMachine(hostId, String.valueOf(event.getTrace().getName()));
         } else if (eventName.equals(QemuKvmStrings.VMSYNC_GH_GUEST) || eventName.equals(QemuKvmStrings.VMSYNC_HG_GUEST)) {
             /* Those events are only present in the guests */
             TmfEventField field = (TmfEventField) event.getContent();
@@ -120,7 +118,7 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
                     machine.setGuest(uid);
                     return machine;
                 }
-                machine = VirtualMachine.newGuestMachine(uid, hostId, traceName);
+                machine = VirtualMachine.newGuestMachine(uid, hostId, String.valueOf(event.getTrace().getName()));
             }
         }
         if (machine != null) {
@@ -228,9 +226,6 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
         VirtualMachine host = fKnownMachines.get(event.getTrace().getHostId());
         switch (eventName) {
         case QemuKvmStrings.VMSYNC_GH_HOST: {
-            if (!eventName.equals(QemuKvmStrings.VMSYNC_GH_HOST)) {
-                return;
-            }
 
             final ITmfEventField content = event.getContent();
             final long ts = event.getTimestamp().toNanos();
@@ -259,12 +254,15 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
                     if (host != null) {
                         host.addChild(machine);
                     }
+
+                    // FIXME: Use the model instead of the analysis directly
                     KernelAnalysisModule module = getLttngKernelModuleFor(hostId);
                     if (module == null) {
                         break;
                     }
-                    Integer tid = KernelThreadInformationProvider.getThreadOnCpu(module, cpu, ts);
-                    if (tid == null) {
+                    IHostModel model = ModelManager.getModelFor(hostId);
+                    int tid = model.getThreadOnCpu(cpu, ts);
+                    if (tid == IHostModel.UNKNOWN_TID) {
                         /*
                          * We do not know which process is running at this
                          * point. It may happen at the beginning of the trace.

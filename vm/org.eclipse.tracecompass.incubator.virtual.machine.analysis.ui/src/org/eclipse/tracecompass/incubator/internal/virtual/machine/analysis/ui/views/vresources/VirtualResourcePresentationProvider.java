@@ -16,11 +16,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
@@ -70,81 +72,82 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
     private Integer fAverageCharWidth;
     private volatile Object selectedFusedVMViewEntry;
     private String selectedMachine;
-    private Thread selectedThread;
+    private HostThread fSelectedThread;
     private int selectedCpu;
     private String selectedContainer;
-    private Map<Thread, Thread> fHighlightedThreads = new HashMap<>();
+//    private Map<Thread, Thread> fHighlightedThreads = new HashMap<>();
     private Map<String, Machine> fHighlightedMachines = new HashMap<>();
     private Multimap<String, Processor> fHighlightedCpus = HashMultimap.create();
     private Collection<Object> fSelectedElements = Collections.emptyList();
 
     private final Map<ITimeEvent, Float> fTimeEventHighlight = new HashMap<>();
 
-    private class Thread {
-        private String machineName;
-        private int threadID;
-        private String threadName;
-        private float fHeight;
-
-        public Thread(String m, int t) {
-            machineName = m;
-            threadID = t;
-            threadName = null;
-            fHeight = FULL_HEIGHT;
-        }
-
-        public Thread(String m, int t, String n) {
-            machineName = m;
-            threadID = t;
-            threadName = n;
-            fHeight = FULL_HEIGHT;
-        }
-
-        public String getMachineName() {
-            return machineName;
-        }
-
-        public int getThreadID() {
-            return threadID;
-        }
-
-        public void modifyHeight(float delta) {
-            fHeight += delta;
-            if (fHeight < 0) {
-                fHeight = 0;
-            } else if (fHeight > FULL_HEIGHT) {
-                fHeight = FULL_HEIGHT;
-            }
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof Thread) {
-                Thread t = (Thread) o;
-                return (t.getMachineName().equals(machineName)) && (t.getThreadID() == threadID);
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 1;
-            hash = hash * 31 + machineName.hashCode();
-            hash = hash * 31 + threadID;
-            return hash;
-        }
-
-        /**
-         * @return the threadName
-         */
-        public String getThreadName() {
-            return threadName;
-        }
-
-        // public float getHeightFactor() {
-        // return fHeight;
-        // }
-    }
+    // TODO: Will this class be needed ?
+//    private class Thread {
+//        private String machineName;
+//        private int threadID;
+//        private String threadName;
+//        private float fHeight;
+//
+//        public Thread(String m, int t) {
+//            machineName = m;
+//            threadID = t;
+//            threadName = null;
+//            fHeight = FULL_HEIGHT;
+//        }
+//
+//        public Thread(String m, int t, String n) {
+//            machineName = m;
+//            threadID = t;
+//            threadName = n;
+//            fHeight = FULL_HEIGHT;
+//        }
+//
+//        public String getMachineName() {
+//            return machineName;
+//        }
+//
+//        public int getThreadID() {
+//            return threadID;
+//        }
+//
+//        public void modifyHeight(float delta) {
+//            fHeight += delta;
+//            if (fHeight < 0) {
+//                fHeight = 0;
+//            } else if (fHeight > FULL_HEIGHT) {
+//                fHeight = FULL_HEIGHT;
+//            }
+//        }
+//
+//        @Override
+//        public boolean equals(Object o) {
+//            if (o instanceof Thread) {
+//                Thread t = (Thread) o;
+//                return (t.getMachineName().equals(machineName)) && (t.getThreadID() == threadID);
+//            }
+//            return false;
+//        }
+//
+//        @Override
+//        public int hashCode() {
+//            int hash = 1;
+//            hash = hash * 31 + machineName.hashCode();
+//            hash = hash * 31 + threadID;
+//            return hash;
+//        }
+//
+//        /**
+//         * @return the threadName
+//         */
+//        public String getThreadName() {
+//            return threadName;
+//        }
+//
+//        // public float getHeightFactor() {
+//        // return fHeight;
+//        // }
+//    }
 
     private enum State {
         IDLE(new RGB(200, 200, 200)),
@@ -577,7 +580,9 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
     private boolean isMachineAndCpuHighlighted(ITimeEvent event) throws StateSystemDisposedException {
         Map<String, Machine> map = getHighlightedMachines();
         if (map.isEmpty()) {
-            return true;
+            // There is no specific machine selected, so we highlight everything
+            // if there is no thread selected
+            return fSelectedThread == null;
         }
 
         // Get the machine of this event
@@ -652,7 +657,8 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
      * @throws StateSystemDisposedException
      */
     private boolean isProcessHighlighted(ITimeEvent event) throws StateSystemDisposedException {
-        if (fHighlightedThreads.isEmpty()) {
+        HostThread selectedThread = fSelectedThread;
+        if (selectedThread == null) {
             return false;
         }
 
@@ -666,27 +672,20 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
             return false;
         }
         ITmfStateInterval interval;
-        int machineNameQuark = ss.optQuarkRelative(cpuQuark, FusedAttributes.MACHINE_NAME);
+        int machineHostQuark = ss.optQuarkRelative(cpuQuark, FusedAttributes.MACHINE_NAME);
         int currentThreadQuark = ss.optQuarkRelative(cpuQuark, FusedAttributes.CURRENT_THREAD);
-        if (machineNameQuark == ITmfStateSystem.INVALID_ATTRIBUTE || currentThreadQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+        if (machineHostQuark == ITmfStateSystem.INVALID_ATTRIBUTE || currentThreadQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
             return false;
         }
-        interval = ss.querySingleState(time, machineNameQuark);
+        interval = ss.querySingleState(time, machineHostQuark);
         ITmfStateValue value = interval.getStateValue();
-        String machineName = value.unboxStr();
+        String machineHost = value.unboxStr();
 
         interval = ss.querySingleState(time, currentThreadQuark);
         value = interval.getStateValue();
         int currentThreadID = value.unboxInt();
 
-        // return highlightedTreads.containsValue(new Thread(machineName,
-        // currentThreadID));
-        Thread t = fHighlightedThreads.get(new Thread(machineName, currentThreadID));
-        if (t != null) {
-            return true;
-        }
-        return false;
-
+        return selectedThread.equals(new HostThread(machineHost, currentThreadID));
     }
 
     //
@@ -751,43 +750,21 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
     }
 
     /**
-     * Gets the selected thread ID
-     *
-     * @return the selectedThreadID
+     * @param ht
+     *            The host thread to select
      */
-    public int getSelectedThreadID() {
-        if (selectedThread != null) {
-            return selectedThread.getThreadID();
+    public void setSelectedThread(@Nullable HostThread ht) {
+        if (ht == null) {
+            fSelectedThread = null;
+        } else {
+            HostThread selectedThread = fSelectedThread;
+            if (ht.equals(selectedThread)) {
+                fSelectedThread = null;
+            } else {
+                fSelectedThread = ht;
+            }
         }
-        return -1;
-    }
-
-    /**
-     * Gets the selected thread name
-     *
-     * @return the selectedThread name;
-     */
-    public String getSelectedThreadName() {
-        if (selectedThread != null) {
-            return selectedThread.getThreadName();
-        }
-        return "No thread selected"; //$NON-NLS-1$
-    }
-
-    /**
-     * @param machineName
-     *            the machine name
-     * @param threadID
-     *            the tid of the thread
-     *
-     */
-    public void setSelectedThread(String machineName, int threadID) {
-        // selectedThread = new Thread(machineName, threadID, threadName);
-        Thread t = new Thread(machineName, threadID, String.valueOf(threadID));
-        selectedThread = fHighlightedThreads.get(t);
-        if (selectedThread == null) {
-            selectedThread = t;
-        }
+        resetTimeEventHighlight();
     }
 
     /**
@@ -809,40 +786,20 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
         return selectedContainer;
     }
 
-    /**
-     * Gets the highlighted threads
-     *
-     * @return the highlightedTreads
-     */
-    public Map<Thread, Thread> getHighlightedTreads() {
-        return fHighlightedThreads;
-    }
 
-    /**
-     * @param machineName
-     *            the machine name
-     * @param tid
-     *            the tid
-     * @return true if the thread is contained in the list of highlighted
-     *         threads
-     */
-    public boolean isThreadSelected(String machineName, int tid) {
-        return fHighlightedThreads.containsValue(new Thread(machineName, tid));
-    }
-
-    /**
-     * Adds the selected thread to the list of highlighted threads
-     */
-    public void addHighlightedThread() {
-        fHighlightedThreads.put(selectedThread, selectedThread);
-    }
-
-    /**
-     * Removes the selected thread of the list of highlighted threads
-     */
-    public void removeHighlightedThread() {
-        fHighlightedThreads.remove(selectedThread);
-    }
+//    /**
+//     * Adds the selected thread to the list of highlighted threads
+//     */
+//    public void addHighlightedThread() {
+//        fHighlightedThreads.put(fSelectedThread, fSelectedThread);
+//    }
+//
+//    /**
+//     * Removes the selected thread of the list of highlighted threads
+//     */
+//    public void removeHighlightedThread() {
+//        fHighlightedThreads.remove(fSelectedThread);
+//    }
 
     private Map<String, Machine> getHighlightedMachines() {
         return fHighlightedMachines;
@@ -884,10 +841,14 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
         return ImmutableMap.of(ITimeEventStyleStrings.heightFactor(), heightFactor);
     }
 
+    /**
+     * @param delta The difference in thread alpha
+     */
     public void modifySelectedThreadAlpha(int delta) {
-        if (selectedThread != null) {
-            selectedThread.modifyHeight(delta / 100);
-        }
+        // TODO: implement this method
+//        if (fSelectedThread != null) {
+//            fSelectedThread.modifyHeight(delta / 100);
+//        }
     }
 
     Collection<Object> getSelectedElements() {

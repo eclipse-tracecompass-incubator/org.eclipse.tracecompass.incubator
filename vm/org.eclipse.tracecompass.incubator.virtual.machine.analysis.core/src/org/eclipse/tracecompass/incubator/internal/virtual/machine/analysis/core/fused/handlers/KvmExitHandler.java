@@ -108,7 +108,7 @@ public class KvmExitHandler extends VMKernelEventHandler {
          * Set the name of the VM that will run just after the kvm_entry
          */
         int machineNameQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.MACHINE_NAME);
-        value = TmfStateValue.newValueString(event.getTrace().getName());
+        value = TmfStateValue.newValueString(event.getTrace().getHostId());
         ss.modifyAttribute(timestamp, value, machineNameQuark);
     }
 

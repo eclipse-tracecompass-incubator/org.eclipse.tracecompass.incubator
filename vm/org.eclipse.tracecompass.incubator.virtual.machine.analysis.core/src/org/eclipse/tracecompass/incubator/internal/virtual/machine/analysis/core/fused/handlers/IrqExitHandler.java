@@ -60,7 +60,7 @@ public class IrqExitHandler extends VMKernelEventHandler {
 
         /* Set the CPU status back to running or "idle" */
         FusedVMEventHandlerUtils.cpuExitInterrupt(timestamp, cpu, ss);
-        quark = ss.getQuarkRelativeAndAdd(FusedVirtualMachineStateProvider.getCurrentCPUNode(cpu, ss), FusedAttributes.STATUS);
+        quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getCurrentCPUNode(cpu, ss), FusedAttributes.STATUS);
         value = cpuObject.getStateBeforeIRQ();
         ss.modifyAttribute(timestamp, value, quark);
     }

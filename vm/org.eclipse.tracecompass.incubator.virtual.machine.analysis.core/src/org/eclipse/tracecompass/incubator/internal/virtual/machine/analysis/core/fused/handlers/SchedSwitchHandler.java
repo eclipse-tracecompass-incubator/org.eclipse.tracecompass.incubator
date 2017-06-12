@@ -69,16 +69,16 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
         String nextProcessName = checkNotNull((String) content.getField(getLayout().fieldNextComm()).getValue());
         Integer nextTid = ((Long) content.getField(getLayout().fieldNextTid()).getValue()).intValue();
         Integer nextPrio = ((Long) content.getField(getLayout().fieldNextPrio()).getValue()).intValue();
-        String machineName = event.getTrace().getName();
+        String machineHost = event.getTrace().getHostId();
 
         /* Will never return null since "cpu" is null checked */
         String formerThreadAttributeName = FusedVMEventHandlerUtils.buildThreadAttributeName(prevTid, cpu);
         String currenThreadAttributeName = FusedVMEventHandlerUtils.buildThreadAttributeName(nextTid, cpu);
 
         int nodeThreads = FusedVMEventHandlerUtils.getNodeThreads(ss);
-        int formerThreadNode = ss.getQuarkRelativeAndAdd(nodeThreads, machineName, formerThreadAttributeName);
-        int newCurrentThreadNode = ss.getQuarkRelativeAndAdd(nodeThreads, machineName, currenThreadAttributeName);
-        int currentMachineQuark = ss.getQuarkAbsoluteAndAdd(FusedAttributes.MACHINES, machineName);
+        int formerThreadNode = ss.getQuarkRelativeAndAdd(nodeThreads, machineHost, formerThreadAttributeName);
+        int newCurrentThreadNode = ss.getQuarkRelativeAndAdd(nodeThreads, machineHost, currenThreadAttributeName);
+        int currentMachineQuark = ss.getQuarkAbsoluteAndAdd(FusedAttributes.HOSTS, machineHost);
         int machineContainerQuark = ss.getQuarkRelativeAndAdd(currentMachineQuark, FusedAttributes.CONTAINERS);
 
         long timestamp = FusedVMEventHandlerUtils.getTimestamp(event);
@@ -108,7 +108,7 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
         boolean modify = true;
         int machineNameQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.MACHINE_NAME);
         try {
-            modify = ss.querySingleState(timestamp, machineNameQuark).getStateValue().unboxStr().equals(machineName);
+            modify = ss.querySingleState(timestamp, machineNameQuark).getStateValue().unboxStr().equals(machineHost);
         } catch (StateSystemDisposedException e) {
             e.printStackTrace();
         }

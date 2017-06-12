@@ -26,7 +26,6 @@ import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vcpuview.VirtualMachineView;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vresources.Messages;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vresources.VirtualResourcesView;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTestExperiment;
@@ -44,11 +43,11 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * Test the {@link VirtualMachineView} class
+ * Test the {@link VirtualResourcesView} class
  *
  * @author Geneviève Bastien
  */
-public class VcpuViewTest {
+public class VirtualResourcesViewTest {
 
     private static final String TRACE_TYPE = "org.eclipse.tracecompass.incubator.virtual.machine.analysis.vm.trace.stub";
     private static final String PROJECT_NAME = "test";
@@ -129,8 +128,8 @@ public class VcpuViewTest {
      */
     @Test
     public void testOneQemuKvm() {
-        String[] physCPU0 = { VmTraces.HOST_ONE_QEMUKVM.getFileName(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
-        String[] virtCPU0 = { VmTraces.HOST_ONE_QEMUKVM.getFileName(), Messages.FusedVMView_VirtualMachinesEntry, VmTraces.GUEST_ONE_QEMUKVM.getFileName(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
+        String[] physCPU0 = { VmTraces.HOST_ONE_QEMUKVM.getHostId(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
+        String[] virtCPU0 = { VmTraces.HOST_ONE_QEMUKVM.getHostId(), Messages.FusedVMView_VirtualMachinesEntry, VmTraces.GUEST_ONE_QEMUKVM.getHostId(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
         testExperiment(VmTestExperiment.ONE_QEMUKVM, ImmutableSet.of(physCPU0, virtCPU0));
     }
 
@@ -139,13 +138,13 @@ public class VcpuViewTest {
      */
     @Test
     public void testOneContainer() {
-        String[] physCPU0 = { VmTraces.ONE_CONTAINER.getFileName(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
-        String[] physCPU1 = { VmTraces.ONE_CONTAINER.getFileName(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 1" };
+        String[] physCPU0 = { VmTraces.ONE_CONTAINER.getHostId(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
+        String[] physCPU1 = { VmTraces.ONE_CONTAINER.getHostId(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 1" };
 
-        String[] contCPU00 = { VmTraces.ONE_CONTAINER.getFileName(), Messages.FusedVMView_ContainersEntry, "654321", Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
-        String[] contCPU01 = { VmTraces.ONE_CONTAINER.getFileName(), Messages.FusedVMView_ContainersEntry, "654321", Messages.FusedVMView_PhysicalCpusEntry, "PCPU 1" };
-        String[] contCPU10 = { VmTraces.ONE_CONTAINER.getFileName(), Messages.FusedVMView_ContainersEntry, "654321", Messages.FusedVMView_ContainersEntry, "987654", Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
-        String[] contCPU11 = { VmTraces.ONE_CONTAINER.getFileName(), Messages.FusedVMView_ContainersEntry, "654321", Messages.FusedVMView_ContainersEntry, "987654", Messages.FusedVMView_PhysicalCpusEntry, "PCPU 1" };
+        String[] contCPU00 = { VmTraces.ONE_CONTAINER.getHostId(), Messages.FusedVMView_ContainersEntry, "654321", Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
+        String[] contCPU01 = { VmTraces.ONE_CONTAINER.getHostId(), Messages.FusedVMView_ContainersEntry, "654321", Messages.FusedVMView_PhysicalCpusEntry, "PCPU 1" };
+        String[] contCPU10 = { VmTraces.ONE_CONTAINER.getHostId(), Messages.FusedVMView_ContainersEntry, "654321", Messages.FusedVMView_ContainersEntry, "987654", Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
+        String[] contCPU11 = { VmTraces.ONE_CONTAINER.getHostId(), Messages.FusedVMView_ContainersEntry, "654321", Messages.FusedVMView_ContainersEntry, "987654", Messages.FusedVMView_PhysicalCpusEntry, "PCPU 1" };
 
         testExperiment(VmTestExperiment.ONE_CONTAINER, ImmutableSet.of(physCPU0, physCPU1, contCPU00, contCPU01, contCPU10, contCPU11));
     }
@@ -155,9 +154,12 @@ public class VcpuViewTest {
      */
     @Test
     public void testQemuContainer() {
-        String[] physCPU0 = { VmTraces.HOST_ONE_QEMUKVM.getFileName(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
-        String[] virtCPU0 = { VmTraces.HOST_ONE_QEMUKVM.getFileName(), Messages.FusedVMView_VirtualMachinesEntry, VmTraces.GUEST_ONE_QEMUKVM.getFileName(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
-        String[] contCPU0 = { VmTraces.HOST_ONE_QEMUKVM.getFileName(), Messages.FusedVMView_VirtualMachinesEntry, VmTraces.GUEST_ONE_QEMUKVM.getFileName(), Messages.FusedVMView_ContainersEntry, "987654", Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
+        // The getHostId method of the traces cannot be overridden in those
+        // tests, as the SWTBOT utils uses trace compass's default behavior, so
+        // the host ID will be the ones from the ONE_QEMUKVM experiment
+        String[] physCPU0 = { VmTraces.HOST_ONE_QEMUKVM.getHostId(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
+        String[] virtCPU0 = { VmTraces.HOST_ONE_QEMUKVM.getHostId(), Messages.FusedVMView_VirtualMachinesEntry, VmTraces.GUEST_ONE_QEMUKVM.getHostId(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
+        String[] contCPU0 = { VmTraces.HOST_ONE_QEMUKVM.getHostId(), Messages.FusedVMView_VirtualMachinesEntry, VmTraces.GUEST_ONE_QEMUKVM.getHostId(), Messages.FusedVMView_ContainersEntry, "987654", Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
 
         testExperiment(VmTestExperiment.QEMU_CONTAINER, ImmutableSet.of(physCPU0, virtCPU0, contCPU0));
     }

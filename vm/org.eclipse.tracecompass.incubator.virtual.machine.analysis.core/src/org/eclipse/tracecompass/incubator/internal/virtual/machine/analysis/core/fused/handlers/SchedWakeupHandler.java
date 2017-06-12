@@ -45,7 +45,7 @@ public class SchedWakeupHandler extends VMKernelEventHandler {
                 return;
             }
         }
-        String machineName = event.getTrace().getName();
+        String machineHost = event.getTrace().getHostId();
         final int tid = ((Long) event.getContent().getField(getLayout().fieldTid()).getValue()).intValue();
         final int prio = ((Long) event.getContent().getField(getLayout().fieldPrio()).getValue()).intValue();
 
@@ -54,7 +54,7 @@ public class SchedWakeupHandler extends VMKernelEventHandler {
             return;
         }
 
-        final int threadNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineName, threadAttributeName);
+        final int threadNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineHost, threadAttributeName);
 
         /*
          * The process indicated in the event's payload is now ready to run.

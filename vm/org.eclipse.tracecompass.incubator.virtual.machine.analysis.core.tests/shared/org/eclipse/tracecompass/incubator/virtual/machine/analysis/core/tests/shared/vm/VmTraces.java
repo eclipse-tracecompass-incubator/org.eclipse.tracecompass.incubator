@@ -42,15 +42,20 @@ public enum VmTraces {
     /** Guest from simple QEMU/KVM experiment */
     ONE_CONTAINER("vm/Containers/withContainers.xml"),
     /** Host from simple QEMU/KVM experiment */
-    HOST_QEMUKVM_CONTAINER("vm/QemuContainer/host.xml"),
+    HOST_QEMUKVM_CONTAINER("vm/QemuContainer/host.xml", "host"),
     /** Guest from simple QEMU/KVM experiment */
-    GUEST_QEMUKVM_CONTAINER("vm/QemuContainer/guest.xml"),;
+    GUEST_QEMUKVM_CONTAINER("vm/QemuContainer/guest.xml", "guest"),;
 
     private static final @NonNull String filePath = "testfiles";
 
     private final @NonNull IPath fPath;
+    private final @NonNull String fHostId;
 
     VmTraces(String path) {
+        this(path, null);
+    }
+
+    VmTraces(String path, @Nullable String hostId) {
         IPath relativePath = new Path(filePath + File.separator + path);
         Activator plugin = Activator.getDefault();
         URL location = FileLocator.find(plugin.getBundle(), relativePath, null);
@@ -59,6 +64,7 @@ public enum VmTraces {
         } catch (IOException e) {
             throw new IllegalStateException();
         }
+        fHostId = hostId != null ? hostId : getFileName();
     }
 
     /**
@@ -70,7 +76,14 @@ public enum VmTraces {
      * @return A TmfXmlTraceStub reference to this trace
      */
     public @Nullable ITmfTrace getTrace() {
-        VmXmlKernelTraceStub trace = new VmXmlKernelTraceStub();
+        VmXmlKernelTraceStub trace = new VmXmlKernelTraceStub() {
+
+            @Override
+            public @NonNull String getHostId() {
+                return fHostId;
+            }
+
+        };
         IStatus status = trace.validate(null, fPath.toOSString());
         if (!status.isOK()) {
             return null;
@@ -90,6 +103,15 @@ public enum VmTraces {
      */
     public boolean exists() {
         return fPath.toFile().exists();
+    }
+
+    /**
+     * Get the filename of this trace
+     *
+     * @return The last segment (file name of this trace)
+     */
+    public @NonNull String getHostId() {
+        return fHostId;
     }
 
     /**

@@ -25,11 +25,11 @@ import org.eclipse.tracecompass.statesystem.core.tests.shared.utils.StateSystemT
 import com.google.common.collect.ImmutableList;
 
 /**
- * Test case for the QemuKvm experiment and Fused VM analysis
+ * Test case for one host and one qemu/kvm guest with containers
  *
  * @author Geneviève Bastien
  */
-public class OneQemuKvmFusedTestCase extends VmTestCase {
+public class TwoHostsTestCase extends VmTestCase {
 
     private static final ITmfStateValue HOST_SV_STRING = TmfStateValue.newValueString(VmTraces.HOST_ONE_QEMUKVM.getHostId());
     private static final ITmfStateValue GUEST_SV_STRING = TmfStateValue.newValueString(VmTraces.GUEST_ONE_QEMUKVM.getHostId());
@@ -37,8 +37,8 @@ public class OneQemuKvmFusedTestCase extends VmTestCase {
     /**
      * Constructor
      */
-    public OneQemuKvmFusedTestCase() {
-        super(VmTestExperiment.ONE_QEMUKVM);
+    public TwoHostsTestCase() {
+        super(VmTestExperiment.TWO_HOSTS);
     }
 
     @Override

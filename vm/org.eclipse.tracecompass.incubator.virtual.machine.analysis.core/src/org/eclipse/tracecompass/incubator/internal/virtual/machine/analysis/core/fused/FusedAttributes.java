@@ -26,7 +26,7 @@ public interface FusedAttributes {
     /* First-level attributes */
     String CPUS = "CPUs";
     String THREADS = "Threads";
-    String MACHINES = "Machines";
+    String HOSTS = "Hosts";
 
     /* Sub-attributes of the CPU nodes */
     String CURRENT_THREAD = "Current_thread";

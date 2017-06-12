@@ -40,7 +40,7 @@ public class ProcessForkContainerHandler extends VMKernelEventHandler {
     public void handleEvent(ITmfStateSystemBuilder ss, ITmfEvent event) {
         ITmfEventField content = event.getContent();
         ITmfEventField field;
-        String machineName = event.getTrace().getName();
+        String machineHost = event.getTrace().getHostId();
         String childProcessName = (String) content.getField(getLayout().fieldChildComm()).getValue();
         long childVTIDs[] = { };
         field = content.getField("vtids"); //$NON-NLS-1$
@@ -52,15 +52,15 @@ public class ProcessForkContainerHandler extends VMKernelEventHandler {
             childNSInum = -1L;
         } else {
             /* Save the namespace id somewhere so it can be reused */
-            ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, FusedAttributes.CONTAINERS, Long.toString(childNSInum));
+            ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getMachinesNode(ss), machineHost, FusedAttributes.CONTAINERS, Long.toString(childNSInum));
         }
         Long parentNSInum = content.getFieldValue(Long.class, "parent_ns_inum"); //$NON-NLS-1$
 
         Integer parentTid = ((Long) content.getField(getLayout().fieldParentTid()).getValue()).intValue();
         Integer childTid = ((Long) content.getField(getLayout().fieldChildTid()).getValue()).intValue();
 
-        Integer parentTidNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineName, parentTid.toString());
-        Integer childTidNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineName, childTid.toString());
+        Integer parentTidNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineHost, parentTid.toString());
+        Integer childTidNode = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeThreads(ss), machineHost, childTid.toString());
 
         /* Assign the PPID to the new process */
         int quark = ss.getQuarkRelativeAndAdd(childTidNode, FusedAttributes.PPID);
@@ -115,7 +115,7 @@ public class ProcessForkContainerHandler extends VMKernelEventHandler {
                 ss.modifyAttribute(timestamp, value, quark);
 
                 /* Save the tid */
-                quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, FusedAttributes.CONTAINERS, Long.toString(value.unboxLong()));
+                quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getMachinesNode(ss), machineHost, FusedAttributes.CONTAINERS, Long.toString(value.unboxLong()));
                 quark = FusedVMEventHandlerUtils.saveContainerThreadID(ss, quark, childTid);
                 ss.modifyAttribute(timestamp, TmfStateValue.newValueInt((int) vtid), quark);
 
@@ -154,7 +154,7 @@ public class ProcessForkContainerHandler extends VMKernelEventHandler {
                         value = TmfStateValue.newValueLong(childNSInum);
 
                         /* Save the tid */
-                        quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, FusedAttributes.CONTAINERS, Long.toString(value.unboxLong()));
+                        quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getMachinesNode(ss), machineHost, FusedAttributes.CONTAINERS, Long.toString(value.unboxLong()));
                         quark = FusedVMEventHandlerUtils.saveContainerThreadID(ss, quark, childTid);
                         ss.modifyAttribute(timestamp, TmfStateValue.newValueInt((int) vtid), quark);
                     }
@@ -166,7 +166,7 @@ public class ProcessForkContainerHandler extends VMKernelEventHandler {
                     ss.modifyAttribute(timestamp, value, quark);
 
                     /* Save the tid */
-                    quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, FusedAttributes.CONTAINERS, Long.toString(value.unboxLong()));
+                    quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getMachinesNode(ss), machineHost, FusedAttributes.CONTAINERS, Long.toString(value.unboxLong()));
                     quark = FusedVMEventHandlerUtils.saveContainerThreadID(ss, quark, childTid);
                     ss.modifyAttribute(timestamp, TmfStateValue.newValueInt((int) vtid), quark);
                 }
@@ -190,7 +190,7 @@ public class ProcessForkContainerHandler extends VMKernelEventHandler {
                 ss.modifyAttribute(timestamp, value, quark);
 
                 /* Save the tid */
-                int quarkContainer = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeMachines(ss), machineName, FusedAttributes.CONTAINERS, Long.toString(childNSInum));
+                int quarkContainer = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getMachinesNode(ss), machineHost, FusedAttributes.CONTAINERS, Long.toString(childNSInum));
                 quark = FusedVMEventHandlerUtils.saveContainerThreadID(ss, quarkContainer, childTid);
                 ss.modifyAttribute(timestamp, TmfStateValue.newValueInt((int) vtid), quark);
 

@@ -102,14 +102,11 @@ public class VirtualResourceEntry extends TimeGraphEntry implements Comparable<I
      *            The start time of this entry lifetime
      * @param endTime
      *            The end time of this entry
+     * @param type
+     *            The type of this entry
      * @param id
      *            The id of this entry
      */
-    public VirtualResourceEntry(@NonNull ITmfTrace trace, String name,
-            long startTime, long endTime, int id) {
-        this(-1, trace, name, startTime, endTime, Type.NULL, id);
-    }
-
     public VirtualResourceEntry(@NonNull ITmfTrace trace, String name,
             long startTime, long endTime, Type type, int id) {
         this(-1, trace, name, startTime, endTime, type, id);

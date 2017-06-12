@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -33,6 +34,7 @@ import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.analysis.os.linux.core.signals.TmfThreadSelectedSignal;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVMInformationProvider;
@@ -124,11 +126,11 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         @Override
         public void run() {
             VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
-            if (isChecked()) {
-                presentationProvider.addHighlightedThread();
-            } else {
-                presentationProvider.removeHighlightedThread();
-            }
+//            if (isChecked()) {
+//                presentationProvider.addHighlightedThread();
+//            } else {
+//                presentationProvider.removeHighlightedThread();
+//            }
             presentationProvider.resetTimeEventHighlight();
             refresh();
         }
@@ -205,7 +207,7 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
                     value = interval.getStateValue();
                     int threadID = value.unboxInt();
 
-                    presentationProvider.setSelectedThread(machineName, threadID);
+                    presentationProvider.setSelectedThread(new HostThread(machineName, threadID));
 
                     int conditionQuark = ssq.getQuarkRelative(cpuQuark, FusedAttributes.CONDITION);
                     interval = ssq.querySingleState(begin, conditionQuark);
@@ -419,7 +421,7 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         long endTime = end + 1;
         setEndTime(Math.max(getEndTime(), endTime));
 
-        List<Integer> machinesQuarks = ssq.getQuarks(FusedAttributes.MACHINES, "*"); //$NON-NLS-1$
+        List<Integer> machinesQuarks = ssq.getQuarks(FusedAttributes.HOSTS, "*"); //$NON-NLS-1$
         String hostName = null;
         for (int quark : machinesQuarks) {
             try {
@@ -427,7 +429,7 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
                     hostName = ssq.getAttributeName(quark);
                 }
             } catch (StateSystemDisposedException e) {
-                e.printStackTrace();
+                return;
             }
         }
 
@@ -658,7 +660,6 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
                 /* Get the entry of the machine containing the container */
                 VirtualResourceEntry machineEntry = (VirtualResourceEntry) entry.getParent();
                 if (machineEntry == null) {
-                    System.out.println("null");
                     continue;
                 }
                 while (machineEntry.getType() != Type.VM) {
@@ -674,6 +675,10 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
                     continue;
                 }
                 int containerQuark = FusedVMInformationProvider.getContainerQuark(ssq, machineName, containerID);
+                if (containerQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                    Activator.getDefault().logWarning("Container quark not found for " + containerID + " in machine " + machineName + ". This shouldn't happen."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                    break;
+                }
                 int threadID = currentThreadInterval.getStateValue().unboxInt();
                 List<Integer> threadsQuarks = ssq.getQuarks(containerQuark, FusedAttributes.THREADS, "*"); //$NON-NLS-1$
                 boolean foundThread = false;
@@ -717,15 +722,17 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
      * @return
      */
     private boolean isInsideVM(String machine1, String machine2) {
-        if (machine1.equals(machine2)) {
-            return true;
-        }
         Machine m2 = fMachines.get(machine2);
         if (m2 == null) {
             return false;
         }
+        String machine2Host = m2.getHostId();
+        if (machine1.equals(machine2Host)) {
+            return true;
+        }
+
         for (Machine child : m2.getVirtualMachines()) {
-            if (isInsideVM(machine1, child.getMachineName())) {
+            if (isInsideVM(machine1, child.getHostId())) {
                 return true;
             }
         }
@@ -869,10 +876,8 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
         fHighlightMachine.setToolTipText(presentationProvider.getSelectedMachine());
         fHighlightCPU.setToolTipText(Integer.toString((presentationProvider.getSelectedCpu())));
-        fHighlightProcess.setToolTipText(Messages.FusedVMView_ButtonProcessSelected + ": " + //$NON-NLS-1$
-                presentationProvider.getSelectedThreadName() + "\n" + //$NON-NLS-1$
-                Messages.FusedVMView_ButtonHoverProcessSelectedTID + ": " + //$NON-NLS-1$
-                Integer.toString(presentationProvider.getSelectedThreadID()));
+        // TODO: Add the name of the selected process
+        fHighlightProcess.setToolTipText(Messages.FusedVMView_ButtonProcessSelected);
         fHighlightContainer.setToolTipText(presentationProvider.getSelectedContainer());
     }
 
@@ -945,20 +950,21 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         /* Separate host from guests */
         Machine host = null;
         List<Machine> guests = new LinkedList<>();
-        for (String machineName : FusedVMInformationProvider.getMachinesTraced(ssq)) {
-            ITmfStateValue typeMachine = FusedVMInformationProvider.getTypeMachine(ssq, machineName);
+        for (String machineHost : FusedVMInformationProvider.getMachinesTraced(ssq)) {
+            ITmfStateValue typeMachine = FusedVMInformationProvider.getTypeMachine(ssq, machineHost);
 
-            if (typeMachine == null) {
+            if (typeMachine.isNull()) {
                 continue;
             }
+            String machineName = FusedVMInformationProvider.getMachineName(ssq, machineHost);
             Machine machine = null;
             if ((typeMachine.unboxInt() & StateValues.MACHINE_GUEST) == StateValues.MACHINE_GUEST) {
-                machine = new Machine(machineName, typeMachine, FusedVMInformationProvider.getPhysicalCpusUsedByMachine(ssq, machineName));
+                machine = new Machine(machineName, machineHost, typeMachine, FusedVMInformationProvider.getPhysicalCpusUsedByMachine(ssq, machineHost));
                 fMachines.put(machine.getMachineName(), machine);
                 guests.add(machine);
             } else if (typeMachine.unboxInt() == StateValues.MACHINE_HOST) {
-                machine = new Machine(machineName, typeMachine);
-                for (String cpus : FusedVMInformationProvider.getCpusUsedByMachine(ssq, machineName)) {
+                machine = new Machine(machineName, machineHost, typeMachine);
+                for (String cpus : FusedVMInformationProvider.getCpusUsedByMachine(ssq, machineHost)) {
                     machine.addPCpu(cpus);
                 }
                 fMachines.put(machine.getMachineName(), machine);
@@ -983,14 +989,14 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
 
     private static void createMachineHierarchy(@NonNull ITmfStateSystem ssq, Machine host, List<Machine> guests) {
         for (Machine m : guests) {
-            String parentName = FusedVMInformationProvider.getParentMachineName(ssq, m.getMachineName());
-            if (parentName.equals(host.getMachineName())) {
+            String parentHostId = FusedVMInformationProvider.getParentMachineHostId(ssq, m.getHostId());
+            if (parentHostId.equals(host.getHostId())) {
                 m.setHost(host);
                 host.addVirtualMachine(m);
             }
             for (Machine m2 : guests) {
-                parentName = FusedVMInformationProvider.getParentMachineName(ssq, m2.getMachineName());
-                if (parentName.equals(m.getMachineName())) {
+                parentHostId = FusedVMInformationProvider.getParentMachineHostId(ssq, m2.getHostId());
+                if (parentHostId.equals(m.getHostId())) {
                     m2.setHost(m);
                     m.addVirtualMachine(m2);
                 }
@@ -999,29 +1005,29 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
     }
 
     private static void createContainersHierarchyForMachine(@NonNull ITmfStateSystem ssq, Machine m) {
-        String machineName = m.getMachineName();
-        List<Integer> containersQuarks = FusedVMInformationProvider.getMachineContainersQuarks(ssq, machineName);
+        String machineName = m.getHostId();
+        Collection<Integer> containersQuarks = FusedVMInformationProvider.getMachineContainersQuarks(ssq, machineName);
         /* Look for not nested containers */
         for (Integer quark : containersQuarks) {
-            Long parentContainer = FusedVMInformationProvider.getParentContainer(ssq, quark);
+            long parentContainer = FusedVMInformationProvider.getParentContainer(ssq, quark);
             if (parentContainer == IVirtualMachineModel.ROOT_NAMESPACE) {
                 String containerName = ssq.getAttributeName(quark);
                 List<String> pCpus = FusedVMInformationProvider.getPCpusUsedByContainer(ssq, quark);
-                Machine container = m.createContainer(containerName, pCpus);
+                Machine container = m.createContainer(containerName, m.getHostId(), pCpus);
                 /* Continue construction for these containers */
                 createContainersHierarchyForContainer(ssq, container, containersQuarks);
             }
         }
     }
 
-    private static void createContainersHierarchyForContainer(@NonNull ITmfStateSystem ssq, Machine container, List<Integer> containersQuarks) {
+    private static void createContainersHierarchyForContainer(@NonNull ITmfStateSystem ssq, Machine container, Collection<Integer> containersQuarks) {
         Long containerName = Long.parseLong(container.getMachineName());
         for (int quark : containersQuarks) {
             if (FusedVMInformationProvider.getParentContainer(ssq, quark).equals(containerName)) {
                 /* We found a child */
                 String childName = ssq.getAttributeName(quark);
                 List<String> pCpus = FusedVMInformationProvider.getPCpusUsedByContainer(ssq, quark);
-                Machine child = container.createContainer(childName, pCpus);
+                Machine child = container.createContainer(childName, container.getHostId(), pCpus);
                 /* Look for child's childs */
                 createContainersHierarchyForContainer(ssq, child, containersQuarks);
             }
@@ -1038,7 +1044,7 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
     public void threadSelected(TmfThreadSelectedSignal signal) {
         int threadId = signal.getThreadId();
         VirtualResourcePresentationProvider presentationProvider = getFusedVMViewPresentationProvider();
-        presentationProvider.setSelectedThread(signal.getHostId(), threadId);
+        presentationProvider.setSelectedThread(new HostThread(Objects.requireNonNull(signal.getHostId()), threadId));
 
         updateButtonsSelection();
         updateToolTipTexts();
