@@ -17,10 +17,13 @@ parser.add_argument('name', help='The human readable name of the plugins and fea
 parser.add_argument('--dir', help='Directory in which to add the plugins')
 parser.add_argument('--no-ui', dest='noUi', action='store_const', const=True, default=False, help='Whether to add a UI plugin for this feature')
 parser.add_argument('--no-help', dest='noHelp', action='store_const', const=True, default=False, help='Whether to add an help plugin for this feature')
+parser.add_argument('--copyright', default="École Polytechnique de Montréal", help='The organisation that has the copyright on the new files')
 
 args = parser.parse_args()
 idPlaceholder = "{%skeleton}"
 namePlaceholder = "{%skeletonName}"
+copyrightPlaceholder = "{%copyright}"
+copyright = args.copyright
 
 baseDir = os.path.dirname(os.path.realpath(__file__))
 
@@ -49,7 +52,8 @@ def copyAndUpdate(srcDir, destDir, name, id):
                 s = f.read()
             s = s.replace(idPlaceholder, id)
             s = s.replace(namePlaceholder, name)
-            with open(fpath, encoding = "ISO-8859-1", mode = "w") as f:
+            s = s.replace(copyrightPlaceholder, copyright)
+            with open(fpath, encoding = "utf-8", mode = "w") as f:
                 f.write(s)
 
 def moveActivator(moveTo, suffix, id):
@@ -71,8 +75,8 @@ def updatePom(baseDir, destDir, id, moduleStr):
         s = f.read();
     s = s.replace("{%dir}", destDir)
     s = s.replace(pomModulePlaceholder, moduleStr + pomModulePlaceholder)
-    s.encode(encoding = "ISO-8859-1")
-    with open(destPom, encoding = "ISO-8859-1", mode = 'w+') as f:
+    s = s.replace(copyrightPlaceholder, copyright)
+    with open(destPom, encoding = "utf-8", mode = 'w+') as f:
         f.write(s)
     
 
@@ -125,7 +129,5 @@ def copyDirs(fullname, dir, noUi, noHelp):
     print("For the Hudson jobs to take them in, don't forget the add them to the appropriate pom.xml files and if necessary, create a pom.xml file in the parent directory. A pom.xml file may have been created or updated in the install directory, but the unit tests plugin need to be added manually when tests are available.")
 
 copyDirs(args.name, args.dir, args.noUi, args.noHelp)
-
-
 
 
