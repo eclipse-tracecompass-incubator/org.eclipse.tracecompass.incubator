@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            category="org.eclipse.tracecompass.incubator.eclipse"
+            event_type="org.eclipse.tracecompass.incubator.internal.hudson.maven.core.trace.MavenEvent"
+            id="org.eclipse.tracecompass.incubator.husdon.maven.core.trace"
+            isDirectory="false"
+            name="Maven Hudson Trace"
+            trace_type="org.eclipse.tracecompass.incubator.internal.hudson.maven.core.trace.MavenTrace">
+      </type>
+      <category
+            id="org.eclipse.tracecompass.incubator.eclipse"
+            name="Eclipse traces">
+      </category>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.hudson.maven.core.analysis.MavenCallstackAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.husdon.maven.core.callstack"
+            name="Maven Callstack">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.hudson.maven.core.trace.MavenTrace">
+         </tracetype>
+      </module>
+   </extension>
+
+</plugin>
