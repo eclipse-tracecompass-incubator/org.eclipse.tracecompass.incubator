@@ -95,6 +95,15 @@ public class Machine {
     }
 
     /**
+     * Return whether this machine is a container
+     *
+     * @return whether the machine is a container
+     */
+    public boolean isContainer() {
+        return fMachineType == StateValues.MACHINE_CONTAINER_VALUE;
+    }
+
+    /**
      * Get the name of this machine
      *
      * @return The name of the machine

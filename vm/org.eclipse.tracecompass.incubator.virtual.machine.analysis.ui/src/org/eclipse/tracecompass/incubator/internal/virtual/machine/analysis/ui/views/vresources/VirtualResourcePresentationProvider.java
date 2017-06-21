@@ -862,10 +862,12 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
         for (Object obj : elements) {
             if (obj instanceof Machine) {
                 Machine machine = (Machine) obj;
-                fHighlightedMachines.put(machine.getMachineName(), machine);
+                // FIXME: Containers could have same ID in different physical machine, need the host ID as well
+                fHighlightedMachines.put(machine.isContainer() ? machine.getMachineName() : machine.getHostId(), machine);
             } else if (obj instanceof Processor) {
                 Processor processor = (Processor) obj;
-                fHighlightedCpus.put(processor.getMachine().getMachineName(), processor);
+                Machine machine = processor.getMachine();
+                fHighlightedCpus.put(machine.isContainer() ? machine.getMachineName() : machine.getHostId(), processor);
             }
         }
     }
