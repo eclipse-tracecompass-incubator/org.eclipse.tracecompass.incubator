@@ -18,26 +18,30 @@
    <license url="%licenseURL">
       %license
    </license>
-    
+
+   <requires>
+      <import plugin="org.eclipse.tracecompass.incubator.analysis.core"/>
+   </requires>
+
    <plugin
          id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/> 
- 
+         unpack="false"/>
+
    <plugin
          id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/> 
- 
+         unpack="false"/>
+
    <plugin
          id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.doc.user"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/> 
+         unpack="false"/>
 
 </feature>

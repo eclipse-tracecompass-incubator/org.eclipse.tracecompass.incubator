@@ -42,4 +42,15 @@ take some time, to skip them you can append `-Dmaven.test.skip=true` to the
 
     mvn clean install -Dmaven.test.skip=true
 
+Maven profiles and properties
+-----------------------------
 
+The following Maven profiles and properties are defined in
+the build system. You can set them by using `-P[profile name]` and
+`-D[property name]=[value]` in `mvn` commands.
+
+* `-Pdeploy-update-site`
+
+  Mainly for use on build servers. Copies the standard update site (for the
+  Eclipse plugin installation) to the destination specified by
+ `-DsiteDestination=/absolute/path/to/destination`.
