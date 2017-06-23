@@ -1,0 +1,20 @@
+
+= In and Out Analyses =
+
+This is a set of analyses intended to help explore a given trace. General compute and configurability is prioritized over performance.
+
+This is a simple way to programmatically fill a callstack/flamegraph. Define scope entries and exits, as well as a unique scope identifier. By default, events with names ending in _entry, _exit and a CPU aspect are used.
+
+To configure In and Outs, right click on the analysis and click on "Configure".
+
+There will be a box with configuration options. Each entry except for the first and last expect regular expressions as inputs. These regular expressions are applied on the event name, content and a given aspect defined by the bottom box. Every in must match a given out. For example, if an event has a PID 42, it will only match another PID 42 if filtered on it.
+
+Should a regular expression bet set to "all" (case-insensitive), then it is treated as being empty. Context entries are treated as optional, in the case of at least ContextIn being left as empty.
+
+To name the states, the "label" field needs to be set to a value. If the value is {0}, it will take the first capture group from the first textbox field below. If the value is {1} it will take the first capture group of the second textbox and so on. By default, the label is set to "latency".
+
+Clicking OK saves the configuration and closes the trace. The trace gets re-opened after.
+
+Interesting use cases:
+1- make a callstack on TID then switch it to see it per CPU.
+2- Make a "call stack" on non-nesting latencies, e.g. irq start/end. This can be used to calculate total times and statistics on a given data. This can include total thread execution time.

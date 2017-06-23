@@ -48,6 +48,10 @@
     <module>org.eclipse.tracecompass.incubator.rocm</module>
     <module>org.eclipse.tracecompass.incubator.rocm.core</module>
     <module>org.eclipse.tracecompass.incubator.rocm.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.inandout</module>
+    <module>org.eclipse.tracecompass.incubator.inandout.core</module>
+    <module>org.eclipse.tracecompass.incubator.inandout.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.inandout.ui</module>
     <!-- insert modules here -->
   </modules>
 

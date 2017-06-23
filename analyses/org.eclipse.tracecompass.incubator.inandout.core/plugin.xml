@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.inandout.core.analysis.InAndOutAnalysisModule"
+            applies_experiment="true"
+            automatic="false"
+            icon="icons/inandout.png"
+            id="org.eclipse.tracecompass.incubator.inandout.analysis"
+            name="In and Out">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.tmf.core.trace.TmfTrace">
+         </tracetype>
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment">
+         </tracetype>
+      </module>
+   </extension>
+</plugin>
