@@ -29,6 +29,7 @@
     <module>org.eclipse.tracecompass.incubator.virtual.machine.analysis.core</module>
     <module>org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui</module>
+    <module>org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui.swtbot.tests</module>
     <module>org.eclipse.tracecompass.incubator.virtual.machine.analysis.doc.user</module>
     <!-- insert modules here -->
   </modules>

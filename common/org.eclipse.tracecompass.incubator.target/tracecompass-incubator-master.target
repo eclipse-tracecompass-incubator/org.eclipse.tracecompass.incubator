@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="tracecompass-incubator-master" sequenceNumber="3">
+<?pde version="3.8"?><target name="tracecompass-incubator-master" sequenceNumber="4">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.cdt.gnu.dsf.feature.group" version="0.0.0"/>
@@ -72,11 +72,15 @@
 <repository location="http://download.eclipse.org/modeling/emf/emf/updates/2.13/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.tracecompass.lttng2.kernel.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.tracecompass.ctf.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.tracecompass.tmf.ctf.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.tracecompass.lttng2.ust.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.tracecompass.testing.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.tracecompass.tmf.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.tracecompass.tmf.pcap.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.tracecompass.tmf.remote.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.tracecompass.testing.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.tracecompass.lttng2.kernel.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.tracecompass.lttng2.control.feature.group" version="0.0.0"/>
 <repository location="http://download.eclipse.org/tracecompass/master/repository"/>
 </location>
 </locations>

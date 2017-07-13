@@ -38,6 +38,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableSet;
@@ -126,6 +127,7 @@ public class VirtualResourcesViewTest {
     /**
      * Test with a trace of a host with one QEMU guest
      */
+    @Ignore
     @Test
     public void testOneQemuKvm() {
         String[] physCPU0 = { VmTraces.HOST_ONE_QEMUKVM.getHostId(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
@@ -136,6 +138,7 @@ public class VirtualResourcesViewTest {
     /**
      * Test with a trace with containers
      */
+    @Ignore
     @Test
     public void testOneContainer() {
         String[] physCPU0 = { VmTraces.ONE_CONTAINER.getHostId(), Messages.FusedVMView_PhysicalCpusEntry, "PCPU 0" };
@@ -152,6 +155,7 @@ public class VirtualResourcesViewTest {
     /**
      * Test with a trace of a host with one QEMU guest with containers
      */
+    @Ignore
     @Test
     public void testQemuContainer() {
         // The getHostId method of the traces cannot be overridden in those
