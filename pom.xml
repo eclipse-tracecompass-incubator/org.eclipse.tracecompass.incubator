@@ -277,6 +277,7 @@
     <module>callstack</module>
     <module>vm</module>
     <module>tracetypes</module>
+    <module>trace-server</module>
   </modules>
 
   <build>

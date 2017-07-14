@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright (C) 2017 Ericsson
+
+   All rights reserved. This program and the accompanying materials
+   are made available under the terms of the Eclipse Public License v1.0
+   which accompanies this distribution, and is available at
+   http://www.eclipse.org/legal/epl-v10.html
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>org.eclipse.tracecompass.incubator</artifactId>
+    <groupId>org.eclipse.tracecompass.incubator</groupId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>org.eclipse.tracecompass.incubator.trace.server-parent</artifactId>
+  <packaging>pom</packaging>
+
+  <name>Trace Compass Incubator Trace Server Parent</name>
+
+  <modules>
+    <module>org.eclipse.tracecompass.incubator.trace.server.jersey.rest</module>
+    <module>org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core</module>
+    <module>org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.trace.server.product</module>    
+    <!-- insert modules here -->
+  </modules>
+
+</project>

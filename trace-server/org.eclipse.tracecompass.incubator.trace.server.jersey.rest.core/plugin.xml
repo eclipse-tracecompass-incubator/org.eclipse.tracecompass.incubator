@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+<extension
+         id="id"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="any"
+            visible="true">
+         <run
+               class="org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.application.Application">
+         </run>
+      </application>
+   </extension>
+<extension
+      id="id"
+      point="org.eclipse.core.runtime.products">
+   <product
+         application="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id"
+         name="Trace Compass Trace Server (Jersey Rest)">
+      <property
+            name="appName"
+            value="Trace Compass Trace Server (Jersey Rest)">
+      </property>
+   </product>
+</extension>
+</plugin>
