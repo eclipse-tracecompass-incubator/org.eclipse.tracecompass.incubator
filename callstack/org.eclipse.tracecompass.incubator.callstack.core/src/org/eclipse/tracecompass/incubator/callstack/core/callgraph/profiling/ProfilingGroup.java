@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.profiling;
+package org.eclipse.tracecompass.incubator.callstack.core.callgraph.profiling;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackGroupDescriptor;
@@ -31,7 +31,10 @@ public class ProfilingGroup extends LeafGroupNode {
     }
 
     /**
-     * @param stackTrace
+     * Add a stack trace to this group, such that the symbol at position 0 is the
+     * top of the stack, ie the last symbol called.
+     *
+     * @param stackTrace The stack trace to add to the group
      */
     public void addStackTrace(long[] stackTrace) {
         if (stackTrace.length == 0) {

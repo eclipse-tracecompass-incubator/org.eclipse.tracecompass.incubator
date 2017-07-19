@@ -22,11 +22,11 @@ import java.util.Objects;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.CallStackSeries;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackProvider;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.CallGraphAnalysis;
 import org.eclipse.tracecompass.internal.analysis.timing.core.Activator;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
@@ -46,16 +46,22 @@ import com.google.common.collect.ImmutableList;
  * The base classes for analyses who want to populate the CallStack state
  * system.
  *
+ * If the elements in the callstack are grouped by process ID / thread ID, the
+ * default state provider {@link CallStackStateProvider} can be extended, and
+ * implement how to retrieve function entry and exit and process/thread IDs.
+ *
  * @author Matthew Khouzam
  * @author Geneviève Bastien
  */
 public abstract class CallStackAnalysis extends TmfStateSystemAnalysisModule implements ICallStackProvider, ICallGraphProvider {
 
+    /** CallStack stack-attribute */
+    public static final String CALL_STACK = "CallStack"; //$NON-NLS-1$
+
     private static final String[] DEFAULT_PROCESSES_PATTERN = new String[] { CallStackStateProvider.PROCESSES, "*" }; //$NON-NLS-1$
     private static final String[] DEFAULT_THREADS_PATTERN = new String[] { "*" }; //$NON-NLS-1$
-    private static final String[] DEFAULT_CALL_STACK_PATH = new String[] { CallStackStateProvider.CALL_STACK };
 
-    private static final List<String[]> PATTERNS = ImmutableList.of(DEFAULT_PROCESSES_PATTERN, DEFAULT_THREADS_PATTERN, DEFAULT_CALL_STACK_PATH);
+    private static final List<String[]> PATTERNS = ImmutableList.of(DEFAULT_PROCESSES_PATTERN, DEFAULT_THREADS_PATTERN);
 
     private @Nullable Collection<@NonNull CallStackSeries> fCallStacks;
 
@@ -73,7 +79,7 @@ public abstract class CallStackAnalysis extends TmfStateSystemAnalysisModule imp
      */
     protected CallStackAnalysis() {
         super();
-        fCallGraph = new CallGraphAnalysis();
+        fCallGraph = new CallGraphAnalysis(this);
     }
 
     private @Nullable ISegmentStore<@NonNull CallStackEdge> buildOnDiskSegmentStore(String fileName) {
@@ -112,7 +118,7 @@ public abstract class CallStackAnalysis extends TmfStateSystemAnalysisModule imp
         if (callstacks == null) {
             ITmfStateSystem ss = getStateSystem();
             if (ss == null) {
-                return Collections.emptyList();
+                return Collections.emptySet();
             }
             callstacks = Collections.singleton(new CallStackSeries(ss, PATTERNS, 0, "", getHostId(), new CallStackSeries.AttributeNameThreadResolver(1))); //$NON-NLS-1$
             fCallStacks = callstacks;

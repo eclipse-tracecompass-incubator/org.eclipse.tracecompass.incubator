@@ -382,16 +382,4 @@ public class CallStackSeries {
         return fName;
     }
 
-    /**
-     * Get all the final elements of this series that correspond to different
-     * callstacks
-     *
-     * @return The list of final elements
-     */
-    public List<ICallStackLeafElement> getLeafElements() {
-        List<ICallStackLeafElement> leafElements = new ArrayList<>();
-        getRootElements().forEach(el -> leafElements.addAll(el.getLeafElements()));
-        return leafElements;
-    }
-
 }

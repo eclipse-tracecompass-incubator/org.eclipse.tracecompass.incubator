@@ -17,16 +17,17 @@ import static org.junit.Assert.fail;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICpuTimeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.callstack.CallStackTestBase;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallStackAnalysisStub;
 import org.eclipse.tracecompass.incubator.internal.analysis.core.model.CompositeHostModel;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.LeafGroupNode;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.AggregatedCalledFunction;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.CallGraphAnalysis;
@@ -84,11 +85,9 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         Collection<GroupNode> secondLevels = group.getChildren();
         assertEquals(2, secondLevels.size());
         for (GroupNode secondLevel : secondLevels) {
+            assertTrue(secondLevel instanceof LeafGroupNode);
             String secondLevelName = secondLevel.getName();
-            assertEquals(1, secondLevel.getChildren().size());
-            GroupNode thirdLevel = secondLevel.getChildren().iterator().next();
-            assertTrue(thirdLevel instanceof LeafGroupNode);
-            Collection<AggregatedCallSite> children = ((LeafGroupNode) thirdLevel).getAggregatedData();
+            Collection<AggregatedCallSite> children = ((LeafGroupNode) secondLevel).getAggregatedData();
             switch (secondLevelName) {
             case "2":
                 assertEquals(2, children.size());
@@ -173,7 +172,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
 
                 break;
             default:
-                fail("Unknown process in callstack");
+                fail("Unknown process in callstack: " + secondLevelName);
             }
         }
     }
@@ -182,11 +181,9 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         Collection<GroupNode> secondLevels = group.getChildren();
         assertEquals(2, secondLevels.size());
         for (GroupNode secondLevel : secondLevels) {
+            assertTrue(secondLevel instanceof LeafGroupNode);
             String secondLevelName = secondLevel.getName();
-            assertEquals(1, secondLevel.getChildren().size());
-            GroupNode thirdLevel = secondLevel.getChildren().iterator().next();
-            assertTrue(thirdLevel instanceof LeafGroupNode);
-            Collection<AggregatedCallSite> children = ((LeafGroupNode) thirdLevel).getAggregatedData();
+            Collection<AggregatedCallSite> children = ((LeafGroupNode) secondLevel).getAggregatedData();
             switch (secondLevelName) {
             case "6": {
                 assertEquals(1, children.size());
@@ -282,13 +279,13 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
             }
                 break;
             default:
-                fail("Unknown process in callstack");
+                fail("Unknown process in callstack: " + secondLevelName);
             }
         }
     }
 
     private CallGraphAnalysis getCallGraphModule() throws TmfAnalysisException {
-        CallGraphAnalysis cga = new CallGraphAnalysis();
+        CallGraphAnalysis cga = new CallGraphAnalysis(Objects.requireNonNull(getModule()));
         cga.setId(getModule().getId());
         cga.setTrace(getTrace());
 
@@ -375,10 +372,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         assertEquals(2, secondLevels.size());
         for (GroupNode secondLevel : secondLevels) {
             String secondLevelName = secondLevel.getName();
-            assertEquals(1, secondLevel.getChildren().size());
-            GroupNode thirdLevel = secondLevel.getChildren().iterator().next();
-            assertTrue(thirdLevel instanceof LeafGroupNode);
-            Collection<AggregatedCallSite> children = ((LeafGroupNode) thirdLevel).getAggregatedData();
+            assertTrue(secondLevel instanceof LeafGroupNode);
+            Collection<AggregatedCallSite> children = ((LeafGroupNode) secondLevel).getAggregatedData();
             switch (secondLevelName) {
             case "2":
                 assertEquals(2, children.size());
@@ -421,7 +416,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(0, func.getChildren().size());
                         break;
                     default:
-                        fail("Unknown symbol for thread 2" + func.getSymbol());
+                        fail("Unknown symbol for thread 2: " + func.getSymbol());
                     }
                 }
                 break;
@@ -457,13 +452,13 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(0, next.getChildren().size());
                         break;
                     default:
-                        fail("Unknown symbol for thread 2" + func.getSymbol());
+                        fail("Unknown symbol for thread 3: " + func.getSymbol());
                     }
                 }
 
                 break;
             default:
-                fail("Unknown process in callstack");
+                fail("Unknown process in callstack: " + secondLevelName);
             }
         }
     }
@@ -473,10 +468,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         assertEquals(2, secondLevels.size());
         for (GroupNode secondLevel : secondLevels) {
             String secondLevelName = secondLevel.getName();
-            assertEquals(1, secondLevel.getChildren().size());
-            GroupNode thirdLevel = secondLevel.getChildren().iterator().next();
-            assertTrue(thirdLevel instanceof LeafGroupNode);
-            Collection<AggregatedCallSite> children = ((LeafGroupNode) thirdLevel).getAggregatedData();
+            assertTrue(secondLevel instanceof LeafGroupNode);
+            Collection<AggregatedCallSite> children = ((LeafGroupNode) secondLevel).getAggregatedData();
             switch (secondLevelName) {
             case "6": {
                 assertEquals(1, children.size());
@@ -572,7 +565,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
             }
                 break;
             default:
-                fail("Unknown process in callstack");
+                fail("Unknown process in callstack: " + secondLevelName);
             }
         }
     }

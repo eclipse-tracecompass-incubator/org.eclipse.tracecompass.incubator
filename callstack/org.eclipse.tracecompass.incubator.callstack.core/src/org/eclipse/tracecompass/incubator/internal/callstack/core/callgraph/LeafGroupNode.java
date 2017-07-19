@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackGroupDescriptor;
 
 public class LeafGroupNode extends GroupNode {

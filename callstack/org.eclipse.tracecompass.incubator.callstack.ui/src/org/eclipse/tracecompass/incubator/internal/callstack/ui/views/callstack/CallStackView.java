@@ -690,18 +690,20 @@ public class CallStackView extends AbstractTimeGraphView {
     }
 
     private void processCallStackElement(ISymbolProvider provider, ICallStackElement element, TimeGraphEntry parentEntry) {
+        TimeGraphEntry entry = new LevelEntry(element.getName(), parentEntry.getStartTime(), parentEntry.getEndTime(), element.isSymbolKeyElement());
+        parentEntry.addChild(entry);
         // Is this an intermediate or leaf element
         if (element instanceof ICallStackLeafElement) {
+            // For the leaf element, add the callstack entries
             ICallStackLeafElement finalElement = (ICallStackLeafElement) element;
             CallStack callStack = finalElement.getCallStack();
             setEndTime(Math.max(getEndTime(), callStack.getEndTime()));
             for (int i = 0; i < callStack.getMaxDepth(); i++) {
-                parentEntry.addChild(new CallStackEntry(provider, i + 1, callStack));
+                entry.addChild(new CallStackEntry(provider, i + 1, callStack));
             }
             return;
         }
-        TimeGraphEntry entry = new LevelEntry(element.getName(), parentEntry.getStartTime(), parentEntry.getEndTime(), element.isSymbolKeyElement());
-        parentEntry.addChild(entry);
+        // Intermediate element, process children
         element.getChildren().stream().forEach(e -> processCallStackElement(provider, e, entry));
     }
 

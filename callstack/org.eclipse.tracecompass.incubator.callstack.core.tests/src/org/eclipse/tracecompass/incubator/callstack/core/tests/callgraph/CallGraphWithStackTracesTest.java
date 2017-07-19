@@ -15,9 +15,9 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.profiling.ProfilingGroup;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.CallGraphAllGroupDescriptor;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.profiling.ProfilingGroup;
 import org.junit.Test;
 
 /**

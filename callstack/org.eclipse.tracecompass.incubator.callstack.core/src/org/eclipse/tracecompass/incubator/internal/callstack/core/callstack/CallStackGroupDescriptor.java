@@ -85,18 +85,18 @@ public class CallStackGroupDescriptor implements ICallStackGroupDescriptor {
         // Get the elements from the base quark at the given pattern
         List<Integer> quarks = fStateSystem.getQuarks(baseQuark, getSubPattern());
         if (quarks.isEmpty()) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         if (parent != null && !(parent instanceof CallStackElement)) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
         CallStackGroupDescriptor nextGroup = fNextGroup;
         // If the next level is null, then this is a callstack final element
         List<ICallStackElement> elements = new ArrayList<>(quarks.size());
         for (Integer quark : quarks) {
-            CallStackElement element = nextGroup == null ? new CallStackLeafElement(fHostId, fStateSystem, quark, symbolKeyElement, threadIdProvider, (CallStackElement) parent)
-                    : new CallStackElement(fHostId, fStateSystem, quark, getNextGroup(), symbolKeyElement, threadIdProvider, (CallStackElement) parent);
+            CallStackElement element = nextGroup == null ? new CallStackLeafElement(fHostId, fStateSystem, quark, this, symbolKeyElement, threadIdProvider, (CallStackElement) parent)
+                    : new CallStackElement(fHostId, fStateSystem, quark, this, getNextGroup(), symbolKeyElement, threadIdProvider, (CallStackElement) parent);
             if (isSymbolKeyGroup()) {
                 element.setSymbolKeyElement(element);
             }

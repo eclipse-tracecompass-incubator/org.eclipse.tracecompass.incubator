@@ -52,11 +52,10 @@ public class CallGraphAnalysisStub extends CallGraphAnalysis {
      * The third level of the callstack hierarchy
      */
     public static final String CALLSTACK_PATH = "CallStack";
-    private static final String[] CSP = { CALLSTACK_PATH };
     private static final String[] PP = { PROCESS_PATH };
     private static final String[] TP = { THREAD_PATH };
 
-    private static final List<String[]> PATTERNS = ImmutableList.of(PP, TP, CSP);
+    private static final List<String[]> PATTERNS = ImmutableList.of(PP, TP);
 
     private static class CSAnalysis extends CallStackAnalysis {
 
@@ -105,7 +104,7 @@ public class CallGraphAnalysisStub extends CallGraphAnalysis {
      *            The state system to use for this analysis
      */
     public CallGraphAnalysisStub(ITmfStateSystemBuilder fixture) {
-        fCsProvider = new CSAnalysis(fixture);
+        this(new CSAnalysis(fixture));
     }
 
     /**
@@ -117,7 +116,12 @@ public class CallGraphAnalysisStub extends CallGraphAnalysis {
      *            The patterns to each level of the callstack hierarchy
      */
     public CallGraphAnalysisStub(ITmfStateSystemBuilder fixture, List<String[]> patterns) {
-        fCsProvider = new CSAnalysis(fixture, patterns);
+        this(new CSAnalysis(fixture, patterns));
+    }
+
+    private CallGraphAnalysisStub(ICallStackProvider csp) {
+        super(csp);
+        fCsProvider = csp;
     }
 
     /**

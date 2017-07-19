@@ -27,7 +27,12 @@ import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
- * The state provider for traces that support the Call Stack view.
+ * The default base state provider for traces that implement the default
+ * {@link CallStackAnalysis} with a process / thread grouping, using the default
+ * values.
+ *
+ * Specific analyses will need to override it to specify the function
+ * entry/exit, as well as how to get the process ID and thread ID.
  *
  * The attribute tree should have the following structure:
  *
@@ -81,9 +86,6 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
      */
     public static final String PROCESSES = "Processes"; //$NON-NLS-1$
 
-    /** CallStack stack-attribute */
-    public static final String CALL_STACK = "CallStack"; //$NON-NLS-1$
-
     /**
      * Unknown process ID
      *
@@ -119,6 +121,11 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
 
         ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
 
+        handleFunctionEntry(ss, event);
+        handleFunctionExit(ss, event);
+    }
+
+    private void handleFunctionEntry(ITmfStateSystemBuilder ss, ITmfEvent event) {
         /* Check if the event is a function entry */
         ITmfStateValue functionEntryName = functionEntry(event);
         if (functionEntryName != null) {
@@ -140,12 +147,14 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
             int threadQuark = ss.getQuarkRelativeAndAdd(processQuark, threadName);
             ss.updateOngoingState(TmfStateValue.newValueLong(threadId), threadQuark);
 
-            int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, CALL_STACK);
+            int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, CallStackAnalysis.CALL_STACK);
             ITmfStateValue value = functionEntryName;
             ss.pushAttribute(timestamp, value, callStackQuark);
             return;
         }
+    }
 
+    private void handleFunctionExit(ITmfStateSystemBuilder ss, ITmfEvent event) {
         /* Check if the event is a function exit */
         ITmfStateValue functionExitState = functionExit(event);
         if (functionExitState != null) {
@@ -159,7 +168,7 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
             if (threadName == null) {
                 threadName = Long.toString(getThreadId(event));
             }
-            int quark = ss.getQuarkAbsoluteAndAdd(PROCESSES, processName, threadName, CALL_STACK);
+            int quark = ss.getQuarkAbsoluteAndAdd(PROCESSES, processName, threadName, CallStackAnalysis.CALL_STACK);
             ITmfStateValue poppedValue = ss.popAttribute(timestamp, quark);
             /*
              * Verify that the value we are popping matches the one in the

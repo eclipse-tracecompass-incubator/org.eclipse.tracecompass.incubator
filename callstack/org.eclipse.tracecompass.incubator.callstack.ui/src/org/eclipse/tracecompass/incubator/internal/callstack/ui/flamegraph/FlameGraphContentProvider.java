@@ -22,9 +22,9 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackElement;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.LeafGroupNode;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphContentProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;

@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.profiling;
+package org.eclipse.tracecompass.incubator.callstack.core.callgraph.profiling;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +39,6 @@ public class ProfilingGroupDescriptor implements ICallStackGroupDescriptor {
 
     @Override
     public boolean isSymbolKeyGroup() {
-        // TODO Auto-generated method stub
         return false;
     }
 

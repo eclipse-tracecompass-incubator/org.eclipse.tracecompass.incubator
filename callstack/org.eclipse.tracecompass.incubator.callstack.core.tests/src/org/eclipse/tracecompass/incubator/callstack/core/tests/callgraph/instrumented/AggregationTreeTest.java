@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.callstack.core.tests.flamegraph;
+package org.eclipse.tracecompass.incubator.callstack.core.tests.callgraph.instrumented;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -19,8 +19,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallGraphAnalysisStub;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.AggregatedCalledFunction;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.CallGraphAnalysis;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.InstrumentedGroup;
@@ -29,6 +29,7 @@ import org.eclipse.tracecompass.statesystem.core.StateSystemFactory;
 import org.eclipse.tracecompass.statesystem.core.backend.IStateHistoryBackend;
 import org.eclipse.tracecompass.statesystem.core.backend.StateHistoryBackendFactory;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
+import org.junit.After;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -68,13 +69,24 @@ public class AggregationTreeTest {
         return leafGroups;
     }
 
-    private List<InstrumentedGroup> getLeafGroups(CallGraphAnalysis cga) {
+    private @NonNull List<InstrumentedGroup> getLeafGroups(CallGraphAnalysis cga) {
         Collection<GroupNode> groups = cga.getGroups();
         List<InstrumentedGroup> leafGroups = new ArrayList<>();
         for (GroupNode group : groups) {
             leafGroups.addAll(getLeafGroups(group));
         }
         return leafGroups;
+    }
+
+    /**
+     * Dispose the callgraph analysis that has been set
+     */
+    @After
+    public void disposeCga() {
+        CallGraphAnalysisStub cga = fCga;
+        if (cga != null) {
+            cga.dispose();
+        }
     }
 
     /**
@@ -90,7 +102,6 @@ public class AggregationTreeTest {
         Collection<InstrumentedGroup> threads = getLeafGroups(cga);
         assertNotNull(threads);
         assertEquals("Number of threads found", 0, threads.size());
-        cga.dispose();
     }
 
     /**
@@ -155,7 +166,6 @@ public class AggregationTreeTest {
         assertEquals("Test first function's nombre of calls", 1, firstFunction.getNbCalls());
         assertEquals("Test second function's nombre of calls", 1, secondFunction.getNbCalls());
         assertEquals("Test third function's nombre of calls", 1, thirdFunction.getNbCalls());
-        cga.dispose();
     }
 
     /**
@@ -224,7 +234,6 @@ public class AggregationTreeTest {
         assertEquals("Test first function's number of calls", 1, firstFunction.getNbCalls());
         assertEquals("Test second function's number of calls", 2, secondFunction.getNbCalls());
         assertEquals("Test third function's number of calls", 1, thirdFunction.getNbCalls());
-        cga.dispose();
     }
 
     /**
@@ -269,8 +278,7 @@ public class AggregationTreeTest {
         // Execute the CallGraphAnalysis
         String @NonNull [] tp = { "*" };
         String @NonNull [] pp = { CallGraphAnalysisStub.PROCESS_PATH };
-        String @NonNull [] csp = { CallGraphAnalysisStub.CALLSTACK_PATH };
-        CallGraphAnalysisStub cga = new CallGraphAnalysisStub(fixture, ImmutableList.of(pp, tp, csp ));
+        CallGraphAnalysisStub cga = new CallGraphAnalysisStub(fixture, ImmutableList.of(pp, tp));
         setCga(cga);
         assertTrue(cga.iterate());
         List<InstrumentedGroup> threads = getLeafGroups(cga);
@@ -307,7 +315,6 @@ public class AggregationTreeTest {
         assertEquals("Test second function's number of calls", 2, secondFunction.getNbCalls());
         assertEquals("Test first leaf's number of calls", 1, leaf1.getNbCalls());
         assertEquals("Test second leaf's number of calls", 1, leaf2.getNbCalls());
-        cga.dispose();
     }
 
     /**
@@ -417,7 +424,6 @@ public class AggregationTreeTest {
         assertEquals("Test first child's number of calls", 2, function2.getNbCalls());
         assertEquals("Test second child's number of calls", 1, function3.getNbCalls());
         assertEquals("Test leaf's number of calls", 2, function4.getNbCalls());
-        cga.dispose();
     }
 
     /**
@@ -458,7 +464,6 @@ public class AggregationTreeTest {
             AggregatedCalledFunction child = (AggregatedCalledFunction) children[0];
             parent = child;
         }
-        cga.dispose();
     }
 
     /**
@@ -526,7 +531,6 @@ public class AggregationTreeTest {
         assertEquals("Test first function's number of calls", 2, firstFunction.getNbCalls());
         assertEquals("Test second function's number of calls", 1, function2.getNbCalls());
         assertEquals("Test third function's number of calls", 1, function3.getNbCalls());
-        cga.dispose();
     }
 
     /**
@@ -601,7 +605,6 @@ public class AggregationTreeTest {
         assertEquals("Test first function's number of calls", 1, secondFunction.getNbCalls());
         assertEquals("Test third function's number of calls", 1, function3.getNbCalls());
         assertEquals("Test third function's number of calls", 1, function4.getNbCalls());
-        cga.dispose();
     }
 
     /**

@@ -7,12 +7,12 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.profiling;
+package org.eclipse.tracecompass.incubator.callstack.core.callgraph.profiling;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.ICallGraphFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.LeafGroupNode;
 

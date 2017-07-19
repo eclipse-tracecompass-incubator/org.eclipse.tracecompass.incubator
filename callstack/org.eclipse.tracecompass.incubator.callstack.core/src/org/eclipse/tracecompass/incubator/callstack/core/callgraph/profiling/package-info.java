@@ -8,4 +8,4 @@
  *******************************************************************************/
 
 @org.eclipse.jdt.annotation.NonNullByDefault
-package org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.profiling;
+package org.eclipse.tracecompass.incubator.callstack.core.callgraph.profiling;

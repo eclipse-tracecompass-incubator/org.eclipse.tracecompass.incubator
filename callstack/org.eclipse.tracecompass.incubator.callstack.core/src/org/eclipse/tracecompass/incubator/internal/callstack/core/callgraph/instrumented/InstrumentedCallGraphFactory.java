@@ -10,9 +10,9 @@
 package org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.ICallGraphFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.LeafGroupNode;
 

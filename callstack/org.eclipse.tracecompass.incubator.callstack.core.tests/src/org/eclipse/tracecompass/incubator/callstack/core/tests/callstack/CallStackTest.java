@@ -88,20 +88,15 @@ public class CallStackTest extends CallStackTestBase {
         IHostModel model = ModelManager.getModelFor("");
         for (ICallStackElement thread : children) {
             assertEquals(element, thread.getParentElement());
+            assertTrue(thread instanceof CallStackLeafElement);
+            assertNull(thread.getNextGroup());
+            CallStack callStack = ((CallStackLeafElement) thread).getCallStack();
             // Make sure the element does not return any call list
             switch (thread.getName()) {
             case "2": {
                 // Make sure the symbol key is correctly resolved
                 assertEquals(1, thread.getSymbolKeyAt(START_TIME));
                 assertEquals(1, thread.getSymbolKeyAt(END_TIME));
-
-                Collection<ICallStackElement> stackElements = thread.getChildren();
-                assertEquals(1, stackElements.size());
-                ICallStackElement stackElement = stackElements.iterator().next();
-                assertEquals(thread, stackElement.getParentElement());
-                assertNull(stackElement.getNextGroup());
-                assertTrue(stackElement instanceof CallStackLeafElement);
-                CallStack callStack = ((CallStackLeafElement) stackElement).getCallStack();
 
                 assertEquals(1, callStack.getSymbolKeyAt(START_TIME));
                 assertEquals(1, callStack.getSymbolKeyAt(END_TIME));
@@ -128,14 +123,6 @@ public class CallStackTest extends CallStackTestBase {
                 assertEquals(1, element.getSymbolKeyAt(START_TIME));
                 assertEquals(1, element.getSymbolKeyAt(END_TIME));
 
-                Collection<ICallStackElement> stackElements = thread.getChildren();
-                assertEquals(1, stackElements.size());
-                ICallStackElement stackElement = stackElements.iterator().next();
-                assertEquals(thread, stackElement.getParentElement());
-                assertNull(stackElement.getNextGroup());
-                assertTrue(stackElement instanceof CallStackLeafElement);
-                CallStack callStack = ((CallStackLeafElement) stackElement).getCallStack();
-
                 assertEquals(1, callStack.getSymbolKeyAt(START_TIME));
                 assertEquals(1, callStack.getSymbolKeyAt(END_TIME));
 
@@ -161,20 +148,15 @@ public class CallStackTest extends CallStackTestBase {
         Collection<ICallStackElement> children = element.getChildren();
         IHostModel model = ModelManager.getModelFor("");
         for (ICallStackElement thread : children) {
+            assertTrue(thread instanceof CallStackLeafElement);
+            assertNull(thread.getNextGroup());
+            CallStack callStack = ((CallStackLeafElement) thread).getCallStack();
             // Make sure the element does not return any call list
             switch (thread.getName()) {
             case "6": {
                 // Make sure the symbol key is correctly resolved
                 assertEquals(5, thread.getSymbolKeyAt(START_TIME));
                 assertEquals(5, thread.getSymbolKeyAt(END_TIME));
-
-                Collection<ICallStackElement> stackElements = thread.getChildren();
-                assertEquals(1, stackElements.size());
-                ICallStackElement stackElement = stackElements.iterator().next();
-                assertEquals(thread, stackElement.getParentElement());
-                assertNull(stackElement.getNextGroup());
-                assertTrue(stackElement instanceof CallStackLeafElement);
-                CallStack callStack = ((CallStackLeafElement) stackElement).getCallStack();
 
                 assertEquals(5, callStack.getSymbolKeyAt(START_TIME));
                 assertEquals(5, callStack.getSymbolKeyAt(END_TIME));
@@ -200,14 +182,6 @@ public class CallStackTest extends CallStackTestBase {
                 // Make sure the symbol key is correctly resolved
                 assertEquals(5, thread.getSymbolKeyAt(START_TIME));
                 assertEquals(5, thread.getSymbolKeyAt(END_TIME));
-
-                Collection<ICallStackElement> stackElements = thread.getChildren();
-                assertEquals(1, stackElements.size());
-                ICallStackElement stackElement = stackElements.iterator().next();
-                assertEquals(thread, stackElement.getParentElement());
-                assertNull(stackElement.getNextGroup());
-                assertTrue(stackElement instanceof CallStackLeafElement);
-                CallStack callStack = ((CallStackLeafElement) stackElement).getCallStack();
 
                 assertEquals(5, callStack.getSymbolKeyAt(START_TIME));
                 assertEquals(5, callStack.getSymbolKeyAt(END_TIME));
@@ -259,9 +233,8 @@ public class CallStackTest extends CallStackTestBase {
         iterator.next();
         ICallStackElement thread = iterator.next();
         assertEquals("7", thread.getName());
-        Collection<ICallStackElement> callstacks = thread.getChildren();
-        assertEquals(1, callstacks.size());
-        return ((ICallStackLeafElement) callstacks.iterator().next()).getCallStack();
+        assertTrue(thread instanceof ICallStackLeafElement);
+        return ((ICallStackLeafElement) thread).getCallStack();
     }
 
     /**

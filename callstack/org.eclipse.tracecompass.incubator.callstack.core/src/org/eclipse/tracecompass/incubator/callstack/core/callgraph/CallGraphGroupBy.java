@@ -7,19 +7,44 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph;
+package org.eclipse.tracecompass.incubator.callstack.core.callgraph;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackGroupDescriptor;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.CallGraphAllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.ICallGraphFactory;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.LeafGroupNode;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callstack.CallStackAllGroupDescriptor;
 
+/**
+ * A class containing helper methods to group aggregated callgraph data by the
+ * different available groups
+ *
+ * @author Geneviève Bastien
+ */
 public final class CallGraphGroupBy {
 
+    private CallGraphGroupBy() {
+        // Nothing to do
+    }
+
+    /**
+     * Group callgraph groups by one of the descriptor.
+     *
+     * @param groupBy
+     *            The group descriptor by which to group the call graph elements.
+     * @param groups
+     *            The full expanded data from the groups
+     * @param factory
+     *            The factory to create individual groups.
+     * @return A collection of data that is the result of the grouping by the
+     *         descriptor
+     */
     public static Collection<GroupNode> groupCallGraphBy(ICallStackGroupDescriptor groupBy, Collection<GroupNode> groups, ICallGraphFactory factory) {
         // Fast return: just aggregated all groups together
         if (groupBy instanceof CallStackAllGroupDescriptor) {
@@ -53,7 +78,7 @@ public final class CallGraphGroupBy {
         return Collections.singleton(allGroup);
     }
 
-    private static Collection<? extends @NonNull GroupNode> searchForGroups(GroupNode group, ICallStackGroupDescriptor descriptor, ICallGraphFactory factory) {
+    private static Collection<? extends GroupNode> searchForGroups(GroupNode group, ICallStackGroupDescriptor descriptor, ICallGraphFactory factory) {
         if (group.getGroupDescriptor().equals(descriptor)) {
             LeafGroupNode leafGroup = factory.createLeafGroup(group.getName(), descriptor);
             addGroupData(group, leafGroup, factory);

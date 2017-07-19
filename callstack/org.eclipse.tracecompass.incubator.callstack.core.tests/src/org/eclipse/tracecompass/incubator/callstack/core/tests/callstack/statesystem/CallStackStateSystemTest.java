@@ -62,7 +62,7 @@ public class CallStackStateSystemTest extends CallStackTestBase {
 
         // Get the patterns for each level of the callstack
         List<String[]> patterns = module.getPatterns();
-        assertEquals(3, patterns.size());
+        assertEquals(2, patterns.size());
 
         // Check each level of the callstack. Make sure the path in the series
         // correspond to the expected path
@@ -75,11 +75,6 @@ public class CallStackStateSystemTest extends CallStackTestBase {
         assertTrue(nextLevel instanceof CallStackGroupDescriptor);
         subPattern = ((CallStackGroupDescriptor) nextLevel).getSubPattern();
         assertArrayEquals(patterns.get(1), subPattern);
-
-        nextLevel = nextLevel.getNextGroup();
-        assertTrue(nextLevel instanceof CallStackGroupDescriptor);
-        subPattern = ((CallStackGroupDescriptor) nextLevel).getSubPattern();
-        assertArrayEquals(patterns.get(2), subPattern);
 
         nextLevel = nextLevel.getNextGroup();
         assertNull(nextLevel);
@@ -118,10 +113,10 @@ public class CallStackStateSystemTest extends CallStackTestBase {
             List<Integer> threadQuarks = ss.getQuarks(processQuark, patterns.get(1));
             switch (ss.getAttributeName(processQuark)) {
             case "1":
-                verifyProcess1(ss, patterns.get(2), callstack, threadQuarks);
+                verifyProcess1(ss, callstack, threadQuarks);
                 break;
             case "5":
-                verifyProcess5(ss, patterns.get(2), callstack, threadQuarks);
+                verifyProcess5(ss, callstack, threadQuarks);
                 break;
             default:
                 fail("Unknown process in callstack");
@@ -129,9 +124,9 @@ public class CallStackStateSystemTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess1(ITmfStateSystem ss, String[] callStackPath, CallStackSeries callstack, List<Integer> threadQuarks) throws AttributeNotFoundException {
+    private static void verifyProcess1(ITmfStateSystem ss, CallStackSeries callstack, List<Integer> threadQuarks) throws AttributeNotFoundException {
         for (Integer threadQuark : threadQuarks) {
-            int csQuark = ss.getQuarkRelative(threadQuark, callStackPath);
+            int csQuark = ss.getQuarkRelative(threadQuark, CallStackAnalysis.CALL_STACK);
             String[] csPathArray = ss.getFullAttributePathArray(csQuark);
             List<String> pathList = new ArrayList<>();
             pathList.addAll(Arrays.asList(csPathArray));
@@ -197,9 +192,9 @@ public class CallStackStateSystemTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess5(ITmfStateSystem ss, String[] callStackPath, CallStackSeries callstack, List<Integer> threadQuarks) throws AttributeNotFoundException {
+    private static void verifyProcess5(ITmfStateSystem ss, CallStackSeries callstack, List<Integer> threadQuarks) throws AttributeNotFoundException {
         for (Integer threadQuark : threadQuarks) {
-            int csQuark = ss.getQuarkRelative(threadQuark, callStackPath);
+            int csQuark = ss.getQuarkRelative(threadQuark, CallStackAnalysis.CALL_STACK);
             String[] csPathArray = ss.getFullAttributePathArray(csQuark);
             List<String> pathList = new ArrayList<>();
             pathList.addAll(Arrays.asList(csPathArray));

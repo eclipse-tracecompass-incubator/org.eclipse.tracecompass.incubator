@@ -22,11 +22,12 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.IAnalysisProgressListener;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.ISegmentStoreProvider;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.common.core.StreamUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICalledFunction;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraphGroupBy;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.CallStack;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.CallStackSeries;
@@ -34,8 +35,6 @@ import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackEle
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackLeafElement;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackProvider;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.CallGraphGroupBy;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.LeafGroupNode;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
@@ -45,8 +44,6 @@ import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.segment.ISegmentAspect;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -94,6 +91,7 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ISeg
      * The Trace's root functions list
      */
     private final List<ICalledFunction> fRootFunctions = new ArrayList<>();
+    private final ICallStackProvider fCsProvider;
 
     /**
      * The List of thread nodes. Each thread has a virtual node having the root
@@ -104,11 +102,15 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ISeg
     private @Nullable ICallStackGroupDescriptor fGroupBy = null;
 
     /**
-     * Default constructor
+     * Constructor
+     *
+     * @param csProvider
+     *            The call stack provider to use with this analysis
      */
-    public CallGraphAnalysis() {
+    public CallGraphAnalysis(ICallStackProvider csProvider) {
         super();
         fStore = SegmentStoreFactory.createSegmentStore(SegmentStoreType.Fast);
+        fCsProvider = csProvider;
     }
 
     @Override
@@ -124,19 +126,12 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ISeg
 
     @Override
     public boolean canExecute(ITmfTrace trace) {
-        /*
-         * FIXME: change to !Iterables.isEmpty(getDependentAnalyses()) when
-         * analysis dependencies work better
-         */
         return true;
     }
 
     @Override
     protected Iterable<IAnalysisModule> getDependentAnalyses() {
-        return TmfTraceManager.getTraceSet(getTrace()).stream()
-                .map(trace -> TmfTraceUtils.getAnalysisModuleOfClass(trace, ICallStackProvider.class, getId()))
-                .filter(a -> a != null)
-                .distinct().collect(Collectors.toList());
+        return Collections.singleton(fCsProvider);
     }
 
     @Override
@@ -173,14 +168,12 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ISeg
 
     private GroupNode createGroups(ICallStackElement element, IHostModel model, IProgressMonitor monitor) {
         if (element instanceof ICallStackLeafElement) {
-            ICallStackElement parentElement = element.getParentElement();
-            String name = parentElement != null ? parentElement.getName() : element.getName();
-            ICallStackGroupDescriptor nextGroup = element.getNextGroup();
-            LeafGroupNode leafGroup = new InstrumentedGroup(name, nextGroup == null ? NonNullUtils.checkNotNull(NonNullUtils.checkNotNull(parentElement).getNextGroup()) : nextGroup);
+            String name = element.getName();
+            LeafGroupNode leafGroup = new InstrumentedGroup(name, element.getGroup());
             iterateOverElement((ICallStackLeafElement) element, leafGroup, model, monitor);
             return leafGroup;
         }
-        GroupNode group = new GroupNode(element.getName(), NonNullUtils.checkNotNull(element.getNextGroup()));
+        GroupNode group = new GroupNode(element.getName(), element.getGroup());
         for (ICallStackElement child : element.getChildren()) {
             group.addChild(createGroups(child, model, monitor));
         }

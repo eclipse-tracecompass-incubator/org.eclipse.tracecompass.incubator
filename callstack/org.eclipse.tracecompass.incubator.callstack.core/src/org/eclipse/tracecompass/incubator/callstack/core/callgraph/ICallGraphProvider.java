@@ -12,7 +12,6 @@ package org.eclipse.tracecompass.incubator.callstack.core.callgraph;
 import java.util.Collection;
 
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackGroupDescriptor;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.GroupNode;
 
 /**
  * Interface that analyses who provide callgraph

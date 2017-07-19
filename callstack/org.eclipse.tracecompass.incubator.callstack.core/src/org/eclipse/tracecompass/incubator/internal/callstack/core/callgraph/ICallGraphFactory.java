@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph;
 
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
 import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackGroupDescriptor;
 
 /**

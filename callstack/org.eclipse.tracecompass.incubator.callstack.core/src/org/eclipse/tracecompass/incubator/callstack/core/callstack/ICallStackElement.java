@@ -90,6 +90,13 @@ public interface ICallStackElement {
     ICallStackGroupDescriptor getNextGroup();
 
     /**
+     * Get the corresponding group descriptor
+     *
+     * @return The group descriptor of this element
+     */
+    ICallStackGroupDescriptor getGroup();
+
+    /**
      * Get the name of this element
      *
      * @return The name of the element
@@ -128,13 +135,6 @@ public interface ICallStackElement {
      */
     @Nullable
     ICallStackElement getParentElement();
-
-    /**
-     * Get the leaf elements in this callstack hierarchy
-     *
-     * @return The collection of leaf elements that contain callstacks
-     */
-    Collection<ICallStackLeafElement> getLeafElements();
 
     /**
      * Get the ID of the host this callstack is part of
