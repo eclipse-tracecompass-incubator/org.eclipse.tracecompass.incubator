@@ -13,24 +13,24 @@ To better understand what is happening in such an environment, it is necessary t
 
 A trace has to be taken for each machine, guest and host, in the virtualized environment. The host trace is the most important to have, as missing guests will only give an incomplete view of the system, but missing hosts usually won't allow to identify the hypervisor, nor determine when a guest is preempted from the host CPUs. The virtual machine analysis only makes sense if the host trace is available.
 
-Once all the traces are imported in Trace Compass, they can be [[#Creating an Experiment | added to an experiment]]. The type of the experiment should by set to '''Virtual Machine Experiment''' by clicking on the right mouse button over the experiment name, then selecting '''Select Experiment Type...'''.
+Once all the traces are imported in Trace Compass, they can be [http://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/Trace-Compass-Main-Features.html#Creating_an_Experiment added to an experiment]. The type of the experiment should by set to '''Virtual Machine Experiment''' by clicking on the right mouse button over the experiment name, then selecting '''Select Experiment Type...'''.
 
-[[Image:images/vmAnalysis/VM_experiment.png | Virtual Machine Experiment]]
+[[Image:images/VM_experiment.png | Virtual Machine Experiment]]
 
-Depending on the hypervisor used, traces might need to be [[#Trace synchronization | synchronized]] so that they have the same time reference and their events can be correctly correlated.
+Depending on the hypervisor used, traces might need to be [http://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/Trace-synchronization.html#Trace_synchronization synchronized] so that they have the same time reference and their events can be correctly correlated.
 
 == Virtual CPU View ==
 
 The Virtual CPU view shows the status of CPUs and threads on guests augmented with the preemption and hypervisor data we get from the host.
 
-In the image below, we see for the virtual CPU status that it has a few more states than the CPUs in the [[#Resources View | Resources View]]: in red and purple respectively, when the virtual CPU is running hypervisor code and when the CPU is preempted on the host.
+In the image below, we see for the virtual CPU status that it has a few more states than the CPUs in the [http://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/LTTng-Kernel-Analysis.html#Resources_View Resources View]: in red and purple respectively, when the virtual CPU is running hypervisor code and when the CPU is preempted on the host.
 
-The entries for each thread of the machine corresponds to the one from the [[#Control flow | Control Flow View]], augmented with the data from the Virtual CPU, so that we see that even though it is running from the guest's point of view, it is actually not running when the Virtual CPU it runs on is in preempted or hypervisor mode.
+The entries for each thread of the machine corresponds to the one from the [http://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/LTTng-Kernel-Analysis.html#Control_flow  Control Flow View], augmented with the data from the Virtual CPU, so that we see that even though it is running from the guest's point of view, it is actually not running when the Virtual CPU it runs on is in preempted or hypervisor mode.
 
-[[Image:images/vmAnalysis/VM_CPU_view.png | Virtual CPU view]]
+[[Image:images/VM_CPU_view.png | Virtual CPU view]]
 
 ==== Using the keyboard ====
-*'''Ctrl + F''': Search in the view. (see [[#Searching in Time Graph Views | Searching in Time Graph Views]])
+*'''Ctrl + F''': Search in the view. (see [http://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/Trace-Compass-Main-Features.html#Searching_in_Time_Graph_Views Searching in Time Graph Views])
 
 == Hypervisor-specific Tracing ==
 
@@ -78,7 +78,7 @@ The following tracepoints will be available
       vmsync_hg_host (loglevel: TRACE_EMERG (0)) (type: tracepoint) # on the host
       ...
 
-Host and guests can now be traced together and their traces added to an experiment. Because each guest has a different clock than the host, it is necessary to synchronize the traces together. Unfortunately, automatic synchronization with the virtual machine events is not completely implemented yet, so another kind of synchronization needs to be done, with TCP packets for instance. See section on [[#Trace synchronization | trace synchronization]] for information on how to obtain synchronizable traces.
+Host and guests can now be traced together and their traces added to an experiment. Because each guest has a different clock than the host, it is necessary to synchronize the traces together. Unfortunately, automatic synchronization with the virtual machine events is not completely implemented yet, so another kind of synchronization needs to be done, with TCP packets for instance. See section on [http://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/Trace-synchronization.html#Trace_synchronization trace synchronization] for information on how to obtain synchronizable traces.
 
 = Virtual Machine Analysis Developer Documentation =
 
