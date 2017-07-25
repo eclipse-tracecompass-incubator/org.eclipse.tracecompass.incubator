@@ -93,7 +93,7 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
     public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event, long hoverTime) {
 //        AggregatedCalledFunctionStatistics statistics = ((FlamegraphEvent) event).getStatistics();
         ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<>();
-        long nb = ((FlamegraphEvent) event).getDuration();
+        long nb = ((FlamegraphEvent) event).getNumberOfCalls();
         builder.put(Messages.FlameGraph_NbCalls, NumberFormat.getIntegerInstance().format(nb)); // $NON-NLS-1$
         Map<String, String> tooltip = ((FlamegraphEvent) event).getTooltip(FORMATTER);
         builder.putAll(tooltip);

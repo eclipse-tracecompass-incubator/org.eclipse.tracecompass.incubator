@@ -15,7 +15,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.statesystem.CallStackAnalysis;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.internal.lttng2.ust.core.callstack.LttngUstCallStackProvider;
 import org.eclipse.tracecompass.lttng2.ust.core.trace.LttngUstTrace;
 import org.eclipse.tracecompass.lttng2.ust.core.trace.layout.ILttngUstEventLayout;
@@ -33,7 +33,7 @@ import com.google.common.collect.ImmutableSet;
  * @author Geneviève Bastien
  */
 @SuppressWarnings("restriction")
-public class LttngUstCallStackAnalysis extends CallStackAnalysis {
+public class LttngUstCallStackAnalysis extends InstrumentedCallStackAnalysis {
 
     private @Nullable Set<@NonNull TmfAbstractAnalysisRequirement> fAnalysisRequirements = null;
 

@@ -23,14 +23,15 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICpuTimeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
-import org.eclipse.tracecompass.incubator.callstack.core.tests.callstack.CallStackTestBase;
+import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallStackAnalysisStub;
 import org.eclipse.tracecompass.incubator.internal.analysis.core.model.CompositeHostModel;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.LeafGroupNode;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.AggregatedCalledFunction;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.CallGraphAnalysis;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedCalledFunction;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.junit.After;
 import org.junit.Test;
@@ -43,7 +44,7 @@ import org.junit.Test;
 public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
 
     /**
-     *
+     * Clean up the memory
      */
     @After
     public void cleanUp() {
@@ -60,17 +61,15 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         CallStackAnalysisStub cga = getModule();
 
         try {
-            Collection<GroupNode> groups = cga.getGroups();
-            for (GroupNode group : groups) {
+            Collection<ICallStackElement> elements = cga.getElements();
+            for (ICallStackElement group : elements) {
                 String firstLevelName = group.getName();
                 switch (firstLevelName) {
                 case "1":
-                    // Make sure the symbol key is correctly resolved
-                    verifyProcess1(group);
+                    verifyProcess1(cga, group);
                     break;
                 case "5":
-                    // Make sure the symbol key is correctly resolved
-                    verifyProcess5(group);
+                    verifyProcess5(cga, group);
                     break;
                 default:
                     fail("Unknown process in callstack");
@@ -81,13 +80,14 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess1(GroupNode group) {
-        Collection<GroupNode> secondLevels = group.getChildren();
+    private static void verifyProcess1(ICallGraphProvider provider, ICallStackElement element) {
+        Collection<ICallStackElement> secondLevels = element.getChildren();
         assertEquals(2, secondLevels.size());
-        for (GroupNode secondLevel : secondLevels) {
-            assertTrue(secondLevel instanceof LeafGroupNode);
+        for (ICallStackElement secondLevel : secondLevels) {
+            assertTrue(secondLevel instanceof InstrumentedCallStackElement);
+            assertTrue(secondLevel.isLeaf());
             String secondLevelName = secondLevel.getName();
-            Collection<AggregatedCallSite> children = ((LeafGroupNode) secondLevel).getAggregatedData();
+            Collection<AggregatedCallSite> children = provider.getCallingContextTree(secondLevel);
             switch (secondLevelName) {
             case "2":
                 assertEquals(2, children.size());
@@ -101,8 +101,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(IHostModel.TIME_UNKNOWN, func.getCpuTime());
                         assertEquals(1, func.getNbCalls());
                         assertEquals(1, func.getProcessId());
-                        assertEquals(1, func.getChildren().size());
-                        AggregatedCalledFunction next = (AggregatedCalledFunction) func.getChildren().iterator().next();
+                        assertEquals(1, func.getCallees().size());
+                        AggregatedCalledFunction next = (AggregatedCalledFunction) func.getCallees().iterator().next();
                         assertNotNull(next);
                         assertEquals(4, next.getDuration());
                         assertEquals(3, next.getSelfTime());
@@ -110,8 +110,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(1, next.getNbCalls());
                         assertEquals(1, next.getProcessId());
                         assertEquals("op2", next.getSymbol());
-                        assertEquals(1, next.getChildren().size());
-                        AggregatedCalledFunction third = (AggregatedCalledFunction) next.getChildren().iterator().next();
+                        assertEquals(1, next.getCallees().size());
+                        AggregatedCalledFunction third = (AggregatedCalledFunction) next.getCallees().iterator().next();
                         assertNotNull(third);
                         assertEquals(1, third.getDuration());
                         assertEquals(1, third.getSelfTime());
@@ -119,7 +119,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(1, third.getNbCalls());
                         assertEquals(1, third.getProcessId());
                         assertEquals("op3", third.getSymbol());
-                        assertEquals(0, third.getChildren().size());
+                        assertEquals(0, third.getCallees().size());
                         break;
                     case "op4":
                         assertEquals(8, func.getDuration());
@@ -127,7 +127,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(IHostModel.TIME_UNKNOWN, func.getCpuTime());
                         assertEquals(1, func.getNbCalls());
                         assertEquals(1, func.getProcessId());
-                        assertEquals(0, func.getChildren().size());
+                        assertEquals(0, func.getCallees().size());
                         break;
                     default:
                         fail("Unknown symbol for thread 2" + func.getSymbol());
@@ -144,8 +144,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                 assertEquals(IHostModel.TIME_UNKNOWN, func.getCpuTime());
                 assertEquals(1, func.getNbCalls());
                 assertEquals(1, func.getProcessId());
-                assertEquals(2, func.getChildren().size());
-                for (AggregatedCallSite nextChild : func.getChildren()) {
+                assertEquals(2, func.getCallees().size());
+                for (AggregatedCallSite nextChild : func.getCallees()) {
                     assertTrue(nextChild instanceof AggregatedCalledFunction);
                     AggregatedCalledFunction next = (AggregatedCalledFunction) nextChild;
                     switch (next.getSymbol().toString()) {
@@ -155,7 +155,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(IHostModel.TIME_UNKNOWN, next.getCpuTime());
                         assertEquals(1, next.getNbCalls());
                         assertEquals(1, next.getProcessId());
-                        assertEquals(0, next.getChildren().size());
+                        assertEquals(0, next.getCallees().size());
                         break;
                     case "op2":
                         assertEquals(6, next.getDuration());
@@ -163,7 +163,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(IHostModel.TIME_UNKNOWN, next.getCpuTime());
                         assertEquals(1, next.getNbCalls());
                         assertEquals(1, next.getProcessId());
-                        assertEquals(0, next.getChildren().size());
+                        assertEquals(0, next.getCallees().size());
                         break;
                     default:
                         fail("Unknown symbol for thread 2" + func.getSymbol());
@@ -177,13 +177,14 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess5(GroupNode group) {
-        Collection<GroupNode> secondLevels = group.getChildren();
+    private static void verifyProcess5(ICallGraphProvider provider, ICallStackElement element) {
+        Collection<ICallStackElement> secondLevels = element.getChildren();
         assertEquals(2, secondLevels.size());
-        for (GroupNode secondLevel : secondLevels) {
-            assertTrue(secondLevel instanceof LeafGroupNode);
+        for (ICallStackElement secondLevel : secondLevels) {
+            assertTrue(secondLevel instanceof InstrumentedCallStackElement);
+            assertTrue(secondLevel.isLeaf());
             String secondLevelName = secondLevel.getName();
-            Collection<AggregatedCallSite> children = ((LeafGroupNode) secondLevel).getAggregatedData();
+            Collection<AggregatedCallSite> children = provider.getCallingContextTree(secondLevel);
             switch (secondLevelName) {
             case "6": {
                 assertEquals(1, children.size());
@@ -195,9 +196,9 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                 assertEquals(IHostModel.TIME_UNKNOWN, func.getCpuTime());
                 assertEquals(1, func.getNbCalls());
                 assertEquals(5, func.getProcessId());
-                assertEquals(2, func.getChildren().size());
+                assertEquals(2, func.getCallees().size());
 
-                for (AggregatedCallSite nextChild : func.getChildren()) {
+                for (AggregatedCallSite nextChild : func.getCallees()) {
                     assertTrue(nextChild instanceof AggregatedCalledFunction);
                     AggregatedCalledFunction next = (AggregatedCalledFunction) nextChild;
                     switch (next.getSymbol().toString()) {
@@ -208,8 +209,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(1, next.getNbCalls());
                         assertEquals(5, next.getProcessId());
                         assertEquals("op3", next.getSymbol());
-                        assertEquals(1, next.getChildren().size());
-                        AggregatedCalledFunction third = (AggregatedCalledFunction) next.getChildren().iterator().next();
+                        assertEquals(1, next.getCallees().size());
+                        AggregatedCalledFunction third = (AggregatedCalledFunction) next.getCallees().iterator().next();
                         assertNotNull(third);
                         assertEquals(2, third.getDuration());
                         assertEquals(2, third.getSelfTime());
@@ -217,7 +218,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(1, third.getNbCalls());
                         assertEquals(5, third.getProcessId());
                         assertEquals("op1", third.getSymbol());
-                        assertEquals(0, third.getChildren().size());
+                        assertEquals(0, third.getCallees().size());
                         break;
                     case "op4":
                         assertEquals(8, next.getDuration());
@@ -226,7 +227,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(1, next.getNbCalls());
                         assertEquals(5, next.getProcessId());
                         assertEquals("op4", next.getSymbol());
-                        assertEquals(0, next.getChildren().size());
+                        assertEquals(0, next.getCallees().size());
                         break;
                     default:
                         fail("Unknown symbol for second level of tid 6");
@@ -254,10 +255,10 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                 assertEquals(IHostModel.TIME_UNKNOWN, func.getCpuTime());
                 assertEquals(1, func.getNbCalls());
                 assertEquals(5, func.getProcessId());
-                assertEquals(1, func.getChildren().size());
+                assertEquals(1, func.getCallees().size());
 
                 // Verify children
-                Iterator<AggregatedCallSite> iterator = func.getChildren().iterator();
+                Iterator<AggregatedCallSite> iterator = func.getCallees().iterator();
                 AggregatedCalledFunction next = (AggregatedCalledFunction) iterator.next();
                 assertNotNull(next);
                 assertEquals(12, next.getDuration());
@@ -266,8 +267,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                 assertEquals(3, next.getNbCalls());
                 assertEquals(5, next.getProcessId());
                 assertEquals("op2", next.getSymbol());
-                assertEquals(1, next.getChildren().size());
-                AggregatedCalledFunction third = (AggregatedCalledFunction) next.getChildren().iterator().next();
+                assertEquals(1, next.getCallees().size());
+                AggregatedCalledFunction third = (AggregatedCalledFunction) next.getCallees().iterator().next();
                 assertNotNull(third);
                 assertEquals(1, third.getDuration());
                 assertEquals(1, third.getSelfTime());
@@ -275,7 +276,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                 assertEquals(1, third.getNbCalls());
                 assertEquals(5, third.getProcessId());
                 assertEquals("op3", third.getSymbol());
-                assertEquals(0, third.getChildren().size());
+                assertEquals(0, third.getCallees().size());
             }
                 break;
             default:
@@ -346,17 +347,17 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
 
         CallGraphAnalysis cga = getCallGraphModule();
         try {
-            Collection<GroupNode> groups = cga.getGroups();
-            for (GroupNode group : groups) {
+            Collection<ICallStackElement> groups = cga.getElements();
+            for (ICallStackElement group : groups) {
                 String firstLevelName = group.getName();
                 switch (firstLevelName) {
                 case "1":
                     // Make sure the symbol key is correctly resolved
-                    verifyProcess1CpuTime(group);
+                    verifyProcess1CpuTime(cga, group);
                     break;
                 case "5":
                     // Make sure the symbol key is correctly resolved
-                    verifyProcess5CpuTime(group);
+                    verifyProcess5CpuTime(cga, group);
                     break;
                 default:
                     fail("Unknown process in callstack");
@@ -367,13 +368,14 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess1CpuTime(GroupNode group) {
-        Collection<GroupNode> secondLevels = group.getChildren();
+    private static void verifyProcess1CpuTime(ICallGraphProvider provider, ICallStackElement element) {
+        Collection<ICallStackElement> secondLevels = element.getChildren();
         assertEquals(2, secondLevels.size());
-        for (GroupNode secondLevel : secondLevels) {
+        for (ICallStackElement secondLevel : secondLevels) {
+            assertTrue(secondLevel instanceof InstrumentedCallStackElement);
+            assertTrue(secondLevel.isLeaf());
             String secondLevelName = secondLevel.getName();
-            assertTrue(secondLevel instanceof LeafGroupNode);
-            Collection<AggregatedCallSite> children = ((LeafGroupNode) secondLevel).getAggregatedData();
+            Collection<AggregatedCallSite> children = provider.getCallingContextTree(secondLevel);
             switch (secondLevelName) {
             case "2":
                 assertEquals(2, children.size());
@@ -387,8 +389,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(9, func.getCpuTime());
                         assertEquals(1, func.getNbCalls());
                         assertEquals(1, func.getProcessId());
-                        assertEquals(1, func.getChildren().size());
-                        AggregatedCalledFunction next = (AggregatedCalledFunction) func.getChildren().iterator().next();
+                        assertEquals(1, func.getCallees().size());
+                        AggregatedCalledFunction next = (AggregatedCalledFunction) func.getCallees().iterator().next();
                         assertNotNull(next);
                         assertEquals(4, next.getDuration());
                         assertEquals(3, next.getSelfTime());
@@ -396,8 +398,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(1, next.getNbCalls());
                         assertEquals(1, next.getProcessId());
                         assertEquals("op2", next.getSymbol());
-                        assertEquals(1, next.getChildren().size());
-                        AggregatedCalledFunction third = (AggregatedCalledFunction) next.getChildren().iterator().next();
+                        assertEquals(1, next.getCallees().size());
+                        AggregatedCalledFunction third = (AggregatedCalledFunction) next.getCallees().iterator().next();
                         assertNotNull(third);
                         assertEquals(1, third.getDuration());
                         assertEquals(1, third.getSelfTime());
@@ -405,7 +407,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(1, third.getNbCalls());
                         assertEquals(1, third.getProcessId());
                         assertEquals("op3", third.getSymbol());
-                        assertEquals(0, third.getChildren().size());
+                        assertEquals(0, third.getCallees().size());
                         break;
                     case "op4":
                         assertEquals(8, func.getDuration());
@@ -413,7 +415,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(3, func.getCpuTime());
                         assertEquals(1, func.getNbCalls());
                         assertEquals(1, func.getProcessId());
-                        assertEquals(0, func.getChildren().size());
+                        assertEquals(0, func.getCallees().size());
                         break;
                     default:
                         fail("Unknown symbol for thread 2: " + func.getSymbol());
@@ -430,8 +432,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                 assertEquals(14, func.getCpuTime());
                 assertEquals(1, func.getNbCalls());
                 assertEquals(1, func.getProcessId());
-                assertEquals(2, func.getChildren().size());
-                for (AggregatedCallSite nextChild : func.getChildren()) {
+                assertEquals(2, func.getCallees().size());
+                for (AggregatedCallSite nextChild : func.getCallees()) {
                     assertTrue(nextChild instanceof AggregatedCalledFunction);
                     AggregatedCalledFunction next = (AggregatedCalledFunction) nextChild;
                     switch (next.getSymbol().toString()) {
@@ -441,7 +443,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(1, next.getCpuTime());
                         assertEquals(1, next.getNbCalls());
                         assertEquals(1, next.getProcessId());
-                        assertEquals(0, next.getChildren().size());
+                        assertEquals(0, next.getCallees().size());
                         break;
                     case "op2":
                         assertEquals(6, next.getDuration());
@@ -449,7 +451,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(3, next.getCpuTime());
                         assertEquals(1, next.getNbCalls());
                         assertEquals(1, next.getProcessId());
-                        assertEquals(0, next.getChildren().size());
+                        assertEquals(0, next.getCallees().size());
                         break;
                     default:
                         fail("Unknown symbol for thread 3: " + func.getSymbol());
@@ -463,13 +465,14 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess5CpuTime(GroupNode group) {
-        Collection<GroupNode> secondLevels = group.getChildren();
+    private static void verifyProcess5CpuTime(ICallGraphProvider provider, ICallStackElement element) {
+        Collection<ICallStackElement> secondLevels = element.getChildren();
         assertEquals(2, secondLevels.size());
-        for (GroupNode secondLevel : secondLevels) {
+        for (ICallStackElement secondLevel : secondLevels) {
+            assertTrue(secondLevel instanceof InstrumentedCallStackElement);
+            assertTrue(secondLevel.isLeaf());
             String secondLevelName = secondLevel.getName();
-            assertTrue(secondLevel instanceof LeafGroupNode);
-            Collection<AggregatedCallSite> children = ((LeafGroupNode) secondLevel).getAggregatedData();
+            Collection<AggregatedCallSite> children = provider.getCallingContextTree(secondLevel);
             switch (secondLevelName) {
             case "6": {
                 assertEquals(1, children.size());
@@ -481,9 +484,9 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                 assertEquals(19, func.getCpuTime());
                 assertEquals(1, func.getNbCalls());
                 assertEquals(5, func.getProcessId());
-                assertEquals(2, func.getChildren().size());
+                assertEquals(2, func.getCallees().size());
 
-                for (AggregatedCallSite nextChild : func.getChildren()) {
+                for (AggregatedCallSite nextChild : func.getCallees()) {
                     assertTrue(nextChild instanceof AggregatedCalledFunction);
                     AggregatedCalledFunction next = (AggregatedCalledFunction) nextChild;
                     switch (next.getSymbol().toString()) {
@@ -494,8 +497,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(1, next.getNbCalls());
                         assertEquals(5, next.getProcessId());
                         assertEquals("op3", next.getSymbol());
-                        assertEquals(1, next.getChildren().size());
-                        AggregatedCalledFunction third = (AggregatedCalledFunction) next.getChildren().iterator().next();
+                        assertEquals(1, next.getCallees().size());
+                        AggregatedCalledFunction third = (AggregatedCalledFunction) next.getCallees().iterator().next();
                         assertNotNull(third);
                         assertEquals(2, third.getDuration());
                         assertEquals(2, third.getSelfTime());
@@ -503,7 +506,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(1, third.getNbCalls());
                         assertEquals(5, third.getProcessId());
                         assertEquals("op1", third.getSymbol());
-                        assertEquals(0, third.getChildren().size());
+                        assertEquals(0, third.getCallees().size());
                         break;
                     case "op4":
                         assertEquals(8, next.getDuration());
@@ -512,7 +515,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                         assertEquals(1, next.getNbCalls());
                         assertEquals(5, next.getProcessId());
                         assertEquals("op4", next.getSymbol());
-                        assertEquals(0, next.getChildren().size());
+                        assertEquals(0, next.getCallees().size());
                         break;
                     default:
                         fail("Unknown symbol for second level of tid 6");
@@ -540,10 +543,10 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                 assertEquals(18, func.getCpuTime());
                 assertEquals(1, func.getNbCalls());
                 assertEquals(5, func.getProcessId());
-                assertEquals(1, func.getChildren().size());
+                assertEquals(1, func.getCallees().size());
 
                 // Verify children
-                Iterator<AggregatedCallSite> iterator = func.getChildren().iterator();
+                Iterator<AggregatedCallSite> iterator = func.getCallees().iterator();
                 AggregatedCalledFunction next = (AggregatedCalledFunction) iterator.next();
                 assertNotNull(next);
                 assertEquals(12, next.getDuration());
@@ -552,8 +555,8 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                 assertEquals(3, next.getNbCalls());
                 assertEquals(5, next.getProcessId());
                 assertEquals("op2", next.getSymbol());
-                assertEquals(1, next.getChildren().size());
-                AggregatedCalledFunction third = (AggregatedCalledFunction) next.getChildren().iterator().next();
+                assertEquals(1, next.getCallees().size());
+                AggregatedCalledFunction third = (AggregatedCalledFunction) next.getCallees().iterator().next();
                 assertNotNull(third);
                 assertEquals(1, third.getDuration());
                 assertEquals(1, third.getSelfTime());
@@ -561,7 +564,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
                 assertEquals(1, third.getNbCalls());
                 assertEquals(5, third.getProcessId());
                 assertEquals("op3", third.getSymbol());
-                assertEquals(0, third.getChildren().size());
+                assertEquals(0, third.getCallees().size());
             }
                 break;
             default:

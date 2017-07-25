@@ -18,20 +18,19 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.CallStackSeries;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackProvider;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.statesystem.CallStackAnalysis;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.CallGraphAnalysis;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.tmf.core.segment.ISegmentAspect;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 
 import com.google.common.collect.ImmutableList;
 
 /**
  * A stub callgraph analysis, using a state system fixture not necessarily built
- * from the {@link CallStackAnalysis} base class. It allows to specify the
+ * from the {@link InstrumentedCallStackAnalysis} base class. It allows to specify the
  * callstack analysis from a state system and the patterns to use for each
  * grouping level of the callstack.
  *
@@ -57,7 +56,7 @@ public class CallGraphAnalysisStub extends CallGraphAnalysis {
 
     private static final List<String[]> PATTERNS = ImmutableList.of(PP, TP);
 
-    private static class CSAnalysis extends CallStackAnalysis {
+    private static class CSAnalysis extends InstrumentedCallStackAnalysis {
 
         private final ITmfStateSystem fSs;
         private final @Nullable List<String[]> fPatterns;
@@ -95,7 +94,7 @@ public class CallGraphAnalysisStub extends CallGraphAnalysis {
 
     }
 
-    private final ICallStackProvider fCsProvider;
+    private final IFlameChartProvider fCsProvider;
 
     /**
      * Constructor
@@ -119,7 +118,7 @@ public class CallGraphAnalysisStub extends CallGraphAnalysis {
         this(new CSAnalysis(fixture, patterns));
     }
 
-    private CallGraphAnalysisStub(ICallStackProvider csp) {
+    private CallGraphAnalysisStub(IFlameChartProvider csp) {
         super(csp);
         fCsProvider = csp;
     }
@@ -131,11 +130,6 @@ public class CallGraphAnalysisStub extends CallGraphAnalysis {
      */
     public boolean iterate() {
         return iterateOverCallstackSerie(fCsProvider.getCallStackSeries().iterator().next(), ModelManager.getModelFor(""), new NullProgressMonitor());
-    }
-
-    @Override
-    public @NonNull Iterable<@NonNull ISegmentAspect> getSegmentAspects() {
-        return Collections.EMPTY_LIST;
     }
 
     @Override

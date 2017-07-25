@@ -3,22 +3,8 @@
 <plugin>
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
-      <output
-            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
-            id="org.eclipse.tracecompass.incubator.internal.callstack.ui.callgraph.callgraphDensity">
-         <analysisModuleClass
-               class="org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.CallGraphAnalysis">
-         </analysisModuleClass>
-      </output>
-      <output
-            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
-            id="org.eclipse.tracecompass.extension.internal.callstack.ui.flamegraph.flamegraphView">
-         <analysisModuleClass
-               class="org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.CallGraphAnalysis">
-         </analysisModuleClass>
-      </output>
       <listener
-            class="org.eclipse.tracecompass.incubator.internal.callstack.ui.views.callstack.CallStackAnalysisListener">
+            class="org.eclipse.tracecompass.incubator.internal.callstack.ui.views.flamechart.CallStackAnalysisListener">
       </listener>
    </extension>
    <extension
@@ -43,10 +29,10 @@
       <view
       		category="org.eclipse.linuxtools.tmf.ui.views.category"
             allowMultiple="true"
-            class="org.eclipse.tracecompass.incubator.internal.callstack.ui.views.callstack.CallStackView"
+            class="org.eclipse.tracecompass.incubator.internal.callstack.ui.views.flamechart.FlameChartView"
             icon="icons/obj16/stckframe_obj.gif"
-            id="org.eclipse.tracecompass.incubator.callstack.ui.views.callstack"
-            name="%view.callstack"
+            id="org.eclipse.tracecompass.incubator.callstack.ui.views.flamechart"
+            name="%view.flameChart"
             restorable="true">
       </view>
       <view

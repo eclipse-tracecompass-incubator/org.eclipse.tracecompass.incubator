@@ -17,7 +17,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICalledFunction;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallGraphAnalysisStub;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
@@ -33,7 +33,6 @@ import org.junit.Test;
  * and tests the segment store returned by the CallGraphAnalysis.
  *
  * @author Sonia Farrah
- *
  */
 public class CallGraphAnalysisTest {
 
@@ -215,7 +214,7 @@ public class CallGraphAnalysisTest {
             // Test the segment store
             assertNotNull(segmentStore);
             Object[] segments = segmentStore.toArray();
-            List<@NonNull ICalledFunction> threads = cga.getRootFunctions();
+            List<org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction> threads = cga.getRootFunctions();
             assertEquals("Number of root functions", 2, threads.size());
             assertEquals("Number of children: first root function", 1, threads.get(0).getChildren().size());
             assertEquals("Number of children: second root function", 1, threads.get(1).getChildren().size());
@@ -345,13 +344,13 @@ public class CallGraphAnalysisTest {
             assertNotNull(segmentStore);
             Object[] segments = segmentStore.toArray();
             assertEquals("Number of segments found", 5, segments.length);
-            List<@NonNull ICalledFunction> rootFunctions = cga.getRootFunctions();
+            List<org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction> rootFunctions = cga.getRootFunctions();
             assertEquals("Test the number of root functions found", 1, rootFunctions.size());
             ICalledFunction rootFunction = rootFunctions.get(0);
 
             // Test the segments links
             assertEquals("Children number:First parent", 3, rootFunction.getChildren().size());
-            List<@NonNull ICalledFunction> firstDepthFunctions = rootFunctions.get(0).getChildren();
+            List<org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction> firstDepthFunctions = rootFunctions.get(0).getChildren();
             ICalledFunction firstChild = firstDepthFunctions.get(0);
             ICalledFunction secondChild = firstDepthFunctions.get(1);
             ICalledFunction thirdChild = firstDepthFunctions.get(2);

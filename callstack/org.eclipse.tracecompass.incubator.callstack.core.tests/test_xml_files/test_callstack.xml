@@ -12,7 +12,6 @@
 <callstack id="callstack.analysis">
 	<callstackGroup>
 		<level path="threads/*"/>
-		<level path="callstack"/>
 	</callstackGroup>
 
 	<pattern version="0" id="callstack.pattern">
@@ -27,7 +26,7 @@
 				<stateChange>
 					<stateAttribute type="constant" value="threads" />
 					<stateAttribute type="eventField" value="tid" />
-					<stateAttribute type="constant" value="callstack" />
+					<stateAttribute type="constant" value="CallStack" />
 					<stateValue type="eventField" value="op" stack="push"/>
 				</stateChange>
 			</action>
@@ -36,7 +35,7 @@
 				<stateChange>
 					<stateAttribute type="constant" value="threads" />
 					<stateAttribute type="eventField" value="tid" />
-					<stateAttribute type="constant" value="callstack" />
+					<stateAttribute type="constant" value="CallStack" />
 					<stateValue type="eventField" value="op" stack="pop"/>
 				</stateChange>
 			</action>

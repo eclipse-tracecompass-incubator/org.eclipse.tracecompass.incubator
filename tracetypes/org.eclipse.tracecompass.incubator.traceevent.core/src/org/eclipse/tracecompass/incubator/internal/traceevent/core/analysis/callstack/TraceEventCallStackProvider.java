@@ -24,9 +24,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.statesystem.CallStackAnalysis;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.statesystem.CallStackEdge;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.statesystem.CallStackStateProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackEdge;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventEvent;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
@@ -296,7 +296,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             }
             int threadQuark = ss.getQuarkRelativeAndAdd(processQuark, threadName);
 
-            int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, CallStackAnalysis.CALL_STACK);
+            int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.CALL_STACK);
             ITmfStateValue value = functionBeginName;
             ss.pushAttribute(timestamp, value, callStackQuark);
             /*
@@ -323,7 +323,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             if (threadName == null) {
                 threadName = Long.toString(getThreadId(event));
             }
-            int quark = ss.getQuarkAbsoluteAndAdd(PROCESSES, pName, threadName, CallStackAnalysis.CALL_STACK);
+            int quark = ss.getQuarkAbsoluteAndAdd(PROCESSES, pName, threadName, InstrumentedCallStackAnalysis.CALL_STACK);
             ss.popAttribute(timestamp - 1, quark);
             /*
              * FIXME: BIG FAT SMELLY HACK
@@ -366,7 +366,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         }
         int threadQuark = ss.getQuarkRelativeAndAdd(processQuark, threadName);
 
-        int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, CallStackAnalysis.CALL_STACK);
+        int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.CALL_STACK);
         ITmfStateValue functionEntry = TmfStateValue.newValueString(event.getName());
         ss.pushAttribute(startTime, functionEntry, callStackQuark);
         Deque<Long> stack = fStack.get(callStackQuark);

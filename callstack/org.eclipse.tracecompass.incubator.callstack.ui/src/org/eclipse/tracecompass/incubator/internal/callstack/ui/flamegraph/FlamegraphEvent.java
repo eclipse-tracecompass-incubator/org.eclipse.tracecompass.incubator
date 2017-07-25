@@ -15,8 +15,8 @@ import java.util.Map.Entry;
 
 import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICalledFunction;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedCalledFunction;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 
@@ -76,9 +76,9 @@ public class FlamegraphEvent extends TimeEvent {
      */
     public Map<String, String> getTooltip(Format formatter) {
         ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<>();
-        for (Entry<String, IStatistics<ICalledFunction>> entry : fCallSite.getStatistics().entrySet()) {
+        for (Entry<String, IStatistics<?>> entry : fCallSite.getStatistics().entrySet()) {
             String statType = String.valueOf(entry.getKey());
-            IStatistics<ICalledFunction> stats = entry.getValue();
+            IStatistics<?> stats = entry.getValue();
             if (stats.getMax() != IHostModel.TIME_UNKNOWN) {
                 builder.put(statType, ""); //$NON-NLS-1$
                 String lowerType = statType.toLowerCase();
@@ -91,6 +91,23 @@ public class FlamegraphEvent extends TimeEvent {
             }
         }
         return builder.build();
+    }
+
+    /**
+     * Get the number of calls for this flamegraph event's callsite. If the callsite
+     * was instrumented, the result will be the exact number of calls of this call
+     * site, otherwise, it will be the number of samples.
+     *
+     * @return The number of calls of the call site
+     */
+    public long getNumberOfCalls() {
+        AggregatedCallSite callSite = fCallSite;
+        // Return the number of calls if this is an instrumented function, otherwise,
+        // the length will be the number of samples
+        if (callSite instanceof AggregatedCalledFunction) {
+            return ((AggregatedCalledFunction) callSite).getNbCalls();
+        }
+        return callSite.getLength();
     }
 
 //    /**

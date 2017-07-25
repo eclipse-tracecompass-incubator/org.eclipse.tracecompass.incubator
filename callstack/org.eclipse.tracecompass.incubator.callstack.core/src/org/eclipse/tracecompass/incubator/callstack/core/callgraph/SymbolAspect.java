@@ -14,7 +14,7 @@ import java.util.Comparator;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICalledFunction;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.tmf.core.segment.ISegmentAspect;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;

@@ -12,7 +12,7 @@ package org.eclipse.tracecompass.incubator.callstack.core.tests.stubs;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.statesystem.CallStackAnalysis;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
@@ -21,7 +21,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  *
  * @author Geneviève Bastien
  */
-public class CallStackAnalysisStub extends CallStackAnalysis {
+public class CallStackAnalysisStub extends InstrumentedCallStackAnalysis {
 
     /**
      * The ID of this analysis

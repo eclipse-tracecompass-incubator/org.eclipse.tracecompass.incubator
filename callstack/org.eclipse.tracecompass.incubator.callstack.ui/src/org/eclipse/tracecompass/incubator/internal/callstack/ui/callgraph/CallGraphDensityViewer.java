@@ -14,10 +14,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.ISegmentStoreProvider;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.density.AbstractSegmentStoreDensityViewer;
-import org.eclipse.tracecompass.common.core.StreamUtils;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.instrumented.CallGraphAnalysis;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * Call stack segments density viewer
@@ -26,7 +23,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  */
 public class CallGraphDensityViewer extends AbstractSegmentStoreDensityViewer {
 
-    private final String fAnalysisId;
+//    private final String fAnalysisId;
 
     /**
      * Constructs a new density viewer.
@@ -38,14 +35,15 @@ public class CallGraphDensityViewer extends AbstractSegmentStoreDensityViewer {
      */
     public CallGraphDensityViewer(@NonNull Composite parent, String analysisId) {
         super(parent);
-        fAnalysisId = analysisId;
+//        fAnalysisId = analysisId;
     }
 
     @Override
     protected @Nullable ISegmentStoreProvider getSegmentStoreProvider(@NonNull ITmfTrace trace) {
-        Iterable<CallGraphAnalysis> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, CallGraphAnalysis.class);
-        return StreamUtils.getStream(modules)
-                .filter(m -> m.getId().equals(fAnalysisId))
-                .findFirst().orElse(null);
+//        Iterable<CallGraphAnalysis> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, CallGraphAnalysis.class);
+//        return StreamUtils.getStream(modules)
+//                .filter(m -> m.getId().equals(fAnalysisId))
+//                .findFirst().orElse(null);
+        return null;
     }
 }

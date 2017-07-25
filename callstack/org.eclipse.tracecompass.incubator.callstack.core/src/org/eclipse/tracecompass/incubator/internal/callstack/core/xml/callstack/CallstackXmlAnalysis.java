@@ -19,9 +19,9 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.CallStackSeries;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackProvider;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.CallStackSeries.IThreadIdResolver;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.xml.callstack.CallstackXmlModuleHelper.ISubModuleHelper;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlStrings;
@@ -40,7 +40,7 @@ import org.w3c.dom.NodeList;
  *
  * @author Geneviève Bastien
  */
-public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements ICallStackProvider, ITmfAnalysisModuleWithStateSystems {
+public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements IFlameChartProvider, ITmfAnalysisModuleWithStateSystems {
 
     private final Path fSourceFile;
     private final ISubModuleHelper fHelper;

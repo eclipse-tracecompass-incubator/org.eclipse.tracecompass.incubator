@@ -22,10 +22,9 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackElement;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.LeafGroupNode;
+import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphContentProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
@@ -87,12 +86,12 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
      *            A stack used to save the functions timeStamps
      */
     private void addEvent(AggregatedCallSite node, List<FlamegraphDepthEntry> childrenEntries, Deque<Long> timestampStack, int depth) {
-        node.getChildren().stream()
+        node.getCallees().stream()
                 .sorted(Comparator.comparingLong(AggregatedCallSite::getLength))
                 .forEach(child -> {
                     addEvent(child, childrenEntries, timestampStack, depth + 1);
                 });
-        node.getChildren().stream().forEach(child -> {
+        node.getCallees().stream().forEach(child -> {
             timestampStack.pop();
         });
 
@@ -114,10 +113,10 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         fLevelEntries.clear();
         // Get the root of each thread
         if (inputElement instanceof Collection<?>) {
-            Collection<?> threadNodes = (Collection<?>) inputElement;
-            for (Object object : threadNodes) {
-                if (object instanceof GroupNode) {
-                    buildChildrenEntries((GroupNode) object, null);
+            Collection<?> callgraphProviders = (Collection<?>) inputElement;
+            for (Object object : callgraphProviders) {
+                if (object instanceof ICallGraphProvider) {
+                    buildForProvider((ICallGraphProvider) object);
                 }
             }
         } else {
@@ -129,38 +128,44 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         return fFlameGraphEntries.toArray(new ITimeGraphEntry[fFlameGraphEntries.size()]);
     }
 
+    private void buildForProvider(ICallGraphProvider provider) {
+        Collection<ICallStackElement> elements = provider.getElements();
+        for (ICallStackElement element : elements) {
+            buildChildrenEntries(element, provider, null);
+        }
+    }
+
     /**
      * Build the entry list for one thread
      *
-     * @param groupNode
+     * @param element
      *            The node of the aggregation tree
      */
-    private void buildChildrenEntries(GroupNode groupNode, @Nullable TimeGraphEntry parent) {
+    private void buildChildrenEntries(ICallStackElement element, ICallGraphProvider cgProvider, @Nullable TimeGraphEntry parent) {
         // Add the entry
-        TimeGraphEntry groupEntry = new TimeGraphEntry(groupNode.getName(), 0L, 0L);
+        TimeGraphEntry currentEntry = new TimeGraphEntry(element.getName(), 0L, 0L);
         if (parent != null) {
-            parent.addChild(groupEntry);
+            parent.addChild(currentEntry);
         } else {
-            fFlameGraphEntries.add(groupEntry);
+            fFlameGraphEntries.add(currentEntry);
         }
 
         // Create the children entries
-        for (GroupNode child : groupNode.getChildren()) {
-            buildChildrenEntries(child, groupEntry);
+        for (ICallStackElement child : element.getChildren()) {
+            buildChildrenEntries(child, cgProvider, currentEntry);
         }
 
         // Create the callsites entries
-        if (!(groupNode instanceof LeafGroupNode)) {
+        if (!(element.isLeaf())) {
             return;
         }
-        LeafGroupNode leaf = (LeafGroupNode) groupNode;
 
         List<FlamegraphDepthEntry> childrenEntries = new ArrayList<>();
         Deque<Long> timestampStack = new ArrayDeque<>();
         timestampStack.push(0L);
 
         // Sort children by duration
-        leaf.getAggregatedData().stream()
+        cgProvider.getCallingContextTree(element).stream()
                 .sorted(Comparator.comparingLong(AggregatedCallSite::getLength))
                 .forEach(rootFunction -> {
                     setData(rootFunction, childrenEntries, timestampStack);
@@ -168,13 +173,10 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
                     timestampStack.push(currentThreadDuration);
                 });
         childrenEntries.forEach(child -> {
-            groupEntry.addChild(child);
+            currentEntry.addChild(child);
         });
-        groupEntry.updateEndTime(timestampStack.pop());
+        currentEntry.updateEndTime(timestampStack.pop());
         return;
-
-
-
 
     }
 

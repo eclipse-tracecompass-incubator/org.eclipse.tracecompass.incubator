@@ -14,12 +14,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackGroupDescriptor;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.CallGraphAllGroupDescriptor;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.ICallGraphFactory;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callgraph.LeafGroupNode;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.callstack.CallStackAllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
+import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
+import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.base.AllGroupDescriptor;
 
 /**
  * A class containing helper methods to group aggregated callgraph data by the
@@ -38,60 +36,52 @@ public final class CallGraphGroupBy {
      *
      * @param groupBy
      *            The group descriptor by which to group the call graph elements.
-     * @param groups
+     * @param elements
      *            The full expanded data from the groups
-     * @param factory
-     *            The factory to create individual groups.
+     * @param cgProvider
+     *            The call graph data provider
      * @return A collection of data that is the result of the grouping by the
      *         descriptor
      */
-    public static Collection<GroupNode> groupCallGraphBy(ICallStackGroupDescriptor groupBy, Collection<GroupNode> groups, ICallGraphFactory factory) {
+    public static Collection<ICallStackElement> groupCallGraphBy(ICallStackGroupDescriptor groupBy, Collection<ICallStackElement> elements, ICallGraphProvider cgProvider) {
         // Fast return: just aggregated all groups together
-        if (groupBy instanceof CallStackAllGroupDescriptor) {
-            return groupCallGraphByAll(groups, factory);
+        if (groupBy.equals(AllGroupDescriptor.getInstance())) {
+            return groupCallGraphByAll(elements, cgProvider);
         }
-        ICallStackGroupDescriptor nextGroup = groupBy.getNextGroup();
-        if (nextGroup == null) {
-            return groups;
-        }
-        // FIXME: a group's descriptor is the next one, when that is fixed, fix
-        // this too
-        List<GroupNode> grouped = new ArrayList<>();
-        groups.forEach(g -> grouped.addAll(searchForGroups(g, nextGroup, factory)));
+
+        List<ICallStackElement> grouped = new ArrayList<>();
+        elements.forEach(g -> grouped.addAll(searchForGroups(g, groupBy, cgProvider)));
         return grouped;
     }
 
-    private static void addGroupData(GroupNode srcGroup, LeafGroupNode dstGroup, ICallGraphFactory factory) {
-        // Add a new
-        srcGroup.getAggregatedData().forEach(ad -> {
-            AggregatedCallSite callsite = factory.createAggregatedCallSite(ad.getSymbol());
+    private static void addGroupData(ICallStackElement srcGroup, ICallStackElement dstGroup, ICallGraphProvider cgProvider) {
+        cgProvider.getCallingContextTree(srcGroup).forEach(ad -> {
+            AggregatedCallSite callsite = cgProvider.createCallSite(ad.getSymbol());
             callsite.merge(ad);
-            dstGroup.addAggregatedData(callsite);
+            cgProvider.addAggregatedCallSite(dstGroup, callsite);
         });
-        srcGroup.getChildren().forEach(g -> addGroupData(g, dstGroup, factory));
+        srcGroup.getChildren().forEach(g -> addGroupData(g, dstGroup, cgProvider));
     }
 
-    private static Collection<GroupNode> groupCallGraphByAll(Collection<GroupNode> groups, ICallGraphFactory factory) {
-        // Fast return: just aggregated all groups together
-        LeafGroupNode allGroup = factory.createLeafGroup("all", CallGraphAllGroupDescriptor.getInstance());
-        groups.forEach(g -> addGroupData(g, allGroup, factory));
+    private static Collection<ICallStackElement> groupCallGraphByAll(Collection<ICallStackElement> groups, ICallGraphProvider cgProvider) {
+        // Fast return: just aggregate all groups together
+        ICallStackElement allGroup = new CallStackElement("All", AllGroupDescriptor.getInstance(), null, null);
+        groups.forEach(g -> addGroupData(g, allGroup, cgProvider));
         return Collections.singleton(allGroup);
     }
 
-    private static Collection<? extends GroupNode> searchForGroups(GroupNode group, ICallStackGroupDescriptor descriptor, ICallGraphFactory factory) {
-        if (group.getGroupDescriptor().equals(descriptor)) {
-            LeafGroupNode leafGroup = factory.createLeafGroup(group.getName(), descriptor);
-            addGroupData(group, leafGroup, factory);
-            return Collections.singleton(leafGroup);
+    private static Collection<? extends ICallStackElement> searchForGroups(ICallStackElement element, ICallStackGroupDescriptor descriptor, ICallGraphProvider cgProvider) {
+        if (element.getGroup().equals(descriptor)) {
+            ICallStackElement groupedElement = new CallStackElement(element.getName(), descriptor);
+            addGroupData(element, groupedElement, cgProvider);
+            return Collections.singleton(groupedElement);
         }
         ICallStackGroupDescriptor nextGroup = descriptor.getNextGroup();
         if (nextGroup == null) {
-            return Collections.singleton(group);
+            return Collections.singleton(element);
         }
-        // FIXME: a group's descriptor is the next one, when that is fixed, fix
-        // this too
-        List<GroupNode> grouped = new ArrayList<>();
-        group.getChildren().forEach(g -> grouped.addAll(searchForGroups(g, nextGroup, factory)));
+        List<ICallStackElement> grouped = new ArrayList<>();
+        element.getChildren().forEach(g -> grouped.addAll(searchForGroups(g, nextGroup, cgProvider)));
         return grouped;
     }
 

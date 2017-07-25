@@ -53,9 +53,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.common.core.StreamUtils;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.GroupNode;
+import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.ICallStackGroupDescriptor;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.base.AllGroupDescriptor;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.Activator;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
@@ -92,18 +92,19 @@ import com.google.common.annotations.VisibleForTesting;
 public class FlameGraphView extends TmfView {
 
     /**
-     *
+     * ID of the view
      */
     public static final String ID = FlameGraphView.class.getPackage().getName() + ".flamegraphView"; //$NON-NLS-1$
 
     private static final String SYMBOL_MAPPING_ICON_PATH = "icons/obj16/binaries_obj.gif"; //$NON-NLS-1$
+    private static final @NonNull String GROUP_BY_ICON_PATH = "icons/etool16/group_by.gif"; //$NON-NLS-1$
 
     private static final String SORT_OPTION_KEY = "sort.option"; //$NON-NLS-1$
     private static final ImageDescriptor SORT_BY_NAME_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_alpha.gif"); //$NON-NLS-1$
     private static final ImageDescriptor SORT_BY_NAME_REV_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_alpha_rev.gif"); //$NON-NLS-1$
     private static final ImageDescriptor SORT_BY_ID_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num.gif"); //$NON-NLS-1$
     private static final ImageDescriptor SORT_BY_ID_REV_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num_rev.gif"); //$NON-NLS-1$
-    private static final ImageDescriptor AGGREGATE_BY_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num_rev.gif"); //$NON-NLS-1$
+    private static final ImageDescriptor AGGREGATE_BY_ICON = Activator.getDefault().getImageDescripterFromPath(GROUP_BY_ICON_PATH);
 
     private TimeGraphViewer fTimeGraphViewer;
 
@@ -217,11 +218,11 @@ public class FlameGraphView extends TmfView {
     /**
      * Get the necessary data for the flame graph and display it
      *
-     * @param callGraphAnalysis
+     * @param callGraphProviders
      *            the callGraphAnalysis
      */
     @VisibleForTesting
-    public void buildFlameGraph(Iterable<ICallGraphProvider> callGraphAnalysis) {
+    public void buildFlameGraph(Iterable<ICallGraphProvider> callGraphProviders) {
         /*
          * Note for synchronization:
          *
@@ -256,12 +257,12 @@ public class FlameGraphView extends TmfView {
             }
         }
 
-        if (!callGraphAnalysis.iterator().hasNext())  {
+        if (!callGraphProviders.iterator().hasNext())  {
             fTimeGraphViewer.setInput(null);
             fLock.release();
             return;
         }
-        for (ICallGraphProvider provider : callGraphAnalysis) {
+        for (ICallGraphProvider provider : callGraphProviders) {
             if (provider instanceof IAnalysisModule) {
                 ((IAnalysisModule) provider).schedule();
             }
@@ -275,17 +276,13 @@ public class FlameGraphView extends TmfView {
                     fLock.release();
                     return Status.CANCEL_STATUS;
                 }
-                for (ICallGraphProvider provider : callGraphAnalysis) {
+                for (ICallGraphProvider provider : callGraphProviders) {
                     if (provider instanceof IAnalysisModule) {
                         ((IAnalysisModule) provider).waitForCompletion(monitor);
                     }
                 }
-                List<GroupNode> groupNodes = new ArrayList<>();
-                for (ICallGraphProvider provider : callGraphAnalysis) {
-                    groupNodes.addAll(provider.getGroups());
-                }
                 Display.getDefault().asyncExec(() -> {
-                    fTimeGraphViewer.setInput(groupNodes);
+                    fTimeGraphViewer.setInput(callGraphProviders);
                     fTimeGraphViewer.resetStartFinishTime();
                     fLock.release();
                 });
@@ -463,7 +460,10 @@ public class FlameGraphView extends TmfView {
                         return menu;
                     }
                     ICallGraphProvider provider = iterator.next();
-                    Collection<ICallStackGroupDescriptor> series = provider.getGroupDescriptor();
+                 // Add the all group element
+                    Action allGroupAction = createActionForGroup(provider, AllGroupDescriptor.getInstance());
+                    new ActionContributionItem(allGroupAction).fill(menu, -1);
+                    Collection<ICallStackGroupDescriptor> series = provider.getGroupDescriptors();
                     series.forEach(group -> {
                         ICallStackGroupDescriptor subGroup = group;
                         do {

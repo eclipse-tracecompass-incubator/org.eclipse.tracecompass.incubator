@@ -35,7 +35,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.IEventCallStackProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.flamechart.IEventCallStackProvider;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.signal.TmfEventSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;

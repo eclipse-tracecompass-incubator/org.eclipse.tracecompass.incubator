@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.callstack.core.callstack.statesystem.CallStackAnalysis;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
 import org.eclipse.tracecompass.tmf.core.analysis.requirements.TmfAbstractAnalysisRequirement;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Matthew khouzam
  */
-public class TraceEventCallstackAnalysis extends CallStackAnalysis {
+public class TraceEventCallstackAnalysis extends InstrumentedCallStackAnalysis {
 
     /**
      * ID
