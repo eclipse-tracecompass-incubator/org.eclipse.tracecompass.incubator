@@ -33,6 +33,9 @@
     <module>org.eclipse.tracecompass.incubator.hudson.maven.core</module>
     <module>org.eclipse.tracecompass.incubator.hudson.maven.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.hudson.maven.ui</module>
+    <module>org.eclipse.tracecompass.incubator.perf.profiling</module>
+    <module>org.eclipse.tracecompass.incubator.perf.profiling.core</module>
+    <module>org.eclipse.tracecompass.incubator.perf.profiling.core.tests</module>
     <!-- insert modules here -->
   </modules>
 

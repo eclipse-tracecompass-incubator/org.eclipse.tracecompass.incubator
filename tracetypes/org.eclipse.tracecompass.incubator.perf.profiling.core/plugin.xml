@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.perf.profiling.core.callgraph.PerfCallchainAnalysisModule"
+            automatic="false"
+            icon="icons/perf.png"
+            id="org.eclipse.tracecompass.extension.perf.profiling.core.callchain"
+            name="Perf Sampling Analysis">
+         <tracetype
+               class="org.eclipse.tracecompass.incubator.internal.perf.profiling.core.trace.PerfCtfTrace">
+         </tracetype>
+      </module>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            category="org.eclipse.linuxtools.tmf.ctf.core.category.ctf"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.perf.profiling.core.trace"
+            isDirectory="true"
+            name="%trace.perf"
+            trace_type="org.eclipse.tracecompass.incubator.internal.perf.profiling.core.trace.PerfCtfTrace">
+      </type>
+   </extension>
+
+</plugin>
