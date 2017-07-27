@@ -8,7 +8,16 @@
             automatic="false"
             icon="icons/perf.png"
             id="org.eclipse.tracecompass.extension.perf.profiling.core.callchain"
-            name="Perf Sampling Analysis">
+            name="%analysis.sampling">
+         <tracetype
+               class="org.eclipse.tracecompass.incubator.internal.perf.profiling.core.trace.PerfCtfTrace">
+         </tracetype>
+      </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.perf.profiling.core.symbol.PerfMmapAnalysisModule"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.perf.profiling.core.symbol.mmap"
+            name="%analysis.symbol">
          <tracetype
                class="org.eclipse.tracecompass.incubator.internal.perf.profiling.core.trace.PerfCtfTrace">
          </tracetype>
