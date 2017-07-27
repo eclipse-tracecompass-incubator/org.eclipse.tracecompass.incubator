@@ -36,6 +36,15 @@
             restorable="true">
       </view>
       <view
+      		category="org.eclipse.linuxtools.tmf.ui.views.category"
+            allowMultiple="true"
+            class="org.eclipse.tracecompass.incubator.internal.callstack.ui.views.cct.CallingContextTreeView"
+            icon="icons/obj16/stckframe_obj.gif"
+            id="org.eclipse.tracecompass.incubator.callstack.ui.views.cct"
+            name="%view.cct"
+            restorable="true">
+      </view>
+      <view
             category="org.eclipse.linuxtools.tmf.ui.views.category"
             class="org.eclipse.tracecompass.incubator.internal.callstack.ui.views.stacktable.CallStackTableView"
             id="org.eclipse.tracecompass.incubator.internal.callstack.ui.views.stacktable"

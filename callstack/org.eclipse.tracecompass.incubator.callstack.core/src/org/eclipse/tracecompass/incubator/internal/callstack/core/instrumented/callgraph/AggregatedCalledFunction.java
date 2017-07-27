@@ -245,9 +245,10 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
     }
 
     /**
-     * The self time of an aggregated function
+     * The CPU time of an aggregated function
      *
-     * @return The self time
+     * @return The CPU time, or {@link IHostModel#TIME_UNKNOWN} if the CPU time
+     *         is not known
      */
     public long getCpuTime() {
         return fCpuTime;
