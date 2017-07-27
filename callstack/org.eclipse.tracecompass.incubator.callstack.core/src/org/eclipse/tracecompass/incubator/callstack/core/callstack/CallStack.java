@@ -262,7 +262,7 @@ public class CallStack {
      */
     public int getThreadId(long time) {
         if (fThreadIdProvider != null) {
-            return fThreadIdProvider.getTheadId(time);
+            return fThreadIdProvider.getThreadId(time);
         }
         return -1;
     }

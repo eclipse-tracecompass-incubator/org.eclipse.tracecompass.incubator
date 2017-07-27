@@ -74,7 +74,7 @@ public abstract class CallStackAnalysis extends TmfStateSystemAnalysisModule imp
             if (ss == null) {
                 return Collections.EMPTY_SET;
             }
-            callstacks = Collections.singleton(new CallStackSeries(ss, PATTERNS, 0, "", getHostId(), new CallStackSeries.AttributeValueThreadResolver(1))); //$NON-NLS-1$
+            callstacks = Collections.singleton(new CallStackSeries(ss, PATTERNS, 0, "", getHostId(), new CallStackSeries.AttributeNameThreadResolver(1))); //$NON-NLS-1$
             fCallStacks = callstacks;
         }
         return callstacks;

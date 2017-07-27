@@ -46,7 +46,7 @@ public class CallStackSeries {
          * @return The ID of the thread, or {@link IHostModel#UNKNOWN_TID} if
          *         unavailable
          */
-        int getTheadId(long time);
+        int getThreadId(long time);
 
     }
 
@@ -66,7 +66,7 @@ public class CallStackSeries {
         }
 
         @Override
-        public int getTheadId(long time) {
+        public int getThreadId(long time) {
             ITmfStateInterval interval = fInterval;
             int tid = fLastThreadId;
             if (interval != null) {
@@ -127,7 +127,7 @@ public class CallStackSeries {
         }
 
         @Override
-        public int getTheadId(long time) {
+        public int getThreadId(long time) {
             return fTid;
         }
 
@@ -151,7 +151,7 @@ public class CallStackSeries {
         }
 
         @Override
-        public int getTheadId(long time) {
+        public int getThreadId(long time) {
             if (fCpuQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
                 return IHostModel.UNKNOWN_TID;
             }
