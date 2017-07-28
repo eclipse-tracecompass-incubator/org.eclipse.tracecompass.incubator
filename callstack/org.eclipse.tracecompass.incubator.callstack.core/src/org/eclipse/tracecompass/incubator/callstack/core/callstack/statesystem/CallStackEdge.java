@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.datastore.core.interval.IHTIntervalReader;
 import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferWriter;
+import org.eclipse.tracecompass.datastore.core.serialization.SafeByteBufferFactory;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 
 /**
@@ -29,11 +30,10 @@ public final class CallStackEdge implements ISegment {
      * ID
      */
     private static final long serialVersionUID = -224193581961404618L;
-    private static final int UUID_SIZE = 16;
     /**
      * Size taken on a disk
      */
-    public static final int SIZE = Integer.BYTES * 2 + (UUID_SIZE * 2) + Long.BYTES * 2;
+    public static final int BASE_SIZE = Integer.BYTES * 2 + Long.BYTES * 2;
 
     /**
      * Factory helper
@@ -159,6 +159,6 @@ public final class CallStackEdge implements ISegment {
 
     @Override
     public int getSizeOnDisk() {
-        return SIZE;
+        return BASE_SIZE + SafeByteBufferFactory.getStringSizeInBuffer(fSrc.getHost()) + SafeByteBufferFactory.getStringSizeInBuffer(fDst.getHost());
     }
 }
