@@ -9,10 +9,18 @@
    <feature url="features/org.eclipse.tracecompass.incubator.virtual.machine.analysis_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.virtual.machine.analysis" version="0.0.1.qualifier">
       <category name="virtualization"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.callstack_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.callstack" version="0.0.1.qualifier">
+      <category name="callstack"/>
+   </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.1.qualifier">
       <category name="analyses"/>
    </bundle>
    <category-def name="trace-types" label="Trace Types"/>
    <category-def name="virtualization" label="Virtualization"/>
    <category-def name="analyses" label="Analyses"/>
+   <category-def name="callstack" label="Call Stack analyses">
+      <description>
+         Contains feature related to call stack data, stack traces, sampling, etc.
+      </description>
+   </category-def>
 </site>

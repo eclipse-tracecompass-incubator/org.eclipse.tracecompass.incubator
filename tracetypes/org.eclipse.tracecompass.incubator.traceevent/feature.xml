@@ -32,7 +32,7 @@
       <import plugin="org.apache.commons.lang3"/>
       <import plugin="org.json"/>
       <import plugin="org.eclipse.ui"/>
-      <import feature="org.eclipse.tracecompass.incubator.callstack" version="0.0.1.qualifier"/>
+      <import feature="org.eclipse.tracecompass.incubator.callstack"/>
       <import plugin="org.eclipse.tracecompass.tmf.ui"/>
    </requires>
 

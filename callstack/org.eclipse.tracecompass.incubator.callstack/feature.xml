@@ -19,6 +19,30 @@
       %license
    </license>
 
+   <requires>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.tracecompass.common.core"/>
+      <import plugin="org.eclipse.tracecompass.datastore.core"/>
+      <import plugin="org.eclipse.tracecompass.segmentstore.core"/>
+      <import plugin="org.eclipse.tracecompass.statesystem.core"/>
+      <import plugin="org.eclipse.tracecompass.analysis.timing.core"/>
+      <import plugin="org.eclipse.tracecompass.tmf.core"/>
+      <import plugin="org.eclipse.tracecompass.tmf.analysis.xml.core"/>
+      <import plugin="org.eclipse.tracecompass.tmf.ctf.core"/>
+      <import plugin="org.eclipse.tracecompass.lttng2.common.core"/>
+      <import plugin="org.eclipse.tracecompass.lttng2.ust.core"/>
+      <import plugin="org.eclipse.tracecompass.analysis.os.linux.core"/>
+      <import plugin="com.google.guava"/>
+      <import plugin="org.apache.commons.lang3"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.tracecompass.analysis.timing.ui"/>
+      <import plugin="org.eclipse.tracecompass.tmf.ui"/>
+      <import plugin="org.swtchart"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.help"/>
+   </requires>
+
    <plugin
          id="org.eclipse.tracecompass.incubator.callstack.core"
          download-size="0"
