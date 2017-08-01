@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.callstack.core.base;
+package org.eclipse.tracecompass.incubator.callstack.core.callgraph;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;

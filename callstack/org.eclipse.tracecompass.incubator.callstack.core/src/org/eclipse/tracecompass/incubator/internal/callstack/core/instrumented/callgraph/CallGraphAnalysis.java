@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -94,6 +95,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     private final Multimap<ICallStackElement, AggregatedCallSite> fCcts = HashMultimap.create();
 
     private @Nullable ICallStackGroupDescriptor fGroupBy = null;
+    private @Nullable Set<ICallStackElement> fGroupedRootElements = null;
+    private @Nullable Multimap<ICallStackElement, AggregatedCallSite> fGroupedCct = null;
 
     /**
      * Constructor
@@ -304,6 +307,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     @Override
     public void setGroupBy(@Nullable ICallStackGroupDescriptor descriptor) {
         fGroupBy = descriptor;
+        fGroupedCct = null;
+        fGroupedRootElements = null;
     }
 
     @Override
@@ -314,7 +319,24 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
             return ImmutableList.copyOf(elements);
         }
 
-        return CallGraphGroupBy.groupCallGraphBy(groupBy, elements, this);
+        Set<ICallStackElement> groupedElements = fGroupedRootElements;
+        if (groupedElements == null) {
+            Map<ICallStackElement, Collection<AggregatedCallSite>> groupCallGraphBy = CallGraphGroupBy.groupCallGraphBy(groupBy, elements, this);
+            // Get the root elements that have no parent
+            groupedElements = groupCallGraphBy.keySet().stream()
+                    .filter(element -> element.getParentElement() == null)
+                    .collect(Collectors.toSet());
+            Multimap<ICallStackElement, AggregatedCallSite> groupedCct = HashMultimap.create();
+            groupCallGraphBy.entrySet().forEach(entry -> {
+                if (!entry.getValue().isEmpty()) {
+                    groupedCct.putAll(entry.getKey(), entry.getValue());
+                }
+            });
+            fGroupedRootElements = groupedElements;
+            fGroupedCct = groupedCct;
+        }
+
+        return groupedElements;
     }
 
     @Override
@@ -327,6 +349,10 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
 
     @Override
     public Collection<AggregatedCallSite> getCallingContextTree(ICallStackElement element) {
+        Multimap<ICallStackElement, AggregatedCallSite> groupedCct = fGroupedCct;
+        if (groupedCct != null) {
+            return groupedCct.get(element);
+        }
         return fCcts.get(element);
     }
 

@@ -93,8 +93,7 @@ public interface ICallStackElement {
      *
      * @return The parent element
      */
-    @Nullable
-    ICallStackElement getParentElement();
+    @Nullable ICallStackElement getParentElement();
 
 
     /**

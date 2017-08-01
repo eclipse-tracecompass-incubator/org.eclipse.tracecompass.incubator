@@ -179,6 +179,8 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
      */
     @Override
     public Collection<ICallStackElement> getElements() {
+        fCallGraph.schedule();
+        fCallGraph.waitForCompletion();
         return fCallGraph.getElements();
     }
 
@@ -202,6 +204,8 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
 
     @Override
     public Collection<AggregatedCallSite> getCallingContextTree(ICallStackElement element) {
+        fCallGraph.schedule();
+        fCallGraph.waitForCompletion();
         return fCallGraph.getCallingContextTree(element);
     }
 

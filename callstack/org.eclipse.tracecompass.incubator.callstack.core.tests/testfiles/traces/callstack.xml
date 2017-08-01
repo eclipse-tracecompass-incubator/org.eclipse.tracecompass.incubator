@@ -110,6 +110,16 @@
 <field name="pid" type="string" value="1" />
 <field name="tid" type="string" value="3" />
 </event>
+<event timestamp="8" name="entry">
+<field name="op" type="string" value="op2" />
+<field name="pid" type="string" value="5" />
+<field name="tid" type="string" value="6" />
+</event>
+<event timestamp="9" name="entry">
+<field name="op" type="string" value="op3" />
+<field name="pid" type="string" value="5" />
+<field name="tid" type="string" value="6" />
+</event>
 <event timestamp="9" name="entry">
 <field name="op" type="string" value="op2" />
 <field name="pid" type="string" value="5" />
@@ -125,10 +135,20 @@
 <field name="pid" type="string" value="1" />
 <field name="tid" type="string" value="2" />
 </event>
+<event timestamp="10" name="exit">
+<field name="op" type="string" value="op3" />
+<field name="pid" type="string" value="5" />
+<field name="tid" type="string" value="6" />
+</event>
 <event timestamp="11" name="exit">
 <field name="op" type="string" value="op3" />
 <field name="pid" type="string" value="5" />
 <field name="tid" type="string" value="7" />
+</event>
+<event timestamp="11" name="exit">
+<field name="op" type="string" value="op2" />
+<field name="pid" type="string" value="5" />
+<field name="tid" type="string" value="6" />
 </event>
 <event timestamp="12" name="entry">
 <field name="op" type="string" value="op4" />

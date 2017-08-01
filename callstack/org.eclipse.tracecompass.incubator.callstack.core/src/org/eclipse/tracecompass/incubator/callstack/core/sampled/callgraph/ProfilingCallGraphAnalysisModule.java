@@ -11,7 +11,9 @@ package org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
@@ -47,7 +49,10 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
     private @Nullable ITmfEventRequest fRequest;
     private final Set<ICallStackElement> fRootElements = new HashSet<>();
     private final Multimap<ICallStackElement, AggregatedCallSite> fCcts = HashMultimap.create();
-    private @Nullable ICallStackGroupDescriptor fGroupBy;
+
+    private @Nullable ICallStackGroupDescriptor fGroupBy = null;
+    private @Nullable Set<ICallStackElement> fGroupedRootElements = null;
+    private @Nullable Multimap<ICallStackElement, AggregatedCallSite> fGroupedCct = null;
 
     /**
      * Get the root elements from this call graph hierarchy
@@ -76,16 +81,42 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
             return ImmutableList.copyOf(elements);
         }
 
-        return CallGraphGroupBy.groupCallGraphBy(groupBy, elements, this);
+        // FIXME: The grouping part of this class is copy-pasted from
+        // instrumented call graph. either have a base class or move this
+        // functionnality to its own class
+        Set<ICallStackElement> groupedElements = fGroupedRootElements;
+        if (groupedElements == null) {
+            Map<ICallStackElement, Collection<AggregatedCallSite>> groupCallGraphBy = CallGraphGroupBy.groupCallGraphBy(groupBy, elements, this);
+            // Get the root elements that have no parent
+            groupedElements = groupCallGraphBy.keySet().stream()
+                    .filter(element -> element.getParentElement() == null)
+                    .collect(Collectors.toSet());
+            Multimap<ICallStackElement, AggregatedCallSite> groupedCct = HashMultimap.create();
+            groupCallGraphBy.entrySet().forEach(entry -> {
+                if (!entry.getValue().isEmpty()) {
+                    groupedCct.putAll(entry.getKey(), entry.getValue());
+                }
+            });
+            fGroupedRootElements = groupedElements;
+            fGroupedCct = groupedCct;
+        }
+
+        return groupedElements;
     }
 
     @Override
     public void setGroupBy(@Nullable ICallStackGroupDescriptor descriptor) {
         fGroupBy = descriptor;
+        fGroupedRootElements = null;
+        fGroupedCct = null;
     }
 
     @Override
     public Collection<AggregatedCallSite> getCallingContextTree(ICallStackElement element) {
+        Multimap<ICallStackElement, AggregatedCallSite> groupedCct = fGroupedCct;
+        if (groupedCct != null) {
+            return groupedCct.get(element);
+        }
         return fCcts.get(element);
     }
 
@@ -107,9 +138,8 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
     }
 
     /**
-     * /**
-     * Add a stack trace to this group, such that the symbol at position 0 is the
-     * top of the stack, ie the last symbol called.
+     * /** Add a stack trace to this group, such that the symbol at position 0
+     * is the top of the stack, ie the last symbol called.
      *
      * @param dstGroup
      *            The element to which to add this stack trace
@@ -131,8 +161,8 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
     }
 
     /**
-     * Add a stack trace to this group, such that the symbol at position 0 is the
-     * top of the stack, ie the last symbol called.
+     * Add a stack trace to this group, such that the symbol at position 0 is
+     * the top of the stack, ie the last symbol called.
      *
      * @param dstGroup
      *            The element to which to add this stack trace
@@ -154,19 +184,20 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
     }
 
     /**
-     * Method to implement to process a callstack event. If this event contains a
-     * stack trace to add to some element, the implementation first needs to find
-     * the element to which to add the stack trace. The root elements of the
-     * hierarchy should be kept in this class. A root element can be added by
-     * calling {@link #addRootElement(ICallStackElement)} and they can be retrieved
-     * with {@link #getRootElements()}.
+     * Method to implement to process a callstack event. If this event contains
+     * a stack trace to add to some element, the implementation first needs to
+     * find the element to which to add the stack trace. The root elements of
+     * the hierarchy should be kept in this class. A root element can be added
+     * by calling {@link #addRootElement(ICallStackElement)} and they can be
+     * retrieved with {@link #getRootElements()}.
      *
-     * Then from, the event, when the stack trace is retrieve, it can be aggregated
-     * to the element by calling {@link #addStackTrace(ICallStackElement, long[])}
-     * or {@link #addStackTrace(ICallStackElement, Object[])}. These methods will
-     * take care of creating the callsite objects and add the resulting callsite to
-     * the element. Refer to the documentation of those method for the order of the
-     * stack.
+     * Then from, the event, when the stack trace is retrieve, it can be
+     * aggregated to the element by calling
+     * {@link #addStackTrace(ICallStackElement, long[])} or
+     * {@link #addStackTrace(ICallStackElement, Object[])}. These methods will
+     * take care of creating the callsite objects and add the resulting callsite
+     * to the element. Refer to the documentation of those method for the order
+     * of the stack.
      *
      * @param event
      *            The trace event to process
@@ -231,8 +262,8 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
                 processEvent(event);
             } else if (fTrace instanceof TmfExperiment) {
                 /*
-                 * If the request is for an experiment, check if the event is from one of the
-                 * child trace
+                 * If the request is for an experiment, check if the event is
+                 * from one of the child trace
                  */
                 for (ITmfTrace childTrace : ((TmfExperiment) fTrace).getTraces()) {
                     if (childTrace == event.getTrace()) {

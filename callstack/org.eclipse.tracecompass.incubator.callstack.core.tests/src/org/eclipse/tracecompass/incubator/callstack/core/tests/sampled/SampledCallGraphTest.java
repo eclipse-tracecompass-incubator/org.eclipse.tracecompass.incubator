@@ -21,8 +21,8 @@ import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph.ProfilingCallGraphAnalysisModule;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.base.AllGroupDescriptor;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.junit.Test;
 

@@ -57,9 +57,29 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
         fProcessId = -1;
     }
 
+    /**
+     * copy constructor
+     *
+     * @param toCopy Object to copy
+     */
+    public AggregatedCalledFunction(AggregatedCalledFunction toCopy) {
+        super(toCopy);
+        fStatistics = new AggregatedCalledFunctionStatistics();
+        fStatistics.merge(toCopy.fStatistics);
+        fProcessId = toCopy.fProcessId;
+        fDuration = toCopy.fDuration;
+        fSelfTime = toCopy.fSelfTime;
+        fCpuTime = toCopy.fCpuTime;
+    }
+
     @Override
     public long getLength() {
         return fDuration;
+    }
+
+    @Override
+    public AggregatedCalledFunction copyOf() {
+        return new AggregatedCalledFunction(this);
     }
 
     @Override

@@ -215,7 +215,9 @@ public class CallStackStateSystemTest extends CallStackTestBase {
                 expected.clear();
                 expected.add(new StateIntervalStub(1, 1, TmfStateValue.nullValue()));
                 expected.add(new StateIntervalStub(2, 6, TmfStateValue.newValueString("op3")));
-                expected.add(new StateIntervalStub(7, 11, TmfStateValue.nullValue()));
+                expected.add(new StateIntervalStub(7, 7, TmfStateValue.nullValue()));
+                expected.add(new StateIntervalStub(8, 10, TmfStateValue.newValueString("op2")));
+                expected.add(new StateIntervalStub(11, 11, TmfStateValue.nullValue()));
                 expected.add(new StateIntervalStub(12, 19, TmfStateValue.newValueString("op4")));
                 expected.add(new StateIntervalStub(20, 20, TmfStateValue.nullValue()));
                 StateSystemTestUtils.testIntervalForAttributes(ss, expected, pathList.toArray(new String[pathList.size()]));
@@ -226,7 +228,9 @@ public class CallStackStateSystemTest extends CallStackTestBase {
                 expected.clear();
                 expected.add(new StateIntervalStub(1, 3, TmfStateValue.nullValue()));
                 expected.add(new StateIntervalStub(4, 5, TmfStateValue.newValueString("op1")));
-                expected.add(new StateIntervalStub(6, 20, TmfStateValue.nullValue()));
+                expected.add(new StateIntervalStub(6, 8, TmfStateValue.nullValue()));
+                expected.add(new StateIntervalStub(9, 9, TmfStateValue.newValueString("op3")));
+                expected.add(new StateIntervalStub(10, 20, TmfStateValue.nullValue()));
                 StateSystemTestUtils.testIntervalForAttributes(ss, expected, pathList.toArray(new String[pathList.size()]));
             }
                 break;

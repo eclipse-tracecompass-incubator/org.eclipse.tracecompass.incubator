@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.callstack.core.callgraph;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
@@ -28,7 +29,7 @@ public abstract class AggregatedCallSite {
 
     private final Object fSymbol;
     private final Map<Object, AggregatedCallSite> fCallees = new HashMap<>();
-    private final @Nullable AggregatedCallSite fCaller = null;
+    private final @Nullable AggregatedCallSite fCaller;
     // private final AggregatedCalledFunctionStatistics fStatistics;
 
     /**
@@ -40,6 +41,21 @@ public abstract class AggregatedCallSite {
      */
     public AggregatedCallSite(Object symbol) {
         fSymbol = symbol;
+        fCaller = null;
+    }
+
+    /**
+     * Copy constructor
+     *
+     * @param copy
+     *            The call site to copy
+     */
+    protected AggregatedCallSite(AggregatedCallSite copy) {
+        fSymbol = copy.fSymbol;
+        for (Entry<Object, AggregatedCallSite> entry : copy.fCallees.entrySet()) {
+            fCallees.put(entry.getKey(), entry.getValue().copyOf());
+        }
+        fCaller = copy.fCaller;
     }
 
     /**
@@ -51,6 +67,15 @@ public abstract class AggregatedCallSite {
      * @return The aggregated value of this callsite
      */
     public abstract long getLength();
+
+    /**
+     * Make a copy of this callsite, with its statistics. Implementing classes
+     * should make sure they copy all fields of the callsite, including the
+     * statistics.
+     *
+     * @return A copy of this aggregated call site
+     */
+    public abstract AggregatedCallSite copyOf();
 
     /**
      * Get the symbol associated with this callsite
@@ -138,7 +163,7 @@ public abstract class AggregatedCallSite {
             Object childSymbol = otherChildSite.getSymbol();
             AggregatedCallSite childSite = fCallees.get(childSymbol);
             if (childSite == null) {
-                fCallees.put(childSymbol, otherChildSite);
+                fCallees.put(childSymbol, otherChildSite.copyOf());
             } else {
                 // combine children
                 childSite.merge(otherChildSite);

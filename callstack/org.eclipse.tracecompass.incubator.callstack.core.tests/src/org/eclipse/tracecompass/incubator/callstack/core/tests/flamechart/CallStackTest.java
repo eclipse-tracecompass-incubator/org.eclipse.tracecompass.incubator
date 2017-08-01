@@ -169,14 +169,16 @@ public class CallStackTest extends CallStackTestBase {
 
                 /* Check the second level */
                 callList = callStack.getCallListAtDepth(2, START_TIME, END_TIME, 1, MONITOR);
-                assertEquals(2, callList.size());
+                assertEquals(3, callList.size());
                 assertEquals(CalledFunctionFactory.create(2L, 7L, 2, "op3", 1, 6, null, model), callList.get(0));
-                assertEquals(CalledFunctionFactory.create(12L, 20L, 2, "op4", 1, 6, null, model), callList.get(1));
+                assertEquals(CalledFunctionFactory.create(8L, 11L, 2, "op2", 1, 6, null, model), callList.get(1));
+                assertEquals(CalledFunctionFactory.create(12L, 20L, 2, "op4", 1, 6, null, model), callList.get(2));
 
                 /* Check the third level */
                 callList = callStack.getCallListAtDepth(3, START_TIME, END_TIME, 1, MONITOR);
-                assertEquals(1, callList.size());
+                assertEquals(2, callList.size());
                 assertEquals(CalledFunctionFactory.create(4L, 6L, 3, "op1", 1, 6, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(9L, 10L, 3, "op3", 1, 6, null, model), callList.get(1));
             }
                 break;
             case "7": {

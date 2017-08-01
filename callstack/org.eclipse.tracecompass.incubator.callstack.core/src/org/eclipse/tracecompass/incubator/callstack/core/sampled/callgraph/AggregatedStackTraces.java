@@ -33,6 +33,11 @@ public class AggregatedStackTraces extends AggregatedCallSite {
         super(symbol);
     }
 
+    private AggregatedStackTraces(AggregatedStackTraces toCopy) {
+        super(toCopy);
+        fCount = toCopy.fCount;
+    }
+
     @Override
     public long getLength() {
         return fCount;
@@ -41,6 +46,11 @@ public class AggregatedStackTraces extends AggregatedCallSite {
     @Override
     protected void mergeData(@NonNull AggregatedCallSite child) {
         fCount += child.getLength();
+    }
+
+    @Override
+    public AggregatedStackTraces copyOf() {
+        return new AggregatedStackTraces(this);
     }
 
 }
