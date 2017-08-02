@@ -14,15 +14,14 @@ package org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
@@ -81,6 +80,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * View to display the flame graph .This uses the flameGraphNode tree generated
@@ -121,7 +122,7 @@ public class FlameGraphView extends TmfView {
  // The action to import a binary file mapping */
     private Action fConfigureSymbolsAction;
 
-    private final Map<ITmfTrace, ISymbolProvider> fSymbolProviders = new HashMap<>();
+    private final Multimap<ITmfTrace, ISymbolProvider> fSymbolProviders = LinkedHashMultimap.create();
     /**
      * A plain old semaphore is used since different threads will be competing
      * for the same resource.
@@ -249,11 +250,16 @@ public class FlameGraphView extends TmfView {
          */
         ITmfTrace trace = fTrace;
         if (trace != null) {
-            ISymbolProvider symbolProvider = fSymbolProviders.get(trace);
-            if (symbolProvider == null) {
-                symbolProvider = SymbolProviderManager.getInstance().getSymbolProvider(trace);
-                symbolProvider.loadConfiguration(null);
-                fSymbolProviders.put(trace, symbolProvider);
+            /*
+             * Load the symbol provider for the current trace, even if it does not provide a
+             * call stack analysis module. See
+             * https://bugs.eclipse.org/bugs/show_bug.cgi?id=494212
+             */
+            Collection<ISymbolProvider> symbolProviders = fSymbolProviders.get(trace);
+            if (symbolProviders.isEmpty()) {
+                symbolProviders = SymbolProviderManager.getInstance().getSymbolProviders(trace);
+                symbolProviders.forEach(provider -> provider.loadConfiguration(new NullProgressMonitor()));
+                fSymbolProviders.putAll(trace, symbolProviders);
             }
         }
 
@@ -571,12 +577,13 @@ public class FlameGraphView extends TmfView {
         ITmfTrace trace = fTrace;
         if (trace != null) {
             for (ITmfTrace subTrace : TmfTraceManager.getTraceSet(trace)) {
-                ISymbolProvider provider = fSymbolProviders.get(subTrace);
-                if (provider instanceof org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) {
-                    org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider provider2 = (org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) provider;
-                    ISymbolProviderPreferencePage page = provider2.createPreferencePage();
-                    if (page != null) {
-                        pages.add(page);
+                for (ISymbolProvider provider : SymbolProviderManager.getInstance().getSymbolProviders(subTrace)) {
+                    if (provider instanceof org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) {
+                        org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider provider2 = (org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) provider;
+                        ISymbolProviderPreferencePage page = provider2.createPreferencePage();
+                        if (page != null) {
+                            pages.add(page);
+                        }
                     }
                 }
             }

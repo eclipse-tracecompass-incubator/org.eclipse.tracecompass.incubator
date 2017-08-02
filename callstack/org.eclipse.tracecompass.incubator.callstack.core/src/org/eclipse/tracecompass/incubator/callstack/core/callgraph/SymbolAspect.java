@@ -19,6 +19,7 @@ import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.tmf.core.segment.ISegmentAspect;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
 import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
+import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderUtils;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 
@@ -69,32 +70,19 @@ public final class SymbolAspect implements ISegmentAspect {
             ICalledFunction calledFunction = (ICalledFunction) segment;
             ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
             if (trace != null) {
-                String symbolText = null;
                 Object symbol = calledFunction.getSymbol();
                 if (symbol instanceof Long) {
                     Long longAddress = (Long) symbol;
                     Collection<ISymbolProvider> providers = SymbolProviderManager.getInstance().getSymbolProviders(trace);
-                    for (ISymbolProvider provider: providers) {
-                        symbolText = provider.getSymbolText(longAddress);
-                        if (symbolText != null) {
-                            break;
-                        }
-                    }
-                    if (symbolText == null) {
-                        return "0x" + Long.toHexString(longAddress); //$NON-NLS-1$
-                    }
-                    // take the start time in the query for the symbol name
-                    long time = calledFunction.getStart();
+
+                    // look for a symbol for a given process
+                    long time = segment.getStart();
                     int pid = calledFunction.getProcessId();
                     if (pid > 0) {
-                        for (ISymbolProvider provider: providers) {
-                            String text = provider.getSymbolText(pid, time, longAddress);
-                            if (text != null) {
-                                return text;
-                            }
-                        }
+                        return SymbolProviderUtils.getSymbolText(providers, pid, time, longAddress);
                     }
-                    return symbolText;
+
+                    return SymbolProviderUtils.getSymbolText(providers, longAddress);
                 }
                 return String.valueOf(symbol);
             }

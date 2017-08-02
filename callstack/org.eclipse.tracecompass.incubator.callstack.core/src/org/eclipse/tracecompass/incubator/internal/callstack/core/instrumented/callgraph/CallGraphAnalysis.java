@@ -33,6 +33,8 @@ import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
+import org.eclipse.tracecompass.incubator.callstack.core.symbol.CallStackSymbolFactory;
+import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
@@ -229,8 +231,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
 
         AbstractCalledFunction nextFunction = (AbstractCalledFunction) callStack.getNextFunction(callStack.getStartTime(), 1, null, model);
         while (nextFunction != null) {
-            AggregatedCalledFunction aggregatedChild = createCallSite(nextFunction.getSymbol());
-            iterateOverCallstack(callStack, nextFunction, 2, aggregatedChild, model, monitor);
+            AggregatedCalledFunction aggregatedChild = createCallSite(CallStackSymbolFactory.createSymbol(nextFunction.getSymbol(), element, nextFunction.getStart()));
+            iterateOverCallstack(element, callStack, nextFunction, 2, aggregatedChild, model, monitor);
             aggregatedChild.addFunctionCall(nextFunction);
             addAggregatedCallSite(element, aggregatedChild);
             fRootFunctions.add(nextFunction);
@@ -238,7 +240,7 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
         }
     }
 
-    private void iterateOverCallstack(CallStack callstack, ICalledFunction function, int nextLevel, AggregatedCalledFunction aggregatedCall, IHostModel model, IProgressMonitor monitor) {
+    private void iterateOverCallstack(ICallStackElement element, CallStack callstack, ICalledFunction function, int nextLevel, AggregatedCalledFunction aggregatedCall, IHostModel model, IProgressMonitor monitor) {
         fStore.add(function);
         if (nextLevel > callstack.getMaxDepth()) {
             return;
@@ -246,8 +248,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
 
         AbstractCalledFunction nextFunction = (AbstractCalledFunction) callstack.getNextFunction(function.getStart(), nextLevel, function, model);
         while (nextFunction != null) {
-            AggregatedCalledFunction aggregatedChild = createCallSite(nextFunction.getSymbol());
-            iterateOverCallstack(callstack, nextFunction, nextLevel + 1, aggregatedChild, model, monitor);
+            AggregatedCalledFunction aggregatedChild = createCallSite(CallStackSymbolFactory.createSymbol(nextFunction.getSymbol(), element, nextFunction.getStart()));
+            iterateOverCallstack(element, callstack, nextFunction, nextLevel + 1, aggregatedChild, model, monitor);
             aggregatedCall.addChild(nextFunction, aggregatedChild);
             nextFunction = (AbstractCalledFunction) callstack.getNextFunction(nextFunction.getEnd(), nextLevel, function, model);
         }
@@ -357,7 +359,7 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     }
 
     @Override
-    public AggregatedCalledFunction createCallSite(Object symbol) {
+    public AggregatedCalledFunction createCallSite(ICallStackSymbol symbol) {
         return new AggregatedCalledFunction(symbol);
     }
 

@@ -96,7 +96,7 @@ public class AggregatedCalledFunctionStatisticsTest {
      * </pre>
      */
     @Test
-    public void TreeStatisticsTest() {
+    public void treeStatisticsTest() {
         ITmfStateSystemBuilder fixture = createFixture();
         // Build the state system
         int parentQuark = fixture.getQuarkAbsoluteAndAdd(CallGraphAnalysisStub.PROCESS_PATH, CallGraphAnalysisStub.THREAD_PATH, CallGraphAnalysisStub.CALLSTACK_PATH);
@@ -181,7 +181,7 @@ public class AggregatedCalledFunctionStatisticsTest {
      * </pre>
      */
     @Test
-    public void MergeFirstLevelCalleesStatisticsTest() {
+    public void mergeFirstLevelCalleesStatisticsTest() {
         ITmfStateSystemBuilder fixture = createFixture();
         // Build the state system
         int parentQuark = fixture.getQuarkAbsoluteAndAdd(CallGraphAnalysisStub.PROCESS_PATH, CallGraphAnalysisStub.THREAD_PATH, CallGraphAnalysisStub.CALLSTACK_PATH);
@@ -218,9 +218,12 @@ public class AggregatedCalledFunctionStatisticsTest {
         AggregatedCalledFunction firstFunction = (AggregatedCalledFunction) children[0];
         Object[] firstFunctionChildren = firstFunction.getCallees().toArray();
         AggregatedCalledFunction secondFunction = (AggregatedCalledFunction) firstFunctionChildren[0];
-        Object[] secondFunctionChildren = secondFunction.getCallees().toArray();
-        AggregatedCalledFunction leaf1 = (AggregatedCalledFunction) secondFunctionChildren[0];
-        AggregatedCalledFunction leaf2 = (AggregatedCalledFunction) secondFunctionChildren[1];
+        AggregatedCalledFunction leaf1 = (AggregatedCalledFunction) secondFunction.getCallees().stream()
+                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x2"))
+                .findAny().get();
+        AggregatedCalledFunction leaf2 = (AggregatedCalledFunction) secondFunction.getCallees().stream()
+                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x3"))
+                .findAny().get();
         // Test the first function statistics
         @NonNull
         AggregatedCalledFunctionStatistics functionStatistics1 = firstFunction.getFunctionStatistics();
@@ -246,7 +249,6 @@ public class AggregatedCalledFunctionStatisticsTest {
         assertEquals("Test second function's standard deviation", Double.NaN, functionStatistics2.getDurationStatistics().getStdDev(), ERROR);
         assertEquals("Test second function's standard deviation", Double.NaN, functionStatistics2.getSelfTimeStatistics().getStdDev(), ERROR);
         // Test the first leaf statistics
-        @NonNull
         AggregatedCalledFunctionStatistics leafStatistics1 = leaf1.getFunctionStatistics();
         assertEquals("Test first leaf's maximum duration", 30, leafStatistics1.getDurationStatistics().getMax());
         assertEquals("Test first leaf's minimum duration", 30, leafStatistics1.getDurationStatistics().getMin());
@@ -258,7 +260,6 @@ public class AggregatedCalledFunctionStatisticsTest {
         assertEquals("Test first leaf's standard deviation", Double.NaN, leafStatistics1.getDurationStatistics().getStdDev(), ERROR);
         assertEquals("Test first leaf's self time standard deviation", Double.NaN, leafStatistics1.getSelfTimeStatistics().getStdDev(), ERROR);
         // Test the second leaf statistics
-        @NonNull
         AggregatedCalledFunctionStatistics leafStatistics2 = leaf2.getFunctionStatistics();
         assertEquals("Test second leaf's maximum duration", 20, leafStatistics2.getDurationStatistics().getMax());
         assertEquals("Test second leaf's minimum duration", 20, leafStatistics2.getDurationStatistics().getMin());
@@ -417,7 +418,7 @@ public class AggregatedCalledFunctionStatisticsTest {
      * </pre>
      */
     @Test
-    public void MergeSecondLevelCalleesTest() {
+    public void mergeSecondLevelCalleesTest() {
         ITmfStateSystemBuilder fixture = createFixture();
 
         buildCallStack(fixture);
@@ -436,9 +437,12 @@ public class AggregatedCalledFunctionStatisticsTest {
         AggregatedCalledFunction main = (AggregatedCalledFunction) children[0];
         Object[] mainChildren = main.getCallees().toArray();
         AggregatedCalledFunction function1 = (AggregatedCalledFunction) mainChildren[0];
-        Object[] firstFunctionChildren = function1.getCallees().toArray();
-        AggregatedCalledFunction function2 = (AggregatedCalledFunction) firstFunctionChildren[0];
-        AggregatedCalledFunction function3 = (AggregatedCalledFunction) firstFunctionChildren[1];
+        AggregatedCalledFunction function2 = (AggregatedCalledFunction) function1.getCallees().stream()
+                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x2"))
+                .findAny().get();
+        AggregatedCalledFunction function3 = (AggregatedCalledFunction) function1.getCallees().stream()
+                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x3"))
+                .findAny().get();
         Object[] firstChildCallee = function2.getCallees().toArray();
         AggregatedCalledFunction function4 = (AggregatedCalledFunction) firstChildCallee[0];
         // Test the main function statistics

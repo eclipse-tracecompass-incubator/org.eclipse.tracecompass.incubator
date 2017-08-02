@@ -14,6 +14,7 @@ import java.util.Collection;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
+import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
 
 /**
  * Interface that analyses who provide callgraph
@@ -70,7 +71,7 @@ public interface ICallGraphProvider {
      *            The symbol
      * @return A new aggregated callsite
      */
-    AggregatedCallSite createCallSite(Object symbol);
+    AggregatedCallSite createCallSite(ICallStackSymbol symbol);
 
     /**
      * @param dstGroup

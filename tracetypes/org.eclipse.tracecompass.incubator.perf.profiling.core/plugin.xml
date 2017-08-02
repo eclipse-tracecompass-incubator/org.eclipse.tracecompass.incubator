@@ -34,5 +34,13 @@
             trace_type="org.eclipse.tracecompass.incubator.internal.perf.profiling.core.trace.PerfCtfTrace">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.symbolProvider">
+      <providerFactory
+            class="org.eclipse.tracecompass.incubator.internal.perf.profiling.core.symbol.PerfMmapSymbolProviderFactory"
+            id="org.eclipse.tracecompass.incubator.perf.profiling.core.perfmmap"
+            priority="75">
+      </providerFactory>
+   </extension>
 
 </plugin>

@@ -87,34 +87,33 @@ public class SampledCallGraphTest {
         TestProfilingAnalysis pg = new TestProfilingAnalysis();
         try {
             ICallStackElement element = pg.getElement();
-            pg.addStackTrace(element, CALLSITE_1);
-            pg.addStackTrace(element, CALLSITE_2);
-            pg.addStackTrace(element, CALLSITE_3);
-            pg.addStackTrace(element, CALLSITE_4);
-            pg.addStackTrace(element, CALLSITE_5);
-            pg.addStackTrace(element, CALLSITE_6);
-            pg.addStackTrace(element, CALLSITE_7);
-            pg.addStackTrace(element, CALLSITE_8);
-            pg.addStackTrace(element, CALLSITE_9);
-            pg.addStackTrace(element, CALLSITE_10);
+            pg.addStackTrace(element, CALLSITE_1, 1);
+            pg.addStackTrace(element, CALLSITE_2, 2);
+            pg.addStackTrace(element, CALLSITE_3, 3);
+            pg.addStackTrace(element, CALLSITE_4, 4);
+            pg.addStackTrace(element, CALLSITE_5, 5);
+            pg.addStackTrace(element, CALLSITE_6, 6);
+            pg.addStackTrace(element, CALLSITE_7, 7);
+            pg.addStackTrace(element, CALLSITE_8, 8);
+            pg.addStackTrace(element, CALLSITE_9, 9);
+            pg.addStackTrace(element, CALLSITE_10, 10);
 
             Collection<AggregatedCallSite> aggregatedData = pg.getCallingContextTree(element);
             assertNotNull(aggregatedData);
             assertEquals(2, aggregatedData.size());
 
             for (AggregatedCallSite callsite : aggregatedData) {
-                switch (((Long) callsite.getSymbol()).intValue()) {
-                case 1: {
+                switch (callsite.getSymbol().resolve(Collections.emptySet())) {
+                case "0x1": {
                     assertEquals(8, callsite.getLength());
                     assertEquals(2, callsite.getCallees().size());
-                    assertEquals(1L, callsite.getSymbol());
                     for (AggregatedCallSite childCallsite : callsite.getCallees()) {
-                        switch (((Long) childCallsite.getSymbol()).intValue()) {
-                        case 2:
+                        switch (childCallsite.getSymbol().resolve(Collections.emptySet())) {
+                        case "0x2":
                             assertEquals(7, childCallsite.getLength());
                             assertEquals(3, childCallsite.getCallees().size());
                             break;
-                        case 3:
+                        case "0x3":
                             assertEquals(1, childCallsite.getLength());
                             assertEquals(1, childCallsite.getCallees().size());
                             break;
@@ -124,14 +123,12 @@ public class SampledCallGraphTest {
                     }
                 }
                     break;
-                case 10: {
+                case "0xa": {
                     assertEquals(2, callsite.getLength());
                     assertEquals(1, callsite.getCallees().size());
-                    assertEquals(10L, callsite.getSymbol());
                     AggregatedCallSite childCallsite = callsite.getCallees().iterator().next();
                     assertEquals(2, childCallsite.getLength());
                     assertEquals(1, callsite.getCallees().size());
-                    assertEquals(11L, childCallsite.getSymbol());
                 }
                     break;
                 default:

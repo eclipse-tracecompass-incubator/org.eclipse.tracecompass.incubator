@@ -24,6 +24,8 @@ import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCal
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraphGroupBy;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.IEventCallStackProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.symbol.CallStackSymbolFactory;
+import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -121,7 +123,7 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
     }
 
     @Override
-    public AggregatedCallSite createCallSite(Object symbol) {
+    public AggregatedCallSite createCallSite(ICallStackSymbol symbol) {
         return new AggregatedStackTraces(symbol);
     }
 
@@ -145,15 +147,17 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
      *            The element to which to add this stack trace
      * @param stackTrace
      *            The stack trace to add to the group
+     * @param ts
+     *            The timestamp at which this stack trace is added
      */
-    public void addStackTrace(ICallStackElement dstGroup, Object[] stackTrace) {
+    public void addStackTrace(ICallStackElement dstGroup, @NonNull Object [] stackTrace, long ts) {
         if (stackTrace.length == 0) {
             return;
         }
         // Create the callsite for this stack trace
-        AggregatedCallSite prevCallsite = createCallSite(stackTrace[stackTrace.length - 1]);
+        AggregatedCallSite prevCallsite = createCallSite(CallStackSymbolFactory.createSymbol(stackTrace[stackTrace.length - 1], dstGroup, ts));
         for (int i = stackTrace.length - 2; i >= 0; i--) {
-            AggregatedCallSite callsite = createCallSite(stackTrace[i]);
+            AggregatedCallSite callsite = createCallSite(CallStackSymbolFactory.createSymbol(stackTrace[i], dstGroup, ts));
             callsite.addCallee(prevCallsite);
             prevCallsite = callsite;
         }
@@ -168,15 +172,17 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
      *            The element to which to add this stack trace
      * @param stackTrace
      *            The stack trace to add to the group
+     * @param ts
+     *            The timestamp at which this stack trace is added
      */
-    public void addStackTrace(ICallStackElement dstGroup, long[] stackTrace) {
+    public void addStackTrace(ICallStackElement dstGroup, long[] stackTrace, long ts) {
         if (stackTrace.length == 0) {
             return;
         }
         // Create the callsite for this stack trace
-        AggregatedCallSite prevCallsite = createCallSite(stackTrace[stackTrace.length - 1]);
+        AggregatedCallSite prevCallsite = createCallSite(CallStackSymbolFactory.createSymbol(stackTrace[stackTrace.length - 1], dstGroup, ts));
         for (int i = stackTrace.length - 2; i >= 0; i--) {
-            AggregatedCallSite callsite = createCallSite(stackTrace[i]);
+            AggregatedCallSite callsite = createCallSite(CallStackSymbolFactory.createSymbol(stackTrace[i], dstGroup, ts));
             callsite.addCallee(prevCallsite);
             prevCallsite = callsite;
         }
@@ -193,8 +199,8 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
      *
      * Then from, the event, when the stack trace is retrieve, it can be
      * aggregated to the element by calling
-     * {@link #addStackTrace(ICallStackElement, long[])} or
-     * {@link #addStackTrace(ICallStackElement, Object[])}. These methods will
+     * {@link #addStackTrace(ICallStackElement, long[], long)} or
+     * {@link #addStackTrace(ICallStackElement, Object[], long)}. These methods will
      * take care of creating the callsite objects and add the resulting callsite
      * to the element. Refer to the documentation of those method for the order
      * of the stack.

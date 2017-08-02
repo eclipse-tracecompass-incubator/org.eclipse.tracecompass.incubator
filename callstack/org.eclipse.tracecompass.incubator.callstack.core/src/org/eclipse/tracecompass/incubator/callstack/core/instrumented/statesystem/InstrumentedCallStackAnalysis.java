@@ -27,6 +27,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDes
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
@@ -172,11 +173,6 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
         return Objects.requireNonNull(links);
     }
 
-    /**
-     * Get the groups
-     *
-     * @return
-     */
     @Override
     public Collection<ICallStackElement> getElements() {
         fCallGraph.schedule();
@@ -210,7 +206,7 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     }
 
     @Override
-    public AggregatedCallSite createCallSite(Object symbol) {
+    public AggregatedCallSite createCallSite(ICallStackSymbol symbol) {
         return fCallGraph.createCallSite(symbol);
     }
 

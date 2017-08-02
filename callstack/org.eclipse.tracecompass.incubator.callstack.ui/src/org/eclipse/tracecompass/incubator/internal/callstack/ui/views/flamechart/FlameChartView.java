@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.Action;
@@ -91,6 +92,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * Main implementation for the Call Stack view
@@ -146,7 +149,7 @@ public class FlameChartView extends AbstractTimeGraphView {
     // Fields
     // ------------------------------------------------------------------------
 
-    private final Map<ITmfTrace, ISymbolProvider> fSymbolProviders = new HashMap<>();
+    private final Multimap<ITmfTrace, ISymbolProvider> fSymbolProviders = LinkedHashMultimap.create();
 
     // The next event action
     private Action fNextEventAction;
@@ -520,7 +523,7 @@ public class FlameChartView extends AbstractTimeGraphView {
         super.traceClosed(signal);
         synchronized (fSymbolProviders) {
             for (ITmfTrace trace : getTracesToBuild(signal.getTrace())) {
-                fSymbolProviders.remove(trace);
+                fSymbolProviders.removeAll(trace);
             }
         }
     }
@@ -545,11 +548,11 @@ public class FlameChartView extends AbstractTimeGraphView {
          * call stack analysis module. See
          * https://bugs.eclipse.org/bugs/show_bug.cgi?id=494212
          */
-        ISymbolProvider symbolProvider = fSymbolProviders.get(trace);
-        if (symbolProvider == null) {
-            symbolProvider = SymbolProviderManager.getInstance().getSymbolProvider(trace);
-            symbolProvider.loadConfiguration(null);
-            fSymbolProviders.put(trace, symbolProvider);
+        Collection<ISymbolProvider> symbolProviders = fSymbolProviders.get(trace);
+        if (symbolProviders.isEmpty()) {
+            symbolProviders = SymbolProviderManager.getInstance().getSymbolProviders(trace);
+            symbolProviders.forEach(provider -> provider.loadConfiguration(new NullProgressMonitor()));
+            fSymbolProviders.putAll(trace, symbolProviders);
         }
 
         /* Continue with the call stack view specific operations */
@@ -588,7 +591,7 @@ public class FlameChartView extends AbstractTimeGraphView {
                 traceEntry.addChild(callStackRootEntry);
             }
             for (ICallStackElement element : callstack.getRootElements()) {
-                processCallStackElement(symbolProvider, element, callStackRootEntry);
+                processCallStackElement(symbolProviders, element, callStackRootEntry);
             }
         }
         final long entryStart = getStartTime();
@@ -689,7 +692,7 @@ public class FlameChartView extends AbstractTimeGraphView {
         return list;
     }
 
-    private void processCallStackElement(ISymbolProvider provider, ICallStackElement element, TimeGraphEntry parentEntry) {
+    private void processCallStackElement(Collection<ISymbolProvider> symbolProviders, ICallStackElement element, TimeGraphEntry parentEntry) {
         TimeGraphEntry entry = new LevelEntry(element.getName(), parentEntry.getStartTime(), parentEntry.getEndTime(), element.isSymbolKeyElement());
         parentEntry.addChild(entry);
         // Is this an intermediate or leaf element
@@ -699,12 +702,12 @@ public class FlameChartView extends AbstractTimeGraphView {
             CallStack callStack = finalElement.getCallStack();
             setEndTime(Math.max(getEndTime(), callStack.getEndTime()));
             for (int i = 0; i < callStack.getMaxDepth(); i++) {
-                entry.addChild(new FlameChartEntry(provider, i + 1, callStack));
+                entry.addChild(new FlameChartEntry(symbolProviders, i + 1, callStack));
             }
             return;
         }
         // Intermediate element, process children
-        element.getChildren().stream().forEach(e -> processCallStackElement(provider, e, entry));
+        element.getChildren().stream().forEach(e -> processCallStackElement(symbolProviders, e, entry));
     }
 
     private void addUnavailableEntry(ITmfTrace trace, ITmfTrace parentTrace) {
@@ -1091,13 +1094,14 @@ public class FlameChartView extends AbstractTimeGraphView {
         List<ISymbolProviderPreferencePage> pages = new ArrayList<>();
         ITmfTrace trace = getTrace();
         if (trace != null) {
-            for (ITmfTrace subTrace : getTracesToBuild(trace)) {
-                ISymbolProvider provider = fSymbolProviders.get(subTrace);
-                if (provider instanceof org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) {
-                    org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider provider2 = (org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) provider;
-                    ISymbolProviderPreferencePage page = provider2.createPreferencePage();
-                    if (page != null) {
-                        pages.add(page);
+            for (ITmfTrace subTrace : TmfTraceManager.getTraceSet(trace)) {
+                for (ISymbolProvider provider : SymbolProviderManager.getInstance().getSymbolProviders(subTrace)) {
+                    if (provider instanceof org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) {
+                        org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider provider2 = (org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) provider;
+                        ISymbolProviderPreferencePage page = provider2.createPreferencePage();
+                        if (page != null) {
+                            pages.add(page);
+                        }
                     }
                 }
             }

@@ -294,9 +294,12 @@ public class AggregationTreeTest {
         Object[] firstFunctionChildren = firstFunction.getCallees().toArray();
         AggregatedCalledFunction secondFunction = (AggregatedCalledFunction) firstFunctionChildren[0];
         assertEquals("Children number: Second function", 2, secondFunction.getCallees().size());
-        Object[] secondFunctionChildren = secondFunction.getCallees().toArray();
-        AggregatedCalledFunction leaf1 = (AggregatedCalledFunction) secondFunctionChildren[0];
-        AggregatedCalledFunction leaf2 = (AggregatedCalledFunction) secondFunctionChildren[1];
+        AggregatedCalledFunction leaf1 = (AggregatedCalledFunction) secondFunction.getCallees().stream()
+                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x2"))
+                .findAny().get();
+        AggregatedCalledFunction leaf2 = (AggregatedCalledFunction) secondFunction.getCallees().stream()
+                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x3"))
+                .findAny().get();
         assertEquals("Children number: First leaf function", 0, leaf1.getCallees().size());
         assertEquals("Children number: Second leaf function", 0, leaf2.getCallees().size());
         // Test duration
@@ -396,9 +399,12 @@ public class AggregationTreeTest {
         Object[] mainChildren = main.getCallees().toArray();
         AggregatedCalledFunction function1 = (AggregatedCalledFunction) mainChildren[0];
         assertEquals("Children number: first function", 2, function1.getCallees().size());
-        Object[] firstFunctionChildren = function1.getCallees().toArray();
-        AggregatedCalledFunction function2 = (AggregatedCalledFunction) firstFunctionChildren[0];
-        AggregatedCalledFunction function3 = (AggregatedCalledFunction) firstFunctionChildren[1];
+        AggregatedCalledFunction function2 = (AggregatedCalledFunction) function1.getCallees().stream()
+                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x2"))
+                .findAny().get();
+        AggregatedCalledFunction function3 = (AggregatedCalledFunction) function1.getCallees().stream()
+                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x3"))
+                .findAny().get();
         assertEquals("Children number: First child", 1, function2.getCallees().size());
         assertEquals("Children number: Second child", 0, function3.getCallees().size());
         Object[] firstChildCallee = function2.getCallees().toArray();

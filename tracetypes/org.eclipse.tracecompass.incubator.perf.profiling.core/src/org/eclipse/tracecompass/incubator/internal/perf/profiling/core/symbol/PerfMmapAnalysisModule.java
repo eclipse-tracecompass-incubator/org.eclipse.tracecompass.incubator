@@ -28,6 +28,11 @@ import com.google.common.collect.ImmutableList;
  */
 public class PerfMmapAnalysisModule extends TmfStateSystemAnalysisModule {
 
+    /**
+     * The ID of this module
+     */
+    public static final String ID = "org.eclipse.tracecompass.incubator.perf.profiling.core.symbol.mmap"; //$NON-NLS-1$
+
     private static final TmfAbstractAnalysisRequirement REQUIREMENT = new TmfAnalysisEventRequirement(ImmutableList.of("perf_mmap", "perf_mmap2"), PriorityLevel.AT_LEAST_ONE); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**

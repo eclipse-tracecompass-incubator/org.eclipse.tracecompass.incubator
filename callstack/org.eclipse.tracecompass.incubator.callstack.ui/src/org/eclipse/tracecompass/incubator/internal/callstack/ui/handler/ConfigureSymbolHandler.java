@@ -119,12 +119,13 @@ public class ConfigureSymbolHandler extends AbstractHandler {
         ITmfTrace trace = fTrace;
         if (trace != null) {
             for (ITmfTrace subTrace : TmfTraceManager.getTraceSet(trace)) {
-                ISymbolProvider provider = SymbolProviderManager.getInstance().getSymbolProvider(subTrace);
-                if (provider instanceof org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) {
-                    org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider provider2 = (org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) provider;
-                    ISymbolProviderPreferencePage page = provider2.createPreferencePage();
-                    if (page != null) {
-                        pages.add(page);
+                for (ISymbolProvider provider : SymbolProviderManager.getInstance().getSymbolProviders(subTrace)) {
+                    if (provider instanceof org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) {
+                        org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider provider2 = (org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider) provider;
+                        ISymbolProviderPreferencePage page = provider2.createPreferencePage();
+                        if (page != null) {
+                            pages.add(page);
+                        }
                     }
                 }
             }

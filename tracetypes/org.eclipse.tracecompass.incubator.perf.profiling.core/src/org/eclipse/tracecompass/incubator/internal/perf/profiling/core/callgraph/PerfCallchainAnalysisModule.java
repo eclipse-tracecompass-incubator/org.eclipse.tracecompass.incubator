@@ -75,7 +75,7 @@ public class PerfCallchainAnalysisModule extends ProfilingCallGraphAnalysisModul
             value[j] = tmp;
         }
         ICallStackElement element = getElement(event);
-        addStackTrace(element, value);
+        addStackTrace(element, value, event.getTimestamp().getValue());
     }
 
     /**
@@ -93,8 +93,17 @@ public class PerfCallchainAnalysisModule extends ProfilingCallGraphAnalysisModul
                 .findFirst();
         if (!process.isPresent()) {
             // Process is null, create both process and thread elements and return
-            ICallStackElement processEl = new CallStackElement(String.valueOf(pid), fProcessDescriptor, fThreadDescriptor, null);
+            ICallStackElement processEl = new CallStackElement(String.valueOf(pid), fProcessDescriptor, fThreadDescriptor, null) {
+
+                @Override
+                protected int retrieveSymbolKeyAt(long time) {
+                    return pid.intValue();
+                }
+
+            };
             ICallStackElement threadEl = new CallStackElement(String.valueOf(tid), fThreadDescriptor, null, processEl);
+            processEl.setSymbolKeyElement(processEl);
+            threadEl.setSymbolKeyElement(processEl);
             processEl.addChild(threadEl);
             addRootElement(processEl);
             return threadEl;

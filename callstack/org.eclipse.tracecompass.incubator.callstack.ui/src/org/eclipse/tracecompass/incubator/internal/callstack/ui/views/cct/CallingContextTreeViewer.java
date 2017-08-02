@@ -43,6 +43,8 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.c
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
+import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
+import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.AbstractTmfTreeViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.ITmfTreeColumnDataProvider;
@@ -67,6 +69,8 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
     private @Nullable ICallGraphProvider fModule;
     private MenuManager fTablePopupMenuManager;
     private String fAnalysisId;
+
+    private Collection<ISymbolProvider> fSymbolProviders = Collections.emptyList();
 
     private static final String[] COLUMN_NAMES = new String[] {
             checkNotNull(Messages.CallingContextTreeViewer_CallSite),
@@ -340,6 +344,7 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
                 return;
             }
             fModule = (ICallGraphProvider) module;
+            fSymbolProviders  = SymbolProviderManager.getInstance().getSymbolProviders(trace);
             module.schedule();
         }
     }
@@ -474,7 +479,7 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
          *            The parent element
          */
         public CCTCallSiteEntry(AggregatedCallSite callsite, ICallGraphProvider provider, TmfTreeViewerEntry parent) {
-            super(String.valueOf(callsite.getSymbol()));
+            super(callsite.getSymbol().resolve(fSymbolProviders));
             fCallSite = callsite;
             fProvider = provider;
             this.setParent(parent);

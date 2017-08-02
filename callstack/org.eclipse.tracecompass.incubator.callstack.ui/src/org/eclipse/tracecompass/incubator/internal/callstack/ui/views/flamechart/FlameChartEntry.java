@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.flamechart;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -20,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
+import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderUtils;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
@@ -37,12 +39,12 @@ public class FlameChartEntry extends TimeGraphEntry {
     private long fFunctionEntryTime;
     private long fFunctionExitTime;
     private final CallStack fCallStack;
-    private final @Nullable ISymbolProvider fSymbolProvider;
+    private final Collection<ISymbolProvider> fSymbolProviders;
 
     /**
      * Standard constructor
      *
-     * @param symbolProvider
+     * @param symbolProviders
      *            The symbol provider for this entry
      * @param stackLevel
      *            The stack level
@@ -50,13 +52,13 @@ public class FlameChartEntry extends TimeGraphEntry {
      *            The call stack state system
      * @since 2.0
      */
-    public FlameChartEntry(@Nullable ISymbolProvider symbolProvider, int stackLevel,
+    public FlameChartEntry(Collection<ISymbolProvider> symbolProviders, int stackLevel,
             @NonNull CallStack element) {
         super(String.valueOf(stackLevel), 0, 0);
         fStackLevel = stackLevel;
         fFunctionName = ""; //$NON-NLS-1$
         fCallStack = element;
-        fSymbolProvider = symbolProvider;
+        fSymbolProviders = symbolProviders;
     }
 
     /**
@@ -176,26 +178,18 @@ public class FlameChartEntry extends TimeGraphEntry {
     String resolveFunctionName(ICalledFunction function, long time) {
         long address = Long.MAX_VALUE;
         Object symbol = function.getSymbol();
-        String name = symbol.toString();
         if (symbol instanceof Number) {
             address = (Long) symbol;
-            name = "0x" + Long.toUnsignedString(address, 16); //$NON-NLS-1$
         } else if (symbol instanceof String) {
             try {
-                address = Long.parseLong(name, 16);
+                address = Long.parseLong((String) symbol, 16);
             } catch (NumberFormatException e) {
-                return name;
+                return String.valueOf(symbol);
             }
         }
 
-        ISymbolProvider provider = fSymbolProvider;
-        if (provider != null) {
-            String symbolString = provider.getSymbolText(function.getProcessId(), time, address);
-            if (symbolString != null) {
-                name = symbolString;
-            }
-        }
-        return name;
+        Collection<ISymbolProvider> providers = fSymbolProviders;
+        return SymbolProviderUtils.getSymbolText(providers, function.getProcessId(), time, address);
     }
 
     /**

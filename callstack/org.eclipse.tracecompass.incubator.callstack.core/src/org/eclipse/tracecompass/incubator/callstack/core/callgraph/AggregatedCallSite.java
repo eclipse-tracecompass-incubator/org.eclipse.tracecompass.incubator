@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
+import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -27,19 +28,18 @@ import com.google.common.collect.ImmutableMap;
  */
 public abstract class AggregatedCallSite {
 
-    private final Object fSymbol;
+    private final ICallStackSymbol fSymbol;
     private final Map<Object, AggregatedCallSite> fCallees = new HashMap<>();
     private final @Nullable AggregatedCallSite fCaller;
-    // private final AggregatedCalledFunctionStatistics fStatistics;
 
     /**
      * Constructor
      *
      * @param symbol
-     *            The symbol of the call site. It can eventually be resolved to a
-     *            string using the symbol providers
+     *            The symbol of the call site. It can eventually be resolved to
+     *            a string using the symbol providers
      */
-    public AggregatedCallSite(Object symbol) {
+    public AggregatedCallSite(ICallStackSymbol symbol) {
         fSymbol = symbol;
         fCaller = null;
     }
@@ -61,8 +61,8 @@ public abstract class AggregatedCallSite {
     /**
      * Get the aggregated value of this callsite. The units of this length will
      * depend on the time of callstack. Typically, for sampled, it will be the
-     * number of times this symbol was hit, while for instrumented, it can be the
-     * total time spent in this callstack element
+     * number of times this symbol was hit, while for instrumented, it can be
+     * the total time spent in this callstack element
      *
      * @return The aggregated value of this callsite
      */
@@ -82,7 +82,7 @@ public abstract class AggregatedCallSite {
      *
      * @return The symbol for this callsite
      */
-    public Object getSymbol() {
+    public ICallStackSymbol getSymbol() {
         return fSymbol;
     }
 
@@ -120,11 +120,11 @@ public abstract class AggregatedCallSite {
     }
 
     /**
-     * Merge a callsite's data with this one. This method will modify the current
-     * callsite.
+     * Merge a callsite's data with this one. This method will modify the
+     * current callsite.
      *
-     * It will first call {@link #mergeData(AggregatedCallSite)} that needs to be
-     * implemented for each implementation of this class.
+     * It will first call {@link #mergeData(AggregatedCallSite)} that needs to
+     * be implemented for each implementation of this class.
      *
      * It will then merge the callees of both callsites by adding the other's
      * callees to this one.
@@ -143,9 +143,10 @@ public abstract class AggregatedCallSite {
     }
 
     /**
-     * Merge the data of two callsites. This should modify the current callsite's
-     * specific data. It is called by {@link #merge(AggregatedCallSite)} and this
-     * method MUST NOT touch the callees of the callsites.
+     * Merge the data of two callsites. This should modify the current
+     * callsite's specific data. It is called by
+     * {@link #merge(AggregatedCallSite)} and this method MUST NOT touch the
+     * callees of the callsites.
      *
      * @param other
      *            The call site to merge to this one
@@ -172,11 +173,11 @@ public abstract class AggregatedCallSite {
     }
 
     /**
-     * Get the maximum depth under and including this aggregated callsite. A depth
-     * of 1 means there is one element under and including this element.
+     * Get the maximum depth under and including this aggregated callsite. A
+     * depth of 1 means there is one element under and including this element.
      *
-     * @return The maximum depth under and including this aggregated call site. The
-     *         minimal value for the depth is 1.
+     * @return The maximum depth under and including this aggregated call site.
+     *         The minimal value for the depth is 1.
      */
     public int getMaxDepth() {
         int maxDepth = 0;

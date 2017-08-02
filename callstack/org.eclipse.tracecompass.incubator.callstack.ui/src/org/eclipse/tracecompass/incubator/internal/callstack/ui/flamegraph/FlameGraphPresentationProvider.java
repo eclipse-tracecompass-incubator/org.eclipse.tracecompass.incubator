@@ -10,7 +10,6 @@ package org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph;
 
 import java.text.Format;
 import java.text.NumberFormat;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -21,7 +20,6 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.SubSecondTimeWithUnitFormat;
-import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
 import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
@@ -100,7 +98,7 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
         String funcSymbol = null;
         FlamegraphEvent fgEvent = (FlamegraphEvent) event;
         if (activeTrace != null) {
-            funcSymbol = getFunctionSymbol(fgEvent, SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
+            funcSymbol = fgEvent.getSymbol().resolve(SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
         }
         builder.put(Messages.FlameGraph_Symbol, funcSymbol == null ? String.valueOf(fgEvent.getSymbol()) : funcSymbol);
         long nb = (fgEvent.getNumberOfCalls());
@@ -119,46 +117,6 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
             return INVISIBLE;
         }
         return State.MULTIPLE.ordinal();
-    }
-
-    /**
-     * Get the event's symbol.It could be an address or a name.
-     *
-     * @param fGEvent
-     *            An event
-     * @param providers
-     *            A symbol provider
-     */
-    private static String getFunctionSymbol(FlamegraphEvent event, Collection<ISymbolProvider> providers) {
-        String funcSymbol = ""; //$NON-NLS-1$
-        if (event.getSymbol() instanceof Long || event.getSymbol() instanceof Integer) {
-            long longAddress = ((Long) event.getSymbol()).longValue();
-            for (ISymbolProvider provider : providers) {
-                funcSymbol = provider.getSymbolText(longAddress);
-                if (funcSymbol != null) {
-                    break;
-                }
-            }
-            if (funcSymbol == null) {
-                return "0x" + Long.toHexString(longAddress); //$NON-NLS-1$
-            }
-            // take time of max segment for time a query the symbol name
-//            ICalledFunction maxObject = event.getStatistics().getDurationStatistics().getMaxObject();
-//            if (maxObject == null) {
-//                return "0x" + Long.toHexString(longAddress); //$NON-NLS-1$
-//            }
-//            long time = maxObject.getStart();
-//            int pid = event.getProcessId();
-//            if (pid > 0) {
-//                String text = symbolProvider.getSymbolText(pid, time, longAddress);
-//                if (text != null) {
-//                    return text;
-//                }
-//            }
-        } else {
-            return String.valueOf(event.getSymbol());
-        }
-        return funcSymbol;
     }
 
     @Override
@@ -181,7 +139,7 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
         ITmfTrace activeTrace = TmfTraceManager.getInstance().getActiveTrace();
         if (activeTrace != null) {
             FlamegraphEvent fgEvent = (FlamegraphEvent) event;
-            funcSymbol = getFunctionSymbol(fgEvent, SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
+            funcSymbol = fgEvent.getSymbol().resolve(SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
         }
         gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
         Utils.drawText(gc, funcSymbol, bounds.x, bounds.y, bounds.width, bounds.height, true, true);

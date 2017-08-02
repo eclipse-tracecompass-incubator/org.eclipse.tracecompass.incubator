@@ -15,6 +15,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -51,7 +52,7 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
      * @param symbol
      *            The symbol of the function
      */
-    public AggregatedCalledFunction(Object symbol) {
+    public AggregatedCalledFunction(ICallStackSymbol symbol) {
         super(symbol);
         fStatistics = new AggregatedCalledFunctionStatistics();
         fProcessId = -1;

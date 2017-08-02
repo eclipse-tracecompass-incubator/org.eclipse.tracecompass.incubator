@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -41,9 +43,13 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfEventSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
 import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
+import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderUtils;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * This view shows the stack trace of events if it is available
@@ -60,7 +66,7 @@ public class CallStackTableView extends TmfView {
     public static final String ID = "org.eclipse.tracecompass.incubator.internal.callstack.ui.views.stacktable"; //$NON-NLS-1$
 
     private @Nullable TreeViewer fTreeViewer;
-    private final Map<ITmfTrace, ISymbolProvider> fSymbolProviders = new HashMap<>();
+    private final Multimap<ITmfTrace, ISymbolProvider> fSymbolProviders = HashMultimap.create();
 
     /**
      *
@@ -212,11 +218,11 @@ public class CallStackTableView extends TmfView {
             treeViewer.setInput(null);
         }
         ITmfTrace trace = event.getTrace();
-        ISymbolProvider symbolProvider = fSymbolProviders.get(trace);
-        if (symbolProvider == null) {
-            symbolProvider = SymbolProviderManager.getInstance().getSymbolProvider(trace);
-            symbolProvider.loadConfiguration(null);
-            fSymbolProviders.put(trace, symbolProvider);
+        Collection<ISymbolProvider> symbolProviders = fSymbolProviders.get(trace);
+        if (symbolProviders.isEmpty()) {
+            symbolProviders = SymbolProviderManager.getInstance().getSymbolProviders(trace);
+            symbolProviders.forEach(provider -> provider.loadConfiguration(new NullProgressMonitor()));
+            fSymbolProviders.putAll(trace, symbolProviders);
         }
 
         Map<String, Collection<Object>> stacks = new HashMap<>();
@@ -225,7 +231,7 @@ public class CallStackTableView extends TmfView {
             stacks.putAll(stack);
         }
 
-        treeViewer.setInput(convertStack(stacks, symbolProvider));
+        treeViewer.setInput(convertStack(stacks, symbolProviders));
     }
 
     private class StackTableEntry {
@@ -268,11 +274,11 @@ public class CallStackTableView extends TmfView {
         private String fName;
         private List<StackTableEntry> fChildren;
 
-        StackTableStringEntry(StackTableRootEntry entry, String name, Collection<Object> list, ISymbolProvider symbolProvider) {
+        StackTableStringEntry(StackTableRootEntry entry, String name, Collection<Object> list, Collection<ISymbolProvider> symbolProviders) {
             super(entry);
             entry.addEntry(this);
             fName = name;
-            fChildren = list.stream().map(l -> createCallSiteEntry(this, l, symbolProvider)).collect(Collectors.toList());
+            fChildren = list.stream().map(l -> createCallSiteEntry(this, l, symbolProviders)).collect(Collectors.toList());
         }
 
         @Override
@@ -286,13 +292,10 @@ public class CallStackTableView extends TmfView {
         }
     }
 
-    private StackTableEntry createCallSiteEntry(StackTableStringEntry entry, Object callsite, ISymbolProvider symbolProvider) {
+    private StackTableEntry createCallSiteEntry(StackTableStringEntry entry, Object callsite, Collection<ISymbolProvider> symbolProviders) {
         if (callsite instanceof Long) {
-            String symbol = symbolProvider.getSymbolText((Long) callsite);
-            if (symbol != null) {
-                return new StackTableObjEntry(entry, symbol);
-            }
-            return new StackTableLongEntry(entry, (Long) callsite);
+            String symbol = SymbolProviderUtils.getSymbolText(symbolProviders, 21576, 0L, (Long) callsite);
+            return new StackTableObjEntry(entry, symbol);
         }
         return new StackTableObjEntry(entry, callsite);
     }
@@ -311,24 +314,10 @@ public class CallStackTableView extends TmfView {
         }
     }
 
-    private class StackTableLongEntry extends StackTableEntry {
-        private long fCallsite;
-
-        public StackTableLongEntry(StackTableStringEntry entry, long callsite) {
-            super(entry);
-            fCallsite = callsite;
-        }
-
-        @Override
-        public String toString() {
-            return Long.toHexString(fCallsite);
-        }
-    }
-
-    private Object convertStack(Map<String, Collection<Object>> stack, ISymbolProvider symbolProvider) {
+    private Object convertStack(Map<String, Collection<Object>> stack, Collection<@NonNull ISymbolProvider> symbolProviders) {
         StackTableRootEntry rootEntry = new StackTableRootEntry();
         for (Entry<String, Collection<Object>> entry: stack.entrySet()) {
-            new StackTableStringEntry(rootEntry, entry.getKey(), entry.getValue(), symbolProvider);
+            new StackTableStringEntry(rootEntry, entry.getKey(), entry.getValue(), symbolProviders);
         }
         return rootEntry;
     }
