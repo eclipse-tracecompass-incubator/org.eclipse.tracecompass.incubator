@@ -146,7 +146,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
 
     @Override
     public double getLocationRatio(ITmfLocation location) {
-        return (double) getCurrentLocation().getLocationInfo() / fFile.length();
+        return ((Long) getCurrentLocation().getLocationInfo()).doubleValue() / fFile.length();
     }
 
     @Override
