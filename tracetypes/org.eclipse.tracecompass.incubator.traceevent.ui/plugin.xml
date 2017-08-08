@@ -8,12 +8,4 @@
             tracetype="org.eclipse.tracecompass.incubator.traceevent.core.trace">
       </type>
    </extension>
-   <extension
-         point="org.eclipse.linuxtools.tmf.core.analysis">
-      <output
-            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
-            id="org.eclipse.tracecompass.incubator.traceevent.analysis.callstack">
-      </output>
-   </extension>
-
 </plugin>
