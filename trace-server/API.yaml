@@ -1,0 +1,319 @@
+###############################################################################
+# Copyright (c) 2017 Ericsson
+#
+# All rights reserved. This program and the accompanying materials are
+# made available under the terms of the Eclipse Public License v1.0 which
+# accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+###############################################################################
+swagger: '2.0'
+info:
+  description: Open source Server for viewing and analyzing any type of logs or traces. Its goal is to provide views, graphs, metrics, and more to help extract useful information from traces, in a way that is more user-friendly and informative than huge text dumps.
+  version: 0.0.0
+  title: Trace Compass Server
+  termsOfService: http://tracecompass.org/
+  contact:
+    email: tracecompass-dev@eclipse.org
+  license:
+    name: Eclipse Public License (EPL)
+    url: https://www.eclipse.org/legal/epl-v10.html
+host: localhost:8080
+basePath: /tracecompass
+tags:
+- name: traces
+  description: How to add traces to your server, or print out their content
+- name: Views
+  description: Find out how to display data
+schemes:
+- http
+paths:
+  /traces:
+    post:
+      tags:
+      - traces
+      summary: Add a trace to the server and open it.
+      description: Add a trace from the server's file system to the trace server,
+        and try to open it. Return some base information once opened.
+      operationId: addTrace
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      parameters:
+      - name: name
+        in: formData
+        description: The name of the trace in the server
+        required: true
+        type: string
+      - name: path
+        in: formData
+        description: Path to the trace on the server file system
+        required: true
+        type: string
+      responses:
+        200:
+          description: The trace has been successfully added to the trace server.
+          schema:
+            $ref: '#/definitions/TraceModel'
+        204:
+          description: Missing the name and path parameters
+        406:
+          description: "Not acceptable: cannot read this trace type"
+        409:
+          description: "Conflict: there was already a trace with this name"
+    get:
+      tags:
+      - traces
+      summary: Get the list of traces opened on the server
+      operationId: getTraces
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Returns a list of traces
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TraceModel'
+    delete:
+      tags:
+      - traces
+      summary: Close a trace and remove it from the server
+      operationId: deleteTrace
+      produces:
+      - application/json
+      parameters:
+      - name: name
+        in: query
+        description: The name of the trace in the server
+        required: true
+        type: string
+      responses:
+        200:
+          description: The traces was successfully deleted
+          schema:
+            $ref: '#/definitions/TraceModel'
+        204:
+          description: There was no trace with this name to close / delete
+  /eventTable:
+    get:
+      tags:
+      - Views
+      - traces
+      summary: Get a virtual view of events from a trace to populate the table
+      operationId: getEvents
+      produces:
+      - application/json
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - name: name
+        in: query
+        description: The name of the trace in the server
+        required: true
+        type: string
+      - name: low
+        in: query
+        description: Rank of the first event to query
+        required: true
+        type: integer
+        format: int64
+      - name: size
+        in: query
+        description: Number of events to query
+        required: true
+        type: integer
+        format: int32
+      - name: filters
+        in: formData
+        type: string
+        description: Map of column / aspect names to regular expression filters
+        required: false
+      responses:
+        200:
+          description: Returns an EventView model with a 2D array of strings and metadata
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/EventView'
+        400:
+          description: Bad request, the top index and size must be larger than 0
+          schema:
+            type: string
+        404:
+          description: No such trace
+          schema:
+            type: string
+        500:
+          description: Error reading the trace
+          schema:
+            type: string
+  /DiskActivityView:
+    get:
+      tags:
+      - Views
+      summary: Get the list of traces for which the Disk IO analysis has started.
+      operationId: getAnalysedTraces
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Return a list of AnalysisModel
+          schema:
+            $ref: '#/definitions/AnalysisModel'
+    post:
+      tags:
+      - Views
+      summary: Start the disk analysis for a trace
+      operationId: startAnalysis
+      produces:
+      - application/json
+      parameters:
+      - name: name
+        in: query
+        description: The name of the trace in the server
+        required: true
+        type: string
+      responses:
+        200:
+          description: The trace analysis was successfully started
+          schema:
+            $ref: '#/definitions/TraceModel'
+        302:
+          description: Analysis already started
+        404:
+          description: No such trace
+        405:
+          description: Cannot run the Disk analysis on this trace
+        500:
+          description: Error running the analysis
+
+  /DiskActivityView/{name}:
+    get:
+      tags:
+      - Views
+      summary: Get the XY series for an analysis
+      operationId: getXY
+      produces:
+      - application/json
+      parameters:
+      - name: name
+        in: path
+        description: Name of the trace to query
+        required: true
+        type: string
+      - name: start
+        in: query
+        description: Start Time of the query
+        required: true
+        type: integer
+        format: int64
+      - name: end
+        in: query
+        description: End Time of the query
+        required: true
+        type: integer
+        format: int64
+      - name: resolution
+        in: query
+        description: Nanoseconds between data points
+        required: true
+        type: integer
+        format: int64
+      responses:
+        404:
+          description: Trace or analysis not found
+          schema:
+            type: string
+        200:
+          description: Return a list of AnalysisModel
+          schema:
+            $ref: '#/definitions/AnalysisModel'
+definitions:
+  TraceModel:
+    type: object
+    properties:
+      name:
+        description: User defined name for the trace
+        type: string
+      path:
+        description: Path to the trace on the file server's File System
+        type: string
+      nbEvents:
+        description: Current number of indexed events in the trace.
+        type: integer
+        format: int64
+      aspects:
+        description: List of the trace's aspect names
+        type: array
+        items:
+          type: string
+  EventView:
+    type: object
+    properties:
+      trace:
+        $ref: '#/definitions/TraceModel'
+      low:
+        description: Rank of the first returned event
+        type: integer
+        format: int64
+      size:
+        description: Number of events.
+        type: integer
+        format: int32
+      filteredSize:
+        description: Total number of events that currently match this filter
+        type: integer
+        format: int64
+      filters:
+        description: Map of column / aspect name to regular expression filter
+        type: object
+        properties:
+          key:
+            type: string
+          value:
+            type: string
+
+      lines:
+        type: array
+        items:
+          type: array
+          items:
+            type: string
+  AnalysisModel:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Name of the analyzed trace.
+      start:
+        type: integer
+        format: int64
+        description: Start time of the analysis in nanoseconds
+      end:
+        type: integer
+        format: int64
+        description: Current end time of the analysis in nanoseconds
+  XYView:
+    type: object
+    properties:
+      model:
+        description: Metadata on the current Analysis
+        $ref: '#/definitions/AnalysisModel'
+      times:
+        description: X values (times) for the XY Model
+        type: array
+        items:
+          type: integer
+          format: int64
+      values:
+        description: Map of Series names to the Y values' arrays.
+        type: object
+        properties:
+          key:
+            type: string
+          value:
+            type: array
+            items:
+              type: integer
+              format: int64

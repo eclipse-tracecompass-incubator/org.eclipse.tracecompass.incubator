@@ -10,6 +10,11 @@ Running the server
 cd trace-server/org.eclipse.tracecompass.incubator.trace.server.product/target/products/traceserver/linux/gtk/x86_64/trace-compass-server/
 ./tracecompss-server
 
+OpenAPI REST specification:
+The REST API is documented using the OpenAPI specification in the API.json file.
+The file can be opened with an IDE plug-in, or Swagger tools.
+For more information, see https://swagger.io/docs/.
+
 Example REST Commands
 ---------------------
 * Open a trace
