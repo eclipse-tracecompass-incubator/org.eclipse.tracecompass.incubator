@@ -34,7 +34,9 @@ import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 
 import com.google.common.collect.Iterables;
 
@@ -118,6 +120,9 @@ public class TraceManagerService {
         ITmfTrace trace = helper.getTrace();
         trace.initTrace(null, path, ITmfEvent.class);
         trace.indexTrace(false);
+        if (trace instanceof TmfTrace) {
+            ((TmfTrace) trace).traceOpened(new TmfTraceOpenedSignal(this, trace, null));
+        }
         TraceModel model = new TraceModel(name, trace);
         traceManager.put(name, model);
         return model;

@@ -153,56 +153,18 @@ paths:
           description: Error reading the trace
           schema:
             type: string
-  /DiskActivityView:
-    get:
-      tags:
-      - Views
-      summary: Get the list of traces for which the Disk IO analysis has started.
-      operationId: getAnalysedTraces
-      produces:
-      - application/json
-      responses:
-        200:
-          description: Return a list of AnalysisModel
-          schema:
-            $ref: '#/definitions/AnalysisModel'
+  /traces/{trace}/DiskIO:
     post:
-      tags:
-      - Views
-      summary: Start the disk analysis for a trace
-      operationId: startAnalysis
-      produces:
-      - application/json
-      parameters:
-      - name: name
-        in: query
-        description: The name of the trace in the server
-        required: true
-        type: string
-      responses:
-        200:
-          description: The trace analysis was successfully started
-          schema:
-            $ref: '#/definitions/TraceModel'
-        302:
-          description: Analysis already started
-        404:
-          description: No such trace
-        405:
-          description: Cannot run the Disk analysis on this trace
-        500:
-          description: Error running the analysis
-
-  /DiskActivityView/{name}:
-    get:
       tags:
       - Views
       summary: Get the XY series for an analysis
       operationId: getXY
+      consumes:
+      - application/x-www-form-urlencoded
       produces:
       - application/json
       parameters:
-      - name: name
+      - name: trace
         in: path
         description: Name of the trace to query
         required: true
@@ -219,21 +181,29 @@ paths:
         required: true
         type: integer
         format: int64
-      - name: resolution
+      - name: nb
         in: query
-        description: Nanoseconds between data points
+        description: Number of data points to sample
         required: true
         type: integer
-        format: int64
+        format: int32
       responses:
-        404:
-          description: Trace or analysis not found
-          schema:
-            type: string
         200:
           description: Return a list of AnalysisModel
           schema:
-            $ref: '#/definitions/AnalysisModel'
+            $ref: '#/definitions/XYView'
+        404:
+          description: Trace not found
+          schema:
+            type: string
+        405:
+          description: Analysis not supported for trace
+          schema:
+            type: string
+        500:
+          description: Fetching model failed
+          schema:
+            type: string
 definitions:
   TraceModel:
     type: object
@@ -302,23 +272,26 @@ definitions:
   XYView:
     type: object
     properties:
-      model:
+      trace:
         description: Metadata on the current Analysis
         $ref: '#/definitions/AnalysisModel'
-      times:
-        description: X values (times) for the XY Model
-        type: array
-        items:
-          type: integer
-          format: int64
-      values:
-        description: Map of Series names to the Y values' arrays.
+      model:
         type: object
         properties:
-          key:
-            type: string
-          value:
+          times:
+            description: X values (times) for the XY Model
             type: array
             items:
               type: integer
               format: int64
+          values:
+            description: Map of Series names to the Y values' arrays.
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: array
+                items:
+                  type: integer
+                  format: int64

@@ -8,10 +8,13 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfXYDataProvider;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -21,9 +24,9 @@ import com.google.common.collect.Table;
  *
  * @author Loic Prieur-Drevon
  */
-public class AnalysisManager {
+public class DataProviderManager {
 
-    private Table<String, String, TmfAbstractAnalysisModule> fAnalysis = HashBasedTable.create();
+    private @NonNull Table<TraceModel, String, ITmfXYDataProvider> fAnalysis = HashBasedTable.create();
 
     /**
      * Getter for an Analysis by trace name and analysis id
@@ -34,7 +37,7 @@ public class AnalysisManager {
      *            the ID from the analysis
      * @return the analysis module if it exists, else null
      */
-    public TmfAbstractAnalysisModule get(String traceName, @NonNull String id) {
+    public ITmfXYDataProvider get(TraceModel traceName, @NonNull String id) {
         return fAnalysis.get(traceName, id);
     }
 
@@ -48,7 +51,7 @@ public class AnalysisManager {
      * @param analysis
      *            the analysis to add
      */
-    public void put(String traceName, @NonNull String id, @NonNull TmfAbstractAnalysisModule analysis) {
+    public void put(TraceModel traceName, @NonNull String id, @NonNull ITmfXYDataProvider analysis) {
         fAnalysis.put(traceName, id, analysis);
     }
 
@@ -59,8 +62,9 @@ public class AnalysisManager {
      *            Analysis module ID
      * @return a Map of trace names to modules for this type of analysis
      */
-    public Map<String, TmfAbstractAnalysisModule> getEntries(@NonNull String id) {
-        return fAnalysis.columnMap().get(id);
+    public @NonNull Set<TraceModel> getEntries(@NonNull String id) {
+        Map<TraceModel, ITmfXYDataProvider> map = fAnalysis.columnMap().get(id);
+        return map != null ? map.keySet() : Collections.emptySet();
     }
 
 }

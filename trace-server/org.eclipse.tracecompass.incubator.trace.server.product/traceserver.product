@@ -95,6 +95,9 @@
       <plugin id="org.eclipse.osgi"/>
       <plugin id="org.eclipse.osgi.compatibility.state" fragment="true"/>
       <plugin id="org.eclipse.text"/>
+      <plugin id="org.eclipse.tracecompass.analysis.counters.core"/>
+      <plugin id="org.eclipse.tracecompass.analysis.graph.core"/>
+      <plugin id="org.eclipse.tracecompass.analysis.lami.core"/>
       <plugin id="org.eclipse.tracecompass.analysis.os.linux.core"/>
       <plugin id="org.eclipse.tracecompass.analysis.timing.core"/>
       <plugin id="org.eclipse.tracecompass.common.core"/>
@@ -102,8 +105,13 @@
       <plugin id="org.eclipse.tracecompass.ctf.parser"/>
       <plugin id="org.eclipse.tracecompass.datastore.core"/>
       <plugin id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core"/>
+      <plugin id="org.eclipse.tracecompass.lttng2.common.core"/>
+      <plugin id="org.eclipse.tracecompass.lttng2.control.core"/>
+      <plugin id="org.eclipse.tracecompass.lttng2.kernel.core"/>
       <plugin id="org.eclipse.tracecompass.segmentstore.core"/>
       <plugin id="org.eclipse.tracecompass.statesystem.core"/>
+      <plugin id="org.eclipse.tracecompass.tmf.analysis.xml.core"/>
+      <plugin id="org.eclipse.tracecompass.tmf.chart.core"/>
       <plugin id="org.eclipse.tracecompass.tmf.core"/>
       <plugin id="org.eclipse.tracecompass.tmf.ctf.core"/>
       <plugin id="org.glassfish.hk2.api"/>
@@ -119,6 +127,7 @@
       <plugin id="org.glassfish.jersey.ext.entityfiltering"/>
       <plugin id="org.glassfish.jersey.media.jersey-media-json-jackson"/>
       <plugin id="org.hamcrest.core"/>
+      <plugin id="org.json"/>
       <plugin id="org.junit"/>
    </plugins>
 

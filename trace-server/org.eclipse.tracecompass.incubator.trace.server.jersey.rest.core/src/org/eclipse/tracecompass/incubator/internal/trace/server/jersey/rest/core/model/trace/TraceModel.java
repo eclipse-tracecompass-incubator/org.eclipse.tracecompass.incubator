@@ -29,16 +29,10 @@ import com.google.common.collect.ImmutableList;
  */
 @XmlRootElement
 public class TraceModel {
-    private ITmfTrace fTrace;
-    private String fName;
-    private List<String> fColumns;
-    private List<ITmfEventAspect<?>> fAspects;
-
-    /**
-     * empty constructor for Jackson
-     */
-    public TraceModel() {
-    }
+    private final @NonNull ITmfTrace fTrace;
+    private final String fName;
+    private final List<String> fColumns;
+    private final List<ITmfEventAspect<?>> fAspects;
 
     /**
      * Construct a model object, giving the trace a name
@@ -134,7 +128,7 @@ public class TraceModel {
      * @return the backing trace
      */
     @XmlTransient
-    public ITmfTrace getTrace() {
+    public @NonNull ITmfTrace getTrace() {
         return fTrace;
     }
 }

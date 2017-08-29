@@ -8,46 +8,44 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.xy;
 
-import java.util.Map;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.analysis.AnalysisModel;
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfCommonXAxisModel;
 
 /**
  * Object to encapsulate the values returned by a query for an XY view
  *
  * @author Loic Prieur-Drevon
  */
+@SuppressWarnings("restriction")
 @XmlRootElement
 public class XYView {
-    private final AnalysisModel fModel;
-    private final long[] fTimes;
-    private final Map<String, long[]> fValues;
+    private final TraceModel fModel;
+    private final ITmfCommonXAxisModel fTimes;
 
     /**
-     * Parameterized Constructor
+     * Compose the {@link TraceModel} and {@link ITmfCommonXAxisModel} in an
+     * {@link XYView}
      *
+     * @param traceModel
+     *            trace model object for the queried trace
      * @param model
-     *            the Analysis model that this XYView represents
-     * @param xSeries
-     *            the series for the x axis
-     * @param yValues
-     *            Map of y series
+     *            XY model for the query
      */
-    public XYView(AnalysisModel model, long[] xSeries, Map<String, long[]> yValues) {
-        fModel = model;
-        fTimes = xSeries;
-        fValues = yValues;
+    public XYView(@Nullable TraceModel traceModel, @Nullable ITmfCommonXAxisModel model) {
+        fModel = traceModel;
+        fTimes = model;
     }
 
     /**
-     * Getter for the analysis model
+     * Getter for the trace model
      *
-     * @return the analysis model
+     * @return the trace model
      */
-    public AnalysisModel getModel() {
+    public TraceModel getTrace() {
         return fModel;
     }
 
@@ -57,17 +55,7 @@ public class XYView {
      * @return the time values
      */
     @XmlElement
-    public long[] getTimes() {
+    public ITmfCommonXAxisModel getModel() {
         return fTimes;
-    }
-
-    /**
-     * Getter for the Y values in this XY view
-     *
-     * @return a map of series name to values
-     */
-    @XmlElement
-    public Map<String, long[]> getValues() {
-        return fValues;
     }
 }
