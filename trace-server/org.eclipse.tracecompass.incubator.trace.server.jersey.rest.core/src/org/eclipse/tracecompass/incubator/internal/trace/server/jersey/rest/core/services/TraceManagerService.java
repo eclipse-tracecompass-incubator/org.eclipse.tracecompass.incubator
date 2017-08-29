@@ -9,7 +9,9 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.util.Collection;
+import java.util.List;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -25,17 +27,19 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.TraceManager;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
+import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
+import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
+
+import com.google.common.collect.Iterables;
 
 /**
- * Service to manage traces. Singleton ensures that there is only one per
- * server.
+ * Service to manage traces.
  *
  * @author Loic Prieur-Drevon
  */
@@ -58,19 +62,22 @@ public class TraceManagerService {
     }
 
     /**
-     * Method to put trace to the service. TODO only CTF traces are supported for
-     * now...
+     * Method to open the trace, initialize it, index it and add it to the trace
+     * manager.
      *
      * @param name
      *            the name to assign to the trace files
      * @param path
      *            the path to the trace
+     * @param typeID
+     *            the ID of a trace (like "o.e.l.specifictrace" )
      * @return the new trace model object or the exception if it failed to load.
      */
     @POST
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response putTrace(@FormParam("name") String name, @FormParam("path") String path) {
+    public Response putTrace(@FormParam("name") String name, @FormParam("path") String path,
+            @FormParam("typeID") String typeID) {
         if (name == null) {
             return Response.status(Status.NO_CONTENT).entity("Invalid name (null)").build(); //$NON-NLS-1$
         }
@@ -79,9 +86,12 @@ public class TraceManagerService {
             return Response.status(Status.CONFLICT).entity(traceModel).build();
         }
         try {
-            TraceModel model = put(path, name);
+            TraceModel model = put(path, name, typeID);
+            if (model == null) {
+                return Response.status(Status.NOT_IMPLEMENTED).entity("Trace type not supported").build(); //$NON-NLS-1$
+            }
             return Response.ok().entity(model).build();
-        } catch (TmfTraceException e) {
+        } catch (TmfTraceException | TmfTraceImportException e) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(e.getMessage()).build();
         }
     }
@@ -95,16 +105,17 @@ public class TraceManagerService {
      */
     @DELETE
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteTrace(@QueryParam("name") String name) {
-        if (name == null) {
-            return Response.status(Status.NO_CONTENT).entity("Invalid name (null)").build(); //$NON-NLS-1$
-        }
-        TraceModel model = traceManager.remove(NonNullUtils.nullToEmptyString(name));
-        return Response.ok().entity(model).build();
+    public Response deleteTrace(@QueryParam("name") @NotNull String name) {
+        return Response.ok().entity(traceManager.remove(name)).build();
     }
 
-    private TraceModel put(String path, @NonNull String name) throws TmfTraceException {
-        ITmfTrace trace = new CtfTmfTrace();
+    private TraceModel put(String path, @NonNull String name, String typeID) throws TmfTraceException, TmfTraceImportException {
+        List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(path, typeID);
+        if (traceTypes.isEmpty()) {
+            return null;
+        }
+        TraceTypeHelper helper = Iterables.get(traceTypes, 0);
+        ITmfTrace trace = helper.getTrace();
         trace.initTrace(null, path, ITmfEvent.class);
         trace.indexTrace(false);
         TraceModel model = new TraceModel(name, trace);

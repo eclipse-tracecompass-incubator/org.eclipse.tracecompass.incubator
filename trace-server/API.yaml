@@ -50,6 +50,11 @@ paths:
         description: Path to the trace on the server file system
         required: true
         type: string
+      - name: typeID
+        in: formData
+        description: The trace type's Eclipse ID.
+        required: false
+        type: String
       responses:
         200:
           description: The trace has been successfully added to the trace server.
