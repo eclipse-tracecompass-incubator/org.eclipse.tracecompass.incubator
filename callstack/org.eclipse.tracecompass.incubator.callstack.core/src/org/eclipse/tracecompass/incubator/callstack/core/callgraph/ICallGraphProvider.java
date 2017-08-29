@@ -11,8 +11,9 @@ package org.eclipse.tracecompass.incubator.callstack.core.callgraph;
 
 import java.util.Collection;
 
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
-import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 
 

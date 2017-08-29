@@ -18,10 +18,10 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph.ProfilingCallGraphAnalysisModule;
@@ -105,6 +105,7 @@ public class SampledCallGraphTest {
             cg.addAggregatedCallSite(element, pg.getCallSite(element, CALLSITE_10, 10));
 
             Collection<AggregatedCallSite> aggregatedData = cg.getCallingContextTree(element);
+
             assertNotNull(aggregatedData);
             assertEquals(2, aggregatedData.size());
 

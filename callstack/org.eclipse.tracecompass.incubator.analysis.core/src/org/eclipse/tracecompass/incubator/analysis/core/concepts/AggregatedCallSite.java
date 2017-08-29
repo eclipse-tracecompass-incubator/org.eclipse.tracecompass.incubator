@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.callstack.core.callgraph;
+package org.eclipse.tracecompass.incubator.analysis.core.concepts;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
-import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
 
 import com.google.common.collect.ImmutableMap;
 

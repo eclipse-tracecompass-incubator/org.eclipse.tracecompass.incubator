@@ -16,13 +16,13 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.IEventCallStackProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.symbol.CallStackSymbolFactory;
-import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -91,8 +91,8 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
     }
 
     /**
-     * Add a stack trace to this group, such that the symbol at position 0 is
-     * the top of the stack, ie the last symbol called.
+     * Get a callsite from a stack trace. The array should be non-zero length and
+     * the symbol at position 0 is the top of the stack, ie the last symbol called.
      *
      * @param dstGroup
      *            The element to which to add this stack trace

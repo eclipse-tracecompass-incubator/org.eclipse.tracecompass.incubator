@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.callstack.core.symbol;
+package org.eclipse.tracecompass.incubator.analysis.core.concepts;
 
 import java.util.Collection;
 

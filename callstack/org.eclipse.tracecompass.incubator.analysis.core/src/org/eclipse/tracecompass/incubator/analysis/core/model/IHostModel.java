@@ -9,6 +9,10 @@
 
 package org.eclipse.tracecompass.incubator.analysis.core.model;
 
+import java.util.Collection;
+
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+
 /**
  * This interface represents a host system, for example a machine running Linux,
  * and allows to access information on the state of the machine at some
@@ -61,5 +65,18 @@ public interface IHostModel {
      *         {@link #TIME_UNKNOWN} if it is not available
      */
     long getCpuTime(int tid, long start, long end);
+
+    /**
+     * Get the aggregated sample data for a thread in a time range.
+     *
+     * @param tid
+     *            The ID of the thread
+     * @param start
+     *            The start of the period for which to get the time on CPU
+     * @param end
+     *            The end of the period for which to get the time on CPU
+     * @return The collection of aggregated sampling data for the time range
+     */
+    Collection<AggregatedCallSite> getSamplingData(int tid, long start, long end);
 
 }

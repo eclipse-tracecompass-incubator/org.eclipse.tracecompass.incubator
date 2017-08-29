@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedCalledFunction;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;

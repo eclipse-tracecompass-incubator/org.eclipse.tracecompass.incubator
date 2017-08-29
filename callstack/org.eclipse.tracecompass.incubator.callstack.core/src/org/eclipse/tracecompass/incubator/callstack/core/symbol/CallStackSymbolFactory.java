@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.callstack.core.symbol;
 
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.symbol.ResolvableSymbol;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.symbol.StringSymbol;

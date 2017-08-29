@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.perf.profiling.core.callgraph.PerfCallchainAnalysisModule"
+            id="org.eclipse.tracecompass.extension.perf.profiling.core.callchain"
+            name="Perf Callchain Test">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.TmfXmlTraceStub">
+         </tracetype>
+      </module>
+   </extension>
+
+</plugin>
