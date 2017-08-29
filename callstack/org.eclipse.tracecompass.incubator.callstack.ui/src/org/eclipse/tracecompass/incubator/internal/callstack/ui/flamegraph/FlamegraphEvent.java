@@ -27,7 +27,6 @@ import com.google.common.collect.ImmutableMap;
  * function in a certain depth)
  *
  * @author Sonia Farrah
- *
  */
 public class FlamegraphEvent extends TimeEvent {
 
@@ -36,10 +35,6 @@ public class FlamegraphEvent extends TimeEvent {
     private final Object fSymbol;
 
     private final AggregatedCallSite fCallSite;
-//    private final long fSelfTime;
-//    private final int fProcessId;
-//    private final AggregatedCalledFunctionStatistics fStatistics;
-//    private final long fCpuTime;
 
     /**
      * Constructor
@@ -55,10 +50,6 @@ public class FlamegraphEvent extends TimeEvent {
         super(source, beginTime, aggregatedFunction.getLength(), String.valueOf(aggregatedFunction.getSymbol()).hashCode() % MODULO + MODULO);
         fSymbol = aggregatedFunction.getSymbol();
         fCallSite = aggregatedFunction;
-//        fStatistics = aggregatedFunction.getFunctionStatistics();
-//        fProcessId = aggregatedFunction.getProcessId();
-//        fSelfTime = aggregatedFunction.getSelfTime();
-//        fCpuTime = aggregatedFunction.getCpuTime();
     }
 
     /**
@@ -71,8 +62,11 @@ public class FlamegraphEvent extends TimeEvent {
     }
 
     /**
+     * Return a map containing tooltip key, value strings for this event
+     *
      * @param formatter
-     * @return
+     *            The number formatter to use
+     * @return A map of key, value tooltip pairs
      */
     public Map<String, String> getTooltip(Format formatter) {
         ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<>();
@@ -83,9 +77,9 @@ public class FlamegraphEvent extends TimeEvent {
                 builder.put(statType, ""); //$NON-NLS-1$
                 String lowerType = statType.toLowerCase();
                 builder.put("\t" + Messages.FlameGraph_Total + ' ' + lowerType, formatter.format(stats.getTotal())); //$NON-NLS-1$
-                builder.put("\t" + Messages.FlameGraph_Average + ' ' + lowerType, formatter.format(stats.getMean())); // $NON-NLS-1$ //$NON-NLS-1$
-                builder.put("\t" + Messages.FlameGraph_Max + ' ' + lowerType, formatter.format(stats.getMax())); // $NON-NLS-1$ //$NON-NLS-1$
-                builder.put("\t" + Messages.FlameGraph_Min + ' ' + lowerType, formatter.format(stats.getMin())); // $NON-NLS-1$ //$NON-NLS-1$
+                builder.put("\t" + Messages.FlameGraph_Average + ' ' + lowerType, formatter.format(stats.getMean())); //$NON-NLS-1$
+                builder.put("\t" + Messages.FlameGraph_Max + ' ' + lowerType, formatter.format(stats.getMax())); //$NON-NLS-1$
+                builder.put("\t" + Messages.FlameGraph_Min + ' ' + lowerType, formatter.format(stats.getMin())); //$NON-NLS-1$
                 builder.put("\t" + Messages.FlameGraph_Deviation + ' ' + lowerType, formatter.format(stats.getStdDev())); //$NON-NLS-1$
 
             }
@@ -110,39 +104,4 @@ public class FlamegraphEvent extends TimeEvent {
         return callSite.getLength();
     }
 
-//    /**
-//     * The event's statistics
-//     *
-//     * @return The event's statistics
-//     */
-//    public AggregatedCalledFunctionStatistics getStatistics() {
-//        return fStatistics;
-//    }
-//
-//    /**
-//     * The self time of an event
-//     *
-//     * @return The self time
-//     */
-//    public long getSelfTime() {
-//        return fSelfTime;
-//    }
-//
-//    /**
-//     * The CPU time of an event
-//     *
-//     * @return The self time
-//     */
-//    public long getCpuTime() {
-//        return fCpuTime;
-//    }
-//
-//    /**
-//     * The process ID of the traced application
-//     *
-//     * @return process id
-//     */
-//    public int getProcessId() {
-//        return fProcessId;
-//    }
 }

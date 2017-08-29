@@ -19,6 +19,8 @@ import org.eclipse.osgi.util.NLS;
 @NonNullByDefault({})
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = Messages.class.getPackage().getName() + ".messages"; //$NON-NLS-1$
+    /** Label for the symbol */
+    public static String FlameGraph_Symbol;
     /** Label for the CPU times */
     public static String FlameGraph_Total;
     /** Label for total CPU time */
