@@ -181,6 +181,15 @@ public class PerfCallchainAnalysisModule extends ProfilingCallGraphAnalysisModul
         return callsites;
     }
 
+    @Override
+    public Collection<String> getHostIds() {
+        ITmfTrace trace = getTrace();
+        if (trace == null) {
+            return Collections.emptySet();
+        }
+        return Collections.singleton(trace.getHostId());
+    }
+
     private class PerfProfilingEventRequest extends TmfEventRequest {
 
         private final int fTid;

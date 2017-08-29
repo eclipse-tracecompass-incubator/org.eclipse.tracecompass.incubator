@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.common.core.StreamUtils;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
@@ -231,15 +232,27 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
         if (nextLevel > callstack.getMaxDepth()) {
             return;
         }
+        int threadId = function.getThreadId();
+        long lastSampleEnd = start;
 
         AbstractCalledFunction nextFunction = (AbstractCalledFunction) callstack.getNextFunction(function.getStart(), nextLevel, function, model, Math.max(function.getStart(), start), Math.min(function.getEnd(), end));
         while (nextFunction != null) {
+            // Add sampling data of the time between next function and beginning of next level
+            if (threadId > 0) {
+                Collection<AggregatedCallSite> samplingData = model.getSamplingData(threadId, lastSampleEnd, nextFunction.getStart());
+                samplingData.forEach(aggregatedCall::addCallee);
+                lastSampleEnd = nextFunction.getEnd();
+            }
             AggregatedCalledFunction aggregatedChild = createCallSite(CallStackSymbolFactory.createSymbol(nextFunction.getSymbol(), element, nextFunction.getStart()));
             iterateOverCallstack(element, callstack, nextFunction, nextLevel + 1, aggregatedChild, model, start, end, monitor);
             aggregatedCall.addChild(nextFunction, aggregatedChild);
             nextFunction = (AbstractCalledFunction) callstack.getNextFunction(nextFunction.getEnd(), nextLevel, function, model, Math.max(function.getStart(), start), Math.min(function.getEnd(), end));
         }
-
+        // Get the sampling to the end of the function
+        if (threadId > 0) {
+            Collection<AggregatedCallSite> samplingData = model.getSamplingData(threadId, lastSampleEnd, function.getEnd() - lastSampleEnd);
+            samplingData.forEach(aggregatedCall::addCallee);
+        }
     }
 
     /**

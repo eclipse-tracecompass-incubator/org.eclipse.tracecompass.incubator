@@ -81,9 +81,10 @@ public interface ICalledFunction extends INamedSegment {
     int getProcessId();
 
     /**
-     * The ID of the thread that was running this function
+     * The ID of the thread that was running this function. A negative value
+     * means an unknows thread ID.
      *
-     * @return The thread ID
+     * @return The thread ID, a negative value means it is not known
      */
     int getThreadId();
 

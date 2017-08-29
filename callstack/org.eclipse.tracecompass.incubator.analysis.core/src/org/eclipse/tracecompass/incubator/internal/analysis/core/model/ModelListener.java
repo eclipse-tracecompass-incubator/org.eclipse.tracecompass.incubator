@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.tid.TidAnalysisModule;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICpuTimeProvider;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ISamplingDataProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.IThreadOnCpuProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
@@ -86,6 +87,16 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
                 fTidModules.put(provider, tidAnalysisWrapper);
                 ((CompositeHostModel) model).setThreadOnCpuProvider(tidAnalysisWrapper);
                 ((CompositeHostModel) model).setCpuTimeProvider(tidAnalysisWrapper);
+            }
+        }
+
+        if (module instanceof ISamplingDataProvider) {
+            ISamplingDataProvider provider = (ISamplingDataProvider) module;
+            for (String hostId : provider.getHostIds()) {
+                IHostModel model = ModelManager.getModelFor(hostId);
+                if (model instanceof CompositeHostModel) {
+                    ((CompositeHostModel) model).setSamplingDataProvider(provider);
+                }
             }
         }
     }

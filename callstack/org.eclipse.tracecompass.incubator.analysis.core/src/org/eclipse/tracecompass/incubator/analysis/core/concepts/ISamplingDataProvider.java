@@ -31,4 +31,11 @@ public interface ISamplingDataProvider {
      */
     Collection<AggregatedCallSite> getSamplingData(int tid, long start, long end);
 
+    /**
+     * The list of host IDs for which this object providers information on
+     * thread on the CPU
+     *
+     * @return The list of host IDs
+     */
+    Collection<String> getHostIds();
 }
