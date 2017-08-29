@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            category="org.eclipse.tracecompass.incubator.uftrace.category"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.uftrace.trace"
+            isDirectory="true"
+            name="UFTrace"
+            trace_type="org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.Uftrace">
+      </type>
+      <category
+            id="org.eclipse.tracecompass.incubator.uftrace.category"
+            name="UFTrace">
+      </category>
+   </extension>
+
+</plugin>
