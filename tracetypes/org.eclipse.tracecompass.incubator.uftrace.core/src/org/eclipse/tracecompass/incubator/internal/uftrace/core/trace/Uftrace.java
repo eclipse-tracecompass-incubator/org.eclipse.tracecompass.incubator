@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
@@ -33,7 +34,11 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
+import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProviderFactory;
+import org.eclipse.tracecompass.tmf.core.symbols.TmfResolvedSymbol;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceKnownSize;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceWithPreDefinedEvents;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
@@ -42,6 +47,7 @@ import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
 /**
  * Trace with the following data
@@ -68,6 +74,8 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
     private TmfLongLocation fCurrentLoc = new TmfLongLocation(0L);
 
     private long fSize;
+
+    private final ISymbolProvider fSymbolProvider = new UfTraceSymbolProvider();
 
     @Override
     public Iterable<ITmfEventAspect<?>> getEventAspects() {
@@ -103,7 +111,14 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
 
                     @Override
                     public @Nullable String resolve(ITmfEvent event) {
-                        return resolveSymbol(event);
+                        if (event.getContent().getValue() instanceof DatEvent) {
+                            DatEvent datEvent = (DatEvent) event.getContent().getValue();
+                            TmfResolvedSymbol symbol = fSymbolProvider.getSymbol(datEvent.getTid(), 0, datEvent.getAddress());
+                            if (symbol != null) {
+                                return symbol.getSymbolName();
+                            }
+                        }
+                        return null;
                     }
                 }
 
@@ -183,7 +198,11 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
                 return context;
             }
             while (context.getLocation() != null && Long.compare(longLocation.getLocationInfo(), Objects.requireNonNull(context.getLocation()).getLocationInfo()) >= 0) {
-                updateAttributes(context, context.getNext());
+                ITmfEvent next = context.getNext();
+                if (next == null) {
+                    break;
+                }
+                updateAttributes(context, next);
                 if (context.getLocation() == null) {
                     return context;
                 }
@@ -231,26 +250,100 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
         return (int) (fCurrentLoc.getLocationInfo() / 1024);
     }
 
-    private String resolveSymbol(ITmfEvent event) {
-        DatEvent fieldValue = (DatEvent) event.getContent().getValue();
-        int tid = fieldValue.getTid();
-        String execName = fTasks.getExecName(tid);
-        long address = fieldValue.getAddress();
-        if (execName == null) {
-            return "0x" + Long.toHexString(address); //$NON-NLS-1$
-        }
-        Entry<Long, MapEntry> key = fMap.getData().floorEntry(address);
-        if (key == null) {
-            return "0x" + Long.toHexString(address); //$NON-NLS-1$
-        }
-        long offset = address - key.getValue().getAddrLow();
-        String pathName = key.getValue().getPathName();
-        String substring = pathName.substring(pathName.lastIndexOf(File.separator) + 1);
-        SymParser sym = fSyms.get(substring);
-        if (sym == null) {
-            return "0x" + Long.toHexString(address); //$NON-NLS-1$
-        }
-        return sym.getMap().floorEntry(offset).getValue().getName();
+    /**
+     * Get the symbol provider for this trace
+     *
+     * @return the symbol provider
+     */
+    public ISymbolProvider getSymbolProvider() {
+        return fSymbolProvider;
     }
 
+    /**
+     * Alleged symbol provider factory
+     *
+     * @author Matthew Khouzam
+     *
+     */
+    public static class UfTraceSymbolProviderAllegedFactory implements ISymbolProviderFactory {
+
+        @Override
+        public @Nullable ISymbolProvider createProvider(@NonNull ITmfTrace trace) {
+            if (trace instanceof Uftrace) {
+                return ((Uftrace) trace).getSymbolProvider();
+            }
+            return null;
+        }
+    }
+
+    /**
+     * get the tasks parser
+     *
+     * @return The tasks parser
+     */
+    public TaskParser getTasks() {
+        return fTasks;
+    }
+
+    /**
+     * overly complicated, should clean up
+     *
+     * @author Matthew Khouzam
+     *
+     */
+    private class UfTraceSymbolProvider implements ISymbolProvider {
+        @Override
+        public TmfResolvedSymbol getSymbol(int tid, long timestamp, long address) {
+            String execName = fTasks.getExecName(tid);
+            if (execName == null) {
+                return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
+            }
+            Entry<Long, MapEntry> key = fMap.getData().floorEntry(address);
+            if (key == null) {
+                return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
+            }
+            long offset = address - key.getValue().getAddrLow();
+            String pathName = key.getValue().getPathName();
+            String substring = pathName.substring(pathName.lastIndexOf(File.separator) + 1);
+            SymParser sym = fSyms.get(substring);
+            if (sym == null) {
+                return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
+            }
+            String name = String.valueOf(sym.getMap().floorEntry(offset).getValue().getName());
+            return new TmfResolvedSymbol(address, name);
+        }
+
+        @Deprecated
+        @Override
+        public @Nullable String getSymbolText(int pid, long timestamp, long address) {
+            TmfResolvedSymbol symbol = getSymbol(pid, timestamp, address);
+            if (symbol != null) {
+                return symbol.getSymbolName();
+            }
+            return "";
+        }
+
+        @Override
+        public @NonNull ITmfTrace getTrace() {
+            return (@NonNull ITmfTrace) this;
+        }
+
+        @Override
+        public void loadConfiguration(@Nullable IProgressMonitor monitor) {
+            // do nothing
+        }
+
+        @Deprecated
+        @Override
+        public @Nullable String getSymbolText(long address) {
+            if (fTasks.getTids().size() == 1) {
+                TmfResolvedSymbol symbol = getSymbol(Iterables.getFirst(fTasks.getTids(), -1), 0, address);
+                if (symbol != null) {
+                    return symbol.getSymbolName();
+                }
+            }
+            return ""; //$NON-NLS-1$
+        }
+
+    }
 }

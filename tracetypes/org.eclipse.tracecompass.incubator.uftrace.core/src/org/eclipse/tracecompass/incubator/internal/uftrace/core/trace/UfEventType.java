@@ -31,9 +31,9 @@ public class UfEventType extends TmfEventType {
     private static final ITmfEventField ROOT = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, DatEvent.create(0, 0xaaaaaaaaaaaaaaaaL, 0), null);
 
     /** Entry event type */
-    private static final UfEventType ENTRY = new UfEventType("entry"); //$NON-NLS-1$
+    public static final UfEventType ENTRY = new UfEventType("entry"); //$NON-NLS-1$
     /** Exit event type */
-    private static final UfEventType EXIT = new UfEventType("exit"); //$NON-NLS-1$
+    public static final UfEventType EXIT = new UfEventType("exit"); //$NON-NLS-1$
     /** Event type */
     private static final UfEventType EVENT = new UfEventType("event"); //$NON-NLS-1$
     /** Lost event type */
