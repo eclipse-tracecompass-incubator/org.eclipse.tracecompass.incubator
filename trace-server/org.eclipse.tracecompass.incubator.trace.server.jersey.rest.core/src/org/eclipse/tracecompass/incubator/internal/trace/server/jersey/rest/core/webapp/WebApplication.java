@@ -36,7 +36,7 @@ public class WebApplication {
 
     private Server fServer;
 
-    private final TraceManager fTraceManager = TraceManager.getInstance();
+    private final TraceManager fTraceManager = new TraceManager();
 
     /**
      * Default Constructor

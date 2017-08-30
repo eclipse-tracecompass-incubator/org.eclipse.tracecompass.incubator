@@ -28,44 +28,6 @@ schemes:
 - http
 paths:
   /traces:
-    post:
-      tags:
-      - traces
-      summary: Add a trace to the server and open it.
-      description: Add a trace from the server's file system to the trace server,
-        and try to open it. Return some base information once opened.
-      operationId: addTrace
-      consumes:
-      - application/x-www-form-urlencoded
-      produces:
-      - application/json
-      parameters:
-      - name: name
-        in: formData
-        description: The name of the trace in the server
-        required: true
-        type: string
-      - name: path
-        in: formData
-        description: Path to the trace on the server file system
-        required: true
-        type: string
-      - name: typeID
-        in: formData
-        description: The trace type's Eclipse ID.
-        required: false
-        type: String
-      responses:
-        200:
-          description: The trace has been successfully added to the trace server.
-          schema:
-            $ref: '#/definitions/TraceModel'
-        204:
-          description: Missing the name and path parameters
-        406:
-          description: "Not acceptable: cannot read this trace type"
-        409:
-          description: "Conflict: there was already a trace with this name"
     get:
       tags:
       - traces
@@ -80,6 +42,45 @@ paths:
             type: array
             items:
               $ref: '#/definitions/TraceModel'
+  /traces/{trace}:
+    post:
+      tags:
+      - traces
+      summary: Add a trace to the server and open it.
+      description: Add a trace from the server's file system to the trace server,
+        and try to open it. Return some base information once opened.
+      operationId: addTrace
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      parameters:
+      - name: trace
+        in: path
+        description: The name of the trace in the server
+        required: true
+        type: string
+      - name: path
+        in: formData
+        description: Path to the trace on the server file system
+        required: true
+        type: string
+      - name: typeID
+        in: formData
+        description: The trace type's Eclipse extension ID.
+        required: false
+        type: String
+      responses:
+        200:
+          description: The trace has been successfully added to the trace server.
+          schema:
+            $ref: '#/definitions/TraceModel'
+        406:
+          description: "Not acceptable: cannot read this trace type"
+        409:
+          description: "Conflict: there was already a trace with this name"
+        500:
+          description: Missing the name and path parameters
     delete:
       tags:
       - traces
@@ -88,8 +89,8 @@ paths:
       produces:
       - application/json
       parameters:
-      - name: name
-        in: query
+      - name: trace
+        in: path
         description: The name of the trace in the server
         required: true
         type: string
@@ -100,7 +101,7 @@ paths:
             $ref: '#/definitions/TraceModel'
         204:
           description: There was no trace with this name to close / delete
-  /eventTable:
+  /traces/{trace}/eventTable:
     get:
       tags:
       - Views
@@ -113,7 +114,7 @@ paths:
       - application/x-www-form-urlencoded
       parameters:
       - name: name
-        in: query
+        in: path
         description: The name of the trace in the server
         required: true
         type: string
@@ -123,12 +124,63 @@ paths:
         required: true
         type: integer
         format: int64
+        minimum: 0
       - name: size
         in: query
         description: Number of events to query
         required: true
         type: integer
         format: int32
+        minimum: 0
+      responses:
+        200:
+          description: Returns an EventView model with a 2D array of strings and metadata
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/EventView'
+        400:
+          description: Bad request, the top index and size must be larger than 0
+          schema:
+            type: string
+        404:
+          description: No such trace
+          schema:
+            type: string
+        500:
+          description: Error reading the trace
+          schema:
+            type: string
+    post:
+      tags:
+      - Views
+      - traces
+      summary: Get a virtual view of events from a trace to populate the table
+      operationId: getEvents
+      produces:
+      - application/json
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - name: name
+        in: path
+        description: The name of the trace in the server
+        required: true
+        type: string
+      - name: low
+        in: query
+        description: Rank of the first event to query, among the filtered events
+        required: true
+        type: integer
+        format: int64
+        minimum: 0
+      - name: size
+        in: query
+        description: Number of filtered events to return
+        required: true
+        type: integer
+        format: int32
+        minimum: 0
       - name: filters
         in: formData
         type: string

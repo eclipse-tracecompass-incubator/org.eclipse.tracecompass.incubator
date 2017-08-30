@@ -19,29 +19,15 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
  * Object to inject to store trace name to model mapping
  *
  * @author Loic Prieur-Drevon
- *
  */
 public class TraceManager {
 
     private final Map<String, TraceModel> fMap = new HashMap<>();
 
-    private static TraceManager fInstance = null;
-
-    private TraceManager() {
-    }
-
     /**
-     * Gets the Trace Manager instance
-     *
-     * @return the Trace manager instance
+     * Constructor
      */
-    public static TraceManager getInstance() {
-        TraceManager instance = fInstance;
-        if (fInstance == null) {
-            instance = new TraceManager();
-            fInstance = instance;
-        }
-        return instance;
+    public TraceManager() {
     }
 
     /**

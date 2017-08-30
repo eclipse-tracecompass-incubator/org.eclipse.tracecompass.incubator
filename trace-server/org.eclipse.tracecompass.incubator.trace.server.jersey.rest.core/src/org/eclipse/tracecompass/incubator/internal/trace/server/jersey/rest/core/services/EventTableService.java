@@ -10,7 +10,9 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -18,6 +20,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -28,6 +31,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.TraceManager;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.events.EventView;
@@ -48,7 +52,7 @@ import com.google.common.collect.Lists;
  *
  * @author Loic Prieur-Drevon
  */
-@Path("/eventTable")
+@Path("/traces")
 public class EventTableService {
     @Context
     TraceManager traceManager;
@@ -67,9 +71,10 @@ public class EventTableService {
      *         trace model objects and the table of queried events
      */
     @GET
+    @Path("/{name}/eventTable")
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getEvents(@QueryParam(value = "name") String name,
-            @QueryParam(value = "low") @Min(0L) long low,
+    public Response getEvents(@PathParam(value = "name") @NotNull String name,
+            @QueryParam(value = "low") @Min(0) long low,
             @QueryParam(value = "size") @Min(0) int size) {
         TraceModel model = traceManager.get(name);
         if (model == null) {
@@ -80,6 +85,7 @@ public class EventTableService {
             EventView view = new EventView(model, low, size, events);
             return Response.ok().entity(view).build();
         } catch (InterruptedException e) {
+            Activator.getInstance().logError("Failed to query the trace", e); //$NON-NLS-1$
             return Response.serverError().entity(e.getMessage()).build();
         }
     }
@@ -99,13 +105,17 @@ public class EventTableService {
      *         trace model objects and the table of queried events
      */
     @PUT
+    @Path("/{name}/eventTable")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getFilteredEvents(@QueryParam(value = "name") String name,
-            @QueryParam(value = "low") @Min(0L) long low,
+    public Response getFilteredEvents(@PathParam(value = "name") @NotNull String name,
+            @QueryParam(value = "low") @Min(0) long low,
             @QueryParam(value = "size") @Min(0) int size,
-            @NotNull MultivaluedMap<String, String> multivaluedMap) {
+            MultivaluedMap<String, String> multivaluedMap) {
 
+        if (multivaluedMap == null) {
+            return Response.status(Status.BAD_REQUEST).entity("bad filter (null)").build(); //$NON-NLS-1$
+        }
         TraceModel model = traceManager.get(name);
         if (model == null) {
             return Response.status(Status.NOT_FOUND).entity("No trace with name: " + name).build(); //$NON-NLS-1$
@@ -115,6 +125,7 @@ public class EventTableService {
             EventView view = new EventView(model, low, size, multivaluedMap, events.getFirst(), events.getSecond());
             return Response.ok().entity(view).build();
         } catch (InterruptedException e) {
+            Activator.getInstance().logError("Failed to query the trace", e); //$NON-NLS-1$
             return Response.serverError().entity(e.getMessage()).build();
         }
     }
@@ -140,10 +151,7 @@ public class EventTableService {
         TmfEventRequest request = new TmfEventRequest(ITmfEvent.class, TmfTimeRange.ETERNITY, low, size, ExecutionType.FOREGROUND) {
             @Override
             public void handleData(ITmfEvent event) {
-                List<@NonNull String> line = Lists.transform(eventAspects,
-                        aspect -> String.valueOf(aspect.resolve(event)));
-
-                events.add(line);
+                events.add(Lists.transform(eventAspects, a -> String.valueOf(a.resolve(event))));
             }
         };
 
@@ -170,8 +178,8 @@ public class EventTableService {
      */
     public Pair<List<List<String>>, Integer> filteredQuery(TraceModel traceModel, long low, int size, MultivaluedMap<String, String> multivaluedMap) throws InterruptedException {
         List<List<String>> events = new ArrayList<>(size);
-        List<@NonNull ITmfEventAspect<?>> eventAspects = Lists.newArrayList(traceModel.getTrace().getEventAspects());
-        List<Pattern> regexes = compileReqexes(traceModel.getTrace(), multivaluedMap);
+        List<ITmfEventAspect<?>> eventAspects = Lists.newArrayList(traceModel.getTrace().getEventAspects());
+        List<Predicate<String>> predicates = Lists.transform(eventAspects, c -> compileReqexes(multivaluedMap.get(c.getName())));
         TmfEventRequest request = new TmfEventRequest(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.FOREGROUND) {
             /**
              * Override number of read events with number of events that match filter
@@ -181,7 +189,7 @@ public class EventTableService {
             @Override
             public void handleData(ITmfEvent event) {
 
-                List<String> buildLine = buildLine(event, eventAspects, regexes);
+                List<String> buildLine = buildLine(event, eventAspects, predicates);
                 if (buildLine != null) {
                     nbRead++;
                     if (nbRead >= low && nbRead <= low + size) {
@@ -200,32 +208,32 @@ public class EventTableService {
         return new Pair<>(events, request.getNbRead());
     }
 
-    private static @NonNull List<Pattern> compileReqexes(@NonNull ITmfTrace trace, MultivaluedMap<String, String> multivaluedMap) {
-        List<Pattern> patterns = new ArrayList<>();
-        for (String column : Iterables.transform(trace.getEventAspects(), ITmfEventAspect::getName)) {
-            String regex = multivaluedMap.getFirst(column);
-            if (regex != null && !regex.isEmpty()) {
-                patterns.add(Pattern.compile(regex));
-            } else {
-                patterns.add(null);
+    private static Predicate<String> compileReqexes(List<String> regexes) {
+        if (regexes == null || regexes.isEmpty()) {
+            return t -> true;
+        }
+        List<Pattern> list = new ArrayList<>();
+        for (String regex : regexes) {
+            try {
+                list.add(Pattern.compile(regex));
+            } catch (PatternSyntaxException e) {
             }
         }
-        return patterns;
+        return s -> Iterables.all(list, p -> p.matcher(s).find());
     }
 
-    private static @Nullable List<String> buildLine(@NonNull ITmfEvent event, List<ITmfEventAspect<?>> aspects, @NonNull List<Pattern> regexes) {
+    private static @Nullable List<String> buildLine(@NonNull ITmfEvent event, List<ITmfEventAspect<?>> aspects, List<Predicate<String>> predicates) {
         List<String> line = new ArrayList<>(aspects.size());
         int i = 0;
         for (ITmfEventAspect<?> aspect : aspects) {
             String text = String.valueOf(aspect.resolve(event));
-            Pattern regex = regexes.get(i);
-            if (regex == null || regex.matcher(text).matches()) {
+            Predicate<String> predicate = predicates.get(i++);
+            if (predicate.test(text)) {
                 line.add(text);
             } else {
                 // return null if one of the regular expressions does not match
                 return null;
             }
-            i++;
         }
         return line;
     }

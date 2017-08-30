@@ -18,8 +18,8 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
@@ -47,8 +47,7 @@ import com.google.common.collect.Iterables;
  */
 @Path("/traces")
 public class TraceManagerService {
-    @Context
-    TraceManager traceManager;
+    @Context TraceManager traceManager;
 
     /**
      * Getter method to access the list of traces
@@ -76,11 +75,14 @@ public class TraceManagerService {
      * @return the new trace model object or the exception if it failed to load.
      */
     @POST
+    @Path("/{name}")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response putTrace(@FormParam("name") String name, @FormParam("path") String path,
+    public Response putTrace(@NotNull @PathParam("name") String name,
+            @FormParam("path") String path,
             @FormParam("typeID") String typeID) {
         if (name == null) {
+            // parameter validation does not apply to FormParam.
             return Response.status(Status.NO_CONTENT).entity("Invalid name (null)").build(); //$NON-NLS-1$
         }
         TraceModel traceModel = traceManager.get(name);
@@ -98,19 +100,6 @@ public class TraceManagerService {
         }
     }
 
-    /**
-     * Delete a trace from the manager and dispose of it
-     *
-     * @param name
-     *            name of the trace
-     * @return a not found response if there is no such trace or the entity.
-     */
-    @DELETE
-    @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteTrace(@QueryParam("name") @NotNull String name) {
-        return Response.ok().entity(traceManager.remove(name)).build();
-    }
-
     private TraceModel put(String path, @NonNull String name, String typeID) throws TmfTraceException, TmfTraceImportException {
         List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(path, typeID);
         if (traceTypes.isEmpty()) {
@@ -126,6 +115,24 @@ public class TraceManagerService {
         TraceModel model = new TraceModel(name, trace);
         traceManager.put(name, model);
         return model;
+    }
+
+    /**
+     * Delete a trace from the manager and dispose of it
+     *
+     * @param name
+     *            name of the trace
+     * @return a not found response if there is no such trace or the entity.
+     */
+    @DELETE
+    @Path("/{name}")
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response deleteTrace(@PathParam("name") @NotNull String name) {
+        TraceModel trace = traceManager.remove(name);
+        if (trace == null) {
+            return Response.ok().status(Status.NOT_FOUND).build();
+        }
+        return Response.ok().entity(trace).build();
     }
 
 }
