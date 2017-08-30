@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -35,7 +37,11 @@ import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 /**
  * Trace Event Table Service.
@@ -62,10 +68,9 @@ public class EventTableService {
      */
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getEvents(@QueryParam(value = "name") String name, @QueryParam(value = "low") long low, @QueryParam(value = "size") int size) {
-        if (low < 0 || size < 0) {
-            return Response.status(Status.BAD_REQUEST).entity("low and size must be greater than 0").build(); //$NON-NLS-1$
-        }
+    public Response getEvents(@QueryParam(value = "name") String name,
+            @QueryParam(value = "low") @Min(0L) long low,
+            @QueryParam(value = "size") @Min(0) int size) {
         TraceModel model = traceManager.get(name);
         if (model == null) {
             return Response.status(Status.NOT_FOUND).entity("No trace with name: " + name).build(); //$NON-NLS-1$
@@ -96,15 +101,11 @@ public class EventTableService {
     @PUT
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getFilteredEvents(@QueryParam(value = "name") String name, @QueryParam(value = "low") long low,
-            @QueryParam(value = "size") int size, MultivaluedMap<String, String> multivaluedMap) {
+    public Response getFilteredEvents(@QueryParam(value = "name") String name,
+            @QueryParam(value = "low") @Min(0L) long low,
+            @QueryParam(value = "size") @Min(0) int size,
+            @NotNull MultivaluedMap<String, String> multivaluedMap) {
 
-        if (low < 0 || size < 0) {
-            return Response.status(Status.BAD_REQUEST).entity("low and size must be greater than 0").build(); //$NON-NLS-1$
-        }
-        if (multivaluedMap == null) {
-            return Response.status(Status.BAD_REQUEST).entity("bad filter (null)").build(); //$NON-NLS-1$
-        }
         TraceModel model = traceManager.get(name);
         if (model == null) {
             return Response.status(Status.NOT_FOUND).entity("No trace with name: " + name).build(); //$NON-NLS-1$
@@ -121,7 +122,7 @@ public class EventTableService {
     /**
      * Query the backing trace
      *
-     * @param trace
+     * @param traceModel
      *            TraceModel representing the trace to query on
      * @param low
      *            rank of the first event to return
@@ -132,12 +133,17 @@ public class EventTableService {
      * @throws InterruptedException
      *             if the request was cancelled
      */
-    public List<List<String>> query(TraceModel trace, long low, int size) throws InterruptedException {
+    private static List<List<String>> query(TraceModel traceModel, long low, int size) throws InterruptedException {
         List<List<String>> events = new ArrayList<>(size);
+        ITmfTrace trace = traceModel.getTrace();
+        List<@NonNull ITmfEventAspect<?>> eventAspects = Lists.newArrayList(trace.getEventAspects());
         TmfEventRequest request = new TmfEventRequest(ITmfEvent.class, TmfTimeRange.ETERNITY, low, size, ExecutionType.FOREGROUND) {
             @Override
             public void handleData(ITmfEvent event) {
-                events.add(buildLine(event, trace.getAspects()));
+                List<@NonNull String> line = Lists.transform(eventAspects,
+                        aspect -> String.valueOf(aspect.resolve(event)));
+
+                events.add(line);
             }
         };
 
@@ -146,18 +152,10 @@ public class EventTableService {
         return events;
     }
 
-    private static List<String> buildLine(@NonNull ITmfEvent event, List<ITmfEventAspect<?>> aspects) {
-        List<String> line = new ArrayList<>();
-        for (ITmfEventAspect<?> aspect : aspects) {
-            line.add(String.valueOf(aspect.resolve(event)));
-        }
-        return line;
-    }
-
     /**
      * Query the backing trace
      *
-     * @param trace
+     * @param traceModel
      *            TraceModel representing the trace to query on
      * @param low
      *            index of the lowest event in the filtered event list
@@ -170,9 +168,10 @@ public class EventTableService {
      * @throws InterruptedException
      *             if the request was cancelled
      */
-    public Pair<List<List<String>>, Integer> filteredQuery(TraceModel trace, long low, int size, @NonNull MultivaluedMap<String, String> multivaluedMap) throws InterruptedException {
+    public Pair<List<List<String>>, Integer> filteredQuery(TraceModel traceModel, long low, int size, MultivaluedMap<String, String> multivaluedMap) throws InterruptedException {
         List<List<String>> events = new ArrayList<>(size);
-        List<Pattern> regexes = compileReqexes(trace.getColumns(), multivaluedMap);
+        List<@NonNull ITmfEventAspect<?>> eventAspects = Lists.newArrayList(traceModel.getTrace().getEventAspects());
+        List<Pattern> regexes = compileReqexes(traceModel.getTrace(), multivaluedMap);
         TmfEventRequest request = new TmfEventRequest(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.FOREGROUND) {
             /**
              * Override number of read events with number of events that match filter
@@ -182,7 +181,7 @@ public class EventTableService {
             @Override
             public void handleData(ITmfEvent event) {
 
-                List<String> buildLine = buildLine(event, trace.getAspects(), regexes);
+                List<String> buildLine = buildLine(event, eventAspects, regexes);
                 if (buildLine != null) {
                     nbRead++;
                     if (nbRead >= low && nbRead <= low + size) {
@@ -196,14 +195,14 @@ public class EventTableService {
                 return nbRead;
             }
         };
-        trace.sendRequest(request);
+        traceModel.getTrace().sendRequest(request);
         request.waitForCompletion();
         return new Pair<>(events, request.getNbRead());
     }
 
-    private @NonNull static List<Pattern> compileReqexes(List<String> columns, MultivaluedMap<String, String> multivaluedMap) {
-        List<Pattern> patterns = new ArrayList<>(columns.size());
-        for (String column : columns) {
+    private static @NonNull List<Pattern> compileReqexes(@NonNull ITmfTrace trace, MultivaluedMap<String, String> multivaluedMap) {
+        List<Pattern> patterns = new ArrayList<>();
+        for (String column : Iterables.transform(trace.getEventAspects(), ITmfEventAspect::getName)) {
             String regex = multivaluedMap.getFirst(column);
             if (regex != null && !regex.isEmpty()) {
                 patterns.add(Pattern.compile(regex));
@@ -214,7 +213,7 @@ public class EventTableService {
         return patterns;
     }
 
-    private @Nullable static List<String> buildLine(@NonNull ITmfEvent event, List<ITmfEventAspect<?>> aspects, @NonNull List<Pattern> regexes) {
+    private static @Nullable List<String> buildLine(@NonNull ITmfEvent event, List<ITmfEventAspect<?>> aspects, @NonNull List<Pattern> regexes) {
         List<String> line = new ArrayList<>(aspects.size());
         int i = 0;
         for (ITmfEventAspect<?> aspect : aspects) {
@@ -223,6 +222,7 @@ public class EventTableService {
             if (regex == null || regex.matcher(text).matches()) {
                 line.add(text);
             } else {
+                // return null if one of the regular expressions does not match
                 return null;
             }
             i++;

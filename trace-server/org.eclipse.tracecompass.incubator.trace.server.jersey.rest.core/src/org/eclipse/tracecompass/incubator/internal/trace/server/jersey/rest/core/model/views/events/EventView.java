@@ -20,6 +20,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
+import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 /**
  * Encapsulate the result of a virtual table query
@@ -31,6 +35,7 @@ public class EventView {
 
     private TraceModel fModel;
     private List<List<String>> fLines;
+    private List<String> fColumns;
     private long fLow;
     private int fSize;
     private Map<String, String> fFilters;
@@ -56,6 +61,7 @@ public class EventView {
      */
     public EventView(@NonNull TraceModel model, long low, int size, List<List<String>> lines) {
         fModel = model;
+        fColumns = Lists.newArrayList(Iterables.transform(model.getTrace().getEventAspects(), ITmfEventAspect::getName));
         fLow = low;
         fSize = size;
         fLines = lines;
@@ -82,6 +88,7 @@ public class EventView {
      */
     public EventView(@NonNull TraceModel model, long low, int size, MultivaluedMap<String, String> filters, List<List<String>> lines, long filteredSize) {
         fModel = model;
+        fColumns = Lists.newArrayList(Iterables.transform(model.getTrace().getEventAspects(), ITmfEventAspect::getName));
         fLow = low;
         fSize = size;
         fFilteredSize = filteredSize;
@@ -109,6 +116,16 @@ public class EventView {
     @XmlElement(name = "event")
     public List<List<String>> getLines() {
         return fLines;
+    }
+
+    /**
+     * Getter for the column names
+     *
+     * @return get the list of column names
+     */
+    @XmlElement
+    public List<String> getColumns() {
+        return fColumns;
     }
 
     /**

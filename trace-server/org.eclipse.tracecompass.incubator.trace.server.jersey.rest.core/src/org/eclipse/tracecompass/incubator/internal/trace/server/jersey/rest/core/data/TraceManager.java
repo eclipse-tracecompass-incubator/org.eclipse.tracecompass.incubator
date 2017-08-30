@@ -88,7 +88,7 @@ public class TraceManager {
     public @Nullable TraceModel remove(String name) {
         TraceModel model = fMap.remove(name);
         if (model != null) {
-            model.dispose();
+            model.getTrace().dispose();
         }
         return model;
     }

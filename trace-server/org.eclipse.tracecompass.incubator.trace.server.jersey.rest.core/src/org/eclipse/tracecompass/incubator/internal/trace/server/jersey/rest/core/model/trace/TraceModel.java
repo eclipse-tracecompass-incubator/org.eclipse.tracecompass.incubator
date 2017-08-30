@@ -8,18 +8,12 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace;
 
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
-import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Model to store the trace and its name, while exposing only the necessary
@@ -31,8 +25,6 @@ import com.google.common.collect.ImmutableList;
 public class TraceModel {
     private final @NonNull ITmfTrace fTrace;
     private final String fName;
-    private final List<String> fColumns;
-    private final List<ITmfEventAspect<?>> fAspects;
 
     /**
      * Construct a model object, giving the trace a name
@@ -45,14 +37,6 @@ public class TraceModel {
     public TraceModel(@NonNull String name, @NonNull ITmfTrace trace) {
         fName = name;
         fTrace = trace;
-        ImmutableList.Builder<String> stringBuilder = ImmutableList.<String> builder();
-        ImmutableList.Builder<ITmfEventAspect<?>> aspectBuilder = ImmutableList.<ITmfEventAspect<?>> builder();
-        for (ITmfEventAspect<?> aspect : fTrace.getEventAspects()) {
-            stringBuilder.add(aspect.getName());
-            aspectBuilder.add(aspect);
-        }
-        fColumns = stringBuilder.build();
-        fAspects = aspectBuilder.build();
     }
 
     /**
@@ -86,40 +70,23 @@ public class TraceModel {
     }
 
     /**
-     * Getter for the columns available in this trace
+     * Get the trace's start time
      *
-     * @return the aspect names
+     * @return the trace's start time
      */
     @XmlElement
-    public List<String> getColumns() {
-        return fColumns;
+    public long getStart() {
+        return fTrace.getStartTime().toNanos();
     }
 
     /**
-     * Getter for the list of aspects in this trace
+     * Get the trace's end time
      *
-     * @return the list of aspects
+     * @return the trace's end time
      */
-    @XmlTransient
-    public List<ITmfEventAspect<?>> getAspects() {
-        return fAspects;
-    }
-
-    /**
-     * Dispose of the underlying trace to avoid resource leakage
-     */
-    public void dispose() {
-        fTrace.dispose();
-    }
-
-    /**
-     * Expose the send request method
-     *
-     * @param request
-     *            the request on the underlying trace
-     */
-    public void sendRequest(TmfEventRequest request) {
-        fTrace.sendRequest(request);
+    @XmlElement
+    public long getEnd() {
+        return fTrace.getEndTime().toNanos();
     }
 
     /**
