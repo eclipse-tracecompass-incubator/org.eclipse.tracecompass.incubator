@@ -29,6 +29,16 @@
                class="org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.counter.TraceEventCounterAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.traceevent.core.counter"
+            name="%counter.name">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace">
+         </tracetype>
+      </module>
    </extension>
 
 </plugin>
