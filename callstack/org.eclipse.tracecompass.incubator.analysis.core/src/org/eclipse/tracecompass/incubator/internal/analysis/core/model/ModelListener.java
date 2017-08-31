@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.analysis.core.model;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -103,17 +104,21 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
 
     private static class TidAnalysisWrapper implements IThreadOnCpuProvider, ICpuTimeProvider {
 
-        private final TidAnalysisModule fModule;
+        private final WeakReference<@Nullable TidAnalysisModule> fModule;
         private final Collection<String> fHostIds;
 
         public TidAnalysisWrapper(TidAnalysisModule module, String hostId) {
             fHostIds = Collections.singleton(hostId);
-            fModule = module;
+            fModule = new WeakReference<>(module);
         }
 
         @Override
         public @Nullable Integer getThreadOnCpuAtTime(int cpu, long time) {
-            return fModule.getThreadOnCpuAtTime(cpu, time);
+            TidAnalysisModule module = fModule.get();
+            if (module == null) {
+                return null;
+            }
+            return module.getThreadOnCpuAtTime(cpu, time);
         }
 
         @Override
@@ -123,7 +128,11 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
 
         @Override
         public long getCpuTime(int tid, long start, long end) {
-            ITmfStateSystem stateSystem = fModule.getStateSystem();
+            TidAnalysisModule module = fModule.get();
+            if (module == null) {
+                return IHostModel.TIME_UNKNOWN;
+            }
+            ITmfStateSystem stateSystem = module.getStateSystem();
             if (stateSystem == null) {
                 return IHostModel.TIME_UNKNOWN;
             }
