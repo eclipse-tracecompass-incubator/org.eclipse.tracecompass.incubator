@@ -11,17 +11,14 @@ package org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraphGroupBy;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.IEventCallStackProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.symbol.CallStackSymbolFactory;
@@ -33,13 +30,11 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
+import org.eclipse.tracecompass.tmf.core.util.Pair;
 
 /**
  * The callgraph analysis module
@@ -50,11 +45,8 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
 
     private @Nullable ITmfEventRequest fRequest;
     private final Set<ICallStackElement> fRootElements = new HashSet<>();
-    private final Multimap<ICallStackElement, AggregatedCallSite> fCcts = HashMultimap.create();
 
-    private @Nullable ICallStackGroupDescriptor fGroupBy = null;
-    private @Nullable Set<ICallStackElement> fGroupedRootElements = null;
-    private @Nullable Multimap<ICallStackElement, AggregatedCallSite> fGroupedCct = null;
+    private @Nullable CallGraph fFullRangeCallGraph;
 
     /**
      * Get the root elements from this call graph hierarchy
@@ -76,92 +68,26 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
     }
 
     @Override
-    public Collection<ICallStackElement> getElements() {
-        ICallStackGroupDescriptor groupBy = fGroupBy;
-        Collection<ICallStackElement> elements = fRootElements;
-        if (groupBy == null) {
-            return ImmutableList.copyOf(elements);
+    public CallGraph getCallGraph(ITmfTimestamp start, ITmfTimestamp end) {
+        CallGraph cg = executeForRange(new TmfTimeRange(start, end));
+        if (cg == null) {
+            return CallGraph.EMPTY_GRAPH;
         }
-
-        // FIXME: The grouping part of this class is copy-pasted from
-        // instrumented call graph. either have a base class or move this
-        // functionnality to its own class
-        Set<ICallStackElement> groupedElements = fGroupedRootElements;
-        if (groupedElements == null) {
-            Map<ICallStackElement, Collection<AggregatedCallSite>> groupCallGraphBy = CallGraphGroupBy.groupCallGraphBy(groupBy, elements, this);
-            // Get the root elements that have no parent
-            groupedElements = groupCallGraphBy.keySet().stream()
-                    .filter(element -> element.getParentElement() == null)
-                    .collect(Collectors.toSet());
-            Multimap<ICallStackElement, AggregatedCallSite> groupedCct = HashMultimap.create();
-            groupCallGraphBy.entrySet().forEach(entry -> {
-                if (!entry.getValue().isEmpty()) {
-                    groupedCct.putAll(entry.getKey(), entry.getValue());
-                }
-            });
-            fGroupedRootElements = groupedElements;
-            fGroupedCct = groupedCct;
-        }
-
-        return groupedElements;
+        return cg;
     }
 
     @Override
-    public void setGroupBy(@Nullable ICallStackGroupDescriptor descriptor) {
-        fGroupBy = descriptor;
-        fGroupedRootElements = null;
-        fGroupedCct = null;
-    }
-
-    @Override
-    public Collection<AggregatedCallSite> getCallingContextTree(ICallStackElement element) {
-        Multimap<ICallStackElement, AggregatedCallSite> groupedCct = fGroupedCct;
-        if (groupedCct != null) {
-            return groupedCct.get(element);
+    public CallGraph getCallGraph() {
+        CallGraph cg = fFullRangeCallGraph;
+        if (cg == null) {
+            return CallGraph.EMPTY_GRAPH;
         }
-        return fCcts.get(element);
+        return cg;
     }
 
     @Override
     public AggregatedCallSite createCallSite(ICallStackSymbol symbol) {
         return new AggregatedStackTraces(symbol);
-    }
-
-    @Override
-    public void addAggregatedCallSite(ICallStackElement dstGroup, AggregatedCallSite callsite) {
-        Collection<AggregatedCallSite> callsites = fCcts.get(dstGroup);
-        for (AggregatedCallSite site : callsites) {
-            if (site.getSymbol().equals(callsite.getSymbol())) {
-                site.merge(callsite);
-                return;
-            }
-        }
-        fCcts.put(dstGroup, callsite);
-    }
-
-    /**
-     * /** Add a stack trace to this group, such that the symbol at position 0
-     * is the top of the stack, ie the last symbol called.
-     *
-     * @param dstGroup
-     *            The element to which to add this stack trace
-     * @param stackTrace
-     *            The stack trace to add to the group
-     * @param ts
-     *            The timestamp at which this stack trace is added
-     */
-    public void addStackTrace(ICallStackElement dstGroup, @NonNull Object [] stackTrace, long ts) {
-        if (stackTrace.length == 0) {
-            return;
-        }
-        // Create the callsite for this stack trace
-        AggregatedCallSite prevCallsite = createCallSite(CallStackSymbolFactory.createSymbol(stackTrace[stackTrace.length - 1], dstGroup, ts));
-        for (int i = stackTrace.length - 2; i >= 0; i--) {
-            AggregatedCallSite callsite = createCallSite(CallStackSymbolFactory.createSymbol(stackTrace[i], dstGroup, ts));
-            callsite.addCallee(prevCallsite);
-            prevCallsite = callsite;
-        }
-        addAggregatedCallSite(dstGroup, prevCallsite);
     }
 
     /**
@@ -174,10 +100,13 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
      *            The stack trace to add to the group
      * @param ts
      *            The timestamp at which this stack trace is added
+     * @return The callsite
+     * @throws ArrayIndexOutOfBoundsException
+     *             Exception thrown if the stackTrace is empty
      */
-    public void addStackTrace(ICallStackElement dstGroup, long[] stackTrace, long ts) {
+    public AggregatedCallSite getCallSite(ICallStackElement dstGroup, long[] stackTrace, long ts) {
         if (stackTrace.length == 0) {
-            return;
+            throw new ArrayIndexOutOfBoundsException("Get callsite, the received array should not be null"); //$NON-NLS-1$
         }
         // Create the callsite for this stack trace
         AggregatedCallSite prevCallsite = createCallSite(CallStackSymbolFactory.createSymbol(stackTrace[stackTrace.length - 1], dstGroup, ts));
@@ -186,32 +115,32 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
             callsite.addCallee(prevCallsite);
             prevCallsite = callsite;
         }
-        addAggregatedCallSite(dstGroup, prevCallsite);
+        return prevCallsite;
     }
 
     /**
-     * Method to implement to process a callstack event. If this event contains
-     * a stack trace to add to some element, the implementation first needs to
-     * find the element to which to add the stack trace. The root elements of
-     * the hierarchy should be kept in this class. A root element can be added
-     * by calling {@link #addRootElement(ICallStackElement)} and they can be
-     * retrieved with {@link #getRootElements()}.
-     *
-     * Then from, the event, when the stack trace is retrieve, it can be
-     * aggregated to the element by calling
-     * {@link #addStackTrace(ICallStackElement, long[], long)} or
-     * {@link #addStackTrace(ICallStackElement, Object[], long)}. These methods will
-     * take care of creating the callsite objects and add the resulting callsite
-     * to the element. Refer to the documentation of those method for the order
-     * of the stack.
+     * Method to implement to get the call stack from an event. It returns a
+     * stack trace in the form or a Pair of {@link ICallStackElement} and
+     * {@link AggregatedCallSite}.
      *
      * @param event
      *            The trace event to process
+     * @return A pair of callstack element and aggregated callsite from this
+     *         event
      */
-    protected abstract void processEvent(ITmfEvent event);
+    protected abstract @Nullable Pair<ICallStackElement, AggregatedCallSite> getProfiledStackTrace(ITmfEvent event);
 
     @Override
     protected boolean executeAnalysis(@NonNull IProgressMonitor monitor) throws TmfAnalysisException {
+        CallGraph callgraph = executeForRange(TmfTimeRange.ETERNITY);
+        if (callgraph == null) {
+            return false;
+        }
+        fFullRangeCallGraph = callgraph;
+        return true;
+    }
+
+    private @Nullable CallGraph executeForRange(TmfTimeRange range) {
         ITmfTrace trace = getTrace();
         if (trace == null) {
             throw new NullPointerException("Trace has not been set, yet the analysis is being run!"); //$NON-NLS-1$
@@ -223,15 +152,20 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
         }
 
         try {
-            request = new ProfilingEventRequest(trace);
+            CallGraph callGraph = new CallGraph();
+            request = new ProfilingEventRequest(trace, callGraph, range);
             fRequest = request;
             trace.sendRequest(request);
 
             request.waitForCompletion();
+            if (!request.isCompleted()) {
+                return null;
+            }
+            return callGraph;
         } catch (InterruptedException e) {
             Activator.getInstance().logError("Request interrupted", e); //$NON-NLS-1$
         }
-        return request.isCompleted();
+        return null;
     }
 
     @Override
@@ -245,20 +179,26 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
     private class ProfilingEventRequest extends TmfEventRequest {
 
         private final ITmfTrace fTrace;
+        private final CallGraph fCallGraph;
 
         /**
          * Constructor
          *
          * @param trace
          *            The trace
+         * @param callgraph
+         *            The callgraph to fill
+         * @param range
+         *            The time range of this request
          */
-        public ProfilingEventRequest(ITmfTrace trace) {
+        public ProfilingEventRequest(ITmfTrace trace, CallGraph callgraph, TmfTimeRange range) {
             super(TmfEvent.class,
-                    TmfTimeRange.ETERNITY,
+                    range,
                     0,
                     ITmfEventRequest.ALL_DATA,
                     ITmfEventRequest.ExecutionType.BACKGROUND);
             fTrace = trace;
+            fCallGraph = callgraph;
         }
 
         @Override
@@ -277,6 +217,14 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
                     }
                 }
             }
+        }
+
+        private void processEvent(ITmfEvent event) {
+            Pair<ICallStackElement, AggregatedCallSite> perfCallSite = getProfiledStackTrace(event);
+            if (perfCallSite == null) {
+                return;
+            }
+            fCallGraph.addAggregatedCallSite(perfCallSite.getFirst(), perfCallSite.getSecond());
         }
     }
 

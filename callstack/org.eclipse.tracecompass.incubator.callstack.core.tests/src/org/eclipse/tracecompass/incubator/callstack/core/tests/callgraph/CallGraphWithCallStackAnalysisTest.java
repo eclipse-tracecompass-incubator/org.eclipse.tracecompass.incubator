@@ -25,7 +25,7 @@ import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallStackAnalysisStub;
 import org.eclipse.tracecompass.incubator.internal.analysis.core.model.CompositeHostModel;
@@ -59,17 +59,18 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
     @Test
     public void testCallGraph() {
         CallStackAnalysisStub cga = getModule();
+        CallGraph cg = cga.getCallGraph();
 
         try {
-            Collection<ICallStackElement> elements = cga.getElements();
+            Collection<ICallStackElement> elements = cg.getElements();
             for (ICallStackElement group : elements) {
                 String firstLevelName = group.getName();
                 switch (firstLevelName) {
                 case "1":
-                    verifyProcess1(cga, group);
+                    verifyProcess1(cg, group);
                     break;
                 case "5":
-                    verifyProcess5(cga, group);
+                    verifyProcess5(cg, group);
                     break;
                 default:
                     fail("Unknown process in callstack");
@@ -80,14 +81,14 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess1(ICallGraphProvider provider, ICallStackElement element) {
+    private static void verifyProcess1(CallGraph cg, ICallStackElement element) {
         Collection<ICallStackElement> secondLevels = element.getChildren();
         assertEquals(2, secondLevels.size());
         for (ICallStackElement secondLevel : secondLevels) {
             assertTrue(secondLevel instanceof InstrumentedCallStackElement);
             assertTrue(secondLevel.isLeaf());
             String secondLevelName = secondLevel.getName();
-            Collection<AggregatedCallSite> children = provider.getCallingContextTree(secondLevel);
+            Collection<AggregatedCallSite> children = cg.getCallingContextTree(secondLevel);
             switch (secondLevelName) {
             case "2":
                 assertEquals(2, children.size());
@@ -177,14 +178,14 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess5(ICallGraphProvider provider, ICallStackElement element) {
+    private static void verifyProcess5(CallGraph cg, ICallStackElement element) {
         Collection<ICallStackElement> secondLevels = element.getChildren();
         assertEquals(2, secondLevels.size());
         for (ICallStackElement secondLevel : secondLevels) {
             assertTrue(secondLevel instanceof InstrumentedCallStackElement);
             assertTrue(secondLevel.isLeaf());
             String secondLevelName = secondLevel.getName();
-            Collection<AggregatedCallSite> children = provider.getCallingContextTree(secondLevel);
+            Collection<AggregatedCallSite> children = cg.getCallingContextTree(secondLevel);
             switch (secondLevelName) {
             case "6": {
                 assertEquals(1, children.size());
@@ -368,18 +369,19 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         ((CompositeHostModel) model).setCpuTimeProvider(cpuTimeProvider);
 
         CallGraphAnalysis cga = getCallGraphModule();
+        CallGraph callGraph = cga.getCallGraph();
         try {
-            Collection<ICallStackElement> groups = cga.getElements();
+            Collection<ICallStackElement> groups = callGraph.getElements();
             for (ICallStackElement group : groups) {
                 String firstLevelName = group.getName();
                 switch (firstLevelName) {
                 case "1":
                     // Make sure the symbol key is correctly resolved
-                    verifyProcess1CpuTime(cga, group);
+                    verifyProcess1CpuTime(callGraph, group);
                     break;
                 case "5":
                     // Make sure the symbol key is correctly resolved
-                    verifyProcess5CpuTime(cga, group);
+                    verifyProcess5CpuTime(callGraph, group);
                     break;
                 default:
                     fail("Unknown process in callstack");
@@ -390,14 +392,14 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess1CpuTime(ICallGraphProvider provider, ICallStackElement element) {
+    private static void verifyProcess1CpuTime(CallGraph callGraph, ICallStackElement element) {
         Collection<ICallStackElement> secondLevels = element.getChildren();
         assertEquals(2, secondLevels.size());
         for (ICallStackElement secondLevel : secondLevels) {
             assertTrue(secondLevel instanceof InstrumentedCallStackElement);
             assertTrue(secondLevel.isLeaf());
             String secondLevelName = secondLevel.getName();
-            Collection<AggregatedCallSite> children = provider.getCallingContextTree(secondLevel);
+            Collection<AggregatedCallSite> children = callGraph.getCallingContextTree(secondLevel);
             switch (secondLevelName) {
             case "2":
                 assertEquals(2, children.size());
@@ -487,14 +489,14 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess5CpuTime(ICallGraphProvider provider, ICallStackElement element) {
+    private static void verifyProcess5CpuTime(CallGraph callGraph, ICallStackElement element) {
         Collection<ICallStackElement> secondLevels = element.getChildren();
         assertEquals(2, secondLevels.size());
         for (ICallStackElement secondLevel : secondLevels) {
             assertTrue(secondLevel instanceof InstrumentedCallStackElement);
             assertTrue(secondLevel.isLeaf());
             String secondLevelName = secondLevel.getName();
-            Collection<AggregatedCallSite> children = provider.getCallingContextTree(secondLevel);
+            Collection<AggregatedCallSite> children = callGraph.getCallingContextTree(secondLevel);
             switch (secondLevelName) {
             case "6": {
                 assertEquals(1, children.size());

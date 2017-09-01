@@ -33,6 +33,7 @@ Export-Package: org.eclipse.tracecompass.incubator.callstack.core.tests,
  org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart,
  org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.statesystem,
  org.eclipse.tracecompass.incubator.callstack.core.tests.lttng2.ust.callstack,
+ org.eclipse.tracecompass.incubator.callstack.core.tests.sampled,
  org.eclipse.tracecompass.incubator.callstack.core.tests.stubs,
  org.eclipse.tracecompass.incubator.callstack.core.tests.xml.module
 Import-Package: com.google.common.collect

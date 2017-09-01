@@ -13,7 +13,7 @@ package org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph;
  *
  * @author Bernd Hufmann
  */
-enum SortOption {
+public enum SortOption {
     /** Sort by thread name*/
     BY_NAME,
     /** Sort by thread name reverse */

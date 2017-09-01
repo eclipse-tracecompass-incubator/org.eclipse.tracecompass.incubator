@@ -22,6 +22,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraphGroupBy;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallStackAnalysisStub;
@@ -129,15 +130,16 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
     @Test
     public void testGroupByAllInstrumented() {
         CallStackAnalysisStub cga = getModule();
+        CallGraph baseCallGraph = cga.getCallGraph();
 
-        cga.setGroupBy(AllGroupDescriptor.getInstance());
-        Collection<ICallStackElement> elements = cga.getElements();
+        CallGraph callGraph = CallGraphGroupBy.groupCallGraphBy(AllGroupDescriptor.getInstance(), baseCallGraph);
+        Collection<ICallStackElement> elements = callGraph.getElements();
         assertEquals(1, elements.size());
 
         ICallStackElement element = Iterables.getFirst(elements, null);
         assertNotNull(element);
 
-        Collection<AggregatedCallSite> callingContextTree = cga.getCallingContextTree(element);
+        Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(element);
         compareCcts("", getExpectedAll(), callingContextTree);
 
     }
@@ -148,14 +150,15 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
     @Test
     public void testGroupByProcessInstrumented() {
         CallStackAnalysisStub cga = getModule();
+        CallGraph baseCallGraph = cga.getCallGraph();
 
         // The first group descriptor is the process
         Collection<ICallStackGroupDescriptor> groupDescriptors = cga.getGroupDescriptors();
         ICallStackGroupDescriptor processGroup = Iterables.getFirst(groupDescriptors, null);
         assertNotNull(processGroup);
 
-        cga.setGroupBy(processGroup);
-        Collection<ICallStackElement> elements = cga.getElements();
+        CallGraph callGraph = CallGraphGroupBy.groupCallGraphBy(processGroup, baseCallGraph);
+        Collection<ICallStackElement> elements = callGraph.getElements();
         assertEquals(2, elements.size());
 
         for (ICallStackElement element : elements) {
@@ -163,14 +166,14 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
             case "1": {
                 Collection<ICallStackElement> children = element.getChildren();
                 assertEquals(0, children.size());
-                Collection<AggregatedCallSite> callingContextTree = cga.getCallingContextTree(element);
+                Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(element);
                 compareCcts("", getExpectedProcess1(), callingContextTree);
             }
                 break;
             case "5": {
                 Collection<ICallStackElement> children = element.getChildren();
                 assertEquals(0, children.size());
-                Collection<AggregatedCallSite> callingContextTree = cga.getCallingContextTree(element);
+                Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(element);
                 compareCcts("", getExpectedProcess5(), callingContextTree);
             }
                 break;
@@ -186,6 +189,7 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
     @Test
     public void testGroupByThreadInstrumented() {
         CallStackAnalysisStub cga = getModule();
+        CallGraph baseCallGraph = cga.getCallGraph();
 
         // The first group descriptor is the process
         Collection<ICallStackGroupDescriptor> groupDescriptors = cga.getGroupDescriptors();
@@ -197,8 +201,8 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
         }
 
         // Group by thread
-        cga.setGroupBy(group);
-        Collection<ICallStackElement> elements = cga.getElements();
+        CallGraph callGraph = CallGraphGroupBy.groupCallGraphBy(group, baseCallGraph);
+        Collection<ICallStackElement> elements = callGraph.getElements();
         assertEquals(2, elements.size());
 
         for (ICallStackElement element : elements) {
@@ -209,12 +213,12 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
                 for (ICallStackElement thread : children) {
                     switch (thread.getName()) {
                     case "2": {
-                        Collection<AggregatedCallSite> callingContextTree = cga.getCallingContextTree(thread);
+                        Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(thread);
                         compareCcts("", getExpectedThread2(), callingContextTree);
                     }
                         break;
                     case "3": {
-                        Collection<AggregatedCallSite> callingContextTree = cga.getCallingContextTree(thread);
+                        Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(thread);
                         compareCcts("", getExpectedThread3(), callingContextTree);
                     }
                         break;
@@ -230,12 +234,12 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
                 for (ICallStackElement thread : children) {
                     switch (thread.getName()) {
                     case "6": {
-                        Collection<AggregatedCallSite> callingContextTree = cga.getCallingContextTree(thread);
+                        Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(thread);
                         compareCcts("", getExpectedThread6(), callingContextTree);
                     }
                         break;
                     case "7": {
-                        Collection<AggregatedCallSite> callingContextTree = cga.getCallingContextTree(thread);
+                        Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(thread);
                         compareCcts("", getExpectedThread7(), callingContextTree);
                     }
                         break;

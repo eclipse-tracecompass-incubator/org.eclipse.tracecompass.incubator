@@ -162,12 +162,9 @@ public class CallGraphAnalysisTest {
             assertNotNull(segmentStore);
             Object[] segments = segmentStore.toArray();
             ICalledFunction f1 = (ICalledFunction) segments[0];
-            assertEquals("Number of segments Found", 1, segments.length);
-            assertEquals("Callees number", 0, f1.getChildren().size());
-            assertEquals("Function's self time", 10, f1.getSelfTime());
-            assertEquals("Compare the function's self time and total time", f1.getLength(), f1.getSelfTime());
-
-            assertEquals("Function's depth", 1, f1.getDepth());
+            assertEquals("Number of segments Found", 3, segments.length);
+            // Time should match the small function at the top
+            assertEquals("Function's self time", 10, f1.getLength());
         } finally {
             cga.dispose();
         }

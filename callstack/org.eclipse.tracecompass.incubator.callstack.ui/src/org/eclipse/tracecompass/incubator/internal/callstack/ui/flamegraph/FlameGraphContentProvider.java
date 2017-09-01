@@ -24,7 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphContentProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
@@ -115,8 +115,8 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         if (inputElement instanceof Collection<?>) {
             Collection<?> callgraphProviders = (Collection<?>) inputElement;
             for (Object object : callgraphProviders) {
-                if (object instanceof ICallGraphProvider) {
-                    buildForProvider((ICallGraphProvider) object);
+                if (object instanceof CallGraph) {
+                    buildCallGraph((CallGraph) object);
                 }
             }
         } else {
@@ -128,10 +128,10 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         return fFlameGraphEntries.toArray(new ITimeGraphEntry[fFlameGraphEntries.size()]);
     }
 
-    private void buildForProvider(ICallGraphProvider provider) {
-        Collection<ICallStackElement> elements = provider.getElements();
+    private void buildCallGraph(CallGraph object) {
+        Collection<ICallStackElement> elements = object.getElements();
         for (ICallStackElement element : elements) {
-            buildChildrenEntries(element, provider, null);
+            buildChildrenEntries(element, object, null);
         }
     }
 
@@ -141,7 +141,7 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
      * @param element
      *            The node of the aggregation tree
      */
-    private void buildChildrenEntries(ICallStackElement element, ICallGraphProvider cgProvider, @Nullable TimeGraphEntry parent) {
+    private void buildChildrenEntries(ICallStackElement element, CallGraph object, @Nullable TimeGraphEntry parent) {
         // Add the entry
         TimeGraphEntry currentEntry = new TimeGraphEntry(element.getName(), 0L, 0L);
         if (parent != null) {
@@ -152,7 +152,7 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
 
         // Create the children entries
         for (ICallStackElement child : element.getChildren()) {
-            buildChildrenEntries(child, cgProvider, currentEntry);
+            buildChildrenEntries(child, object, currentEntry);
         }
 
         // Create the callsites entries
@@ -165,7 +165,7 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         timestampStack.push(0L);
 
         // Sort children by duration
-        cgProvider.getCallingContextTree(element).stream()
+        object.getCallingContextTree(element).stream()
                 .sorted(Comparator.comparingLong(AggregatedCallSite::getLength))
                 .forEach(rootFunction -> {
                     setData(rootFunction, childrenEntries, timestampStack);

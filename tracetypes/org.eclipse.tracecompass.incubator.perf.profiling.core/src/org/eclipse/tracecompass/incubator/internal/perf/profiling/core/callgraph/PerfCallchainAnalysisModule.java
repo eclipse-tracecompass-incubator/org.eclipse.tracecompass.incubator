@@ -17,13 +17,16 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph.ProfilingCallGraphAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.util.Pair;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -56,14 +59,14 @@ public class PerfCallchainAnalysisModule extends ProfilingCallGraphAnalysisModul
     }
 
     @Override
-    protected void processEvent(ITmfEvent event) {
+    protected @Nullable Pair<ICallStackElement, AggregatedCallSite> getProfiledStackTrace(@NonNull ITmfEvent event) {
         if (!event.getName().startsWith(EVENT_SAMPLING)) {
-            return;
+            return null;
         }
         // Get the callchain if available
         ITmfEventField field = event.getContent().getField(FIELD_PERF_CALLCHAIN);
         if (field == null) {
-            return;
+            return null;
         }
         long[] value = (long[]) field.getValue();
         int size = value.length;
@@ -75,7 +78,7 @@ public class PerfCallchainAnalysisModule extends ProfilingCallGraphAnalysisModul
             value[j] = tmp;
         }
         ICallStackElement element = getElement(event);
-        addStackTrace(element, value, event.getTimestamp().getValue());
+        return new Pair<>(element, getCallSite(element, value, event.getTimestamp().getValue()));
     }
 
     /**

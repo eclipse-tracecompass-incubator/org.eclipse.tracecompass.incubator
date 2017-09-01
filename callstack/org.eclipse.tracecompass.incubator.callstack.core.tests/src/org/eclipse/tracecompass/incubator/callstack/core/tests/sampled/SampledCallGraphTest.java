@@ -17,13 +17,16 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph.ProfilingCallGraphAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.util.Pair;
 import org.junit.Test;
 
 /**
@@ -73,8 +76,9 @@ public class SampledCallGraphTest {
         }
 
         @Override
-        protected void processEvent(@NonNull ITmfEvent event) {
-            // Nothing to do here
+        protected @Nullable Pair<@NonNull ICallStackElement, @NonNull AggregatedCallSite> getProfiledStackTrace(@NonNull ITmfEvent event) {
+            // TODO Auto-generated method stub
+            return null;
         }
 
     }
@@ -87,18 +91,20 @@ public class SampledCallGraphTest {
         TestProfilingAnalysis pg = new TestProfilingAnalysis();
         try {
             ICallStackElement element = pg.getElement();
-            pg.addStackTrace(element, CALLSITE_1, 1);
-            pg.addStackTrace(element, CALLSITE_2, 2);
-            pg.addStackTrace(element, CALLSITE_3, 3);
-            pg.addStackTrace(element, CALLSITE_4, 4);
-            pg.addStackTrace(element, CALLSITE_5, 5);
-            pg.addStackTrace(element, CALLSITE_6, 6);
-            pg.addStackTrace(element, CALLSITE_7, 7);
-            pg.addStackTrace(element, CALLSITE_8, 8);
-            pg.addStackTrace(element, CALLSITE_9, 9);
-            pg.addStackTrace(element, CALLSITE_10, 10);
 
-            Collection<AggregatedCallSite> aggregatedData = pg.getCallingContextTree(element);
+            CallGraph cg = pg.getCallGraph();
+            cg.addAggregatedCallSite(element, pg.getCallSite(element, CALLSITE_1, 1));
+            cg.addAggregatedCallSite(element, pg.getCallSite(element, CALLSITE_2, 2));
+            cg.addAggregatedCallSite(element, pg.getCallSite(element, CALLSITE_3, 3));
+            cg.addAggregatedCallSite(element, pg.getCallSite(element, CALLSITE_4, 4));
+            cg.addAggregatedCallSite(element, pg.getCallSite(element, CALLSITE_5, 5));
+            cg.addAggregatedCallSite(element, pg.getCallSite(element, CALLSITE_6, 6));
+            cg.addAggregatedCallSite(element, pg.getCallSite(element, CALLSITE_7, 7));
+            cg.addAggregatedCallSite(element, pg.getCallSite(element, CALLSITE_8, 8));
+            cg.addAggregatedCallSite(element, pg.getCallSite(element, CALLSITE_9, 9));
+            cg.addAggregatedCallSite(element, pg.getCallSite(element, CALLSITE_10, 10));
+
+            Collection<AggregatedCallSite> aggregatedData = cg.getCallingContextTree(element);
             assertNotNull(aggregatedData);
             assertEquals(2, aggregatedData.size());
 

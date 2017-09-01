@@ -13,6 +13,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphPro
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.IEventCallStackProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphView;
+import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.selection.FlameGraphSelView;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.views.cct.CallingContextTreeView;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.views.stacktable.CallStackTableView;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
@@ -35,6 +36,7 @@ public class CallStackAnalysisListener implements ITmfNewAnalysisModuleListener 
         }
         if (module instanceof ICallGraphProvider) {
             module.registerOutput(new TmfAnalysisViewOutput(FlameGraphView.ID, module.getId()));
+            module.registerOutput(new TmfAnalysisViewOutput(FlameGraphSelView.ID, module.getId()));
             module.registerOutput(new TmfAnalysisViewOutput(CallingContextTreeView.ID, module.getId()));
         }
         if (module instanceof IEventCallStackProvider) {

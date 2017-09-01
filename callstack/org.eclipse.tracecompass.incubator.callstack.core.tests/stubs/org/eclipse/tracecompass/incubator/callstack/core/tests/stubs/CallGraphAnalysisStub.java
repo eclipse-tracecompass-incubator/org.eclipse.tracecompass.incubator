@@ -129,7 +129,7 @@ public class CallGraphAnalysisStub extends CallGraphAnalysis {
      * @return The return value of the iteration
      */
     public boolean iterate() {
-        return iterateOverCallstackSerie(fCsProvider.getCallStackSeries().iterator().next(), ModelManager.getModelFor(""), new NullProgressMonitor());
+        return iterateOverCallstackSerie(fCsProvider.getCallStackSeries().iterator().next(), ModelManager.getModelFor(""), getCallGraph(), 0, Long.MAX_VALUE, new NullProgressMonitor());
     }
 
     @Override

@@ -189,7 +189,9 @@ public class CallStack {
     }
 
     /**
-     * Get the next function call
+     * Get the next function call after or including the requested time. To get
+     * the function after a previous function was retrieved, the
+     * {@link ICalledFunction#getEnd()} can be used for the requested time.
      *
      * @param time
      *            The time of the request
@@ -201,23 +203,29 @@ public class CallStack {
      *            The operating system model to retrieve extra information.
      *            FIXME: Since we have the host ID, the model may not be
      *            necessary
+     * @param start
+     *            The time of the start of the function. If the function starts
+     *            earlier, this time will be used as start time.
+     * @param end
+     *            The time of the end of the function. If the function ends
+     *            later, this time will be used as end time.
      * @return The next function call
      */
-    public @Nullable ICalledFunction getNextFunction(long time, int depth, @Nullable ICalledFunction parent, IHostModel model) {
+    public @Nullable ICalledFunction getNextFunction(long time, int depth, @Nullable ICalledFunction parent, IHostModel model, long start, long end) {
         if (depth > getMaxDepth()) {
             throw new ArrayIndexOutOfBoundsException("CallStack depth " + depth + " is too large"); //$NON-NLS-1$ //$NON-NLS-2$
         }
         long endTime = (parent == null ? fStateSystem.getCurrentEndTime() : parent.getEnd() - 1);
-        if (time > endTime) {
+        if (time > endTime || time >= end) {
             return null;
         }
         try {
             ITmfStateInterval interval = fStateSystem.querySingleState(time, fQuarks.get(depth - 1));
-            while ((interval.getStateValue().isNull() || (interval.getStartTime() < time)) && interval.getEndTime() + 1 < endTime) {
+            while ((interval.getStateValue().isNull() || interval.getEndTime() < start) && interval.getEndTime() + 1 < endTime) {
                 interval = fStateSystem.querySingleState(interval.getEndTime() + 1, fQuarks.get(depth - 1));
             }
-            if (!interval.getStateValue().isNull() && interval.getStartTime() >= time) {
-                return CalledFunctionFactory.create(interval.getStartTime(), interval.getEndTime() + 1, depth, interval.getStateValue(), getSymbolKeyAt(interval.getStartTime()), getThreadId(interval.getStartTime()), parent, model);
+            if (!interval.getStateValue().isNull() && interval.getStartTime() < end) {
+                return CalledFunctionFactory.create(Math.max(start, interval.getStartTime()), Math.min(end, interval.getEndTime() + 1), depth, interval.getStateValue(), getSymbolKeyAt(interval.getStartTime()), getThreadId(interval.getStartTime()), parent, model);
             }
         } catch (StateSystemDisposedException e) {
 

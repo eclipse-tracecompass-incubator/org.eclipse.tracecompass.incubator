@@ -27,6 +27,14 @@
             restorable="true">
       </view>
       <view
+            category="org.eclipse.linuxtools.tmf.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.selection.FlameGraphSelView"
+            icon="icons/elcl16/flame.png"
+            id="org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.selection.flamegraphView"
+            name="%view.flameGraphSel"
+            restorable="true">
+      </view>
+      <view
       		category="org.eclipse.linuxtools.tmf.ui.views.category"
             allowMultiple="true"
             class="org.eclipse.tracecompass.incubator.internal.callstack.ui.views.flamechart.FlameChartView"

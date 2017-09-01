@@ -9,7 +9,7 @@
  * Author:
  *     Sonia Farrah
  *******************************************************************************/
-package org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph;
+package org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.selection;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,13 +61,19 @@ import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraphGroupBy;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.Activator;
+import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphContentProvider;
+import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphPresentationProvider;
+import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlamegraphEvent;
+import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.SortOption;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
 import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -89,18 +95,18 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 /**
- * View to display the flame graph .This uses the flameGraphNode tree generated
+ * View to display the flame graph. This uses the flameGraphNode tree generated
  * by CallGraphAnalysisUI.
  *
  * @author Sonia Farrah
  */
 @NonNullByDefault({})
-public class FlameGraphView extends TmfView {
+public class FlameGraphSelView extends TmfView {
 
     /**
      * ID of the view
      */
-    public static final String ID = FlameGraphView.class.getPackage().getName() + ".flamegraphView"; //$NON-NLS-1$
+    public static final String ID = FlameGraphSelView.class.getPackage().getName() + ".flamegraphView"; //$NON-NLS-1$
 
     private static final String SYMBOL_MAPPING_ICON_PATH = "icons/obj16/binaries_obj.gif"; //$NON-NLS-1$
     private static final @NonNull String GROUP_BY_ICON_PATH = "icons/etool16/group_by.gif"; //$NON-NLS-1$
@@ -124,11 +130,14 @@ public class FlameGraphView extends TmfView {
     private Action fAggregateByAction;
     private Action fSortByNameAction;
     private Action fSortByIdAction;
- // The action to import a binary file mapping */
+ // The action to import a binary file mapping
     private Action fConfigureSymbolsAction;
 
-    private final Multimap<ITmfTrace, ISymbolProvider> fSymbolProviders = LinkedHashMultimap.create();
+    private @Nullable ITmfTimestamp fCurrentSelStart;
+    private @Nullable ITmfTimestamp fCurrentSelEnd;
     private @Nullable ICallStackGroupDescriptor fGroupBy = null;
+
+    private final Multimap<ITmfTrace, ISymbolProvider> fSymbolProviders = LinkedHashMultimap.create();
     /**
      * A plain old semaphore is used since different threads will be competing
      * for the same resource.
@@ -138,7 +147,7 @@ public class FlameGraphView extends TmfView {
     /**
      * Constructor
      */
-    public FlameGraphView() {
+    public FlameGraphSelView() {
         super(ID);
     }
 
@@ -270,15 +279,21 @@ public class FlameGraphView extends TmfView {
         }
 
         if (!callGraphProviders.iterator().hasNext())  {
-            fTimeGraphViewer.setInput(null);
-            fLock.release();
-            return;
+            Display.getDefault().asyncExec(() -> {
+                fTimeGraphViewer.setInput(null);
+                fLock.release();
+                return;
+            });
         }
         for (ICallGraphProvider provider : callGraphProviders) {
             if (provider instanceof IAnalysisModule) {
                 ((IAnalysisModule) provider).schedule();
             }
         }
+
+        // Get the callgraph for each of the providers
+        ITmfTimestamp start = fCurrentSelStart;
+        ITmfTimestamp end = fCurrentSelEnd;
 
         Job j = new Job(Messages.CallGraphAnalysis_Execution) {
 
@@ -288,17 +303,22 @@ public class FlameGraphView extends TmfView {
                     fLock.release();
                     return Status.CANCEL_STATUS;
                 }
-                Set<CallGraph> callgraphs = new HashSet<>();
                 ICallStackGroupDescriptor group = fGroupBy;
+                Set<CallGraph> callgraphs = new HashSet<>();
                 for (ICallGraphProvider provider : callGraphProviders) {
                     if (provider instanceof IAnalysisModule) {
                         ((IAnalysisModule) provider).waitForCompletion(monitor);
                     }
-                    CallGraph callGraph = provider.getCallGraph();
-                    if (group == null) {
-                        callgraphs.add(callGraph);
+                    CallGraph cg = null;
+                    if (start == null || end == null) {
+                        cg = provider.getCallGraph();
                     } else {
-                        callgraphs.add(CallGraphGroupBy.groupCallGraphBy(group, callGraph));
+                        cg = provider.getCallGraph(start, end);
+                    }
+                    if (group == null) {
+                        callgraphs.add(cg);
+                    } else {
+                        callgraphs.add(CallGraphGroupBy.groupCallGraphBy(group, cg));
                     }
                 }
                 Display.getDefault().asyncExec(() -> {
@@ -310,6 +330,29 @@ public class FlameGraphView extends TmfView {
             }
         };
         j.schedule();
+    }
+
+    /**
+     * Handles the update of the selection. If the selection is a range, then
+     * get the call graph for this range and update the view, otherwise get
+     * callgraph of the full range
+     *
+     * @param signal
+     *            The signal
+     */
+    @TmfSignalHandler
+    public void handleSelectionChange(TmfSelectionRangeUpdatedSignal signal) {
+        ITmfTimestamp beginTime = signal.getBeginTime();
+        ITmfTimestamp endTime = signal.getEndTime();
+
+        if (beginTime != endTime) {
+            fCurrentSelStart = beginTime;
+            fCurrentSelEnd = endTime;
+        } else {
+            fCurrentSelStart = null;
+            fCurrentSelEnd = null;
+        }
+        buildFlameGraph(getCallgraphModules());
     }
 
     /**
@@ -397,6 +440,7 @@ public class FlameGraphView extends TmfView {
      *            a menuManager to fill
      */
     protected void fillTimeEventContextMenu(@NonNull IMenuManager menuManager) {
+      // TODO : Implement me.
         ISelection selection = getSite().getSelectionProvider().getSelection();
         if (selection instanceof IStructuredSelection) {
             for (Object object : ((IStructuredSelection) selection).toList()) {
@@ -662,9 +706,7 @@ public class FlameGraphView extends TmfView {
      */
     @TmfSignalHandler
     public void symbolMapUpdated(TmfSymbolProviderUpdatedSignal signal) {
-//        if (signal.getSource() != this) {
             fTimeGraphViewer.refresh();
-//        }
     }
 
 }

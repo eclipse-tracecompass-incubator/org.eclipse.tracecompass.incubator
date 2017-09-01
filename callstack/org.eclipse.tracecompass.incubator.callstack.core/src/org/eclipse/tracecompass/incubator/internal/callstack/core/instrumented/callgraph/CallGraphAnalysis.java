@@ -14,11 +14,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.common.core.StreamUtils;
@@ -26,8 +26,7 @@ import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraphGroupBy;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
@@ -42,12 +41,12 @@ import org.eclipse.tracecompass.segmentstore.core.SegmentStoreFactory;
 import org.eclipse.tracecompass.segmentstore.core.SegmentStoreFactory.SegmentStoreType;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
 
 /**
  * Call stack analysis used to create a segment for each call function from an
@@ -88,17 +87,13 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
      */
     private final List<ICalledFunction> fRootFunctions = new ArrayList<>();
     private final IFlameChartProvider fCsProvider;
+    private final CallGraph fCallGraph = new CallGraph();
 
     /**
      * The List of thread nodes. Each thread has a virtual node having the root
      * function as children
      */
     private final Set<ICallStackElement> fRootElements = new HashSet<>();
-    private final Multimap<ICallStackElement, AggregatedCallSite> fCcts = HashMultimap.create();
-
-    private @Nullable ICallStackGroupDescriptor fGroupBy = null;
-    private @Nullable Set<ICallStackElement> fGroupedRootElements = null;
-    private @Nullable Multimap<ICallStackElement, AggregatedCallSite> fGroupedCct = null;
 
     /**
      * Constructor
@@ -135,6 +130,10 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
 
     @Override
     protected boolean executeAnalysis(@Nullable IProgressMonitor monitor) {
+        return executeForRange(fCallGraph, TmfTimeRange.ETERNITY, monitor);
+    }
+
+    private boolean executeForRange(CallGraph callgraph, TmfTimeRange range, @Nullable IProgressMonitor monitor) {
         ITmfTrace trace = getTrace();
         if (monitor == null || trace == null) {
             return false;
@@ -154,7 +153,7 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
             IHostModel model = ModelManager.getModelFor(callstackModule.getHostId());
 
             for (CallStackSeries callstack : callstackModule.getCallStackSeries()) {
-                if (!iterateOverCallstackSerie(callstack, model, monitor)) {
+                if (!iterateOverCallstackSerie(callstack, model, callgraph, range.getStartTime().toNanos(), range.getEndTime().toNanos(), monitor)) {
                     return false;
                 }
             }
@@ -162,41 +161,28 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
         monitor.worked(1);
         monitor.done();
         return true;
-
     }
-
-    // private ICallStackElement createGroups(ICallStackElement element,
-    // IHostModel model, IProgressMonitor monitor) {
-    // if (element instanceof ICallStackLeafElement) {
-    // String name = element.getName();
-    // LeafGroupNode leafGroup = new InstrumentedGroup(name,
-    // element.getGroup());
-    // iterateOverElement((ICallStackLeafElement) element, leafGroup, model,
-    // monitor);
-    // return leafGroup;
-    // }
-    // ICallStackElement group = new CallStackElement(element.getName(),
-    // element.getGroup());
-    // for (ICallStackElement child : element.getChildren()) {
-    // group.addChild(createGroups(child, model, monitor));
-    // }
-    // return group;
-    // }
 
     /**
      * Iterate over a callstack series. It will do a depth-first search to
-     * create teh callgraph
+     * create the callgraph
      *
      * @param callstackSerie
      *            The series to iterate over
      * @param model
      *            The model of the host on which this callstack was running
+     * @param callgraph
+     *            The callgraph to fill
+     * @param start
+     *            the start time of the request
+     * @param end
+     *            The end time of the request
      * @param monitor
      *            A progress monitor
      * @return Whether the series was successfully iterated over
      */
     @VisibleForTesting
-    protected boolean iterateOverCallstackSerie(CallStackSeries callstackSerie, IHostModel model, IProgressMonitor monitor) {
+    protected boolean iterateOverCallstackSerie(CallStackSeries callstackSerie, IHostModel model, CallGraph callgraph, long start, long end, IProgressMonitor monitor) {
         // The root elements are the same as the one from the callstack series
         Collection<ICallStackElement> rootElements = callstackSerie.getRootElements();
         fRootElements.addAll(rootElements);
@@ -204,23 +190,23 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
             if (monitor.isCanceled()) {
                 return false;
             }
-            iterateOverElement(element, model, monitor);
+            iterateOverElement(element, model, callgraph, start, end, monitor);
         }
         return true;
     }
 
-    private void iterateOverElement(ICallStackElement element, IHostModel model, IProgressMonitor monitor) {
+    private void iterateOverElement(ICallStackElement element, IHostModel model, CallGraph callgraph, long start, long end, IProgressMonitor monitor) {
         // Iterator over the children of the element until we reach the leaves
         if (element.isLeaf()) {
-            iterateOverRootElement(element, model, monitor);
+            iterateOverLeafElement(element, model, callgraph, start, end, monitor);
             return;
         }
         for (ICallStackElement child : element.getChildren()) {
-            iterateOverElement(child, model, monitor);
+            iterateOverElement(child, model, callgraph, start, end, monitor);
         }
     }
 
-    private void iterateOverRootElement(ICallStackElement element, IHostModel model, IProgressMonitor monitor) {
+    private void iterateOverLeafElement(ICallStackElement element, IHostModel model, CallGraph callgraph, long start, long end, IProgressMonitor monitor) {
         if (!(element instanceof InstrumentedCallStackElement)) {
             throw new IllegalStateException("Call Graph Analysis: The element does not have the right type"); //$NON-NLS-1$
         }
@@ -229,29 +215,29 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
 
         // Create a root segment
 
-        AbstractCalledFunction nextFunction = (AbstractCalledFunction) callStack.getNextFunction(callStack.getStartTime(), 1, null, model);
+        AbstractCalledFunction nextFunction = (AbstractCalledFunction) callStack.getNextFunction(callStack.getStartTime(), 1, null, model, start, end);
         while (nextFunction != null) {
             AggregatedCalledFunction aggregatedChild = createCallSite(CallStackSymbolFactory.createSymbol(nextFunction.getSymbol(), element, nextFunction.getStart()));
-            iterateOverCallstack(element, callStack, nextFunction, 2, aggregatedChild, model, monitor);
+            iterateOverCallstack(element, callStack, nextFunction, 2, aggregatedChild, model, start, end, monitor);
             aggregatedChild.addFunctionCall(nextFunction);
-            addAggregatedCallSite(element, aggregatedChild);
+            callgraph.addAggregatedCallSite(element, aggregatedChild);
             fRootFunctions.add(nextFunction);
-            nextFunction = (AbstractCalledFunction) callStack.getNextFunction(nextFunction.getEnd(), 1, null, model);
+            nextFunction = (AbstractCalledFunction) callStack.getNextFunction(nextFunction.getEnd(), 1, null, model, start, end);
         }
     }
 
-    private void iterateOverCallstack(ICallStackElement element, CallStack callstack, ICalledFunction function, int nextLevel, AggregatedCalledFunction aggregatedCall, IHostModel model, IProgressMonitor monitor) {
+    private void iterateOverCallstack(ICallStackElement element, CallStack callstack, ICalledFunction function, int nextLevel, AggregatedCalledFunction aggregatedCall, IHostModel model, long start, long end, IProgressMonitor monitor) {
         fStore.add(function);
         if (nextLevel > callstack.getMaxDepth()) {
             return;
         }
 
-        AbstractCalledFunction nextFunction = (AbstractCalledFunction) callstack.getNextFunction(function.getStart(), nextLevel, function, model);
+        AbstractCalledFunction nextFunction = (AbstractCalledFunction) callstack.getNextFunction(function.getStart(), nextLevel, function, model, Math.max(function.getStart(), start), Math.min(function.getEnd(), end));
         while (nextFunction != null) {
             AggregatedCalledFunction aggregatedChild = createCallSite(CallStackSymbolFactory.createSymbol(nextFunction.getSymbol(), element, nextFunction.getStart()));
-            iterateOverCallstack(element, callstack, nextFunction, nextLevel + 1, aggregatedChild, model, monitor);
+            iterateOverCallstack(element, callstack, nextFunction, nextLevel + 1, aggregatedChild, model, start, end, monitor);
             aggregatedCall.addChild(nextFunction, aggregatedChild);
-            nextFunction = (AbstractCalledFunction) callstack.getNextFunction(nextFunction.getEnd(), nextLevel, function, model);
+            nextFunction = (AbstractCalledFunction) callstack.getNextFunction(nextFunction.getEnd(), nextLevel, function, model, Math.max(function.getStart(), start), Math.min(function.getEnd(), end));
         }
 
     }
@@ -299,46 +285,16 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
         return fStore;
     }
 
-    /**
-     * Set the group descriptor by which to group the callgraph data
-     *
-     * @param descriptor
-     *            The descriptor by which to group the callgraph elements, or
-     *            <code>null</code> will group them all together
-     */
     @Override
-    public void setGroupBy(@Nullable ICallStackGroupDescriptor descriptor) {
-        fGroupBy = descriptor;
-        fGroupedCct = null;
-        fGroupedRootElements = null;
+    public CallGraph getCallGraph(ITmfTimestamp start, ITmfTimestamp end) {
+        CallGraph cg = new CallGraph();
+        executeForRange(cg, new TmfTimeRange(start, end), new NullProgressMonitor());
+        return cg;
     }
 
     @Override
-    public Collection<ICallStackElement> getElements() {
-        ICallStackGroupDescriptor groupBy = fGroupBy;
-        Collection<ICallStackElement> elements = fRootElements;
-        if (groupBy == null) {
-            return ImmutableList.copyOf(elements);
-        }
-
-        Set<ICallStackElement> groupedElements = fGroupedRootElements;
-        if (groupedElements == null) {
-            Map<ICallStackElement, Collection<AggregatedCallSite>> groupCallGraphBy = CallGraphGroupBy.groupCallGraphBy(groupBy, elements, this);
-            // Get the root elements that have no parent
-            groupedElements = groupCallGraphBy.keySet().stream()
-                    .filter(element -> element.getParentElement() == null)
-                    .collect(Collectors.toSet());
-            Multimap<ICallStackElement, AggregatedCallSite> groupedCct = HashMultimap.create();
-            groupCallGraphBy.entrySet().forEach(entry -> {
-                if (!entry.getValue().isEmpty()) {
-                    groupedCct.putAll(entry.getKey(), entry.getValue());
-                }
-            });
-            fGroupedRootElements = groupedElements;
-            fGroupedCct = groupedCct;
-        }
-
-        return groupedElements;
+    public CallGraph getCallGraph() {
+        return fCallGraph;
     }
 
     @Override
@@ -350,29 +306,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     }
 
     @Override
-    public Collection<AggregatedCallSite> getCallingContextTree(ICallStackElement element) {
-        Multimap<ICallStackElement, AggregatedCallSite> groupedCct = fGroupedCct;
-        if (groupedCct != null) {
-            return groupedCct.get(element);
-        }
-        return fCcts.get(element);
-    }
-
-    @Override
     public AggregatedCalledFunction createCallSite(ICallStackSymbol symbol) {
         return new AggregatedCalledFunction(symbol);
-    }
-
-    @Override
-    public void addAggregatedCallSite(ICallStackElement dstGroup, AggregatedCallSite callsite) {
-        Collection<AggregatedCallSite> callsites = fCcts.get(dstGroup);
-        for (AggregatedCallSite site : callsites) {
-            if (site.getSymbol().equals(callsite.getSymbol())) {
-                site.merge(callsite);
-                return;
-            }
-        }
-        fCcts.put(dstGroup, callsite);
     }
 
 }

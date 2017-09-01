@@ -11,10 +11,10 @@ package org.eclipse.tracecompass.incubator.callstack.core.callgraph;
 
 import java.util.Collection;
 
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+
 
 /**
  * Interface that analyses who provide callgraph
@@ -22,15 +22,6 @@ import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol
  * @author Geneviève Bastien
  */
 public interface ICallGraphProvider {
-
-    /**
-     * Get the root elements containing the call graph data. If a group by
-     * descriptor was set using {@link #setGroupBy(ICallStackGroupDescriptor)}, the
-     * elements are the root element of the hierarchy grouped per this descriptor.
-     *
-     * @return The root elements of the call graph
-     */
-    Collection<ICallStackElement> getElements();
 
     /**
      * Get the group descriptors that describe how the elements are grouped in this
@@ -43,26 +34,29 @@ public interface ICallGraphProvider {
     Collection<ICallStackGroupDescriptor> getGroupDescriptors();
 
     /**
-     * Set the group descriptor by which to group the callgraph data. To aggregate
-     * all data together, the {@link AllGroupDescriptor#getInstance()} can be used
+     * Get the call graph for a given time range. This callgraph is for all the
+     * elements. The caller can then group the result by calling
+     * {@link CallGraphGroupBy#groupCallGraphBy(ICallStackGroupDescriptor, Collection, CallGraph)}
+     * method
      *
-     * @param descriptor
-     *            The descriptor by which to group the callgraph elements, or
-     *            <code>null</code> will group them all together
+     * @param start
+     *            The start of the range
+     * @param end
+     *            The end of the range
+     * @return The call graph object containing the CCTs for each element in the
+     *         range.
      */
-    void setGroupBy(@Nullable ICallStackGroupDescriptor descriptor);
+    CallGraph getCallGraph(ITmfTimestamp start, ITmfTimestamp end);
 
     /**
-     * Gets the calling context tree for an element.
+     * Get the call graph for the full range of the trace. This callgraph is for all
+     * the elements. The caller can then group the result by calling
+     * {@link CallGraphGroupBy#groupCallGraphBy(ICallStackGroupDescriptor, Collection, CallGraph)}
      *
-     * The calling context tree is the callgraph data aggregated by keeping the
-     * context of each call.
-     *
-     * @param element
-     *            The element for which to get the calling context tree
-     * @return The aggregated data for the first level of the callgraph
+     * @return The call graph object containing the CCTs for each element in the
+     *         range.
      */
-    Collection<AggregatedCallSite> getCallingContextTree(ICallStackElement element);
+    CallGraph getCallGraph();
 
     /**
      * Factory method to create an aggregated callsite for a symbol
@@ -72,11 +66,5 @@ public interface ICallGraphProvider {
      * @return A new aggregated callsite
      */
     AggregatedCallSite createCallSite(ICallStackSymbol symbol);
-
-    /**
-     * @param dstGroup
-     * @param callsite
-     */
-    void addAggregatedCallSite(ICallStackElement dstGroup, AggregatedCallSite callsite);
 
 }

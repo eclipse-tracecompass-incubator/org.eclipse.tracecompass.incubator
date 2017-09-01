@@ -37,6 +37,7 @@ import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.SubSecondT
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph.AggregatedStackTraces;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedCalledFunction;
@@ -45,6 +46,7 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
 import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.AbstractTmfTreeViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.ITmfTreeColumnDataProvider;
@@ -378,7 +380,7 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
     protected class CCTElementEntry extends TmfTreeViewerEntry {
 
         private final ICallStackElement fElement;
-        private final ICallGraphProvider fProvider;
+        private final CallGraph fCallGraph;
         private @Nullable List<ITmfTreeViewerEntry> fChildren = null;
 
         /**
@@ -386,13 +388,13 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
          *
          * @param element
          *            The callstack element of this hierarchy
-         * @param provider
-         *            The call graph provider object
+         * @param callgraph
+         *            The call graph object
          */
-        public CCTElementEntry(ICallStackElement element, ICallGraphProvider provider) {
+        public CCTElementEntry(ICallStackElement element, CallGraph callgraph) {
             super(element.getName());
             fElement = element;
-            fProvider = provider;
+            fCallGraph = callgraph;
         }
 
         /**
@@ -443,16 +445,16 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
             List<ITmfTreeViewerEntry> list = new ArrayList<>();
             Collection<ICallStackElement> children = fElement.getChildren();
             for (ICallStackElement elem : children) {
-                list.add(new CCTElementEntry(elem, fProvider));
+                list.add(new CCTElementEntry(elem, fCallGraph));
             }
             return list;
         }
 
         private List<ITmfTreeViewerEntry> getChildrenCallSites() {
             List<ITmfTreeViewerEntry> list = new ArrayList<>();
-            Collection<AggregatedCallSite> cct = fProvider.getCallingContextTree(fElement);
+            Collection<AggregatedCallSite> cct = fCallGraph.getCallingContextTree(fElement);
             for (AggregatedCallSite callsite : cct) {
-                list.add(new CCTCallSiteEntry(callsite, fProvider, this));
+                list.add(new CCTCallSiteEntry(callsite, fCallGraph, this));
             }
             return list;
         }
@@ -465,7 +467,7 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
     protected class CCTCallSiteEntry extends TmfTreeViewerEntry {
 
         private final AggregatedCallSite fCallSite;
-        private final ICallGraphProvider fProvider;
+        private final CallGraph fCallGraph;
         private @Nullable List<ITmfTreeViewerEntry> fChildren = null;
 
         /**
@@ -473,15 +475,15 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
          *
          * @param callsite
          *            The callsite corresponding to this entry
-         * @param provider
+         * @param callGraph
          *            The call graph provider object
          * @param parent
          *            The parent element
          */
-        public CCTCallSiteEntry(AggregatedCallSite callsite, ICallGraphProvider provider, TmfTreeViewerEntry parent) {
+        public CCTCallSiteEntry(AggregatedCallSite callsite, CallGraph callGraph, TmfTreeViewerEntry parent) {
             super(callsite.getSymbol().resolve(fSymbolProviders));
             fCallSite = callsite;
-            fProvider = provider;
+            fCallGraph = callGraph;
             this.setParent(parent);
         }
 
@@ -505,7 +507,7 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
             if (children == null) {
                 List<CCTCallSiteEntry> cctChildren = new ArrayList<>();
                for (AggregatedCallSite callsite : fCallSite.getCallees()) {
-                    CCTCallSiteEntry entry = new CCTCallSiteEntry(callsite, fProvider, this);
+                    CCTCallSiteEntry entry = new CCTCallSiteEntry(callsite, fCallGraph, this);
                     int index = Collections.binarySearch(cctChildren, entry, COMPARATOR);
                     cctChildren.add((index < 0 ? -index - 1 : index), entry);
                 }
@@ -547,10 +549,16 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
      */
     private void setStats(long start, long end, List<ITmfTreeViewerEntry> entryList, ICallGraphProvider module, boolean isSelection, IProgressMonitor monitor) {
 
-        Collection<ICallStackElement> elements = module.getElements();
+        CallGraph callGraph = null;
+        if (start != end) {
+            callGraph = module.getCallGraph(TmfTimestamp.fromNanos(start), TmfTimestamp.fromNanos(end));
+        } else {
+            callGraph = module.getCallGraph();
+        }
+        Collection<ICallStackElement> elements = callGraph.getElements();
 
         for (ICallStackElement element : elements) {
-            CCTElementEntry entry = new CCTElementEntry(element, module);
+            CCTElementEntry entry = new CCTElementEntry(element, callGraph);
             entryList.add(entry);
         }
     }

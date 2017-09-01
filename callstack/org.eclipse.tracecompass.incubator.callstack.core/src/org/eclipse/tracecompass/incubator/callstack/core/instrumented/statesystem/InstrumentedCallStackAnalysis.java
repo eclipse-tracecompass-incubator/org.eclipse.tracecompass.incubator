@@ -22,9 +22,9 @@ import java.util.Objects;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.symbol.ICallStackSymbol;
@@ -37,6 +37,7 @@ import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 
@@ -174,10 +175,17 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     }
 
     @Override
-    public Collection<ICallStackElement> getElements() {
+    public CallGraph getCallGraph(ITmfTimestamp start, ITmfTimestamp end) {
         fCallGraph.schedule();
         fCallGraph.waitForCompletion();
-        return fCallGraph.getElements();
+        return fCallGraph.getCallGraph(start, end);
+    }
+
+    @Override
+    public CallGraph getCallGraph() {
+        fCallGraph.schedule();
+        fCallGraph.waitForCompletion();
+        return fCallGraph.getCallGraph();
     }
 
     @Override
@@ -194,27 +202,8 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     }
 
     @Override
-    public void setGroupBy(@Nullable ICallStackGroupDescriptor descriptor) {
-        fCallGraph.setGroupBy(descriptor);
-    }
-
-    @Override
-    public Collection<AggregatedCallSite> getCallingContextTree(ICallStackElement element) {
-        fCallGraph.schedule();
-        fCallGraph.waitForCompletion();
-        return fCallGraph.getCallingContextTree(element);
-    }
-
-    @Override
     public AggregatedCallSite createCallSite(ICallStackSymbol symbol) {
         return fCallGraph.createCallSite(symbol);
     }
-
-    @Override
-    public void addAggregatedCallSite(ICallStackElement dstGroup, AggregatedCallSite callsite) {
-        fCallGraph.addAggregatedCallSite(dstGroup, callsite);
-    }
-
-
 
 }

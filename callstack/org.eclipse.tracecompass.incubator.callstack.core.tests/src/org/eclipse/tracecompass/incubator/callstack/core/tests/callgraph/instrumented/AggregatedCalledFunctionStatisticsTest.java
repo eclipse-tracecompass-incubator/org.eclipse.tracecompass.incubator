@@ -66,7 +66,7 @@ public class AggregatedCalledFunctionStatisticsTest {
     }
 
     private @NonNull List<ICallStackElement> getLeafElements(ICallGraphProvider cga) {
-        Collection<ICallStackElement> elements = cga.getElements();
+        Collection<ICallStackElement> elements = cga.getCallGraph().getElements();
         List<ICallStackElement> leafGroups = new ArrayList<>();
         for (ICallStackElement group : elements) {
             leafGroups.addAll(getLeafElements(group));
@@ -126,7 +126,7 @@ public class AggregatedCalledFunctionStatisticsTest {
         assertNotNull(threads);
         ICallStackElement thread = threads.get(0);
         assertNotNull(thread);
-        Object[] children = cga.getCallingContextTree(thread).toArray();
+        Object[] children = cga.getCallGraph().getCallingContextTree(thread).toArray();
         AggregatedCalledFunction firstFunction = (AggregatedCalledFunction) children[0];
         Object[] firstFunctionChildren = firstFunction.getCallees().toArray();
         AggregatedCalledFunction SecondFunction = (AggregatedCalledFunction) firstFunctionChildren[0];
@@ -214,7 +214,7 @@ public class AggregatedCalledFunctionStatisticsTest {
         assertNotNull(threads);
         ICallStackElement thread = threads.get(0);
         assertNotNull(thread);
-        Object[] children = cga.getCallingContextTree(thread).toArray();
+        Object[] children = cga.getCallGraph().getCallingContextTree(thread).toArray();
         AggregatedCalledFunction firstFunction = (AggregatedCalledFunction) children[0];
         Object[] firstFunctionChildren = firstFunction.getCallees().toArray();
         AggregatedCalledFunction secondFunction = (AggregatedCalledFunction) firstFunctionChildren[0];
@@ -313,7 +313,7 @@ public class AggregatedCalledFunctionStatisticsTest {
         assertNotNull(threads);
         ICallStackElement thread = threads.get(0);
         assertNotNull(thread);
-        Object[] children = cga.getCallingContextTree(thread).toArray();
+        Object[] children = cga.getCallGraph().getCallingContextTree(thread).toArray();
         AggregatedCalledFunction firstFunction = (AggregatedCalledFunction) children[0];
         Object[] firstFunctionChildren = firstFunction.getCallees().toArray();
         AggregatedCalledFunction function2 = (AggregatedCalledFunction) firstFunctionChildren[0];
@@ -433,7 +433,7 @@ public class AggregatedCalledFunctionStatisticsTest {
         assertNotNull(threads);
         ICallStackElement thread = threads.get(0);
         assertNotNull(thread);
-        Object[] children = cga.getCallingContextTree(thread).toArray();
+        Object[] children = cga.getCallGraph().getCallingContextTree(thread).toArray();
         AggregatedCalledFunction main = (AggregatedCalledFunction) children[0];
         Object[] mainChildren = main.getCallees().toArray();
         AggregatedCalledFunction function1 = (AggregatedCalledFunction) mainChildren[0];
