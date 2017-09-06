@@ -48,13 +48,16 @@ def copyAndUpdate(srcDir, destDir, name, id):
         for fname in files:
             fpath = os.path.join(dname, fname)
             print(fpath)
-            with open(fpath, encoding = "utf-8") as f:
-                s = f.read()
-            s = s.replace(idPlaceholder, id)
-            s = s.replace(namePlaceholder, name)
-            s = s.replace(copyrightPlaceholder, copyright)
-            with open(fpath, encoding = "utf-8", mode = "w") as f:
-                f.write(s)
+            try:
+                with open(fpath, encoding = "utf-8") as f:
+                    s = f.read()
+                s = s.replace(idPlaceholder, id)
+                s = s.replace(namePlaceholder, name)
+                s = s.replace(copyrightPlaceholder, copyright)
+                with open(fpath, encoding = "utf-8", mode = "w") as f:
+                    f.write(s)
+            except ValueError:
+                print("Problem opening file. That may be normal if the file is not a text file")
 
 def moveActivator(moveTo, suffix, id):
     os.makedirs(moveTo + '.' + suffix + '/src/org/eclipse/tracecompass/incubator/internal/' + id.replace('.', '/') + '/' + suffix)

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            category="org.eclipse.linuxtools.tmf.ctf.core.category.ctf"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.tracecompass.trace.jul"
+            isDirectory="true"
+            name="%tracetype.name"
+            trace_type="org.eclipse.tracecompass.incubator.internal.tracecompass.core.trace.LttngTraceCompassJulTrace">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.tracecompass.core.callstack.TraceEventCallstackAnalysis2"
+            id="org.eclipse.tracecompass.incubator.traceevent.analysis.callstack1"
+            name="Trace Event for JUL">
+         <tracetype
+               class="org.eclipse.tracecompass.incubator.internal.tracecompass.core.trace.LttngTraceCompassJulTrace">
+         </tracetype>
+      </module>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.analysis.xml.core.files">
+      <xmlfile
+            file="xml_analyses/GroupedTasks.xml">
+      </xmlfile>
+   </extension>
+
+</plugin>
