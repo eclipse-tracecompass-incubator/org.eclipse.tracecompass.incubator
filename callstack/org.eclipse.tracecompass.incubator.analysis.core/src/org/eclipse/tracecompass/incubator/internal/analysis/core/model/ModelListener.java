@@ -127,7 +127,7 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
         }
 
         @Override
-        public long getCpuTime(int tid, long start, long end) {
+        public long getCpuTime(int tid, long start, long realEnd) {
             TidAnalysisModule module = fModule.get();
             if (module == null) {
                 return IHostModel.TIME_UNKNOWN;
@@ -143,6 +143,7 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
             }
 
             long time = start;
+            final long end = Math.min(realEnd, stateSystem.getCurrentEndTime());
             boolean found = false;
             try {
                 while (time < end) {
@@ -162,6 +163,9 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
                         while (time < end && !found) {
                             ITmfStateInterval interval = states.remove(0);
                             time = interval.getEndTime() + 1;
+                            if (time > end) {
+                                continue;
+                            }
                             ITmfStateInterval next = stateSystem.querySingleState(time, interval.getAttribute());
                             if (next.getStateValue().unboxLong() == tid) {
                                 long endTime = Math.min(end, next.getEndTime() + 1);
