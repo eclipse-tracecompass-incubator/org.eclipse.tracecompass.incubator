@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -59,7 +60,6 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.I
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.Activator;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
-import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
@@ -623,15 +623,13 @@ public class FlameChartView extends AbstractTimeGraphView {
             return Collections.emptyList();
         }
         InstrumentedCallStackAnalysis csModule = null;
-        for (IAnalysisModule module : trace.getAnalysisModules()) {
-            if (module instanceof InstrumentedCallStackAnalysis) {
-                csModule = (InstrumentedCallStackAnalysis) module;
-                break;
-            }
-        }
-        if (csModule == null) {
+        Iterable<InstrumentedCallStackAnalysis> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, InstrumentedCallStackAnalysis.class);
+        // TODO Support many analysis modules, here we take only the first one
+        Iterator<InstrumentedCallStackAnalysis> iterator = modules.iterator();
+        if (!iterator.hasNext()) {
             return Collections.emptyList();
         }
+        csModule = iterator.next();
         csModule.schedule();
         ISegmentStore<@NonNull CallStackEdge> store = csModule.getSegmentStore();
         if (!store.isEmpty()) {

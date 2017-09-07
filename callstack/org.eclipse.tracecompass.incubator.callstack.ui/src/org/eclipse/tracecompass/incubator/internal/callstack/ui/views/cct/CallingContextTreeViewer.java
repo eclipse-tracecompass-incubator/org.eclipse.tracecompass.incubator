@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.SubSecondTimeWithUnitFormat;
+import org.eclipse.tracecompass.common.core.StreamUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
@@ -48,6 +51,7 @@ import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
 import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.AbstractTmfTreeViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.ITmfTreeColumnDataProvider;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.ITmfTreeViewerEntry;
@@ -68,7 +72,6 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
     // Order CCT children by decreasing length
     private static final Comparator<CCTCallSiteEntry> COMPARATOR = (o1, o2) -> Long.compare(o2.getCallSite().getLength(), o1.getCallSite().getLength());
 
-    private @Nullable ICallGraphProvider fModule;
     private MenuManager fTablePopupMenuManager;
     private String fAnalysisId;
 
@@ -337,17 +340,35 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
         };
     }
 
+    private Set<ICallGraphProvider> getCallGraphs() {
+        ITmfTrace trace = getTrace();
+        if (trace != null) {
+            Iterable<ICallGraphProvider> callgraphModules = TmfTraceUtils.getAnalysisModulesOfClass(trace, ICallGraphProvider.class);
+
+            return StreamUtils.getStream(callgraphModules)
+            .filter(m -> {
+                if (m instanceof IAnalysisModule) {
+                    return ((IAnalysisModule) m).getId().equals(fAnalysisId);
+                }
+                return true;
+            })
+            .collect(Collectors.toSet());
+        }
+        return Collections.emptySet();
+    }
+
     @Override
     public void initializeDataSource() {
         ITmfTrace trace = getTrace();
         if (trace != null) {
-            IAnalysisModule module = trace.getAnalysisModule(fAnalysisId);
-            if (!(module instanceof ICallGraphProvider)) {
-                return;
-            }
-            fModule = (ICallGraphProvider) module;
+            Set<ICallGraphProvider> modules = getCallGraphs();
+
             fSymbolProviders  = SymbolProviderManager.getInstance().getSymbolProviders(trace);
-            module.schedule();
+            modules.forEach(m -> {
+                if (m instanceof IAnalysisModule) {
+                    ((IAnalysisModule) m).schedule();
+                }
+            });
         }
     }
 
@@ -522,20 +543,27 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
     @Override
     protected @Nullable ITmfTreeViewerEntry updateElements(long start, long end, boolean isSelection) {
 
-        ICallGraphProvider module = fModule;
-        if (module == null) {
+        Set<ICallGraphProvider> modules = getCallGraphs();
+
+        if (modules.isEmpty()) {
             return null;
         }
-
-        ((IAnalysisModule) module).waitForCompletion();
+        modules.forEach(m -> {
+            if (m instanceof IAnalysisModule) {
+                ((IAnalysisModule) m).waitForCompletion();
+            }
+        });
 
         TmfTreeViewerEntry root = new TmfTreeViewerEntry(""); //$NON-NLS-1$
         List<ITmfTreeViewerEntry> entryList = root.getChildren();
 
-        if (isSelection) {
-            setStats(start, end, entryList, module, true, new NullProgressMonitor());
+        for (ICallGraphProvider module : modules) {
+            if (isSelection) {
+                setStats(start, end, entryList, module, true, new NullProgressMonitor());
+            }
+            // Start, start to ensure the full callgraph will be returned
+            setStats(start, start, entryList, module, false, new NullProgressMonitor());
         }
-        setStats(start, end, entryList, module, false, new NullProgressMonitor());
         return root;
     }
 
