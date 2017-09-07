@@ -19,9 +19,15 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
+import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.xml.callstack.CallstackXmlModuleHelper.ISubModuleHelper;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlStrings;
@@ -30,6 +36,7 @@ import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfAnalysisModuleWithStateSystems;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -40,12 +47,13 @@ import org.w3c.dom.NodeList;
  *
  * @author Geneviève Bastien
  */
-public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements IFlameChartProvider, ITmfAnalysisModuleWithStateSystems {
+public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements IFlameChartProvider, ITmfAnalysisModuleWithStateSystems, ICallGraphProvider {
 
     private final Path fSourceFile;
     private final ISubModuleHelper fHelper;
     private @Nullable IAnalysisModule fModule = null;
     private @Nullable Collection<CallStackSeries> fCallStacks = null;
+    private final CallGraphAnalysis fCallGraph;
 
     /**
      * Constructor
@@ -59,6 +67,7 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
         super();
         fSourceFile = sourceFile;
         fHelper = helper;
+        fCallGraph = new CallGraphAnalysis(this);
     }
 
     @Override
@@ -136,7 +145,12 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
         if (analysisModule == null) {
             return false;
         }
-        return analysisModule.waitForCompletion(monitor);
+        boolean ret = analysisModule.waitForCompletion(monitor);
+        if (!ret) {
+            return ret;
+        }
+        fCallGraph.schedule();
+        return true;
     }
 
     @Override
@@ -145,7 +159,7 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
         if (analysisModule != null) {
             analysisModule.cancel();
         }
-
+        fCallGraph.cancel();
     }
 
     @Override
@@ -159,6 +173,21 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
         if (analysisModule != null) {
             analysisModule.dispose();
         }
+        fCallGraph.dispose();
+    }
+
+    @Override
+    public boolean setTrace(@NonNull ITmfTrace trace) throws TmfAnalysisException {
+        if (!super.setTrace(trace)) {
+            return false;
+        }
+        return fCallGraph.setTrace(trace);
+    }
+
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+        fCallGraph.setName(name);
     }
 
     @Override
@@ -216,6 +245,26 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
             return ((ITmfAnalysisModuleWithStateSystems) analysisModule).waitForInitialization();
         }
         return false;
+    }
+
+    @Override
+    public Collection<ICallStackGroupDescriptor> getGroupDescriptors() {
+        return fCallGraph.getGroupDescriptors();
+    }
+
+    @Override
+    public CallGraph getCallGraph(ITmfTimestamp start, ITmfTimestamp end) {
+        return fCallGraph.getCallGraph(start, end);
+    }
+
+    @Override
+    public CallGraph getCallGraph() {
+        return fCallGraph.getCallGraph();
+    }
+
+    @Override
+    public AggregatedCallSite createCallSite(ICallStackSymbol symbol) {
+        return fCallGraph.createCallSite(symbol);
     }
 
 }

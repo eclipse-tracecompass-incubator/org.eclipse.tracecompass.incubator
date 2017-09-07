@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.common.core.StreamUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
@@ -106,12 +107,18 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
         super();
         fStore = SegmentStoreFactory.createSegmentStore(SegmentStoreType.Fast);
         fCsProvider = csProvider;
+        setName(NLS.bind(Messages.CallGraphAnalysis_NamePrefix, csProvider.getName()));
     }
 
     @Override
     public @NonNull String getHelpText() {
         String msg = Messages.CallGraphAnalysis_Description;
         return (msg != null) ? msg : super.getHelpText();
+    }
+
+    @Override
+    public void setName(String name) {
+        super.setName(NLS.bind(Messages.CallGraphAnalysis_NamePrefix, name));
     }
 
     @Override

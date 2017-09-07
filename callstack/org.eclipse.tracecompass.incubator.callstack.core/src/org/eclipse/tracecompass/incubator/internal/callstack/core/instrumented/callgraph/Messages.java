@@ -28,6 +28,10 @@ public class Messages extends NLS {
      */
     public static @Nullable String CallGraphAnalysis_Description;
     /**
+     * Prefix for the name of the analysis
+     */
+    public static @Nullable String CallGraphAnalysis_NamePrefix;
+    /**
      * The call stack event's name
      */
     public static @Nullable String CallStack_FunctionName;

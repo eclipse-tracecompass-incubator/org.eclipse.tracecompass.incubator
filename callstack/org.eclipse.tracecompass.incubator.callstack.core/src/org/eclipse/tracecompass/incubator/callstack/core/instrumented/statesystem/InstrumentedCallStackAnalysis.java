@@ -67,7 +67,7 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
 
     private @Nullable Collection<CallStackSeries> fCallStacks;
 
-    private CallGraphAnalysis fCallGraph;
+    private final CallGraphAnalysis fCallGraph;
 
     private static final String LINKS_SUFFIX = ".links.ht"; //$NON-NLS-1$
     /**
@@ -112,6 +112,12 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
             return false;
         }
         return fCallGraph.setTrace(trace);
+    }
+
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+        fCallGraph.setName(name);
     }
 
     @Override
