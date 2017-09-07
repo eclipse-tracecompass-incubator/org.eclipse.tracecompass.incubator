@@ -634,6 +634,9 @@ public class FlameChartView extends AbstractTimeGraphView {
         ISegmentStore<@NonNull CallStackEdge> store = csModule.getSegmentStore();
         if (!store.isEmpty()) {
             List<TimeGraphEntry> entryList = getEntryList(trace);
+            if (entryList == null) {
+                return baseLinks;
+            }
             Iterable<org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackEdge> intersectingElements = store.getIntersectingElements(startTime, endTime);
             if (Iterables.isEmpty(intersectingElements)) {
                 return baseLinks;
