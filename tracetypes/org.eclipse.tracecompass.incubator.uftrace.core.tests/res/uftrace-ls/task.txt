@@ -1,0 +1,2 @@
+SESS timestamp=6754.101996551 pid=26228 sid=51cf6e102ff3cbe9 exename="/home/matthew/code/coreutils-8.25/src/ls"
+TASK timestamp=6754.102074918 tid=26228 pid=26228
