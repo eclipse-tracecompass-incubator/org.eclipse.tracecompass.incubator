@@ -16,7 +16,9 @@ import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
- * This is a counter analysis
+ * This is a counter analysis. It handles the 'C' type events as specified in
+ * https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/
+ * in the section "Counter Events"
  *
  * @author Matthew Khouzam
  */

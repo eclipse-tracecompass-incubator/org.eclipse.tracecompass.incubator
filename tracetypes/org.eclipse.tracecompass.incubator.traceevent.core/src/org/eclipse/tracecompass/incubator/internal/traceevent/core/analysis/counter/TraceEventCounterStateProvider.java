@@ -32,7 +32,20 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Longs;
 
 /**
- * Counter state provider, groups by pid, tid and value
+ * Counter state provider. The counter events have (optional) PIDs and TIDs.
+ * These 'C' events state that the arguments are in a key-value pair in the args
+ * field. The state provider creates a state tree with the following structure
+ *
+ * <pre>
+ * PID
+ *  |- 1
+ *  |- 2
+ *  \- 3 - TID
+ *          |- 1
+ *          \- 2 - Value
+ *                    |- Dogs  (value 1)
+ *                    \  Cats  (value 2)
+ * </pre>
  *
  * @author Matthew Khouzam
  */
