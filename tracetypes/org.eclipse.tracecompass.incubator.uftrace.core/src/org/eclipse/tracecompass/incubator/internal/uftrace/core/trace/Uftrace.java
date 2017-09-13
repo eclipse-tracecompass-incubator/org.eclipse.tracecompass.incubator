@@ -320,12 +320,13 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
             if (symbol != null) {
                 return symbol.getSymbolName();
             }
-            return "";
+            return ""; //$NON-NLS-1$
         }
 
+        /* needed for ISymbolProvider */
         @Override
         public @NonNull ITmfTrace getTrace() {
-            return (@NonNull ITmfTrace) this;
+            return (ITmfTrace) this;
         }
 
         @Override
