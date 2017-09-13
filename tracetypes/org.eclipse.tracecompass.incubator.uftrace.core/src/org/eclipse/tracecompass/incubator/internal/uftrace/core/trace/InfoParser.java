@@ -38,9 +38,9 @@ package org.eclipse.tracecompass.incubator.internal.uftrace.core.trace;
  * </ul>
  * After the metadata, info string follows in a "key:value" form.
  *
- * @author matthew
+ * @author Matthew Khouzam
  *
  */
 public class InfoParser {
-
+    // TODO fill me
 }

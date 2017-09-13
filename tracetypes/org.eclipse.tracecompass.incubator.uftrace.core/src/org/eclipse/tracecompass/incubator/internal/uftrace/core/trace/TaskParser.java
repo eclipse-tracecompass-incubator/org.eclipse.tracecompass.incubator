@@ -34,7 +34,7 @@ import org.apache.commons.io.LineIterator;
 public class TaskParser {
 
     /*
-     * Note: the regex should be this:
+     * Note: If this were implemented as a regex, it should be this:
      *
      * "^([a-fA-F\\d]+)\\s+([PTpt])\\s+(.+)$"
      */

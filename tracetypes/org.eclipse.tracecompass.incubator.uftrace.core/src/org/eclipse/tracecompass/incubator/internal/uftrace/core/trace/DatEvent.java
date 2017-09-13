@@ -15,7 +15,8 @@ import java.nio.ByteOrder;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Data (.dat) event type
+ * Data (.dat) event type. This is to be used in Tracecompass as an event field,
+ * but encapsulates a full event from dat.
  *
  * @author Matthew Khouzam
  *
@@ -23,11 +24,29 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class DatEvent {
 
-    private static final int UFTRACE_MAGIC_NUMBER = 0b101;
+    /**
+     * Magic number, always 5
+     */
+    private static final int UFTRACE_MAGIC_NUMBER = 5;
+    /**
+     * Type mask, first two bits
+     */
     private static final long TYPE_MASK = (1L << 0) | (1L << 1);
+    /**
+     * Marker mask, third bit
+     */
     private static final long MARKER_MASK = (1L << 2);
+    /**
+     * Magic number mask (4th, 5th and 6th bit)
+     */
     private static final long MAGIC_MASK = (1L << 3) | (1L << 4) | (1L << 5);
+    /**
+     * Depth mask, 7th to 16th bit
+     */
     private static final long DEPTH_MASK = ((1L << 10) - 1) << 6;
+    /**
+     * Address mask, the rest
+     */
     private static final long ADDRESS_MASK = (1L << 48) - 1 << 16;
 
     private static final String[] TYPES = { "ENTRY", "EXIT", "EVENT", "LOST" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -39,7 +58,32 @@ public class DatEvent {
     private final int fTid;
 
     /**
-     * Builder for data events
+     * Builder for data events. The data must point to an event in the dat file.
+     * The data format to read is described below.
+     *
+     * <pre>
+     * ##################################################################
+     * #                        64 bit time stamp                       #
+     * ##################################################################
+     * #TTM101DDDDDDDDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA#
+     * ##################################################################
+     *
+     * Where
+     *
+     * TT is a two bit type
+     * 00 = entry
+     * 01 = exit
+     * 10 = event
+     * 11 = lost
+     *
+     * M means more more data
+     *
+     * 101 is a magic number and will always be 101
+     *
+     * DDDDDDDDDD is the 10 bit depth field
+     *
+     * AAA... is a 48 bit address space
+     * </pre>
      *
      * @param bb
      *            byte buffer containing the event
@@ -67,7 +111,7 @@ public class DatEvent {
      */
     public static DatEvent create(long nanoseconds, long payload, int tid) {
         String type = TYPES[(int) (payload & TYPE_MASK)];
-        if(type == null){
+        if (type == null) {
             throw new IllegalStateException("Trace type cannot be null"); //$NON-NLS-1$
         }
         boolean moreData = (payload & MARKER_MASK) == MARKER_MASK;

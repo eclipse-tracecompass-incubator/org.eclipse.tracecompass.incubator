@@ -10,7 +10,8 @@
 package org.eclipse.tracecompass.incubator.internal.uftrace.core.trace;
 
 /**
- * A map entry
+ * An entry of the /proc/[pid]/maps file. For more information, see the man page
+ * of proc ( man 5 proc ).
  *
  * @author Matthew Khouzam
  */
@@ -19,9 +20,9 @@ public class MapEntry {
     private final long fAddrHigh;
     private final long fAddrLow;
 
-    private final char fDeviceHigh;
+    private final char fDeviceMajor;
 
-    private final char fDeviceLow;
+    private final char fDeviceMinor;
 
     private final long fINode;
 
@@ -42,56 +43,69 @@ public class MapEntry {
      *            permissions
      * @param offset
      *            offset
-     * @param deviceLow
-     *            device low address
-     * @param deviceHigh
-     *            device high address
+     * @param deviceMinor
+     *            device major
+     * @param deviceMajor
+     *            device minor
      * @param iNode
-     *            inode location
+     *            inode location of the device
      * @param pathName
-     *            file path
+     *            file path that backs this mapping (there may be pseudo-paths
+     *            in brackes [])
      */
-    public MapEntry(long addrLow, long addrHigh, Perms perms, long offset, char deviceLow, char deviceHigh, long iNode,
+    public MapEntry(long addrLow, long addrHigh, Perms perms, long offset, char deviceMinor, char deviceMajor, long iNode,
             String pathName) {
         fAddrLow = addrLow;
         fAddrHigh = addrHigh;
         fPerms = perms;
         fOffset = offset;
-        fDeviceHigh = deviceHigh;
-        fDeviceLow = deviceLow;
+        fDeviceMajor = deviceMajor;
+        fDeviceMinor = deviceMinor;
         fINode = iNode;
         fPathName = pathName;
     }
 
     /**
-     * @return the addrHigh
+     * Get the ceiling value of the mapping address
+     *
+     * @return the high address
      */
     public long getAddrHigh() {
         return fAddrHigh;
     }
 
     /**
-     * @return the addrLow
+     * Get the floor value of the mapping address
+     *
+     * @return the low address
      */
     public long getAddrLow() {
         return fAddrLow;
     }
 
     /**
-     * @return the deviceHigh
+     * Get the device major address byte, to be used in conjunction with
+     * {@link #getDeviceMinor()}
+     *
+     * @return the deviceMajor
      */
-    public char getDeviceHigh() {
-        return fDeviceHigh;
+    public char getDeviceMajor() {
+        return fDeviceMajor;
     }
 
     /**
-     * @return the deviceLow
+     * Get the device minor address byte, to be used in conjunction with
+     * {@link #getDeviceMajor()}
+     *
+     * @return the deviceMinor
      */
-    public char getDeviceLow() {
-        return fDeviceLow;
+    public char getDeviceMinor() {
+        return fDeviceMinor;
     }
 
     /**
+     * Get the inode on the device, an inode of 0 means none is associated
+     *
      * @return the iNode
      */
     public long getiNode() {
@@ -99,6 +113,8 @@ public class MapEntry {
     }
 
     /**
+     * The offset in the file described in {@link #getPathName()}
+     *
      * @return the offset
      */
     public long getOffset() {
@@ -106,6 +122,9 @@ public class MapEntry {
     }
 
     /**
+     * Get the path name of the file backing this mapping. If it is in brackets,
+     * it is a special case, if it is blank, it is anonymous.
+     *
      * @return the pathName
      */
     public String getPathName() {
@@ -113,7 +132,9 @@ public class MapEntry {
     }
 
     /**
-     * @return the perms
+     * Get the permissions for the file
+     *
+     * @return the permissions for the file
      */
     public Perms getPerms() {
         return fPerms;
