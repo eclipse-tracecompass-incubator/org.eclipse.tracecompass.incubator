@@ -1,4 +1,13 @@
 
 = uftrace =
 
+From [https://github.com/namhyung/uftrace the uftrace github page]. The uftrace tool is a tool that
+traces and analyzes the execution of a program written in C/C++. It was heavily inspired by the ftrace
+framework of the Linux kernel (especially function graph tracer) and supports userspace programs. It
+supports various kind of commands and filters to help analyze the program execution and performance.
 
+This extension supports UfTrace traces. It populates a call graph and therefore will pupulate most
+of the views of the generic callstack analysis.
+
+The parser handles native uftrace traces. In order to open one, select any file within a uftrace
+directory.
