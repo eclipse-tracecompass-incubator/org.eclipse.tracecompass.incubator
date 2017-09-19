@@ -15,6 +15,9 @@
    <feature url="features/org.eclipse.tracecompass.incubator.perf.profiling_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.perf.profiling" version="0.0.1.qualifier">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.uftrace_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.uftrace" version="0.0.1.qualifier">
+      <category name="trace-types"/>
+   </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.1.qualifier">
       <category name="analyses"/>
    </bundle>
