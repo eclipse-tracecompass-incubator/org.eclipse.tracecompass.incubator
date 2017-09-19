@@ -36,6 +36,7 @@
     <module>org.eclipse.tracecompass.incubator.perf.profiling</module>
     <module>org.eclipse.tracecompass.incubator.perf.profiling.core</module>
     <module>org.eclipse.tracecompass.incubator.perf.profiling.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.perf.profiling.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.uftrace</module>
     <module>org.eclipse.tracecompass.incubator.uftrace.core</module>
     <module>org.eclipse.tracecompass.incubator.uftrace.core.tests</module>
