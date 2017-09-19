@@ -12,6 +12,9 @@
    <feature url="features/org.eclipse.tracecompass.incubator.callstack_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.callstack" version="0.0.1.qualifier">
       <category name="callstack"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.perf.profiling_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.perf.profiling" version="0.0.1.qualifier">
+      <category name="trace-types"/>
+   </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.1.qualifier">
       <category name="analyses"/>
    </bundle>

@@ -27,6 +27,13 @@
       <import plugin="org.eclipse.tracecompass.tmf.ctf.core"/>
       <import plugin="com.google.guava"/>
       <import feature="org.eclipse.tracecompass.incubator.callstack"/>
+      <import plugin="org.eclipse.tracecompass.incubator.callstack.core"/>
+      <import plugin="org.eclipse.tracecompass.lttng2.kernel.core"/>
+      <import plugin="org.eclipse.tracecompass.lttng2.common.core"/>
+      <import plugin="org.eclipse.tracecompass.analysis.os.linux.core"/>
+      <import plugin="org.eclipse.cdt.core"/>
+      <import plugin="org.eclipse.tracecompass.incubator.analysis.core"/>
+      <import plugin="org.eclipse.tracecompass.tmf.ui"/>
    </requires>
 
    <plugin
