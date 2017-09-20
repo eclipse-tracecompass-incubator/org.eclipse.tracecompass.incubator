@@ -274,6 +274,7 @@
 
   <modules>
     <module>common</module>
+    <module>analyses</module>
     <module>callstack</module>
     <module>vm</module>
     <module>tracetypes</module>
