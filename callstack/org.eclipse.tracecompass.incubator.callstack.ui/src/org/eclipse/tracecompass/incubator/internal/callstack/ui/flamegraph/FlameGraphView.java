@@ -19,6 +19,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,6 +58,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.common.core.StreamUtils;
+import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
+import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
@@ -119,12 +124,13 @@ public class FlameGraphView extends TmfView {
     private TimeGraphPresentationProvider fPresentationProvider;
 
     private ITmfTrace fTrace;
+    private static final @NonNull Logger LOGGER = Logger.getLogger(FlameGraphView.class.getName());
 
     private final @NonNull MenuManager fEventMenuManager = new MenuManager();
     private Action fAggregateByAction;
     private Action fSortByNameAction;
     private Action fSortByIdAction;
- // The action to import a binary file mapping */
+    // The action to import a binary file mapping */
     private Action fConfigureSymbolsAction;
 
     private final Multimap<ITmfTrace, ISymbolProvider> fSymbolProviders = LinkedHashMultimap.create();
@@ -134,6 +140,11 @@ public class FlameGraphView extends TmfView {
      * for the same resource.
      */
     private final Semaphore fLock = new Semaphore(1);
+
+    // Variable used to specify when the graph is dirty, ie waiting for data refresh
+    private final AtomicInteger fDirty = new AtomicInteger();
+
+    private Job fJob;
 
     /**
      * Constructor
@@ -202,7 +213,7 @@ public class FlameGraphView extends TmfView {
     @TmfSignalHandler
     public void traceSelected(final TmfTraceSelectedSignal signal) {
         fTrace = signal.getTrace();
-        buildFlameGraph(getCallgraphModules());
+        Display.getDefault().asyncExec(() -> buildFlameGraph(getCallgraphModules()));
     }
 
     private Iterable<ICallGraphProvider> getCallgraphModules() {
@@ -239,92 +250,117 @@ public class FlameGraphView extends TmfView {
          *
          * 2- if the data is null and we have no UI to update
          *
-         * 3- if the request is cancelled before it gets to the display
-         *
-         * 4- on a clean execution
+         * 3- when the job starts running and can thus be canceled
          */
-        try {
-            fLock.acquire();
-        } catch (InterruptedException e) {
-            Activator.getDefault().logError(e.getMessage(), e);
-            fLock.release();
+        Job job = fJob;
+        if (job != null) {
+            job.cancel();
         }
-        /*
-         * Load the symbol provider for the current trace, even if it does not
-         * provide a call stack analysis module. See
-         * https://bugs.eclipse.org/bugs/show_bug.cgi?id=494212
-         */
-        ITmfTrace trace = fTrace;
-        if (trace != null) {
+        try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:Building").setCategory(getViewId()).build()) { //$NON-NLS-1$
+            try {
+                fLock.acquire();
+            } catch (InterruptedException e) {
+                Activator.getDefault().logError(e.getMessage(), e);
+                fLock.release();
+            }
             /*
              * Load the symbol provider for the current trace, even if it does not provide a
              * call stack analysis module. See
              * https://bugs.eclipse.org/bugs/show_bug.cgi?id=494212
              */
-            Collection<ISymbolProvider> symbolProviders = fSymbolProviders.get(trace);
-            if (symbolProviders.isEmpty()) {
-                symbolProviders = SymbolProviderManager.getInstance().getSymbolProviders(trace);
-                symbolProviders.forEach(provider -> provider.loadConfiguration(new NullProgressMonitor()));
-                fSymbolProviders.putAll(trace, symbolProviders);
-            }
-        }
-
-        if (!callGraphProviders.iterator().hasNext())  {
-            fTimeGraphViewer.setInput(null);
-            fLock.release();
-            return;
-        }
-        for (ICallGraphProvider provider : callGraphProviders) {
-            if (provider instanceof IAnalysisModule) {
-                ((IAnalysisModule) provider).schedule();
-            }
-        }
-
-        Job j = new Job(Messages.CallGraphAnalysis_Execution) {
-
-            @Override
-            protected IStatus run(IProgressMonitor monitor) {
-                if (monitor.isCanceled()) {
-                    fLock.release();
-                    return Status.CANCEL_STATUS;
+            ITmfTrace trace = fTrace;
+            if (trace != null) {
+                /*
+                 * Load the symbol provider for the current trace, even if it does not provide a
+                 * call stack analysis module. See
+                 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=494212
+                 */
+                Collection<ISymbolProvider> symbolProviders = fSymbolProviders.get(trace);
+                if (symbolProviders.isEmpty()) {
+                    symbolProviders = SymbolProviderManager.getInstance().getSymbolProviders(trace);
+                    symbolProviders.forEach(provider -> provider.loadConfiguration(new NullProgressMonitor()));
+                    fSymbolProviders.putAll(trace, symbolProviders);
                 }
-                Set<CallGraph> callgraphs = new HashSet<>();
-                ICallStackGroupDescriptor group = fGroupBy;
-                for (ICallGraphProvider provider : callGraphProviders) {
-                    if (provider instanceof IAnalysisModule) {
-                        ((IAnalysisModule) provider).waitForCompletion(monitor);
-                    }
-                    CallGraph callGraph = provider.getCallGraph();
-                    if (group == null) {
-                        callgraphs.add(callGraph);
-                    } else {
-                        callgraphs.add(CallGraphGroupBy.groupCallGraphBy(group, callGraph));
+            }
+
+            if (!callGraphProviders.iterator().hasNext()) {
+                fTimeGraphViewer.setInput(null);
+                fLock.release();
+                return;
+            }
+            for (ICallGraphProvider provider : callGraphProviders) {
+                if (provider instanceof IAnalysisModule) {
+                    ((IAnalysisModule) provider).schedule();
+                }
+            }
+
+            job = new Job(Messages.CallGraphAnalysis_Execution) {
+
+                @Override
+                protected IStatus run(IProgressMonitor monitor) {
+                    try (FlowScopeLog runLog = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:GettingFlameGraphs").setParentScope(log).build()) { //$NON-NLS-1$
+                        if (monitor.isCanceled()) {
+                            return Status.CANCEL_STATUS;
+                        }
+                        // Set the view as dirty before releasing the lock
+                        fDirty.incrementAndGet();
+                        fLock.release();
+                        Set<CallGraph> callgraphs = new HashSet<>();
+                        ICallStackGroupDescriptor group = fGroupBy;
+                        for (ICallGraphProvider provider : callGraphProviders) {
+                            if (provider instanceof IAnalysisModule) {
+                                ((IAnalysisModule) provider).waitForCompletion(monitor);
+                            }
+                            // FIXME: This waits for completion, there is no way of cancelling this call, so
+                            // make the views responsive to updates in the model, so that we can return a
+                            // partial callgraph
+                            CallGraph callGraph = provider.getCallGraph();
+                            if (group == null) {
+                                callgraphs.add(callGraph);
+                            } else {
+                                callgraphs.add(CallGraphGroupBy.groupCallGraphBy(group, callGraph));
+                            }
+                        }
+                        if (monitor.isCanceled()) {
+                            // Decrease dirtiness, job canceled
+                            fDirty.decrementAndGet();
+                            return Status.CANCEL_STATUS;
+                        }
+                        Display.getDefault().asyncExec(() -> {
+                            try (FlowScopeLog asyncLog = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:SettingInput").setParentScope(runLog).build()) { //$NON-NLS-1$
+                                fTimeGraphViewer.setInput(callgraphs);
+                                fTimeGraphViewer.resetStartFinishTime();
+                            } finally {
+                                // Finished updating, decrease dirtiness
+                                fDirty.decrementAndGet();
+                            }
+                        });
+                        return Status.OK_STATUS;
                     }
                 }
-                Display.getDefault().asyncExec(() -> {
-                    fTimeGraphViewer.setInput(callgraphs);
-                    fTimeGraphViewer.resetStartFinishTime();
-                    fLock.release();
-                });
-                return Status.OK_STATUS;
-            }
-        };
-        j.schedule();
+            };
+            fJob = job;
+            job.schedule();
+        }
     }
 
     /**
      * Await the next refresh
      *
+     * @return Whether the view is ready with new data
+     *
      * @throws InterruptedException
      *             something took too long
      */
     @VisibleForTesting
-    public void waitForUpdate() throws InterruptedException {
+    public boolean isDirty() throws InterruptedException {
         /*
          * wait for the semaphore to be available, then release it immediately
+         * and verify dirtiness
          */
         fLock.acquire();
         fLock.release();
+        return (fDirty.get() != 0);
     }
 
     /**

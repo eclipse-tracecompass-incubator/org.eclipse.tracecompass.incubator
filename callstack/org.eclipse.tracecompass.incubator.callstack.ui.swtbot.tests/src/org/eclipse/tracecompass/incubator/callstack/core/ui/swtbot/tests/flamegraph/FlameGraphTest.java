@@ -13,7 +13,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Collections;
 import java.util.Map;
@@ -34,6 +33,7 @@ import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.callgraph.instrumented.AggregationTreeTest;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphPresentationProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphView;
+import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.ConditionHelpers.SWTBotTestCondition;
 import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.SWTBotUtils;
 import org.eclipse.tracecompass.tmf.ui.tests.shared.WaitUtils;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
@@ -105,11 +105,18 @@ public class FlameGraphTest extends AggregationTreeTest {
 
     private void loadFlameGraph() {
         UIThreadRunnable.syncExec(() -> fFg.buildFlameGraph(Collections.singleton(getCga())));
-        try {
-            fFg.waitForUpdate();
-        } catch (InterruptedException e) {
-            fail(e.getMessage());
-        }
+        fBot.waitUntil(new SWTBotTestCondition() {
+            @Override
+            public boolean test() throws Exception {
+                return !fFg.isDirty();
+            }
+
+            @Override
+            public String getFailureMessage() {
+                return "Flame graph not ready";
+            }
+        });
+
     }
 
     private ITimeGraphEntry selectRoot() {

@@ -52,7 +52,7 @@ public interface ICallGraphProvider {
     /**
      * Get the call graph for the full range of the trace. This callgraph is for all
      * the elements. The caller can then group the result by calling
-     * {@link CallGraphGroupBy#groupCallGraphBy(ICallStackGroupDescriptor, Collection, CallGraph)}
+     * {@link CallGraphGroupBy#groupCallGraphBy(ICallStackGroupDescriptor, CallGraph)}
      *
      * @return The call graph object containing the CCTs for each element in the
      *         range.
