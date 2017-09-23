@@ -52,7 +52,7 @@ public class MapParser {
         String name = file.getName();
         Matcher stuff = SESSION_PATTERN.matcher(name);
         stuff.matches();
-        long sessionId = Long.parseLong(stuff.group(1), 16);
+        long sessionId = Long.parseUnsignedLong(stuff.group(1), 16);
         LineIterator iter = FileUtils.lineIterator(file);
         NavigableMap<Long, MapEntry> entries = new TreeMap<>();
         while (iter.hasNext()) {

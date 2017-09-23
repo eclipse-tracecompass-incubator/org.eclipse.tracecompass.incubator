@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.SymParser.Symbol;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
@@ -309,8 +310,15 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
             if (sym == null) {
                 return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
             }
-            String name = String.valueOf(sym.getMap().floorEntry(offset).getValue().getName());
-            return new TmfResolvedSymbol(address, name);
+            Entry<Long, Symbol> floorEntry = sym.getMap().floorEntry(offset);
+            if (floorEntry != null) {
+                Symbol value = floorEntry.getValue();
+                if (value != null) {
+                    String name = String.valueOf(value.getName());
+                    return new TmfResolvedSymbol(address, name);
+                }
+            }
+            return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
         }
 
         @Deprecated
