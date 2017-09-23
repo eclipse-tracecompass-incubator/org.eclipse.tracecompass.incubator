@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.SymParser.Symbol;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -69,7 +70,7 @@ import com.google.common.collect.Iterables;
 public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWithPreDefinedEvents {
 
     private Collection<DatParser> fDats = new ArrayList<>();
-    private MapParser fMap;
+    private Map<Long, MapParser> fMap = new HashMap<>();
     private Map<String, SymParser> fSyms = new HashMap<>();
     private TaskParser fTasks;
     private TmfLongLocation fCurrentLoc = new TmfLongLocation(0L);
@@ -77,6 +78,10 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
     private long fSize;
 
     private final ISymbolProvider fSymbolProvider = new UfTraceSymbolProvider();
+
+    private final @NonNull TidAspect fTidAspect = new TidAspect();
+    private final @NonNull PidAspect fPidAspect = new PidAspect();
+    private final @NonNull ExecAspect fExecAspect = new ExecAspect();
 
     @Override
     public Iterable<ITmfEventAspect<?>> getEventAspects() {
@@ -121,7 +126,7 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
                         }
                         return null;
                     }
-                }
+                }, getTidAspect(), getPidAspect(), getExecAspect()
 
         );
     }
@@ -165,7 +170,8 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
                     fSize += child.length();
                     fDats.add(new DatParser(child));
                 } else if (name.endsWith(".map")) { //$NON-NLS-1$
-                    fMap = MapParser.create(child);
+                    MapParser create = MapParser.create(child);
+                    fMap.put(create.getSessionId(), create);
                 } else if (name.endsWith(".sym")) { //$NON-NLS-1$
                     fSyms.put(name.substring(0, name.length() - 4), SymParser.parse(child));
                 } else if (name.equals("task.txt")) { //$NON-NLS-1$
@@ -261,6 +267,76 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
     }
 
     /**
+     * TID aspect for UFTrace
+     *
+     * @author Matthew Khouzam
+     */
+    public final class TidAspect extends LinuxTidAspect {
+        @Override
+        public @Nullable Integer resolve(ITmfEvent event) {
+            if (event.getContent().getValue() instanceof DatEvent) {
+                DatEvent datEvent = (DatEvent) event.getContent().getValue();
+                return datEvent.getTid();
+            }
+            return null;
+        }
+    }
+
+    /**
+     * PID aspect for UFTrace
+     *
+     * @author Matthew Khouzam
+     */
+    public final class PidAspect implements ITmfEventAspect<Integer> {
+        @Override
+        public @NonNull String getName() {
+            return "Pid"; //$NON-NLS-1$
+        }
+
+        @Override
+        public @Nullable Integer resolve(ITmfEvent event) {
+            if (event.getContent().getValue() instanceof DatEvent) {
+                DatEvent datEvent = (DatEvent) event.getContent().getValue();
+                int tid = datEvent.getTid();
+                return fTasks.getPid(tid);
+            }
+            return null;
+        }
+
+        @Override
+        public @NonNull String getHelpText() {
+            return ""; //$NON-NLS-1$
+        }
+    }
+
+    /**
+     * Executable name aspect for UFTrace
+     *
+     * @author Matthew Khouzam
+     */
+    public final class ExecAspect implements ITmfEventAspect<String> {
+        @Override
+        public @NonNull String getName() {
+            return "Executable"; //$NON-NLS-1$
+        }
+
+        @Override
+        public @NonNull String getHelpText() {
+            return ""; //$NON-NLS-1$
+        }
+
+        @Override
+        public @Nullable String resolve(@NonNull ITmfEvent event) {
+            if (event.getContent().getValue() instanceof DatEvent) {
+                DatEvent datEvent = (DatEvent) event.getContent().getValue();
+                int tid = datEvent.getTid();
+                return fTasks.getExecName(tid);
+            }
+            return null;
+        }
+    }
+
+    /**
      * Alleged symbol provider factory
      *
      * @author Matthew Khouzam
@@ -287,6 +363,33 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
     }
 
     /**
+     * Get the aspect to retrieve the executable name from a uftrace event
+     *
+     * @return The executable name aspect
+     */
+    public @NonNull ExecAspect getExecAspect() {
+        return fExecAspect;
+    }
+
+    /**
+     * Get the aspect to retrieve the PID of a uftrace event
+     *
+     * @return the pid aspect
+     */
+    public @NonNull PidAspect getPidAspect() {
+        return fPidAspect;
+    }
+
+    /**
+     * Get the aspect to retrieve the TID of a uftrace event
+     *
+     * @return the TID aspect
+     */
+    public @NonNull TidAspect getTidAspect() {
+        return fTidAspect;
+    }
+
+    /**
      * overly complicated, should clean up
      *
      * @author Matthew Khouzam
@@ -299,7 +402,15 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
             if (execName == null) {
                 return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
             }
-            Entry<Long, MapEntry> key = fMap.getData().floorEntry(address);
+            Long session = fTasks.getSessName(tid);
+            if (session == null) {
+                return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
+            }
+            MapParser mapParser = fMap.get(session);
+            if (mapParser == null) {
+                return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
+            }
+            Entry<Long, MapEntry> key = mapParser.getData().floorEntry(address);
             if (key == null) {
                 return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
             }
@@ -308,7 +419,7 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
             String substring = pathName.substring(pathName.lastIndexOf(File.separator) + 1);
             SymParser sym = fSyms.get(substring);
             if (sym == null) {
-                return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
+                return new TmfResolvedSymbol(address, pathName + ":0x" + Long.toHexString(address)); //$NON-NLS-1$
             }
             Entry<Long, Symbol> floorEntry = sym.getMap().floorEntry(offset);
             if (floorEntry != null) {

@@ -36,7 +36,7 @@ public class UfCallstackAnalysis extends InstrumentedCallStackAnalysis {
     protected @NonNull ITmfStateProvider createStateProvider() {
         ITmfTrace trace = Objects.requireNonNull(getTrace());
         if (trace instanceof Uftrace) {
-            return new UfCallstackProvider((Uftrace) trace);
+            return new UfCallstackProvider(trace);
         }
         // placeholder for CTF UFTraces
         throw new IllegalStateException();

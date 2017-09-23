@@ -11,15 +11,20 @@ package org.eclipse.tracecompass.incubator.internal.uftrace.core.analysis;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.DatEvent;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.UfEventType;
-import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.Uftrace;
+import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.Uftrace.ExecAspect;
+import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.Uftrace.PidAspect;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
+import org.eclipse.tracecompass.tmf.core.event.aspect.MultiAspect;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * UFTrace callstack provider
@@ -28,28 +33,27 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  */
 public class UfCallstackProvider extends CallStackStateProvider {
 
+
+    private final ITmfEventAspect<String> fExecAspect;
+    private final ITmfEventAspect<Integer> fTidAspect;
+    private final ITmfEventAspect<Integer> fPidAspect;
+
     /**
      * Constructor
      *
      * @param trace
      *            the trace
      */
-    public UfCallstackProvider(@NonNull Uftrace trace) {
+    public UfCallstackProvider(@NonNull ITmfTrace trace) {
         super(trace);
+        fExecAspect = (ITmfEventAspect<String>) MultiAspect.<String>create(TmfTraceUtils.getEventAspects(trace, ExecAspect.class), ExecAspect.class);
+        fTidAspect = (ITmfEventAspect<Integer>) MultiAspect.<Integer>create(TmfTraceUtils.getEventAspects(trace, LinuxTidAspect.class), LinuxTidAspect.class);
+        fPidAspect = (ITmfEventAspect<Integer>) MultiAspect.<Integer>create(TmfTraceUtils.getEventAspects(trace, PidAspect.class), PidAspect.class);
     }
 
     @Override
     public int getVersion() {
-        return 1;
-    }
-
-    @Override
-    public @NonNull Uftrace getTrace() {
-        ITmfTrace trace = super.getTrace();
-        if (trace instanceof Uftrace) {
-            return (Uftrace) trace;
-        }
-        throw new IllegalStateException("Trace of the wrong type " + trace); //$NON-NLS-1$
+        return 2;
     }
 
     @Override
@@ -89,18 +93,19 @@ public class UfCallstackProvider extends CallStackStateProvider {
     }
 
     @Override
+    protected @Nullable String getProcessName(@NonNull ITmfEvent event) {
+        return fExecAspect.resolve(event);
+    }
+
+    @Override
     protected int getProcessId(@NonNull ITmfEvent event) {
-        return getTrace().getTasks().getPid((int) getThreadId(event));
+        Integer resolve = fPidAspect.resolve(event);
+        return resolve == null ? -1 : resolve.intValue();
     }
 
     @Override
     protected long getThreadId(@NonNull ITmfEvent event) {
-        ITmfEventField content = event.getContent();
-        Object payload = content.getValue();
-        if (payload instanceof DatEvent) {
-            DatEvent ev = (DatEvent) payload;
-            return ev.getTid();
-        }
-        return 0;
+        Integer resolve = fTidAspect.resolve(event);
+        return resolve == null ? -1 : resolve.longValue();
     }
 }
