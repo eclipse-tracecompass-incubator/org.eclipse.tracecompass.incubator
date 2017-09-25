@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.xaf.core.statemachine.backend.StateMachineBackendAnalysis"
+            applies_experiment="false"
+            automatic="false"
+            icon="icons/xaf.png"
+            id="org.eclipse.tracecompass.xaf.core.statemachine.backend"
+            name="State Machine Backend State System">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace">
+         </tracetype>
+      </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineAnalysis"
+            applies_experiment="true"
+            automatic="false"
+            icon="icons/xaf.png"
+            id="org.eclipse.tracecompass.xaf.core.statemachine"
+            name="State Machine Automatic Analysis">
+         <tracetype
+               class="org.eclipse.tracecompass.tmf.core.trace.TmfTrace">
+         </tracetype>
+         <parameter
+               name="parameters">
+         </parameter>
+      </module>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.xaf.core.ui.views.stateMachineInstancesConstraints">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineAnalysis">
+         </analysisModuleClass>
+      </output>
+      <parameterProvider
+            class="org.eclipse.tracecompass.incubator.xaf.ui.handlers.XaFParameterProvider">
+         <analysisId
+               id="org.eclipse.tracecompass.xaf.core.statemachine">
+         </analysisId>
+      </parameterProvider>
+      <!--<module
+            analysis_module="org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.analysis.os.linux.kernel"
+            name="Kernel Analysis Test">
+         <tracetype
+               class="org.eclipse.tracecompass.tmf.core.trace.TmfTrace">
+         </tracetype>
+      </module>-->
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="org.eclipse.linuxtools.lttng2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.xaf.ui.views.StateMachineInstancesConstraintsView"
+            icon="icons/xaf.png"
+            id="org.eclipse.tracecompass.xaf.core.ui.views.stateMachineInstancesConstraints"
+            name="%view.smconstraints"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.eclipse.tracecompass.incubator.internal.xaf.ui.console.RTConsoleStartup">
+      </startup>
+   </extension>
+</plugin>

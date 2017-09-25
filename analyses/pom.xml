@@ -27,6 +27,8 @@
   <modules>
     <module>org.eclipse.tracecompass.incubator.contextswitch</module>
     <module>org.eclipse.tracecompass.incubator.contextswitch.ui</module>
+    <module>org.eclipse.tracecompass.incubator.xaf.core</module>
+    <module>org.eclipse.tracecompass.incubator.xaf.ui</module>
     <!-- insert modules here -->
   </modules>
 
