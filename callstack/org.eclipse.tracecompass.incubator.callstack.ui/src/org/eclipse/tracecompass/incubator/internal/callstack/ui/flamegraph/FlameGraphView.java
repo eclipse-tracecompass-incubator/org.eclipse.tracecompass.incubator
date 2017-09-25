@@ -89,6 +89,8 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.TimeForma
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.LinkedHashMultimap;
@@ -315,8 +317,7 @@ public class FlameGraphView extends TmfView {
                     ((IAnalysisModule) provider).schedule();
                 }
             }
-
-            job = new Job(Messages.CallGraphAnalysis_Execution) {
+            job = new Job(Messages.FlameGraphView_RetrievingData) {
 
                 @Override
                 protected IStatus run(IProgressMonitor monitor) {
@@ -366,8 +367,17 @@ public class FlameGraphView extends TmfView {
                     }
                 }
             };
+            IWorkbenchSiteProgressService service = null;
+            IWorkbenchPartSite site = getSite();
+            if (site != null) {
+                service = site.getService(IWorkbenchSiteProgressService.class);
+            }
             fJob = job;
-            job.schedule();
+            if (service != null) {
+                service.schedule(job);
+            } else {
+                job.schedule();
+            }
         }
     }
 

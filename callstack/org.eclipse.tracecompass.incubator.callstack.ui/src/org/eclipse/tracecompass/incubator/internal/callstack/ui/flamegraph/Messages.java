@@ -66,7 +66,7 @@ public class Messages extends NLS {
     /**
      * Execution of the callGraph Analysis
      */
-    public static String CallGraphAnalysis_Execution;
+    public static String FlameGraphView_RetrievingData;
 
     static {
         // initialize resource bundle
