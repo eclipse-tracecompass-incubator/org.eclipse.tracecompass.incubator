@@ -15,11 +15,8 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
-import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
 import org.eclipse.tracecompass.tmf.core.analysis.requirements.TmfAbstractAnalysisRequirement;
-import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -37,19 +34,6 @@ public class TraceEventCallstackAnalysis extends InstrumentedCallStackAnalysis {
     public static final String ID = "org.eclipse.tracecompass.incubator.traceevent.analysis.callstack"; //$NON-NLS-1$
 
     private @Nullable Set<@NonNull TmfAbstractAnalysisRequirement> fAnalysisRequirements = null;
-
-    @Override
-    public boolean setTrace(ITmfTrace trace) throws TmfAnalysisException {
-        if (!(trace instanceof TraceEventTrace)) {
-            return false;
-        }
-        return super.setTrace(trace);
-    }
-
-    @Override
-    public TraceEventTrace getTrace() {
-        return (TraceEventTrace) super.getTrace();
-    }
 
     @Override
     protected ITmfStateProvider createStateProvider() {

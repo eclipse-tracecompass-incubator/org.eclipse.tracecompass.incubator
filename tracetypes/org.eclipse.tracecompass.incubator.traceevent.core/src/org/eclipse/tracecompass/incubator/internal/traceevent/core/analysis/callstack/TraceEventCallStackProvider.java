@@ -28,7 +28,6 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
-import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventEvent;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
@@ -49,8 +48,6 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     /**
      * Link builder between events
-     *
-     * @author Matthew Khouzam
      */
     private final class EdgeBuilder {
 
@@ -138,33 +135,34 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     @Override
     protected boolean considerEvent(@NonNull ITmfEvent event) {
-        return (event instanceof TraceEventEvent);
+        String ph = event.getContent().getFieldValue(String.class, ITraceEventConstants.PHASE);
+        return (ph != null);
     }
 
     @Override
     protected @Nullable ITmfStateValue functionEntry(@NonNull ITmfEvent event) {
-        if (event instanceof TraceEventEvent && isEntry(event)) {
+        if (isEntry(event)) {
             return TmfStateValue.newValueString(event.getName());
         }
         return null;
     }
 
     private static boolean isEntry(ITmfEvent event) {
-        char phase = ((TraceEventEvent) event).getField().getPhase();
-        return 'B' == phase || phase == 's';
+        String phase = event.getContent().getFieldValue(String.class, ITraceEventConstants.PHASE);
+        return "B".equals(phase) || "s".equals(phase); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
     protected @Nullable ITmfStateValue functionExit(@NonNull ITmfEvent event) {
-        if (event instanceof TraceEventEvent && isExit(event)) {
+        if (isExit(event)) {
             return TmfStateValue.newValueString(event.getName());
         }
         return null;
     }
 
     private static boolean isExit(ITmfEvent event) {
-        char phase = ((TraceEventEvent) event).getField().getPhase();
-        return 'E' == phase || 'f' == phase;
+        String phase = event.getContent().getFieldValue(String.class, ITraceEventConstants.PHASE);
+        return "E".equals(phase) || "f".equals(phase);  //$NON-NLS-1$//$NON-NLS-2$
     }
 
     @Override
@@ -177,40 +175,41 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         /* Check if the event is a function entry */
         long timestamp = event.getTimestamp().toNanos();
         updateCloseCandidates(ss, timestamp);
-        TraceEventEvent traceEvent = (TraceEventEvent) event;
         String processName = getProcessName(event);
-        char ph = traceEvent.getField().getPhase();
+        String ph = event.getContent().getFieldValue(String.class, ITraceEventConstants.PHASE);
+        if (ph == null) {
+            return;
+        }
         switch (ph) {
-        case 'B':
+        case "B": //$NON-NLS-1$
             handleStart(event, ss, timestamp, processName);
             break;
 
-        case 's':
+        case "s": //$NON-NLS-1$
             handleStart(event, ss, timestamp, processName);
-            updateSLinks(traceEvent);
+            updateSLinks(event);
             break;
 
-        case 'X':
-            Long duration = traceEvent.getField().getDuration();
+        case "X": //$NON-NLS-1$
+            Long duration = event.getContent().getFieldValue(Long.class, ITraceEventConstants.DURATION);
             if (duration != null) {
-                handleComplete(traceEvent, ss, processName);
+                handleComplete(event, ss, processName);
             }
             break;
 
-        case 'E':
+        case "E": //$NON-NLS-1$
             handleEnd(event, ss, timestamp, processName);
             break;
 
-        case 'f':
+        case "f": //$NON-NLS-1$
             handleEnd(event, ss, timestamp, processName);
-            updateFLinks(traceEvent);
+            updateFLinks(event);
             break;
 
-        case 'b':
+        case "b": //$NON-NLS-1$
             handleStart(event, ss, timestamp, processName);
             break;
 
-        // $CASES-OMITTED$
         default:
             return;
         }
@@ -232,30 +231,33 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         }
     }
 
-    private void updateFLinks(TraceEventEvent traceEvent) {
-        String fId = traceEvent.getField().getId();
+    private void updateFLinks(ITmfEvent event) {
+        String fId = event.getContent().getFieldValue(String.class, ITraceEventConstants.ID);
         EdgeBuilder fLink = fLinks.get(fId);
         if (fLink != null && fLink.getTime() == Long.MAX_VALUE) {
-            fLink.fSrcTime = traceEvent.getTimestamp().toNanos();
+            fLink.fSrcTime = event.getTimestamp().toNanos();
         }
     }
 
-    private void updateSLinks(TraceEventEvent traceEvent) {
-        String sId = traceEvent.getField().getId();
+    private void updateSLinks(ITmfEvent event) {
+        String sId = event.getContent().getFieldValue(String.class, ITraceEventConstants.ID);
+        if (sId == null) {
+            return;
+        }
         EdgeBuilder sLink = fLinks.get(sId);
-        Integer tid = traceEvent.getField().getTid();
+        Integer tid = event.getContent().getFieldValue(Integer.class, ITraceEventConstants.TID);
         tid = tid == null ? IHostModel.UNKNOWN_TID : tid;
         if (sLink != null) {
             if (sLink.getTime() == Long.MAX_VALUE) {
                 sLink.fDur = 0;
-                sLink.fSrcTime = traceEvent.getTimestamp().toNanos();
+                sLink.fSrcTime = event.getTimestamp().toNanos();
                 sLink.fDstTid = tid;
-                sLink.fDst = traceEvent.getTrace().getHostId();
+                sLink.fDst = event.getTrace().getHostId();
 
                 fLinksStore.add(sLink.build());
                 EdgeBuilder builder = new EdgeBuilder();
                 builder.fSrcTid = tid;
-                builder.fSrc = traceEvent.getTrace().getHostId();
+                builder.fSrc = event.getTrace().getHostId();
                 fLinks.put(sId, builder);
             } else {
                 /*
@@ -263,28 +265,28 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
                  *
                  * end time = traceEvent.getTimestamp().toNanos()
                  */
-                sLink.fDur = traceEvent.getTimestamp().toNanos() - sLink.fSrcTime;
+                sLink.fDur = event.getTimestamp().toNanos() - sLink.fSrcTime;
                 sLink.fDstTid = tid;
-                sLink.fDst = traceEvent.getTrace().getHostId();
+                sLink.fDst = event.getTrace().getHostId();
 
                 fLinksStore.add(sLink.build());
                 EdgeBuilder builder = new EdgeBuilder();
-                builder.fSrcTime = traceEvent.getTimestamp().toNanos();
+                builder.fSrcTime = event.getTimestamp().toNanos();
                 builder.fSrcTid = tid;
-                builder.fSrc = traceEvent.getTrace().getHostId();
+                builder.fSrc = event.getTrace().getHostId();
 
                 fLinks.put(sId, builder);
             }
         } else {
             EdgeBuilder builder = new EdgeBuilder();
-            builder.fSrcTime = traceEvent.getTimestamp().toNanos();
+            builder.fSrcTime = event.getTimestamp().toNanos();
             builder.fSrcTid = tid;
-            builder.fSrc = traceEvent.getTrace().getHostId();
+            builder.fSrc = event.getTrace().getHostId();
             fLinks.put(sId, builder);
         }
     }
 
-    private int handleStart(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp, String processName) {
+    private void handleStart(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp, String processName) {
         ITmfStateValue functionBeginName = functionEntry(event);
         if (functionBeginName != null) {
             int processQuark = ss.getQuarkAbsoluteAndAdd(PROCESSES, processName);
@@ -299,17 +301,10 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.CALL_STACK);
             ITmfStateValue value = functionBeginName;
             ss.pushAttribute(timestamp, value, callStackQuark);
-            /*
-             * FIXME: BIG FAT SMELLY HACK
-             *
-             * We are regenerating a stack without going through the helpers
-             */
-            return ss.queryOngoingState(callStackQuark).unboxInt() + callStackQuark;
         }
-        return -1;
     }
 
-    private int handleEnd(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp, String processName) {
+    private void handleEnd(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp, String processName) {
         /* Check if the event is a function exit */
         ITmfStateValue functionExitState = functionExit(event);
         if (functionExitState != null) {
@@ -325,14 +320,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             }
             int quark = ss.getQuarkAbsoluteAndAdd(PROCESSES, pName, threadName, InstrumentedCallStackAnalysis.CALL_STACK);
             ss.popAttribute(timestamp - 1, quark);
-            /*
-             * FIXME: BIG FAT SMELLY HACK
-             *
-             * We are regenerating a stack without going through the helpers
-             */
-            return ss.queryOngoingState(quark).unboxInt() + quark;
         }
-        return -1;
     }
 
     /**
@@ -343,7 +331,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
      * @param ss
      * @param processName
      */
-    private void handleComplete(TraceEventEvent event, ITmfStateSystemBuilder ss, String processName) {
+    private void handleComplete(ITmfEvent event, ITmfStateSystemBuilder ss, String processName) {
 
         ITmfTimestamp timestamp = event.getTimestamp();
         fSafeTime = fSafeTime.compareTo(timestamp) > 0 ? fSafeTime : timestamp;
@@ -355,7 +343,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         int processQuark = ss.getQuarkAbsoluteAndAdd(PROCESSES, currentProcessName);
         long startTime = event.getTimestamp().toNanos();
         long end = startTime;
-        Long duration = event.getField().getDuration();
+        Long duration = event.getContent().getFieldValue(Long.class, ITraceEventConstants.DURATION);
         if (duration != null) {
             end += Math.max(duration - 1, 0);
         }
@@ -394,4 +382,5 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         fLinksStore.close(false);
         super.done();
     }
+
 }

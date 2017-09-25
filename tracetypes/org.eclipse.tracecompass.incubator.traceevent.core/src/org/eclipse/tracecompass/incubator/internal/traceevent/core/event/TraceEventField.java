@@ -60,7 +60,7 @@ public class TraceEventField {
      * @param fields
      *            event fields (arguments)
      */
-    public TraceEventField(String name, long ts, char phase, @Nullable Object pid, @Nullable Integer tid, @Nullable String category, @Nullable String id, @Nullable Double duration, Map<String, Object> fields) {
+    public TraceEventField(String name, long ts, String phase, @Nullable Object pid, @Nullable Integer tid, @Nullable String category, @Nullable String id, @Nullable Double duration, Map<String, Object> fields) {
         fName = name;
         fPid = pid;
         fTid = tid;
@@ -72,7 +72,7 @@ public class TraceEventField {
         fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array);
         fTs = ts;
         fDuration = duration == null ? null : Double.isFinite(duration) ? duration.longValue() : null;
-        fPhase = phase;
+        fPhase = phase.charAt(0);
         @SuppressWarnings("null")
         Map<@NonNull String, @NonNull Object> args = fields.entrySet().stream()
                 .filter(entry -> {

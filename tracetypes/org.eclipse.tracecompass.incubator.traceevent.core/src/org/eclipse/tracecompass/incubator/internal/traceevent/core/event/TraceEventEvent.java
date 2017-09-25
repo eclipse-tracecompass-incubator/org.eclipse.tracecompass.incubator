@@ -49,7 +49,7 @@ public class TraceEventEvent extends TmfEvent implements ITmfSourceLookup {
         fCallsite = null;
         fLogLevel = Level.OFF;
         fName = StringUtils.EMPTY;
-        fField = new TraceEventField(StringUtils.EMPTY, 0, 'X', null, null, null, null, null, Collections.EMPTY_MAP);
+        fField = new TraceEventField(StringUtils.EMPTY, 0, "X", null, null, null, null, null, Collections.EMPTY_MAP); //$NON-NLS-1$
     }
 
     /**
@@ -105,8 +105,12 @@ public class TraceEventEvent extends TmfEvent implements ITmfSourceLookup {
             if (Double.isFinite(tso)) {
                 ts = (long) (tso * MICRO_TO_NANO);
             }
-            char phase = optString(root, ITraceEventConstants.PHASE, "I").charAt(0); //$NON-NLS-1$
-            String name = String.valueOf(optString(root,ITraceEventConstants.NAME, 'E' == phase ? "exit" : "unknown")); //$NON-NLS-1$ //$NON-NLS-2$
+            String phase = optString(root, ITraceEventConstants.PHASE, "I"); //$NON-NLS-1$
+            if (phase == null) {
+                // FIXME: Easy way to avoid null warning
+                phase = "I"; //$NON-NLS-1$
+            }
+            String name = String.valueOf(optString(root,ITraceEventConstants.NAME, "E".equals(phase) ? "exit" : "unknown")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             Integer tid = optInt(root, ITraceEventConstants.TID);
             if (tid == Integer.MIN_VALUE) {
                 tid = null;
@@ -159,7 +163,7 @@ public class TraceEventEvent extends TmfEvent implements ITmfSourceLookup {
     }
 
     private static String optString(JSONObject root, String key, String defaultValue) {
-        return root.has(key) ? (String) root.optString(key) : defaultValue;
+        return root.has(key) ? root.optString(key) : defaultValue;
     }
 
     private static String optString(JSONObject root, String key) {
