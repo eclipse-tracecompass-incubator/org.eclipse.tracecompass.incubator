@@ -104,7 +104,7 @@ public class FlameGraphTest extends AggregationTreeTest {
     }
 
     private void loadFlameGraph() {
-        UIThreadRunnable.syncExec(() -> fFg.buildFlameGraph(Collections.singleton(getCga())));
+        UIThreadRunnable.syncExec(() -> fFg.buildFlameGraph(Collections.singleton(getCga()), null, null));
         fBot.waitUntil(new SWTBotTestCondition() {
             @Override
             public boolean test() throws Exception {

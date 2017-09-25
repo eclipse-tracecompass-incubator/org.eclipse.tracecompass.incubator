@@ -73,6 +73,7 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
 import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -153,6 +154,16 @@ public class FlameGraphView extends TmfView {
         super(ID);
     }
 
+    /**
+     * Constructor with ID
+     *
+     * @param id
+     *            The ID of the view
+     */
+    protected FlameGraphView(String id) {
+        super(id);
+    }
+
     @Override
     public void createPartControl(Composite parent) {
         super.createPartControl(parent);
@@ -213,10 +224,15 @@ public class FlameGraphView extends TmfView {
     @TmfSignalHandler
     public void traceSelected(final TmfTraceSelectedSignal signal) {
         fTrace = signal.getTrace();
-        Display.getDefault().asyncExec(() -> buildFlameGraph(getCallgraphModules()));
+        Display.getDefault().asyncExec(() -> buildFlameGraph(getCallgraphModules(), null, null));
     }
 
-    private Iterable<ICallGraphProvider> getCallgraphModules() {
+    /**
+     * Get the callgraph modules used to build the view
+     *
+     * @return The call graph provider modules
+     */
+    protected Iterable<ICallGraphProvider> getCallgraphModules() {
         ITmfTrace trace = fTrace;
         if (trace == null) {
             return null;
@@ -238,9 +254,15 @@ public class FlameGraphView extends TmfView {
      *
      * @param callGraphProviders
      *            the callGraphAnalysis
+     * @param selStart
+     *            The selection start timestamp or <code>null</code> to show all
+     *            data
+     * @param selEnd
+     *            The selection end timestamp or <code>null</code> to show all
+     *            data
      */
     @VisibleForTesting
-    public void buildFlameGraph(Iterable<ICallGraphProvider> callGraphProviders) {
+    public void buildFlameGraph(Iterable<ICallGraphProvider> callGraphProviders, @Nullable ITmfTimestamp selStart, @Nullable ITmfTimestamp selEnd) {
         /*
          * Note for synchronization:
          *
@@ -314,7 +336,12 @@ public class FlameGraphView extends TmfView {
                             // FIXME: This waits for completion, there is no way of cancelling this call, so
                             // make the views responsive to updates in the model, so that we can return a
                             // partial callgraph
-                            CallGraph callGraph = provider.getCallGraph();
+                            CallGraph callGraph;
+                            if (selStart == null || selEnd == null) {
+                                callGraph = provider.getCallGraph();
+                            } else {
+                                callGraph = provider.getCallGraph(selStart, selEnd);
+                            }
                             if (group == null) {
                                 callgraphs.add(callGraph);
                             } else {
@@ -541,14 +568,13 @@ public class FlameGraphView extends TmfView {
     }
 
     private Action createActionForGroup(ICallGraphProvider provider, ICallStackGroupDescriptor descriptor) {
-        final Action groupAction = new Action(descriptor.getName(), IAction.AS_RADIO_BUTTON) {
+        return new Action(descriptor.getName(), IAction.AS_RADIO_BUTTON) {
             @Override
             public void run() {
                 fGroupBy = descriptor;
-                buildFlameGraph(Collections.singleton(provider));
+                buildFlameGraph(Collections.singleton(provider), null, null);
             }
         };
-        return groupAction;
     }
 
     private Action getSortByNameAction() {

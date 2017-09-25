@@ -28,9 +28,9 @@
       </view>
       <view
             category="org.eclipse.linuxtools.tmf.ui.views.category"
-            class="org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.selection.FlameGraphSelView"
+            class="org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphSelView"
             icon="icons/elcl16/flame.png"
-            id="org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.selection.flamegraphView"
+            id="org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.flamegraphViewSel"
             name="%view.flameGraphSel"
             restorable="true">
       </view>
