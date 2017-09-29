@@ -234,6 +234,19 @@ public class InstrumentedCallStackElement extends CallStackElement {
      * @return The call stack
      */
     public CallStack getCallStack() {
+        List<Integer> subAttributes = getStackQuarks();
+        return new CallStack(getStateSystem(), subAttributes, this, getHostId(), fThreadIdProvider);
+    }
+
+    /**
+     * Get the stack quarks that contain the data of the function calls
+     *
+     * This is meant to remain internal. It is public only so that the segment store
+     * from the CallStackSeries can access this
+     *
+     * @return The list of quarks containing the data
+     */
+    public List<Integer> getStackQuarks() {
         if (!isLeaf()) {
             throw new NoSuchElementException();
         }
@@ -242,7 +255,7 @@ public class InstrumentedCallStackElement extends CallStackElement {
             throw new IllegalStateException("The leaf element should have an element called " + InstrumentedCallStackAnalysis.CALL_STACK); //$NON-NLS-1$
         }
         List<Integer> subAttributes = getStateSystem().getSubAttributes(stackQuark, false);
-        return new CallStack(getStateSystem(), subAttributes, this, getHostId(), fThreadIdProvider);
+        return subAttributes;
     }
 
 }

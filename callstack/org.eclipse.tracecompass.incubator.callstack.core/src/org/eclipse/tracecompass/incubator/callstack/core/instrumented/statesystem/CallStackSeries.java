@@ -12,7 +12,10 @@ package org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyst
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -21,11 +24,19 @@ import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedGroupDescriptor;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CalledFunctionFactory;
+import org.eclipse.tracecompass.segmentstore.core.ISegment;
+import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 
 /**
  * A callstack series contain the information necessary to build all the
@@ -71,7 +82,7 @@ import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
  *
  * @author Geneviève Bastien
  */
-public class CallStackSeries {
+public class CallStackSeries implements ISegmentStore<ISegment> {
 
     /**
      * Interface for classes that provide a thread ID at time t for a callstack. The
@@ -409,6 +420,147 @@ public class CallStackSeries {
      */
     public String getName() {
         return fName;
+    }
+
+    // ---------------------------------------------------
+    // Segment store methods
+    // ---------------------------------------------------
+
+    private Collection<ICallStackElement> getLeafElements(ICallStackElement element) {
+        if (element.isLeaf()) {
+            return Collections.singleton(element);
+        }
+        List<ICallStackElement> list = new ArrayList<>();
+        element.getChildren().forEach(e -> list.addAll(getLeafElements(e)));
+        return list;
+    }
+
+    private Collection<Integer> getCallStackQuarks() {
+        // Get the leaf elements and their callstacks
+        return getRootElements().stream().flatMap(e -> getLeafElements(e).stream())
+                .filter(e -> e instanceof InstrumentedCallStackElement)
+                .flatMap(e -> ((InstrumentedCallStackElement) e).getStackQuarks().stream())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public int size() {
+        return Iterators.size(iterator());
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return !iterator().hasNext();
+    }
+
+    @Override
+    public boolean contains(@Nullable Object o) {
+        // narrow down search when object is a segment
+        if (o instanceof ICalledFunction) {
+            ICalledFunction seg = (ICalledFunction) o;
+            Iterable<@NonNull ISegment> iterable = getIntersectingElements(seg.getStart());
+            return Iterables.contains(iterable, seg);
+        }
+        return false;
+    }
+
+    @Override
+    public Iterator<ISegment> iterator() {
+        ITmfStateSystem stateSystem = fRootGroup.getStateSystem();
+        long start = stateSystem.getStartTime();
+        long end = stateSystem.getCurrentEndTime();
+        return getIntersectingElements(start, end).iterator();
+    }
+
+    @Override
+    public Object[] toArray() {
+        throw new UnsupportedOperationException("This segment store can potentially cause OutOfMemoryExceptions"); //$NON-NLS-1$
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        throw new UnsupportedOperationException("This segment store can potentially cause OutOfMemoryExceptions"); //$NON-NLS-1$
+    }
+
+    @Override
+    public boolean add(ISegment e) {
+        throw new UnsupportedOperationException("This segment store does not support adding new segments"); //$NON-NLS-1$
+    }
+
+    @Override
+    public boolean containsAll(@Nullable Collection<?> c) {
+        if (c == null) {
+            return false;
+        }
+        /*
+         * Check that all elements in the collection are indeed ISegments, and
+         * find their min end and max start time
+         */
+        long minEnd = Long.MAX_VALUE, maxStart = Long.MIN_VALUE;
+        for (Object o : c) {
+            if (o instanceof ICalledFunction) {
+                ICalledFunction seg = (ICalledFunction) o;
+                minEnd = Math.min(minEnd, seg.getEnd());
+                maxStart = Math.max(maxStart, seg.getStart());
+            } else {
+                return false;
+            }
+        }
+        if (minEnd > maxStart) {
+            /*
+             * all segments intersect a common range, we just need to intersect
+             * a time stamp in that range
+             */
+            minEnd = maxStart;
+        }
+
+        /* Iterate through possible segments until we have found them all */
+        Iterator<@NonNull ISegment> iterator = getIntersectingElements(minEnd, maxStart).iterator();
+        int unFound = c.size();
+        while (iterator.hasNext() && unFound > 0) {
+            ISegment seg = iterator.next();
+            for (Object o : c) {
+                if (Objects.equals(o, seg)) {
+                    unFound--;
+                }
+            }
+        }
+        return unFound == 0;
+    }
+
+    @Override
+    public boolean addAll(@Nullable Collection<? extends ISegment> c) {
+        throw new UnsupportedOperationException("This segment store does not support adding new segments"); //$NON-NLS-1$
+    }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException("This segment store does not support clearing the data"); //$NON-NLS-1$
+    }
+
+    @Override
+    public Iterable<ISegment> getIntersectingElements(long start, long end) {
+        ITmfStateSystem stateSystem = fRootGroup.getStateSystem();
+        long startTime = Math.max(start - 1, stateSystem.getStartTime());
+        long endTime = Math.min(end, stateSystem.getCurrentEndTime());
+        if (startTime > endTime) {
+            return Collections.emptyList();
+        }
+        Collection<Integer> quarks = getCallStackQuarks();
+        try {
+            Iterable<ITmfStateInterval> query2d = stateSystem.query2D(quarks, startTime, endTime);
+            query2d = Iterables.filter(query2d, interval -> !interval.getStateValue().isNull());
+            return Iterables.transform(query2d, interval -> CalledFunctionFactory.create(interval.getStartTime(), interval.getEndTime() + 1, 0, interval.getStateValue(), -1, IHostModel.UNKNOWN_TID,
+                    null, ModelManager.getModelFor(fRootGroup.getHostId())));
+        } catch (StateSystemDisposedException e) {
+            Activator.getInstance().logError("Error getting intersecting elements: StateSystemDisposed"); //$NON-NLS-1$
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void dispose() {
+        // Nothing to do
     }
 
 }

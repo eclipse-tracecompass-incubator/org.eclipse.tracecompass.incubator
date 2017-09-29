@@ -34,7 +34,7 @@ public class TraceEventCallstackAnalysis extends InstrumentedCallStackAnalysis {
 
     @Override
     protected ITmfStateProvider createStateProvider() {
-        return new TraceEventCallStackProvider(Objects.requireNonNull(getTrace()), getSegmentStore());
+        return new TraceEventCallStackProvider(Objects.requireNonNull(getTrace()), getLinks());
     }
 
     @Override

@@ -11,6 +11,7 @@ package org.eclipse.tracecompass.incubator.callstack.core.instrumented;
 
 import java.util.Collection;
 
+import org.eclipse.tracecompass.analysis.timing.core.segmentstore.ISegmentStoreProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 
@@ -20,7 +21,7 @@ import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
  *
  * @author Geneviève Bastien
  */
-public interface IFlameChartProvider extends IAnalysisModule {
+public interface IFlameChartProvider extends IAnalysisModule, ISegmentStoreProvider {
 
     /**
      * Get all the callstacks provided by this analysis.

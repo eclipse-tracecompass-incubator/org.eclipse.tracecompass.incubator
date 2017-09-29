@@ -38,4 +38,5 @@ Export-Package: org.eclipse.tracecompass.incubator.callstack.core.base,
  org.eclipse.tracecompass.incubator.internal.callstack.core.xml.callstack;x-friends:="org.eclipse.tracecompass.incubator.callstack.core.tests,org.eclipse.tracecompass.incubator.callstack.ui"
 Import-Package: com.google.common.annotations,
  com.google.common.collect,
+ com.google.common.base,
  org.apache.commons.lang3

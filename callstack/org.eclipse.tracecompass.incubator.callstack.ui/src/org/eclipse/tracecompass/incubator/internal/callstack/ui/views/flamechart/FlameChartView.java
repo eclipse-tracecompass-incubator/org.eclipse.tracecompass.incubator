@@ -630,7 +630,7 @@ public class FlameChartView extends AbstractTimeGraphView {
         }
         csModule = iterator.next();
         csModule.schedule();
-        ISegmentStore<@NonNull CallStackEdge> store = csModule.getSegmentStore();
+        ISegmentStore<@NonNull CallStackEdge> store = csModule.getLinks();
         if (!store.isEmpty()) {
             List<TimeGraphEntry> entryList = getEntryList(trace);
             if (entryList == null) {

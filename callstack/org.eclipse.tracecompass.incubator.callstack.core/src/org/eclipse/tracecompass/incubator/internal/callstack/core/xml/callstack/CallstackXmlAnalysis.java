@@ -17,24 +17,30 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.timing.core.segmentstore.IAnalysisProgressListener;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.SymbolAspect;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.xml.callstack.CallstackXmlModuleHelper.ISubModuleHelper;
+import org.eclipse.tracecompass.segmentstore.core.ISegment;
+import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlStrings;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
+import org.eclipse.tracecompass.tmf.core.segment.ISegmentAspect;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfAnalysisModuleWithStateSystems;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -54,6 +60,8 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
     private @Nullable IAnalysisModule fModule = null;
     private @Nullable Collection<CallStackSeries> fCallStacks = null;
     private final CallGraphAnalysis fCallGraph;
+
+    private final ListenerList fListeners = new ListenerList(ListenerList.IDENTITY);
 
     /**
      * Constructor
@@ -148,6 +156,10 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
         boolean ret = analysisModule.waitForCompletion(monitor);
         if (!ret) {
             return ret;
+        }
+        ISegmentStore<ISegment> segmentStore = getSegmentStore();
+        if (segmentStore != null) {
+            sendUpdate(segmentStore);
         }
         fCallGraph.schedule();
         return true;
@@ -265,6 +277,57 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
     @Override
     public AggregatedCallSite createCallSite(ICallStackSymbol symbol) {
         return fCallGraph.createCallSite(symbol);
+    }
+
+    @Override
+    public void addListener(@NonNull IAnalysisProgressListener listener) {
+        fListeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(@NonNull IAnalysisProgressListener listener) {
+        fListeners.remove(listener);
+    }
+
+    @Override
+    public Iterable<ISegmentAspect> getSegmentAspects() {
+        return Collections.singletonList(SymbolAspect.SYMBOL_ASPECT);
+    }
+
+    @Override
+    public @Nullable ISegmentStore<ISegment> getSegmentStore() {
+        Collection<CallStackSeries> series = getCallStackSeries();
+        if (series.isEmpty()) {
+            return null;
+        }
+        return series.iterator().next();
+    }
+
+    /**
+     * Returns all the listeners
+     *
+     * @return latency listeners
+     */
+    protected Iterable<IAnalysisProgressListener> getListeners() {
+        List<IAnalysisProgressListener> listeners = new ArrayList<>();
+        for (Object listener : fListeners.getListeners()) {
+            if (listener != null) {
+                listeners.add((IAnalysisProgressListener) listener);
+            }
+        }
+        return listeners;
+    }
+
+    /**
+     * Send the segment store to all its listener
+     *
+     * @param store
+     *            The segment store to broadcast
+     */
+    protected void sendUpdate(final ISegmentStore<ISegment> store) {
+        for (IAnalysisProgressListener listener : getListeners()) {
+            listener.onComplete(this, store);
+        }
     }
 
 }

@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.callstack.ui.callgraph;
+package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.functiondensity;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
@@ -22,10 +22,6 @@ public class Messages extends NLS {
      * Name of the function name aspect
      */
     public static @Nullable String CallStack_FunctionName;
-    /**
-     * Name of the job executing the callGraphAnalysis
-     */
-    public static @Nullable String CallGraphAnalysis;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -12,10 +12,10 @@
       <view
             allowMultiple="false"
             category="org.eclipse.linuxtools.tmf.ui.views.category"
-            class="org.eclipse.tracecompass.incubator.internal.callstack.ui.callgraph.CallGraphDensityView"
+            class="org.eclipse.tracecompass.incubator.internal.callstack.ui.views.functiondensity.FunctionDensityView"
             icon="icons/elcl16/funcdensity.png"
-            id="org.eclipse.tracecompass.incubator.internal.callstack.ui.callgraph.callgraphDensity"
-            name="%view.callgraphDensity"
+            id="org.eclipse.tracecompass.incubator.internal.callstack.ui.views.functiondensity.functionDensity"
+            name="%view.functionDensity"
             restorable="true">
       </view>
       <view

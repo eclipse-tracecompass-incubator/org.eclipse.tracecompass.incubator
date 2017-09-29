@@ -14,29 +14,35 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.timing.core.segmentstore.IAnalysisProgressListener;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.SymbolAspect;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
+import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
 import org.eclipse.tracecompass.segmentstore.core.SegmentStoreFactory;
 import org.eclipse.tracecompass.segmentstore.core.SegmentStoreFactory.SegmentStoreType;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
+import org.eclipse.tracecompass.tmf.core.segment.ISegmentAspect;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -76,6 +82,11 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     private @Nullable ISegmentStore<CallStackEdge> fLinks = null;
 
     /**
+     * Listeners
+     */
+    private final ListenerList fListeners = new ListenerList(ListenerList.IDENTITY);
+
+    /**
      * Abstract constructor (should only be called via the sub-classes'
      * constructors.
      */
@@ -84,7 +95,7 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
         fCallGraph = new CallGraphAnalysis(this);
     }
 
-    private @Nullable ISegmentStore<org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackEdge> buildOnDiskSegmentStore(String fileName) {
+    private @Nullable ISegmentStore<CallStackEdge> buildOnDiskSegmentStore(String fileName) {
         ITmfTrace trace = checkNotNull(getTrace());
 
         /* See if the data file already exists on disk */
@@ -151,6 +162,10 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
         if (!ret) {
             return ret;
         }
+        ISegmentStore<ISegment> segmentStore = getSegmentStore();
+        if (segmentStore != null) {
+            sendUpdate(segmentStore);
+        }
         fCallGraph.schedule();
         return true;
     }
@@ -179,7 +194,7 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
      *
      * @return a list of the edges
      */
-    public ISegmentStore<CallStackEdge> getSegmentStore() {
+    public ISegmentStore<CallStackEdge> getLinks() {
         ISegmentStore<CallStackEdge> links = fLinks;
         if (fLinks == null) {
             links = buildOnDiskSegmentStore(String.valueOf(getId()) + LINKS_SUFFIX);
@@ -219,6 +234,62 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     @Override
     public AggregatedCallSite createCallSite(ICallStackSymbol symbol) {
         return fCallGraph.createCallSite(symbol);
+    }
+
+    /**
+     * Get the edges (links) of the callstack
+     *
+     * @return a list of the edges
+     */
+    @Override
+    public @Nullable ISegmentStore<ISegment> getSegmentStore() {
+        Collection<CallStackSeries> callStacks = getCallStackSeries();
+        if (callStacks.isEmpty()) {
+            return null;
+        }
+        return callStacks.iterator().next();
+    }
+
+    @Override
+    public void addListener(@NonNull IAnalysisProgressListener listener) {
+        fListeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(@NonNull IAnalysisProgressListener listener) {
+        fListeners.remove(listener);
+    }
+
+    @Override
+    public Iterable<ISegmentAspect> getSegmentAspects() {
+        return Collections.singletonList(SymbolAspect.SYMBOL_ASPECT);
+    }
+
+    /**
+     * Returns all the listeners
+     *
+     * @return latency listeners
+     */
+    protected Iterable<IAnalysisProgressListener> getListeners() {
+        List<IAnalysisProgressListener> listeners = new ArrayList<>();
+        for (Object listener : fListeners.getListeners()) {
+            if (listener != null) {
+                listeners.add((IAnalysisProgressListener) listener);
+            }
+        }
+        return listeners;
+    }
+
+    /**
+     * Send the segment store to all its listener
+     *
+     * @param store
+     *            The segment store to broadcast
+     */
+    protected void sendUpdate(final ISegmentStore<ISegment> store) {
+        for (IAnalysisProgressListener listener : getListeners()) {
+            listener.onComplete(this, store);
+        }
     }
 
 }

@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.callstack.ui.callgraph;
+package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.functiondensity;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.viewers.TableViewer;
@@ -24,21 +24,21 @@ import org.eclipse.tracecompass.common.core.NonNullUtils;
  *
  * @author Sonia Farrah
  */
-public class CallGraphDensityView extends AbstractSegmentStoreDensityView {
+public class FunctionDensityView extends AbstractSegmentStoreDensityView {
 
     /** The view's ID */
-    public static final @NonNull String ID = CallGraphDensityView.class.getPackage().getName() + ".callgraphDensity"; //$NON-NLS-1$
+    public static final @NonNull String ID = FunctionDensityView.class.getPackage().getName() + ".functionDensity"; //$NON-NLS-1$
 
     /**
      * Constructs a new density view.
      */
-    public CallGraphDensityView() {
+    public FunctionDensityView() {
         super(ID);
     }
 
     @Override
     protected AbstractSegmentStoreTableViewer createSegmentStoreTableViewer(Composite parent) {
-        return new CallGraphTableViewer(new TableViewer(parent, SWT.FULL_SELECTION | SWT.VIRTUAL), getViewSite().getSecondaryId()) {
+        return new FunctionTableViewer(new TableViewer(parent, SWT.FULL_SELECTION | SWT.VIRTUAL), getViewSite().getSecondaryId()) {
             @Override
             protected void createProviderColumns() {
                 super.createProviderColumns();
@@ -50,6 +50,6 @@ public class CallGraphDensityView extends AbstractSegmentStoreDensityView {
 
     @Override
     protected AbstractSegmentStoreDensityViewer createSegmentStoreDensityViewer(Composite parent) {
-        return new CallGraphDensityViewer(NonNullUtils.checkNotNull(parent), getViewSite().getSecondaryId());
+        return new FunctionDensityViewer(NonNullUtils.checkNotNull(parent), getViewSite().getSecondaryId());
     }
 }

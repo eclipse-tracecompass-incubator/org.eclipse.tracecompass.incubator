@@ -7,13 +7,14 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.callstack.ui.callgraph;
+package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.functiondensity;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.ISegmentStoreProvider;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.density.AbstractSegmentStoreDensityViewer;
+import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
@@ -21,9 +22,9 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  *
  * @author Sonia Farrah
  */
-public class CallGraphDensityViewer extends AbstractSegmentStoreDensityViewer {
+public class FunctionDensityViewer extends AbstractSegmentStoreDensityViewer {
 
-//    private final String fAnalysisId;
+    private final String fAnalysisId;
 
     /**
      * Constructs a new density viewer.
@@ -33,17 +34,17 @@ public class CallGraphDensityViewer extends AbstractSegmentStoreDensityViewer {
      * @param analysisId
      *            The ID of the analysis for this view
      */
-    public CallGraphDensityViewer(@NonNull Composite parent, String analysisId) {
+    public FunctionDensityViewer(@NonNull Composite parent, String analysisId) {
         super(parent);
-//        fAnalysisId = analysisId;
+        fAnalysisId = analysisId;
     }
 
     @Override
     protected @Nullable ISegmentStoreProvider getSegmentStoreProvider(@NonNull ITmfTrace trace) {
-//        Iterable<CallGraphAnalysis> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, CallGraphAnalysis.class);
-//        return StreamUtils.getStream(modules)
-//                .filter(m -> m.getId().equals(fAnalysisId))
-//                .findFirst().orElse(null);
-        return null;
+        IAnalysisModule modules = trace.getAnalysisModule(fAnalysisId);
+        if (!(modules instanceof ISegmentStoreProvider)) {
+            return null;
+        }
+        return (ISegmentStoreProvider) modules;
     }
 }
