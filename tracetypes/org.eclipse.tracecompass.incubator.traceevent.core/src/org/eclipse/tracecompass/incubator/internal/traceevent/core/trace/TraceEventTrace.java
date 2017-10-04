@@ -98,11 +98,13 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
                 confidence = MAX_CONFIDENCE * matches / lineCount;
                 line = readNextEventString(() -> (char) rafile.read());
             }
+            if (matches == 0) {
+                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Most assuredly NOT a traceevent trace"); //$NON-NLS-1$
+            }
         } catch (IOException e) {
             Activator.getInstance().logError("Error validating file: " + path, e); //$NON-NLS-1$
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "IOException validating file: " + path, e); //$NON-NLS-1$
         }
-
         return new TraceValidationStatus(confidence, Activator.PLUGIN_ID);
     }
 
