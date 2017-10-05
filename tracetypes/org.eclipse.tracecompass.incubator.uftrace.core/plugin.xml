@@ -21,6 +21,7 @@
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.uftrace.core.analysis.UfCallstackAnalysis"
             automatic="true"
+            icon="icons/stckframe_obj.gif"
             id="org.eclipse.tracecompass.incubator.uftrace.analysis.callstack"
             name="%uftrace.callstack.name">
          <tracetype
