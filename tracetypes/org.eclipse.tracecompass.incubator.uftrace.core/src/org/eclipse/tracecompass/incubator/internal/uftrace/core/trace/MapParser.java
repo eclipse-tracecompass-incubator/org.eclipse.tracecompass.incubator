@@ -50,9 +50,11 @@ public class MapParser {
      */
     public static MapParser create(File file) throws IOException {
         String name = file.getName();
-        Matcher stuff = SESSION_PATTERN.matcher(name);
-        stuff.matches();
-        long sessionId = Long.parseUnsignedLong(stuff.group(1), 16);
+        Matcher sessionName = SESSION_PATTERN.matcher(name);
+        if (!sessionName.matches()) {
+            return null;
+        }
+        long sessionId = Long.parseUnsignedLong(sessionName.group(1), 16);
         LineIterator iter = FileUtils.lineIterator(file);
         NavigableMap<Long, MapEntry> entries = new TreeMap<>();
         while (iter.hasNext()) {

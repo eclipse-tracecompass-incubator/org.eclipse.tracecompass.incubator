@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -137,15 +138,31 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
         int confidence = 0;
         if (dir.isDirectory()) {
             confidence += 5;
-            List<String> data = Arrays.asList(dir.list());
-            for (String file : data) {
-                if (file.endsWith(".dat")) { //$NON-NLS-1$
+            List<File> data = Arrays.asList(dir.listFiles());
+            for (File file : data) {
+                String extension = FilenameUtils.getExtension(file.getName());
+                if (extension.equals(".dat")) { //$NON-NLS-1$
+                    try {
+                        DatParser dp = new DatParser(file);
+                        // read first event (really check magic number header)
+                        dp.iterator().next();
+                    } catch (IllegalArgumentException e) {
+                        // we don't want a failing trace
+                        confidence = Integer.MIN_VALUE;
+                    }
                     confidence += 4;
                 }
-                if (file.endsWith(".map")) { //$NON-NLS-1$
-                    confidence += 4;
+                if (extension.equals(".map")) { //$NON-NLS-1$
+                    try {
+                        if (MapParser.create(file) != null) {
+                            confidence += 4;
+                        }
+                    } catch (IOException e) {
+                        // we don't want a failing trace
+                        confidence = Integer.MIN_VALUE;
+                    }
                 }
-                if (file.endsWith("*.sym")) { //$NON-NLS-1$
+                if (extension.equals("*.sym")) { //$NON-NLS-1$
                     confidence += 3;
                 }
             }
@@ -171,7 +188,9 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
                     fDats.add(new DatParser(child));
                 } else if (name.endsWith(".map")) { //$NON-NLS-1$
                     MapParser create = MapParser.create(child);
-                    fMap.put(create.getSessionId(), create);
+                    if (create != null) {
+                        fMap.put(create.getSessionId(), create);
+                    }
                 } else if (name.endsWith(".sym")) { //$NON-NLS-1$
                     fSyms.put(name.substring(0, name.length() - 4), SymParser.parse(child));
                 } else if (name.equals("task.txt")) { //$NON-NLS-1$

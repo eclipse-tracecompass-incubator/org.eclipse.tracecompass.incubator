@@ -16,6 +16,8 @@ import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.lang3.math.NumberUtils;
+
 import com.google.common.collect.PeekingIterator;
 
 /**
@@ -85,7 +87,7 @@ public class DatParser implements Iterable<DatEvent> {
                         throw new NoSuchElementException("no more data"); //$NON-NLS-1$
                     }
                     fCurrent = DatEvent.create(bb,
-                            Integer.parseInt(fFile.getName().substring(0, fFile.getName().length() - 4)));
+                            NumberUtils.toInt(fFile.getName().substring(0, fFile.getName().length() - 4)));
                     return fCurrent;
                 }
 

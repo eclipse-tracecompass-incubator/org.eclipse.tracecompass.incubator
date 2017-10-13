@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Data (.dat) event type. This is to be used in Tracecompass as an event field,
@@ -91,7 +92,7 @@ public class DatEvent {
      *            the thread id of the stream
      * @return an event
      */
-    public static DatEvent create(ByteBuffer bb, int tid) {
+    public static @Nullable DatEvent create(ByteBuffer bb, int tid) {
         bb.order(ByteOrder.LITTLE_ENDIAN);
         long time = bb.getLong();
         long payload = bb.getLong();
@@ -109,7 +110,7 @@ public class DatEvent {
      *            the tid this event comes from
      * @return an event
      */
-    public static DatEvent create(long nanoseconds, long payload, int tid) {
+    public static @Nullable DatEvent create(long nanoseconds, long payload, int tid) {
         String type = TYPES[(int) (payload & TYPE_MASK)];
         if (type == null) {
             throw new IllegalStateException("Trace type cannot be null"); //$NON-NLS-1$
@@ -119,7 +120,7 @@ public class DatEvent {
         int depth = (int) ((payload & DEPTH_MASK) >>> 6);
         long address = (payload & ADDRESS_MASK) >>> 16;
         if (magic != UFTRACE_MAGIC_NUMBER) {
-            throw new IllegalStateException("Magic missmatch"); //$NON-NLS-1$
+            return null;
         }
         if (moreData) {
             // TODO: do something here
