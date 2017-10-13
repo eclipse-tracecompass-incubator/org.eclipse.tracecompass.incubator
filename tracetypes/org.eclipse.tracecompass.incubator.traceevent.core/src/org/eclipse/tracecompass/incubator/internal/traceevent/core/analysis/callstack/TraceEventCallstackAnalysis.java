@@ -9,16 +9,13 @@
 
 package org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack;
 
+import java.util.Collections;
 import java.util.Objects;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.tmf.core.analysis.requirements.TmfAbstractAnalysisRequirement;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Call-stack analysis to populate the TMF CallStack View from Trace Event
@@ -33,7 +30,7 @@ public class TraceEventCallstackAnalysis extends InstrumentedCallStackAnalysis {
      */
     public static final String ID = "org.eclipse.tracecompass.incubator.traceevent.analysis.callstack"; //$NON-NLS-1$
 
-    private @Nullable Set<@NonNull TmfAbstractAnalysisRequirement> fAnalysisRequirements = null;
+//    private @Nullable Set<@NonNull TmfAbstractAnalysisRequirement> fAnalysisRequirements = null;
 
     @Override
     protected ITmfStateProvider createStateProvider() {
@@ -42,13 +39,14 @@ public class TraceEventCallstackAnalysis extends InstrumentedCallStackAnalysis {
 
     @Override
     public @NonNull Iterable<@NonNull TmfAbstractAnalysisRequirement> getAnalysisRequirements() {
-
-        Set<@NonNull TmfAbstractAnalysisRequirement> requirements = fAnalysisRequirements;
-        if (requirements == null) {
-            requirements = ImmutableSet.of(new TraceEventCallStackAnalysisRequirement());
-            fAnalysisRequirements = requirements;
-        }
-        return requirements;
+        return Collections.emptyList();
+        // TODO: Bring back this requirement
+//        Set<@NonNull TmfAbstractAnalysisRequirement> requirements = fAnalysisRequirements;
+//        if (requirements == null) {
+//            requirements = ImmutableSet.of(new TraceEventCallStackAnalysisRequirement());
+//            fAnalysisRequirements = requirements;
+//        }
+//        return requirements;
     }
 
 }

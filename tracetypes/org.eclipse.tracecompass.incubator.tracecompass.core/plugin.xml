@@ -15,9 +15,9 @@
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
-            analysis_module="org.eclipse.tracecompass.incubator.internal.tracecompass.core.callstack.TraceEventCallstackAnalysis2"
+            analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack.TraceEventCallstackAnalysis"
             id="org.eclipse.tracecompass.incubator.traceevent.analysis.callstack1"
-            name="Trace Event for JUL">
+            name="%callstack.name">
          <tracetype
                class="org.eclipse.tracecompass.incubator.internal.tracecompass.core.trace.LttngTraceCompassJulTrace">
          </tracetype>
