@@ -128,7 +128,7 @@ public class FusedVirtualMachineStateProvider extends AbstractTmfStateProvider {
             }
         }
         fEventNames = ImmutableMap.copyOf(builder);
-        fKvmModel = new QemuKvmVmModel(experiment);
+        fKvmModel = QemuKvmVmModel.get(experiment);
         fContainerModel = new LxcModel();
     }
 

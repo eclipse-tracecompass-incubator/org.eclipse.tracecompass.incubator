@@ -145,4 +145,10 @@ public class LxcModel implements IVirtualMachineModel {
         return fKnownContainers.size();
     }
 
+    @Override
+    public @Nullable HostThread getVirtualCpuTid(VirtualCPU vcpu) {
+        // Not used for lxc
+        return null;
+    }
+
 }

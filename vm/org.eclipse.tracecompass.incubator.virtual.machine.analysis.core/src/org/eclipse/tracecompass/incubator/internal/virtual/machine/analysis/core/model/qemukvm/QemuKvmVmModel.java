@@ -56,6 +56,8 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
 
     private static final String KVM = "kvm_"; //$NON-NLS-1$
 
+    private static final Map<TmfExperiment, QemuKvmVmModel> MODELS = new HashMap<>();
+
     /* Associate a host's thread to a virtual CPU */
     private final Map<HostThread, VirtualCPU> fTidToVcpu = new HashMap<>();
     /* Associate a host's thread to a virtual machine */
@@ -76,12 +78,28 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
             QemuKvmStrings.VMSYNC_HG_HOST);
 
     /**
+     * Get the VM model for this experiment
+     *
+     * @param exp
+     *            The experiment
+     * @return The Qemu Kvm model
+     */
+    public static synchronized QemuKvmVmModel get(TmfExperiment exp) {
+        QemuKvmVmModel model = MODELS.get(exp);
+        if (model == null) {
+            model = new QemuKvmVmModel(exp);
+            MODELS.put(exp, model);
+        }
+        return model;
+    }
+
+    /**
      * Constructor
      *
      * @param exp
      *            The experiment this model applies to
      */
-    public QemuKvmVmModel(TmfExperiment exp) {
+    private QemuKvmVmModel(TmfExperiment exp) {
         fExperiment = exp;
         /* If there is only one trace we consider it as a host */
         if (exp.getTraces().size() == 1) {
@@ -217,6 +235,16 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
     @Override
     public @Nullable VirtualCPU getVirtualCpu(HostThread ht) {
         return fTidToVcpu.get(ht);
+    }
+
+    @Override
+    public @Nullable HostThread getVirtualCpuTid(VirtualCPU vcpu) {
+        for (Entry<HostThread, VirtualCPU> entry : fTidToVcpu.entrySet()) {
+            if (entry.getValue().equals(vcpu)) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     @Override

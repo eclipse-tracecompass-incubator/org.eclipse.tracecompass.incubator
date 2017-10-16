@@ -311,7 +311,10 @@ public final class FusedVMInformationProvider {
             if (parenthostQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
                 return parentHostId;
             }
-            parentHostId = ssq.querySingleState(ssq.getStartTime(), parenthostQuark).getStateValue().unboxStr();
+            ITmfStateValue stateValue = ssq.querySingleState(ssq.getStartTime(), parenthostQuark).getStateValue();
+            if (!stateValue.isNull()) {
+                parentHostId = stateValue.unboxStr();
+            }
         } catch (StateSystemDisposedException e) {
             // About to be disposed, ignore
         }

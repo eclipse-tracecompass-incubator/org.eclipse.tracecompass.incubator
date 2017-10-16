@@ -118,6 +118,16 @@ public interface IVirtualMachineModel {
     @Nullable VirtualCPU getVirtualCpu(HostThread ht);
 
     /**
+     * Get the host thread corresponding to a virtual CPU
+     *
+     * @param vcpu
+     *            The vcpu for which to get the thread
+     * @return The HostThread corresponding to this CPU, or <code>null</code> if no
+     *         such thread is found
+     */
+    @Nullable HostThread getVirtualCpuTid(VirtualCPU vcpu);
+
+    /**
      * Handles the event. This method will be called for each event required or
      * optional by the analysis, before any other handling is done on this
      * event.

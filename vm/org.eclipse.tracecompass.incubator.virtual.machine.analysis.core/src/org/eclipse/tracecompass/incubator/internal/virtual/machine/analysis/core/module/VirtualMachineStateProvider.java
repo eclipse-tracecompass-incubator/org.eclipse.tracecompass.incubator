@@ -18,12 +18,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
-import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInformationProvider;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.DefaultEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
+import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
+import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VcpuStateValues;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VmAttributes;
@@ -44,7 +44,6 @@ import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
-import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperimentUtils;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -98,7 +97,7 @@ public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
     public VirtualMachineStateProvider(TmfExperiment experiment) {
         super(experiment, "Virtual Machine State Provider"); //$NON-NLS-1$
 
-        fModel = new QemuKvmVmModel(experiment);
+        fModel = QemuKvmVmModel.get(experiment);
         Table<ITmfTrace, String, @Nullable Integer> table = HashBasedTable.create();
         fEventNames = table;
         fLayouts = new HashMap<>();
@@ -348,26 +347,22 @@ public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
         return checkNotNull(getStateSystemBuilder()).getQuarkAbsoluteAndAdd(VmAttributes.VIRTUAL_MACHINES);
     }
 
-    private @Nullable HostThread getCurrentHostThread(ITmfEvent event, long ts) {
-        /* Get the LTTng kernel analysis for the host */
-        String hostId = event.getTrace().getHostId();
-        KernelAnalysisModule module = TmfExperimentUtils.getAnalysisModuleOfClassForHost(getTrace(), hostId, KernelAnalysisModule.class);
-        if (module == null) {
-            return null;
-        }
-
+    private static @Nullable HostThread getCurrentHostThread(ITmfEvent event, long ts) {
         /* Get the CPU the event is running on */
         Integer cpu = TmfTraceUtils.resolveIntEventAspectOfClassForEvent(event.getTrace(), TmfCpuAspect.class, event);
         if (cpu == null) {
             /* We couldn't find any CPU information, ignore this event */
             return null;
         }
+        /* Get the LTTng kernel analysis for the host */
+        String hostId = event.getTrace().getHostId();
+        IHostModel model = ModelManager.getModelFor(hostId);
+        int tid = model.getThreadOnCpu(cpu, ts);
 
-        Integer currentTid = KernelThreadInformationProvider.getThreadOnCpu(module, cpu, ts);
-        if (currentTid == null) {
+        if (tid == IHostModel.UNKNOWN_TID) {
             return null;
         }
-        return new HostThread(hostId, currentTid);
+        return new HostThread(hostId, tid);
     }
 
 }

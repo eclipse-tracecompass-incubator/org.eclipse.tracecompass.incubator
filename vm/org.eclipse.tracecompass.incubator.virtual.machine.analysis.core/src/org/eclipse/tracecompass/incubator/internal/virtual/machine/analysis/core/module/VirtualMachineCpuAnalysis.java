@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInformationProvider;
+import org.eclipse.tracecompass.analysis.os.linux.core.tid.TidAnalysisModule;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VcpuStateValues;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VmAttributes;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
@@ -96,7 +97,7 @@ public class VirtualMachineCpuAnalysis extends TmfStateSystemAnalysisModule {
         Set<IAnalysisModule> modules = new HashSet<>();
         /* Depends on the LTTng Kernel analysis modules */
         for (ITmfTrace trace : TmfTraceManager.getTraceSet(getTrace())) {
-            for (KernelAnalysisModule module : TmfTraceUtils.getAnalysisModulesOfClass(trace, KernelAnalysisModule.class)) {
+            for (TidAnalysisModule module : TmfTraceUtils.getAnalysisModulesOfClass(trace, TidAnalysisModule.class)) {
                 modules.add(module);
             }
         }
