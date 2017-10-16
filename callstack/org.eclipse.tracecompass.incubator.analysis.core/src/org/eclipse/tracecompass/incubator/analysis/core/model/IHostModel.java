@@ -10,8 +10,10 @@
 package org.eclipse.tracecompass.incubator.analysis.core.model;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 
 /**
  * This interface represents a host system, for example a machine running Linux,
@@ -78,5 +80,34 @@ public interface IHostModel {
      * @return The collection of aggregated sampling data for the time range
      */
     Collection<AggregatedCallSite> getSamplingData(int tid, long start, long end);
+
+    /**
+     * Get an iterator over the status intervals of a thread
+     *
+     * @param tid
+     *            The ID of the thread
+     * @param start
+     *            The start of the period for which to get the time on CPU
+     * @param end
+     *            The end of the period for which to get the time on CPU
+     * @return An iterator over the status intervals for the thread
+     */
+    Iterator<ProcessStatusInterval> getThreadStatusIntervals(int tid, long start, long end);
+
+    /**
+     * Get whether sampling data is available for this host
+     *
+     * @return <code>true</code> if sampling data is available, <code>false</code>
+     *         otherwise
+     */
+    boolean isSamplingDataAvailable();
+
+    /**
+     * Get whether thread status information is available for this host
+     *
+     * @return <code>true</code> if thread status information is available,
+     *         <code>false</code> otherwise
+     */
+    boolean isThreadStatusAvailable();
 
 }

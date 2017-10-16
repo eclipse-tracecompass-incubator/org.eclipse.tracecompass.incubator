@@ -11,15 +11,24 @@ package org.eclipse.tracecompass.incubator.internal.analysis.core.model;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
+import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInformationProvider;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.ProcessStatus;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICpuTimeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ISamplingDataProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.IThreadOnCpuProvider;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
+import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * Operating system model based on analyses who implement certain interfaces to
@@ -32,9 +41,19 @@ import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
  */
 public class CompositeHostModel implements IHostModel {
 
-    private Set<ICpuTimeProvider> fCpuTimeProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<ICpuTimeProvider, Boolean>()));
-    private Set<IThreadOnCpuProvider> fThreadOnCpuProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<IThreadOnCpuProvider, Boolean>()));
-    private Set<ISamplingDataProvider> fSamplingDataProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<ISamplingDataProvider, Boolean>()));
+    private final Set<ICpuTimeProvider> fCpuTimeProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<ICpuTimeProvider, Boolean>()));
+    private final Set<IThreadOnCpuProvider> fThreadOnCpuProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<IThreadOnCpuProvider, Boolean>()));
+    private final Set<ISamplingDataProvider> fSamplingDataProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<ISamplingDataProvider, Boolean>()));
+    private final String fHostId;
+
+    /**
+     * Constructor
+     *
+     * @param hostId The ID of the host this model is for
+     */
+    public CompositeHostModel(String hostId) {
+        fHostId = hostId;
+    }
 
     @Override
     public int getThreadOnCpu(int cpu, long t) {
@@ -102,6 +121,64 @@ public class CompositeHostModel implements IHostModel {
     @Override
     public String toString() {
         return String.valueOf(getClass());
+    }
+
+    /**
+     * Iterator class to allow 2-way iteration over intervals of a given
+     * attribute. Not thread-safe!
+     */
+    private static class ThreadStatusIterator implements Iterator<ProcessStatusInterval> {
+
+        private final Iterator<ITmfStateInterval> fIntervalIterator;
+        private final long fStart;
+        private final long fEnd;
+
+        public ThreadStatusIterator(long start, long end, Iterator<ITmfStateInterval> iter) {
+            fIntervalIterator = iter;
+            fStart = start;
+            fEnd = end;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return fIntervalIterator.hasNext();
+        }
+
+        @Override
+        public ProcessStatusInterval next() {
+            if (!fIntervalIterator.hasNext()) {
+                throw new NoSuchElementException();
+            }
+            ITmfStateInterval interval = fIntervalIterator.next();
+            long start = Math.max(interval.getStartTime(), fStart);
+            long end = Math.min(interval.getEndTime(), fEnd);
+            return new ProcessStatusInterval(start, end, ProcessStatus.getStatusFromStateValue(interval.getStateValue()));
+        }
+
+    }
+
+    @Override
+    public Iterator<ProcessStatusInterval> getThreadStatusIntervals(int tid, long start, long end) {
+        if (tid == IHostModel.UNKNOWN_TID) {
+            return Objects.requireNonNull(Collections.emptyListIterator());
+        }
+        Iterable<KernelAnalysisModule> modules = TmfTraceUtils.getAnalysisModulesOfClass(fHostId, KernelAnalysisModule.class);
+        if (modules.iterator().hasNext()) {
+            KernelAnalysisModule module = modules.iterator().next();
+            return new ThreadStatusIterator(start, end, KernelThreadInformationProvider.getStatusIntervalsForThread(module, tid, start, end));
+        }
+        return Objects.requireNonNull(Collections.emptyListIterator());
+    }
+
+    @Override
+    public boolean isSamplingDataAvailable() {
+        return !fSamplingDataProviders.isEmpty();
+    }
+
+    @Override
+    public boolean isThreadStatusAvailable() {
+        Iterable<KernelAnalysisModule> modules = TmfTraceUtils.getAnalysisModulesOfClass(fHostId, KernelAnalysisModule.class);
+        return modules.iterator().hasNext();
     }
 
 }

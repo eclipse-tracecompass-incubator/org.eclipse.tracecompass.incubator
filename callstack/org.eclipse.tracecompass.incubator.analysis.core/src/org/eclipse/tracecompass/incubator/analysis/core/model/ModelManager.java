@@ -38,7 +38,7 @@ public final class ModelManager {
     public static synchronized IHostModel getModelFor(String hostId) {
         IHostModel model = MODELS_FOR_HOST.get(hostId);
         if (model == null) {
-            model = new CompositeHostModel();
+            model = new CompositeHostModel(hostId);
             MODELS_FOR_HOST.put(hostId, model);
         }
         return model;

@@ -40,6 +40,9 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  */
 public class ModelListener implements ITmfNewAnalysisModuleListener {
 
+    // Maximum time to wait for information
+    private static final int WAIT_TIMEOUT = 500;
+
     private static final Comparator<ITmfStateInterval> INTERVAL_COMPARATOR = new Comparator<ITmfStateInterval>() {
 
         @Override
@@ -117,6 +120,19 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
             TidAnalysisModule module = fModule.get();
             if (module == null) {
                 return null;
+            }
+            // Wait for the module to be queryable, wait time is arbitrary to avoid
+            // deadlock. 100ms is added each time instead of fixing a deadline from now so
+            // that slow systems will wait longer than fast ones.
+            int wait = 0;
+            while (!module.isQueryable(time) && wait < WAIT_TIMEOUT) {
+                try {
+                    Thread.sleep(100);
+                    wait += 100;
+                } catch (InterruptedException e) {
+                    // just get out of the loop
+                    break;
+                }
             }
             return module.getThreadOnCpuAtTime(cpu, time);
         }

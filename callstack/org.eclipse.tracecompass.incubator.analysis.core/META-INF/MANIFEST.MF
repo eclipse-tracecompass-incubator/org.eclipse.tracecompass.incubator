@@ -14,7 +14,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.analysis.os.linux.core,
  org.eclipse.tracecompass.statesystem.core,
- org.eclipse.tracecompass.analysis.timing.core
+ org.eclipse.tracecompass.analysis.timing.core,
+ org.eclipse.tracecompass.segmentstore.core,
+ org.eclipse.tracecompass.datastore.core
 Export-Package: org.eclipse.tracecompass.incubator.analysis.core.aspects,
  org.eclipse.tracecompass.incubator.analysis.core.concepts,
  org.eclipse.tracecompass.incubator.analysis.core.model,
