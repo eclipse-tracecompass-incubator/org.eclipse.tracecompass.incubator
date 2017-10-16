@@ -28,6 +28,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDes
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
@@ -41,7 +42,6 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -128,10 +128,20 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
             if (ss == null) {
                 return Collections.emptySet();
             }
-            callstacks = Collections.singleton(new CallStackSeries(ss, PATTERNS, 0, "", getHostId(), new CallStackSeries.AttributeNameThreadResolver(1))); //$NON-NLS-1$
+            callstacks = Collections.singleton(new CallStackSeries(ss, getPatterns(), 0, "", getHostId(), getCallStackTidResolver())); //$NON-NLS-1$
             fCallStacks = callstacks;
         }
         return callstacks;
+    }
+
+    /**
+     * Get the callstack TID resolver for this instrumented series. The default is
+     * to use the name of the second attribute as the thread ID.
+     *
+     * @return The thread ID resolver
+     */
+    protected @Nullable IThreadIdResolver getCallStackTidResolver() {
+        return new CallStackSeries.AttributeNameThreadResolver(1);
     }
 
     @Override
@@ -151,7 +161,6 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
      *
      * @return The patterns for the different levels in the state system
      */
-    @VisibleForTesting
     protected List<String[]> getPatterns() {
         return PATTERNS;
     }
