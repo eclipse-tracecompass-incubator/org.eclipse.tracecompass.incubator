@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.common.core.StreamUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
@@ -92,8 +94,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     private final CallGraph fCallGraph = new CallGraph();
 
     /**
-     * The List of thread nodes. Each thread has a virtual node having the root
-     * function as children
+     * The List of root elements. They should be the same as the corresponding
+     * callstack
      */
     private final Set<ICallStackElement> fRootElements = new HashSet<>();
 
@@ -172,8 +174,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     }
 
     /**
-     * Iterate over a callstack series. It will do a depth-first search to
-     * create the callgraph
+     * Iterate over a callstack series. It will do a depth-first search to create
+     * the callgraph
      *
      * @param callstackSerie
      *            The series to iterate over
@@ -228,6 +230,10 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
             AggregatedCalledFunction aggregatedChild = createCallSite(CallStackSymbolFactory.createSymbol(nextFunction.getSymbol(), element, nextFunction.getStart()));
             iterateOverCallstack(element, callStack, nextFunction, 2, aggregatedChild, model, start, end, monitor);
             aggregatedChild.addFunctionCall(nextFunction);
+            // Add the kernel statuses if available
+            Iterator<ProcessStatusInterval> kernelStatuses = callStack.getKernelStatuses(nextFunction);
+            kernelStatuses.forEachRemaining(aggregatedChild::addKernelStatus);
+
             callgraph.addAggregatedCallSite(element, aggregatedChild);
             fRootFunctions.add(nextFunction);
             nextFunction = (AbstractCalledFunction) callStack.getNextFunction(nextFunction.getEnd(), 1, null, model, start, end);
@@ -244,7 +250,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
 
         AbstractCalledFunction nextFunction = (AbstractCalledFunction) callstack.getNextFunction(function.getStart(), nextLevel, function, model, Math.max(function.getStart(), start), Math.min(function.getEnd(), end));
         while (nextFunction != null) {
-            // Add sampling data of the time between next function and beginning of next level
+            // Add sampling data of the time between next function and beginning of next
+            // level
             if (threadId > 0) {
                 Collection<AggregatedCallSite> samplingData = model.getSamplingData(threadId, lastSampleEnd, nextFunction.getStart());
                 samplingData.forEach(aggregatedCall::addCallee);
@@ -287,6 +294,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     /**
      * The functions of the first level
      *
+     * TODO: It doesn't seem to be used anywhere else than unit test, so remove this
+     *
      * @return Functions of the first level
      */
     public List<ICalledFunction> getRootFunctions() {
@@ -296,8 +305,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     /**
      * Get the segment store that accompanies this callgraph
      *
-     * FIXME: Is this analysis the right place for the segment store, or should
-     * it be during call stack building
+     * FIXME: Is this analysis the right place for the segment store, or should it
+     * be during call stack building
      *
      * @return The segment store
      */

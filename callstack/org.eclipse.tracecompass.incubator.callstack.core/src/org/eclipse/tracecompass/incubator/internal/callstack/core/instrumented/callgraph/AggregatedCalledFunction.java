@@ -9,14 +9,19 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.ProcessStatus;
 import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -45,6 +50,7 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
     private long fSelfTime = 0;
     private long fCpuTime = IHostModel.TIME_UNKNOWN;
     private int fProcessId;
+    private Map<ProcessStatus, AggregatedThreadStatus> fProcessStatuses = new HashMap<>();
 
     /**
      * Constructor, parent is not null
@@ -71,6 +77,7 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
         fDuration = toCopy.fDuration;
         fSelfTime = toCopy.fSelfTime;
         fCpuTime = toCopy.fCpuTime;
+        mergeProcessStatuses(toCopy);
     }
 
     @Override
@@ -94,6 +101,19 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
         addToSelfTime(otherFct.getSelfTime());
         addToCpuTime(otherFct.getCpuTime());
         getFunctionStatistics().merge(otherFct.getFunctionStatistics(), true);
+        mergeProcessStatuses(otherFct);
+    }
+
+    private void mergeProcessStatuses(AggregatedCalledFunction other) {
+        Map<ProcessStatus, AggregatedThreadStatus> processStatuses = other.fProcessStatuses;
+        for (Entry<ProcessStatus, AggregatedThreadStatus> entry : processStatuses.entrySet()) {
+            AggregatedThreadStatus status = fProcessStatuses.get(entry.getKey());
+            if (status == null) {
+                status = new AggregatedThreadStatus(entry.getKey());
+            }
+            status.merge(entry.getValue());
+            fProcessStatuses.put(entry.getKey(), status);
+        }
     }
 
     @Override
@@ -262,6 +282,27 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
      */
     public int getProcessId() {
         return fProcessId;
+    }
+
+    /**
+     * Add a process status interval tot his called function
+     *
+     * @param interval
+     *            The process status interval
+     */
+    public void addKernelStatus(ProcessStatusInterval interval) {
+        ProcessStatus processStatus = interval.getProcessStatus();
+        AggregatedThreadStatus status = fProcessStatuses.get(processStatus);
+        if (status == null) {
+            status = new AggregatedThreadStatus(processStatus);
+            fProcessStatuses.put(processStatus, status);
+        }
+        status.update(interval);
+    }
+
+    @Override
+    public Iterable<AggregatedCallSite> getExtraChildrenSites() {
+        return ImmutableList.copyOf(fProcessStatuses.values());
     }
 
     /**

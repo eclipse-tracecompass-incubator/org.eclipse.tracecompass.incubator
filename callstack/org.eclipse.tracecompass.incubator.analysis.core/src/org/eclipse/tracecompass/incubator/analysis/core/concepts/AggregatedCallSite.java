@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.analysis.core.concepts;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -198,6 +199,16 @@ public abstract class AggregatedCallSite {
     @Override
     public String toString() {
         return "CallSite: " + fSymbol; //$NON-NLS-1$
+    }
+
+    /**
+     * Get extra children sites that come with this callsite. For instance, an
+     * instrumented callsite could return the kernel processes
+     *
+     * @return The extra children sites
+     */
+    public Iterable<AggregatedCallSite> getExtraChildrenSites() {
+        return Collections.emptyList();
     }
 
 }

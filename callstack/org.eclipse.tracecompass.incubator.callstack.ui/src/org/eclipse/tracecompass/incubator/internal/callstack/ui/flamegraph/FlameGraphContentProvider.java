@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +26,10 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedThreadStatus;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphContentProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 
 /**
@@ -69,6 +72,33 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         // Build the event list for next entries (next depth)
         addEvent(firstNode, childrenEntries, timestampStack, 1);
         timestampStack.pop();
+    }
+
+    private static void setExtraData(AggregatedCallSite firstNode, List<TimeGraphEntry> extraEntries, Deque<Long> timestampStack) {
+        long lastEnd = timestampStack.peek();
+        Iterator<AggregatedCallSite> extraChildrenSites = firstNode.getExtraChildrenSites().iterator();
+
+        if (!extraChildrenSites.hasNext()) {
+            return;
+        }
+        // Get or add the entry
+        if (extraEntries.isEmpty()) {
+            TimeGraphEntry entry = new TimeGraphEntry("extra", 0, 0);
+            extraEntries.add(entry);
+        }
+        TimeGraphEntry entry = extraEntries.get(0);
+
+        // TODO: loop in the extra data and add the events
+        while (extraChildrenSites.hasNext()) {
+            AggregatedCallSite next = extraChildrenSites.next();
+            if (next instanceof AggregatedThreadStatus) {
+               entry.addEvent(new TimeEvent(entry, lastEnd, next.getLength(), ((AggregatedThreadStatus) next).getProcessStatus().getStateValue().unboxInt()));
+            } else {
+                entry.addEvent(new FlamegraphEvent(entry, lastEnd, next));
+            }
+            lastEnd += next.getLength();
+            entry.updateEndTime(lastEnd);
+        }
     }
 
     /**
@@ -161,6 +191,7 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         }
 
         List<FlamegraphDepthEntry> childrenEntries = new ArrayList<>();
+        List<TimeGraphEntry> extraEntries = new ArrayList<>();
         Deque<Long> timestampStack = new ArrayDeque<>();
         timestampStack.push(0L);
 
@@ -169,10 +200,14 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
                 .sorted(Comparator.comparingLong(AggregatedCallSite::getLength))
                 .forEach(rootFunction -> {
                     setData(rootFunction, childrenEntries, timestampStack);
+                    setExtraData(rootFunction, extraEntries, timestampStack);
                     long currentThreadDuration = timestampStack.pop() + rootFunction.getLength();
                     timestampStack.push(currentThreadDuration);
                 });
         childrenEntries.forEach(child -> {
+            currentEntry.addChild(child);
+        });
+        extraEntries.forEach(child -> {
             currentEntry.addChild(child);
         });
         currentEntry.updateEndTime(timestampStack.pop());
