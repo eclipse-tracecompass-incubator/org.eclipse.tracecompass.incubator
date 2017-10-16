@@ -31,5 +31,15 @@
                class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.trace.VirtualMachineExperiment">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.overhead.VmOverheadAnalysis"
+            automatic="false"
+            id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.overhead.analysis"
+            name="%vm.analysis.overhead">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.trace.VirtualMachineExperiment">
+         </tracetype>
+      </module>
    </extension>
 </plugin>
