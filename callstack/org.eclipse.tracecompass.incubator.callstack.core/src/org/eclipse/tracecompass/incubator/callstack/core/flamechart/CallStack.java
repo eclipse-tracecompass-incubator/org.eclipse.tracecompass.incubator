@@ -11,11 +11,13 @@ package org.eclipse.tracecompass.incubator.callstack.core.flamechart;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
@@ -351,6 +353,30 @@ public class CallStack {
 
         }
         return null;
+    }
+
+    /**
+     * Get whether this callstack has kernel statuses available
+     *
+     * @return <code>true</code> if kernel statuses are available for this callstack
+     */
+    public boolean hasKernelStatuses() {
+        IHostModel model = ModelManager.getModelFor(fHostId);
+        return model.isThreadStatusAvailable();
+    }
+
+    /**
+     * Get the kernel statuses that span a given function
+     *
+     * @param function
+     *            The function for which to get the kernel statuses
+     * @return An iterator over the kernel status. The iterator can be empty is
+     *         statuses are not available or if the function is outside the range of
+     *         the available data.
+     */
+    public Iterator<ProcessStatusInterval> getKernelStatuses(ICalledFunction function) {
+        IHostModel model = ModelManager.getModelFor(fHostId);
+        return model.getThreadStatusIntervals(function.getThreadId(), function.getStart(), function.getEnd());
     }
 
 }

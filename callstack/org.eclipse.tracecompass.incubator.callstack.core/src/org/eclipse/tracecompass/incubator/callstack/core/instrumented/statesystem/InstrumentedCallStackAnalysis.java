@@ -141,7 +141,7 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
      * @return The thread ID resolver
      */
     protected @Nullable IThreadIdResolver getCallStackTidResolver() {
-        return new CallStackSeries.AttributeNameThreadResolver(1);
+        return new CallStackSeries.AttributeValueThreadResolver(1);
     }
 
     @Override

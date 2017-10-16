@@ -12,7 +12,9 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.flamechart;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 
 /**
@@ -20,6 +22,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
  *
  * @author Patrick Tasse
  */
+@NonNullByDefault
 public class FlameChartEvent extends TimeEvent {
 
     private final ICalledFunction fFunction;
@@ -48,8 +51,12 @@ public class FlameChartEvent extends TimeEvent {
      */
     @Override
     public FlameChartEntry getEntry() {
+        ITimeGraphEntry entry = fEntry;
+        if (!(entry instanceof FlameChartEntry)) {
+            throw new IllegalStateException();
+        }
         /* Type enforced at constructor */
-        return (FlameChartEntry) fEntry;
+        return (FlameChartEntry) entry;
     }
 
     /**
@@ -60,6 +67,24 @@ public class FlameChartEvent extends TimeEvent {
      */
     public String getFunctionName() {
         return getEntry().resolveFunctionName(fFunction, getTime());
+    }
+
+    /**
+     * Get the ID of the thread associated with this function
+     *
+     * @return The tid of the function. A negative value means it is not known
+     */
+    public int getTid() {
+        return fFunction.getThreadId();
+    }
+
+    /**
+     * Get the function corresponding to this event
+     *
+     * @return The function
+     */
+    public ICalledFunction getFunction() {
+        return fFunction;
     }
 
 }

@@ -86,6 +86,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ILinkEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry.Sampling;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeLinkEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
 import org.eclipse.ui.IEditorPart;
@@ -294,9 +295,7 @@ public class FlameChartView extends AbstractTimeGraphView {
 
     @Override
     protected @NonNull Iterable<ITmfTrace> getTracesToBuild(@Nullable ITmfTrace trace) {
-        // For callstacks, it makes little sense to build for experiment, each trace
-        // will have its own
-        return TmfTraceManager.getTraceSet(trace);
+        return TmfTraceManager.getTraceSetWithExperiment(trace);
     }
 
     private static class CallStackTreeLabelProvider extends TreeLabelProvider {
@@ -584,7 +583,7 @@ public class FlameChartView extends AbstractTimeGraphView {
         }
 
         for (CallStackSeries callstack : callStacks) {
-            // If there is more than one callstack objects in the analys
+            // If there is more than one callstack objects in the analysis
             TimeGraphEntry callStackRootEntry = traceEntry;
             if (callStacks.size() > 1) {
                 callStackRootEntry = new TimeGraphEntry(callstack.getName(), start, end + 1);
@@ -703,7 +702,11 @@ public class FlameChartView extends AbstractTimeGraphView {
             CallStack callStack = finalElement.getCallStack();
             setEndTime(Math.max(getEndTime(), callStack.getEndTime()));
             for (int i = 0; i < callStack.getMaxDepth(); i++) {
-                entry.addChild(new FlameChartEntry(symbolProviders, i + 1, callStack));
+                FlameChartEntry flameChartEntry = new FlameChartEntry(symbolProviders, i + 1, callStack);
+                if (i == 0 && callStack.hasKernelStatuses()) {
+                    entry.addChild(new ProcessStatusEntry(callStack, flameChartEntry));
+                }
+                entry.addChild(flameChartEntry);
             }
             return;
         }
@@ -739,6 +742,40 @@ public class FlameChartView extends AbstractTimeGraphView {
         FlameChartEntry entry = (FlameChartEntry) tgentry;
 
         return entry.getEventList(startTime, endTime, resolution, monitor);
+    }
+
+    @Override
+    protected void zoomEntries(@NonNull Iterable<@NonNull TimeGraphEntry> entries, long zoomStartTime, long zoomEndTime, long resolution, @NonNull IProgressMonitor monitor) {
+        List<@NonNull ProcessStatusEntry> psEntries = new ArrayList<>();
+        Sampling clampedSampling = new Sampling(zoomStartTime, zoomEndTime, resolution);
+        for (TimeGraphEntry entry : entries) {
+            if (entry instanceof ProcessStatusEntry) {
+                psEntries.add((ProcessStatusEntry) entry);
+                continue;
+            }
+            List<ITimeEvent> zoomedEventList = getEventList(entry, zoomStartTime, zoomEndTime, resolution, monitor);
+            if (monitor.isCanceled()) {
+                return;
+            }
+            if (zoomedEventList != null) {
+                applyResults(() -> {
+                    entry.setZoomedEventList(zoomedEventList);
+                    entry.setSampling(clampedSampling);
+                });
+            }
+        }
+        for (ProcessStatusEntry entry : psEntries) {
+            List<ITimeEvent> zoomedEventList = entry.getEventList(zoomStartTime, zoomEndTime, resolution, monitor);
+            if (monitor.isCanceled()) {
+                return;
+            }
+            if (zoomedEventList != null) {
+                applyResults(() -> {
+                    entry.setZoomedEventList(zoomedEventList);
+                    entry.setSampling(clampedSampling);
+                });
+            }
+        }
     }
 
     @Override

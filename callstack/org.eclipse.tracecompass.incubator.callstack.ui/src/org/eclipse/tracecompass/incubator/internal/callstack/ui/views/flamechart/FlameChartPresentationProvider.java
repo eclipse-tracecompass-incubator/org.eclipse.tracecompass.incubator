@@ -18,11 +18,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.tracecompass.internal.analysis.os.linux.ui.views.controlflow.ControlFlowPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils;
 
 import com.google.common.cache.CacheBuilder;
@@ -35,6 +37,7 @@ import com.google.common.cache.LoadingCache;
  *
  * @author Patrick Tasse
  */
+@SuppressWarnings("restriction")
 public class FlameChartPresentationProvider extends TimeGraphPresentationProvider {
 
     /** Number of colors used for call stack events */
@@ -46,6 +49,8 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
      * the ellipsis characters.
      */
     private Integer fMinimumBarWidth;
+
+    private final ControlFlowPresentationProvider fCfProvider = new ControlFlowPresentationProvider();
 
     private final LoadingCache<FlameChartEvent, Optional<String>> fTimeEventNames = CacheBuilder.newBuilder()
             .maximumSize(1000)
@@ -84,11 +89,15 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
     public StateItem[] getStateTable() {
         final float saturation = 0.6f;
         final float brightness = 0.6f;
-        StateItem[] stateTable = new StateItem[NUM_COLORS + 1];
+        StateItem[] cfStateTable = fCfProvider.getStateTable();
+        StateItem[] stateTable = new StateItem[NUM_COLORS + 1 + cfStateTable.length];
         stateTable[0] = new StateItem(State.MULTIPLE.rgb, State.MULTIPLE.toString());
         for (int i = 0; i < NUM_COLORS; i++) {
             RGB rgb = new RGB(i, saturation, brightness);
             stateTable[i + 1] = new StateItem(rgb, State.EXEC.toString());
+        }
+        for (int i = 0; i < cfStateTable.length; i++) {
+            stateTable[NUM_COLORS + 1 + i] = cfStateTable[i];
         }
         return stateTable;
     }
@@ -100,6 +109,11 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
             return callStackEvent.getValue() + 1;
         } else if (event instanceof NullTimeEvent) {
             return INVISIBLE;
+        } else if (event instanceof TimeEvent) {
+            int cfIndex = fCfProvider.getStateTableIndex(event);
+            if (cfIndex >= 0) {
+                return NUM_COLORS + 1 + cfIndex;
+            }
         }
         return State.MULTIPLE.ordinal();
     }

@@ -40,6 +40,8 @@ public class FlameChartEntry extends TimeGraphEntry {
     private long fFunctionExitTime;
     private final CallStack fCallStack;
     private final Collection<ISymbolProvider> fSymbolProviders;
+    // FIXME: This is only for the zoomed event list. Not the complete one
+    private List<ITimeEvent> fLastEvents;
 
     /**
      * Standard constructor
@@ -175,7 +177,17 @@ public class FlameChartEntry extends TimeGraphEntry {
         return events;
     }
 
-    String resolveFunctionName(ICalledFunction function, long time) {
+    @Override
+    public void setZoomedEventList(List<ITimeEvent> eventList) {
+        fLastEvents = eventList;
+        super.setZoomedEventList(eventList);
+    }
+
+    List<ITimeEvent> getLastEvents() {
+        return fLastEvents;
+    }
+
+    @NonNull String resolveFunctionName(ICalledFunction function, long time) {
         long address = Long.MAX_VALUE;
         Object symbol = function.getSymbol();
         if (symbol instanceof Number) {

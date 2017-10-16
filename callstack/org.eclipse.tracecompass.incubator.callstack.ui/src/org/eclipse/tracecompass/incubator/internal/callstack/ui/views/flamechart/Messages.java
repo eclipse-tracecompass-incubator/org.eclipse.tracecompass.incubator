@@ -54,6 +54,8 @@ public class Messages extends NLS {
 
     public static String CallStackView_PreviousStateChangeText;
 
+    public static String CallStackView_KernelStatus;
+
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
