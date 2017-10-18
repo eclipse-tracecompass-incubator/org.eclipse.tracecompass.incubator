@@ -112,7 +112,7 @@ public class TraceCompassJulEvent extends CtfTmfEvent {
                     while (keys.hasNext()) {
                         String key = String.valueOf(keys.next());
                         String value = args.optString(key);
-                        fields.add(new TmfEventField(key, value, null));
+                        fields.add(new TmfEventField("args." + key, value, null));
                     }
                 }
             } catch (JSONException e1) {
