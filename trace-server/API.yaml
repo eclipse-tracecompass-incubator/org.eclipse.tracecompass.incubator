@@ -206,7 +206,7 @@ paths:
           schema:
             type: string
   /traces/{trace}/DiskIO:
-    post:
+    get:
       tags:
       - Views
       summary: Get the XY series for an analysis
@@ -240,6 +240,64 @@ paths:
         type: integer
         format: int32
       responses:
+      responses:
+        200:
+          description: Returns a list of view entries
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/XYEntry'
+        404:
+          description: Trace not found
+          schema:
+            type: string
+        405:
+          description: Analysis not possible for this trace
+          schema:
+            type: string
+  /traces/{trace}/DiskIO/xy:
+    post:
+      tags:
+      - Views
+      summary: Get the XY series for an analysis
+      operationId: getXY
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      parameters:
+      - name: trace
+        in: path
+        description: Name of the trace to query
+        required: true
+        type: string
+      - name: start
+        in: query
+        description: Start Time of the query
+        required: true
+        type: integer
+        format: int64
+      - name: end
+        in: query
+        description: End Time of the query
+        required: true
+        type: integer
+        format: int64
+      - name: nb
+        in: query
+        description: Number of data points to sample
+        required: true
+        type: integer
+        format: int32
+      - name: ids
+        in: formData
+        description: Parameters to query specific entries
+        required: true
+        type: array
+        items:
+          type: integer
+          format: int64
+      responses:
         200:
           description: Return a list of AnalysisModel
           schema:
@@ -249,11 +307,7 @@ paths:
           schema:
             type: string
         405:
-          description: Analysis not supported for trace
-          schema:
-            type: string
-        500:
-          description: Fetching model failed
+          description: Analysis not possible for this trace
           schema:
             type: string
 definitions:
@@ -300,7 +354,6 @@ definitions:
             type: string
           value:
             type: string
-
       lines:
         type: array
         items:
@@ -321,6 +374,20 @@ definitions:
         type: integer
         format: int64
         description: Current end time of the analysis in nanoseconds
+  XYEntry:
+    type: object
+    properties:
+      name:
+        description: Displayed name for this Entry
+        type: string
+      id:
+        description: Unique id to identify this entry in the backend.
+        type: integer
+        format: int32
+      parentId:
+        description: Unique id to identify this parent's entry.
+        type: integer
+        format: int32
   XYView:
     type: object
     properties:

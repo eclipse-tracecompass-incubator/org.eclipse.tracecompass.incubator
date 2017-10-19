@@ -8,6 +8,11 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -22,8 +27,11 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.inputoutput.DisksIODataProvider;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.TraceManager;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.xy.XYView;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TreeView;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.XYView;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TimeQueryFilter;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.tree.TmfTreeDataModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfCommonXAxisModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
@@ -37,11 +45,10 @@ import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 @SuppressWarnings("restriction")
 @Path("/traces")
 public class DiskActivityViewService {
-    @Context
-    TraceManager traceManager;
+    @Context TraceManager traceManager;
 
     /**
-     * Query the state system for the XY view
+     * Query the provider for the entry tree
      *
      * @param traceName
      *            name of the trace to query
@@ -54,27 +61,65 @@ public class DiskActivityViewService {
      * @return an {@link XYView} with the results
      */
     @GET
-    @Path("/{name}/DiskIO")
+    @Path("/{name}/DiskIO/tree")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getXY(@PathParam(value = "name") String traceName, @QueryParam(value = "start") long start,
-            @QueryParam(value = "end") long end, @QueryParam(value = "nb") int nb) {
+    public Response getTree(@PathParam(value = "name") String traceName,
+            @QueryParam(value = "start") long start,
+            @QueryParam(value = "end") long end,
+            @QueryParam(value = "nb") int nb) {
         TraceModel traceModel = traceManager.get(traceName);
         if (traceModel == null) {
             return Response.status(Status.NOT_FOUND).entity("No Such Trace").build(); //$NON-NLS-1$
         }
-        DisksIODataProvider provider = DataProviderManager.getInstance().getDataProvider(traceModel.getTrace(), DisksIODataProvider.ID, DisksIODataProvider.class);
+
+        DisksIODataProvider provider = DataProviderManager.getInstance().getDataProvider(traceModel.getTrace(),
+                DisksIODataProvider.ID, DisksIODataProvider.class);
         if (provider == null) {
             // The analysis cannot be run on this trace
             return Response.status(Status.METHOD_NOT_ALLOWED).entity("Analysis cannot run").build(); //$NON-NLS-1$
         }
-        // TODO allow the Data provider to create its time query filter from the form.
-        TmfModelResponse<@NonNull ITmfCommonXAxisModel> response = provider.fetchXY(new TimeQueryFilter(start, end, nb), null);
-        if (response.getStatus() == TmfModelResponse.Status.CANCELLED
-                || response.getStatus() == TmfModelResponse.Status.FAILED) {
-            return Response.serverError().entity(response.getStatusMessage()).build();
+
+        TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> response = provider.fetchTree(new TimeQueryFilter(start, end, nb), null);
+        return Response.ok().entity(new TreeView(traceModel, response)).build();
+    }
+
+    /**
+     * Query the provider for the XY view
+     *
+     * @param traceName
+     *            name of the trace to query
+     * @param start
+     *            lower bound for the query
+     * @param end
+     *            upper bound for the query
+     * @param nb
+     *            nanoseconds between two data points
+     * @param ids
+     *            ids of the entries to query
+     * @return an {@link XYView} with the results
+     */
+    @GET
+    @Path("/{name}/DiskIO/xy")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getXY(@PathParam(value = "name") String traceName,
+            @QueryParam(value = "start") long start,
+            @QueryParam(value = "end") long end,
+            @QueryParam(value = "nb") @Min(1) int nb,
+            @QueryParam(value = "ids") @NotNull Set<Long> ids) {
+        TraceModel traceModel = traceManager.get(traceName);
+        if (traceModel == null) {
+            return Response.status(Status.NOT_FOUND).entity("No Such Trace").build(); //$NON-NLS-1$
         }
 
-        return Response.ok().entity(new XYView(traceModel, response.getModel())).build();
+        DisksIODataProvider provider = DataProviderManager.getInstance().getDataProvider(traceModel.getTrace(),
+                DisksIODataProvider.ID, DisksIODataProvider.class);
+        if (provider == null) {
+            // The analysis cannot be run on this trace
+            return Response.status(Status.METHOD_NOT_ALLOWED).entity("Analysis cannot run").build(); //$NON-NLS-1$
+        }
+
+        TmfModelResponse<@NonNull ITmfCommonXAxisModel> response = provider.fetchXY(new SelectionTimeQueryFilter(start, end, nb, ids), null);
+        return Response.ok().entity(new XYView(traceModel, response)).build();
     }
 
 }

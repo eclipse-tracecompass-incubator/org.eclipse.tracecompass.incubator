@@ -8,10 +8,12 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -26,7 +28,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.TraceManager;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -78,16 +79,15 @@ public class TraceManagerService {
     @Path("/{name}")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response putTrace(@NotNull @PathParam("name") String name,
+    public Response putTrace(@PathParam("name") @NotNull @Size(min = 1) String name,
             @FormParam("path") String path,
             @FormParam("typeID") String typeID) {
-        if (name == null) {
-            // parameter validation does not apply to FormParam.
-            return Response.status(Status.NO_CONTENT).entity("Invalid name (null)").build(); //$NON-NLS-1$
-        }
         TraceModel traceModel = traceManager.get(name);
         if (traceModel != null) {
             return Response.status(Status.CONFLICT).entity(traceModel).build();
+        }
+        if (!Paths.get(path).toFile().exists()) {
+            return Response.status(Status.NOT_FOUND).entity("No trace at " + path).build(); //$NON-NLS-1$
         }
         try {
             TraceModel model = put(path, name, typeID);
@@ -100,7 +100,7 @@ public class TraceManagerService {
         }
     }
 
-    private TraceModel put(String path, @NonNull String name, String typeID) throws TmfTraceException, TmfTraceImportException {
+    private TraceModel put(String path, String name, String typeID) throws TmfTraceException, TmfTraceImportException {
         List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(path, typeID);
         if (traceTypes.isEmpty()) {
             return null;

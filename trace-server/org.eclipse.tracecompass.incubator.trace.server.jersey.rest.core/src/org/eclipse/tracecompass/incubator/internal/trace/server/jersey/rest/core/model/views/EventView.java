@@ -6,7 +6,8 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
-package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.events;
+
+package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views;
 
 import java.util.Collections;
 import java.util.HashMap;

@@ -6,38 +6,43 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
-package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.xy;
+
+package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views;
+
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfCommonXAxisModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.tree.TmfTreeDataModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
 
 /**
- * Object to encapsulate the values returned by a query for an XY view
+ * Object to encapsulate the values returned by a query for a Tree view
  *
  * @author Loic Prieur-Drevon
  */
 @SuppressWarnings("restriction")
 @XmlRootElement
-public class XYView {
+public class TreeView {
     private final TraceModel fModel;
-    private final ITmfCommonXAxisModel fTimes;
+    private final TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> fResponse;
 
     /**
-     * Compose the {@link TraceModel} and {@link ITmfCommonXAxisModel} in an
-     * {@link XYView}
+     * Compose the {@link TraceModel} and list of {@link TmfTreeDataModel} in an
+     * {@link TreeView}
      *
      * @param traceModel
      *            trace model object for the queried trace
-     * @param model
-     *            XY model for the query
+     * @param response
+     *            Flattened tree model response for the query
      */
-    public XYView(@Nullable TraceModel traceModel, @Nullable ITmfCommonXAxisModel model) {
+    public TreeView(@Nullable TraceModel traceModel, TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> response) {
         fModel = traceModel;
-        fTimes = model;
+        fResponse = response;
     }
 
     /**
@@ -50,12 +55,12 @@ public class XYView {
     }
 
     /**
-     * Getter for the time values in this XY view
+     * Getter for the encapsulated tree response
      *
-     * @return the time values
+     * @return the flattened tree model.
      */
     @XmlElement
-    public ITmfCommonXAxisModel getModel() {
-        return fTimes;
+    public TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> getResponse() {
+        return fResponse;
     }
 }

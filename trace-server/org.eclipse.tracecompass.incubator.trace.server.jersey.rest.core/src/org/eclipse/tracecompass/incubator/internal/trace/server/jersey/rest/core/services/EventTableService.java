@@ -34,7 +34,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.TraceManager;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.events.EventView;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.EventView;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
