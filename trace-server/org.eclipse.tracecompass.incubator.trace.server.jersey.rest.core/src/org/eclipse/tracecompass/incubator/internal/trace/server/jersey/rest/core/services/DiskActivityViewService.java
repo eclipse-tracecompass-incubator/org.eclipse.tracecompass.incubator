@@ -20,14 +20,13 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.inputoutput.DisksIODataProvider;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.DataProviderManager;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.TraceManager;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.xy.XYView;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfCommonXAxisModel;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfXYDataProvider;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 
 /**
  * Service to query the DiskIO usage View
@@ -38,11 +37,8 @@ import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelR
 @SuppressWarnings("restriction")
 @Path("/traces")
 public class DiskActivityViewService {
-    private static final @NonNull String DISK_ACTIVITY_VIEW = "DiskActivityView"; //$NON-NLS-1$
     @Context
     TraceManager traceManager;
-    @Context
-    DataProviderManager analysisManager;
 
     /**
      * Query the state system for the XY view
@@ -66,16 +62,10 @@ public class DiskActivityViewService {
         if (traceModel == null) {
             return Response.status(Status.NOT_FOUND).entity("No Such Trace").build(); //$NON-NLS-1$
         }
-        ITmfXYDataProvider provider = analysisManager.get(traceModel, DISK_ACTIVITY_VIEW);
+        DisksIODataProvider provider = DataProviderManager.getInstance().getDataProvider(traceModel.getTrace(), DisksIODataProvider.ID, DisksIODataProvider.class);
         if (provider == null) {
-            // The analysis has not been run yet
-            // TODO use a plug-in to identify the DataProvider
-            provider = DisksIODataProvider.create(traceModel.getTrace());
-            if (provider == null) {
-                // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity("Analysis cannot run").build(); //$NON-NLS-1$
-            }
-            analysisManager.put(traceModel, DISK_ACTIVITY_VIEW, provider);
+            // The analysis cannot be run on this trace
+            return Response.status(Status.METHOD_NOT_ALLOWED).entity("Analysis cannot run").build(); //$NON-NLS-1$
         }
         // TODO allow the Data provider to create its time query filter from the form.
         TmfModelResponse<@NonNull ITmfCommonXAxisModel> response = provider.fetchXY(new TimeQueryFilter(start, end, nb), null);

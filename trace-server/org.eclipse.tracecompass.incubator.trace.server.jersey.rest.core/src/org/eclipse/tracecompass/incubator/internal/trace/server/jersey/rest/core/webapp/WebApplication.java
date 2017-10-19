@@ -11,7 +11,6 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.DataProviderManager;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.TraceManager;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DiskActivityViewService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EventTableService;
@@ -38,7 +37,6 @@ public class WebApplication {
     private Server fServer;
 
     private final TraceManager fTraceManager = TraceManager.getInstance();
-    private final DataProviderManager fAnalysisManager = new DataProviderManager();
 
     /**
      * Default Constructor
@@ -84,17 +82,6 @@ public class WebApplication {
             @Override
             protected void configure() {
                 bind(fTraceManager).to(TraceManager.class);
-            }
-        });
-
-        /**
-         * register a TraceManager, this allows it to be swappable with another
-         * implementation.
-         */
-        rc.register(new AbstractBinder() {
-            @Override
-            protected void configure() {
-                bind(fAnalysisManager).to(DataProviderManager.class);
             }
         });
 
