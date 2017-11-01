@@ -109,7 +109,7 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
         if (activeTrace != null) {
             funcSymbol = fgEvent.getSymbol().resolve(SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
         }
-        builder.put(Messages.FlameGraph_Symbol, funcSymbol == null ? String.valueOf(fgEvent.getSymbol()) : funcSymbol);
+        builder.put(Messages.FlameGraph_Symbol, funcSymbol == null ? String.valueOf(fgEvent.getSymbol()) : funcSymbol + " (" + fgEvent.getSymbol() + ")");
         long nb = (fgEvent.getNumberOfCalls());
         builder.put(Messages.FlameGraph_NbCalls, NumberFormat.getIntegerInstance().format(nb)); // $NON-NLS-1$
         Map<String, String> tooltip = ((FlamegraphEvent) event).getTooltip(FORMATTER);
