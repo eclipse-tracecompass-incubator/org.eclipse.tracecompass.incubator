@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,6 +39,7 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.project.model.ITmfPropertiesProvider;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProviderFactory;
 import org.eclipse.tracecompass.tmf.core.symbols.TmfResolvedSymbol;
@@ -68,13 +71,15 @@ import com.google.common.collect.Iterables;
  *
  * @author Matthew Khouzam
  */
-public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWithPreDefinedEvents {
+public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
+        ITmfTraceKnownSize, ITmfTraceWithPreDefinedEvents {
 
     private Collection<DatParser> fDats = new ArrayList<>();
     private Map<Long, MapParser> fMap = new HashMap<>();
     private Map<String, SymParser> fSyms = new HashMap<>();
     private TaskParser fTasks;
     private TmfLongLocation fCurrentLoc = new TmfLongLocation(0L);
+    private InfoParser fInfo;
 
     private long fSize;
 
@@ -166,9 +171,9 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
                     confidence += 3;
                 }
             }
-        }
-        if (confidence > 10) {
-            return new TraceValidationStatus(confidence, Activator.class.getCanonicalName());
+            if (confidence > 10) {
+                return new TraceValidationStatus(confidence, Activator.class.getCanonicalName());
+            }
         }
         return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Most probably not a UFTrace"); //$NON-NLS-1$
     }
@@ -195,6 +200,8 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
                     fSyms.put(name.substring(0, name.length() - 4), SymParser.parse(child));
                 } else if (name.equals("task.txt")) { //$NON-NLS-1$
                     fTasks = new TaskParser(child);
+                } else if (name.equals("info")) { //$NON-NLS-1$
+                    fInfo = InfoParser.parse(child);
                 }
             } catch (IOException e) {
                 throw new TmfTraceException(e.getMessage(), e);
@@ -372,6 +379,21 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
         }
     }
 
+    @Override
+    public @NonNull Map<@NonNull String, @NonNull String> getProperties() {
+        if(fInfo == null) {
+            return Collections.emptyMap();
+        }
+        Map<@NonNull String, @NonNull String> properties = new LinkedHashMap<>();
+        properties.put("version", String.valueOf(fInfo.getVersion())); //$NON-NLS-1$
+        properties.put("address length", String.valueOf(fInfo.getAddressSize())); //$NON-NLS-1$
+        properties.put("endianness", String.valueOf(fInfo.getByteOrder())); //$NON-NLS-1$
+        properties.put("maximum depth", String.valueOf(fInfo.getMaxDepth())); //$NON-NLS-1$
+        properties.put("feature bit mask", Long.toBinaryString(fInfo.getFeatures())); //$NON-NLS-1$
+        properties.putAll(fInfo.getData());
+        return properties;
+    }
+
     /**
      * get the tasks parser
      *
@@ -485,4 +507,5 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
         }
 
     }
+
 }
