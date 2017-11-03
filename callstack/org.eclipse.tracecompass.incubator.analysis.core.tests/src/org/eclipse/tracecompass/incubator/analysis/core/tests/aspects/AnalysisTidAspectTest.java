@@ -94,7 +94,7 @@ public class AnalysisTidAspectTest {
         assertNotNull(trace);
 
         IHostModel model = ModelManager.getModelFor(trace.getHostId());
-        int threadOnCpu = model.getThreadOnCpu(0, startTs);
+        int threadOnCpu = model.getThreadOnCpu(0, startTs + 1);
         assertEquals(processCpu0, threadOnCpu);
         threadOnCpu = model.getThreadOnCpu(1, endTs);
         assertEquals(processCpu1, threadOnCpu);
