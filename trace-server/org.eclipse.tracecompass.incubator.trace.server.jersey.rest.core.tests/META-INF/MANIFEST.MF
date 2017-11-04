@@ -13,7 +13,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.junit,
  com.fasterxml.jackson.jaxrs.jackson-jaxrs-base,
  com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider,
- com.fasterxml.jackson.core.jackson-databind
+ com.fasterxml.jackson.core.jackson-databind,
+ org.eclipse.tracecompass.tmf.core,
+ org.eclipse.tracecompass.lttng2.ust.core
 Export-Package: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests
 Import-Package: com.fasterxml.jackson.annotation,
  com.fasterxml.jackson.jaxrs.base,

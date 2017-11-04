@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.tree.TmfTreeDataModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
@@ -29,10 +29,10 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 @XmlRootElement
 public class TreeView {
     private final ITmfTrace fTrace;
-    private final TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> fResponse;
+    private final TmfModelResponse<@NonNull List<@NonNull ITmfTreeDataModel>> fResponse;
 
     /**
-     * Compose the {@link ITmfTrace} and list of {@link TmfTreeDataModel} in an
+     * Compose the {@link ITmfTrace} and list of {@link ITmfTreeDataModel} in an
      * {@link TreeView}
      *
      * @param trace
@@ -40,7 +40,7 @@ public class TreeView {
      * @param response
      *            Flattened tree model response for the query
      */
-    public TreeView(@Nullable ITmfTrace trace, TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> response) {
+    public TreeView(@Nullable ITmfTrace trace, TmfModelResponse<@NonNull List<@NonNull ITmfTreeDataModel>> response) {
         fTrace = trace;
         fResponse = response;
     }
@@ -60,7 +60,7 @@ public class TreeView {
      * @return the flattened tree model.
      */
     @XmlElement
-    public TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> getResponse() {
+    public TmfModelResponse<@NonNull List<@NonNull ITmfTreeDataModel>> getResponse() {
         return fResponse;
     }
 }

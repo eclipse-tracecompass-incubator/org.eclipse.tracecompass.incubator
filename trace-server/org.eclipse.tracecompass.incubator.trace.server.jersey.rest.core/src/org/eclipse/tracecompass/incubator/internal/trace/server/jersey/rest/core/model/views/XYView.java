@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfCommonXAxisModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfXyModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
@@ -27,10 +27,10 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 @XmlRootElement
 public class XYView {
     private final ITmfTrace fTrace;
-    private final TmfModelResponse<@NonNull ITmfCommonXAxisModel> fResponse;
+    private final TmfModelResponse<@NonNull ITmfXyModel> fResponse;
 
     /**
-     * Compose the {@link ITmfTrace} and {@link ITmfCommonXAxisModel} in an
+     * Compose the {@link ITmfTrace} and {@link ITmfXyModel} in an
      * {@link XYView}
      *
      * @param trace
@@ -38,7 +38,7 @@ public class XYView {
      * @param response
      *            XY model response for the query
      */
-    public XYView(@Nullable ITmfTrace trace, TmfModelResponse<@NonNull ITmfCommonXAxisModel> response) {
+    public XYView(@Nullable ITmfTrace trace, TmfModelResponse<@NonNull ITmfXyModel> response) {
         fTrace = trace;
         fResponse = response;
     }
@@ -58,7 +58,7 @@ public class XYView {
      * @return the time values
      */
     @XmlElement
-    public TmfModelResponse<@NonNull ITmfCommonXAxisModel> getResponse() {
+    public TmfModelResponse<@NonNull ITmfXyModel> getResponse() {
         return fResponse;
     }
 }

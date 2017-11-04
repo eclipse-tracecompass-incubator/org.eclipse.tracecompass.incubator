@@ -69,6 +69,22 @@ public class TraceModelStub implements Serializable {
     }
 
     /**
+     * Constructor for comparing equality
+     *
+     * @param name
+     *            trace name
+     * @param path
+     *            path to trace on server file system
+     * @param uuid
+     *            the stub's UUID
+     * @param start
+     *            start time
+     */
+    public TraceModelStub(String name, String path, UUID uuid, long start) {
+        this(name, path, uuid, 0, start, start);
+    }
+
+    /**
      * Getter for the trace's name
      *
      * @return trace name

@@ -11,9 +11,9 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DiskActivityViewService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EventTableService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -76,7 +76,7 @@ public class WebApplication {
 
         rc.register(TraceManagerService.class);
         rc.register(EventTableService.class);
-        rc.register(DiskActivityViewService.class);
+        rc.register(DataProviderService.class);
         rc.register(CORSFilter.class);
         rc.register(registerCustomMappers());
 
