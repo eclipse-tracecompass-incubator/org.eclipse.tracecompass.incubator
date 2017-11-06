@@ -141,7 +141,7 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
             List<File> data = Arrays.asList(dir.listFiles());
             for (File file : data) {
                 String extension = FilenameUtils.getExtension(file.getName());
-                if (extension.equals(".dat")) { //$NON-NLS-1$
+                if (extension.equals("dat")) { //$NON-NLS-1$
                     try {
                         DatParser dp = new DatParser(file);
                         // read first event (really check magic number header)
@@ -152,7 +152,7 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
                     }
                     confidence += 4;
                 }
-                if (extension.equals(".map")) { //$NON-NLS-1$
+                if (extension.equals("map")) { //$NON-NLS-1$
                     try {
                         if (MapParser.create(file) != null) {
                             confidence += 4;
@@ -162,7 +162,7 @@ public class Uftrace extends TmfTrace implements ITmfTraceKnownSize, ITmfTraceWi
                         confidence = Integer.MIN_VALUE;
                     }
                 }
-                if (extension.equals("*.sym")) { //$NON-NLS-1$
+                if (extension.equals("sym")) { //$NON-NLS-1$
                     confidence += 3;
                 }
             }
