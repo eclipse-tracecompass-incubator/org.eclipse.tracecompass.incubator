@@ -9,20 +9,27 @@
 
 package org.eclipse.tracecompass.incubator.internal.perf.profiling.core.trace;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
 import org.eclipse.tracecompass.incubator.internal.perf.profiling.core.Activator;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.PerfEventLayout;
+import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
+import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
+import org.eclipse.tracecompass.tmf.ctf.core.event.aspect.CtfChannelAspect;
 import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
 import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTraceValidationStatus;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * A perf trace converted to CTF using the "perf data convert --to-ctf" command
@@ -32,6 +39,13 @@ import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTraceValidationStatus;
  */
 @SuppressWarnings("restriction")
 public class PerfCtfTrace extends CtfTmfTrace implements IKernelTrace {
+
+    private static final Collection<@NonNull ITmfEventAspect<?>> PERF_CTF_ASPECTS = ImmutableList.of(
+            TmfBaseAspects.getTimestampAspect(),
+            new CtfChannelAspect(),
+            new PerfCpuAspect(),
+            TmfBaseAspects.getEventTypeAspect(),
+            TmfBaseAspects.getContentsAspect());
 
     /**
      * CTF metadata should mention the tracer as perf, so confidence is pretty high
@@ -44,6 +58,11 @@ public class PerfCtfTrace extends CtfTmfTrace implements IKernelTrace {
      */
     public PerfCtfTrace() {
         super();
+    }
+
+    @Override
+    public Iterable<ITmfEventAspect<?>> getEventAspects() {
+        return PERF_CTF_ASPECTS;
     }
 
     @Override
