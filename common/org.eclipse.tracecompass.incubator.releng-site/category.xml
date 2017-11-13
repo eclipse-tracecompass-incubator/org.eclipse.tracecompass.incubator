@@ -21,6 +21,9 @@
    <feature url="features/org.eclipse.tracecompass.incubator.contextswitch_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.contextswitch" version="0.0.1.qualifier">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.lttng2.ust.extras_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.lttng2.ust.extras" version="0.0.1.qualifier">
+      <category name="analyses"/>
+   </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.1.qualifier">
       <category name="analyses"/>
    </bundle>

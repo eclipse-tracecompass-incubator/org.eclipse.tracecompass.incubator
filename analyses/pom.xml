@@ -29,6 +29,10 @@
     <module>org.eclipse.tracecompass.incubator.contextswitch.ui</module>
     <module>org.eclipse.tracecompass.incubator.xaf.core</module>
     <module>org.eclipse.tracecompass.incubator.xaf.ui</module>
+    <module>org.eclipse.tracecompass.incubator.lttng2.ust.extras</module>
+    <module>org.eclipse.tracecompass.incubator.lttng2.ust.extras.core</module>
+    <module>org.eclipse.tracecompass.incubator.lttng2.ust.extras.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.lttng2.ust.extras.doc.user</module>
     <!-- insert modules here -->
   </modules>
 
