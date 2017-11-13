@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 École Polytechnique de Montréal
+ * Copyright (c) 2016 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -22,9 +22,13 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 
 /**
- * @author Cédric Biancheri
+ * Internal entry of the aggregate kind, it is one without a state system value,
+ * it uses other entries and aggregates their values.
+ *
+ * @author Matthew Khouzam
  */
-public class AggregateFusedVMViewEntry extends VirtualResourceEntry {
+class AggregateResourcesEntry extends VirtualResourceEntry {
+
     private final @NonNull List<ITimeGraphEntry> fContributors = new ArrayList<>();
 
     private static final Comparator<ITimeEvent> COMPARATOR = new Comparator<ITimeEvent>() {
@@ -40,7 +44,7 @@ public class AggregateFusedVMViewEntry extends VirtualResourceEntry {
     };
 
     /**
-     * AggregateFusedVMViewEntry Constructor
+     * AggregateResourcesEntry Constructor
      *
      * @param trace
      *            the parent trace
@@ -53,7 +57,7 @@ public class AggregateFusedVMViewEntry extends VirtualResourceEntry {
      * @param id
      *            the id
      */
-    public AggregateFusedVMViewEntry(@NonNull ITmfTrace trace,
+    public AggregateResourcesEntry(@NonNull ITmfTrace trace,
             long startTime, long endTime, Type type, int id) {
         super(ITmfStateSystem.INVALID_ATTRIBUTE, trace, startTime, endTime, type, id);
     }
@@ -74,7 +78,7 @@ public class AggregateFusedVMViewEntry extends VirtualResourceEntry {
      * @param id
      *            The id of this entry
      */
-    public AggregateFusedVMViewEntry(@NonNull ITmfTrace trace, String name, long startTime, long endTime, Type type, int id) {
+    public AggregateResourcesEntry(@NonNull ITmfTrace trace, String name, long startTime, long endTime, Type type, int id) {
         super(ITmfStateSystem.INVALID_ATTRIBUTE, trace, name, startTime, endTime, type, id);
     }
 
