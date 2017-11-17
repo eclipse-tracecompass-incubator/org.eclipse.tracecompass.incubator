@@ -27,13 +27,16 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.lttng2.common.core,
  org.eclipse.tracecompass.lttng2.ust.core,
  org.eclipse.tracecompass.tmf.analysis.xml.core,
- org.eclipse.tracecompass.analysis.os.linux.core
+ org.eclipse.tracecompass.analysis.os.linux.core,
+ org.eclipse.test.performance,
+ org.eclipse.tracecompass.ctf.core.tests
 Export-Package: org.eclipse.tracecompass.incubator.callstack.core.tests,
  org.eclipse.tracecompass.incubator.callstack.core.tests.callgraph,
  org.eclipse.tracecompass.incubator.callstack.core.tests.callgraph.instrumented,
  org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart,
  org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.statesystem,
  org.eclipse.tracecompass.incubator.callstack.core.tests.lttng2.ust.callstack,
+ org.eclipse.tracecompass.incubator.callstack.core.tests.perf.analysis,
  org.eclipse.tracecompass.incubator.callstack.core.tests.sampled,
  org.eclipse.tracecompass.incubator.callstack.core.tests.stubs,
  org.eclipse.tracecompass.incubator.callstack.core.tests.xml.module

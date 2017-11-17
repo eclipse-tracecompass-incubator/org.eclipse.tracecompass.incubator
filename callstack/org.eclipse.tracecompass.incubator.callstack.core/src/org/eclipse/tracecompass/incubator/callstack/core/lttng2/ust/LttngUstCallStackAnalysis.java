@@ -35,6 +35,11 @@ import com.google.common.collect.ImmutableSet;
 @SuppressWarnings("restriction")
 public class LttngUstCallStackAnalysis extends InstrumentedCallStackAnalysis {
 
+    /**
+     * ID of this analysis
+     */
+    public static final String ID = "org.eclipse.tracecompass.incubator.callstack.core.lttng.ust"; //$NON-NLS-1$
+
     private @Nullable Set<@NonNull TmfAbstractAnalysisRequirement> fAnalysisRequirements = null;
 
     @Override
