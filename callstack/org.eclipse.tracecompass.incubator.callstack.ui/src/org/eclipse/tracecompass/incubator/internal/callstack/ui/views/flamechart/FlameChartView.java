@@ -643,6 +643,9 @@ public class FlameChartView extends AbstractTimeGraphView {
             links.addAll(baseLinks);
 
             for (ISegment arrow : intersectingElements) {
+                if (monitor.isCanceled()) {
+                    return Collections.emptyList();
+                }
                 if (arrow instanceof CallStackEdge) {
                     CallStackEdge edge = (CallStackEdge) arrow;
                     ITimeGraphEntry src = findEntry(entryList, edge.getSrcHost(), edge.getSrcTid(), edge.getStart());
@@ -657,7 +660,7 @@ public class FlameChartView extends AbstractTimeGraphView {
         return baseLinks;
     }
 
-    private static ITimeGraphEntry findEntry(List<TimeGraphEntry> entryList, @NonNull String host, @NonNull Integer tid, long ts) {
+    private static ITimeGraphEntry findEntry(List<TimeGraphEntry> entryList, @NonNull String host, int tid, long ts) {
         List<TraceEntry> traceEntries = entryList.stream().filter(e -> e instanceof TraceEntry)
                 .map(e -> (TraceEntry) e)
                 .filter(te -> te.fHostId.equals(host))
@@ -676,7 +679,7 @@ public class FlameChartView extends AbstractTimeGraphView {
         return null;
     }
 
-    private static List<FlameChartEntry> findInChildren(ITimeGraphEntry entry, @NonNull Integer tid, long ts) {
+    private static List<FlameChartEntry> findInChildren(ITimeGraphEntry entry, int tid, long ts) {
         List<FlameChartEntry> list = new ArrayList<>();
         entry.getChildren().forEach(tgEntry -> {
             if (tgEntry instanceof FlameChartEntry) {
@@ -958,8 +961,7 @@ public class FlameChartView extends AbstractTimeGraphView {
         if (secondaryId == null) {
             return null;
         }
-        IFlameChartProvider module =
-                TmfTraceUtils.getAnalysisModuleOfClass(trace, IFlameChartProvider.class, secondaryId);
+        IFlameChartProvider module = TmfTraceUtils.getAnalysisModuleOfClass(trace, IFlameChartProvider.class, secondaryId);
         if (module == null) {
             return null;
         }
