@@ -87,7 +87,6 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry.Sampling;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeLinkEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -649,7 +648,7 @@ public class FlameChartView extends AbstractTimeGraphView {
                     ITimeGraphEntry src = findEntry(entryList, edge.getSrcHost(), edge.getSrcTid(), edge.getStart());
                     ITimeGraphEntry dst = findEntry(entryList, edge.getDstHost(), edge.getDstTid(), edge.getStart() + edge.getDuration());
                     if (src != null && dst != null) {
-                        links.add(new TimeLinkEvent(src, dst, edge.getStart(), edge.getDuration()));
+                        links.add(SpanLinkEvent.create(src, dst, edge.getStart(), edge.getDuration(), edge.getId()));
                     }
                 }
             }

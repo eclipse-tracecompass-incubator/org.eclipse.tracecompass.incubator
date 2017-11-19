@@ -29,11 +29,11 @@ public final class CallStackEdge implements ISegment {
     /**
      * ID
      */
-    private static final long serialVersionUID = -224193581961404618L;
+    private static final long serialVersionUID = -224193581961404619L;
     /**
      * Size taken on a disk
      */
-    public static final int BASE_SIZE = Integer.BYTES * 2 + Long.BYTES * 2;
+    public static final int BASE_SIZE = Integer.BYTES * 3 + Long.BYTES * 2;
 
     /**
      * Factory helper
@@ -45,13 +45,15 @@ public final class CallStackEdge implements ISegment {
         String dstHost = bb.getString();
         long start = bb.getLong();
         long duration = bb.getLong();
-        return new CallStackEdge(new HostThread(srcHost, srcTid), new HostThread(dstHost, dstTid), start, duration);
+        int id = bb.getInt();
+        return new CallStackEdge(new HostThread(srcHost, srcTid), new HostThread(dstHost, dstTid), start, duration, id);
     };
 
     private final transient HostThread fSrc;
     private final transient HostThread fDst;
     private final long fStart;
     private final long fDuration;
+    private final int fId;
 
     /**
      * Constructor
@@ -64,12 +66,15 @@ public final class CallStackEdge implements ISegment {
      *            start time
      * @param duration
      *            duration
+     * @param id
+     *            the unique id of this span
      */
-    public CallStackEdge(HostThread src, HostThread dst, long time, long duration) {
+    public CallStackEdge(HostThread src, HostThread dst, long time, long duration, int id) {
         fSrc = src;
         fDst = dst;
         fStart = time;
         fDuration = duration;
+        fId = id;
     }
 
     /**
@@ -127,9 +132,18 @@ public final class CallStackEdge implements ISegment {
         return fDuration;
     }
 
+    /**
+     * Get the span ID of the edge
+     *
+     * @return the span id
+     */
+    public int getId() {
+        return fId;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(fSrc, fDst, fStart, fDuration);
+        return Objects.hash(fSrc, fDst, fStart, fDuration, fId);
     }
 
     @Override
@@ -144,7 +158,11 @@ public final class CallStackEdge implements ISegment {
             return false;
         }
         CallStackEdge other = (CallStackEdge) obj;
-        return (fDuration == other.fDuration) && (fStart == other.fStart) && Objects.equals(fSrc, other.fSrc) && Objects.equals(fDst,  other.fDst);
+        return (fDuration == other.fDuration) &&
+                (fStart == other.fStart) &&
+                Objects.equals(fSrc, other.fSrc) &&
+                Objects.equals(fDst, other.fDst) &&
+                fId == other.fId;
     }
 
     @Override
@@ -155,6 +173,7 @@ public final class CallStackEdge implements ISegment {
         bb.putString(getDstHost());
         bb.putLong(getStart());
         bb.putLong(getDuration());
+        bb.putInt(fId);
     }
 
     @Override

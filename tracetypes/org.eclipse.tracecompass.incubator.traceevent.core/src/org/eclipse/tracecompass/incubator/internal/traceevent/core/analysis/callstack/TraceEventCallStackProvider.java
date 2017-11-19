@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +37,8 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
+import com.google.common.primitives.Ints;
+
 /**
  * Trace event callstack provider
  *
@@ -46,24 +49,29 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  */
 public class TraceEventCallStackProvider extends CallStackStateProvider {
 
+    private static final int UNSET_ID = -1;
     /**
      * Link builder between events
      */
     private final class EdgeBuilder {
 
+        /**
+         *
+         */
         private @NonNull String fSrc = StringUtils.EMPTY;
         private @NonNull String fDst = StringUtils.EMPTY;
         private long fSrcTime = Long.MAX_VALUE;
         private int fSrcTid = IHostModel.UNKNOWN_TID;
         private int fDstTid = IHostModel.UNKNOWN_TID;
         private long fDur = 0;
+        private int fId = UNSET_ID;
 
         public long getTime() {
             return fSrcTime;
         }
 
         public @NonNull CallStackEdge build() {
-            return new CallStackEdge(new HostThread(fSrc, fSrcTid), new HostThread(fDst, fDstTid), fSrcTime, fDur);
+            return new CallStackEdge(new HostThread(fSrc, fSrcTid), new HostThread(fDst, fDstTid), fSrcTime, fDur, fId);
         }
 
     }
@@ -249,6 +257,9 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         tid = tid == null ? IHostModel.UNKNOWN_TID : tid;
         if (sLink != null) {
             if (sLink.getTime() == Long.MAX_VALUE) {
+                if (sLink.fId == UNSET_ID) {
+                    sLink.fId = Optional.of(Ints.tryParse(sId)).orElse(UNSET_ID);
+                }
                 sLink.fDur = 0;
                 sLink.fSrcTime = event.getTimestamp().toNanos();
                 sLink.fDstTid = tid;
@@ -265,6 +276,9 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
                  *
                  * end time = traceEvent.getTimestamp().toNanos()
                  */
+                if (sLink.fId == UNSET_ID) {
+                    sLink.fId = Optional.of(Ints.tryParse(sId)).orElse(UNSET_ID);
+                }
                 sLink.fDur = event.getTimestamp().toNanos() - sLink.fSrcTime;
                 sLink.fDstTid = tid;
                 sLink.fDst = event.getTrace().getHostId();
