@@ -39,6 +39,7 @@ public class SpanLinkEvent extends TimeLinkEvent {
      *            duration
      * @param id
      *            span id
+     * @return the link event
      */
     public static @NonNull ILinkEvent create(ITimeGraphEntry src, ITimeGraphEntry dst, long start, long duration, int id) {
         return id == -1 ? new TimeLinkEvent(src, dst, start, duration) : new SpanLinkEvent(src, dst, start, duration, id);
@@ -81,6 +82,5 @@ public class SpanLinkEvent extends TimeLinkEvent {
     public boolean equals(Object obj) {
         return super.equals(obj) && ((SpanLinkEvent) obj).fId == fId;
     }
-
 
 }

@@ -45,8 +45,8 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
 
     /**
      * Minimum width of a displayed state below which we will not print any text
-     * into it. It corresponds to the average width of 1 char, plus the width of
-     * the ellipsis characters.
+     * into it. It corresponds to the average width of 1 char, plus the width of the
+     * ellipsis characters.
      */
     private Integer fMinimumBarWidth;
 
@@ -67,7 +67,7 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
 
         private final RGB rgb;
 
-        private State (RGB rgb) {
+        private State(RGB rgb) {
             this.rgb = rgb;
         }
     }
@@ -109,6 +109,8 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
             return callStackEvent.getValue() + 1;
         } else if (event instanceof NullTimeEvent) {
             return INVISIBLE;
+        } else if (event instanceof SpanLinkEvent) {
+            return (NUM_COLORS + 1 + ((SpanLinkEvent) event).getId()) % NUM_COLORS;
         } else if (event instanceof TimeEvent) {
             int cfIndex = fCfProvider.getStateTableIndex(event);
             if (cfIndex >= 0) {
@@ -137,8 +139,7 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
         }
         if (bounds.width <= fMinimumBarWidth) {
             /*
-             * Don't print anything if we cannot at least show one character and
-             * ellipses.
+             * Don't print anything if we cannot at least show one character and ellipses.
              */
             return;
         }

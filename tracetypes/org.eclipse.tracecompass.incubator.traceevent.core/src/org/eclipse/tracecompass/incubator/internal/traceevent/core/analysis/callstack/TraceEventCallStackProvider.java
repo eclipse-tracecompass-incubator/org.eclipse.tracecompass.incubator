@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,15 +28,15 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
+import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventAspects;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-
-import com.google.common.primitives.Ints;
 
 /**
  * Trace event callstack provider
@@ -50,6 +49,7 @@ import com.google.common.primitives.Ints;
 public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     private static final int UNSET_ID = -1;
+
     /**
      * Link builder between events
      */
@@ -76,6 +76,8 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     }
 
+    private Map<String, Integer> fLinkIdCache = new HashMap<>();
+
     private ITmfTimestamp fSafeTime;
 
     private final Map<String, EdgeBuilder> fLinks = new HashMap<>();
@@ -86,6 +88,8 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
     private final Map<Integer, Deque<Long>> fStack = new TreeMap<>();
 
     private final ISegmentStore<@NonNull CallStackEdge> fLinksStore;
+
+    private final ITmfEventAspect<?> fIdAspect;
 
     /**
      * Constructor
@@ -104,6 +108,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         }
         fLinksStore = segStore;
         fSafeTime = trace.getStartTime();
+        fIdAspect = TraceEventAspects.ID_ASPECT;
     }
 
     @Override
@@ -170,7 +175,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     private static boolean isExit(ITmfEvent event) {
         String phase = event.getContent().getFieldValue(String.class, ITraceEventConstants.PHASE);
-        return "E".equals(phase) || "f".equals(phase);  //$NON-NLS-1$//$NON-NLS-2$
+        return "E".equals(phase) || "f".equals(phase); //$NON-NLS-1$//$NON-NLS-2$
     }
 
     @Override
@@ -250,7 +255,11 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
     private void updateSLinks(ITmfEvent event) {
         String sId = event.getContent().getFieldValue(String.class, ITraceEventConstants.ID);
         if (sId == null) {
-            return;
+            Object resolve = fIdAspect.resolve(event);
+            if (resolve == null) {
+                resolve = Integer.valueOf(0);
+            }
+            sId = String.valueOf(resolve);
         }
         EdgeBuilder sLink = fLinks.get(sId);
         Integer tid = event.getContent().getFieldValue(Integer.class, ITraceEventConstants.TID);
@@ -258,7 +267,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         if (sLink != null) {
             if (sLink.getTime() == Long.MAX_VALUE) {
                 if (sLink.fId == UNSET_ID) {
-                    sLink.fId = Optional.of(Ints.tryParse(sId)).orElse(UNSET_ID);
+                    sLink.fId = fLinkIdCache.getOrDefault(sId, -1);
                 }
                 sLink.fDur = 0;
                 sLink.fSrcTime = event.getTimestamp().toNanos();
@@ -277,7 +286,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
                  * end time = traceEvent.getTimestamp().toNanos()
                  */
                 if (sLink.fId == UNSET_ID) {
-                    sLink.fId = Optional.of(Ints.tryParse(sId)).orElse(UNSET_ID);
+                    sLink.fId = fLinkIdCache.getOrDefault(sId, -1);
                 }
                 sLink.fDur = event.getTimestamp().toNanos() - sLink.fSrcTime;
                 sLink.fDstTid = tid;
@@ -296,6 +305,15 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             builder.fSrcTime = event.getTimestamp().toNanos();
             builder.fSrcTid = tid;
             builder.fSrc = event.getTrace().getHostId();
+            if (!fLinkIdCache.containsKey(sId)) {
+                try {
+                    Integer id = Integer.decode(sId);
+                    fLinkIdCache.put(sId, id);
+                } catch (NumberFormatException e) {
+                    fLinkIdCache.put(sId, UNSET_ID);
+                }
+            }
+            builder.fId = fLinkIdCache.getOrDefault(sId, UNSET_ID);
             fLinks.put(sId, builder);
         }
     }
@@ -311,6 +329,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
                 threadName = Long.toString(threadId);
             }
             int threadQuark = ss.getQuarkRelativeAndAdd(processQuark, threadName);
+            ss.modifyAttribute(event.getTimestamp().toNanos(), threadId, threadQuark);
 
             int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.CALL_STACK);
             ITmfStateValue value = functionBeginName;
@@ -367,6 +386,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             threadName = Long.toString(threadId).intern();
         }
         int threadQuark = ss.getQuarkRelativeAndAdd(processQuark, threadName);
+        ss.modifyAttribute(event.getTimestamp().toNanos(), threadId, threadQuark);
 
         int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.CALL_STACK);
         ITmfStateValue functionEntry = TmfStateValue.newValueString(event.getName());

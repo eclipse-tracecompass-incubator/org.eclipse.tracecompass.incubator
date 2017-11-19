@@ -27,6 +27,14 @@ import com.google.common.collect.ImmutableList;
  */
 public class TraceEventAspects {
 
+    /**
+     * An ID aspect, can be used to identify flows.
+     */
+    public static final TraceCompassScopeLogIdAspect ID_ASPECT = new TraceCompassScopeLogIdAspect();
+
+    /**
+     * Apects of a trace
+     */
     private static Iterable<@NonNull ITmfEventAspect<?>> aspects;
 
     /**
@@ -34,6 +42,7 @@ public class TraceEventAspects {
      *
      * @return get the event aspects
      */
+    @SuppressWarnings("null")
     public static @NonNull Iterable<@NonNull ITmfEventAspect<?>> getAspects() {
         Iterable<@NonNull ITmfEventAspect<?>> aspectSet = aspects;
         if (aspectSet == null) {
@@ -46,7 +55,7 @@ public class TraceEventAspects {
                     new TraceCompassScopeLogPidAspect(),
                     new TraceCompassScopeLogCategoryAspect(),
                     new TraceCompassScopeLogDurationAspect(),
-                    new TraceCompassScopeLogIdAspect(),
+                    ID_ASPECT,
                     new TraceCompassScopeLogArgsAspect(),
                     new TraceCompassScopeLogCallsiteAspect());
             aspects = aspectSet;
