@@ -22,6 +22,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackEdge;
@@ -37,6 +38,7 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * Trace event callstack provider
@@ -131,8 +133,12 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     @Override
     protected long getThreadId(@NonNull ITmfEvent event) {
-        Integer fieldValue = event.getContent().getFieldValue(Integer.class, ITraceEventConstants.TID);
-        return fieldValue == null ? IHostModel.UNKNOWN_TID : fieldValue.intValue();
+        Integer tid = TmfTraceUtils.resolveIntEventAspectOfClassForEvent(event.getTrace(), LinuxTidAspect.class, event);
+        if (tid == null) {
+            // Fallback to a tid field in the event
+            tid = event.getContent().getFieldValue(Integer.class, ITraceEventConstants.TID);
+        }
+        return tid == null ? IHostModel.UNKNOWN_TID : tid.intValue();
 
     }
 
@@ -262,8 +268,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             sId = String.valueOf(resolve);
         }
         EdgeBuilder sLink = fLinks.get(sId);
-        Integer tid = event.getContent().getFieldValue(Integer.class, ITraceEventConstants.TID);
-        tid = tid == null ? IHostModel.UNKNOWN_TID : tid;
+        int tid = Long.valueOf(getThreadId(event)).intValue();
         if (sLink != null) {
             if (sLink.getTime() == Long.MAX_VALUE) {
                 if (sLink.fId == UNSET_ID) {

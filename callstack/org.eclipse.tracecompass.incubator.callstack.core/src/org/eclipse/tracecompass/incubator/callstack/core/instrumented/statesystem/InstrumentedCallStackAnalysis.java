@@ -208,7 +208,7 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
      *
      * @return a list of the edges
      */
-    public ISegmentStore<CallStackEdge> getLinks() {
+    public synchronized ISegmentStore<CallStackEdge> getLinks() {
         ISegmentStore<CallStackEdge> links = fLinks;
         if (fLinks == null) {
             links = buildOnDiskSegmentStore(String.valueOf(getId()) + LINKS_SUFFIX);
