@@ -126,7 +126,12 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
                     } else {
                         attribute = threadElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL);
                         if (!attribute.isEmpty()) {
-                            resolver = new CallStackSeries.AttributeNameThreadResolver(Integer.valueOf(attribute));
+                            String type = threadElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL_TYPE);
+                            if (type.equals(CallstackXmlStrings.CALLSTACK_THREADLEVEL_VALUE)) {
+                                resolver = new CallStackSeries.AttributeValueThreadResolver(Integer.valueOf(attribute));
+                            } else {
+                                resolver = new CallStackSeries.AttributeNameThreadResolver(Integer.valueOf(attribute));
+                            }
                         }
                     }
                 }

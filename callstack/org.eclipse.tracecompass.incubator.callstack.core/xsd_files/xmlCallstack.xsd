@@ -99,6 +99,21 @@
 				<xs:documentation>The level whose value contains the thread ID.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="type" use="optional">
+			<xs:annotation>
+				<xs:documentation>Describe where at this level the thread ID value is.</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="name" >
+						<xs:annotation>
+							<xs:documentation>The thread ID is the name of the level</xs:documentation></xs:annotation></xs:enumeration>
+					<xs:enumeration value="value" >
+						<xs:annotation>
+							<xs:documentation>The thread ID is the value at this level</xs:documentation></xs:annotation></xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
 	</xs:complexType>
 
 </xs:schema>
