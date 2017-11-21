@@ -143,6 +143,12 @@ public class TraceEventEvent extends TmfEvent implements ITmfSourceLookup {
             if (Double.isFinite(duration)) {
                 argsMap.put(ITraceEventConstants.DURATION, duration);
             }
+            if (category != null) {
+                argsMap.put(ITraceEventConstants.CATEGORY, category);
+            }
+            if (id != null) {
+                argsMap.put(ITraceEventConstants.ID, id);
+            }
             return new TraceEventField(name, ts, phase, pid, tid, category, id, duration, argsMap);
         } catch (JSONException e1) {
             // invalid, return null and it will fail
