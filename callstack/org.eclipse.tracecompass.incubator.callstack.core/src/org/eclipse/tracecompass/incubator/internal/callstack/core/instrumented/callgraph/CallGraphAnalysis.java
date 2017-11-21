@@ -12,10 +12,8 @@ package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,10 +37,6 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChar
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.incubator.callstack.core.symbol.CallStackSymbolFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
-import org.eclipse.tracecompass.segmentstore.core.ISegment;
-import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
-import org.eclipse.tracecompass.segmentstore.core.SegmentStoreFactory;
-import org.eclipse.tracecompass.segmentstore.core.SegmentStoreFactory.SegmentStoreType;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -50,7 +44,6 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 
 /**
  * Call stack analysis used to create a segment for each call function from an
@@ -81,23 +74,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     // Attributes
     // ------------------------------------------------------------------------
 
-    /**
-     * Segment store
-     */
-    private final ISegmentStore<@NonNull ISegment> fStore;
-
-    /**
-     * The Trace's root functions list
-     */
-    private final List<ICalledFunction> fRootFunctions = new ArrayList<>();
     private final IFlameChartProvider fCsProvider;
     private final CallGraph fCallGraph = new CallGraph();
-
-    /**
-     * The List of root elements. They should be the same as the corresponding
-     * callstack
-     */
-    private final Set<ICallStackElement> fRootElements = new HashSet<>();
 
     /**
      * Constructor
@@ -107,7 +85,6 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
      */
     public CallGraphAnalysis(IFlameChartProvider csProvider) {
         super();
-        fStore = SegmentStoreFactory.createSegmentStore(SegmentStoreType.Fast);
         fCsProvider = csProvider;
         setName(NLS.bind(Messages.CallGraphAnalysis_NamePrefix, csProvider.getName()));
     }
@@ -195,7 +172,6 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     protected boolean iterateOverCallstackSerie(CallStackSeries callstackSerie, IHostModel model, CallGraph callgraph, long start, long end, IProgressMonitor monitor) {
         // The root elements are the same as the one from the callstack series
         Collection<ICallStackElement> rootElements = callstackSerie.getRootElements();
-        fRootElements.addAll(rootElements);
         for (ICallStackElement element : rootElements) {
             if (monitor.isCanceled()) {
                 return false;
@@ -235,13 +211,11 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
             kernelStatuses.forEachRemaining(aggregatedChild::addKernelStatus);
 
             callgraph.addAggregatedCallSite(element, aggregatedChild);
-            fRootFunctions.add(nextFunction);
             nextFunction = (AbstractCalledFunction) callStack.getNextFunction(nextFunction.getEnd(), 1, null, model, start, end);
         }
     }
 
     private void iterateOverCallstack(ICallStackElement element, CallStack callstack, ICalledFunction function, int nextLevel, AggregatedCalledFunction aggregatedCall, IHostModel model, long start, long end, IProgressMonitor monitor) {
-        fStore.add(function);
         if (nextLevel > callstack.getMaxDepth()) {
             return;
         }
@@ -289,29 +263,6 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     @Override
     protected void canceling() {
         // Do nothing
-    }
-
-    /**
-     * The functions of the first level
-     *
-     * TODO: It doesn't seem to be used anywhere else than unit test, so remove this
-     *
-     * @return Functions of the first level
-     */
-    public List<ICalledFunction> getRootFunctions() {
-        return ImmutableList.copyOf(fRootFunctions);
-    }
-
-    /**
-     * Get the segment store that accompanies this callgraph
-     *
-     * FIXME: Is this analysis the right place for the segment store, or should it
-     * be during call stack building
-     *
-     * @return The segment store
-     */
-    public ISegmentStore<ISegment> getSegmentStore() {
-        return fStore;
     }
 
     @Override
