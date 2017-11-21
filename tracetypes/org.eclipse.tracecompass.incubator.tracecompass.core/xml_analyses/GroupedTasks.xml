@@ -98,10 +98,12 @@
 				<stateChange>
 					<stateAttribute type="constant" value="#CurrentScenario" />
 					<stateAttribute type="constant" value="component" />
-					<stateValue type="eventField" value="cat" />
+					<stateValue type="script" value="cat == null ? 'UNKNOWN' : cat" scriptEngine="nashorn" >
+						<stateValue id="cat" type="eventField" value="cat" />
+					</stateValue>
 				</stateChange>
 			</action>
-	
+
 			<action id="push_event_type">
 				<!-- Push the current event to the thread's callstack -->
 				<stateChange>

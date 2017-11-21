@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tmfxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../org.eclipse.tracecompass.tmf.analysis.xml.core/src/org/eclipse/tracecompass/tmf/analysis/xml/core/module/xmlDefinition.xsd">
+<callstack id="org.eclipse.tracecompass.incubator.tracecompass.grouped.threads">
+	<callstackGroup name="Per component callstack">
+		<level path="Components/*" />
+		<level path="Threads/*"/>
+		<thread level="1" type="value" />
+	</callstackGroup>
+
+	<pattern version="1" id="org.eclipse.tracecompass.incubator.traceevent.grouped.threads.pattern">
+		<head>
+			<traceType id="org.eclipse.tracecompass.incubator.traceevent.core.trace" />
+			<label value="Thread by Component" />
+		</head>
+
+		<location id="CurrentThread">
+			<stateAttribute type="constant" value="Components" />
+			<stateAttribute type="query">
+				<stateAttribute type="constant" value="#CurrentScenario" />
+				<stateAttribute type="constant" value="component" />
+			</stateAttribute>
+			<stateAttribute type="constant" value="Threads" />
+			<stateAttribute type="pool" />
+		</location>
+
+		<patternHandler>
+
+		<!-- CONDITIONS -->
+		<!-- Test if the current running thread is equal to the current scenario thread -->
+		<test id="thread_thread">
+			<if>
+				<condition>
+					<stateValue type="eventField" value="tid" forcedType="int"/>
+					<stateValue type="query">
+						<stateAttribute type="constant" value="#CurrentScenario" />
+						<stateAttribute type="constant" value="threadID" />
+					</stateValue>
+				</condition>
+			</if>
+		</test>
+		<test id="is_start">
+			<if>
+				<or>
+					<condition>
+						<stateValue type="eventField" value="ph"/>
+						<stateValue type="string" value="s"/>
+					</condition>
+					<condition>
+						<stateValue type="eventField" value="ph"/>
+						<stateValue type="string" value="B"/>
+					</condition>
+				</or>
+			</if>
+		</test>
+		<test id="is_end">
+			<if>
+				<or>
+					<condition>
+						<stateValue type="eventField" value="ph"/>
+						<stateValue type="string" value="f"/>
+					</condition>
+					<condition>
+						<stateValue type="eventField" value="ph"/>
+						<stateValue type="string" value="E"/>
+					</condition>
+				</or>
+			</if>
+		</test>
+		<test id="last_out">
+			<if>
+			    <condition>
+					<stateValue type="query">
+				    	<stateAttribute type="location" value="CurrentThread" />
+	                	<stateAttribute type="constant" value="CallStack" />
+	            	</stateValue>
+	        	    <stateValue type="int" value="1" />
+				</condition>
+			</if>
+		</test>
+
+		<!-- ACTIONS -->
+
+		<!-- Actions and test for time graph view threads -->
+		<action id="entering_thread">
+			<!-- Initialize current scenario data: component, type of thread, queries and drawing event counts -->
+			<stateChange>
+				<stateAttribute type="constant" value="#CurrentScenario" />
+				<stateAttribute type="constant" value="threadID" />
+				<stateValue type="eventField" value="tid" forcedType="int"/>
+			</stateChange>
+			<stateChange>
+				<stateAttribute type="constant" value="#CurrentScenario" />
+				<stateAttribute type="constant" value="type" />
+				<stateValue type="eventField" value="name" />
+			</stateChange>
+			<stateChange>
+				<stateAttribute type="constant" value="#CurrentScenario" />
+				<stateAttribute type="constant" value="component" />
+				<stateValue type="script" value="cat == null ? 'UNKNOWN' : cat" scriptEngine="nashorn" >
+					<stateValue id="cat" type="eventField" value="cat" />
+				</stateValue>
+			</stateChange>
+		</action>
+
+		<action id="push_event_type">
+			<!-- Push the current event to the thread's callstack -->
+			<stateChange>
+                    <stateAttribute type="location" value="CurrentThread" />
+                    <stateAttribute type="constant" value="CallStack" />
+					<stateValue type="eventField" value="name" stack="push"/>
+            </stateChange>
+            <stateChange>
+				<stateAttribute type="location" value="CurrentThread" />
+				<stateValue type="eventField" value="tid" />
+			</stateChange>
+		</action>
+
+		<action id="pop_event_type">
+			<!-- Pop the current event from the callstack -->
+			<stateChange>
+				<stateAttribute type="location" value="CurrentThread" />
+                <stateAttribute type="constant" value="CallStack" />
+				<stateValue type="eventField" value="name" stack="pop"/>
+			</stateChange>
+		</action>
+
+		<!-- FSMs -->
+		<fsm id="tgThread" initial="Wait_thread_start">
+			<state id="Wait_thread_start">
+				<!-- The state will stay here until we have a thread start event -->
+				<transition event="*" cond="is_start" target="in_thread" action="entering_thread:push_event_type"/>
+			</state>
+			<state id="in_thread" >
+				<!-- The state will loop on itself until the thread ends and increment the operations that happen during the execution -->
+				<transition event="*" cond="thread_thread:is_start" target="in_thread" action="push_event_type"/>
+				<transition event="*" cond="thread_thread:is_end:last_out" target="end_thread" action="pop_event_type"/>
+				<transition event="*" cond="thread_thread:is_end" target="in_thread" action="pop_event_type"/>
+			</state>
+			<final id="end_thread"/>
+		</fsm>
+
+		</patternHandler>
+	</pattern>
+</callstack>
+</tmfxml>
