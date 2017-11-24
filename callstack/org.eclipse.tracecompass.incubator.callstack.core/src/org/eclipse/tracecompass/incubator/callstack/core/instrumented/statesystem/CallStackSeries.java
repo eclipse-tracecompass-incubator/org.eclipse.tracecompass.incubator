@@ -214,7 +214,9 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
                     return IHostModel.UNKNOWN_TID;
                 }
                 int cpu = querySingleState.getStateValue().unboxInt();
-                return fModel.getThreadOnCpu(cpu, time);
+                // The thread running is the one on the CPU at the beginning of this interval
+                long startTime = querySingleState.getStartTime();
+                return fModel.getThreadOnCpu(cpu, startTime);
             } catch (StateSystemDisposedException e) {
 
             }

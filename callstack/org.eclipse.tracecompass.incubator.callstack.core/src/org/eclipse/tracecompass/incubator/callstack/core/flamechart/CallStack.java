@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
@@ -278,6 +279,23 @@ public class CallStack {
             return fThreadIdProvider.getThreadId(time);
         }
         return -1;
+    }
+
+    /**
+     * Get the ID of the thread running this callstack at time t. This method is
+     * used in conjunction with other trace data to get the time spent on the
+     * CPU for this call.
+     *
+     * @param time
+     *            The time of query
+     * @return The thread ID or <code>-1</code> if not available.
+     */
+    public @Nullable HostThread getHostThread(long time) {
+        int tid = getThreadId(time);
+        if (tid < 0) {
+            return null;
+        }
+        return new HostThread(fHostId, tid);
     }
 
     /**

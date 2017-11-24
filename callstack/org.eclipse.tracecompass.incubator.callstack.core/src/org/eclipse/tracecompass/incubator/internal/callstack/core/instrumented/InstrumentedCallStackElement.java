@@ -47,6 +47,7 @@ public class InstrumentedCallStackElement extends CallStackElement {
 
     private @Nullable Collection<ICallStackElement> fChildren;
     private @Nullable IThreadIdProvider fThreadIdProvider = null;
+    private @Nullable CallStack fCallstack = null;
 
     /**
      * Constructor
@@ -234,8 +235,13 @@ public class InstrumentedCallStackElement extends CallStackElement {
      * @return The call stack
      */
     public CallStack getCallStack() {
-        List<Integer> subAttributes = getStackQuarks();
-        return new CallStack(getStateSystem(), subAttributes, this, getHostId(), fThreadIdProvider);
+        CallStack callstack  = fCallstack;
+        if (callstack == null) {
+            List<Integer> subAttributes = getStackQuarks();
+            callstack =  new CallStack(getStateSystem(), subAttributes, this, getHostId(), fThreadIdProvider);
+            fCallstack = callstack;
+        }
+        return callstack;
     }
 
     /**

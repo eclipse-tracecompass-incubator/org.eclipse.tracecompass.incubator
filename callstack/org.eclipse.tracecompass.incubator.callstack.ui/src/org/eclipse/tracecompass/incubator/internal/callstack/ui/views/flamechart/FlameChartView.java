@@ -43,12 +43,14 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
@@ -58,6 +60,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.Activator;
+import org.eclipse.tracecompass.internal.analysis.os.linux.ui.actions.FollowThreadAction;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
@@ -203,10 +206,16 @@ public class FlameChartView extends AbstractTimeGraphView {
     private static class LevelEntry extends TimeGraphEntry {
 
         private final boolean fIsSymbolKey;
+        private final @Nullable CallStack fCallStack;
 
-        public LevelEntry(String name, long startTime, long endTime, boolean isSymbolKey) {
-            super(name, startTime, endTime);
-            fIsSymbolKey = isSymbolKey;
+        public LevelEntry(ICallStackElement element, long startTime, long endTime) {
+            super(element.getName(), startTime, endTime);
+            fIsSymbolKey = element.isSymbolKeyElement();
+            if ((element instanceof InstrumentedCallStackElement) && element.isLeaf()) {
+                fCallStack = ((InstrumentedCallStackElement) element).getCallStack();
+            } else {
+                fCallStack = null;
+            }
         }
 
         @Override
@@ -216,6 +225,14 @@ public class FlameChartView extends AbstractTimeGraphView {
 
         public boolean isSymbolKeyGroup() {
             return fIsSymbolKey;
+        }
+
+        public @Nullable HostThread getHostThread(long time) {
+            CallStack callStack = fCallStack;
+            if (callStack == null) {
+                return null;
+            }
+            return callStack.getHostThread(time);
         }
     }
 
@@ -451,7 +468,6 @@ public class FlameChartView extends AbstractTimeGraphView {
      *
      * @param signal
      *            The incoming signal
-     * @since 1.0
      */
     @Override
     @TmfSignalHandler
@@ -484,9 +500,6 @@ public class FlameChartView extends AbstractTimeGraphView {
 
     }
 
-    /**
-     * @since 2.0
-     */
     @Override
     @TmfSignalHandler
     public void windowRangeUpdated(final TmfWindowRangeUpdatedSignal signal) {
@@ -506,9 +519,6 @@ public class FlameChartView extends AbstractTimeGraphView {
     // Internal
     // ------------------------------------------------------------------------
 
-    /**
-     * @since 2.1
-     */
     @Override
     protected FlameChartPresentationProvider getPresentationProvider() {
         /* Set to this type by the constructor */
@@ -526,9 +536,6 @@ public class FlameChartView extends AbstractTimeGraphView {
         }
     }
 
-    /**
-     * @since 2.0
-     */
     @Override
     protected void refresh() {
         super.refresh();
@@ -695,7 +702,7 @@ public class FlameChartView extends AbstractTimeGraphView {
     }
 
     private void processCallStackElement(Collection<ISymbolProvider> symbolProviders, ICallStackElement element, TimeGraphEntry parentEntry) {
-        TimeGraphEntry entry = new LevelEntry(element.getName(), parentEntry.getStartTime(), parentEntry.getEndTime(), element.isSymbolKeyElement());
+        TimeGraphEntry entry = new LevelEntry(element, parentEntry.getStartTime(), parentEntry.getEndTime());
         parentEntry.addChild(entry);
         // Is this an intermediate or leaf element
         if ((element instanceof InstrumentedCallStackElement) && element.isLeaf()) {
@@ -733,9 +740,6 @@ public class FlameChartView extends AbstractTimeGraphView {
         }
     }
 
-    /**
-     * @since 1.2
-     */
     @Override
     protected final List<ITimeEvent> getEventList(TimeGraphEntry tgentry, long startTime, long endTime, long resolution, IProgressMonitor monitor) {
         if (!(tgentry instanceof FlameChartEntry)) {
@@ -835,9 +839,6 @@ public class FlameChartView extends AbstractTimeGraphView {
         });
     }
 
-    /**
-     * @since 1.2
-     */
     @Override
     protected void fillLocalToolBar(IToolBarManager manager) {
         manager.add(getConfigureSymbolsAction());
@@ -862,15 +863,26 @@ public class FlameChartView extends AbstractTimeGraphView {
         manager.add(getTimeGraphViewer().getZoomOutAction());
     }
 
-    /**
-     * @since 2.0
-     */
+    @SuppressWarnings("restriction")
     @Override
     protected void fillTimeGraphEntryContextMenu(IMenuManager contextMenu) {
         contextMenu.add(new GroupMarker(IWorkbenchActionConstants.GROUP_REORGANIZE));
         contextMenu.add(getSortByNameAction());
         contextMenu.add(getSortByIdAction());
         contextMenu.add(getSortByTimeAction());
+        // Add a follow thread if necessary
+        ISelection selection = getSite().getSelectionProvider().getSelection();
+        if (selection instanceof StructuredSelection) {
+            StructuredSelection sSel = (StructuredSelection) selection;
+            System.out.println(sSel);
+            if (sSel.getFirstElement() instanceof LevelEntry) {
+                LevelEntry entry = (LevelEntry) sSel.getFirstElement();
+                HostThread hostThread = entry.getHostThread(getTimeGraphViewer().getSelectionBegin());
+                if (hostThread != null) {
+                    contextMenu.add(new FollowThreadAction(FlameChartView.this, entry.getName(), hostThread));
+                }
+            }
+        }
     }
 
     /**
