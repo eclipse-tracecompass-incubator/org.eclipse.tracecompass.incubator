@@ -222,7 +222,7 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
 
     }
 
-    private @Nullable IAnalysisModule getAnalysisModule() {
+    private synchronized @Nullable IAnalysisModule getAnalysisModule() {
         IAnalysisModule module = fModule;
         if (module == null) {
             ITmfTrace trace = getTrace();
