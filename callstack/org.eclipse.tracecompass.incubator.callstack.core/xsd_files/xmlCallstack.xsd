@@ -25,10 +25,17 @@
 						</xs:annotation>
 					</xs:element>
 					<xs:choice maxOccurs="1" minOccurs="1">
-						<xs:element maxOccurs="1" minOccurs="0" name="analysis" type="xs:string" >
+						<xs:element maxOccurs="1" minOccurs="0" name="analysis">
 							<xs:annotation>
 								<xs:documentation>The ID of the analysis whose state system is to be used as base for the state system. Both the callstack and the analysis it links to will appear for a given trace. The trace type it applies to are the same as the base analysis.</xs:documentation>
 							</xs:annotation>
+							<xs:complexType>
+								<xs:attribute name="id" type="xs:string" use="required">
+									<xs:annotation>
+										<xs:documentation>The ID of the analysis whose state system is to be used as base for the state system. Both the callstack and the analysis it links to will appear for a given trace. The trace type it applies to are the same as the base analysis.</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+							</xs:complexType>
 						</xs:element>
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="pattern" type="pattern" >
 							<xs:annotation>

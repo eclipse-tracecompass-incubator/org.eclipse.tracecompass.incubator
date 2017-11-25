@@ -258,7 +258,9 @@ public class InstrumentedCallStackElement extends CallStackElement {
         }
         int stackQuark = getStateSystem().optQuarkRelative(getQuark(), InstrumentedCallStackAnalysis.CALL_STACK);
         if (stackQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
-            throw new IllegalStateException("The leaf element should have an element called " + InstrumentedCallStackAnalysis.CALL_STACK); //$NON-NLS-1$
+            // No CallStack element underneath, assume a flat chart: the current quark has
+            // the status to show
+            return Collections.singletonList(getQuark());
         }
         List<Integer> subAttributes = getStateSystem().getSubAttributes(stackQuark, false);
         return subAttributes;

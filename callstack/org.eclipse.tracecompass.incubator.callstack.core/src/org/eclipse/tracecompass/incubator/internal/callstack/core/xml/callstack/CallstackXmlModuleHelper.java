@@ -122,7 +122,7 @@ public class CallstackXmlModuleHelper extends TmfAnalysisModuleHelperXml {
             throw new IllegalStateException("XML callstack element: there should be one of {pattern, stateProvider, analysis}. none found"); //$NON-NLS-1$
         }
         // Create a helper for this module
-        fHelper = new RefModuleHelper(String.valueOf(childElements.get(0).getNodeValue()));
+        fHelper = new RefModuleHelper(String.valueOf(childElements.get(0).getAttribute(TmfXmlStrings.ID)));
         return;
     }
 
