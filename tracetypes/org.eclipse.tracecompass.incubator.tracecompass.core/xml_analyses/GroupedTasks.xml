@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tmfxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../org.eclipse.tracecompass.tmf.analysis.xml.core/src/org/eclipse/tracecompass/tmf/analysis/xml/core/module/xmlDefinition.xsd">
-<callstack id="org.eclipse.tracecompass.incubator.tracecompass.grouped.threads">
+  <callstack id="org.eclipse.tracecompass.incubator.tracecompass.grouped.threads">
 	<callstackGroup name="Per component callstack">
 		<level path="Views/*" /> 
 		<level path="Threads/*"/> 
@@ -10,7 +10,6 @@
 	
     <pattern version="1" id="org.eclipse.tracecompass.incubator.tracecompass.grouped.threads.pattern">
         <head>
-            <traceType id="org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTrace:TMF:TraceCompassLog" />
             <traceType id="org.eclipse.tracecompass.incubator.tracecompass.trace.jul" />
             <label value="Trace Compass Thread by Component" />
         </head>   
@@ -103,34 +102,6 @@
 				</stateChange>
 			</action>
 	
-			<action id="thread_done">
-				<!-- Generate a segment for this thread -->
-				<segment>
-					<segType>
-						<segName>
-							<stateValue type="query">
-							<stateAttribute type="constant" value="#CurrentScenario" />
-							<stateAttribute type="constant" value="type" />
-						</stateValue>	
-						</segName>
-					</segType>
-					<segContent>
-						<segField name="threadID" type="int">
-							<stateValue type="query">
-								<stateAttribute type="constant" value="#CurrentScenario" />
-								<stateAttribute type="constant" value="threadID" />
-							</stateValue>
-						</segField>
-						<segField name="component" type="string">
-							<stateValue type="query">
-								<stateAttribute type="constant" value="#CurrentScenario" />
-								<stateAttribute type="constant" value="component" />
-							</stateValue>
-						</segField>
-					</segContent>
-				</segment>
-			</action>
-	
 			<action id="push_event_type">
 				<!-- Push the current event to the thread's callstack -->
 				<stateChange>
@@ -172,6 +143,6 @@
 			
 		</patternHandler>
 	</pattern>
-</callstack>
+  </callstack>
 	
 </tmfxml>
