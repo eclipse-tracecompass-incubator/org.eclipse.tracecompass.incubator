@@ -81,6 +81,7 @@ import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
 import org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProviderPreferencePage;
 import org.eclipse.tracecompass.tmf.ui.symbols.SymbolProviderConfigDialog;
 import org.eclipse.tracecompass.tmf.ui.symbols.TmfSymbolProviderUpdatedSignal;
+import org.eclipse.tracecompass.tmf.ui.views.SaveImageUtil;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
@@ -737,6 +738,11 @@ public class FlameGraphView extends TmfView {
 //        if (signal.getSource() != this) {
             fTimeGraphViewer.refresh();
 //        }
+    }
+
+    @Override
+    protected @Nullable IAction createSaveAction() {
+        return SaveImageUtil.createSaveAction(getName(), this::getTimeGraphViewer);
     }
 
 }
