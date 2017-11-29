@@ -22,6 +22,7 @@ public interface CallstackXmlStrings {
     String CALLSTACK = "callstack"; //$NON-NLS-1$
     String CALLSTACK_LEVEL = "level"; //$NON-NLS-1$
     String CALLSTACK_PATH = "path"; //$NON-NLS-1$
+    String CALLSTACK_HOST = "host"; //$NON-NLS-1$
     String CALLSTACK_THREAD = "thread"; //$NON-NLS-1$
     String CALLSTACK_THREADCPU = "cpu"; //$NON-NLS-1$
     String CALLSTACK_THREADLEVEL = "level"; //$NON-NLS-1$

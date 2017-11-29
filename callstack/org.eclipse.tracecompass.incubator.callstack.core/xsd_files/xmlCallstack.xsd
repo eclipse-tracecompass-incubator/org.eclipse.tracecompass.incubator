@@ -72,6 +72,11 @@
 				<xs:annotation>
 					<xs:documentation>Defines how to get the thread ID of the thread doing the callstack.</xs:documentation>
 				</xs:annotation>
+			</xs:element>
+			<xs:element maxOccurs="1" minOccurs="0" name="host" type="callstackHostProvider">
+				<xs:annotation>
+					<xs:documentation>Defines how to get the host ID for a callstack.</xs:documentation>
+				</xs:annotation>
 			</xs:element>		
 		</xs:sequence>
 		<xs:attribute name="name" type="xs:string" use="optional">
@@ -118,6 +123,32 @@
 					<xs:enumeration value="value" >
 						<xs:annotation>
 							<xs:documentation>The thread ID is the value at this level</xs:documentation></xs:annotation></xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+	
+	<xs:complexType name="callstackHostProvider">
+		<xs:annotation>
+			<xs:documentation>Defines the way to get the host ID for the callstack.</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="level" type="xs:integer" use="required">
+			<xs:annotation>
+				<xs:documentation>The level whose data to use to get the host ID.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="type" use="optional">
+			<xs:annotation>
+				<xs:documentation>Describe where at this level the host ID is.</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="name" >
+						<xs:annotation>
+							<xs:documentation>The host ID is the name of the level</xs:documentation></xs:annotation></xs:enumeration>
+					<xs:enumeration value="value" >
+						<xs:annotation>
+							<xs:documentation>The host ID is the value at this level</xs:documentation></xs:annotation></xs:enumeration>
 				</xs:restriction>
 			</xs:simpleType>
 		</xs:attribute>

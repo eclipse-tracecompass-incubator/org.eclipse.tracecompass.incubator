@@ -30,6 +30,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphPro
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.SymbolAspect;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdResolver;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
@@ -138,7 +139,24 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
                     }
                 }
 
-                callstacks.add(new CallStackSeries(ss, patterns, 0, element.getAttribute(TmfXmlStrings.NAME), new CallStackHostUtils.TraceHostIdResolver(Objects.requireNonNull(getTrace())), resolver));
+                // Build the host resolver
+                childElements = TmfXmlUtils.getChildElements(element, CallstackXmlStrings.CALLSTACK_HOST);
+                IHostIdResolver hostResolver = null;
+                if (childElements.size() > 0) {
+                    Element hostElement = childElements.get(0);
+                    String attribute = hostElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL);
+                    if (!attribute.isEmpty()) {
+                        String type = hostElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL_TYPE);
+                        if (type.equals(CallstackXmlStrings.CALLSTACK_THREADLEVEL_VALUE)) {
+                            hostResolver = new CallStackHostUtils.AttributeValueHostResolver(Integer.valueOf(attribute));
+                        } else {
+                            hostResolver = new CallStackHostUtils.AttributeNameHostResolver(Integer.valueOf(attribute));
+                        }
+                    }
+                }
+                hostResolver = hostResolver == null ? new CallStackHostUtils.TraceHostIdResolver(Objects.requireNonNull(getTrace())) : hostResolver;
+
+                callstacks.add(new CallStackSeries(ss, patterns, 0, element.getAttribute(TmfXmlStrings.NAME), hostResolver, resolver));
             }
             fCallStacks = callstacks;
         }
