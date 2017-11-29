@@ -136,10 +136,11 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
         Collection<CallStackSeries> callstacks = fCallStacks;
         if (callstacks == null) {
             ITmfStateSystem ss = getStateSystem();
-            if (ss == null) {
+            ITmfTrace trace = getTrace();
+            if (ss == null || trace == null) {
                 return Collections.emptySet();
             }
-            callstacks = Collections.singleton(new CallStackSeries(ss, getPatterns(), 0, "", getHostId(), getCallStackTidResolver())); //$NON-NLS-1$
+            callstacks = Collections.singleton(new CallStackSeries(ss, getPatterns(), 0, "", new CallStackHostUtils.TraceHostIdResolver(trace), getCallStackTidResolver())); //$NON-NLS-1$
             fCallStacks = callstacks;
         }
         return callstacks;

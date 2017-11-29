@@ -24,6 +24,7 @@ import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CalledFunctionFactory;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
@@ -49,7 +50,7 @@ public class CallStack {
     private final @Nullable IThreadIdProvider fThreadIdProvider;
     private final ITmfStateSystem fStateSystem;
     private final List<Integer> fQuarks;
-    private final String fHostId;
+    private final IHostIdProvider fHostProvider;
 
     /**
      * Constructor
@@ -60,17 +61,17 @@ public class CallStack {
      *            The quarks corresponding to each of the depth levels
      * @param element
      *            The element this callstack belongs to
-     * @param hostId
-     *            The ID of the host this callstack is from
+     * @param hostIdProvider
+     *            The provider of the host ID for this callstack
      * @param threadIdProvider
      *            The provider of the thread ID for this callstack
      */
-    public CallStack(ITmfStateSystem ss, List<Integer> quarks, ICallStackElement element, String hostId, @Nullable IThreadIdProvider threadIdProvider) {
+    public CallStack(ITmfStateSystem ss, List<Integer> quarks, ICallStackElement element, IHostIdProvider hostIdProvider, @Nullable IThreadIdProvider threadIdProvider) {
         fSymbolKeyElement = element;
         fThreadIdProvider = threadIdProvider;
         fStateSystem = ss;
         fQuarks = quarks;
-        fHostId = hostId;
+        fHostProvider = hostIdProvider;
     }
 
     /**
@@ -120,13 +121,17 @@ public class CallStack {
                 if (!callInterval.getStateValue().isNull()) {
                     int threadId = getThreadId(callInterval.getStartTime());
                     callList.add(CalledFunctionFactory.create(callInterval.getStartTime(), callInterval.getEndTime() + 1, depth, callInterval.getStateValue(), getSymbolKeyAt(callInterval.getStartTime()), threadId,
-                            null, ModelManager.getModelFor(fHostId)));
+                            null, ModelManager.getModelFor(getHostId(callInterval.getStartTime()))));
                 }
             }
             return callList;
         } catch (AttributeNotFoundException | StateSystemDisposedException | TimeRangeException e) {
             return Collections.EMPTY_LIST;
         }
+    }
+
+    private String getHostId(long time) {
+        return fHostProvider.apply(time);
     }
 
     /**
@@ -183,7 +188,7 @@ public class CallStack {
             }
             if (!interval.getStateValue().isNull() && interval.getStartTime() >= time) {
                 return CalledFunctionFactory.create(interval.getStartTime(), interval.getEndTime() + 1, depth, interval.getStateValue(), getSymbolKeyAt(interval.getStartTime()), getThreadId(interval.getStartTime()), null,
-                        ModelManager.getModelFor(fHostId));
+                        ModelManager.getModelFor(getHostId(time)));
             }
         } catch (StateSystemDisposedException e) {
 
@@ -295,7 +300,7 @@ public class CallStack {
         if (tid < 0) {
             return null;
         }
-        return new HostThread(fHostId, tid);
+        return new HostThread(getHostId(time), tid);
     }
 
     /**
@@ -379,7 +384,7 @@ public class CallStack {
      * @return <code>true</code> if kernel statuses are available for this callstack
      */
     public boolean hasKernelStatuses() {
-        IHostModel model = ModelManager.getModelFor(fHostId);
+        IHostModel model = ModelManager.getModelFor(getHostId(getEndTime()));
         return model.isThreadStatusAvailable();
     }
 
@@ -393,7 +398,7 @@ public class CallStack {
      *         the available data.
      */
     public Iterator<ProcessStatusInterval> getKernelStatuses(ICalledFunction function) {
-        IHostModel model = ModelManager.getModelFor(fHostId);
+        IHostModel model = ModelManager.getModelFor(getHostId(function.getStart()));
         return model.getThreadStatusIntervals(function.getThreadId(), function.getStart(), function.getEnd());
     }
 

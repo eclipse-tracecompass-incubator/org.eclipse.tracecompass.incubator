@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
@@ -79,7 +80,7 @@ public class CallGraphAnalysisStub extends CallGraphAnalysis {
         @Override
         public Collection<CallStackSeries> getCallStackSeries() {
             List<String @NonNull []> patterns = fPatterns;
-            return Collections.singleton(new CallStackSeries(fSs, patterns == null ? PATTERNS : patterns, 0, "", getHostId(), new CallStackSeries.AttributeValueThreadResolver(1))); //$NON-NLS-1$
+            return Collections.singleton(new CallStackSeries(fSs, patterns == null ? PATTERNS : patterns, 0, "", new CallStackHostUtils.TraceHostIdResolver(getTrace()), new CallStackSeries.AttributeValueThreadResolver(1))); //$NON-NLS-1$
         }
 
         @Override

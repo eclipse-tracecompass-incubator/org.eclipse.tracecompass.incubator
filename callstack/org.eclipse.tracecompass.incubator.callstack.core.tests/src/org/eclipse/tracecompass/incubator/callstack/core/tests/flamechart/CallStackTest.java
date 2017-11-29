@@ -22,6 +22,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
@@ -31,6 +32,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallStackAnalysisStub;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CalledFunctionFactory;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.junit.Test;
 
 /**
@@ -82,9 +84,11 @@ public class CallStackTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess1(ICallStackElement element) {
+    private void verifyProcess1(ICallStackElement element) {
         Collection<ICallStackElement> children = element.getChildren();
         IHostModel model = ModelManager.getModelFor("");
+        ITmfTrace trace = getTrace();
+        assertNotNull(trace);
         for (ICallStackElement thread : children) {
             assertEquals(element, thread.getParentElement());
             assertTrue(thread instanceof InstrumentedCallStackElement);
@@ -116,6 +120,10 @@ public class CallStackTest extends CallStackTestBase {
                 callList = callStack.getCallListAtDepth(3, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(1, callList.size());
                 assertEquals(CalledFunctionFactory.create(4L, 5L, 3, "op3", 1, 2, null, model), callList.get(0));
+
+                /* Check the host thread */
+                assertEquals(new HostThread(trace.getHostId(), 2), callStack.getHostThread(1L));
+                assertEquals(new HostThread(trace.getHostId(), 2), callStack.getHostThread(20L));
             }
                 break;
             case "3": {
@@ -136,6 +144,10 @@ public class CallStackTest extends CallStackTestBase {
                 assertEquals(2, callList.size());
                 assertEquals(CalledFunctionFactory.create(5L, 6L, 2, "op3", 1, 3, null, model), callList.get(0));
                 assertEquals(CalledFunctionFactory.create(7L, 13L, 2, "op2", 1, 3, null, model), callList.get(1));
+
+                /* Check the host thread */
+                assertEquals(new HostThread(trace.getHostId(), 3), callStack.getHostThread(1L));
+                assertEquals(new HostThread(trace.getHostId(), 3), callStack.getHostThread(20L));
             }
                 break;
             default:
@@ -144,9 +156,11 @@ public class CallStackTest extends CallStackTestBase {
         }
     }
 
-    private static void verifyProcess5(ICallStackElement element) {
+    private void verifyProcess5(ICallStackElement element) {
         Collection<ICallStackElement> children = element.getChildren();
         IHostModel model = ModelManager.getModelFor("");
+        ITmfTrace trace = getTrace();
+        assertNotNull(trace);
         for (ICallStackElement thread : children) {
             assertTrue(thread instanceof InstrumentedCallStackElement);
             assertTrue(thread.isLeaf());
@@ -179,6 +193,10 @@ public class CallStackTest extends CallStackTestBase {
                 assertEquals(2, callList.size());
                 assertEquals(CalledFunctionFactory.create(4L, 6L, 3, "op1", 1, 6, null, model), callList.get(0));
                 assertEquals(CalledFunctionFactory.create(9L, 10L, 3, "op3", 1, 6, null, model), callList.get(1));
+
+                /* Check the host thread */
+                assertEquals(new HostThread(trace.getHostId(), 6), callStack.getHostThread(1L));
+                assertEquals(new HostThread(trace.getHostId(), 6), callStack.getHostThread(20L));
             }
                 break;
             case "7": {
@@ -205,6 +223,10 @@ public class CallStackTest extends CallStackTestBase {
                 callList = callStack.getCallListAtDepth(3, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(1, callList.size());
                 assertEquals(CalledFunctionFactory.create(10L, 11L, 3, "op3", 1, 6, null, model), callList.get(0));
+
+                /* Check the host thread */
+                assertEquals(new HostThread(trace.getHostId(), 7), callStack.getHostThread(1L));
+                assertEquals(new HostThread(trace.getHostId(), 7), callStack.getHostThread(20L));
 
             }
                 break;

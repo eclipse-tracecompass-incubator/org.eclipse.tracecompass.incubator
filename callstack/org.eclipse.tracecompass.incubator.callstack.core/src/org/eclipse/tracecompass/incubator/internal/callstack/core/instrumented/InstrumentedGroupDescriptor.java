@@ -25,7 +25,6 @@ public class InstrumentedGroupDescriptor extends CallStackGroupDescriptor {
 
     private final String[] fSubPattern;
     private final ITmfStateSystem fSs;
-    private final String fHostId;
 
     /**
      * Constructor
@@ -39,14 +38,11 @@ public class InstrumentedGroupDescriptor extends CallStackGroupDescriptor {
      *            constructed or <code>null</code> if this group is the leaf
      * @param isSymbolKeyGroup
      *            Whether this level contains the symbol key
-     * @param hostId
-     *            The ID of the host these callstack groups are from
      */
-    public InstrumentedGroupDescriptor(ITmfStateSystem ss, String[] subPath, @Nullable InstrumentedGroupDescriptor nextGroup, boolean isSymbolKeyGroup, String hostId) {
+    public InstrumentedGroupDescriptor(ITmfStateSystem ss, String[] subPath, @Nullable InstrumentedGroupDescriptor nextGroup, boolean isSymbolKeyGroup) {
         super(String.valueOf(StringUtils.join(subPath, '/')), nextGroup, isSymbolKeyGroup);
         fSubPattern = subPath;
         fSs = ss;
-        fHostId = hostId;
     }
 
     /**
@@ -67,17 +63,6 @@ public class InstrumentedGroupDescriptor extends CallStackGroupDescriptor {
      */
     public ITmfStateSystem getStateSystem() {
         return fSs;
-    }
-
-    /**
-     * Get the host ID this group descriptor is for
-     *
-     * TODO: Do we need this?
-     *
-     * @return The host ID
-     */
-    public String getHostId() {
-        return fHostId;
     }
 
     @Override

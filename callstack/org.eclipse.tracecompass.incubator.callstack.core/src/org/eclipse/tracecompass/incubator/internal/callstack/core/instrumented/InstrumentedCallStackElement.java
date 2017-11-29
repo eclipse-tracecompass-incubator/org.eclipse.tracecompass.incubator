@@ -22,6 +22,8 @@ import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdResolver;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
@@ -42,18 +44,17 @@ public class InstrumentedCallStackElement extends CallStackElement {
 
     private final ITmfStateSystem fStateSystem;
     private final int fQuark;
-    private final String fHostId;
+    private final IHostIdResolver fHostResolver;
     private final @Nullable IThreadIdResolver fThreadIdResolver;
 
     private @Nullable Collection<ICallStackElement> fChildren;
-    private @Nullable IThreadIdProvider fThreadIdProvider = null;
     private @Nullable CallStack fCallstack = null;
 
     /**
      * Constructor
      *
-     * @param hostId
-     *            The ID of the host this callstack part of
+     * @param hostResolver
+     *            The resolver for the host ID for the callstack
      * @param stateSystem
      *            The state system containing the callstack
      * @param quark
@@ -68,7 +69,7 @@ public class InstrumentedCallStackElement extends CallStackElement {
      *            The parent element or <code>null</code> if this is the root
      *            element
      */
-    public InstrumentedCallStackElement(String hostId, ITmfStateSystem stateSystem, Integer quark,
+    public InstrumentedCallStackElement(IHostIdResolver hostResolver, ITmfStateSystem stateSystem, Integer quark,
             InstrumentedGroupDescriptor group,
             @Nullable InstrumentedGroupDescriptor nextGroup,
             @Nullable IThreadIdResolver threadIdResolver,
@@ -76,11 +77,8 @@ public class InstrumentedCallStackElement extends CallStackElement {
         super(INSTRUMENTED, group, nextGroup, parent);
         fStateSystem = stateSystem;
         fQuark = quark;
-        fHostId = hostId;
+        fHostResolver = hostResolver;
         fThreadIdResolver = threadIdResolver;
-        if (threadIdResolver != null) {
-            fThreadIdProvider = threadIdResolver.resolve(hostId, this);
-        }
     }
 
     @Override
@@ -110,20 +108,22 @@ public class InstrumentedCallStackElement extends CallStackElement {
      *
      * @param rootGroup
      *            The root group descriptor
+     * @param hostResolver
+     *            The host ID resolver
      * @param resolver
      *            the thread ID resolver
      * @return A collection of elements that are roots of the given callstack
      *         grouping
      */
-    public static Collection<ICallStackElement> getRootElements(InstrumentedGroupDescriptor rootGroup, @Nullable IThreadIdResolver resolver) {
-        return getNextElements(rootGroup, rootGroup.getStateSystem(), ITmfStateSystem.ROOT_ATTRIBUTE, rootGroup.getHostId(), resolver, null);
+    public static Collection<ICallStackElement> getRootElements(InstrumentedGroupDescriptor rootGroup, IHostIdResolver hostResolver, @Nullable IThreadIdResolver resolver) {
+        return getNextElements(rootGroup, rootGroup.getStateSystem(), ITmfStateSystem.ROOT_ATTRIBUTE, hostResolver, resolver, null);
     }
 
     private Collection<ICallStackElement> getNextGroupElements(InstrumentedGroupDescriptor nextGroup) {
-        return getNextElements(nextGroup, fStateSystem, fQuark, fHostId, fThreadIdResolver, this);
+        return getNextElements(nextGroup, fStateSystem, fQuark, fHostResolver, fThreadIdResolver, this);
     }
 
-    private static Collection<ICallStackElement> getNextElements(InstrumentedGroupDescriptor nextGroup, ITmfStateSystem stateSystem, int baseQuark, String hostId, @Nullable IThreadIdResolver threadIdProvider, @Nullable InstrumentedCallStackElement parent) {
+    private static Collection<ICallStackElement> getNextElements(InstrumentedGroupDescriptor nextGroup, ITmfStateSystem stateSystem, int baseQuark, IHostIdResolver hostResolver, @Nullable IThreadIdResolver threadIdProvider, @Nullable InstrumentedCallStackElement parent) {
         // Get the elements from the base quark at the given pattern
         List<Integer> quarks = stateSystem.getQuarks(baseQuark, nextGroup.getSubPattern());
         if (quarks.isEmpty()) {
@@ -134,7 +134,7 @@ public class InstrumentedCallStackElement extends CallStackElement {
         // If the next level is null, then this is a callstack final element
         List<ICallStackElement> elements = new ArrayList<>(quarks.size());
         for (Integer quark : quarks) {
-            InstrumentedCallStackElement element = new InstrumentedCallStackElement(hostId, stateSystem, quark,
+            InstrumentedCallStackElement element = new InstrumentedCallStackElement(hostResolver, stateSystem, quark,
                     nextGroup, nextLevel, threadIdProvider, parent);
             if (nextGroup.isSymbolKeyGroup()) {
                 element.setSymbolKeyElement(element);
@@ -152,17 +152,6 @@ public class InstrumentedCallStackElement extends CallStackElement {
      */
     protected @Nullable IThreadIdResolver getThreadIdResolver() {
         return fThreadIdResolver;
-    }
-
-    /**
-     * Get the ID of the host this callstack is part of
-     *
-     * FIXME: Can a callstack cover multiple hosts? Definitely
-     *
-     * @return the ID of the host this callstack is for
-     */
-    public String getHostId() {
-        return fHostId;
     }
 
     @Override
@@ -237,8 +226,11 @@ public class InstrumentedCallStackElement extends CallStackElement {
     public CallStack getCallStack() {
         CallStack callstack  = fCallstack;
         if (callstack == null) {
+            IHostIdProvider hostProvider = fHostResolver.apply(this);
+            IThreadIdResolver threadIdResolver = fThreadIdResolver;
+            IThreadIdProvider threadIdProvider = threadIdResolver == null ? null : threadIdResolver.resolve(hostProvider, this);
             List<Integer> subAttributes = getStackQuarks();
-            callstack =  new CallStack(getStateSystem(), subAttributes, this, getHostId(), fThreadIdProvider);
+            callstack =  new CallStack(getStateSystem(), subAttributes, this, hostProvider, threadIdProvider);
             fCallstack = callstack;
         }
         return callstack;

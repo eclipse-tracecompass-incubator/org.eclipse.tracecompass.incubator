@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
@@ -28,6 +29,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.SymbolAspect;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
@@ -136,7 +138,7 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
                     }
                 }
 
-                callstacks.add(new CallStackSeries(ss, patterns, 0, element.getAttribute(TmfXmlStrings.NAME), getHostId(), resolver));
+                callstacks.add(new CallStackSeries(ss, patterns, 0, element.getAttribute(TmfXmlStrings.NAME), new CallStackHostUtils.TraceHostIdResolver(Objects.requireNonNull(getTrace())), resolver));
             }
             fCallStacks = callstacks;
         }

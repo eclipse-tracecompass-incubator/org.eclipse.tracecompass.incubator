@@ -12,19 +12,24 @@ package org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyst
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdResolver;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedGroupDescriptor;
@@ -35,6 +40,7 @@ import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 
@@ -191,11 +197,11 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
 
         private final ITmfStateSystem fSs;
         private final int fCpuQuark;
-        private final IHostModel fModel;
+        private final IHostIdProvider fHostProvider;
 
-        public CpuThreadProvider(String hostId, ITmfStateSystem ss, int quark, String[] path) {
+        public CpuThreadProvider(IHostIdProvider hostProvider, ITmfStateSystem ss, int quark, String[] path) {
             fSs = ss;
-            fModel = ModelManager.getModelFor(hostId);
+            fHostProvider = hostProvider;
             // Get the cpu quark
             List<@NonNull Integer> quarks = ss.getQuarks(quark, path);
             fCpuQuark = quarks.isEmpty() ? ITmfStateSystem.INVALID_ATTRIBUTE : quarks.get(0);
@@ -216,7 +222,8 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
                 int cpu = querySingleState.getStateValue().unboxInt();
                 // The thread running is the one on the CPU at the beginning of this interval
                 long startTime = querySingleState.getStartTime();
-                return fModel.getThreadOnCpu(cpu, startTime);
+                IHostModel model = ModelManager.getModelFor(fHostProvider.apply(startTime));
+                return model.getThreadOnCpu(cpu, startTime);
             } catch (StateSystemDisposedException e) {
 
             }
@@ -233,13 +240,13 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
         /**
          * Get the actual thread ID provider from this resolver
          *
-         * @param hostId
-         *            The ID of the host the callstack is from
+         * @param hostProvider
+         *            The provider of the host ID for the callstack
          * @param element
          *            The leaf element of the callstack
          * @return The thread ID provider
          */
-        @Nullable IThreadIdProvider resolve(String hostId, ICallStackElement element);
+        @Nullable IThreadIdProvider resolve(IHostIdProvider hostProvider, ICallStackElement element);
 
     }
 
@@ -263,7 +270,7 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
         }
 
         @Override
-        public @Nullable IThreadIdProvider resolve(String hostId, ICallStackElement element) {
+        public @Nullable IThreadIdProvider resolve(IHostIdProvider hostProvider, ICallStackElement element) {
             if (!(element instanceof InstrumentedCallStackElement)) {
                 throw new IllegalArgumentException();
             }
@@ -305,7 +312,7 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
         }
 
         @Override
-        public @Nullable IThreadIdProvider resolve(String hostId, ICallStackElement element) {
+        public @Nullable IThreadIdProvider resolve(IHostIdProvider hostProvider, ICallStackElement element) {
             if (!(element instanceof InstrumentedCallStackElement)) {
                 throw new IllegalArgumentException();
             }
@@ -346,20 +353,21 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
         }
 
         @Override
-        public @Nullable IThreadIdProvider resolve(String hostId, ICallStackElement element) {
+        public @Nullable IThreadIdProvider resolve(IHostIdProvider hostProvider, ICallStackElement element) {
             if (!(element instanceof InstrumentedCallStackElement)) {
                 throw new IllegalArgumentException();
             }
             InstrumentedCallStackElement insElement = (InstrumentedCallStackElement) element;
 
-            return new CpuThreadProvider(hostId, insElement.getStateSystem(), insElement.getQuark(), fPath);
+            return new CpuThreadProvider(hostProvider, insElement.getStateSystem(), insElement.getQuark(), fPath);
         }
 
     }
 
     private final InstrumentedGroupDescriptor fRootGroup;
     private final String fName;
-    private @Nullable IThreadIdResolver fResolver;
+    private final @Nullable IThreadIdResolver fResolver;
+    private final IHostIdResolver fHostResolver;
 
     /**
      * Constructor
@@ -376,25 +384,26 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
      *            instance a process ID
      * @param name
      *            A name for this callstack
-     * @param hostId
-     *            The ID of the host where this callstack happens
+     * @param hostResolver
+     *            The host ID resolver for this callstack
      * @param threadResolver
      *            The thread resolver
      */
-    public CallStackSeries(ITmfStateSystem ss, List<String[]> patternPaths, int symbolKeyLevelIndex, String name, String hostId, @Nullable IThreadIdResolver threadResolver) {
+    public CallStackSeries(ITmfStateSystem ss, List<String[]> patternPaths, int symbolKeyLevelIndex, String name, IHostIdResolver hostResolver, @Nullable IThreadIdResolver threadResolver) {
         // Build the groups from the state system and pattern paths
         if (patternPaths.isEmpty()) {
             throw new IllegalArgumentException("State system callstack: the list of paths should not be empty"); //$NON-NLS-1$
         }
         int startIndex = patternPaths.size() - 1;
-        InstrumentedGroupDescriptor prevLevel = new InstrumentedGroupDescriptor(ss, patternPaths.get(startIndex), null, symbolKeyLevelIndex == startIndex ? true : false, hostId);
+        InstrumentedGroupDescriptor prevLevel = new InstrumentedGroupDescriptor(ss, patternPaths.get(startIndex), null, symbolKeyLevelIndex == startIndex ? true : false);
         for (int i = startIndex - 1; i >= 0; i--) {
-            InstrumentedGroupDescriptor level = new InstrumentedGroupDescriptor(ss, patternPaths.get(i), prevLevel, symbolKeyLevelIndex == i ? true : false, hostId);
+            InstrumentedGroupDescriptor level = new InstrumentedGroupDescriptor(ss, patternPaths.get(i), prevLevel, symbolKeyLevelIndex == i ? true : false);
             prevLevel = level;
         }
         fRootGroup = prevLevel;
         fName = name;
         fResolver = threadResolver;
+        fHostResolver = hostResolver;
     }
 
     /**
@@ -403,7 +412,7 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
      * @return The root elements of the callstack series
      */
     public Collection<ICallStackElement> getRootElements() {
-        return InstrumentedCallStackElement.getRootElements(fRootGroup, fResolver);
+        return InstrumentedCallStackElement.getRootElements(fRootGroup, fHostResolver, fResolver);
     }
 
     /**
@@ -435,14 +444,6 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
         List<ICallStackElement> list = new ArrayList<>();
         element.getChildren().forEach(e -> list.addAll(getLeafElements(e)));
         return list;
-    }
-
-    private Collection<Integer> getCallStackQuarks() {
-        // Get the leaf elements and their callstacks
-        return getRootElements().stream().flatMap(e -> getLeafElements(e).stream())
-                .filter(e -> e instanceof InstrumentedCallStackElement)
-                .flatMap(e -> ((InstrumentedCallStackElement) e).getStackQuarks().stream())
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -540,6 +541,18 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
         throw new UnsupportedOperationException("This segment store does not support clearing the data"); //$NON-NLS-1$
     }
 
+    private Map<Integer, CallStack> getCallStackQuarks() {
+        Map<Integer, CallStack> quarkToElement = new HashMap<>();
+        // Get the leaf elements and their callstacks
+        getRootElements().stream().flatMap(e -> getLeafElements(e).stream())
+                .filter(e -> e instanceof InstrumentedCallStackElement)
+                .map(e -> (InstrumentedCallStackElement) e)
+                .forEach(e -> {
+                    e.getStackQuarks().forEach(c -> quarkToElement.put(c, e.getCallStack()));
+                });
+        return quarkToElement;
+    }
+
     @Override
     public Iterable<ISegment> getIntersectingElements(long start, long end) {
         ITmfStateSystem stateSystem = fRootGroup.getStateSystem();
@@ -548,12 +561,23 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
         if (startTime > endTime) {
             return Collections.emptyList();
         }
-        Collection<Integer> quarks = getCallStackQuarks();
+        Map<Integer, CallStack> quarksToElement = getCallStackQuarks();
         try {
-            Iterable<ITmfStateInterval> query2d = stateSystem.query2D(quarks, startTime, endTime);
+            Iterable<ITmfStateInterval> query2d = stateSystem.query2D(quarksToElement.keySet(), startTime, endTime);
             query2d = Iterables.filter(query2d, interval -> !interval.getStateValue().isNull());
-            return Iterables.transform(query2d, interval -> CalledFunctionFactory.create(interval.getStartTime(), interval.getEndTime() + 1, 0, interval.getStateValue(), -1, IHostModel.UNKNOWN_TID,
-                    null, ModelManager.getModelFor(fRootGroup.getHostId())));
+            Function<ITmfStateInterval, ICalledFunction> fct = interval -> {
+                CallStack callstack = quarksToElement.get(interval.getAttribute());
+                if (callstack == null) {
+                    throw new NullPointerException("The quark was in that map in the first place, there must be a callstack to go with it!"); //$NON-NLS-1$
+                }
+                HostThread hostThread = callstack.getHostThread(interval.getStartTime());
+                if (hostThread == null) {
+                    hostThread = new HostThread(StringUtils.EMPTY, IHostModel.UNKNOWN_TID);
+                }
+                return CalledFunctionFactory.create(interval.getStartTime(), interval.getEndTime() + 1, 0, interval.getStateValue(), -1, hostThread.getTid(),
+                        null, ModelManager.getModelFor(hostThread.getHost()));
+            };
+            return Iterables.transform(query2d, fct);
         } catch (StateSystemDisposedException e) {
             Activator.getInstance().logError("Error getting intersecting elements: StateSystemDisposed"); //$NON-NLS-1$
         }
