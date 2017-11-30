@@ -27,7 +27,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.Action;
@@ -170,9 +173,12 @@ public class FlameChartView extends AbstractTimeGraphView {
     // a view
     private TmfWindowRangeUpdatedSignal fSavedRangeSyncSignal;
 
-    // When set to true, syncToTime() will select the first call stack entry
-    // whose current state start time exactly matches the sync time.
-    private boolean fSyncSelection = false;
+    // When set to a value, if syncToTime() syncs to this value, it will select the
+    // first call stack entry whose current state start time exactly matches this
+    // time.
+    private long fSyncTime = -1;
+
+    private Job fJob;
 
     // ------------------------------------------------------------------------
     // Classes
@@ -491,9 +497,9 @@ public class FlameChartView extends AbstractTimeGraphView {
                 } else {
                     getTimeGraphViewer().setSelectionRange(beginTime, endTime, true);
                 }
-                fSyncSelection = true;
+                fSyncTime = beginTime;
                 synchingToTime(beginTime);
-                fSyncSelection = false;
+                fSyncTime = -1;
                 startZoomThread(getTimeGraphViewer().getTime0(), getTimeGraphViewer().getTime1());
             }
         });
@@ -786,36 +792,57 @@ public class FlameChartView extends AbstractTimeGraphView {
 
     @Override
     protected void synchingToTime(final long time) {
-        List<TimeGraphEntry> traceEntries = getEntryList(getTrace());
-        if (traceEntries == null) {
-            return;
+        if(fJob!= null ) {
+            fJob.cancel();
         }
-        Consumer<TimeGraphEntry> consumer = new Consumer<TimeGraphEntry>() {
-            @Override
-            public void accept(TimeGraphEntry entry) {
-                if (entry instanceof FlameChartEntry) {
-                    FlameChartEntry callStackEntry = (FlameChartEntry) entry;
-                    ICalledFunction currentFunction = callStackEntry.updateAt(time);
+        long syncTime = fSyncTime;
+        fJob = new Job("Flame Chart: Synching to " + time) { //$NON-NLS-1$
 
-                    if (fSyncSelection && currentFunction != null) {
-                        if (time == currentFunction.getStart()) {
-                            fSyncSelection = false;
-                            Display.getDefault().asyncExec(() -> {
-                                getTimeGraphViewer().setSelection(callStackEntry, true);
-                                getTimeGraphViewer().getTimeGraphControl().fireSelectionChanged();
-                            });
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                List<TimeGraphEntry> traceEntries = getEntryList(getTrace());
+                if (traceEntries == null) {
+                    return Status.OK_STATUS;
+                }
+                Consumer<TimeGraphEntry> consumer = new Consumer<TimeGraphEntry>() {
+
+                    private long fLocalSyncTime = syncTime;
+
+                    @Override
+                    public void accept(TimeGraphEntry entry) {
+                        if (monitor.isCanceled()) {
+                            return;
+                        }
+                        if (!(entry instanceof FlameChartEntry)) {
+                            entry.getChildren().forEach(this);
+                            return;
+                        }
+                        FlameChartEntry callStackEntry = (FlameChartEntry) entry;
+                        ICalledFunction currentFunction = callStackEntry.updateAt(time);
+
+                        if (fLocalSyncTime == time && currentFunction != null) {
+                            if (time == currentFunction.getStart()) {
+                                fLocalSyncTime = -1;
+                                Display.getDefault().asyncExec(() -> {
+                                    getTimeGraphViewer().setSelection(callStackEntry, true);
+                                    getTimeGraphViewer().getTimeGraphControl().fireSelectionChanged();
+                                });
+                            }
                         }
                     }
-                    return;
+                };
+                traceEntries.forEach(consumer);
+                if (monitor.isCanceled()) {
+                    return Status.CANCEL_STATUS;
                 }
-                entry.getChildren().forEach(this);
-            }
 
+                Display.getDefault().asyncExec(() -> {
+                    getTimeGraphViewer().refresh();
+                });
+                return Status.OK_STATUS;
+            }
         };
-        traceEntries.forEach(consumer);
-        if (Display.getCurrent() != null) {
-            getTimeGraphViewer().refresh();
-        }
+        fJob.schedule();
     }
 
     private void contributeToActionBars() {
