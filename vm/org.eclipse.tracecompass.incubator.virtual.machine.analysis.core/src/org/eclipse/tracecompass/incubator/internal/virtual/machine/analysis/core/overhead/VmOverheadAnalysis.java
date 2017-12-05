@@ -18,8 +18,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.TraceHostIdResolver;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVMInformationProvider;
@@ -159,6 +161,28 @@ public class VmOverheadAnalysis extends InstrumentedCallStackAnalysis {
     @Override
     protected @Nullable IThreadIdResolver getCallStackTidResolver() {
         return new VirtualCpuTidResolver(HOST_CPU_TID_PATH);
+    }
+
+    @Override
+    protected TraceHostIdResolver getCallStackHostResolver(ITmfTrace trace) {
+        // FIXME: There should be a better way to get the host ID
+        FusedVirtualMachineAnalysis analysisModule = TmfTraceUtils.getAnalysisModuleOfClass(trace, FusedVirtualMachineAnalysis.class, FusedVirtualMachineAnalysis.ID);
+        if (analysisModule == null) {
+            return super.getCallStackHostResolver(trace);
+        }
+        analysisModule.schedule();
+        analysisModule.waitForCompletion();
+        ITmfStateSystem stateSystem = analysisModule.getStateSystem();
+        if (stateSystem == null) {
+            return super.getCallStackHostResolver(trace);
+        }
+        Optional<ITmfTrace> hostTrace = TmfTraceManager.getTraceSet(trace).stream()
+                .filter(t -> FusedVMInformationProvider.getParentMachineHostId(stateSystem, t.getHostId()).isEmpty())
+                .findFirst();
+        if (hostTrace.isPresent()) {
+            return new CallStackHostUtils.TraceHostIdResolver(hostTrace.get());
+        }
+        return super.getCallStackHostResolver(trace);
     }
 
     @Override

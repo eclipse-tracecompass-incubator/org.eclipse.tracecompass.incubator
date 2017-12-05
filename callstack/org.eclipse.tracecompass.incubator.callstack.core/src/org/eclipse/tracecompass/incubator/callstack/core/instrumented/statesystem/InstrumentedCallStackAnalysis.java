@@ -32,6 +32,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.SymbolAspect;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.TraceHostIdResolver;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
@@ -140,10 +141,22 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
             if (ss == null || trace == null) {
                 return Collections.emptySet();
             }
-            callstacks = Collections.singleton(new CallStackSeries(ss, getPatterns(), 0, "", new CallStackHostUtils.TraceHostIdResolver(trace), getCallStackTidResolver())); //$NON-NLS-1$
+            callstacks = Collections.singleton(new CallStackSeries(ss, getPatterns(), 0, "", getCallStackHostResolver(trace), getCallStackTidResolver())); //$NON-NLS-1$
             fCallStacks = callstacks;
         }
         return callstacks;
+    }
+
+    /**
+     * Get the callstack host ID resolver for this instrumented series. The default
+     * is to use the host name of the trace.
+     *
+     * @param trace
+     *            The trace this analysis is run on
+     * @return The host ID resolver
+     */
+    protected TraceHostIdResolver getCallStackHostResolver(ITmfTrace trace) {
+        return new CallStackHostUtils.TraceHostIdResolver(trace);
     }
 
     /**

@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.callstack.core.instrumented;
 import java.util.Collection;
 
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.ISegmentStoreProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 
@@ -32,6 +33,8 @@ public interface IFlameChartProvider extends IAnalysisModule, ISegmentStoreProvi
 
     /**
      * Get the ID of the host this callstack provider is for
+     *
+     * TODO: Deprecate me, now using the interfaces from {@link CallStackHostUtils}
      *
      * @return The ID of the host
      */
