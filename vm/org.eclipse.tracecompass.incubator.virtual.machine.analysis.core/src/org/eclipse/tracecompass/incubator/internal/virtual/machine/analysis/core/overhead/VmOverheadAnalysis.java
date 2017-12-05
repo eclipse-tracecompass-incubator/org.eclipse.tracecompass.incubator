@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
@@ -144,7 +145,7 @@ public class VmOverheadAnalysis extends InstrumentedCallStackAnalysis {
         }
 
         @Override
-        public @Nullable IThreadIdProvider resolve(String hostId, ICallStackElement element) {
+        public @Nullable IThreadIdProvider resolve(IHostIdProvider hostProvider, ICallStackElement element) {
             if (!(element instanceof InstrumentedCallStackElement)) {
                 throw new IllegalArgumentException();
             }
