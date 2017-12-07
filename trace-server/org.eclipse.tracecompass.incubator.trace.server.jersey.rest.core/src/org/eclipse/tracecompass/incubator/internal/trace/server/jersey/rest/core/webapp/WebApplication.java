@@ -73,6 +73,7 @@ public class WebApplication {
         rc.register(table);
         DiskActivityViewService diskService = new DiskActivityViewService();
         rc.register(diskService);
+        rc.register(new CORSFilter());
 
         /**
          * register a TraceManager, this allows it to be swappable with another
