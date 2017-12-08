@@ -792,7 +792,7 @@ public class FlameChartView extends AbstractTimeGraphView {
 
     @Override
     protected void synchingToTime(final long time) {
-        if(fJob!= null ) {
+        if (fJob != null) {
             fJob.cancel();
         }
         long syncTime = fSyncTime;
@@ -868,26 +868,26 @@ public class FlameChartView extends AbstractTimeGraphView {
 
     @Override
     protected void fillLocalToolBar(IToolBarManager manager) {
-        manager.add(getConfigureSymbolsAction());
-        manager.add(new Separator());
-        manager.add(getSortByNameAction());
-        manager.add(getSortByIdAction());
-        manager.add(getSortByTimeAction());
-        manager.add(new Separator());
-        manager.add(getTimeGraphViewer().getShowFilterDialogAction());
-        manager.add(new Separator());
-        manager.add(getTimeGraphViewer().getResetScaleAction());
-        manager.add(getPreviousEventAction());
-        manager.add(getNextEventAction());
-        manager.add(new Separator());
-        manager.add(getTimeGraphViewer().getToggleBookmarkAction());
-        manager.add(getTimeGraphViewer().getPreviousMarkerAction());
-        manager.add(getTimeGraphViewer().getNextMarkerAction());
-        manager.add(new Separator());
-        manager.add(getTimeGraphViewer().getPreviousItemAction());
-        manager.add(getTimeGraphViewer().getNextItemAction());
-        manager.add(getTimeGraphViewer().getZoomInAction());
-        manager.add(getTimeGraphViewer().getZoomOutAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getConfigureSymbolsAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new Separator());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getSortByNameAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getSortByIdAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getSortByTimeAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new Separator());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getTimeGraphViewer().getShowFilterDialogAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new Separator());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getTimeGraphViewer().getResetScaleAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getPreviousEventAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getNextEventAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new Separator());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getTimeGraphViewer().getToggleBookmarkAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getTimeGraphViewer().getPreviousMarkerAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getTimeGraphViewer().getNextMarkerAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new Separator());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getTimeGraphViewer().getPreviousItemAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getTimeGraphViewer().getNextItemAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getTimeGraphViewer().getZoomInAction());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, getTimeGraphViewer().getZoomOutAction());
     }
 
     @SuppressWarnings("restriction")
