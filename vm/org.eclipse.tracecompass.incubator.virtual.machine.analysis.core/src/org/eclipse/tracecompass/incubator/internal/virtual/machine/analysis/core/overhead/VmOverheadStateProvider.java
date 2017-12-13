@@ -88,6 +88,7 @@ public class VmOverheadStateProvider extends AbstractTmfStateProvider {
     private final Map<ITmfTrace, IKernelAnalysisEventLayout> fLayouts;
 
     private final Map<HostThread, GuestKernelThreadStatuses> fGuestThreads = new HashMap<>();
+    private final Map<HostThread, OverheadStatus> fPrevStatus = new HashMap<>();
 
     private class GuestKernelThreadStatuses {
 
@@ -117,6 +118,16 @@ public class VmOverheadStateProvider extends AbstractTmfStateProvider {
             return false;
         }
 
+    }
+
+    private class OverheadStatus {
+        private final @Nullable Object fLevel2;
+        private final @Nullable Object fLevel3;
+
+        public OverheadStatus(@Nullable Object level2, @Nullable  Object level3) {
+            fLevel2 = level2;
+            fLevel3 = level3;
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -254,8 +265,13 @@ public class VmOverheadStateProvider extends AbstractTmfStateProvider {
             int guestTid = model.getThreadOnCpu(vcpu.getCpuId().intValue(), ts);
             if (guestTid != IHostModel.UNKNOWN_TID) {
                 int quark = ss.getQuarkAbsoluteAndAdd(TRACES, vm.getTraceName(), THREADS, buildThreadAttributeName(guestTid, vcpu.getCpuId().intValue()), InstrumentedCallStackAnalysis.CALL_STACK);
-             // Just make sure this attribute exists, at the beginning of trace or if lost events, it may not
-                ss.getQuarkRelativeAndAdd(quark, LEVEL_1);
+                // Just make sure this attribute exists, at the beginning of trace or if lost
+                // events, it may not
+                int tidQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_1);
+                if (ss.queryOngoing(tidQuark) == null) {
+                    HostThread hostThread = new HostThread(event.getTrace().getHostId(), guestTid);
+                    createGuestThreadStatus(ss, hostThread, ts, tidQuark);
+                }
                 int preemptQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_2);
                 ss.removeAttribute(ts, preemptQuark);
                 int statusQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_3);
@@ -279,8 +295,13 @@ public class VmOverheadStateProvider extends AbstractTmfStateProvider {
             int guestTid = model.getThreadOnCpu(vcpu.getCpuId().intValue(), ts);
             if (guestTid != IHostModel.UNKNOWN_TID) {
                 int quark = ss.getQuarkAbsoluteAndAdd(TRACES, vm.getTraceName(), THREADS, buildThreadAttributeName(guestTid, vcpu.getCpuId().intValue()), InstrumentedCallStackAnalysis.CALL_STACK);
-             // Just make sure this attribute exists, at the beginning of trace or if lost events, it may not
-                ss.getQuarkRelativeAndAdd(quark, LEVEL_1);
+                // Just make sure this attribute exists, at the beginning of trace or if lost
+                // events, it may not
+                int tidQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_1);
+                if (ss.queryOngoing(tidQuark) == null) {
+                    HostThread hostThread = new HostThread(event.getTrace().getHostId(), guestTid);
+                    createGuestThreadStatus(ss, hostThread, ts, tidQuark);
+                }
                 int preemptQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_2);
                 ss.modifyAttribute(ts, STATUS_VMM_MODE, preemptQuark);
                 int statusQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_3);
@@ -349,7 +370,9 @@ public class VmOverheadStateProvider extends AbstractTmfStateProvider {
 
         quark = ss.getQuarkRelativeAndAdd(baseQuark, InstrumentedCallStackAnalysis.CALL_STACK);
         tidQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_1);
-        ss.modifyAttribute(ts, STATUS_RUNNING, tidQuark);
+        if (ss.queryOngoing(tidQuark) == null) {
+            ss.modifyAttribute(ts, STATUS_RUNNING, tidQuark);
+        }
         preemptQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_2);
         ss.removeAttribute(ts, preemptQuark);
         statusQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_3);
@@ -388,8 +411,12 @@ public class VmOverheadStateProvider extends AbstractTmfStateProvider {
                 // Just make sure this attribute exists, at the beginning of trace or if lost events, it may not
                 ss.getQuarkRelativeAndAdd(quark, LEVEL_1);
                 int preemptQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_2);
-                ss.modifyAttribute(ts, STATUS_VCPU_PREEMPTED, preemptQuark);
                 int statusQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_3);
+                // Save the previous statuses for this thread
+                fPrevStatus.put(new HostThread(vm.getHostId(), guestTid), new OverheadStatus(ss.queryOngoing(preemptQuark), ss.queryOngoing(statusQuark)));
+
+                // Set the overhead as vcpu preempted
+                ss.modifyAttribute(ts, STATUS_VCPU_PREEMPTED, preemptQuark);
                 if (prevState != null) {
                     ss.modifyAttribute(ts, String.valueOf(prevState), statusQuark);
                 }
@@ -404,13 +431,21 @@ public class VmOverheadStateProvider extends AbstractTmfStateProvider {
             if (guestTid != IHostModel.UNKNOWN_TID) {
                 int quark = ss.getQuarkAbsoluteAndAdd(TRACES, vm.getTraceName(), THREADS, buildThreadAttributeName(guestTid, vcpu.getCpuId().intValue()), InstrumentedCallStackAnalysis.CALL_STACK);
                 int tidQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_1);
-                ss.modifyAttribute(ts, STATUS_RUNNING, tidQuark);
+                if (ss.queryOngoing(tidQuark) == null) {
+                    ss.modifyAttribute(ts, STATUS_RUNNING, tidQuark);
+                }
+                // Reset to the previous overhead status
                 int preemptQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_2);
-                ss.removeAttribute(ts, preemptQuark);
                 int statusQuark = ss.getQuarkRelativeAndAdd(quark, LEVEL_3);
-                ss.removeAttribute(ts, statusQuark);
+                OverheadStatus overheadStatus = fPrevStatus.remove(new HostThread(vm.getHostId(), guestTid));
+                if (overheadStatus == null) {
+                    ss.removeAttribute(ts, preemptQuark);
+                    ss.removeAttribute(ts, statusQuark);
+                } else {
+                    ss.modifyAttribute(ts, overheadStatus.fLevel2, preemptQuark);
+                    ss.modifyAttribute(ts, overheadStatus.fLevel3, statusQuark);
+                }
             }
         }
     }
-
 }

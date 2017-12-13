@@ -18,10 +18,13 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.analysis.os.linux.core,
  org.eclipse.tracecompass.analysis.os.linux.core.tests,
  org.eclipse.tracecompass.tmf.core.tests,
- org.eclipse.tracecompass.statesystem.core.tests
+ org.eclipse.tracecompass.statesystem.core.tests,
+ org.eclipse.tracecompass.incubator.callstack.core,
+ org.eclipse.tracecompass.incubator.analysis.core
 Export-Package: org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests,
  org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.fused,
  org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.model,
+ org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.overhead,
  org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.trace,
  org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm,
  org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.virtual.resources
