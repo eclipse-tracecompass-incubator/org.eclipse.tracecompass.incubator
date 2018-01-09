@@ -44,12 +44,12 @@ The Qemu/KVM hypervisor require extra tracepoints not yet shipped in LTTng for b
 
 Obtain the source code with extra tracepoints, along with lttng-modules
 
-    # git clone https://github.com/giraldeau/lttng-modules.git
+    # git clone https://github.com/tahini/lttng-modules
     # cd lttng-modules
 
 Checkout the addons branch, compile and install lttng-modules as per the lttng-modules documentation.
 
-    # git checkout addons
+    # git checkout addons_vm
     # make
     # sudo make modules_install
     # sudo depmod -a
