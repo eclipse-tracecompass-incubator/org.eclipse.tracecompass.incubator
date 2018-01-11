@@ -12,7 +12,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>org.eclipse.tracecompass.incubator.tracetypes-parent</artifactId>
+    <artifactId>org.eclipse.tracecompass.incubator.doc</artifactId>
     <groupId>org.eclipse.tracecompass.incubator</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>

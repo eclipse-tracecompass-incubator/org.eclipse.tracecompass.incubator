@@ -4,7 +4,7 @@
         Generate Eclipse help content for the callstack User Guide
     </description>
 
-   <property name="document.title" value="Trace Compass callstack User Guide" />
+   <property name="document.title" value="Trace Compass Incubator Callstack User Guide" />
 
     <path id="wikitext.tasks.classpath">
         <!-- Search in the local Eclipse plugins directory for the Wikitext plugin -->
@@ -19,7 +19,7 @@
 
     <taskdef classpathref="wikitext.tasks.classpath" resource="org/eclipse/mylyn/wikitext/core/ant/tasks.properties" />
 
-    <target name="build" description="Generate Eclipse help content for the Trace Compass Incubator callstack User Guide">
+    <target name="build" description="Generate Eclipse help content for the Trace Compass Incubator Callstack User Guide">
         <wikitext-to-eclipse-help markupLanguage="MediaWiki"
             validate="true"
             failonvalidationerror="true"

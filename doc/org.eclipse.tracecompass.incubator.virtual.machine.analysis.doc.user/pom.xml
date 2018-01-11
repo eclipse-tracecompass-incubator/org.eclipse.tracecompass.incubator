@@ -12,15 +12,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>org.eclipse.tracecompass.incubator.analyses-parent</artifactId>
+    <artifactId>org.eclipse.tracecompass.incubator.doc</artifactId>
     <groupId>org.eclipse.tracecompass.incubator</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.eclipse.tracecompass.incubator.lttng2.ust.extras.doc.user</artifactId>
+  <artifactId>org.eclipse.tracecompass.incubator.virtual.machine.analysis.doc.user</artifactId>
   <packaging>eclipse-plugin</packaging>
 
-  <name>Trace Compass Incubator LTTng2 Ust Extras User Guide</name>
+  <name>Trace Compass Incubator Virtual Machine Analysis User Guide</name>
 
   <build>
     <plugins>
@@ -102,12 +102,12 @@
                   <target>
                     <delete includeemptydirs="false">
                       <fileset
-                        dir="${docDestination}/org.eclipse.tracecompass.incubator.lttng2.ust.extras.doc.user">
+                        dir="${docDestination}/org.eclipse.tracecompass.incubator.virtual.machine.analysis.doc.user">
                         <include name="**" />
                       </fileset>
                     </delete>
 
-                    <copy includeemptydirs="false" todir="${docDestination}/org.eclipse.tracecompass.incubator.lttng2.ust.extras.doc.user">
+                    <copy includeemptydirs="false" todir="${docDestination}/org.eclipse.tracecompass.incubator.virtual.machine.analysis.doc.user">
                       <fileset dir="doc" includes="*.html,images/**"/>
                     </copy>
                   </target>

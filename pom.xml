@@ -279,6 +279,7 @@
     <module>vm</module>
     <module>tracetypes</module>
     <module>trace-server</module>
+    <module>doc</module>
   </modules>
 
   <build>
