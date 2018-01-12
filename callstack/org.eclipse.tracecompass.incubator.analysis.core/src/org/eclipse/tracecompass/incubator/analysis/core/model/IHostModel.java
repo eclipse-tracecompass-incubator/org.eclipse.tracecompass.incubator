@@ -51,7 +51,25 @@ public interface IHostModel {
      * @return The ID of the thread running on the CPU, or {@link #UNKNOWN_TID}
      *         if it is not available
      */
-    int getThreadOnCpu(int cpu, long t);
+    default int getThreadOnCpu(int cpu, long t) {
+        return getThreadOnCpu(cpu, t, false);
+    }
+
+    /**
+     * Get which thread is running on the CPU at a given time, but may blocks if the
+     * answer is not available yet but may come later
+     *
+     * @param cpu
+     *            The CPU ID on which the thread is running
+     * @param t
+     *            The desired time
+     * @param block
+     *            If <code>true</code>, the method will block until the providers
+     *            have the data available.
+     * @return The ID of the thread running on the CPU, or {@link #UNKNOWN_TID} if
+     *         it is not available
+     */
+    int getThreadOnCpu(int cpu, long t, boolean block);
 
     /**
      * Get the amount of time a thread was active on the CPU (any CPU) during a

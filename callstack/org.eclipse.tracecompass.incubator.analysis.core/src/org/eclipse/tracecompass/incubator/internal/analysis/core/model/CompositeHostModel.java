@@ -56,9 +56,9 @@ public class CompositeHostModel implements IHostModel {
     }
 
     @Override
-    public int getThreadOnCpu(int cpu, long t) {
+    public int getThreadOnCpu(int cpu, long t, boolean block) {
         for (IThreadOnCpuProvider provider : fThreadOnCpuProviders) {
-            Integer tid = provider.getThreadOnCpuAtTime(cpu, t);
+            Integer tid = provider.getThreadOnCpuAtTime(cpu, t, block);
             if (tid != null && tid != IHostModel.UNKNOWN_TID) {
                 return tid;
             }

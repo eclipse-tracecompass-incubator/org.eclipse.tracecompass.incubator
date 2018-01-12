@@ -67,7 +67,7 @@ public class CompositeHostModelTest {
         }
 
         @Override
-        public @Nullable Integer getThreadOnCpuAtTime(int cpu, long time) {
+        public @Nullable Integer getThreadOnCpuAtTime(int cpu, long time, boolean block) {
             // On CPU 0 is tid 1, otherwise, return null
             if (cpu == 0) {
                 return 1;

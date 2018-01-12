@@ -32,8 +32,25 @@ public interface IThreadOnCpuProvider {
      * @return the current TID at the time on the CPU or {@code null} if not
      *         known
      */
+    default @Nullable Integer getThreadOnCpuAtTime(int cpu, long time) {
+        return getThreadOnCpuAtTime(cpu, time, false);
+    }
+
+    /**
+     * Gets the current thread ID on a given CPU for a given time, but may blocks if
+     * the answer is not available yet but may come later
+     *
+     * @param cpu
+     *            the CPU
+     * @param time
+     *            the time in nanoseconds
+     * @param block
+     *            If <code>true</code>, the method will block until the providers
+     *            have the data available.
+     * @return the current TID at the time on the CPU or {@code null} if not known
+     */
     @Nullable
-    Integer getThreadOnCpuAtTime(int cpu, long time);
+    Integer getThreadOnCpuAtTime(int cpu, long time, boolean block);
 
     /**
      * The list of host IDs for which this object providers information on
