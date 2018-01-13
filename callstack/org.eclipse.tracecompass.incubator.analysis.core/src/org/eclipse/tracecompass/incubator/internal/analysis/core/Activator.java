@@ -11,6 +11,7 @@ package org.eclipse.tracecompass.incubator.internal.analysis.core;
 
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
 import org.eclipse.tracecompass.incubator.analysis.core.aspects.AnalysisTidAspect;
+import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
@@ -44,6 +45,7 @@ public class Activator extends TraceCompassActivator {
 
     @Override
     protected void stopActions() {
+        ModelManager.disposeModels();
     }
 
 }

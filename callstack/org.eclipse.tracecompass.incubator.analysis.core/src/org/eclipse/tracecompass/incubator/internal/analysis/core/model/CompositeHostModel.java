@@ -28,19 +28,28 @@ import org.eclipse.tracecompass.incubator.analysis.core.concepts.IThreadOnCpuPro
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * Operating system model based on analyses who implement certain interfaces to
  * provider the necessary information. The analyses will need to implement one
  * of the interfaces found in package
- * {@link org.eclipse.tracecompass.incubator.analysis.core.concepts} and the analysis
- * module should be automatically picked up at creation time.
+ * {@link org.eclipse.tracecompass.incubator.analysis.core.concepts} and the
+ * analysis module should be automatically picked up at creation time.
  *
  * @author Geneviève Bastien
  */
 public class CompositeHostModel implements IHostModel {
 
+    private final Multimap<ITmfTrace, Object> fTraceObjectMap = HashMultimap.create();
     private final Set<ICpuTimeProvider> fCpuTimeProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<ICpuTimeProvider, Boolean>()));
     private final Set<IThreadOnCpuProvider> fThreadOnCpuProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<IThreadOnCpuProvider, Boolean>()));
     private final Set<ISamplingDataProvider> fSamplingDataProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<ISamplingDataProvider, Boolean>()));
@@ -49,10 +58,12 @@ public class CompositeHostModel implements IHostModel {
     /**
      * Constructor
      *
-     * @param hostId The ID of the host this model is for
+     * @param hostId
+     *            The ID of the host this model is for
      */
     public CompositeHostModel(String hostId) {
         fHostId = hostId;
+        TmfSignalManager.register(this);
     }
 
     @Override
@@ -99,6 +110,19 @@ public class CompositeHostModel implements IHostModel {
     }
 
     /**
+     * Set a CPU time provider for this host model
+     *
+     * @param trace
+     *            The trace associated with this provider
+     * @param provider
+     *            The CPU time provider
+     */
+    public void setCpuTimeProvider(ITmfTrace trace, ICpuTimeProvider provider) {
+        fCpuTimeProviders.add(provider);
+        fTraceObjectMap.put(trace, provider);
+    }
+
+    /**
      * Set a thread on CPU provider for this host model
      *
      * @param provider
@@ -106,6 +130,19 @@ public class CompositeHostModel implements IHostModel {
      */
     public void setThreadOnCpuProvider(IThreadOnCpuProvider provider) {
         fThreadOnCpuProviders.add(provider);
+    }
+
+    /**
+     * Set a thread on CPU provider for this host model
+     *
+     * @param trace
+     *            The trace associated with this provider
+     * @param provider
+     *            The thread on CPU time provider
+     */
+    public void setThreadOnCpuProvider(ITmfTrace trace, IThreadOnCpuProvider provider) {
+        fThreadOnCpuProviders.add(provider);
+        fTraceObjectMap.put(trace, provider);
     }
 
     /**
@@ -118,14 +155,27 @@ public class CompositeHostModel implements IHostModel {
         fSamplingDataProviders.add(provider);
     }
 
+    /**
+     * Set a sampling data provider for this host model
+     *
+     * @param trace
+     *            The trace associated with this provider
+     * @param provider
+     *            The sampling data provider
+     */
+    public void setSamplingDataProvider(ITmfTrace trace, ISamplingDataProvider provider) {
+        fSamplingDataProviders.add(provider);
+        fTraceObjectMap.put(trace, provider);
+    }
+
     @Override
     public String toString() {
         return String.valueOf(getClass());
     }
 
     /**
-     * Iterator class to allow 2-way iteration over intervals of a given
-     * attribute. Not thread-safe!
+     * Iterator class to allow 2-way iteration over intervals of a given attribute.
+     * Not thread-safe!
      */
     private static class ThreadStatusIterator implements Iterator<ProcessStatusInterval> {
 
@@ -179,6 +229,36 @@ public class CompositeHostModel implements IHostModel {
     public boolean isThreadStatusAvailable() {
         Iterable<KernelAnalysisModule> modules = TmfTraceUtils.getAnalysisModulesOfClass(fHostId, KernelAnalysisModule.class);
         return modules.iterator().hasNext();
+    }
+
+    /**
+     * Remove model elements associated with the trace being closed
+     *
+     * @param signal
+     *            The traced closed signal
+     */
+    @TmfSignalHandler
+    public void traceClosed(final TmfTraceClosedSignal signal) {
+        ITmfTrace trace = signal.getTrace();
+        TmfTraceManager.getTraceSetWithExperiment(trace).forEach(t -> {
+            Collection<Object> objects = fTraceObjectMap.removeAll(t);
+            for (Object object : objects) {
+                if (object instanceof ICpuTimeProvider) {
+                    fCpuTimeProviders.remove(object);
+                }
+                if (object instanceof IThreadOnCpuProvider) {
+                    fThreadOnCpuProviders.remove(object);
+                }
+                if (object instanceof ISamplingDataProvider) {
+                    fSamplingDataProviders.remove(object);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void dispose() {
+        TmfSignalManager.deregister(this);
     }
 
 }

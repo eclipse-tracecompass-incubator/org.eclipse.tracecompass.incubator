@@ -86,8 +86,8 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
                 IHostModel model = ModelManager.getModelFor(trace.getHostId());
                 TidAnalysisWrapper tidAnalysisWrapper = new TidAnalysisWrapper(provider, trace.getHostId());
                 fTidModules.put(provider, tidAnalysisWrapper);
-                ((CompositeHostModel) model).setThreadOnCpuProvider(tidAnalysisWrapper);
-                ((CompositeHostModel) model).setCpuTimeProvider(tidAnalysisWrapper);
+                ((CompositeHostModel) model).setThreadOnCpuProvider(trace, tidAnalysisWrapper);
+                ((CompositeHostModel) model).setCpuTimeProvider(trace, tidAnalysisWrapper);
             }
         }
 

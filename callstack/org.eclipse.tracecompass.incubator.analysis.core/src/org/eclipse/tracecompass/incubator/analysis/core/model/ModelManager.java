@@ -12,7 +12,6 @@ package org.eclipse.tracecompass.incubator.analysis.core.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.analysis.core.model.CompositeHostModel;
 
 /**
@@ -22,7 +21,7 @@ import org.eclipse.tracecompass.incubator.internal.analysis.core.model.Composite
  */
 public final class ModelManager {
 
-    private static final Map<String, @Nullable IHostModel> MODELS_FOR_HOST = new HashMap<>();
+    private static final Map<String, IHostModel> MODELS_FOR_HOST = new HashMap<>();
 
     private ModelManager() {
 
@@ -42,6 +41,14 @@ public final class ModelManager {
             MODELS_FOR_HOST.put(hostId, model);
         }
         return model;
+    }
+
+    /**
+     * Dispose all the models
+     */
+    public static synchronized void disposeModels() {
+        MODELS_FOR_HOST.values().forEach(IHostModel::dispose);
+        MODELS_FOR_HOST.clear();
     }
 
 }

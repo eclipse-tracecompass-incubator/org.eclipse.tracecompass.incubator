@@ -128,4 +128,9 @@ public interface IHostModel {
      */
     boolean isThreadStatusAvailable();
 
+    /**
+     * Dispose of the model when it is not needed anymore
+     */
+    void dispose();
+
 }
