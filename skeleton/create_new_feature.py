@@ -111,9 +111,10 @@ def copyDirs(fullname, dir, noUi, noHelp):
         os.makedirs(moveTo + '.ui.swtbot.tests/src')
 
     if not(noHelp):
-        copyAndUpdate(baseDir + '/skeleton.doc.user', moveTo + '.doc.user', fullname, id)
+        copyAndUpdate(baseDir + '/skeleton.doc.user', baseDir + '/../doc/org.eclipse.tracecompass.incubator.' + id + '.doc.user', fullname, id)
         pluginStr = pluginStr + featurePluginStr.replace("{%plugin}", "org.eclipse.tracecompass.incubator." + id + ".doc.user")
-        pomModule += pomModuleStr.replace(idPlaceholder, id).replace("{%suffix}", ".doc.user")
+        # Update the pom.xml
+        updatePom(baseDir, baseDir + '/../doc', id, pomModuleStr.replace(idPlaceholder, id).replace("{%suffix}", ".doc.user"))
 
     # Add the appropriate plugins to the feature.xml
     fpath = os.path.join(moveTo, "feature.xml")

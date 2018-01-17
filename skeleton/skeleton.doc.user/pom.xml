@@ -12,7 +12,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>org.eclipse.tracecompass.incubator.{%dir}-parent</artifactId>
+    <artifactId>org.eclipse.tracecompass.incubator.doc</artifactId>
     <groupId>org.eclipse.tracecompass.incubator</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
@@ -100,13 +100,13 @@
                   </goals>
                   <configuration>
                   <target>
+                    <mkdir dir="${docDestination}/org.eclipse.tracecompass.incubator.{%skeleton}.doc.user" />
                     <delete includeemptydirs="false">
                       <fileset
                         dir="${docDestination}/org.eclipse.tracecompass.incubator.{%skeleton}.doc.user">
                         <include name="**" />
                       </fileset>
                     </delete>
-
                     <copy includeemptydirs="false" todir="${docDestination}/org.eclipse.tracecompass.incubator.{%skeleton}.doc.user">
                       <fileset dir="doc" includes="*.html,images/**"/>
                     </copy>
