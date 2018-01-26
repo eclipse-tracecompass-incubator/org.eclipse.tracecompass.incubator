@@ -10,7 +10,7 @@
  *    Alexandre Montplaisir - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module;
+package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources;
 
 /**
  * Definitions of values used in the Linux kernel code.

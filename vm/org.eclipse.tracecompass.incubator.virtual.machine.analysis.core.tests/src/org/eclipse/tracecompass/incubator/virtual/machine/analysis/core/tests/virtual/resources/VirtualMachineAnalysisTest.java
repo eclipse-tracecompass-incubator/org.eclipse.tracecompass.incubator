@@ -10,7 +10,7 @@
  *   Geneviève Bastien - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.tests;
+package org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.virtual.resources;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VcpuStateValues;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VmAttributes;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.VirtualMachineCpuAnalysis;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.VirtualResourcesAnalysis;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTestExperiment;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
@@ -43,7 +43,7 @@ import org.junit.Test;
 import com.google.common.collect.Multimap;
 
 /**
- * Test suite for the {@link VirtualMachineCpuAnalysis} class
+ * Test suite for the {@link VirtualResourcesAnalysis} class
  *
  * @author Geneviève Bastien
  */
@@ -104,8 +104,8 @@ public class VirtualMachineAnalysisTest {
         /* End of TODO block */
 
         experiment.traceOpened(new TmfTraceOpenedSignal(this, experiment, null));
-        VirtualMachineCpuAnalysis module = null;
-        for (VirtualMachineCpuAnalysis mod : TmfTraceUtils.getAnalysisModulesOfClass(experiment, VirtualMachineCpuAnalysis.class)) {
+        VirtualResourcesAnalysis module = null;
+        for (VirtualResourcesAnalysis mod : TmfTraceUtils.getAnalysisModulesOfClass(experiment, VirtualResourcesAnalysis.class)) {
             module = mod;
             break;
         }

@@ -11,4 +11,4 @@
  *******************************************************************************/
 
 @org.eclipse.jdt.annotation.NonNullByDefault
-package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module;
+package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources;

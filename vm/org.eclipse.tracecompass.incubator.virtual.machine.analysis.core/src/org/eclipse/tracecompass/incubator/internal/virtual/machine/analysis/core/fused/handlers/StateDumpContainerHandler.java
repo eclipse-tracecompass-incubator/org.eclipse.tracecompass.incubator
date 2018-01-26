@@ -11,8 +11,8 @@ package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.cor
 
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.LinuxValues;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.StateValues;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.LinuxValues;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;

@@ -17,8 +17,8 @@ import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEven
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualCPU;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.LinuxValues;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.StateValues;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.LinuxValues;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;

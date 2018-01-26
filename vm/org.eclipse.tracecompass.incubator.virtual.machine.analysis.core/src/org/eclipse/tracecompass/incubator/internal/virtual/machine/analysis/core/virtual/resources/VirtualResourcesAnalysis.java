@@ -11,7 +11,7 @@
  *   Geneviève Bastien - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module;
+package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -53,10 +53,10 @@ import com.google.common.collect.TreeMultimap;
  * @author Mohamad Gebai
  * @author Geneviève Bastien
  */
-public class VirtualMachineCpuAnalysis extends TmfStateSystemAnalysisModule {
+public class VirtualResourcesAnalysis extends TmfStateSystemAnalysisModule {
 
     /** The ID of this analysis module */
-    public static final String ID = "org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.VirtualMachineAnalysisModule"; //$NON-NLS-1$
+    public static final String ID = "org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.VirtualResourcesAnalysis"; //$NON-NLS-1$
 
     // TODO: Update with event layout when requirements are back */
     static final Set<String> REQUIRED_EVENTS = ImmutableSet.of(
@@ -69,7 +69,7 @@ public class VirtualMachineCpuAnalysis extends TmfStateSystemAnalysisModule {
     /**
      * Constructor
      */
-    public VirtualMachineCpuAnalysis() {
+    public VirtualResourcesAnalysis() {
         super();
     }
 
@@ -79,7 +79,7 @@ public class VirtualMachineCpuAnalysis extends TmfStateSystemAnalysisModule {
         if (!(trace instanceof TmfExperiment)) {
             throw new IllegalStateException();
         }
-        return new VirtualMachineStateProvider((TmfExperiment) trace);
+        return new VirtualResourcesStateProvider((TmfExperiment) trace);
     }
 
     @Override

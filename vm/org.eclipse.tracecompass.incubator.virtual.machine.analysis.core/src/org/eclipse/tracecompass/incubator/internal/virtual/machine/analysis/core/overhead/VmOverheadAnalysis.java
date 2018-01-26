@@ -26,7 +26,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVMInformationProvider;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVirtualMachineAnalysis;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.VirtualMachineCpuAnalysis;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.VirtualResourcesAnalysis;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
@@ -61,17 +61,17 @@ public class VmOverheadAnalysis extends InstrumentedCallStackAnalysis {
 
     private static final List<String[]> PATTERNS = ImmutableList.of(DEFAULT_TRACES_PATTERN, DEFAULT_THREADS_PATTERN);
 
-    private @Nullable VirtualMachineCpuAnalysis getDependentAnalysis() {
+    private @Nullable VirtualResourcesAnalysis getDependentAnalysis() {
         ITmfTrace trace = getTrace();
         if (trace == null) {
             return null;
         }
-        return TmfTraceUtils.getAnalysisModuleOfClass(trace, VirtualMachineCpuAnalysis.class, VirtualMachineCpuAnalysis.ID);
+        return TmfTraceUtils.getAnalysisModuleOfClass(trace, VirtualResourcesAnalysis.class, VirtualResourcesAnalysis.ID);
     }
 
     @Override
     protected @NonNull Iterable<@NonNull IAnalysisModule> getDependentAnalyses() {
-        VirtualMachineCpuAnalysis dependentAnalysis = getDependentAnalysis();
+        VirtualResourcesAnalysis dependentAnalysis = getDependentAnalysis();
         if (dependentAnalysis == null) {
             return Collections.emptySet();
         }

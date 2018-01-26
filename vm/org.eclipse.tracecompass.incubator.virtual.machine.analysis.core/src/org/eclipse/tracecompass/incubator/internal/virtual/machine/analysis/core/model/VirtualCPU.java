@@ -15,7 +15,7 @@ package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.cor
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.StateValues;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 

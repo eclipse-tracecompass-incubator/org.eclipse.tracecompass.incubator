@@ -12,9 +12,9 @@
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
-            analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.VirtualMachineCpuAnalysis"
+            analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.VirtualResourcesAnalysis"
             automatic="false"
-            id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.VirtualMachineAnalysisModule"
+            id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.VirtualResourcesAnalysis"
             name="%vm.analysis">
             <tracetype
                   applies="true"

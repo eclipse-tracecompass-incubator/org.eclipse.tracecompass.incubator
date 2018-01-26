@@ -10,7 +10,7 @@
  *   Mohamad Gebai - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module;
+package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
@@ -69,7 +69,7 @@ import com.google.common.collect.Table;
  *
  * @author Mohamad Gebai
  */
-public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
+public class VirtualResourcesStateProvider extends AbstractTmfStateProvider {
 
     /**
      * Version number of this state provider. Please bump this if you modify the
@@ -94,7 +94,7 @@ public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
      * @param experiment
      *            The virtual machine experiment
      */
-    public VirtualMachineStateProvider(TmfExperiment experiment) {
+    public VirtualResourcesStateProvider(TmfExperiment experiment) {
         super(experiment, "Virtual Machine State Provider"); //$NON-NLS-1$
 
         fModel = QemuKvmVmModel.get(experiment);
@@ -138,9 +138,9 @@ public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
     }
 
     @Override
-    public VirtualMachineStateProvider getNewInstance() {
+    public VirtualResourcesStateProvider getNewInstance() {
         TmfExperiment trace = getTrace();
-        return new VirtualMachineStateProvider(trace);
+        return new VirtualResourcesStateProvider(trace);
     }
 
     @Override

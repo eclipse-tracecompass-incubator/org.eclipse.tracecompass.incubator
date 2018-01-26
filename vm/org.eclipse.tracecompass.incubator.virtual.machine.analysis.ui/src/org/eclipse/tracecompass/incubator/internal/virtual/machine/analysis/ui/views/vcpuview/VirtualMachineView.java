@@ -24,8 +24,8 @@ import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModu
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInformationProvider;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VmAttributes;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module.VirtualMachineCpuAnalysis;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.trace.VirtualMachineExperiment;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.VirtualResourcesAnalysis;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.Activator;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vcpuview.VirtualMachineCommon.Type;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
@@ -138,7 +138,7 @@ public class VirtualMachineView extends AbstractTimeGraphView {
         if (!(parentTrace instanceof VirtualMachineExperiment)) {
             return;
         }
-        VirtualMachineCpuAnalysis module = TmfTraceUtils.getAnalysisModuleOfClass(parentTrace, VirtualMachineCpuAnalysis.class, VirtualMachineCpuAnalysis.ID);
+        VirtualResourcesAnalysis module = TmfTraceUtils.getAnalysisModuleOfClass(parentTrace, VirtualResourcesAnalysis.class, VirtualResourcesAnalysis.ID);
         if (module == null) {
             return;
         }
@@ -146,7 +146,7 @@ public class VirtualMachineView extends AbstractTimeGraphView {
         if (!module.waitForInitialization()) {
             return;
         }
-        ITmfStateSystem ssq = module.getStateSystem(VirtualMachineCpuAnalysis.ID);
+        ITmfStateSystem ssq = module.getStateSystem(VirtualResourcesAnalysis.ID);
         if (ssq == null) {
             return;
         }
@@ -346,7 +346,7 @@ public class VirtualMachineView extends AbstractTimeGraphView {
         }
         case VM: {
             VirtualMachineExperiment experiment = vmEntry.getExperiment();
-            VirtualMachineCpuAnalysis vmAnalysis = TmfTraceUtils.getAnalysisModuleOfClass(experiment, VirtualMachineCpuAnalysis.class, VirtualMachineCpuAnalysis.ID);
+            VirtualResourcesAnalysis vmAnalysis = TmfTraceUtils.getAnalysisModuleOfClass(experiment, VirtualResourcesAnalysis.class, VirtualResourcesAnalysis.ID);
             if (vmAnalysis == null) {
                 break;
             }
@@ -369,7 +369,7 @@ public class VirtualMachineView extends AbstractTimeGraphView {
         try {
             int quark = vmEntry.getNumericId();
 
-            ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(vmEntry.getExperiment(), VirtualMachineCpuAnalysis.ID);
+            ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(vmEntry.getExperiment(), VirtualResourcesAnalysis.ID);
             if (ssq == null) {
                 return Collections.EMPTY_LIST;
             }

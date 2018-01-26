@@ -24,7 +24,7 @@
             class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
             id="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.vm.ui.vmview">
          <analysisId
-               id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.VirtualMachineAnalysisModule">
+               id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.VirtualResourcesAnalysis">
          </analysisId>
       </output>
       <output

@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module;
+package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources;
 
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;

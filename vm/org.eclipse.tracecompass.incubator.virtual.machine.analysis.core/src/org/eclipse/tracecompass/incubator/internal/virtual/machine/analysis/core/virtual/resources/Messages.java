@@ -10,7 +10,7 @@
  *   Geneviève Bastien - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.module;
+package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
@@ -22,7 +22,7 @@ import org.eclipse.osgi.util.NLS;
  */
 @SuppressWarnings("javadoc")
 public class Messages extends NLS {
-    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.internal.lttng2.kernel.core.analysis.vm.module.messages"; //$NON-NLS-1$
+    private static final String BUNDLE_NAME = Messages.class.getPackage().getName() + ".messages"; //$NON-NLS-1$
 
     public static @Nullable String VirtualMachineCPUAnalysis_Help;
     public static @Nullable String FusedVirtualMachineAnalysis_Help;
