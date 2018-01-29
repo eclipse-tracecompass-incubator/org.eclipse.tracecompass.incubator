@@ -27,6 +27,11 @@ public class Application implements IApplication {
     private static final String WORKSPACE_NAME = ".tracecompass-webapp"; //$NON-NLS-1$
     private WebApplication fWebAppl;
     private Location fInstanceLoc = null;
+    private int fPort;
+
+    public Application(int port) {
+        fPort = port;
+    }
 
     @Override
     public Object start(IApplicationContext context) throws Exception {
@@ -52,7 +57,7 @@ public class Application implements IApplication {
             return IApplication.EXIT_OK;
         }
 
-        fWebAppl = new WebApplication();
+        fWebAppl = new WebApplication(fPort);
         fWebAppl.start();
         return null;
     }

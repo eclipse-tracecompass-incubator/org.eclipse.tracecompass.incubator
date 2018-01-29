@@ -31,6 +31,10 @@ public class WebApplication {
 
     private static final String CONTEXT_PATH = "/tracecompass"; //$NON-NLS-1$
     private static final String PATH_SPEC = "/*"; //$NON-NLS-1$
+    /**
+     * Port value which boots the server in testing mode.
+     */
+    public static final int TEST_PORT = 8378;
 
     private int fPort;
 
@@ -94,7 +98,9 @@ public class WebApplication {
         fServer.setHandler(sch);
 
         fServer.start();
-        fServer.join();
+        if (fPort != TEST_PORT) {
+            fServer.join();
+        }
     }
 
     /**
