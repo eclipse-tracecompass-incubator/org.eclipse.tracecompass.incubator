@@ -23,7 +23,7 @@ import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
  */
 public class VmTestCase extends LinuxTestCase {
 
-    private final @NonNull TmfExperiment fExperiment;
+    private final VmTestExperiment fExperiment;
 
     /**
      * Constructor for a virtual machine test case
@@ -34,7 +34,7 @@ public class VmTestCase extends LinuxTestCase {
     public VmTestCase(VmTestExperiment experiment) {
         super(experiment.name());
         assumeTrue(experiment.exists());
-        fExperiment = experiment.getExperiment(true);
+        fExperiment = experiment;
     }
 
     @Override
@@ -48,19 +48,13 @@ public class VmTestCase extends LinuxTestCase {
     }
 
     /**
-     * Get the experiment for this test case
+     * Get the experiment for this test case. The caller is responsible to destroy
+     * this experiment
      *
      * @return The experiment, fully initialized
      */
-    public TmfExperiment getExperiment() {
-        return fExperiment;
-    }
-
-    /**
-     * Dispose the experiment
-     */
-    public void dispose() {
-        fExperiment.dispose();
+    public @NonNull TmfExperiment getExperiment() {
+        return fExperiment.getExperiment(true);
     }
 
 }

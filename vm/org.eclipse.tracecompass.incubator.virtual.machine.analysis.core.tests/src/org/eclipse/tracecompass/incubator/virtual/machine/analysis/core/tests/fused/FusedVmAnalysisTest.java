@@ -43,6 +43,7 @@ import org.junit.runners.Parameterized.Parameters;
 public class FusedVmAnalysisTest {
 
     private final VmTestCase fTestCase;
+    private final TmfExperiment fExperiment;
 
     /**
      * Constructor
@@ -55,6 +56,7 @@ public class FusedVmAnalysisTest {
     public FusedVmAnalysisTest(String testName, VmTestCase test) {
         super();
         fTestCase = test;
+        fExperiment = test.getExperiment();
     }
 
     /**
@@ -62,7 +64,7 @@ public class FusedVmAnalysisTest {
      */
     @After
     public void tearDown() {
-        fTestCase.dispose();
+        fExperiment.dispose();
     }
 
     /**
@@ -80,7 +82,7 @@ public class FusedVmAnalysisTest {
     }
 
     private FusedVirtualMachineAnalysis setUp() {
-        TmfExperiment experiment = fTestCase.getExperiment();
+        TmfExperiment experiment = fExperiment;
 
         /* Open the traces */
         for (ITmfTrace trace : experiment.getTraces()) {

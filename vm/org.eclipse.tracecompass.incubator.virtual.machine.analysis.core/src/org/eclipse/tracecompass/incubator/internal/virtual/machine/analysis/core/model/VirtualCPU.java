@@ -26,6 +26,8 @@ import com.google.common.collect.Table;
  * This class represents a virtual CPU, which is a CPU running on a guest. It
  * associates the guest CPU ID to a virtual machine of the model.
  *
+ * @TODO Review this class's API with the new virtual machine environment
+ *
  * @author Geneviève Bastien
  */
 public final class VirtualCPU {

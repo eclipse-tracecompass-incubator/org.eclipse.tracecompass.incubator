@@ -21,6 +21,8 @@ import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
  * This class represents a machine, host or guest, in a virtual machine model. A
  * machine is identified by a trace's host ID.
  *
+ * @TODO Review this class's API with the new virtual machine environment
+ *
  * @author Geneviève Bastien
  */
 public final class VirtualMachine {

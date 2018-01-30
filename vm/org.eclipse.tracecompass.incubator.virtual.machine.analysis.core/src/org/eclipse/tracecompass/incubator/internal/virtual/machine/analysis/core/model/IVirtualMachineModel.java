@@ -23,6 +23,8 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
  * Interface that represents the model of an hypervisor. Each hypervisor (or
  * tracing method for an hypervisor) should implement this.
  *
+ * @TODO: Deprecate me in favor of {@link IVirtualEnvironmentModel}
+ *
  * @author Geneviève Bastien
  */
 public interface IVirtualMachineModel {

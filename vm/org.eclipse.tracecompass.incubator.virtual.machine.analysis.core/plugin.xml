@@ -41,5 +41,15 @@
                class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.trace.VirtualMachineExperiment">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.analysis.VirtualMachineModelAnalysis"
+            automatic="false"
+            id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.model.analysis"
+            name="%vm.analysis.model">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.trace.VirtualMachineExperiment">
+         </tracetype>
+      </module>
    </extension>
 </plugin>
