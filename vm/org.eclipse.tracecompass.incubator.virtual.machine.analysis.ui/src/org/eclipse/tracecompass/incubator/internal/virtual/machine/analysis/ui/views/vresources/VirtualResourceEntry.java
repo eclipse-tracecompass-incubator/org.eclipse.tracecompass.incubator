@@ -12,7 +12,7 @@ package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.
 import java.util.Iterator;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.internal.analysis.os.linux.ui.views.resources.SoftIrqLabelProvider;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.resourcesstatus.SoftIrqLabelProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
