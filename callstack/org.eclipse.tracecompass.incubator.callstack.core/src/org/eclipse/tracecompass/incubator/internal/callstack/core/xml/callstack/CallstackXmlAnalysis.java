@@ -286,16 +286,22 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
 
     @Override
     public Collection<ICallStackGroupDescriptor> getGroupDescriptors() {
+        fCallGraph.schedule();
+        fCallGraph.waitForCompletion();
         return fCallGraph.getGroupDescriptors();
     }
 
     @Override
     public CallGraph getCallGraph(ITmfTimestamp start, ITmfTimestamp end) {
+        fCallGraph.schedule();
+        fCallGraph.waitForCompletion();
         return fCallGraph.getCallGraph(start, end);
     }
 
     @Override
     public CallGraph getCallGraph() {
+        fCallGraph.schedule();
+        fCallGraph.waitForCompletion();
         return fCallGraph.getCallGraph();
     }
 
