@@ -23,8 +23,8 @@ import java.util.List;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VcpuStateValues;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VmAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.VirtualResourcesAnalysis;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.VmAttributes;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTestExperiment;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
@@ -33,6 +33,8 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedE
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
@@ -52,7 +54,6 @@ public class VirtualMachineAnalysisTest {
     private static void verifyStateIntervals(String testId, List<ITmfStateInterval> intervals, int[] expectedStarts, ITmfStateValue[] expectedValues) {
         int expectedCount = expectedStarts.length - 1;
 
-        assertEquals(testId + ": Interval count", expectedCount, intervals.size());
         for (int i = 0; i < expectedCount; i++) {
             ITmfStateInterval interval = intervals.get(i);
             assertEquals(testId + ": Start time of interval " + i, expectedStarts[i], interval.getStartTime());
@@ -60,12 +61,12 @@ public class VirtualMachineAnalysisTest {
             assertEquals(testId + ": End time of interval " + i, actualEnd, interval.getEndTime());
             assertEquals(testId + ": Expected value of interval " + i, expectedValues[i], interval.getStateValue());
         }
+        assertEquals(testId + ": Interval count " + intervals, expectedCount, intervals.size());
     }
 
     private static void verifyIntervalsWithMask(String testId, Collection<ITmfStateInterval> intervals, int[] expectedStarts, int[] expectedEnds, ITmfStateValue[] expectedValues, int mask) {
         int expectedCount = expectedStarts.length - 1;
 
-        assertEquals(testId + ": Interval count", expectedCount, intervals.size());
         int i = 0;
         for (ITmfStateInterval interval : intervals) {
             assertEquals(testId + ": Start time of interval " + i, expectedStarts[i], interval.getStartTime());
@@ -73,11 +74,12 @@ public class VirtualMachineAnalysisTest {
             assertEquals(testId + ": Expected value of interval " + i, expectedValues[i].unboxInt() & mask, interval.getStateValue().unboxInt() & mask);
             i++;
         }
+        assertEquals(testId + ": Interval count", expectedCount, intervals.size());
     }
 
     /**
-     * Test the analysis execution with stub traces of a virtual machine with
-     * one virtual machine and one CPU
+     * Test the analysis execution with stub traces of a virtual machine with one
+     * virtual machine and one CPU
      */
     @Test
     public void testStubTracesOneQemuKvm() {
@@ -91,9 +93,9 @@ public class VirtualMachineAnalysisTest {
         }
 
         /*
-         * TODO For now, make sure the LttngKernelAnalysis have been run for
-         * each trace before running the analysis. When event request precedence
-         * is implemented, we can remove this
+         * TODO For now, make sure the LttngKernelAnalysis have been run for each trace
+         * before running the analysis. When event request precedence is implemented, we
+         * can remove this
          */
         for (ITmfTrace trace : experiment.getTraces()) {
             for (KernelAnalysisModule module : TmfTraceUtils.getAnalysisModulesOfClass(trace, KernelAnalysisModule.class)) {
@@ -133,9 +135,10 @@ public class VirtualMachineAnalysisTest {
             List<ITmfStateInterval> intervals = StateSystemUtils.queryHistoryRange(ss, statusQuark, ss.getStartTime(), ss.getCurrentEndTime());
 
             /* Expected interval values for the virtual CPU */
-            int[] expectedStarts = { 1, 60, 75, 95, 100, 150, 155, 195, 210, 245, 260, 295, 300, 350, 355, 375 };
-            ITmfStateValue[] expectedValues = { TmfStateValue.nullValue(),
-                    TmfStateValue.newValueInt(VcpuStateValues.VCPU_UNKNOWN),
+            int[] expectedStarts = { 1, 10, 45, 60, 95, 100, 150, 155, 195, 210, 245, 260, 295, 300, 350, 355, 375 };
+            ITmfStateValue[] expectedValues = { TmfStateValue.newValueInt(VcpuStateValues.VCPU_UNKNOWN),
+                    TmfStateValue.newValueInt(VcpuStateValues.VCPU_RUNNING),
+                    TmfStateValue.newValueInt(VcpuStateValues.VCPU_RUNNING | VcpuStateValues.VCPU_VMM),
                     TmfStateValue.newValueInt(VcpuStateValues.VCPU_RUNNING),
                     TmfStateValue.newValueInt(VcpuStateValues.VCPU_RUNNING | VcpuStateValues.VCPU_VMM),
                     TmfStateValue.newValueInt(VcpuStateValues.VCPU_RUNNING | VcpuStateValues.VCPU_VMM | VcpuStateValues.VCPU_PREEMPT),
@@ -152,10 +155,11 @@ public class VirtualMachineAnalysisTest {
             verifyStateIntervals("Virtual CPU", intervals, expectedStarts, expectedValues);
 
             /* Check the status of the guest's threads */
-            int[] expectedStartsT130 = { 10, 35, 75, 175, 195, 225, 275, 295, 300, 350, 375 };
-            int[] expectedEndsT130 = { 34, 74, 174, 224, 209, 274, 374, 299, 349, 354, 375 };
+            int[] expectedStartsT130 = { 10, 35, 45, 75, 175, 195, 225, 275, 295, 300, 350, 375 };
+            int[] expectedEndsT130 = { 34, 74, 59, 174, 224, 209, 274, 374, 299, 349, 354, 375 };
             ITmfStateValue[] expectedValuesT30 = { TmfStateValue.newValueInt(VcpuStateValues.VCPU_IDLE),
                     TmfStateValue.newValueInt(VcpuStateValues.VCPU_RUNNING),
+                    TmfStateValue.newValueInt(VcpuStateValues.VCPU_PREEMPT),
                     TmfStateValue.newValueInt(VcpuStateValues.VCPU_IDLE),
                     TmfStateValue.newValueInt(VcpuStateValues.VCPU_RUNNING),
                     TmfStateValue.newValueInt(VcpuStateValues.VCPU_PREEMPT),
@@ -187,6 +191,7 @@ public class VirtualMachineAnalysisTest {
         } catch (AttributeNotFoundException | StateSystemDisposedException e) {
             fail(e.getMessage());
         } finally {
+            TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, experiment));
             experiment.dispose();
         }
     }

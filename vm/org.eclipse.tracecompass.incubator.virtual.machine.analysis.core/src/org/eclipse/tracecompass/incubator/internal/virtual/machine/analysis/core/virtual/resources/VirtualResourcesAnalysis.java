@@ -13,17 +13,16 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources;
 
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInformationProvider;
-import org.eclipse.tracecompass.analysis.os.linux.core.tid.TidAnalysisModule;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VcpuStateValues;
-import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VmAttributes;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.analysis.VirtualMachineModelAnalysis;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
@@ -31,13 +30,12 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedE
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.interval.TmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue.Type;
+import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperimentUtils;
@@ -77,9 +75,18 @@ public class VirtualResourcesAnalysis extends TmfStateSystemAnalysisModule {
     protected ITmfStateProvider createStateProvider() {
         ITmfTrace trace = getTrace();
         if (!(trace instanceof TmfExperiment)) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("The trace should be an experiment"); //$NON-NLS-1$
         }
-        return new VirtualResourcesStateProvider((TmfExperiment) trace);
+        VirtualMachineModelAnalysis model = TmfTraceUtils.getAnalysisModuleOfClass(trace, VirtualMachineModelAnalysis.class, VirtualMachineModelAnalysis.ID);
+        if (model == null) {
+            throw new IllegalStateException("There should be a model analysis for this class"); //$NON-NLS-1$
+        }
+        model.schedule();
+        if (!model.waitForInitialization()) {
+            throw new IllegalStateException("Problem initializing the model analysis"); //$NON-NLS-1$
+        }
+
+        return new VirtualResourcesStateProvider((TmfExperiment) trace, model.getVirtualEnvironmentModel());
     }
 
     @Override
@@ -94,14 +101,16 @@ public class VirtualResourcesAnalysis extends TmfStateSystemAnalysisModule {
 
     @Override
     protected Iterable<IAnalysisModule> getDependentAnalyses() {
-        Set<IAnalysisModule> modules = new HashSet<>();
-        /* Depends on the LTTng Kernel analysis modules */
-        for (ITmfTrace trace : TmfTraceManager.getTraceSet(getTrace())) {
-            for (TidAnalysisModule module : TmfTraceUtils.getAnalysisModulesOfClass(trace, TidAnalysisModule.class)) {
-                modules.add(module);
+        ITmfTrace exp = getTrace();
+        if (exp instanceof TmfExperiment) {
+            VirtualMachineModelAnalysis model = TmfTraceUtils.getAnalysisModuleOfClass(exp, VirtualMachineModelAnalysis.class, VirtualMachineModelAnalysis.ID);
+            if (model == null) {
+                throw new IllegalStateException("There should be a model analysis for this class"); //$NON-NLS-1$
             }
+            return Collections.singleton(model);
         }
-        return modules;
+
+        return Collections.emptySet();
     }
 
     private static Multimap<Integer, ITmfStateInterval> createThreadMultimap() {

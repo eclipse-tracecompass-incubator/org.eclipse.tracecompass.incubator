@@ -50,6 +50,9 @@ import com.google.common.collect.Table;
  * hypervisor. It also requires vmsync_* events from both guests and hosts to
  * identify which thread from a host belongs to which machine.
  *
+ * FIXME: Remove this class entirely once the fused analysis does not require it
+ * Part of it is in the model, part in each analysis
+ *
  * @author Mohamad Gebai
  */
 public class QemuKvmVmModel implements IVirtualMachineModel {
@@ -197,6 +200,11 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
             return null;
         }
 
+        VirtualCPU vcpu = fTidToVcpu.get(ht);
+        if (vcpu != null) {
+            return vcpu;
+        }
+
         /*
          * Are we entering the hypervisor and if so, which virtual CPU is
          * concerned?
@@ -265,6 +273,23 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
                 return;
             }
 
+            IHostModel model = ModelManager.getModelFor(hostId);
+            int tid = model.getThreadOnCpu(cpu, ts, true);
+            if (tid == IHostModel.UNKNOWN_TID) {
+                /*
+                 * We do not know which process is running at this
+                 * point. It may happen at the beginning of the trace.
+                 */
+                return;
+            }
+            HostThread ht = new HostThread(hostId, tid);
+
+            VirtualMachine vm = fTidToVm.get(ht);
+            if (vm != null) {
+                // Machine is already known, exit
+                return;
+            }
+
             /* Find a virtual machine with the vm uid payload value */
             ITmfEventField data = content.getField(QemuKvmStrings.VM_UID_PAYLOAD);
             if (data == null) {
@@ -283,22 +308,13 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
                         host.addChild(machine);
                     }
 
+                    fTidToVm.put(ht, machine);
+
                     // FIXME: Use the model instead of the analysis directly
                     KernelAnalysisModule module = getLttngKernelModuleFor(hostId);
                     if (module == null) {
                         break;
                     }
-                    IHostModel model = ModelManager.getModelFor(hostId);
-                    int tid = model.getThreadOnCpu(cpu, ts);
-                    if (tid == IHostModel.UNKNOWN_TID) {
-                        /*
-                         * We do not know which process is running at this
-                         * point. It may happen at the beginning of the trace.
-                         */
-                        break;
-                    }
-                    HostThread ht = new HostThread(hostId, tid);
-                    fTidToVm.put(ht, machine);
 
                     /*
                      * To make sure siblings are also associated with this VM,
