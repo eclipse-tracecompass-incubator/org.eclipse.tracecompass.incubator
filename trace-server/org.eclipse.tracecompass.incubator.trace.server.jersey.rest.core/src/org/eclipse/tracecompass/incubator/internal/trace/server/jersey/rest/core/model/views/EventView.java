@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -51,8 +52,8 @@ public class EventView {
     /**
      * Build an EventView from the Trace that is queried and the queried range
      *
-     * @param model
-     *            encapsulates the queried trace
+     * @param trace
+     *            the queried trace
      * @param low
      *            lower bound for the query
      * @param size
@@ -60,21 +61,21 @@ public class EventView {
      * @param lines
      *            the array of event view values to include
      */
-    public EventView(@NonNull TraceModel model, long low, int size, List<List<String>> lines) {
-        fModel = model;
-        fColumns = Lists.newArrayList(Iterables.transform(model.getTrace().getEventAspects(), ITmfEventAspect::getName));
+    public EventView(@NonNull ITmfTrace trace, long low, int size, List<List<String>> lines) {
+        fModel = new TraceModel(trace);
+        fColumns = Lists.newArrayList(Iterables.transform(trace.getEventAspects(), ITmfEventAspect::getName));
         fLow = low;
         fSize = size;
         fLines = lines;
         fFilters = Collections.emptyMap();
-        fFilteredSize = model.getNbEvents();
+        fFilteredSize = trace.getNbEvents();
     }
 
     /**
      * Build an EventView from the Trace that is queried and the queried range
      *
-     * @param model
-     *            encapsulates the queried trace
+     * @param trace
+     *            the queried trace
      * @param low
      *            lower bound for the query
      * @param size
@@ -87,9 +88,9 @@ public class EventView {
      * @param filteredSize
      *            the number of events that match the filters
      */
-    public EventView(@NonNull TraceModel model, long low, int size, MultivaluedMap<String, String> filters, List<List<String>> lines, long filteredSize) {
-        fModel = model;
-        fColumns = Lists.newArrayList(Iterables.transform(model.getTrace().getEventAspects(), ITmfEventAspect::getName));
+    public EventView(@NonNull ITmfTrace trace, long low, int size, MultivaluedMap<String, String> filters, List<List<String>> lines, long filteredSize) {
+        fModel = new TraceModel(trace);
+        fColumns = Lists.newArrayList(Iterables.transform(trace.getEventAspects(), ITmfEventAspect::getName));
         fLow = low;
         fSize = size;
         fFilteredSize = filteredSize;

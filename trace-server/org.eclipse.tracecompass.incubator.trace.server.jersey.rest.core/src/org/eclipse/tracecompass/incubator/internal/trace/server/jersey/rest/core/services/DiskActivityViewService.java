@@ -25,7 +25,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.inputoutput.DisksIODataProvider;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.TraceManager;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TreeView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.XYView;
@@ -35,6 +34,11 @@ import org.eclipse.tracecompass.internal.provisional.tmf.core.model.tree.TmfTree
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfCommonXAxisModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 
 /**
  * Service to query the DiskIO usage View
@@ -45,7 +49,7 @@ import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 @SuppressWarnings("restriction")
 @Path("/traces")
 public class DiskActivityViewService {
-    @Context TraceManager traceManager;
+    @Context TmfTraceManager traceManager;
 
     /**
      * Query the provider for the entry tree
@@ -67,12 +71,13 @@ public class DiskActivityViewService {
             @QueryParam(value = "start") long start,
             @QueryParam(value = "end") long end,
             @QueryParam(value = "nb") int nb) {
-        TraceModel traceModel = traceManager.get(traceName);
-        if (traceModel == null) {
+        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(traceManager.getOpenedTraces(), t -> t.getName().equals(traceName));
+        if (!optional.isPresent()) {
             return Response.status(Status.NOT_FOUND).entity("No Such Trace").build(); //$NON-NLS-1$
         }
 
-        DisksIODataProvider provider = DataProviderManager.getInstance().getDataProvider(traceModel.getTrace(),
+        ITmfTrace trace = optional.get();
+        DisksIODataProvider provider = DataProviderManager.getInstance().getDataProvider(trace,
                 DisksIODataProvider.ID, DisksIODataProvider.class);
         if (provider == null) {
             // The analysis cannot be run on this trace
@@ -80,7 +85,7 @@ public class DiskActivityViewService {
         }
 
         TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> response = provider.fetchTree(new TimeQueryFilter(start, end, nb), null);
-        return Response.ok().entity(new TreeView(traceModel, response)).build();
+        return Response.ok().entity(new TreeView(new TraceModel(trace), response)).build();
     }
 
     /**
@@ -106,12 +111,13 @@ public class DiskActivityViewService {
             @QueryParam(value = "end") long end,
             @QueryParam(value = "nb") @Min(1) int nb,
             @QueryParam(value = "ids") @NotNull Set<Long> ids) {
-        TraceModel traceModel = traceManager.get(traceName);
-        if (traceModel == null) {
+        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(traceManager.getOpenedTraces(), t -> t.getName().equals(traceName));
+        if (!optional.isPresent()) {
             return Response.status(Status.NOT_FOUND).entity("No Such Trace").build(); //$NON-NLS-1$
         }
 
-        DisksIODataProvider provider = DataProviderManager.getInstance().getDataProvider(traceModel.getTrace(),
+        ITmfTrace trace = optional.get();
+        DisksIODataProvider provider = DataProviderManager.getInstance().getDataProvider(trace,
                 DisksIODataProvider.ID, DisksIODataProvider.class);
         if (provider == null) {
             // The analysis cannot be run on this trace
@@ -119,7 +125,7 @@ public class DiskActivityViewService {
         }
 
         TmfModelResponse<@NonNull ITmfCommonXAxisModel> response = provider.fetchXY(new SelectionTimeQueryFilter(start, end, nb, ids), null);
-        return Response.ok().entity(new XYView(traceModel, response)).build();
+        return Response.ok().entity(new XYView(new TraceModel(trace), response)).build();
     }
 
 }

@@ -11,10 +11,10 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.TraceManager;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DiskActivityViewService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EventTableService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -39,8 +39,6 @@ public class WebApplication {
     private int fPort;
 
     private Server fServer;
-
-    private final TraceManager fTraceManager = new TraceManager();
 
     /**
      * Default Constructor
@@ -86,7 +84,7 @@ public class WebApplication {
         rc.register(new AbstractBinder() {
             @Override
             protected void configure() {
-                bind(fTraceManager).to(TraceManager.class);
+                bind(TmfTraceManager.getInstance()).to(TmfTraceManager.class);
             }
         });
 

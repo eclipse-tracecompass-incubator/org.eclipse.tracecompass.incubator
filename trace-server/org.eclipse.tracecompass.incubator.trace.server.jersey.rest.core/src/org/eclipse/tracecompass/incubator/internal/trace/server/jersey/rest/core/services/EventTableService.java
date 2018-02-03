@@ -32,8 +32,6 @@ import javax.ws.rs.core.Response.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.TraceManager;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.EventView;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
@@ -42,8 +40,10 @@ import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -55,7 +55,7 @@ import com.google.common.collect.Lists;
 @Path("/traces")
 public class EventTableService {
     @Context
-    TraceManager traceManager;
+    TmfTraceManager traceManager;
 
     /**
      * Query a trace for a list of events to populate a virtual table
@@ -76,13 +76,14 @@ public class EventTableService {
     public Response getEvents(@PathParam(value = "name") @NotNull String name,
             @QueryParam(value = "low") @Min(0) long low,
             @QueryParam(value = "size") @Min(0) int size) {
-        TraceModel model = traceManager.get(name);
-        if (model == null) {
+        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(traceManager.getOpenedTraces(), t -> t.getName().equals(name));
+        if (!optional.isPresent()) {
             return Response.status(Status.NOT_FOUND).entity("No trace with name: " + name).build(); //$NON-NLS-1$
         }
         try {
-            List<List<String>> events = query(model, low, size);
-            EventView view = new EventView(model, low, size, events);
+            ITmfTrace trace = optional.get();
+            List<List<String>> events = query(trace, low, size);
+            EventView view = new EventView(trace, low, size, events);
             return Response.ok().entity(view).build();
         } catch (InterruptedException e) {
             Activator.getInstance().logError("Failed to query the trace", e); //$NON-NLS-1$
@@ -116,13 +117,14 @@ public class EventTableService {
         if (multivaluedMap == null) {
             return Response.status(Status.BAD_REQUEST).entity("bad filter (null)").build(); //$NON-NLS-1$
         }
-        TraceModel model = traceManager.get(name);
-        if (model == null) {
+        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(traceManager.getOpenedTraces(), t -> t.getName().equals(name));
+        if (!optional.isPresent()) {
             return Response.status(Status.NOT_FOUND).entity("No trace with name: " + name).build(); //$NON-NLS-1$
         }
         try {
-            Pair<List<List<String>>, Integer> events = filteredQuery(model, low, size, multivaluedMap);
-            EventView view = new EventView(model, low, size, multivaluedMap, events.getFirst(), events.getSecond());
+            ITmfTrace trace = optional.get();
+            Pair<List<List<String>>, Integer> events = filteredQuery(trace, low, size, multivaluedMap);
+            EventView view = new EventView(trace, low, size, multivaluedMap, events.getFirst(), events.getSecond());
             return Response.ok().entity(view).build();
         } catch (InterruptedException e) {
             Activator.getInstance().logError("Failed to query the trace", e); //$NON-NLS-1$
@@ -133,7 +135,7 @@ public class EventTableService {
     /**
      * Query the backing trace
      *
-     * @param traceModel
+     * @param trace
      *            TraceModel representing the trace to query on
      * @param low
      *            rank of the first event to return
@@ -144,9 +146,8 @@ public class EventTableService {
      * @throws InterruptedException
      *             if the request was cancelled
      */
-    private static List<List<String>> query(TraceModel traceModel, long low, int size) throws InterruptedException {
+    private static List<List<String>> query(ITmfTrace trace, long low, int size) throws InterruptedException {
         List<List<String>> events = new ArrayList<>(size);
-        ITmfTrace trace = traceModel.getTrace();
         List<@NonNull ITmfEventAspect<?>> eventAspects = Lists.newArrayList(trace.getEventAspects());
         TmfEventRequest request = new TmfEventRequest(ITmfEvent.class, TmfTimeRange.ETERNITY, low, size, ExecutionType.FOREGROUND) {
             @Override
@@ -163,7 +164,7 @@ public class EventTableService {
     /**
      * Query the backing trace
      *
-     * @param traceModel
+     * @param trace
      *            TraceModel representing the trace to query on
      * @param low
      *            index of the lowest event in the filtered event list
@@ -176,9 +177,9 @@ public class EventTableService {
      * @throws InterruptedException
      *             if the request was cancelled
      */
-    public Pair<List<List<String>>, Integer> filteredQuery(TraceModel traceModel, long low, int size, MultivaluedMap<String, String> multivaluedMap) throws InterruptedException {
+    public Pair<List<List<String>>, Integer> filteredQuery(ITmfTrace trace, long low, int size, MultivaluedMap<String, String> multivaluedMap) throws InterruptedException {
         List<List<String>> events = new ArrayList<>(size);
-        List<ITmfEventAspect<?>> eventAspects = Lists.newArrayList(traceModel.getTrace().getEventAspects());
+        List<ITmfEventAspect<?>> eventAspects = Lists.newArrayList(trace.getEventAspects());
         List<Predicate<String>> predicates = Lists.transform(eventAspects, c -> compileReqexes(multivaluedMap.get(c.getName())));
         TmfEventRequest request = new TmfEventRequest(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.FOREGROUND) {
             /**
@@ -203,7 +204,7 @@ public class EventTableService {
                 return nbRead;
             }
         };
-        traceModel.getTrace().sendRequest(request);
+        trace.sendRequest(request);
         request.waitForCompletion();
         return new Pair<>(events, request.getNbRead());
     }

@@ -9,7 +9,6 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -23,12 +22,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.data.TraceManager;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
@@ -39,8 +37,11 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 /**
  * Service to manage traces.
@@ -49,7 +50,7 @@ import com.google.common.collect.Iterables;
  */
 @Path("/traces")
 public class TraceManagerService {
-    @Context TraceManager traceManager;
+    @Context TmfTraceManager traceManager;
 
     /**
      * Getter method to access the list of traces
@@ -59,9 +60,9 @@ public class TraceManagerService {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getTraces() {
-        GenericEntity<Collection<TraceModel>> entity = new GenericEntity<Collection<TraceModel>>(traceManager.getTraces()) {
-        };
-        return Response.ok().entity(entity).build();
+        Iterable<@NonNull ITmfTrace> traces = traceManager.getOpenedTraces();
+        Iterable<TraceModel> traceModels = Iterables.transform(traces, TraceModel::new);
+        return Response.ok().entity(Lists.newArrayList(traceModels)).build();
     }
 
     /**
@@ -83,9 +84,9 @@ public class TraceManagerService {
     public Response putTrace(@PathParam("name") @NotNull @Size(min = 1) String name,
             @FormParam("path") String path,
             @FormParam("typeID") String typeID) {
-        TraceModel traceModel = traceManager.get(name);
-        if (traceModel != null) {
-            return Response.status(Status.CONFLICT).entity(traceModel).build();
+        Optional<@NonNull ITmfTrace> optional = getTrace(name);
+        if (optional.isPresent()) {
+            return Response.status(Status.CONFLICT).entity(new TraceModel(optional.get())).build();
         }
         if (!Paths.get(path).toFile().exists()) {
             return Response.status(Status.NOT_FOUND).entity("No trace at " + path).build(); //$NON-NLS-1$
@@ -101,6 +102,10 @@ public class TraceManagerService {
         }
     }
 
+    private Optional<@NonNull ITmfTrace> getTrace(String name) {
+        return Iterables.tryFind(traceManager.getOpenedTraces(), t -> t.getName().equals(name));
+    }
+
     private TraceModel put(String path, String name, String typeID)
             throws TmfTraceException, TmfTraceImportException, InstantiationException, IllegalAccessException {
         List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(path, typeID);
@@ -112,9 +117,7 @@ public class TraceManagerService {
         trace.initTrace(null, path, ITmfEvent.class, name, typeID);
         trace.indexTrace(false);
         TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(this, trace, null));
-        TraceModel model = new TraceModel(trace);
-        traceManager.put(name, model);
-        return model;
+        return new TraceModel(trace);
     }
 
     /**
@@ -128,12 +131,14 @@ public class TraceManagerService {
     @Path("/{name}")
     @Produces({ MediaType.APPLICATION_JSON })
     public Response deleteTrace(@PathParam("name") @NotNull String name) {
-        TraceModel trace = traceManager.remove(name);
-        if (trace == null) {
+        Optional<@NonNull ITmfTrace> optional = getTrace(name);
+        if (!optional.isPresent()) {
             return Response.ok().status(Status.NOT_FOUND).build();
         }
-        TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, trace.getTrace()));
-        return Response.ok().entity(trace).build();
+        ITmfTrace trace = optional.get();
+        TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, trace));
+        trace.dispose();
+        return Response.ok().entity(new TraceModel(trace)).build();
     }
 
 }

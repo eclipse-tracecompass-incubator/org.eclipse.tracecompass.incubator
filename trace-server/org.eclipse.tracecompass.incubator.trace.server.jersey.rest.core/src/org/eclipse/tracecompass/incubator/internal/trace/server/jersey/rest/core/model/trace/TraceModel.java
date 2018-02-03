@@ -10,7 +10,6 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -83,15 +82,5 @@ public class TraceModel {
     @XmlElement
     public long getEnd() {
         return fTrace.getEndTime().toNanos();
-    }
-
-    /**
-     * Getter for the underlying trace
-     *
-     * @return the backing trace
-     */
-    @XmlTransient
-    public @NonNull ITmfTrace getTrace() {
-        return fTrace;
     }
 }
