@@ -16,7 +16,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Basic Implementation of the serialized trace model object used by clients
+ * Basic Implementation of the serialized trace model object used by clients.
+ * Equality of two stubs is determined by equality of names, paths and start
+ * times, as the end and nbEvents may be unknown due to incomplete indexing.
  *
  * @author Loic Prieur-Drevon
  */
@@ -113,7 +115,7 @@ public class TraceModelStub implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fName, fPath);
+        return Objects.hash(fName, fPath, fStart);
     }
 
     @Override
@@ -130,8 +132,6 @@ public class TraceModelStub implements Serializable {
         TraceModelStub other = (TraceModelStub) obj;
         return Objects.equals(fName, other.fName)
                 && Objects.equals(fPath, other.fPath)
-                && fNbEvents == other.fNbEvents
-                && fStart == other.fStart
-                && fEnd == other.fEnd;
+                && fStart == other.fStart;
     }
 }

@@ -35,9 +35,10 @@ import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 
 import com.google.common.collect.Iterables;
 
@@ -95,24 +96,23 @@ public class TraceManagerService {
                 return Response.status(Status.NOT_IMPLEMENTED).entity("Trace type not supported").build(); //$NON-NLS-1$
             }
             return Response.ok().entity(model).build();
-        } catch (TmfTraceException | TmfTraceImportException e) {
+        } catch (TmfTraceException | TmfTraceImportException | InstantiationException | IllegalAccessException e) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(e.getMessage()).build();
         }
     }
 
-    private TraceModel put(String path, String name, String typeID) throws TmfTraceException, TmfTraceImportException {
+    private TraceModel put(String path, String name, String typeID)
+            throws TmfTraceException, TmfTraceImportException, InstantiationException, IllegalAccessException {
         List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(path, typeID);
         if (traceTypes.isEmpty()) {
             return null;
         }
         TraceTypeHelper helper = Iterables.get(traceTypes, 0);
-        ITmfTrace trace = helper.getTrace();
-        trace.initTrace(null, path, ITmfEvent.class);
+        ITmfTrace trace = helper.getTraceClass().newInstance();
+        trace.initTrace(null, path, ITmfEvent.class, name, typeID);
         trace.indexTrace(false);
-        if (trace instanceof TmfTrace) {
-            ((TmfTrace) trace).traceOpened(new TmfTraceOpenedSignal(this, trace, null));
-        }
-        TraceModel model = new TraceModel(name, trace);
+        TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(this, trace, null));
+        TraceModel model = new TraceModel(trace);
         traceManager.put(name, model);
         return model;
     }
@@ -132,6 +132,7 @@ public class TraceManagerService {
         if (trace == null) {
             return Response.ok().status(Status.NOT_FOUND).build();
         }
+        TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, trace.getTrace()));
         return Response.ok().entity(trace).build();
     }
 

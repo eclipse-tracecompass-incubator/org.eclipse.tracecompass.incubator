@@ -24,18 +24,14 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 @XmlRootElement
 public class TraceModel {
     private final @NonNull ITmfTrace fTrace;
-    private final String fName;
 
     /**
-     * Construct a model object, giving the trace a name
+     * Construct a model object
      *
-     * @param name
-     *            name to give this object
      * @param trace
      *            {@link ITmfTrace} to encapsulate
      */
-    public TraceModel(@NonNull String name, @NonNull ITmfTrace trace) {
-        fName = name;
+    public TraceModel(@NonNull ITmfTrace trace) {
         fTrace = trace;
     }
 
@@ -46,7 +42,7 @@ public class TraceModel {
      */
     @XmlElement
     public String getName() {
-        return fName;
+        return fTrace.getName();
     }
 
     /**

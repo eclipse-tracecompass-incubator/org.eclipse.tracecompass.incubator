@@ -11,7 +11,9 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.s
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +33,8 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
 import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
-import org.junit.AfterClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -45,11 +48,32 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 public class TraceManagerServiceTest {
     private static final String SERVER = "http://localhost:8378/tracecompass/traces"; //$NON-NLS-1$
     private static final String PATH = "path"; //$NON-NLS-1$
+
     private static String TRACE2_PATH;
+    private static TraceModelStub TRACE2_STUB;
+
+    private static String KERNEL_PATH;
+    private static TraceModelStub KERNEL_STUB;
+
     private static final GenericType<List<TraceModelStub>> TRACE_MODEL_LIST_TYPE = new GenericType<List<TraceModelStub>>() {
     };
 
     private static final Application fWebApp = new Application(WebApplication.TEST_PORT);
+
+    /**
+     * Get the paths to the desired traces statically
+     *
+     * @throws IOException
+     *             if the URL could not be converted to a path
+     */
+    @BeforeClass
+    public static void beforeTest() throws IOException {
+        TRACE2_PATH = FileLocator.toFileURL(CtfTestTrace.TRACE2.getTraceURL()).getPath();
+        TRACE2_STUB = new TraceModelStub("trace2", TRACE2_PATH, 0, 1331668247314038062L, 1331668247314038062L);
+
+        KERNEL_PATH = FileLocator.toFileURL(CtfTestTrace.KERNEL.getTraceURL()).getPath();
+        KERNEL_STUB = new TraceModelStub("kernel", KERNEL_PATH, 0, 1332170682440133097L, 1332170682440133097L);
+    }
 
     /**
      * Start the Eclipse / Jetty Web server
@@ -57,17 +81,16 @@ public class TraceManagerServiceTest {
      * @throws Exception
      *             if there is a problem running this application.
      */
-    @BeforeClass
-    public static void startServer() throws Exception {
-        TRACE2_PATH = FileLocator.toFileURL(CtfTestTrace.TRACE2.getTraceURL()).getPath();
+    @Before
+    public void startServer() throws Exception {
         fWebApp.start(null);
     }
 
     /**
      * Stop the server once tests are finished
      */
-    @AfterClass
-    public static void stopServer() {
+    @After
+    public void stopServer() {
         fWebApp.stop();
     }
 
@@ -77,7 +100,6 @@ public class TraceManagerServiceTest {
     @Test
     public void testWithOneTrace() {
         Client client = ClientBuilder.newClient();
-        // FIXME this should be done at the application level?
         client.register(JacksonJsonProvider.class);
         WebTarget traces = client.target(SERVER);
 
@@ -85,13 +107,7 @@ public class TraceManagerServiceTest {
         assertNotNull("Model returned by server should not be null", traceModels);
         assertEquals("Expected empty list of traces", Collections.emptyList(), traceModels);
 
-        WebTarget traceTarget = traces.path("trace2");
-
-        Form form = new Form(PATH, TRACE2_PATH);
-        Response postResponse = traceTarget.request().post(Entity.form(form));
-        int code = postResponse.getStatus();
-        assertEquals("Failed to POST trace2, error code=" + code, 200, code);
-        assertEqualsTrace2Model(postResponse);
+        assertPost(traces, TRACE2_STUB);
 
         traceModels = traces.request(MediaType.APPLICATION_JSON).get(TRACE_MODEL_LIST_TYPE);
         assertNotNull("Model returned by server should not be null", traceModels);
@@ -100,7 +116,7 @@ public class TraceManagerServiceTest {
         Response deleteResponse = traces.path("trace2").request().delete();
         int deleteCode = deleteResponse.getStatus();
         assertEquals("Failed to DELETE trace2, error code=" + deleteCode, 200, deleteCode);
-        assertEqualsTrace2Model(deleteResponse);
+        assertEquals(TRACE2_STUB, deleteResponse.readEntity(TraceModelStub.class));
 
         traceModels = traces.request(MediaType.APPLICATION_JSON).get(TRACE_MODEL_LIST_TYPE);
         assertNotNull("Model returned by server should not be null", traceModels);
@@ -108,20 +124,37 @@ public class TraceManagerServiceTest {
     }
 
     /**
-     * Assert that the entity contained in a response matches trace2's name, path
-     * and start time (We are not sure that the trace is completely indexed, so the
-     * number of events and the end time might not be final.
-     *
-     * @param response
-     *            {@link Response} that may contain a {@link TraceModelStub}.
+     * Test the server with two traces, to eliminate the server trace manager bug
      */
-    private static void assertEqualsTrace2Model(Response response) {
-        @Nullable
-        TraceModelStub model = response.readEntity(TraceModelStub.class);
+    @Test
+    public void testWithTwoTraces() {
+        Client client = ClientBuilder.newClient();
+        client.register(JacksonJsonProvider.class);
+        WebTarget traces = client.target(SERVER);
+
+        assertPost(traces, TRACE2_STUB);
+
+        assertPost(traces, KERNEL_STUB);
+
+        List<TraceModelStub> traceModels = traces.request(MediaType.APPLICATION_JSON).get(TRACE_MODEL_LIST_TYPE);
+        assertNotNull(traceModels);
+        assertEquals(2, traceModels.size());
+        assertTrue(traceModels.contains(KERNEL_STUB));
+        assertTrue(traceModels.contains(TRACE2_STUB));
+
+        traces.path("trace2").request().delete();
+        traces.path("kernel").request().delete();
+    }
+
+    private static void assertPost(WebTarget traces, TraceModelStub stub) {
+        WebTarget kernelTarget = traces.path(stub.getName());
+        Form form2 = new Form(PATH, stub.getPath());
+        Response response = kernelTarget.request().post(Entity.form(form2));
+        int code2 = response.getStatus();
+        assertEquals("Failed to POST " + stub.getName() + ", error code=" + code2, 200, code2);
+        @Nullable TraceModelStub model = response.readEntity(TraceModelStub.class);
         assertNotNull(model);
-        assertEquals("trace2", model.getName());
-        assertEquals(TRACE2_PATH, model.getPath());
-        assertEquals(1331668247314038062L, model.getStart());
+        assertEquals(stub, model);
     }
 
 }
