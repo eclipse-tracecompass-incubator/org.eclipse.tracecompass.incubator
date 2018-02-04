@@ -103,7 +103,7 @@ public class EventTableService {
      * @param multivaluedMap
      *            map of columns to filters
      * @return a {@link Response} encapsulating an error code and message, or the
-     *         trace model objects and the table of queried events
+     *         trace objects and the table of queried events
      */
     @PUT
     @Path("/{name}/eventTable")
@@ -136,7 +136,7 @@ public class EventTableService {
      * Query the backing trace
      *
      * @param trace
-     *            TraceModel representing the trace to query on
+     *            the trace to query on
      * @param low
      *            rank of the first event to return
      * @param size
@@ -165,7 +165,7 @@ public class EventTableService {
      * Query the backing trace
      *
      * @param trace
-     *            TraceModel representing the trace to query on
+     *            the trace to query on
      * @param low
      *            index of the lowest event in the filtered event list
      * @param size

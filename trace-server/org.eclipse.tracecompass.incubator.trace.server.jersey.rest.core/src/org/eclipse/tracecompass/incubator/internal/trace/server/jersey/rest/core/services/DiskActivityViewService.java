@@ -25,7 +25,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.inputoutput.DisksIODataProvider;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TreeView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.XYView;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.SelectionTimeQueryFilter;
@@ -85,7 +84,7 @@ public class DiskActivityViewService {
         }
 
         TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> response = provider.fetchTree(new TimeQueryFilter(start, end, nb), null);
-        return Response.ok().entity(new TreeView(new TraceModel(trace), response)).build();
+        return Response.ok().entity(new TreeView(trace, response)).build();
     }
 
     /**
@@ -125,7 +124,7 @@ public class DiskActivityViewService {
         }
 
         TmfModelResponse<@NonNull ITmfCommonXAxisModel> response = provider.fetchXY(new SelectionTimeQueryFilter(start, end, nb, ids), null);
-        return Response.ok().entity(new XYView(new TraceModel(trace), response)).build();
+        return Response.ok().entity(new XYView(trace, response)).build();
     }
 
 }

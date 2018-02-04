@@ -14,11 +14,16 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DiskActivityViewService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EventTableService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
-import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
 /**
  *
@@ -67,15 +72,13 @@ public class WebApplication {
         ServletContextHandler sch = new ServletContextHandler();
         sch.setContextPath(CONTEXT_PATH);
 
-        TraceManagerService resource = new TraceManagerService();
         ResourceConfig rc = new ResourceConfig();
-        rc.register(JacksonFeature.class);
-        rc.register(resource);
-        EventTableService table = new EventTableService();
-        rc.register(table);
-        DiskActivityViewService diskService = new DiskActivityViewService();
-        rc.register(diskService);
-        rc.register(new CORSFilter());
+
+        rc.register(TraceManagerService.class);
+        rc.register(EventTableService.class);
+        rc.register(DiskActivityViewService.class);
+        rc.register(CORSFilter.class);
+        rc.register(registerCustomMappers());
 
         /**
          * register a TraceManager, this allows it to be swappable with another
@@ -99,6 +102,20 @@ public class WebApplication {
         if (fPort != TEST_PORT) {
             fServer.join();
         }
+    }
+
+    private static JacksonJaxbJsonProvider registerCustomMappers() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        // create JsonProvider to provide custom ObjectMapper
+        JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
+        provider.setMapper(mapper);
+
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(ITmfTrace.class, new TraceSerializer());
+        mapper.registerModule(module);
+        return provider;
     }
 
     /**

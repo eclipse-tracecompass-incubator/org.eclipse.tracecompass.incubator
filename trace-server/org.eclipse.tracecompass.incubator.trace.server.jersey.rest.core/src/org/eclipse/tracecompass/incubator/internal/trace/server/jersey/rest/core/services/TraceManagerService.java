@@ -28,7 +28,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
@@ -42,7 +41,6 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 /**
  * Service to manage traces.
@@ -61,9 +59,7 @@ public class TraceManagerService {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getTraces() {
-        Iterable<@NonNull ITmfTrace> traces = traceManager.getOpenedTraces();
-        Iterable<TraceModel> traceModels = Iterables.transform(traces, TraceModel::new);
-        return Response.ok().entity(Lists.newArrayList(traceModels)).build();
+        return Response.ok().entity(traceManager.getOpenedTraces()).build();
     }
 
     /**
@@ -86,23 +82,23 @@ public class TraceManagerService {
             @FormParam("typeID") String typeID) {
         Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(traceManager.getOpenedTraces(), t -> t.getPath().equals(path));
         if (optional.isPresent()) {
-            return Response.status(Status.CONFLICT).entity(new TraceModel(optional.get())).build();
+            return Response.status(Status.CONFLICT).entity(optional.get()).build();
         }
         if (!Paths.get(path).toFile().exists()) {
             return Response.status(Status.NOT_FOUND).entity("No trace at " + path).build(); //$NON-NLS-1$
         }
         try {
-            TraceModel model = put(path, name, typeID);
-            if (model == null) {
+            ITmfTrace trace = put(path, name, typeID);
+            if (trace == null) {
                 return Response.status(Status.NOT_IMPLEMENTED).entity("Trace type not supported").build(); //$NON-NLS-1$
             }
-            return Response.ok().entity(model).build();
+            return Response.ok().entity(trace).build();
         } catch (TmfTraceException | TmfTraceImportException | InstantiationException | IllegalAccessException e) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(e.getMessage()).build();
         }
     }
 
-    private TraceModel put(String path, String name, String typeID)
+    private ITmfTrace put(String path, String name, String typeID)
             throws TmfTraceException, TmfTraceImportException, InstantiationException, IllegalAccessException {
         List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(path, typeID);
         if (traceTypes.isEmpty()) {
@@ -113,7 +109,7 @@ public class TraceManagerService {
         trace.initTrace(null, path, ITmfEvent.class, name, typeID);
         trace.indexTrace(false);
         TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(this, trace, null));
-        return new TraceModel(trace);
+        return trace;
     }
 
     /**
@@ -134,7 +130,7 @@ public class TraceManagerService {
         ITmfTrace trace = optional.get();
         TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, trace));
         trace.dispose();
-        return Response.ok().entity(new TraceModel(trace)).build();
+        return Response.ok().entity(trace).build();
     }
 
 }

@@ -20,7 +20,6 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
@@ -35,7 +34,7 @@ import com.google.common.collect.Lists;
 @XmlRootElement
 public class EventView {
 
-    private TraceModel fModel;
+    private ITmfTrace fTrace;
     private List<List<String>> fLines;
     private List<String> fColumns;
     private long fLow;
@@ -62,7 +61,7 @@ public class EventView {
      *            the array of event view values to include
      */
     public EventView(@NonNull ITmfTrace trace, long low, int size, List<List<String>> lines) {
-        fModel = new TraceModel(trace);
+        fTrace = trace;
         fColumns = Lists.newArrayList(Iterables.transform(trace.getEventAspects(), ITmfEventAspect::getName));
         fLow = low;
         fSize = size;
@@ -82,14 +81,14 @@ public class EventView {
      *            number of events to return
      * @param filters
      *            the columns which will be queried, if null, the field will be
-     *            populated by the TraceModel's columns
+     *            populated by the trace's columns
      * @param lines
      *            the array of event view values to include
      * @param filteredSize
      *            the number of events that match the filters
      */
     public EventView(@NonNull ITmfTrace trace, long low, int size, MultivaluedMap<String, String> filters, List<List<String>> lines, long filteredSize) {
-        fModel = new TraceModel(trace);
+        fTrace = trace;
         fColumns = Lists.newArrayList(Iterables.transform(trace.getEventAspects(), ITmfEventAspect::getName));
         fLow = low;
         fSize = size;
@@ -99,13 +98,13 @@ public class EventView {
     }
 
     /**
-     * Getter for the trace model
+     * Getter for the trace
      *
-     * @return this query's trace model
+     * @return this query's trace
      */
     @XmlElement
-    public TraceModel getTrace() {
-        return fModel;
+    public ITmfTrace getTrace() {
+        return fTrace;
     }
 
     /**

@@ -16,9 +16,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace.TraceModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.tree.TmfTreeDataModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
  * Object to encapsulate the values returned by a query for a Tree view
@@ -28,30 +28,30 @@ import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelR
 @SuppressWarnings("restriction")
 @XmlRootElement
 public class TreeView {
-    private final TraceModel fModel;
+    private final ITmfTrace fTrace;
     private final TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> fResponse;
 
     /**
-     * Compose the {@link TraceModel} and list of {@link TmfTreeDataModel} in an
+     * Compose the {@link ITmfTrace} and list of {@link TmfTreeDataModel} in an
      * {@link TreeView}
      *
-     * @param traceModel
-     *            trace model object for the queried trace
+     * @param trace
+     *            queried trace
      * @param response
      *            Flattened tree model response for the query
      */
-    public TreeView(@Nullable TraceModel traceModel, TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> response) {
-        fModel = traceModel;
+    public TreeView(@Nullable ITmfTrace trace, TmfModelResponse<@NonNull List<@NonNull TmfTreeDataModel>> response) {
+        fTrace = trace;
         fResponse = response;
     }
 
     /**
-     * Getter for the trace model
+     * Getter for the trace
      *
-     * @return the trace model
+     * @return the trace
      */
-    public TraceModel getTrace() {
-        return fModel;
+    public ITmfTrace getTrace() {
+        return fTrace;
     }
 
     /**
