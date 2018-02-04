@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.trace;
 
+import java.util.UUID;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -82,5 +84,15 @@ public class TraceModel {
     @XmlElement
     public long getEnd() {
         return fTrace.getEndTime().toNanos();
+    }
+
+    /**
+     * Get the UUID for this trace
+     *
+     * @return this trace's unique ID.
+     */
+    @XmlElement
+    public UUID getUUID() {
+        return fTrace.getUUID();
     }
 }

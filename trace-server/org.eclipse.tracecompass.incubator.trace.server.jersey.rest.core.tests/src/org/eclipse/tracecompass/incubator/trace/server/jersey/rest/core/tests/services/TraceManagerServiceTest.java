@@ -16,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -47,13 +48,16 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
  */
 public class TraceManagerServiceTest {
     private static final String SERVER = "http://localhost:8378/tracecompass/traces"; //$NON-NLS-1$
+    private static final String NAME = "name";
     private static final String PATH = "path"; //$NON-NLS-1$
 
     private static String TRACE2_PATH;
     private static TraceModelStub TRACE2_STUB;
+    private static final UUID TRACE2_UUID = UUID.fromString("5bf45359-069d-4e45-a34d-24d037ca5676") ;
 
     private static String KERNEL_PATH;
     private static TraceModelStub KERNEL_STUB;
+    private static final UUID KERNEL_UUID = UUID.fromString("d18e6374-35a1-cd42-8e70-a9cffa712793") ;
 
     private static final GenericType<List<TraceModelStub>> TRACE_MODEL_LIST_TYPE = new GenericType<List<TraceModelStub>>() {
     };
@@ -69,10 +73,10 @@ public class TraceManagerServiceTest {
     @BeforeClass
     public static void beforeTest() throws IOException {
         TRACE2_PATH = FileLocator.toFileURL(CtfTestTrace.TRACE2.getTraceURL()).getPath();
-        TRACE2_STUB = new TraceModelStub("trace2", TRACE2_PATH, 0, 1331668247314038062L, 1331668247314038062L);
+        TRACE2_STUB = new TraceModelStub("trace2", TRACE2_PATH, TRACE2_UUID, 0, 1331668247314038062L, 1331668247314038062L);
 
         KERNEL_PATH = FileLocator.toFileURL(CtfTestTrace.KERNEL.getTraceURL()).getPath();
-        KERNEL_STUB = new TraceModelStub("kernel", KERNEL_PATH, 0, 1332170682440133097L, 1332170682440133097L);
+        KERNEL_STUB = new TraceModelStub("kernel", KERNEL_PATH, KERNEL_UUID, 0, 1332170682440133097L, 1332170682440133097L);
     }
 
     /**
@@ -113,7 +117,7 @@ public class TraceManagerServiceTest {
         assertNotNull("Model returned by server should not be null", traceModels);
         assertEquals("Expected list of traces to contain one trace", 1, traceModels.size());
 
-        Response deleteResponse = traces.path("trace2").request().delete();
+        Response deleteResponse = traces.path(TRACE2_UUID.toString()).request().delete();
         int deleteCode = deleteResponse.getStatus();
         assertEquals("Failed to DELETE trace2, error code=" + deleteCode, 200, deleteCode);
         assertEquals(TRACE2_STUB, deleteResponse.readEntity(TraceModelStub.class));
@@ -142,14 +146,14 @@ public class TraceManagerServiceTest {
         assertTrue(traceModels.contains(KERNEL_STUB));
         assertTrue(traceModels.contains(TRACE2_STUB));
 
-        traces.path("trace2").request().delete();
-        traces.path("kernel").request().delete();
+        traces.path(TRACE2_UUID.toString()).request().delete();
+        traces.path(KERNEL_UUID.toString()).request().delete();
     }
 
     private static void assertPost(WebTarget traces, TraceModelStub stub) {
-        WebTarget kernelTarget = traces.path(stub.getName());
-        Form form2 = new Form(PATH, stub.getPath());
-        Response response = kernelTarget.request().post(Entity.form(form2));
+        Form form = new Form(PATH, stub.getPath());
+        form.param(NAME, stub.getName());
+        Response response = traces.request().post(Entity.form(form));
         int code2 = response.getStatus();
         assertEquals("Failed to POST " + stub.getName() + ", error code=" + code2, 200, code2);
         @Nullable TraceModelStub model = response.readEntity(TraceModelStub.class);

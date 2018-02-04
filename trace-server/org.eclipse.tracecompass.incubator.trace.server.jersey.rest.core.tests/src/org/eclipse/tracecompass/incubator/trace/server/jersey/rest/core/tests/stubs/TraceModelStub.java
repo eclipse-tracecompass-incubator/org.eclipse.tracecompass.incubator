@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Basic Implementation of the serialized trace model object used by clients.
@@ -31,6 +32,7 @@ public class TraceModelStub implements Serializable {
 
     private final String fName;
     private final String fPath;
+    private final UUID fUUID;
     private final long fNbEvents;
     private final long fStart;
     private final long fEnd;
@@ -42,6 +44,8 @@ public class TraceModelStub implements Serializable {
      *            trace name
      * @param path
      *            path to trace on server file system
+     * @param uuid
+     *            the stub's UUID
      * @param nbEvents
      *            number of current indexed events
      * @param start
@@ -52,11 +56,13 @@ public class TraceModelStub implements Serializable {
     @JsonCreator
     public TraceModelStub(@JsonProperty("name") String name,
             @JsonProperty("path") String path,
+            @JsonProperty("UUID") UUID uuid,
             @JsonProperty("nbEvents") long nbEvents,
             @JsonProperty("start") long start,
             @JsonProperty("end") long end) {
         fName = name;
         fPath = path;
+        fUUID = uuid;
         fNbEvents = nbEvents;
         fStart = start;
         fEnd = end;
@@ -107,6 +113,15 @@ public class TraceModelStub implements Serializable {
         return fEnd;
     }
 
+    /**
+     * Getter for this stub's UUID
+     *
+     * @return this stub's UUID
+     */
+    public UUID getUUID() {
+        return fUUID;
+    }
+
     @Override
     public String toString() {
         return fName + ":<path=" + fPath + ", nbEvents=" + fNbEvents //$NON-NLS-1$ //$NON-NLS-2$
@@ -115,7 +130,7 @@ public class TraceModelStub implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fName, fPath, fStart);
+        return Objects.hash(fName, fPath, fUUID, fStart);
     }
 
     @Override
@@ -132,6 +147,7 @@ public class TraceModelStub implements Serializable {
         TraceModelStub other = (TraceModelStub) obj;
         return Objects.equals(fName, other.fName)
                 && Objects.equals(fPath, other.fPath)
+                && Objects.equals(fUUID, other.fUUID)
                 && fStart == other.fStart;
     }
 }

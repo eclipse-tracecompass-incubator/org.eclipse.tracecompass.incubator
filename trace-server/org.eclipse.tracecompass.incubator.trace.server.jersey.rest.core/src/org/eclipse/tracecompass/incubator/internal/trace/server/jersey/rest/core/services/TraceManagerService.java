@@ -10,6 +10,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -78,13 +79,12 @@ public class TraceManagerService {
      * @return the new trace model object or the exception if it failed to load.
      */
     @POST
-    @Path("/{name}")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response putTrace(@PathParam("name") @NotNull @Size(min = 1) String name,
+    public Response putTrace(@FormParam("name") @NotNull @Size(min = 1) String name,
             @FormParam("path") String path,
             @FormParam("typeID") String typeID) {
-        Optional<@NonNull ITmfTrace> optional = getTrace(name);
+        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(traceManager.getOpenedTraces(), t -> t.getPath().equals(path));
         if (optional.isPresent()) {
             return Response.status(Status.CONFLICT).entity(new TraceModel(optional.get())).build();
         }
@@ -100,10 +100,6 @@ public class TraceManagerService {
         } catch (TmfTraceException | TmfTraceImportException | InstantiationException | IllegalAccessException e) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(e.getMessage()).build();
         }
-    }
-
-    private Optional<@NonNull ITmfTrace> getTrace(String name) {
-        return Iterables.tryFind(traceManager.getOpenedTraces(), t -> t.getName().equals(name));
     }
 
     private TraceModel put(String path, String name, String typeID)
@@ -123,15 +119,15 @@ public class TraceManagerService {
     /**
      * Delete a trace from the manager and dispose of it
      *
-     * @param name
-     *            name of the trace
+     * @param uuid
+     *            Unique trace ID
      * @return a not found response if there is no such trace or the entity.
      */
     @DELETE
-    @Path("/{name}")
+    @Path("/{uuid}")
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteTrace(@PathParam("name") @NotNull String name) {
-        Optional<@NonNull ITmfTrace> optional = getTrace(name);
+    public Response deleteTrace(@PathParam("uuid") @NotNull UUID uuid) {
+        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(traceManager.getOpenedTraces(), t -> uuid.equals(t.getUUID()));
         if (!optional.isPresent()) {
             return Response.ok().status(Status.NOT_FOUND).build();
         }
