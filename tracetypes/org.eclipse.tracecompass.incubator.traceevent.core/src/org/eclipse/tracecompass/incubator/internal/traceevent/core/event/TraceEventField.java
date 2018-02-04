@@ -9,6 +9,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.traceevent.core.event;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -18,14 +20,17 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
- * Trace Compass Log fields, used as a quick wrapper for Trace compass log data
+ * Trace Event fields. Used as a quick wrapper for Trace Event log data.
  *
  * @author Matthew Khouzam
  */
 @NonNullByDefault
 public class TraceEventField {
+    private static final double MICRO_TO_NANO = 1000.0;
 
     private final long fTs;
     private final char fPhase;
@@ -37,6 +42,97 @@ public class TraceEventField {
     private final @Nullable String fId;
     private final @Nullable Long fDuration;
     private final @Nullable Object fPid;
+
+    /**
+     * Parse a JSON string
+     *
+     * @param fieldsString
+     *            the string
+     * @return an event field
+     */
+    public static @Nullable TraceEventField parseJson(String fieldsString) {
+        // looks like this
+        // {"ts":94824347413117,"phase":"B","tid":39,"name":"TimeGraphView:BuildThread","args"={"trace":"django-httpd"}}
+        JSONObject root;
+        Map<@NonNull String, @NonNull Object> argsMap = new HashMap<>();
+        try {
+            root = new JSONObject(fieldsString);
+            long ts = 0;
+
+            Double tso = optDouble(root, ITraceEventConstants.TIMESTAMP);
+            if (Double.isFinite(tso)) {
+                ts = (long) (tso * MICRO_TO_NANO);
+            }
+            String phase = optString(root, ITraceEventConstants.PHASE, "I"); //$NON-NLS-1$
+            if (phase == null) {
+                // FIXME: Easy way to avoid null warning
+                phase = "I"; //$NON-NLS-1$
+            }
+            String name = String.valueOf(optString(root,ITraceEventConstants.NAME, "E".equals(phase) ? "exit" : "unknown")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            Integer tid = optInt(root, ITraceEventConstants.TID);
+            if (tid == Integer.MIN_VALUE) {
+                tid = null;
+            }
+            Object pid = root.opt(ITraceEventConstants.PID);
+            Double duration = optDouble(root, ITraceEventConstants.DURATION);
+            if (Double.isFinite(duration)) {
+                duration = (duration * MICRO_TO_NANO);
+            }
+            String category = optString(root, ITraceEventConstants.CATEGORY);
+            String id = optString(root, ITraceEventConstants.ID);
+            JSONObject args = optJSONObject(root, ITraceEventConstants.ARGS);
+            if (args != null) {
+                Iterator<?> keys = args.keys();
+                while (keys.hasNext()) {
+                    String key = String.valueOf(keys.next());
+                    String value = args.optString(key);
+                    argsMap.put("arg/" + key, String.valueOf(value)); //$NON-NLS-1$
+                }
+            }
+            argsMap.put(ITraceEventConstants.TIMESTAMP, ts);
+            argsMap.put(ITraceEventConstants.PHASE, phase);
+            argsMap.put(ITraceEventConstants.NAME, name);
+            if (tid != null) {
+                argsMap.put(ITraceEventConstants.TID, tid);
+            }
+            if (pid != null) {
+                argsMap.put(ITraceEventConstants.PID, pid);
+            }
+            if (Double.isFinite(duration)) {
+                argsMap.put(ITraceEventConstants.DURATION, duration);
+            }
+            if (category != null) {
+                argsMap.put(ITraceEventConstants.CATEGORY, category);
+            }
+            if (id != null) {
+                argsMap.put(ITraceEventConstants.ID, id);
+            }
+            return new TraceEventField(name, ts, phase, pid, tid, category, id, duration, argsMap);
+        } catch (JSONException e1) {
+            // invalid, return null and it will fail
+        }
+        return null;
+    }
+
+    private static double optDouble(JSONObject root, String key) {
+        return root.has(key) ? root.optDouble(key) : Double.NaN;
+    }
+
+    private static int optInt(JSONObject root, String key) {
+        return root.has(key) ? root.optInt(key) : Integer.MIN_VALUE;
+    }
+
+    private static @Nullable JSONObject optJSONObject(JSONObject root, String key){
+        return root.has(key) ? root.optJSONObject(key) : null;
+    }
+
+    private static @Nullable String optString(JSONObject root, String key, @Nullable String defaultValue) {
+        return root.has(key) ? root.optString(key) : defaultValue;
+    }
+
+    private static @Nullable String optString(JSONObject root, String key) {
+        return optString(root, key, null);
+    }
 
     /**
      * Constructor
@@ -60,7 +156,7 @@ public class TraceEventField {
      * @param fields
      *            event fields (arguments)
      */
-    public TraceEventField(String name, long ts, String phase, @Nullable Object pid, @Nullable Integer tid, @Nullable String category, @Nullable String id, @Nullable Double duration, Map<String, Object> fields) {
+    protected TraceEventField(String name, long ts, String phase, @Nullable Object pid, @Nullable Integer tid, @Nullable String category, @Nullable String id, @Nullable Double duration, Map<String, Object> fields) {
         fName = name;
         fPid = pid;
         fTid = tid;

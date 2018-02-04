@@ -87,7 +87,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
             String line = readNextEventString(() -> (char) rafile.read());
             while ((line != null) && (lineCount++ < MAX_LINES)) {
                 try {
-                    TraceEventField field = TraceEventEvent.parseJson(line);
+                    TraceEventField field = TraceEventField.parseJson(line);
                     if (field != null) {
                         matches++;
                     }
@@ -211,7 +211,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
                     }
                     String nextJson = readNextEventString(() -> (char) fFileInput.read());
                     if (nextJson != null) {
-                        TraceEventField field = TraceEventEvent.parseJson(nextJson);
+                        TraceEventField field = TraceEventField.parseJson(nextJson);
                         return new TraceEventEvent(this, context.getRank(), field);
                     }
                 } catch (IOException e) {
