@@ -29,6 +29,19 @@ public class Application implements IApplication {
     private Location fInstanceLoc = null;
     private int fPort;
 
+    /**
+     * Default constructor (used by the eclipse/product launcher.
+     */
+    public Application() {
+        this(8080);
+    }
+
+    /**
+     * Constructor, to specify a specific port to run the server on.
+     *
+     * @param port
+     *            port to run the web server on.
+     */
     public Application(int port) {
         fPort = port;
     }
