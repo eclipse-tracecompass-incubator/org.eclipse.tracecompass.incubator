@@ -22,12 +22,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
@@ -49,7 +49,6 @@ import com.google.common.collect.Iterables;
  */
 @Path("/traces")
 public class TraceManagerService {
-    @Context TmfTraceManager traceManager;
 
     /**
      * Getter method to access the list of traces
@@ -59,7 +58,7 @@ public class TraceManagerService {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getTraces() {
-        return Response.ok().entity(traceManager.getOpenedTraces()).build();
+        return Response.ok().entity(TmfTraceManager.getInstance().getOpenedTraces()).build();
     }
 
     /**
@@ -80,7 +79,7 @@ public class TraceManagerService {
     public Response putTrace(@FormParam("name") @NotNull @Size(min = 1) String name,
             @FormParam("path") String path,
             @FormParam("typeID") String typeID) {
-        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(traceManager.getOpenedTraces(), t -> t.getPath().equals(path));
+        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(TmfTraceManager.getInstance().getOpenedTraces(), t -> t.getPath().equals(path));
         if (optional.isPresent()) {
             return Response.status(Status.CONFLICT).entity(optional.get()).build();
         }
@@ -104,12 +103,30 @@ public class TraceManagerService {
         if (traceTypes.isEmpty()) {
             return null;
         }
-        TraceTypeHelper helper = Iterables.get(traceTypes, 0);
+        TraceTypeHelper helper = traceTypes.get(0);
         ITmfTrace trace = helper.getTraceClass().newInstance();
         trace.initTrace(null, path, ITmfEvent.class, name, typeID);
         trace.indexTrace(false);
         TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(this, trace, null));
         return trace;
+    }
+
+    /**
+     * Getter method to get a trace object
+     *
+     * @param uuid
+     *            Unique trace ID
+     * @return a response containing the trace
+     */
+    @GET
+    @Path("/{uuid}")
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response getTrace(@PathParam("uuid") @NotNull UUID uuid) {
+        ITmfTrace trace = getTraceByUUID(uuid);
+        if (trace == null) {
+            return Response.ok().status(Status.NOT_FOUND).build();
+        }
+        return Response.ok().entity(trace).build();
     }
 
     /**
@@ -123,14 +140,24 @@ public class TraceManagerService {
     @Path("/{uuid}")
     @Produces({ MediaType.APPLICATION_JSON })
     public Response deleteTrace(@PathParam("uuid") @NotNull UUID uuid) {
-        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(traceManager.getOpenedTraces(), t -> uuid.equals(t.getUUID()));
-        if (!optional.isPresent()) {
+        ITmfTrace trace = getTraceByUUID(uuid);
+        if (trace == null) {
             return Response.ok().status(Status.NOT_FOUND).build();
         }
-        ITmfTrace trace = optional.get();
         TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, trace));
         trace.dispose();
         return Response.ok().entity(trace).build();
+    }
+
+    /**
+     * Try and find a trace with the queried UUID in the {@link TmfTraceManager}.
+     *
+     * @param uuid
+     *            queried {@link UUID}
+     * @return the trace or null if none match.
+     */
+    public static @Nullable ITmfTrace getTraceByUUID(UUID uuid) {
+        return Iterables.tryFind(TmfTraceManager.getInstance().getOpenedTraces(), t -> uuid.equals(t.getUUID())).orNull();
     }
 
 }

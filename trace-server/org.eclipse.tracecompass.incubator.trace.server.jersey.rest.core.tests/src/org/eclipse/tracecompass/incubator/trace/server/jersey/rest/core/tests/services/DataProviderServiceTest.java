@@ -11,44 +11,23 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.s
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
-import java.util.UUID;
-
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
-import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Test the {@link TraceManagerService}
+ * Test the {@link DataProviderService}
  *
  * @author Loic Prieur-Drevon
  */
 public class DataProviderServiceTest extends RestServerTest {
+    private static final String PROVIDERS_PATH = "providers";
     private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.tmf.core.callstack.provider.CallStackDataProvider";
-
-    private static String CONTEXT_SWITCHES_UST_PATH;
-    private static TraceModelStub CONTEXT_SWITCHES_UST_STUB;
-    private static final UUID CONTEXT_SWITCHES_UST_UUID = UUID.fromString("8160c5b3-c482-4d86-9d81-3272e872537f");
-
-    /**
-     * Get the paths to the desired traces statically
-     *
-     * @throws IOException
-     *             if the URL could not be converted to a path
-     */
-    @BeforeClass
-    public static void beforeTest() throws IOException {
-        CONTEXT_SWITCHES_UST_PATH = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath();
-        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub("trace2", CONTEXT_SWITCHES_UST_PATH, CONTEXT_SWITCHES_UST_UUID);
-    }
+    private static final String TREE_PATH = "tree";
 
     /**
      * Ensure that the Call Stack data provider exists for the trace.
@@ -59,12 +38,21 @@ public class DataProviderServiceTest extends RestServerTest {
         RestServerTest.assertPost(traces, CONTEXT_SWITCHES_UST_STUB);
 
         Response tree = traces.path(CONTEXT_SWITCHES_UST_UUID.toString())
+                .path(PROVIDERS_PATH)
                 .path(CALL_STACK_DATAPROVIDER_ID)
+                .path(TREE_PATH)
                 .queryParam("start", 0L)
                 .queryParam("end", Long.MAX_VALUE)
                 .queryParam("nb", 2)
                 .request(MediaType.APPLICATION_JSON).get();
         assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
+
+        Response defaults = traces.path(CONTEXT_SWITCHES_UST_UUID.toString())
+                .path(PROVIDERS_PATH)
+                .path(CALL_STACK_DATAPROVIDER_ID)
+                .path(TREE_PATH)
+                .request(MediaType.APPLICATION_JSON).get();
+        assertEquals("Default values should return OK code", 200, defaults.getStatus());
     }
 
 }

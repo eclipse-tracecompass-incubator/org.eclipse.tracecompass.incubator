@@ -11,12 +11,10 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EventTableService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
-import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
@@ -79,17 +77,6 @@ public class WebApplication {
         rc.register(DataProviderService.class);
         rc.register(CORSFilter.class);
         rc.register(registerCustomMappers());
-
-        /**
-         * register a TraceManager, this allows it to be swappable with another
-         * implementation.
-         */
-        rc.register(new AbstractBinder() {
-            @Override
-            protected void configure() {
-                bind(TmfTraceManager.getInstance()).to(TmfTraceManager.class);
-            }
-        });
 
         ServletContainer sc = new ServletContainer(rc);
         ServletHolder holder = new ServletHolder(sc);

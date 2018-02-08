@@ -10,9 +10,10 @@
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -23,11 +24,14 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
+import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
@@ -44,8 +48,43 @@ public abstract class RestServerTest {
     private static final String NAME = "name";
     private static final String PATH = "path"; //$NON-NLS-1$
 
-    private static final GenericType<List<TraceModelStub>> TRACE_MODEL_LIST_TYPE = new GenericType<List<TraceModelStub>>() {
+    private static final GenericType<Set<TraceModelStub>> TRACE_MODEL_SET_TYPE = new GenericType<Set<TraceModelStub>>() {
     };
+
+    /**
+     * {@link UUID} for {@link CtfTestTrace#TRACE2}.
+     */
+    protected static final UUID TRACE2_UUID = UUID.fromString("5bf45359-069d-4e45-a34d-24d037ca5676");
+    /**
+     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link CtfTestTrace#TRACE2}.
+     */
+    protected static TraceModelStub TRACE2_STUB;
+
+    /**
+     * {@link UUID} for {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
+     */
+    protected static final UUID CONTEXT_SWITCHES_UST_UUID = UUID.fromString("8160c5b3-c482-4d86-9d81-3272e872537f");
+    /**
+     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
+     */
+    protected static TraceModelStub CONTEXT_SWITCHES_UST_STUB;
+
+    /**
+     * Create the {@link TraceModelStub}s before running the tests
+     *
+     * @throws IOException
+     *             if the URL could not be converted to a path
+     */
+    @BeforeClass
+    public static void beforeTest() throws IOException {
+        String trace2Path = FileLocator.toFileURL(CtfTestTrace.TRACE2.getTraceURL()).getPath();
+        TRACE2_STUB = new TraceModelStub("trace2", trace2Path, TRACE2_UUID);
+
+        String contextSwitchesUstPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath();
+        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub("trace2", contextSwitchesUstPath, CONTEXT_SWITCHES_UST_UUID);
+    }
 
     /**
      * Start the Eclipse / Jetty Web server
@@ -64,8 +103,7 @@ public abstract class RestServerTest {
     @After
     public void stopServer() {
         WebTarget traceTarget = getTracesEndpoint();
-        List<TraceModelStub> traces = getTraces(traceTarget);
-        for (TraceModelStub trace : traces) {
+        for (TraceModelStub trace : getTraces(traceTarget)) {
             traceTarget.path(trace.getUUID().toString()).request().delete();
         }
         fWebApp.stop();
@@ -79,8 +117,7 @@ public abstract class RestServerTest {
     public static WebTarget getTracesEndpoint() {
         Client client = ClientBuilder.newClient();
         client.register(JacksonJsonProvider.class);
-        WebTarget traces = client.target(SERVER);
-        return traces;
+        return client.target(SERVER);
     }
 
     /**
@@ -91,8 +128,8 @@ public abstract class RestServerTest {
      *            the server.
      * @return list of currently open traces.
      */
-    public static List<TraceModelStub> getTraces(WebTarget traces) {
-        return traces.request(MediaType.APPLICATION_JSON).get(TRACE_MODEL_LIST_TYPE);
+    public static Set<TraceModelStub> getTraces(WebTarget traces) {
+        return traces.request(MediaType.APPLICATION_JSON).get(TRACE_MODEL_SET_TYPE);
     }
 
     /**
@@ -111,7 +148,6 @@ public abstract class RestServerTest {
         int code = response.getStatus();
         assertEquals("Failed to POST " + stub.getName() + ", error code=" + code, 200, code);
         @Nullable TraceModelStub model = response.readEntity(TraceModelStub.class);
-        assertNotNull(model);
         assertEquals(stub, model);
     }
 }

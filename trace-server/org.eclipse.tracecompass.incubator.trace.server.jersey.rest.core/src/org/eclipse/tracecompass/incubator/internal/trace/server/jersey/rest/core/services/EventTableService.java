@@ -10,6 +10,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -23,7 +24,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -40,10 +40,8 @@ import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -52,16 +50,14 @@ import com.google.common.collect.Lists;
  *
  * @author Loic Prieur-Drevon
  */
-@Path("/traces")
+@Path("/traces/{uuid}/eventTable")
 public class EventTableService {
-    @Context
-    TmfTraceManager traceManager;
 
     /**
      * Query a trace for a list of events to populate a virtual table
      *
-     * @param name
-     *            The queried trace's name
+     * @param uuid
+     *            The queried trace's uuid
      *
      * @param low
      *            rank of the first event to return
@@ -71,17 +67,15 @@ public class EventTableService {
      *         trace model objects and the table of queried events
      */
     @GET
-    @Path("/{name}/eventTable")
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getEvents(@PathParam(value = "name") @NotNull String name,
-            @QueryParam(value = "low") @Min(0) long low,
-            @QueryParam(value = "size") @Min(0) int size) {
-        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(traceManager.getOpenedTraces(), t -> t.getName().equals(name));
-        if (!optional.isPresent()) {
-            return Response.status(Status.NOT_FOUND).entity("No trace with name: " + name).build(); //$NON-NLS-1$
+    public Response getEvents(@PathParam("uuid") @NotNull UUID uuid,
+            @QueryParam("low") @Min(0) long low,
+            @QueryParam("size") @Min(0) int size) {
+        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+        if (trace == null) {
+            return Response.status(Status.NOT_FOUND).entity("No trace with uuid: " + uuid).build(); //$NON-NLS-1$
         }
         try {
-            ITmfTrace trace = optional.get();
             List<List<String>> events = query(trace, low, size);
             EventView view = new EventView(trace, low, size, events);
             return Response.ok().entity(view).build();
@@ -94,8 +88,8 @@ public class EventTableService {
     /**
      * Query a trace for a list of events to populate a virtual table
      *
-     * @param name
-     *            The queried trace's name
+     * @param uuid
+     *            The queried trace's {@link UUID}
      * @param low
      *            rank of the first event to return
      * @param size
@@ -106,23 +100,21 @@ public class EventTableService {
      *         trace objects and the table of queried events
      */
     @PUT
-    @Path("/{name}/eventTable")
     @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getFilteredEvents(@PathParam(value = "name") @NotNull String name,
-            @QueryParam(value = "low") @Min(0) long low,
-            @QueryParam(value = "size") @Min(0) int size,
+    public Response getFilteredEvents(@PathParam("uuid") @NotNull UUID uuid,
+            @QueryParam("low") @Min(0) long low,
+            @QueryParam("size") @Min(0) int size,
             MultivaluedMap<String, String> multivaluedMap) {
 
         if (multivaluedMap == null) {
             return Response.status(Status.BAD_REQUEST).entity("bad filter (null)").build(); //$NON-NLS-1$
         }
-        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(traceManager.getOpenedTraces(), t -> t.getName().equals(name));
-        if (!optional.isPresent()) {
-            return Response.status(Status.NOT_FOUND).entity("No trace with name: " + name).build(); //$NON-NLS-1$
+        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+        if (trace == null) {
+            return Response.status(Status.NOT_FOUND).entity("No trace with uuid: " + uuid).build(); //$NON-NLS-1$
         }
         try {
-            ITmfTrace trace = optional.get();
             Pair<List<List<String>>, Integer> events = filteredQuery(trace, low, size, multivaluedMap);
             EventView view = new EventView(trace, low, size, multivaluedMap, events.getFirst(), events.getSecond());
             return Response.ok().entity(view).build();

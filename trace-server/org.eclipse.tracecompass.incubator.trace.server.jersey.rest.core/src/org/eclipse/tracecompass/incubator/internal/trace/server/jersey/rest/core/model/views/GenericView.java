@@ -12,33 +12,32 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfXyModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
- * Object to encapsulate the values returned by a query for an XY view
+ * Object to encapsulate the values returned by a data provider query
  *
+ * @param <R> Type of model to return
  * @author Loic Prieur-Drevon
  */
 @SuppressWarnings("restriction")
 @XmlRootElement
-public class XYView {
+public class GenericView<R> {
     private final ITmfTrace fTrace;
-    private final TmfModelResponse<@NonNull ITmfXyModel> fResponse;
+    private final TmfModelResponse<R> fResponse;
 
     /**
-     * Compose the {@link ITmfTrace} and {@link ITmfXyModel} in an
-     * {@link XYView}
+     * Compose the {@link ITmfTrace} and response in an
+     * {@link GenericView}
      *
      * @param trace
      *            the queried trace
      * @param response
      *            XY model response for the query
      */
-    public XYView(@Nullable ITmfTrace trace, TmfModelResponse<@NonNull ITmfXyModel> response) {
+    public GenericView(@Nullable ITmfTrace trace, TmfModelResponse<R> response) {
         fTrace = trace;
         fResponse = response;
     }
@@ -53,12 +52,12 @@ public class XYView {
     }
 
     /**
-     * Getter for the time values in this XY view
+     * Getter for the ModelResponse in this XY view
      *
      * @return the time values
      */
     @XmlElement
-    public TmfModelResponse<@NonNull ITmfXyModel> getResponse() {
+    public TmfModelResponse<R> getResponse() {
         return fResponse;
     }
 }
