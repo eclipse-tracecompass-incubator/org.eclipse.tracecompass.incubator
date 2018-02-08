@@ -18,8 +18,9 @@ import java.util.UUID;
 
 /**
  * Basic Implementation of the serialized trace model object used by clients.
- * Equality of two stubs is determined by equality of names, paths and start
- * times, as the end and nbEvents may be unknown due to incomplete indexing.
+ * Equality of two stubs is determined by equality of names, paths and
+ * {@link UUID}, as the start time, end time and number of events may be unknown
+ * due to incomplete indexing.
  *
  * @author Loic Prieur-Drevon
  */
@@ -77,11 +78,9 @@ public class TraceModelStub implements Serializable {
      *            path to trace on server file system
      * @param uuid
      *            the stub's UUID
-     * @param start
-     *            start time
      */
-    public TraceModelStub(String name, String path, UUID uuid, long start) {
-        this(name, path, uuid, 0, start, start);
+    public TraceModelStub(String name, String path, UUID uuid) {
+        this(name, path, uuid, 0, 0L, 0L);
     }
 
     /**
@@ -146,7 +145,7 @@ public class TraceModelStub implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fName, fPath, fUUID, fStart);
+        return Objects.hash(fName, fPath, fUUID);
     }
 
     @Override
@@ -163,7 +162,6 @@ public class TraceModelStub implements Serializable {
         TraceModelStub other = (TraceModelStub) obj;
         return Objects.equals(fName, other.fName)
                 && Objects.equals(fPath, other.fPath)
-                && Objects.equals(fUUID, other.fUUID)
-                && fStart == other.fStart;
+                && Objects.equals(fUUID, other.fUUID);
     }
 }

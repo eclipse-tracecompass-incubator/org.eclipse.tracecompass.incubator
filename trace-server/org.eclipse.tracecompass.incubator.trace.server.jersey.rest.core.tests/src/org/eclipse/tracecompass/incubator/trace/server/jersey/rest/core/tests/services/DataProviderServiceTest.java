@@ -24,7 +24,6 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -48,14 +47,12 @@ public class DataProviderServiceTest extends RestServerTest {
     @BeforeClass
     public static void beforeTest() throws IOException {
         CONTEXT_SWITCHES_UST_PATH = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath();
-        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub("trace2", CONTEXT_SWITCHES_UST_PATH, CONTEXT_SWITCHES_UST_UUID, 1450193697034689597L);
+        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub("trace2", CONTEXT_SWITCHES_UST_PATH, CONTEXT_SWITCHES_UST_UUID);
     }
 
     /**
-     * Ensure that the Call Stack data provider exists for the trace. TODO ensure
-     * that the correct plug-ins are loaded.
+     * Ensure that the Call Stack data provider exists for the trace.
      */
-    @Ignore
     @Test
     public void testCallStackDataProvider() {
         WebTarget traces = getTracesEndpoint();

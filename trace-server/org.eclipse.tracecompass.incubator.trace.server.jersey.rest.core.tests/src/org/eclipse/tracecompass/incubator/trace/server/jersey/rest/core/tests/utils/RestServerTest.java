@@ -24,7 +24,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.application.Application;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
 import org.junit.After;
@@ -41,7 +40,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
  */
 public abstract class RestServerTest {
     private static final String SERVER = "http://localhost:8378/tracecompass/traces"; //$NON-NLS-1$
-    private static final Application fWebApp = new Application(WebApplication.TEST_PORT);
+    private static final WebApplication fWebApp = new WebApplication(WebApplication.TEST_PORT);
     private static final String NAME = "name";
     private static final String PATH = "path"; //$NON-NLS-1$
 
@@ -56,7 +55,7 @@ public abstract class RestServerTest {
      */
     @Before
     public void startServer() throws Exception {
-        fWebApp.start(null);
+        fWebApp.start();
     }
 
     /**

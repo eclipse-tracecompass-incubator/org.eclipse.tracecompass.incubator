@@ -53,10 +53,10 @@ public class TraceManagerServiceTest extends RestServerTest {
     @BeforeClass
     public static void beforeTest() throws IOException {
         TRACE2_PATH = FileLocator.toFileURL(CtfTestTrace.TRACE2.getTraceURL()).getPath();
-        TRACE2_STUB = new TraceModelStub("trace2", TRACE2_PATH, TRACE2_UUID, 1331668247314038062L);
+        TRACE2_STUB = new TraceModelStub("trace2", TRACE2_PATH, TRACE2_UUID);
 
         KERNEL_PATH = FileLocator.toFileURL(CtfTestTrace.KERNEL.getTraceURL()).getPath();
-        KERNEL_STUB = new TraceModelStub("kernel", KERNEL_PATH, KERNEL_UUID, 1332170682440133097L);
+        KERNEL_STUB = new TraceModelStub("kernel", KERNEL_PATH, KERNEL_UUID);
     }
 
     /**

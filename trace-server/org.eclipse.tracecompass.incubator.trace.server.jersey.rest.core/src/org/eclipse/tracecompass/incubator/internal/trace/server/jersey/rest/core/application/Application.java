@@ -27,24 +27,6 @@ public class Application implements IApplication {
     private static final String WORKSPACE_NAME = ".tracecompass-webapp"; //$NON-NLS-1$
     private WebApplication fWebAppl;
     private Location fInstanceLoc = null;
-    private int fPort;
-
-    /**
-     * Default constructor (used by the eclipse/product launcher.
-     */
-    public Application() {
-        this(8080);
-    }
-
-    /**
-     * Constructor, to specify a specific port to run the server on.
-     *
-     * @param port
-     *            port to run the web server on.
-     */
-    public Application(int port) {
-        fPort = port;
-    }
 
     @Override
     public Object start(IApplicationContext context) throws Exception {
@@ -70,7 +52,7 @@ public class Application implements IApplication {
             return IApplication.EXIT_OK;
         }
 
-        fWebAppl = new WebApplication(fPort);
+        fWebAppl = new WebApplication();
         fWebAppl.start();
         return null;
     }
