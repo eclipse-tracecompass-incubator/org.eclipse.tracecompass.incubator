@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
@@ -27,10 +28,22 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
+import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.io.ResourceUtil;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
@@ -97,23 +110,72 @@ public class TraceManagerService {
                 return Response.status(Status.NOT_IMPLEMENTED).entity("Trace type not supported").build(); //$NON-NLS-1$
             }
             return Response.ok(trace).build();
-        } catch (TmfTraceException | TmfTraceImportException | InstantiationException | IllegalAccessException e) {
+        } catch (TmfTraceException | TmfTraceImportException | InstantiationException
+                | IllegalAccessException | CoreException e) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(e.getMessage()).build();
         }
     }
 
     private ITmfTrace put(String path, String name, String typeID)
-            throws TmfTraceException, TmfTraceImportException, InstantiationException, IllegalAccessException {
+            throws TmfTraceException, TmfTraceImportException, InstantiationException,
+            IllegalAccessException, CoreException {
         List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(path, typeID);
         if (traceTypes.isEmpty()) {
             return null;
         }
+
+        IResource resource = getResource(path);
+
         TraceTypeHelper helper = traceTypes.get(0);
         ITmfTrace trace = helper.getTraceClass().newInstance();
-        trace.initTrace(null, path, ITmfEvent.class, name, typeID);
+        trace.initTrace(resource, path, ITmfEvent.class, name, typeID);
         trace.indexTrace(false);
         TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(this, trace, null));
         return trace;
+    }
+
+    /**
+     * Gets the Eclipse resource from the path and prepares the supplementary
+     * directory for this trace.
+     *
+     * @param path
+     *            the absolute path string to the trace
+     * @return The Eclipse resources
+     *
+     * @throws CoreException
+     *             if an error occurs
+     */
+    private static IResource getResource(String path) throws CoreException {
+        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        IProject project = root.getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME);
+        IPath iPath = org.eclipse.core.runtime.Path.forPosix(path);
+
+        IResource resource = null;
+        boolean isSuccess = false;
+        // create the resource hierarchy.
+        if (new File(path).isFile()) {
+            IFile file = project.getFile(path);
+            createFolder((IFolder) file.getParent(), null);
+            isSuccess = ResourceUtil.createSymbolicLink(file, iPath, true, null);
+            resource = file;
+        } else {
+            IFolder folder = project.getFolder(path);
+            createFolder((IFolder) folder.getParent(), null);
+            isSuccess = ResourceUtil.createSymbolicLink(folder, iPath, true, null);
+            resource = folder;
+        }
+
+        if (!isSuccess) {
+            return null;
+        }
+
+        // create supplementary folder on file system:
+        IFolder supplRootFolder = project.getFolder(TmfCommonConstants.TRACE_SUPPLEMENTARY_FOLDER_NAME);
+        IFolder supplFolder = supplRootFolder.getFolder(path);
+        createFolder(supplFolder, null);
+        resource.setPersistentProperty(TmfCommonConstants.TRACE_SUPPLEMENTARY_FOLDER, supplFolder.getLocation().toOSString());
+
+        return resource;
     }
 
     /**
@@ -150,7 +212,16 @@ public class TraceManagerService {
             return Response.status(Status.NOT_FOUND).build();
         }
         TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, trace));
+        TmfTraceManager.deleteSupplementaryFolder(trace);
         trace.dispose();
+        try {
+            trace.getResource().delete(IResource.FORCE, null);
+            ResourcesPlugin.getWorkspace().getRoot()
+                    .getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME)
+                    .refreshLocal(Integer.MAX_VALUE, null);
+        } catch (CoreException e) {
+            Activator.getInstance().logError("Failed to delete trace", e); //$NON-NLS-1$
+        }
         return Response.ok(trace).build();
     }
 
@@ -165,4 +236,14 @@ public class TraceManagerService {
         return Iterables.tryFind(TmfTraceManager.getInstance().getOpenedTraces(), t -> uuid.equals(t.getUUID())).orNull();
     }
 
+    private static void createFolder(IFolder folder, IProgressMonitor monitor) throws CoreException {
+        // Taken from: org.eclipse.tracecompass.tmf.ui.project.model.TraceUtil.java
+        // TODO: have a tmf.core util for that.
+        if (!folder.exists()) {
+            if (folder.getParent() instanceof IFolder) {
+                createFolder((IFolder) folder.getParent(), monitor);
+            }
+            folder.create(true, true, monitor);
+        }
+    }
 }

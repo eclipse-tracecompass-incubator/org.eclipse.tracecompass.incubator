@@ -8,6 +8,8 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -16,6 +18,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
+import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -90,6 +93,14 @@ public class WebApplication {
         fServer = new Server(fPort);
         fServer.setHandler(sch);
 
+        // create and open a default eclipse project.
+        IProject project = ResourcesPlugin.getWorkspace().getRoot()
+                .getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME);
+        if (!project.exists()) {
+            project.create(null);
+        }
+        project.open(null);
+
         fServer.start();
         if (fPort != TEST_PORT) {
             fServer.join();
@@ -117,6 +128,9 @@ public class WebApplication {
     public void stop() {
         try {
             fServer.stop();
+            ResourcesPlugin.getWorkspace().getRoot()
+                    .getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME)
+                    .close(null);
         } catch (Exception e) {
             // ignore
         }
