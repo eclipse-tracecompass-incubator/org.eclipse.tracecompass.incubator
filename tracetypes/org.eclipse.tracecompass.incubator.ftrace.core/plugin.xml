@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <category
+            id="org.eclipse.tracecompass.incubator.ftrace.core"
+            name="Ftrace Format">
+      </category>
+      <type
+            category="org.eclipse.tracecompass.incubator.ftrace.core"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.ftrace.core"
+            isDirectory="false"
+            name="%trace.ftrace"
+            trace_type="org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.FtraceTrace">
+      </type>
+   </extension>
+
+</plugin>

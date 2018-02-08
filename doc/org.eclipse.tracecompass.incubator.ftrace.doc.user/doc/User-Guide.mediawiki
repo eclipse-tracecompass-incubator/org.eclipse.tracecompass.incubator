@@ -1,0 +1,43 @@
+
+= ftrace =
+
+Support is currently limited to event tracing. The expected format is the human readable raw format.
+
+== Generating a trace ==
+
+There are two ways to generate the trace in the human readable raw format. Using ftrace via the debugfs filesystem or using the trace-cmd command-line tool.
+
+=== Debugfs filesystem ===
+
+Mount the debugfs filesystem using the following command:
+
+  # mount -t debugfs nodev /sys/kernel/debug
+
+The filesystem could be mounted elsewhere.
+
+Before starting the tracer, traced events must be enabled by echoing ''1'' in the correct files.
+For example, enabling ''sched_switch'' and ''sched_wakeup'' is done with the following commands:
+
+  # echo 1 > /sys/kernel/debug/tracing/events/sched/sched_wakeup/enable
+  # echo 1 > /sys/kernel/debug/tracing/events/sched/sched_switch/enable
+
+Recording of a trace is started by echoing ''1'' in ''tracing_on'':
+
+  # echo 1 > /sys/kernel/debug/tracing/tracing_on
+
+Recording is stopped by echoing ''0'' in the same file.
+The trace can be obtained in raw format in the ''trace'' file:
+
+  # cat /sys/kernel/debug/tracing/trace
+
+=== trace-cmd ===
+
+Recording of a trace can be started by the following command:
+
+  # trace-cmd record -e sched_switch -e sched_wakeup
+
+The recorded trace would contain only ''sched_switch'' and ''sched_wakeup'' events. Outputting the recorded trace is done using the following command:
+
+  # trace-cmd report -R
+
+The ''-R'' argument is needed to get the raw format.

@@ -34,6 +34,7 @@
     <module>org.eclipse.tracecompass.incubator.perf.profiling.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.virtual.machine.analysis.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.uftrace.doc.user</module>
+    <module>org.eclipse.tracecompass.incubator.ftrace.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.lttng2.ust.extras.doc.user</module>
     <!-- insert modules here -->
   </modules>
