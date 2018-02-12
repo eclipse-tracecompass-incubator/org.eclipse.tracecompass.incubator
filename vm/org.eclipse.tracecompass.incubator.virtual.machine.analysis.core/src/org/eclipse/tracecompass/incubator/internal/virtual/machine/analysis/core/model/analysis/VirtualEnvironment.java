@@ -24,6 +24,8 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedE
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.primitives.Longs;
 
 /**
@@ -36,7 +38,7 @@ import com.google.common.primitives.Longs;
 public class VirtualEnvironment implements IVirtualEnvironmentModel {
 
     /** Associate a host's thread to a virtual CPU */
-    protected final Map<HostThread, VirtualCPU> fTidToVcpu = new HashMap<>();
+    protected final BiMap<HostThread, VirtualCPU> fTidToVcpu = HashBiMap.create();
     /** Associate a host's thread to a virtual machine */
     protected final Map<HostThread, VirtualMachine> fTidToVm = new HashMap<>();
     /** Maps a virtual machine name to a virtual machine */
@@ -151,6 +153,11 @@ public class VirtualEnvironment implements IVirtualEnvironmentModel {
     @Override
     public Collection<VirtualMachine> getMachines() {
         return fKnownMachines.values();
+    }
+
+    @Override
+    public @Nullable HostThread getVirtualCpuTid(VirtualCPU vcpu) {
+        return fTidToVcpu.inverse().get(vcpu);
     }
 
 }

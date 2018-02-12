@@ -42,7 +42,9 @@ public class OneQemuKvmTestCase extends VmTestCase {
         Set<IntervalInfo> info = new HashSet<>();
 
         /* Verify the first level of overhead attribute */
-        ImmutableList<ITmfStateInterval> intervals = ImmutableList.of(new StateIntervalStub(1, 174, TmfStateValue.nullValue()),
+        ImmutableList<ITmfStateInterval> intervals = ImmutableList.of(new StateIntervalStub(1, 34, TmfStateValue.nullValue()),
+                new StateIntervalStub(35, 74, TmfStateValue.newValueString("RUN")),
+                new StateIntervalStub(75, 174, TmfStateValue.nullValue()),
                 new StateIntervalStub(175, 224, TmfStateValue.newValueString("RUN")),
                 new StateIntervalStub(225, 274, TmfStateValue.nullValue()),
                 new StateIntervalStub(275, 374, TmfStateValue.newValueString("RUN")),
@@ -50,7 +52,9 @@ public class OneQemuKvmTestCase extends VmTestCase {
         info.add(new IntervalInfo(intervals, VmOverheadStateProvider.TRACES, VmTraces.GUEST_ONE_QEMUKVM.getHostId(), VmOverheadStateProvider.THREADS, "130", "CallStack", "1"));
 
         /* Verify the second level of overhead */
-        intervals = ImmutableList.of(new StateIntervalStub(1, 194, TmfStateValue.nullValue()),
+        intervals = ImmutableList.of(new StateIntervalStub(1, 44, TmfStateValue.nullValue()),
+                new StateIntervalStub(45, 59, TmfStateValue.newValueString("VMM")),
+                new StateIntervalStub(60, 194, TmfStateValue.nullValue()),
                 new StateIntervalStub(195, 209, TmfStateValue.newValueString("VMM")),
                 new StateIntervalStub(210, 294, TmfStateValue.nullValue()),
                 new StateIntervalStub(295, 299, TmfStateValue.newValueString("VMM")),
@@ -60,7 +64,9 @@ public class OneQemuKvmTestCase extends VmTestCase {
         info.add(new IntervalInfo(intervals, VmOverheadStateProvider.TRACES, VmTraces.GUEST_ONE_QEMUKVM.getHostId(), VmOverheadStateProvider.THREADS, "130", "CallStack", "2"));
 
         /* Verify the third level of overhead */
-        intervals = ImmutableList.of(new StateIntervalStub(1, 194, TmfStateValue.nullValue()),
+        intervals = ImmutableList.of(new StateIntervalStub(1, 44, TmfStateValue.nullValue()),
+                new StateIntervalStub(45, 59, TmfStateValue.newValueString("32")),
+                new StateIntervalStub(60, 194, TmfStateValue.nullValue()),
                 new StateIntervalStub(195, 209, TmfStateValue.newValueString("32")),
                 new StateIntervalStub(210, 294, TmfStateValue.nullValue()),
                 new StateIntervalStub(295, 299, TmfStateValue.newValueString("32")),

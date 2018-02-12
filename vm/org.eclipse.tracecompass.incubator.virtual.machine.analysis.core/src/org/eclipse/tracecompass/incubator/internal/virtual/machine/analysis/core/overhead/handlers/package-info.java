@@ -8,4 +8,4 @@
  *******************************************************************************/
 
 @org.eclipse.jdt.annotation.NonNullByDefault
-package org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.overhead;
+package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.overhead.handlers;

@@ -154,7 +154,6 @@ public class VirtualResourcesStateProvider extends AbstractTmfStateProvider {
 
         ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
 
-
         Collection<IVirtualMachineEventHandler> handlers = fEventNames.get(eventName);
         if (handlers.isEmpty()) {
             return;

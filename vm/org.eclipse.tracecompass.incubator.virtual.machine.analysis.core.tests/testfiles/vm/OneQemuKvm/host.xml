@@ -18,7 +18,7 @@
 </event>
 <event timestamp="45" name="kvm_exit">
 <field name="cpu" value="0" type="int" />
-<field name="exit_reason" value="32" type="int" />
+<field name="exit_reason" value="32" type="long" />
 <field name="guest_rip" value="123456" type="long" />
 <field name="isa" value="1" type="int" />
 <field name="info1" value="654654" type="long" />
@@ -40,7 +40,7 @@
 </event>
 <event timestamp="95" name="kvm_exit">
 <field name="cpu" value="0" type="int" />
-<field name="exit_reason" value="32" type="int" />
+<field name="exit_reason" value="32" type="long" />
 <field name="guest_rip" value="123456" type="long" />
 <field name="isa" value="1" type="int" />
 <field name="info1" value="654654" type="long" />
@@ -72,7 +72,7 @@
 </event>
 <event timestamp="195" name="kvm_exit">
 <field name="cpu" value="0" type="int" />
-<field name="exit_reason" value="32" type="int" />
+<field name="exit_reason" value="32" type="long" />
 <field name="guest_rip" value="123456" type="long" />
 <field name="isa" value="1" type="int" />
 <field name="info1" value="654654" type="long" />
@@ -94,7 +94,7 @@
 </event>
 <event timestamp="245" name="kvm_exit">
 <field name="cpu" value="0" type="int" />
-<field name="exit_reason" value="32" type="int" />
+<field name="exit_reason" value="32" type="long" />
 <field name="guest_rip" value="123456" type="long" />
 <field name="isa" value="1" type="int" />
 <field name="info1" value="654654" type="long" />
@@ -116,7 +116,7 @@
 </event>
 <event timestamp="295" name="kvm_exit">
 <field name="cpu" value="0" type="int" />
-<field name="exit_reason" value="32" type="int" />
+<field name="exit_reason" value="32" type="long" />
 <field name="guest_rip" value="123456" type="long" />
 <field name="isa" value="1" type="int" />
 <field name="info1" value="654654" type="long" />

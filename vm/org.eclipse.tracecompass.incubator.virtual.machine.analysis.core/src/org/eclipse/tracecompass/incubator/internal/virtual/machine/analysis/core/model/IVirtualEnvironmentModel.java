@@ -94,7 +94,7 @@ public interface IVirtualEnvironmentModel {
      * @return The HostThread corresponding to this CPU, or <code>null</code> if no
      *         such thread is found
      */
-    // @Nullable
-    // HostThread getVirtualCpuTid(VirtualCPU vcpu);
+    @Nullable
+    HostThread getVirtualCpuTid(VirtualCPU vcpu);
 
 }

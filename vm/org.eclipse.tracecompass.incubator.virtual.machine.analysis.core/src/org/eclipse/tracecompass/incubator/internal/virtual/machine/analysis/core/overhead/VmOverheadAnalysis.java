@@ -26,6 +26,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVMInformationProvider;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVirtualMachineAnalysis;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.analysis.VirtualMachineModelAnalysis;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.VirtualResourcesAnalysis;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
@@ -89,7 +90,15 @@ public class VmOverheadAnalysis extends InstrumentedCallStackAnalysis {
         if (!(trace instanceof TmfExperiment)) {
             throw new IllegalStateException();
         }
-        return new VmOverheadStateProvider((TmfExperiment) trace);
+        VirtualMachineModelAnalysis model = TmfTraceUtils.getAnalysisModuleOfClass(trace, VirtualMachineModelAnalysis.class, VirtualMachineModelAnalysis.ID);
+        if (model == null) {
+            throw new IllegalStateException("There should be a model analysis for this class"); //$NON-NLS-1$
+        }
+        model.schedule();
+        if (!model.waitForInitialization()) {
+            throw new IllegalStateException("Problem initializing the model analysis"); //$NON-NLS-1$
+        }
+        return new VmOverheadStateProvider((TmfExperiment) trace, model.getVirtualEnvironmentModel());
     }
 
     /**
