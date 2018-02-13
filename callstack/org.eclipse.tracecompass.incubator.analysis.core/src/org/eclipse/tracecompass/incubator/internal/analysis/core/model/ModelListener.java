@@ -151,7 +151,7 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
                 return IHostModel.TIME_UNKNOWN;
             }
 
-            long time = start;
+            long time = Long.max(start, stateSystem.getStartTime());
             final long end = Math.min(realEnd, stateSystem.getCurrentEndTime());
             boolean found = false;
             try {

@@ -393,13 +393,16 @@ public class CallStack {
      *
      * @param function
      *            The function for which to get the kernel statuses
+     * @param resolution
+     *            The resolution, ie the number of nanoseconds between kernel status
+     *            queries. A value lower or equal to 1 will return all intervals.
      * @return An iterator over the kernel status. The iterator can be empty is
      *         statuses are not available or if the function is outside the range of
      *         the available data.
      */
-    public Iterator<ProcessStatusInterval> getKernelStatuses(ICalledFunction function) {
+    public Iterator<ProcessStatusInterval> getKernelStatuses(ICalledFunction function, long resolution) {
         IHostModel model = ModelManager.getModelFor(getHostId(function.getStart()));
-        return model.getThreadStatusIntervals(function.getThreadId(), function.getStart(), function.getEnd());
+        return model.getThreadStatusIntervals(function.getThreadId(), function.getStart(), function.getEnd(), resolution);
     }
 
 }

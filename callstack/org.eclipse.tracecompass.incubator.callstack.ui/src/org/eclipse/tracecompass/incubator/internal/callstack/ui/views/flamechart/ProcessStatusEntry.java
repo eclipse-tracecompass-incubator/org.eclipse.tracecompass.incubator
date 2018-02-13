@@ -77,7 +77,7 @@ public class ProcessStatusEntry extends TimeGraphEntry {
             ICalledFunction function = fcEvent.getFunction();
             // FIXME: This gets all the statuses, that can be big for large time ranges. Use
             // a method with resolution when it is available
-            Iterator<@NonNull ProcessStatusInterval> statuses = fCallStack.getKernelStatuses(function);
+            Iterator<@NonNull ProcessStatusInterval> statuses = fCallStack.getKernelStatuses(function, resolution);
             while (statuses.hasNext()) {
                 ProcessStatusInterval status = statuses.next();
                 events.add(new TimeEvent(this, status.getStart(), status.getLength(), status.getProcessStatus().getStateValue().unboxInt()));

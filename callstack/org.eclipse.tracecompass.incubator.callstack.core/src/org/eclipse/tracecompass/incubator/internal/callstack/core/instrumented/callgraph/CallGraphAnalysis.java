@@ -207,7 +207,7 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
             iterateOverCallstack(element, callStack, nextFunction, 2, aggregatedChild, model, start, end, monitor);
             aggregatedChild.addFunctionCall(nextFunction);
             // Add the kernel statuses if available
-            Iterator<ProcessStatusInterval> kernelStatuses = callStack.getKernelStatuses(nextFunction);
+            Iterator<ProcessStatusInterval> kernelStatuses = callStack.getKernelStatuses(nextFunction, -1);
             kernelStatuses.forEachRemaining(aggregatedChild::addKernelStatus);
 
             callgraph.addAggregatedCallSite(element, aggregatedChild);

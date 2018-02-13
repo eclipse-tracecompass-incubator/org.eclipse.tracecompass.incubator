@@ -108,9 +108,12 @@ public interface IHostModel {
      *            The start of the period for which to get the time on CPU
      * @param end
      *            The end of the period for which to get the time on CPU
+     * @param resolution
+     *            The resolution, ie the number of nanoseconds between kernel status
+     *            queries. A value lower or equal to 1 will return all intervals.
      * @return An iterator over the status intervals for the thread
      */
-    Iterator<ProcessStatusInterval> getThreadStatusIntervals(int tid, long start, long end);
+    Iterator<ProcessStatusInterval> getThreadStatusIntervals(int tid, long start, long end, long resolution);
 
     /**
      * Get whether sampling data is available for this host

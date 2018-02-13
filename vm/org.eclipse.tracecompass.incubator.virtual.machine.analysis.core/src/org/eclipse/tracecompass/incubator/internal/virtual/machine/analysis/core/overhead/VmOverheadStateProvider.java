@@ -323,7 +323,7 @@ public class VmOverheadStateProvider extends AbstractTmfStateProvider {
 
     private void createGuestThreadStatus(ITmfStateSystemBuilder ss, HostThread ht, long start, int tidQuark) {
         IHostModel model = ModelManager.getModelFor(ht.getHost());
-        Iterator<ProcessStatusInterval> statuses = model.getThreadStatusIntervals(ht.getTid(), start, Long.MAX_VALUE);
+        Iterator<ProcessStatusInterval> statuses = model.getThreadStatusIntervals(ht.getTid(), start, Long.MAX_VALUE, 1);
         if (statuses.hasNext()) {
             GuestKernelThreadStatuses threadStatus = new GuestKernelThreadStatuses(ss, start, statuses, tidQuark);
             fGuestThreads.put(ht, threadStatus);
