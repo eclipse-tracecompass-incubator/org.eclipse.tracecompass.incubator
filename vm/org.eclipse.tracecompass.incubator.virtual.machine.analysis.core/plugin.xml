@@ -25,6 +25,7 @@
             analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVirtualMachineAnalysis"
             automatic="false"
             id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.FusedVirtualMachineAnalysis"
+            icon="icons/fusedcpu.png"
             name="%vm.analysis.fused">
          <tracetype
                applies="true"
