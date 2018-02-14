@@ -16,5 +16,12 @@
             trace_type="org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.FtraceTrace">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
+      <type
+            icon="icons/ftrace.png"
+            tracetype="org.eclipse.tracecompass.incubator.ftrace.core">
+      </type>
+   </extension>
 
 </plugin>
