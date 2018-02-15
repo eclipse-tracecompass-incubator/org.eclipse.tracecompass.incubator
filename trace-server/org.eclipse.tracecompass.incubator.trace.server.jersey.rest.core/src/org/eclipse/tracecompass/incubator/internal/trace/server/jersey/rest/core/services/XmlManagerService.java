@@ -21,6 +21,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlAnalysisModuleSource;
@@ -45,7 +46,7 @@ public class XmlManagerService {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getXml() {
-        return Response.ok().entity(Maps.transformValues(XmlUtils.listFiles(), File::getAbsolutePath)).build();
+        return Response.ok(Maps.transformValues(XmlUtils.listFiles(), File::getAbsolutePath)).build();
     }
 
     /**
@@ -75,14 +76,17 @@ public class XmlManagerService {
     /**
      * End point to delete an XML file by name
      *
-     * @param path
+     * @param name
      *            XML file name
      * @return OK
      */
     @DELETE
     @Path("/{name}")
-    public Response deleteXml(@PathParam("name") String path) {
-        XmlUtils.deleteFile(path);
+    public Response deleteXml(@PathParam("name") String name) {
+        if (!XmlUtils.listFiles().containsKey(name)) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+        XmlUtils.deleteFile(name);
         return Response.ok().build();
     }
 

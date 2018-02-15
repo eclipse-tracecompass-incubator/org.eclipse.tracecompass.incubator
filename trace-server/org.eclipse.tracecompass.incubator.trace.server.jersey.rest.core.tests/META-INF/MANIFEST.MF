@@ -21,6 +21,7 @@ Export-Package: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core
 Import-Package: com.fasterxml.jackson.annotation,
  com.fasterxml.jackson.jaxrs.base,
  com.fasterxml.jackson.jaxrs.json,
+ com.google.common.collect,
  javax.ws.rs.client,
  javax.ws.rs.core,
  org.eclipse.tracecompass.testtraces.ctf,

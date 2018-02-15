@@ -6,6 +6,7 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
+
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.nio.file.Paths;
@@ -38,8 +39,11 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 
 /**
@@ -58,7 +62,8 @@ public class TraceManagerService {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getTraces() {
-        return Response.ok().entity(TmfTraceManager.getInstance().getOpenedTraces()).build();
+        return Response.ok(Collections2.filter(TmfTraceManager.getInstance().getOpenedTraces(),
+                Predicates.not(TmfExperiment.class::isInstance))).build();
     }
 
     /**
@@ -91,7 +96,7 @@ public class TraceManagerService {
             if (trace == null) {
                 return Response.status(Status.NOT_IMPLEMENTED).entity("Trace type not supported").build(); //$NON-NLS-1$
             }
-            return Response.ok().entity(trace).build();
+            return Response.ok(trace).build();
         } catch (TmfTraceException | TmfTraceImportException | InstantiationException | IllegalAccessException e) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(e.getMessage()).build();
         }
@@ -123,10 +128,10 @@ public class TraceManagerService {
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getTrace(@PathParam("uuid") @NotNull UUID uuid) {
         ITmfTrace trace = getTraceByUUID(uuid);
-        if (trace == null) {
-            return Response.ok().status(Status.NOT_FOUND).build();
+        if (trace == null || trace instanceof TmfExperiment) {
+            return Response.status(Status.NOT_FOUND).build();
         }
-        return Response.ok().entity(trace).build();
+        return Response.ok(trace).build();
     }
 
     /**
@@ -141,12 +146,12 @@ public class TraceManagerService {
     @Produces({ MediaType.APPLICATION_JSON })
     public Response deleteTrace(@PathParam("uuid") @NotNull UUID uuid) {
         ITmfTrace trace = getTraceByUUID(uuid);
-        if (trace == null) {
-            return Response.ok().status(Status.NOT_FOUND).build();
+        if (trace == null || trace instanceof TmfExperiment) {
+            return Response.status(Status.NOT_FOUND).build();
         }
         TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, trace));
         trace.dispose();
-        return Response.ok().entity(trace).build();
+        return Response.ok(trace).build();
     }
 
     /**

@@ -34,23 +34,22 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testCallStackDataProvider() {
-        WebTarget traces = getTracesEndpoint();
+        WebTarget traces = getApplicationEndpoint().path(TRACES);
         RestServerTest.assertPost(traces, CONTEXT_SWITCHES_UST_STUB);
 
-        Response tree = traces.path(CONTEXT_SWITCHES_UST_UUID.toString())
+        WebTarget callstackTree = traces.path(CONTEXT_SWITCHES_UST_UUID.toString())
                 .path(PROVIDERS_PATH)
                 .path(CALL_STACK_DATAPROVIDER_ID)
-                .path(TREE_PATH)
+                .path(TREE_PATH);
+
+        Response tree = callstackTree
                 .queryParam("start", 0L)
                 .queryParam("end", Long.MAX_VALUE)
                 .queryParam("nb", 2)
                 .request(MediaType.APPLICATION_JSON).get();
         assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
 
-        Response defaults = traces.path(CONTEXT_SWITCHES_UST_UUID.toString())
-                .path(PROVIDERS_PATH)
-                .path(CALL_STACK_DATAPROVIDER_ID)
-                .path(TREE_PATH)
+        Response defaults = callstackTree
                 .request(MediaType.APPLICATION_JSON).get();
         assertEquals("Default values should return OK code", 200, defaults.getStatus());
     }

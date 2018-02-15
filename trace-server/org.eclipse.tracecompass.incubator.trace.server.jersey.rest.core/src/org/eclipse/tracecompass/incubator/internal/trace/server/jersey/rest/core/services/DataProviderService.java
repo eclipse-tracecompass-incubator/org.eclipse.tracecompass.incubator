@@ -106,7 +106,7 @@ public class DataProviderService {
         }
 
         TmfModelResponse<?> treeResponse = provider.fetchTree(new TimeQueryFilter(start, end, nb), null);
-        return Response.ok().entity(new GenericView<>(trace, treeResponse)).build();
+        return Response.ok(new GenericView<>(trace, treeResponse)).build();
     }
 
     /**
@@ -154,7 +154,7 @@ public class DataProviderService {
         }
 
         TmfModelResponse<@NonNull ITmfXyModel> response = provider.fetchXY(new SelectionTimeQueryFilter(start, end, nb, ids), null);
-        return Response.ok().entity(new GenericView<>(trace, response)).build();
+        return Response.ok(new GenericView<>(trace, response)).build();
     }
 
     /**
@@ -202,7 +202,7 @@ public class DataProviderService {
         }
 
         TmfModelResponse<List<@NonNull ITimeGraphRowModel>> response = provider.fetchRowModel(new SelectionTimeQueryFilter(start, end, nb, ids), null);
-        return Response.ok().entity(new GenericView<>(trace, response)).build();
+        return Response.ok(new GenericView<>(trace, response)).build();
     }
 
     /**
@@ -247,7 +247,7 @@ public class DataProviderService {
         }
 
         TmfModelResponse<List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(new TimeQueryFilter(start, end, nb), null);
-        return Response.ok().entity(new GenericView<>(trace, response)).build();
+        return Response.ok(new GenericView<>(trace, response)).build();
     }
 
     /**

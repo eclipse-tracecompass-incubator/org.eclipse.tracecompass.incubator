@@ -13,9 +13,11 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EventTableService;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
@@ -74,6 +76,7 @@ public class WebApplication {
         ResourceConfig rc = new ResourceConfig();
 
         rc.register(TraceManagerService.class);
+        rc.register(ExperimentManagerService.class);
         rc.register(EventTableService.class);
         rc.register(DataProviderService.class);
         rc.register(XmlManagerService.class);
@@ -103,6 +106,7 @@ public class WebApplication {
 
         SimpleModule module = new SimpleModule();
         module.addSerializer(ITmfTrace.class, new TraceSerializer());
+        module.addSerializer(TmfExperiment.class, new ExperimentSerializer());
         mapper.registerModule(module);
         return provider;
     }

@@ -10,35 +10,32 @@
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Basic Implementation of the serialized trace model object used by clients.
- * Equality of two stubs is determined by equality of names, paths and
- * {@link UUID}, as the start time, end time and number of events may be unknown
- * due to incomplete indexing.
+ * Basic Implementation of the serialized experiment model object used by
+ * clients. Equality of two stubs is determined by equality of names, paths,
+ * {@link UUID}, and of the child tracesas the start time, end time and number
+ * of events may be unknown due to incomplete indexing.
  *
  * @author Loic Prieur-Drevon
  */
-public class TraceModelStub extends AbstractModelStub {
-
+public class ExperimentModelStub extends AbstractModelStub {
     /**
      * Generated Serial Version UID
      */
-    private static final long serialVersionUID = -1030854786688167776L;
-
-    private final String fPath;
+    private static final long serialVersionUID = -4143023822990481607L;
+    private final Set<TraceModelStub> fTraces;
 
     /**
      * {@link JsonCreator} Constructor for final fields
      *
      * @param name
      *            trace name
-     * @param path
-     *            path to trace on server file system
      * @param uuid
      *            the stub's UUID
      * @param nbEvents
@@ -47,59 +44,48 @@ public class TraceModelStub extends AbstractModelStub {
      *            start time
      * @param end
      *            end time
+     * @param traces
+     *            encapsulated traces
      */
     @JsonCreator
-    public TraceModelStub(@JsonProperty("name") String name,
-            @JsonProperty("path") String path,
+    public ExperimentModelStub(@JsonProperty("name") String name,
             @JsonProperty("UUID") UUID uuid,
             @JsonProperty("nbEvents") long nbEvents,
             @JsonProperty("start") long start,
-            @JsonProperty("end") long end) {
+            @JsonProperty("end") long end,
+            @JsonProperty("traces") Set<TraceModelStub> traces) {
         super(name, uuid, nbEvents, start, end);
-        fPath = path;
+        fTraces = traces;
     }
 
     /**
-     * Constructor for comparing equality
+     * Getter for the list of traces in the experiment
      *
-     * @param name
-     *            trace name
-     * @param path
-     *            path to trace on server file system
-     * @param uuid
-     *            the stub's UUID
+     * @return list of traces encapsulated in the experiment
      */
-    public TraceModelStub(String name, String path, UUID uuid) {
-        this(name, path, uuid, 0, 0L, 0L);
-    }
-
-    /**
-     * Getter for the path to the trace on the server's file system
-     *
-     * @return path
-     */
-    public String getPath() {
-        return fPath;
-    }
-
-    @Override
-    public String toString() {
-        return getName() + ":<path=" + fPath + ", UUID=" + getUUID() + '>'; //$NON-NLS-1$ //$NON-NLS-2$
+    public Set<TraceModelStub> getTraces() {
+        return fTraces;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), fPath);
+        return Objects.hash(super.hashCode(), fTraces);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (!super.equals(obj)) {
             return false;
-        } else if (obj instanceof TraceModelStub) {
-            TraceModelStub other = (TraceModelStub) obj;
-            return Objects.equals(fPath, other.fPath);
+        } else if (obj instanceof ExperimentModelStub) {
+            ExperimentModelStub other = (ExperimentModelStub) obj;
+            return fTraces.equals(other.fTraces);
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return getName() + ":<nbEvents=" + ", UUID=" + getUUID() + ", traces=" + fTraces + '>';
+    }
+
 }

@@ -10,21 +10,19 @@
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Test the {@link TraceManagerService}
@@ -38,29 +36,23 @@ public class TraceManagerServiceTest extends RestServerTest {
      */
     @Test
     public void testWithOneTrace() {
-        WebTarget traces = getTracesEndpoint();
+        WebTarget traces = getApplicationEndpoint().path(TRACES);
 
-        Set<TraceModelStub> traceModels = getTraces(traces);
-        assertNotNull("Model returned by server should not be null", traceModels);
-        assertTrue("Expected empty set of traces", traceModels.isEmpty());
+        assertTrue("Expected empty set of traces", getTraces(traces).isEmpty());
 
-        assertPost(traces, TRACE2_STUB);
+        assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
 
-        @Nullable TraceModelStub actual = traces.path(TRACE2_STUB.getUUID().toString()).request().get(TraceModelStub.class);
-        assertEquals(TRACE2_STUB, actual);
+        assertEquals(CONTEXT_SWITCHES_KERNEL_STUB, traces.path(CONTEXT_SWITCHES_KERNEL_UUID.toString()).request().get(TraceModelStub.class));
 
-        traceModels = getTraces(traces);
         assertEquals("Expected set of traces to contain trace2 stub",
-                Collections.singleton(TRACE2_STUB), traceModels);
+                Collections.singleton(CONTEXT_SWITCHES_KERNEL_STUB), getTraces(traces));
 
-        Response deleteResponse = traces.path(TRACE2_UUID.toString()).request().delete();
+        Response deleteResponse = traces.path(CONTEXT_SWITCHES_KERNEL_UUID.toString()).request().delete();
         int deleteCode = deleteResponse.getStatus();
         assertEquals("Failed to DELETE trace2, error code=" + deleteCode, 200, deleteCode);
-        assertEquals(TRACE2_STUB, deleteResponse.readEntity(TraceModelStub.class));
+        assertEquals(CONTEXT_SWITCHES_KERNEL_STUB, deleteResponse.readEntity(TraceModelStub.class));
 
-        traceModels = getTraces(traces);
-        assertNotNull("Model returned by server should not be null", traceModels);
-        assertEquals("Trace should have been deleted", Collections.emptySet(), traceModels);
+        assertEquals("Trace should have been deleted", Collections.emptySet(), getTraces(traces));
     }
 
     /**
@@ -68,15 +60,11 @@ public class TraceManagerServiceTest extends RestServerTest {
      */
     @Test
     public void testWithTwoTraces() {
-        WebTarget traces = getTracesEndpoint();
+        WebTarget traces = getApplicationEndpoint().path(TRACES);
 
-        assertPost(traces, TRACE2_STUB);
+        assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
         assertPost(traces, CONTEXT_SWITCHES_UST_STUB);
 
-        Set<TraceModelStub> expected = new HashSet<>();
-        expected.add(CONTEXT_SWITCHES_UST_STUB);
-        expected.add(TRACE2_STUB);
-        assertEquals(expected, getTraces(traces));
+        assertEquals(ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_STUB, CONTEXT_SWITCHES_UST_STUB), getTraces(traces));
     }
-
 }

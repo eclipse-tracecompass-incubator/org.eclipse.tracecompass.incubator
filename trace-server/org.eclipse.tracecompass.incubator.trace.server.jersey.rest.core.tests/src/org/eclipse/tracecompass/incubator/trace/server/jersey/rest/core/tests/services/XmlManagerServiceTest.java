@@ -18,8 +18,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
@@ -36,8 +34,6 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.ut
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-
 /**
  * Basic test for the {@link XmlManagerService}.
  *
@@ -45,7 +41,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
  */
 public class XmlManagerServiceTest extends RestServerTest {
     private static final Bundle XML_CORE_TESTS = Platform.getBundle("org.eclipse.tracecompass.tmf.analysis.xml.core.tests");
-    private static final GenericType<Map<String, String>> STRING_LIST_TYPE = new GenericType<Map<String, String>>() {
+    private static final GenericType<Map<String, String>> MAP_STRING_STRING_TYPE = new GenericType<Map<String, String>>() {
     };
 
     /**
@@ -60,9 +56,7 @@ public class XmlManagerServiceTest extends RestServerTest {
      */
     @Test
     public void test() throws URISyntaxException, IOException {
-        Client client = ClientBuilder.newClient();
-        client.register(JacksonJsonProvider.class);
-        WebTarget application = client.target("http://localhost:8378/tracecompass");
+        WebTarget application = getApplicationEndpoint();
         WebTarget xmlEndpoint = application.path("xml");
 
         String invalidPath = getPath("test_xml_files/test_invalid/test_invalid.xml");
@@ -70,20 +64,20 @@ public class XmlManagerServiceTest extends RestServerTest {
                 .post(Entity.form(new Form(PATH, invalidPath)));
         assertEquals(500, invalidResponse.getStatus());
         assertEquals("Invalid path should not be added to XML collection",
-                0, xmlEndpoint.request().get(STRING_LIST_TYPE).size());
+                0, xmlEndpoint.request().get(MAP_STRING_STRING_TYPE).size());
 
         String validPath = getPath("test_xml_files/test_valid/test_valid.xml");
         Response validResponse = xmlEndpoint.request(MediaType.APPLICATION_JSON)
                 .post(Entity.form(new Form(PATH, validPath)));
         assertEquals(200, validResponse.getStatus());
-        Map<String, String> map = xmlEndpoint.request().get(STRING_LIST_TYPE);
+        Map<String, String> map = xmlEndpoint.request().get(MAP_STRING_STRING_TYPE);
         assertEquals("valid XML should have posted successfully",
                 Collections.singleton("test_valid.xml"), map.keySet());
 
         WebTarget traces = application.path("traces");
-        assertPost(traces, TRACE2_STUB);
+        assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
 
-        WebTarget xmlProviderPath = traces.path(TRACE2_UUID.toString())
+        WebTarget xmlProviderPath = traces.path(CONTEXT_SWITCHES_KERNEL_UUID.toString())
                 .path(DataProviderServiceTest.PROVIDERS_PATH)
                 // path to the tree XY data provider from the valid XML file
                 .path("org.eclipse.linuxtools.tmf.analysis.xml.core.tests.xy")
@@ -93,7 +87,7 @@ public class XmlManagerServiceTest extends RestServerTest {
 
         assertEquals(200, xmlEndpoint.path("test_valid.xml").request().delete().getStatus());
         assertEquals("XML file should have been deleted",
-                0, xmlEndpoint.request().get(STRING_LIST_TYPE).size());
+                0, xmlEndpoint.request().get(MAP_STRING_STRING_TYPE).size());
 
         Response noXmlTree = xmlProviderPath.request(MediaType.APPLICATION_JSON).get();
         assertEquals("The end point for the XML data provider should no longer be available.",

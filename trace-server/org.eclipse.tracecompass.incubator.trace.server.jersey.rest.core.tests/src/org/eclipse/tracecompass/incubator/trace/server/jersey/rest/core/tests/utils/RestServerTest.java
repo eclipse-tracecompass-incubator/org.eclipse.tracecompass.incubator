@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.u
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,8 +26,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
 import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
 import org.junit.After;
@@ -43,23 +44,29 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
  * @author Loic Prieur-Drevon
  */
 public abstract class RestServerTest {
-    private static final String SERVER = "http://localhost:8378/tracecompass/traces"; //$NON-NLS-1$
+    private static final String SERVER = "http://localhost:8378/tracecompass"; //$NON-NLS-1$
     private static final WebApplication fWebApp = new WebApplication(WebApplication.TEST_PORT);
-    private static final String NAME = "name";
-    protected static final String PATH = "path"; //$NON-NLS-1$
+    /**
+     * Traces endpoint path (relative to application).
+     */
+    public static final String TRACES = "traces";
+    /**
+     * Experiments endpoint path (relative to application).
+     */
+    public static final String EXPERIMENTS = "experiments";
+    /**
+     * <b>name</b> constant
+     */
+    public static final String NAME = "name";
+    /**
+     * <b>path</b> constant
+     */
+    public static final String PATH = "path";
 
     private static final GenericType<Set<TraceModelStub>> TRACE_MODEL_SET_TYPE = new GenericType<Set<TraceModelStub>>() {
     };
-
-    /**
-     * {@link UUID} for {@link CtfTestTrace#TRACE2}.
-     */
-    protected static final UUID TRACE2_UUID = UUID.fromString("5bf45359-069d-4e45-a34d-24d037ca5676");
-    /**
-     * {@link TraceModelStub} to represent the object returned by the server for
-     * {@link CtfTestTrace#TRACE2}.
-     */
-    protected static TraceModelStub TRACE2_STUB;
+    private static final GenericType<Set<ExperimentModelStub>> EXPERIMENT_MODEL_SET_TYPE = new GenericType<Set<ExperimentModelStub>>() {
+    };
 
     /**
      * {@link UUID} for {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
@@ -72,6 +79,16 @@ public abstract class RestServerTest {
     protected static TraceModelStub CONTEXT_SWITCHES_UST_STUB;
 
     /**
+     * {@link UUID} for {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL}.
+     */
+    protected static final UUID CONTEXT_SWITCHES_KERNEL_UUID = UUID.fromString("5694cebc-b3d1-2d46-a2e6-c6993919ae4f");
+    /**
+     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL}.
+     */
+    protected static TraceModelStub CONTEXT_SWITCHES_KERNEL_STUB;
+
+    /**
      * Create the {@link TraceModelStub}s before running the tests
      *
      * @throws IOException
@@ -79,11 +96,11 @@ public abstract class RestServerTest {
      */
     @BeforeClass
     public static void beforeTest() throws IOException {
-        String trace2Path = FileLocator.toFileURL(CtfTestTrace.TRACE2.getTraceURL()).getPath();
-        TRACE2_STUB = new TraceModelStub("trace2", trace2Path, TRACE2_UUID);
-
         String contextSwitchesUstPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath();
-        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub("trace2", contextSwitchesUstPath, CONTEXT_SWITCHES_UST_UUID);
+        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub("ust", contextSwitchesUstPath, CONTEXT_SWITCHES_UST_UUID);
+
+        String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath();
+        CONTEXT_SWITCHES_KERNEL_STUB = new TraceModelStub("kernel", contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_UUID);
     }
 
     /**
@@ -102,19 +119,26 @@ public abstract class RestServerTest {
      */
     @After
     public void stopServer() {
-        WebTarget traceTarget = getTracesEndpoint();
-        for (TraceModelStub trace : getTraces(traceTarget)) {
-            traceTarget.path(trace.getUUID().toString()).request().delete();
+        WebTarget application = getApplicationEndpoint();
+        WebTarget experimentsTarget = application.path(EXPERIMENTS);
+        for (ExperimentModelStub experiment: getExperiments(experimentsTarget)) {
+            assertEquals(experiment, experimentsTarget.path(experiment.getUUID().toString()).request().delete().readEntity(ExperimentModelStub.class));
         }
+        WebTarget traceTarget = application.path(TRACES);
+        for (TraceModelStub trace : getTraces(traceTarget)) {
+            assertEquals(trace, traceTarget.path(trace.getUUID().toString()).request().delete().readEntity(TraceModelStub.class));
+        }
+        assertEquals(Collections.emptySet(), getTraces(traceTarget));
+        assertEquals(Collections.emptySet(), getExperiments(experimentsTarget));
         fWebApp.stop();
     }
 
     /**
-     * Getter for the {@link WebTarget} for the traces endpoint.
+     * Getter for the {@link WebTarget} for the application endpoint.
      *
-     * @return the traces endpoint {@link WebTarget}.
+     * @return the application endpoint {@link WebTarget}.
      */
-    public static WebTarget getTracesEndpoint() {
+    public static WebTarget getApplicationEndpoint() {
         Client client = ClientBuilder.newClient();
         client.register(JacksonJsonProvider.class);
         return client.target(SERVER);
@@ -124,12 +148,22 @@ public abstract class RestServerTest {
      * Get the traces currently open on the server.
      *
      * @param traces
-     *            list of {@link TraceModelStub}s for the traces currently open on
-     *            the server.
+     *            traces endpoint on the server
      * @return list of currently open traces.
      */
     public static Set<TraceModelStub> getTraces(WebTarget traces) {
         return traces.request(MediaType.APPLICATION_JSON).get(TRACE_MODEL_SET_TYPE);
+    }
+
+    /**
+     * Get the experiments currently open on the server.
+     *
+     * @param experiments
+     *            experiment endpoint on the server.
+     * @return list of currently open experiments.
+     */
+    public static Set<ExperimentModelStub> getExperiments(WebTarget experiments) {
+        return experiments.request(MediaType.APPLICATION_JSON).get(EXPERIMENT_MODEL_SET_TYPE);
     }
 
     /**
@@ -147,7 +181,6 @@ public abstract class RestServerTest {
         Response response = traces.request().post(Entity.form(form));
         int code = response.getStatus();
         assertEquals("Failed to POST " + stub.getName() + ", error code=" + code, 200, code);
-        @Nullable TraceModelStub model = response.readEntity(TraceModelStub.class);
-        assertEquals(stub, model);
+        assertEquals(stub, response.readEntity(TraceModelStub.class));
     }
 }
