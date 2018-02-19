@@ -24,7 +24,7 @@ import java.util.Map;
  * @author Pierre-Yves Lajoie
  * @author Eva Terriault
  */
-public class FtraceEventTypeFactory {
+public class GenericFtraceEventTypeFactory {
 
     private static final Map<String, TmfEventType> TYPES = new HashMap<>();
 

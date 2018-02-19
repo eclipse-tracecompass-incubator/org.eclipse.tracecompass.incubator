@@ -22,13 +22,13 @@ import org.eclipse.tracecompass.analysis.os.linux.core.trace.DefaultEventLayout;
  * @author Pierre-Yves Lajoie
  * @author Eva Terriault
  */
-public class FtraceEventLayout extends DefaultEventLayout {
+public class GenericFtraceEventLayout extends DefaultEventLayout {
 
     /* Field names */
     private static final @NonNull String NEXT_PID = "next_pid"; //$NON-NLS-1$
     private static final @NonNull String PREV_PID = "prev_pid"; //$NON-NLS-1$
     private static final @NonNull String TID = "pid"; //$NON-NLS-1$
-    private static @Nullable FtraceEventLayout INSTANCE;
+    private static @Nullable GenericFtraceEventLayout INSTANCE;
 
     /**
      * The instance of this event layout
@@ -38,10 +38,10 @@ public class FtraceEventLayout extends DefaultEventLayout {
      *
      * @return the instance
      */
-    public static synchronized @NonNull FtraceEventLayout getInstance() {
-        FtraceEventLayout inst = INSTANCE;
+    public static synchronized @NonNull GenericFtraceEventLayout getInstance() {
+        GenericFtraceEventLayout inst = INSTANCE;
         if (inst == null) {
-            inst = new FtraceEventLayout();
+            inst = new GenericFtraceEventLayout();
             INSTANCE = inst;
         }
         return inst;

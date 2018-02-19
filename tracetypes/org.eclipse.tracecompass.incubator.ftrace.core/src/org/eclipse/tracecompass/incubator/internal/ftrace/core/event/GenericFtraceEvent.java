@@ -27,11 +27,11 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  * @author Pierre-Yves Lajoie
  * @author Eva Terriault
  */
-public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
+public class GenericFtraceEvent extends TmfEvent implements ITmfSourceLookup {
 
     private final @Nullable ITmfCallsite fCallsite;
     private @NonNull final String fName;
-    private final FtraceField fField;
+    private final GenericFtraceField fField;
 
     /**
      * Constructor
@@ -43,8 +43,8 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
      * @param field
      *            the event field, contains all the needed data
      */
-    public FtraceEvent(ITmfTrace trace, long rank, FtraceField field) {
-        super(trace, rank, TmfTimestamp.fromNanos(field.getTs()), FtraceEventTypeFactory.get(field.getName()), field.getContent());
+    public GenericFtraceEvent(ITmfTrace trace, long rank, GenericFtraceField field) {
+        super(trace, rank, TmfTimestamp.fromNanos(field.getTs()), GenericFtraceEventTypeFactory.get(field.getName()), field.getContent());
         fField = field;
         fName = field.getName();
         fCallsite = null;
@@ -70,7 +70,7 @@ public class FtraceEvent extends TmfEvent implements ITmfSourceLookup {
      *
      * @return the fields of the event
      */
-    public FtraceField getField() {
+    public GenericFtraceField getField() {
         return fField;
     }
 

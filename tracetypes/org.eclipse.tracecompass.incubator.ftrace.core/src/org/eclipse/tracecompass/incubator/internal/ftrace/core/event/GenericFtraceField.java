@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
  * @author Eva Terriault
  */
 @NonNullByDefault
-public class FtraceField {
+public class GenericFtraceField {
 
     private static final Pattern KEYVAL_PATTERN = Pattern.compile("(?<key>[^\\s=\\[\\]]+)=(?<val>[^\\s=\\[\\]]+)"); //$NON-NLS-1$
     private static final String KEYVAL_KEY_GROUP = "key"; //$NON-NLS-1$
@@ -75,7 +75,7 @@ public class FtraceField {
      * @param tid    the threadId
      * @param fields event fields (arguments)
      */
-    public FtraceField(String name, Integer cpu, Long ts, @Nullable Integer pid, @Nullable Integer tid, Map<String, Object> fields) {
+    public GenericFtraceField(String name, Integer cpu, Long ts, @Nullable Integer pid, @Nullable Integer tid, Map<String, Object> fields) {
         fName = name;
         fCpu = cpu;
         fPid = pid;
@@ -93,24 +93,24 @@ public class FtraceField {
      * @param line The string to parse
      * @return An event field
      */
-    public static @Nullable FtraceField parseLine(String line) {
-        Matcher matcher = IFtraceConstants.FTRACE_PATTERN.matcher(line);
+    public static @Nullable GenericFtraceField parseLine(String line) {
+        Matcher matcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
         if (matcher.matches()) {
-            Integer pid = Integer.parseInt(matcher.group(IFtraceConstants.FTRACE_PID_GROUP));
+            Integer pid = Integer.parseInt(matcher.group(IGenericFtraceConstants.FTRACE_PID_GROUP));
             Integer tid = pid;
-            Integer cpu = Integer.parseInt(matcher.group(IFtraceConstants.FTRACE_CPU_GROUP));
-            Double timestampInSec = Double.parseDouble(matcher.group(IFtraceConstants.FTRACE_TIMESTAMP_GROUP));
+            Integer cpu = Integer.parseInt(matcher.group(IGenericFtraceConstants.FTRACE_CPU_GROUP));
+            Double timestampInSec = Double.parseDouble(matcher.group(IGenericFtraceConstants.FTRACE_TIMESTAMP_GROUP));
             Long timestampInNano = (long) (timestampInSec * SECONDS_TO_NANO);
 
-            String name = matcher.group(IFtraceConstants.FTRACE_NAME_GROUP);
+            String name = matcher.group(IGenericFtraceConstants.FTRACE_NAME_GROUP);
             name = name.trim();
             name = name.substring(0, name.length() - 1);
 
-            String attributes = matcher.group(IFtraceConstants.FTRACE_DATA_GROUP);
+            String attributes = matcher.group(IGenericFtraceConstants.FTRACE_DATA_GROUP);
 
             Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
-            fields.put(IFtraceConstants.TIMESTAMP, timestampInNano);
-            fields.put(IFtraceConstants.NAME, name);
+            fields.put(IGenericFtraceConstants.TIMESTAMP, timestampInNano);
+            fields.put(IGenericFtraceConstants.NAME, name);
 
             Matcher keyvalMatcher = KEYVAL_PATTERN.matcher(attributes);
             while (keyvalMatcher.find()) {
@@ -127,7 +127,7 @@ public class FtraceField {
                     }
                 }
             }
-            return new FtraceField(name, cpu, timestampInNano, pid, tid, fields);
+            return new GenericFtraceField(name, cpu, timestampInNano, pid, tid, fields);
         }
         return null;
     }

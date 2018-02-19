@@ -23,7 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Eva Terriault
  */
 @NonNullByDefault
-public interface IFtraceConstants {
+public interface IGenericFtraceConstants {
 
     /**
      * Timestamp field name
@@ -47,23 +47,23 @@ public interface IFtraceConstants {
      */
     Pattern FTRACE_PATTERN = Pattern.compile("^\\s*(?<comm>.*)-(?<pid>\\d+)(?:\\s+\\(.*\\))?\\s+\\[(?<cpu>\\d+)\\](?:\\s+....)?\\s+(?<timestamp>[0-9]+(?<us>\\.[0-9]+)?): (?<name>\\w+:\\s+)+(?<data>.+)"); //$NON-NLS-1$
     /**
-     * PID group in {@link IFtraceConstants#FTRACE_PATTERN}
+     * PID group in {@link IGenericFtraceConstants#FTRACE_PATTERN}
      */
     String FTRACE_PID_GROUP = "pid"; //$NON-NLS-1$
     /**
-     * CPU group in {@link IFtraceConstants#FTRACE_PATTERN}
+     * CPU group in {@link IGenericFtraceConstants#FTRACE_PATTERN}
      */
     String FTRACE_CPU_GROUP = "cpu"; //$NON-NLS-1$
     /**
-     * Timestamp group in {@link IFtraceConstants#FTRACE_PATTERN}
+     * Timestamp group in {@link IGenericFtraceConstants#FTRACE_PATTERN}
      */
     String FTRACE_TIMESTAMP_GROUP = "timestamp"; //$NON-NLS-1$
     /**
-     * Name group in {@link IFtraceConstants#FTRACE_PATTERN}
+     * Name group in {@link IGenericFtraceConstants#FTRACE_PATTERN}
      */
     String FTRACE_NAME_GROUP = "name"; //$NON-NLS-1$
     /**
-     * Data group in {@link IFtraceConstants#FTRACE_PATTERN}
+     * Data group in {@link IGenericFtraceConstants#FTRACE_PATTERN}
      */
     String FTRACE_DATA_GROUP = "data"; //$NON-NLS-1$
 }

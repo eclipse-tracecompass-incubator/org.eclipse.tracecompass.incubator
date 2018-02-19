@@ -9,7 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.ftrace.core.tests.event;
 
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.FtraceField;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.GenericFtraceField;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -33,7 +33,7 @@ public class FtraceFieldTest {
     public void testParseSchedWakeupLine() {
         String line = "kworker/0:0-9514  [000] d..4  3210.263482: sched_wakeup: comm=daemonsu pid=16620 prio=120 success=1 target_cpu=000";
 
-        FtraceField field = FtraceField.parseLine(line);
+        GenericFtraceField field = GenericFtraceField.parseLine(line);
 
         assertNotNull(field);
         assertEquals((Integer) 0, field.getCpu());
@@ -60,7 +60,7 @@ public class FtraceFieldTest {
     public void testParseIrqRaise() {
         String line = "ksoftirqd/1-12    [001] d.s1   387.212674: softirq_raise: vec=9 [action=RCU]";
 
-        FtraceField field = FtraceField.parseLine(line);
+        GenericFtraceField field = GenericFtraceField.parseLine(line);
 
         assertNotNull(field);
         assertEquals((Integer) 1, field.getCpu());

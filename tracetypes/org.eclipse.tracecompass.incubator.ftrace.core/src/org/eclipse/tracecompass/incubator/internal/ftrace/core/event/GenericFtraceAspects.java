@@ -27,7 +27,7 @@ import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
  * @author Pierre-Yves Lajoie
  * @author Eva Terriault
  */
-public class FtraceAspects {
+public class GenericFtraceAspects {
 
     /**
      * Apects of a trace
@@ -57,8 +57,8 @@ public class FtraceAspects {
 
         @Override
         public @Nullable Integer resolve(ITmfEvent event) {
-            if (event instanceof FtraceEvent) {
-                FtraceEvent ftraceEvent = (FtraceEvent) event;
+            if (event instanceof GenericFtraceEvent) {
+                GenericFtraceEvent ftraceEvent = (GenericFtraceEvent) event;
                 return ftraceEvent.getField().getPid();
             }
             return null;
@@ -69,10 +69,10 @@ public class FtraceAspects {
 
         @Override
         public @Nullable Integer resolve(ITmfEvent event) {
-            if (!(event instanceof FtraceEvent)) {
+            if (!(event instanceof GenericFtraceEvent)) {
                 return null;
             }
-            return ((FtraceEvent) event).getField().getCpu();
+            return ((GenericFtraceEvent) event).getField().getCpu();
         }
     }
 }
