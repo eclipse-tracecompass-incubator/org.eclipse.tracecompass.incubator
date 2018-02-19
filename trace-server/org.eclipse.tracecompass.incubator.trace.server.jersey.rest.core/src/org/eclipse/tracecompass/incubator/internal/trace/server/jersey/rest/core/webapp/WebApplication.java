@@ -14,6 +14,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EventTableService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -75,6 +76,7 @@ public class WebApplication {
         rc.register(TraceManagerService.class);
         rc.register(EventTableService.class);
         rc.register(DataProviderService.class);
+        rc.register(XmlManagerService.class);
         rc.register(CORSFilter.class);
         rc.register(registerCustomMappers());
 

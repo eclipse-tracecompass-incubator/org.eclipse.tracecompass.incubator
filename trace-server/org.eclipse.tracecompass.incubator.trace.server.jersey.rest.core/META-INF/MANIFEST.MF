@@ -38,7 +38,9 @@ Require-Bundle: org.eclipse.core.runtime,
  com.fasterxml.jackson.datatype.jackson-datatype-guava,
  com.fasterxml.jackson.jaxrs.jackson-jaxrs-base
 Import-Package: com.google.common.base,
- com.google.common.collect;version="15.0.0"
+ com.google.common.collect,
+ org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module,
+ org.eclipse.tracecompass.tmf.analysis.xml.core.module
 Bundle-ClassPath: .,
  lib/validation-api-1.1.0.Final.jar,
  lib/jackson-module-jaxb-annotations-2.6.2.jar,

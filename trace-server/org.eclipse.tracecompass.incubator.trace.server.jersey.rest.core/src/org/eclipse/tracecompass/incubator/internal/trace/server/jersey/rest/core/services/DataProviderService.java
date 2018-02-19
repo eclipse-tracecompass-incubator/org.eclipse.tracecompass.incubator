@@ -6,8 +6,10 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
+
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -25,6 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TimeQueryFilter;
@@ -37,8 +40,16 @@ import org.eclipse.tracecompass.internal.provisional.tmf.core.model.tree.ITmfTre
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfTreeXYDataProvider;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.xy.ITmfXyModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
+import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlOutputElement;
+import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
+import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils.OutputType;
+import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
+import org.eclipse.tracecompass.tmf.analysis.xml.core.module.XmlDataProviderManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.w3c.dom.Element;
+
+import com.google.common.collect.Iterables;
 
 /**
  * Service to query the {@link ITmfTreeDataProvider}s
@@ -81,15 +92,21 @@ public class DataProviderService {
             return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
         }
 
-        ITmfTreeDataProvider<@NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+        ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
                 providerId, ITmfTreeDataProvider.class);
+
+        if (provider == null && providerId != null) {
+            // try and find the XML provider for the ID.
+            provider = getXmlProvider(trace, providerId, EnumSet.allOf(OutputType.class));
+        }
+
         if (provider == null) {
             // The analysis cannot be run on this trace
             return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
         }
 
-        TmfModelResponse<@NonNull List<@NonNull ITmfTreeDataModel>> response = provider.fetchTree(new TimeQueryFilter(start, end, nb), null);
-        return Response.ok().entity(new GenericView<>(trace, response)).build();
+        TmfModelResponse<?> treeResponse = provider.fetchTree(new TimeQueryFilter(start, end, nb), null);
+        return Response.ok().entity(new GenericView<>(trace, treeResponse)).build();
     }
 
     /**
@@ -125,6 +142,12 @@ public class DataProviderService {
 
         ITmfTreeXYDataProvider<@NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
                 providerId, ITmfTreeXYDataProvider.class);
+
+        if (provider == null && providerId != null) {
+            // try and find the XML provider for the ID.
+            provider = getXmlProvider(trace, providerId, EnumSet.of(OutputType.XY));
+        }
+
         if (provider == null) {
             // The analysis cannot be run on this trace
             return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
@@ -167,6 +190,12 @@ public class DataProviderService {
 
         ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = manager.getDataProvider(trace,
                 providerId, ITimeGraphDataProvider.class);
+
+        if (provider == null && providerId != null) {
+            // try and find the XML provider for the ID.
+            provider = getXmlProvider(trace, providerId, EnumSet.of(OutputType.TIME_GRAPH));
+        }
+
         if (provider == null) {
             // The analysis cannot be run on this trace
             return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
@@ -206,6 +235,12 @@ public class DataProviderService {
 
         ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = manager.getDataProvider(trace,
                 providerId, ITimeGraphDataProvider.class);
+
+        if (provider == null && providerId != null) {
+            // try and find the XML provider for the ID.
+            provider = getXmlProvider(trace, providerId, EnumSet.of(OutputType.TIME_GRAPH));
+        }
+
         if (provider == null) {
             // The analysis cannot be run on this trace
             return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
@@ -213,6 +248,34 @@ public class DataProviderService {
 
         TmfModelResponse<List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(new TimeQueryFilter(start, end, nb), null);
         return Response.ok().entity(new GenericView<>(trace, response)).build();
+    }
+
+    /**
+     * Get the XML data provider for a trace, provider id and XML {@link OutputType}
+     *
+     * @param trace
+     *            the queried trace
+     * @param id
+     *            the queried ID
+     * @param types
+     *            the data provider type
+     * @return the provider if an XML containing the ID exists and applies to the
+     *         trace, else null
+     */
+    private static <@Nullable P extends ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel>> P
+        getXmlProvider(@NonNull ITmfTrace trace, @NonNull String id, EnumSet<OutputType> types) {
+        for (OutputType viewType : types) {
+            for (XmlOutputElement element : Iterables.filter(XmlUtils.getXmlOutputElements().values(),
+                    element -> element.getXmlElem().equals(viewType.getXmlElem()) && id.equals(element.getId()))) {
+                Element viewElement = TmfXmlUtils.getElementInFile(element.getPath(), viewType.getXmlElem(), id);
+                if (viewElement != null && viewType == OutputType.XY) {
+                    return (P) XmlDataProviderManager.getInstance().getXyProvider(trace, viewElement);
+                } else if (viewElement != null && viewType == OutputType.TIME_GRAPH) {
+                    return (P) XmlDataProviderManager.getInstance().getTimeGraphProvider(trace, viewElement);
+                }
+            }
+        }
+        return null;
     }
 
 }

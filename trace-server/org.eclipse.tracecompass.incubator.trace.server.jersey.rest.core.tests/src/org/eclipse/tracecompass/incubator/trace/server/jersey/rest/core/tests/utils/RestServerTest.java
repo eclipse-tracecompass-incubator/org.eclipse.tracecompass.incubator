@@ -46,7 +46,7 @@ public abstract class RestServerTest {
     private static final String SERVER = "http://localhost:8378/tracecompass/traces"; //$NON-NLS-1$
     private static final WebApplication fWebApp = new WebApplication(WebApplication.TEST_PORT);
     private static final String NAME = "name";
-    private static final String PATH = "path"; //$NON-NLS-1$
+    protected static final String PATH = "path"; //$NON-NLS-1$
 
     private static final GenericType<Set<TraceModelStub>> TRACE_MODEL_SET_TYPE = new GenericType<Set<TraceModelStub>>() {
     };

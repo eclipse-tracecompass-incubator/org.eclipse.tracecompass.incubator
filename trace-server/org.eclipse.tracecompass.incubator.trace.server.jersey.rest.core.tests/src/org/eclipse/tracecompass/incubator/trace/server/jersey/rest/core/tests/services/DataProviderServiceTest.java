@@ -25,9 +25,9 @@ import org.junit.Test;
  * @author Loic Prieur-Drevon
  */
 public class DataProviderServiceTest extends RestServerTest {
-    private static final String PROVIDERS_PATH = "providers";
+    static final String PROVIDERS_PATH = "providers";
     private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.tmf.core.callstack.provider.CallStackDataProvider";
-    private static final String TREE_PATH = "tree";
+    static final String TREE_PATH = "tree";
 
     /**
      * Ensure that the Call Stack data provider exists for the trace.
