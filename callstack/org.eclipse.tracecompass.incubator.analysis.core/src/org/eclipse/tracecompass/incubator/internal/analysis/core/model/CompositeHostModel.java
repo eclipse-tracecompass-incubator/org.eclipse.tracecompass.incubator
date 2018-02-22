@@ -215,7 +215,7 @@ public class CompositeHostModel implements IHostModel {
         Iterable<KernelAnalysisModule> modules = TmfTraceUtils.getAnalysisModulesOfClass(fHostId, KernelAnalysisModule.class);
         if (modules.iterator().hasNext()) {
             KernelAnalysisModule module = modules.iterator().next();
-            return new ThreadStatusIterator(start, end, KernelThreadInformationProvider.getStatusIntervalsForThread(module, tid, start, end));
+            return new ThreadStatusIterator(start, end, KernelThreadInformationProvider.getStatusIntervalsForThread(module, tid, start, end, -1));
         }
         return Objects.requireNonNull(Collections.emptyListIterator());
     }
