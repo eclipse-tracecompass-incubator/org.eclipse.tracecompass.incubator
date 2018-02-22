@@ -18,7 +18,7 @@
       point="org.eclipse.core.runtime.products">
    <product
          application="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id"
-         name="Trace Compass Trace Server (Jersey Rest)">
+         name="%product.name">
       <property
             name="appName"
             value="Trace Compass Trace Server (Jersey Rest)">
