@@ -21,6 +21,7 @@
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack.TraceEventCallstackAnalysis"
             automatic="true"
+            icon="icon/atrace.png"
             id="org.eclipse.tracecompass.incubator.traceevent.analysis.callstack"
             name="%callstack.name">
          <tracetype
