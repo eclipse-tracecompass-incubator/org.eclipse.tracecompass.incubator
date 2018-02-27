@@ -11,7 +11,7 @@ package org.eclipse.tracecompass.incubator.analysis.core.model;
 
 import java.util.Collection;
 import java.util.Iterator;
-
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 
@@ -70,6 +70,32 @@ public interface IHostModel {
      *         it is not available
      */
     int getThreadOnCpu(int cpu, long t, boolean block);
+
+    /**
+     * Get the process ID of a thread
+     *
+     * @param tid
+     *            The ID of the thread for which to get the process ID
+     * @param t
+     *            The desired time. A negative value will return the first found
+     *            value
+     * @return The ID of the process this thread is part of, or {@link #UNKNOWN_TID}
+     *         if it is not available
+     */
+    int getProcessId(int tid, long t);
+
+    /**
+     * Get the executable name of a thread
+     *
+     * @param tid
+     *            The ID of the thread for which to get the process ID
+     * @param t
+     *            The desired time. A negative value will return the first found
+     *            value.
+     * @return The executable name of the thread or <code>null</code> if the name is
+     *         not found
+     */
+    @Nullable String getExecName(int tid, long t);
 
     /**
      * Get the amount of time a thread was active on the CPU (any CPU) during a

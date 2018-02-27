@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInformationProvider;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.ProcessStatus;
@@ -53,6 +54,7 @@ public class CompositeHostModel implements IHostModel {
     private final Set<ICpuTimeProvider> fCpuTimeProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<ICpuTimeProvider, Boolean>()));
     private final Set<IThreadOnCpuProvider> fThreadOnCpuProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<IThreadOnCpuProvider, Boolean>()));
     private final Set<ISamplingDataProvider> fSamplingDataProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<ISamplingDataProvider, Boolean>()));
+    private final Set<KernelAnalysisModule> fKernelModules = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<KernelAnalysisModule, Boolean>()));
     private final String fHostId;
 
     /**
@@ -97,6 +99,23 @@ public class CompositeHostModel implements IHostModel {
             }
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public int getProcessId(int tid, long t) {
+        Integer pid = fKernelModules.stream()
+                .map(module -> KernelThreadInformationProvider.getProcessId(module, tid, t))
+                .filter(Objects::nonNull)
+                .findFirst().orElse(null);
+        return pid == null ? IHostModel.UNKNOWN_TID : (int) pid;
+    }
+
+    @Override
+    public @Nullable String getExecName(int tid, long t) {
+        return fKernelModules.stream()
+                .map(module -> KernelThreadInformationProvider.getExecutableName(module, tid))
+                .filter(Objects::nonNull)
+                .findFirst().orElse(null);
     }
 
     /**
@@ -166,6 +185,19 @@ public class CompositeHostModel implements IHostModel {
     public void setSamplingDataProvider(ITmfTrace trace, ISamplingDataProvider provider) {
         fSamplingDataProviders.add(provider);
         fTraceObjectMap.put(trace, provider);
+    }
+
+    /**
+     * Set a kernel module for this host model
+     *
+     * @param trace
+     *            The trace this module belongs to
+     * @param module
+     *            The kernel analysis module
+     */
+    public void setKernelModule(ITmfTrace trace, KernelAnalysisModule module) {
+        fKernelModules.add(module);
+        fTraceObjectMap.put(trace, module);
     }
 
     @Override
@@ -251,6 +283,9 @@ public class CompositeHostModel implements IHostModel {
                 }
                 if (object instanceof ISamplingDataProvider) {
                     fSamplingDataProviders.remove(object);
+                }
+                if (object instanceof KernelAnalysisModule) {
+                    fKernelModules.remove(object);
                 }
             }
         });

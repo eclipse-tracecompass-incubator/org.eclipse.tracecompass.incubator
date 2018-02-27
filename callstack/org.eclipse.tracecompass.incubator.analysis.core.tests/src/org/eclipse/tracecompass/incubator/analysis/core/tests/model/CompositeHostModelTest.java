@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.analysis.core.tests.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
@@ -138,6 +139,31 @@ public class CompositeHostModelTest {
         threadOnCpu = model.getThreadOnCpu(1, 20);
         assertEquals(IHostModel.UNKNOWN_TID, threadOnCpu);
 
+    }
+
+    /**
+     * Test the {@link IHostModel#getProcessId(int, long)} method's default values
+     */
+    @Test
+    public void testGetProcessId() {
+        IHostModel model = ModelManager.getModelFor(HOST_ID);
+        assertTrue(model instanceof CompositeHostModel);
+
+        int processId = model.getProcessId(10, 10);
+        assertEquals(IHostModel.UNKNOWN_TID, processId);
+
+    }
+
+    /**
+     * Test the {@link IHostModel#getExecName(int, long)} method's default values
+     */
+    @Test
+    public void testGetExecName() {
+        IHostModel model = ModelManager.getModelFor(HOST_ID);
+        assertTrue(model instanceof CompositeHostModel);
+
+        String execName = model.getExecName(10, 10);
+        assertNull(execName);
     }
 
     /**
