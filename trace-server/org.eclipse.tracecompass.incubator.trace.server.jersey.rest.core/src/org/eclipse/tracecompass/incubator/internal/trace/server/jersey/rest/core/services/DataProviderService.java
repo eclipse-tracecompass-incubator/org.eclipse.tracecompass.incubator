@@ -11,6 +11,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -188,13 +189,7 @@ public class DataProviderService {
             return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
         }
 
-        ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = manager.getDataProvider(trace,
-                providerId, ITimeGraphDataProvider.class);
-
-        if (provider == null && providerId != null) {
-            // try and find the XML provider for the ID.
-            provider = getXmlProvider(trace, providerId, EnumSet.of(OutputType.TIME_GRAPH));
-        }
+        ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, providerId);
 
         if (provider == null) {
             // The analysis cannot be run on this trace
@@ -233,6 +228,60 @@ public class DataProviderService {
             return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
         }
 
+        ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, providerId);
+
+        if (provider == null) {
+            // The analysis cannot be run on this trace
+            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+        }
+
+        TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(new TimeQueryFilter(start, end, nb), null);
+        return Response.ok(new GenericView<>(trace, response)).build();
+    }
+
+    /**
+     * Query the provider for the time graph tooltips
+     *
+     * @param uuid
+     *            desired trace UUID
+     * @param providerId
+     *            Eclipse extension point ID for the data provider to query
+     * @param start
+     *            lower bound for the query
+     * @param end
+     *            upper bound for the query
+     * @param nb
+     *            nanoseconds between two data points
+     * @param ids
+     *            ids of the entries to query
+     * @return an {@link GenericView} with the results
+     */
+    @GET
+    @Path("/tooltip")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTooltip(@PathParam("uuid") UUID uuid,
+            @PathParam("providerId") String providerId,
+            @QueryParam("start") long start,
+            @QueryParam("end") long end,
+            @QueryParam("nb") int nb,
+            @QueryParam("ids") @NotNull Set<Long> ids) {
+        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+        if (trace == null) {
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        }
+
+        ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, providerId);
+
+        if (provider == null) {
+            // The analysis cannot be run on this trace
+            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+        }
+
+        TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = provider.fetchTooltip(new SelectionTimeQueryFilter(start, end, nb, ids), null);
+        return Response.ok(new GenericView<>(trace, response)).build();
+    }
+
+    private ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> getTimeGraphProvider(@NonNull ITmfTrace trace, String providerId) {
         ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = manager.getDataProvider(trace,
                 providerId, ITimeGraphDataProvider.class);
 
@@ -240,14 +289,7 @@ public class DataProviderService {
             // try and find the XML provider for the ID.
             provider = getXmlProvider(trace, providerId, EnumSet.of(OutputType.TIME_GRAPH));
         }
-
-        if (provider == null) {
-            // The analysis cannot be run on this trace
-            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
-        }
-
-        TmfModelResponse<List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(new TimeQueryFilter(start, end, nb), null);
-        return Response.ok(new GenericView<>(trace, response)).build();
+        return provider;
     }
 
     /**
