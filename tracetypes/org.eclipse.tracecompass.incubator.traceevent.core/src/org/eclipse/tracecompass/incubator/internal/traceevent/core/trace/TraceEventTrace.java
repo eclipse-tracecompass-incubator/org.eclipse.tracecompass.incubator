@@ -193,10 +193,12 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
         if (!fFile.exists()) {
             Job sortJob = new SortingJob(this, path);
             sortJob.schedule();
-            try {
-                sortJob.join();
-            } catch (InterruptedException e) {
-                throw new TmfTraceException(e.getMessage(), e);
+            while (sortJob.getResult() == null) {
+                try {
+                    sortJob.join();
+                } catch (InterruptedException e) {
+                    throw new TmfTraceException(e.getMessage(), e);
+                }
             }
             IStatus result = sortJob.getResult();
             if (!result.isOK()) {

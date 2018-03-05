@@ -105,9 +105,12 @@ final class SortingJob extends Job {
         tempDir.mkdirs();
         List<File> tracelings = new ArrayList<>();
         try (BufferedInputStream parser = new BufferedInputStream(new FileInputStream(fPath))) {
-            char data = (char) parser.read();
+            int data = parser.read();
             while (data != '[') {
-                data = (char) parser.read();
+                data = parser.read();
+                if (data == -1) {
+                    return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Missing symbol \'[\' or \']\' in " + fPath); //$NON-NLS-1$
+                }
             }
             List<Pair> events = new ArrayList<>(CHUNK_SIZE);
             String eventString = TraceEventTrace.readNextEventString(() -> (char) parser.read());
@@ -159,8 +162,7 @@ final class SortingJob extends Job {
             for (File traceling : tracelings) {
 
                 /*
-                 * This resource is added to a priority queue and then removed
-                 * at the very end.
+                 * This resource is added to a priority queue and then removed at the very end.
                  */
                 @SuppressWarnings("resource")
                 BufferedInputStream createParser = new BufferedInputStream(new FileInputStream(traceling));
