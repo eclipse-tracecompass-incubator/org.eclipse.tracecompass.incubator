@@ -324,4 +324,17 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
         return Collections.emptyList();
     }
 
+    @Override
+    public boolean isComplete() {
+        // Initialization error, but the analysis is completed
+        if (!waitForInitialization()) {
+            return true;
+        }
+        ITmfStateSystem stateSystem = getStateSystem();
+        if (stateSystem == null) {
+            throw new IllegalStateException("The initialiation is complete, so the state system must not be null"); //$NON-NLS-1$
+        }
+        return stateSystem.waitUntilBuilt(0);
+    }
+
 }

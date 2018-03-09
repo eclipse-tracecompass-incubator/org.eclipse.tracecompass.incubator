@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
@@ -76,7 +77,7 @@ public class ProcessStatusEntry extends TimeGraphEntry {
             ICalledFunction function = fcEvent.getFunction();
             // FIXME: This gets all the statuses, that can be big for large time ranges. Use
             // a method with resolution when it is available
-            Iterable<@NonNull ProcessStatusInterval> statuses = fCallStack.getKernelStatuses(function, resolution);
+            Iterable<@NonNull ProcessStatusInterval> statuses = fCallStack.getKernelStatuses(function, StateSystemUtils.getTimes(startTime, endTime, resolution));
             for (ProcessStatusInterval status : statuses) {
                 events.add(new TimeEvent(this, status.getStart(), status.getLength(), status.getProcessStatus().getStateValue().unboxInt()));
             }

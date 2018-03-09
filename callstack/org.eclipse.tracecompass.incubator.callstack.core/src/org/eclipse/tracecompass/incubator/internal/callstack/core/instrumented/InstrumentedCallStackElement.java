@@ -12,8 +12,11 @@ package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
@@ -46,8 +49,8 @@ public class InstrumentedCallStackElement extends CallStackElement {
     private final int fQuark;
     private final IHostIdResolver fHostResolver;
     private final @Nullable IThreadIdResolver fThreadIdResolver;
+    private final Map<Integer, ICallStackElement> fNextElements = new HashMap<>();
 
-    private @Nullable Collection<ICallStackElement> fChildren;
     private @Nullable CallStack fCallstack = null;
 
     /**
@@ -83,19 +86,12 @@ public class InstrumentedCallStackElement extends CallStackElement {
 
     @Override
     public Collection<ICallStackElement> getChildren() {
-        Collection<ICallStackElement> children = fChildren;
-        if (children == null) {
-            // Get the elements from the next group in the hierarchy
-            @Nullable
-            ICallStackGroupDescriptor nextGroup = getNextGroup();
-            if (!(nextGroup instanceof InstrumentedGroupDescriptor)) {
-                children = Collections.EMPTY_LIST;
-            } else {
-                children = getNextGroupElements((InstrumentedGroupDescriptor) nextGroup);
-            }
-            fChildren = children;
+        // Get the elements from the next group in the hierarchy
+        @Nullable ICallStackGroupDescriptor nextGroup = getNextGroup();
+        if (!(nextGroup instanceof InstrumentedGroupDescriptor)) {
+            return Collections.emptyList();
         }
-        return children;
+        return getNextGroupElements((InstrumentedGroupDescriptor) nextGroup);
     }
 
     @Override
@@ -112,18 +108,21 @@ public class InstrumentedCallStackElement extends CallStackElement {
      *            The host ID resolver
      * @param resolver
      *            the thread ID resolver
+     * @param cache
+     *            A cache of elements already built. It maps a quark to an element
+     *            and the element will be returned if it has already been computed
      * @return A collection of elements that are roots of the given callstack
      *         grouping
      */
-    public static Collection<ICallStackElement> getRootElements(InstrumentedGroupDescriptor rootGroup, IHostIdResolver hostResolver, @Nullable IThreadIdResolver resolver) {
-        return getNextElements(rootGroup, rootGroup.getStateSystem(), ITmfStateSystem.ROOT_ATTRIBUTE, hostResolver, resolver, null);
+    public static Collection<ICallStackElement> getRootElements(InstrumentedGroupDescriptor rootGroup, IHostIdResolver hostResolver, @Nullable IThreadIdResolver resolver, Map<Integer, ICallStackElement> cache) {
+        return getNextElements(rootGroup, rootGroup.getStateSystem(), ITmfStateSystem.ROOT_ATTRIBUTE, hostResolver, resolver, null, cache);
     }
 
     private Collection<ICallStackElement> getNextGroupElements(InstrumentedGroupDescriptor nextGroup) {
-        return getNextElements(nextGroup, fStateSystem, fQuark, fHostResolver, fThreadIdResolver, this);
+        return getNextElements(nextGroup, fStateSystem, fQuark, fHostResolver, fThreadIdResolver, this, fNextElements);
     }
 
-    private static Collection<ICallStackElement> getNextElements(InstrumentedGroupDescriptor nextGroup, ITmfStateSystem stateSystem, int baseQuark, IHostIdResolver hostResolver, @Nullable IThreadIdResolver threadIdProvider, @Nullable InstrumentedCallStackElement parent) {
+    private static Collection<ICallStackElement> getNextElements(InstrumentedGroupDescriptor nextGroup, ITmfStateSystem stateSystem, int baseQuark, IHostIdResolver hostResolver, @Nullable IThreadIdResolver threadIdProvider, @Nullable InstrumentedCallStackElement parent, Map<Integer, ICallStackElement> cache) {
         // Get the elements from the base quark at the given pattern
         List<Integer> quarks = stateSystem.getQuarks(baseQuark, nextGroup.getSubPattern());
         if (quarks.isEmpty()) {
@@ -134,10 +133,14 @@ public class InstrumentedCallStackElement extends CallStackElement {
         // If the next level is null, then this is a callstack final element
         List<ICallStackElement> elements = new ArrayList<>(quarks.size());
         for (Integer quark : quarks) {
-            InstrumentedCallStackElement element = new InstrumentedCallStackElement(hostResolver, stateSystem, quark,
-                    nextGroup, nextLevel, threadIdProvider, parent);
-            if (nextGroup.isSymbolKeyGroup()) {
-                element.setSymbolKeyElement(element);
+            ICallStackElement element = cache.get(quark);
+            if (element == null) {
+                element = new InstrumentedCallStackElement(hostResolver, stateSystem, quark,
+                        nextGroup, nextLevel, threadIdProvider, parent);
+                if (nextGroup.isSymbolKeyGroup()) {
+                    element.setSymbolKeyElement(element);
+                }
+                cache.put(quark, element);
             }
             elements.add(element);
         }
@@ -225,15 +228,20 @@ public class InstrumentedCallStackElement extends CallStackElement {
      */
     public CallStack getCallStack() {
         CallStack callstack  = fCallstack;
+        List<Integer> subAttributes = getStackQuarks();
         if (callstack == null) {
             IHostIdProvider hostProvider = fHostResolver.apply(this);
             IThreadIdResolver threadIdResolver = fThreadIdResolver;
             IThreadIdProvider threadIdProvider = threadIdResolver == null ? null : threadIdResolver.resolve(hostProvider, this);
-            List<Integer> subAttributes = getStackQuarks();
             callstack =  new CallStack(getStateSystem(), subAttributes, this, hostProvider, threadIdProvider);
             fCallstack = callstack;
+        } else {
+            // Update the callstack if attributes were added
+            if (callstack.getMaxDepth() < subAttributes.size() ) {
+                callstack.updateAttributes(subAttributes);
+            }
         }
-        return callstack;
+        return Objects.requireNonNull(callstack);
     }
 
     /**

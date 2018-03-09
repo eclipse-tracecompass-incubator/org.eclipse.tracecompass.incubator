@@ -359,4 +359,17 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
         }
     }
 
+    @Override
+    public boolean isComplete() {
+        // Initialization error, but the analysis is completed
+        if (!waitForInitialization()) {
+            return true;
+        }
+        Iterator<ITmfStateSystem> iterator = getStateSystems().iterator();
+        if (!iterator.hasNext()) {
+            throw new IllegalStateException("The initialization is complete, so the state system must not be null"); //$NON-NLS-1$
+        }
+        return iterator.next().waitUntilBuilt(0);
+    }
+
 }

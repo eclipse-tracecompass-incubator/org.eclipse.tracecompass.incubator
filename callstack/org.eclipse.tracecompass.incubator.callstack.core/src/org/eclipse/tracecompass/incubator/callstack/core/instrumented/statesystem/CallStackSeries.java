@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.CallStackDepth;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdResolver;
@@ -34,15 +36,20 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedGroupDescriptor;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CalledFunctionFactory;
+import org.eclipse.tracecompass.segmentstore.core.BasicSegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
+import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 /**
  * A callstack series contain the information necessary to build all the
@@ -141,8 +148,10 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
         public int getThreadId(long time) {
             ITmfStateInterval interval = fInterval;
             int tid = fLastThreadId;
-            if (interval != null && interval.intersects(time)) {
-                return fLastThreadId;
+            // If interval is not null and either the tid does not vary in time or the
+            // interval intersects the requested time
+            if (interval != null && (!fVariesInTime || interval.intersects(time))) {
+                return tid;
             }
             try {
                 interval = fSs.querySingleState(time, fQuark);
@@ -402,6 +411,8 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
     private final String fName;
     private final @Nullable IThreadIdResolver fResolver;
     private final IHostIdResolver fHostResolver;
+    private final ITmfStateSystem fStateSystem;
+    private final Map<Integer, ICallStackElement> fRootElements = new HashMap<>();
 
     /**
      * Constructor
@@ -434,6 +445,7 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
             InstrumentedGroupDescriptor level = new InstrumentedGroupDescriptor(ss, patternPaths.get(i), prevLevel, symbolKeyLevelIndex == i ? true : false);
             prevLevel = level;
         }
+        fStateSystem = ss;
         fRootGroup = prevLevel;
         fName = name;
         fResolver = threadResolver;
@@ -446,7 +458,7 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
      * @return The root elements of the callstack series
      */
     public Collection<ICallStackElement> getRootElements() {
-        return InstrumentedCallStackElement.getRootElements(fRootGroup, fHostResolver, fResolver);
+        return InstrumentedCallStackElement.getRootElements(fRootGroup, fHostResolver, fResolver, fRootElements);
     }
 
     /**
@@ -465,6 +477,53 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
      */
     public String getName() {
         return fName;
+    }
+
+    /**
+     * Query the requested callstacks and return the segments for the sampled times.
+     * The returned segments will be simply {@link ISegment} when there is no
+     * function at a given depth, or {@link ICalledFunction} when there is an actual
+     * function.
+     *
+     * @param callstacks
+     *            The callstack entries to query
+     * @param times
+     *            The complete list of times to query, they may not all be within
+     *            this series's range
+     * @return A map of callstack depths to a list of segments.
+     */
+    public Multimap<CallStackDepth, ISegment> queryCallStacks(Collection<CallStackDepth> callstacks, Collection<Long> times) {
+        Map<Integer, CallStackDepth> quarks = Maps.uniqueIndex(callstacks, cs -> cs.getQuark());
+        Multimap<CallStackDepth, ISegment> map = Objects.requireNonNull(ArrayListMultimap.create());
+        Collection<Long> queryTimes = getTimes(fStateSystem, times);
+        try {
+            Iterable<ITmfStateInterval> query2d = fStateSystem.query2D(quarks.keySet(), queryTimes);
+            for (ITmfStateInterval callInterval : query2d) {
+                CallStackDepth callStackDepth = Objects.requireNonNull(quarks.get(callInterval.getAttribute()));
+                if (callInterval.getValue() != null) {
+                    map.put(callStackDepth, callStackDepth.getCallStack().getFunctionFromInterval(callInterval));
+                } else {
+                    map.put(callStackDepth, new BasicSegment(callInterval.getStartTime(), callInterval.getEndTime() + 1));
+                }
+            }
+        } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    private static Collection<Long> getTimes(ITmfStateSystem ss, Collection<Long> times) {
+        // Filter and deduplicate the time stamps for the statesystem
+        long start = ss.getStartTime();
+        long end = ss.getCurrentEndTime();
+        // use a HashSet to deduplicate time stamps
+        Collection<Long> queryTimes = new HashSet<>();
+        for (long t : times) {
+            if (t >= start && t <= end) {
+                queryTimes.add(t);
+            }
+        }
+        return queryTimes;
     }
 
     // ---------------------------------------------------
