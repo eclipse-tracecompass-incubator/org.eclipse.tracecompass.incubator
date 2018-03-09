@@ -235,36 +235,43 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
         List<ITmfStateInterval> arrows = fArrowProvider.fetchArrows(filter, monitor);
         List<ITimeGraphArrow> tgArrows = new ArrayList<>();
         // First, get the distinct callstacks
-        Set<CallStack> callstacks = fIdToCallstack.values().stream()
-                .map(CallStackDepth::getCallStack)
-                .distinct()
-                .collect(Collectors.toSet());
-        // Find the source and destination entry for each arrow
-        for (ITmfStateInterval interval : arrows) {
-            if (monitor != null && monitor.isCanceled()) {
-                return new TmfModelResponse<>(null, Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
+        fLock.readLock().lock();
+        try {
+            Set<CallStack> callstacks = fIdToCallstack.values().stream()
+                    .map(CallStackDepth::getCallStack)
+                    .distinct()
+                    .collect(Collectors.toSet());
+
+            // Find the source and destination entry for each arrow
+            for (ITmfStateInterval interval : arrows) {
+                if (monitor != null && monitor.isCanceled()) {
+                    return new TmfModelResponse<>(null, Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
+                }
+                EdgeStateValue edge = (EdgeStateValue) interval.getValue();
+                if (edge == null) {
+                    /*
+                     * by contract all the intervals should have EdgeStateValues but need to check
+                     * to avoid NPE
+                     */
+                    continue;
+                }
+                Long src = findEntry(callstacks, edge.getSource(), interval.getStartTime());
+                Long dst = findEntry(callstacks, edge.getDestination(), interval.getEndTime() + 1);
+                if (src != null && dst != null) {
+                    long duration = interval.getEndTime() - interval.getStartTime() + 1;
+                    tgArrows.add(new TimeGraphArrow(src, dst, interval.getStartTime(), duration, edge.getId()));
+                }
             }
-            EdgeStateValue edge = (EdgeStateValue) interval.getValue();
-            if (edge == null) {
-                /*
-                 * by contract all the intervals should have EdgeStateValues but need to check
-                 * to avoid NPE
-                 */
-                continue;
-            }
-            Long src = findEntry(callstacks, edge.getSource(), interval.getStartTime());
-            Long dst = findEntry(callstacks, edge.getDestination(), interval.getEndTime() + 1);
-            if (src != null && dst != null) {
-                long duration = interval.getEndTime() - interval.getStartTime() + 1;
-                tgArrows.add(new TimeGraphArrow(src, dst, interval.getStartTime(), duration, edge.getId()));
-            }
+        } finally {
+            fLock.readLock().unlock();
         }
         return new TmfModelResponse<>(tgArrows, Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
     private @Nullable Long findEntry(Set<CallStack> callstacks, @NonNull HostThread hostThread, long ts) {
-        // Get the
+
         for (CallStack callstack : callstacks) {
+            // Get the host thread running on the callstack and compare with desired
             HostThread csHt = callstack.getHostThread(ts);
             if (csHt == null || !csHt.equals(hostThread)) {
                 continue;
@@ -273,7 +280,8 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
             int currentDepth = callstack.getCurrentDepth(ts);
             for (Entry<Long, CallStackDepth> csdEntry : fIdToCallstack.entrySet()) {
                 CallStackDepth csd = csdEntry.getValue();
-                if (csd.getDepth() == currentDepth && csd.getCallStack().equals(callstack)) {
+                // For callstack, compare objects, not content
+                if (csd.getDepth() == currentDepth && csd.getCallStack() == callstack) {
                     return csdEntry.getKey();
                 }
             }
@@ -300,8 +308,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
     private @Nullable Map<String, String> getTooltip(Entry<Long, FlameChartEntryModel> entry, SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
         FlameChartEntryModel value = Objects.requireNonNull(entry.getValue());
         switch (value.getEntryType()) {
-        case FUNCTION:
-        {
+        case FUNCTION: {
             CallStackDepth selectedDepth = fIdToCallstack.get(entry.getKey());
             if (selectedDepth == null) {
                 return null;
@@ -426,7 +433,8 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
         if (data != null && data.fStatus.equals(Status.COMPLETED)) {
             return;
         }
-        // FIXME: Wouldn't work correctly if trace is an experiment as it would cover many hosts
+        // FIXME: Wouldn't work correctly if trace is an experiment as it would cover
+        // many hosts
         Set<ITmfTrace> tracesForHost = TmfTraceManager.getInstance().getTracesForHost(getTrace().getHostId());
         for (ITmfTrace trace : tracesForHost) {
             ThreadStatusDataProvider dataProvider = DataProviderManager.getInstance().getDataProvider(trace, ThreadStatusDataProvider.ID, ThreadStatusDataProvider.class);
@@ -461,7 +469,8 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
                 builder.add(flameChartEntry);
                 if (depth == 0 && callStack.hasKernelStatuses()) {
                     needsKernel = true;
-                    builder.add(new FlameChartEntryModel(getKernelEntryId(flameChartEntry.getId()), entry.getId(), String.valueOf(Messages.FlameChartDataProvider_KernelStatusTitle), parentEntry.getStartTime(), parentEntry.getEndTime(), FlameChartEntryModel.EntryType.KERNEL));
+                    builder.add(new FlameChartEntryModel(getKernelEntryId(flameChartEntry.getId()), entry.getId(), String.valueOf(Messages.FlameChartDataProvider_KernelStatusTitle), parentEntry.getStartTime(), parentEntry.getEndTime(),
+                            FlameChartEntryModel.EntryType.KERNEL));
                 }
             }
             return needsKernel;
@@ -545,7 +554,8 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
         }
     }
 
-    private @Nullable Map<Long, List<ITimeGraphState>> getCallStackRows(SelectionTimeQueryFilter filter, Map<Long, FlameChartEntryModel> entries, SubMonitor subMonitor) throws IndexOutOfBoundsException, TimeRangeException, StateSystemDisposedException {
+    private @Nullable Map<Long, List<ITimeGraphState>> getCallStackRows(SelectionTimeQueryFilter filter, Map<Long, FlameChartEntryModel> entries, SubMonitor subMonitor)
+            throws IndexOutOfBoundsException, TimeRangeException, StateSystemDisposedException {
 
         // Get the data for the model entries that are of type function
         Map<Long, List<ITimeGraphState>> rows = new HashMap<>();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 Ericsson
+ * Copyright (c) 2013, 2017 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -12,24 +12,37 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.flamechart;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel.EntryType;
 import org.eclipse.tracecompass.internal.analysis.os.linux.ui.views.controlflow.ControlFlowPresentationProvider;
+import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
+import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEventStyleStrings;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NamedTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeLinkEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Presentation provider for the Call Stack view, based on the generic TMF
@@ -37,29 +50,35 @@ import com.google.common.cache.LoadingCache;
  *
  * @author Patrick Tasse
  */
-@SuppressWarnings("restriction")
 public class FlameChartPresentationProvider extends TimeGraphPresentationProvider {
 
     /** Number of colors used for call stack events */
     public static final int NUM_COLORS = 360;
 
+    private static final ControlFlowPresentationProvider CF_PROVIDER = new ControlFlowPresentationProvider();
+
+    private static final StateItem[] STATE_TABLE;
+    static {
+        final float saturation = 0.6f;
+        final float brightness = 0.6f;
+        StateItem[] cfStateTable = CF_PROVIDER.getStateTable();
+        STATE_TABLE = new StateItem[NUM_COLORS + 1 + cfStateTable.length];
+        STATE_TABLE[0] = new StateItem(State.MULTIPLE.rgb, State.MULTIPLE.toString());
+        for (int i = 0; i < NUM_COLORS; i++) {
+            RGB rgb = new RGB(i, saturation, brightness);
+            STATE_TABLE[i + 1] = new StateItem(rgb, State.EXEC.toString());
+        }
+        for (int i = 0; i < cfStateTable.length; i++) {
+            STATE_TABLE[NUM_COLORS + 1 + i] = cfStateTable[i];
+        }
+    }
+
     /**
      * Minimum width of a displayed state below which we will not print any text
-     * into it. It corresponds to the average width of 1 char, plus the width of the
-     * ellipsis characters.
+     * into it. It corresponds to the average width of 1 char, plus the width of
+     * the ellipsis characters.
      */
     private Integer fMinimumBarWidth;
-
-    private final ControlFlowPresentationProvider fCfProvider = new ControlFlowPresentationProvider();
-
-    private final LoadingCache<FlameChartEvent, Optional<String>> fTimeEventNames = CacheBuilder.newBuilder()
-            .maximumSize(1000)
-            .build(new CacheLoader<FlameChartEvent, Optional<String>>() {
-                @Override
-                public Optional<String> load(FlameChartEvent event) {
-                    return Optional.ofNullable(event.getFunctionName());
-                }
-            });
 
     private enum State {
         MULTIPLE (new RGB(100, 100, 100)),
@@ -67,7 +86,7 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
 
         private final RGB rgb;
 
-        private State(RGB rgb) {
+        private State (RGB rgb) {
             this.rgb = rgb;
         }
     }
@@ -80,57 +99,66 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
     public FlameChartPresentationProvider() {
     }
 
+    /**
+     * Sets the call stack view
+     *
+     * @param view
+     *            The call stack view that will contain the time events
+     * @since 1.2
+     * @deprecated {@link FlameChartPresentationProvider} no longer needs the
+     *             reference to the {@link FlameChartView}
+     */
+    @Deprecated
+    public void setCallStackView(FlameChartView view) {
+    }
+
     @Override
     public String getStateTypeName(ITimeGraphEntry entry) {
-        return Messages.CallStackPresentationProvider_Thread;
+        if (entry instanceof TimeGraphEntry) {
+            ITimeGraphEntryModel model = ((TimeGraphEntry) entry).getModel();
+            if (model instanceof FlameChartEntryModel) {
+                return ((FlameChartEntryModel) model).getEntryType().name();
+            }
+        }
+        return null;
     }
 
     @Override
     public StateItem[] getStateTable() {
-        final float saturation = 0.6f;
-        final float brightness = 0.6f;
-        StateItem[] cfStateTable = fCfProvider.getStateTable();
-        StateItem[] stateTable = new StateItem[NUM_COLORS + 1 + cfStateTable.length];
-        stateTable[0] = new StateItem(State.MULTIPLE.rgb, State.MULTIPLE.toString());
-        for (int i = 0; i < NUM_COLORS; i++) {
-            RGB rgb = new RGB(i, saturation, brightness);
-            stateTable[i + 1] = new StateItem(rgb, State.EXEC.toString());
-        }
-        for (int i = 0; i < cfStateTable.length; i++) {
-            stateTable[NUM_COLORS + 1 + i] = cfStateTable[i];
-        }
-        return stateTable;
+        return STATE_TABLE;
     }
 
     @Override
     public int getStateTableIndex(ITimeEvent event) {
-        if (event instanceof FlameChartEvent) {
-            FlameChartEvent callStackEvent = (FlameChartEvent) event;
+        // See if it is a thread status state
+        TimeGraphEntry entry = (TimeGraphEntry) event.getEntry();
+        FlameChartEntryModel model = (FlameChartEntryModel) entry.getModel();
+        if (model.getEntryType().equals(EntryType.KERNEL)) {
+            int cfIndex = CF_PROVIDER.getStateTableIndex(event);
+            return (cfIndex >= 0) ? NUM_COLORS + 1 + cfIndex : cfIndex;
+        }
+        if (event instanceof NamedTimeEvent) {
+            NamedTimeEvent callStackEvent = (NamedTimeEvent) event;
             return callStackEvent.getValue() + 1;
+        } else if (event instanceof TimeLinkEvent) {
+            return (NUM_COLORS + 1 + ((TimeLinkEvent) event).getValue()) % NUM_COLORS;
         } else if (event instanceof NullTimeEvent) {
             return INVISIBLE;
-        } else if (event instanceof SpanLinkEvent) {
-            return (NUM_COLORS + 1 + ((SpanLinkEvent) event).getId()) % NUM_COLORS;
-        } else if (event instanceof TimeEvent) {
-            int cfIndex = fCfProvider.getStateTableIndex(event);
-            if (cfIndex >= 0) {
-                return NUM_COLORS + 1 + cfIndex;
-            }
         }
         return State.MULTIPLE.ordinal();
     }
 
     @Override
     public String getEventName(ITimeEvent event) {
-        if (event instanceof FlameChartEvent) {
-            return fTimeEventNames.getUnchecked((FlameChartEvent) event).orElse(null);
+        if (event instanceof NamedTimeEvent) {
+            return ((NamedTimeEvent) event).getLabel();
         }
         return State.MULTIPLE.toString();
     }
 
     @Override
     public void postDrawEvent(ITimeEvent event, Rectangle bounds, GC gc) {
-        if (!(event instanceof FlameChartEvent)) {
+        if (!(event instanceof NamedTimeEvent)) {
             return;
         }
 
@@ -139,27 +167,48 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
         }
         if (bounds.width <= fMinimumBarWidth) {
             /*
-             * Don't print anything if we cannot at least show one character and ellipses.
+             * Don't print anything if we cannot at least show one character and
+             * ellipses.
              */
             return;
         }
 
-        String name = fTimeEventNames.getUnchecked((FlameChartEvent) event).orElse(""); //$NON-NLS-1$
-        if (name.isEmpty()) {
-            /* No text to print */
-            return;
-        }
-
+        String label = ((NamedTimeEvent) event).getLabel();
         gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
-        Utils.drawText(gc, name, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
+        Utils.drawText(gc, label, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
     }
 
-    /**
-     * Indicate that the provider of function names has changed, so any cached
-     * values must be reset.
-     */
-    void resetFunctionNames() {
-        fTimeEventNames.invalidateAll();
+    @Override
+    public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event, long hoverTime) {
+        Map<String, String> retMap = super.getEventHoverToolTipInfo(event, hoverTime);
+        if (retMap == null) {
+            retMap = new LinkedHashMap<>(1);
+        }
+
+        if (!(event instanceof TimeEvent) || !((TimeEvent) event).hasValue() ||
+                !(event.getEntry() instanceof TimeGraphEntry)) {
+            return retMap;
+        }
+
+        TimeGraphEntry entry = (TimeGraphEntry) event.getEntry();
+        ITimeGraphDataProvider<? extends TimeGraphEntryModel> dataProvider = BaseDataProviderTimeGraphView.getProvider(entry);
+        TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = dataProvider.fetchTooltip(
+                new SelectionTimeQueryFilter(hoverTime, hoverTime, 1, Collections.singletonList(entry.getModel().getId())), null);
+        Map<@NonNull String, @NonNull String> map = response.getModel();
+        if (map != null) {
+            retMap.putAll(map);
+        }
+
+        return retMap;
+    }
+
+    @Override
+    public Map<String, Object> getSpecificEventStyle(ITimeEvent event) {
+        if (event instanceof TimeLinkEvent) {
+            // styles are reused for links and states, make sure link height is 0.1f
+            return ImmutableMap.of(ITimeEventStyleStrings.heightFactor(), 0.1f);
+        }
+        return Collections.emptyMap();
     }
 
 }
