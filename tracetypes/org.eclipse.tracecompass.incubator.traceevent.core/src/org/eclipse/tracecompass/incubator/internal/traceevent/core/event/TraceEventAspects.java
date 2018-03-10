@@ -14,6 +14,8 @@ import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfCallsite;
@@ -135,25 +137,28 @@ public class TraceEventAspects {
         }
     }
 
-    private static class TraceCompassScopeLogTidAspect implements ITraceEventAspect<Integer> {
+    private static class TraceCompassScopeLogTidAspect extends LinuxTidAspect {
 
         @Override
-        public @NonNull String getName() {
-            return String.valueOf(Messages.TraceCompassScopeLogAspects_ThreadId);
+        public boolean isHiddenByDefault() {
+            return false;
         }
 
         @Override
-        public @NonNull String getHelpText() {
-            return String.valueOf(Messages.TraceCompassScopeLogAspects_ThreadIdD);
-        }
-
-        @Override
-        public @Nullable Integer resolveTCL(@NonNull TraceEventEvent event) {
-            return event.getField().getTid();
+        public @Nullable Integer resolve(@NonNull ITmfEvent event) {
+            if (event instanceof TraceEventEvent) {
+                return ((TraceEventEvent) event).getField().getTid();
+            }
+            return null;
         }
     }
 
-    private static class TraceCompassScopeLogPidAspect implements ITraceEventAspect<String> {
+    /**
+     * Numerical PID aspect
+     *
+     * @author Matthew Khouzam
+     */
+    public static class TraceCompassScopeLogPidAspect implements ITraceEventAspect<String> {
 
         @Override
         public @NonNull String getName() {

@@ -14,8 +14,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -44,6 +48,8 @@ import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfPersistentlyIndexable
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
+import com.google.common.collect.Lists;
+
 /**
  * Trace event trace. Can read trace event unsorted or sorted JSON traces.
  *
@@ -52,16 +58,75 @@ import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
  */
 public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexable, ITmfPropertiesProvider, ITmfTraceKnownSize {
 
+    /**
+     * Tid prefix to add to thread name
+     */
+    private static final String TID_PREFIX = "tid-"; //$NON-NLS-1$
+    /**
+     * Pid Labels prefix
+     */
+    private static final String PID_LABEL_PREFIX = "pidLabel-"; //$NON-NLS-1$
+    /**
+     * Pid name prefix
+     */
+    private static final String PID_PREFIX = "pid-"; //$NON-NLS-1$
+    /**
+     * Metadata Field String Name
+     */
+    private static final String NAME_ARG = "name"; //$NON-NLS-1$
+    /**
+     * Metadata Field String labels
+     */
+    private static final String LABELS = "labels"; //$NON-NLS-1$
+    /**
+     * Metadata Field String sort index
+     */
+    private static final String SORT_INDEX = "sort_index"; //$NON-NLS-1$
+    /**
+     * Metadata String Process Name
+     */
+    private static final String PROCESS_NAME = "process_name"; //$NON-NLS-1$
+    /**
+     * Metadata String Process Labels
+     */
+    private static final String PROCESS_LABELS = "process_labels"; //$NON-NLS-1$
+    /**
+     * Metadata String Process Sort Index
+     */
+    private static final String PROCESS_SORT_INDEX = "process_sort_index"; //$NON-NLS-1$
+    /**
+     * Metadata String Thread Name
+     */
+    private static final String THREAD_NAME = "thread_name"; //$NON-NLS-1$
+    /**
+     * Metadata String Thread Sort Index
+     */
+    private static final String THREAD_SORT_INDEX = "thread_sort_index"; //$NON-NLS-1$
+
     private static final int CHECKPOINT_SIZE = 10000;
     private static final int ESTIMATED_EVENT_SIZE = 90;
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
     private static final TmfContext INVALID_CONTEXT = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
     private static final int MAX_LINES = 100;
     private static final int MAX_CONFIDENCE = 100;
+    private final @NonNull Map<@NonNull String, @NonNull String> fProperties = new LinkedHashMap<>();
+    private final @NonNull Map<Object, String> fPidNames = new HashMap<>();
+    private final @NonNull NavigableMap<Integer, String> fTidNames = new TreeMap<>();
 
     private File fFile;
 
     private RandomAccessFile fFileInput;
+    private final @NonNull Iterable<@NonNull ITmfEventAspect<?>> fEventAspects;
+
+    /**
+     * Constructor
+     */
+    public TraceEventTrace() {
+        List<@NonNull ITmfEventAspect<?>> aspects = Lists.newArrayList(TraceEventAspects.getAspects());
+        aspects.add(new ProcessNameAspect());
+        aspects.add(new ThreadNameAspect());
+        fEventAspects = aspects;
+    }
 
     @Override
     public IStatus validate(IProject project, String path) {
@@ -73,6 +138,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Not a file. It's a directory: " + path); //$NON-NLS-1$
         }
         int confidence = 0;
+
         try {
             if (!TmfTraceUtils.isText(file)) {
                 return new TraceValidationStatus(confidence, Activator.PLUGIN_ID);
@@ -82,6 +148,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "IOException validating file: " + path, e); //$NON-NLS-1$
         }
         try (BufferedRandomAccessFile rafile = new BufferedRandomAccessFile(path, "r")) { //$NON-NLS-1$
+            goToCorrectStart(rafile);
             int lineCount = 0;
             int matches = 0;
             String line = readNextEventString(() -> (char) rafile.read());
@@ -108,9 +175,19 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
         return new TraceValidationStatus(confidence, Activator.PLUGIN_ID);
     }
 
+    private static void goToCorrectStart(RandomAccessFile rafile) throws IOException {
+        // skip start if it's {"traceEvents":
+        if (rafile.readLine().startsWith("{\"traceEvents\":")) { //$NON-NLS-1$
+            rafile.seek(14);
+        } else {
+            rafile.seek(0);
+        }
+    }
+
     @Override
     public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
         super.initTrace(resource, path, type);
+        fProperties.put("Type", "Trace-Event"); //$NON-NLS-1$ //$NON-NLS-2$ , value)
         String dir = TmfTraceManager.getSupplementaryFileDir(this);
         fFile = new File(dir + new File(path).getName());
         if (!fFile.exists()) {
@@ -128,6 +205,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
         }
         try {
             fFileInput = new BufferedRandomAccessFile(fFile, "r"); //$NON-NLS-1$
+            goToCorrectStart(fFileInput);
         } catch (IOException e) {
             throw new TmfTraceException(e.getMessage(), e);
         }
@@ -191,7 +269,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
 
     @Override
     public Iterable<@NonNull ITmfEventAspect<?>> getEventAspects() {
-        return TraceEventAspects.getAspects();
+        return fEventAspects;
     }
 
     @Override
@@ -210,9 +288,16 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
                         fFileInput.seek(locationInfo);
                     }
                     String nextJson = readNextEventString(() -> (char) fFileInput.read());
-                    if (nextJson != null) {
+                    while (nextJson != null) {
                         TraceEventField field = TraceEventField.parseJson(nextJson);
-                        return new TraceEventEvent(this, context.getRank(), field);
+                        if (field == null) {
+                            return null;
+                        }
+                        if (field.getPhase() != 'M') {
+                            return new TraceEventEvent(this, context.getRank(), field);
+                        }
+                        parseMetadata(field);
+                        nextJson = readNextEventString(() -> (char) fFileInput.read());
                     }
                 } catch (IOException e) {
                     Activator.getInstance().logError("Error parsing event", e); //$NON-NLS-1$
@@ -220,6 +305,52 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
             }
         }
         return null;
+    }
+
+    private void parseMetadata(TraceEventField field) {
+        Map<@NonNull String, @NonNull Object> args = field.getArgs();
+        String name = field.getName();
+        if (args == null) {
+            return;
+        }
+        switch (name) {
+        case PROCESS_NAME:
+            String procName = (String) args.get(NAME_ARG);
+            fPidNames.put(field.getPid(), procName);
+            if (procName != null) {
+                fProperties.put(PID_PREFIX + field.getPid(), procName);
+            }
+            break;
+        case PROCESS_LABELS:
+            String procLabels = (String) args.get(LABELS);
+            if (procLabels != null) {
+                fProperties.put(PID_LABEL_PREFIX + field.getPid(), procLabels);
+            }
+            break;
+        case PROCESS_SORT_INDEX:
+            String sortIndex = (String) args.get(SORT_INDEX);
+            if (sortIndex != null) {
+                fProperties.put(name + '-' + field.getPid(), sortIndex);
+            }
+            break;
+        case THREAD_NAME:
+            String threadName = (String) args.get(NAME_ARG);
+            fTidNames.put(field.getTid(), threadName);
+            if (threadName != null) {
+                fProperties.put(TID_PREFIX + field.getTid(), threadName);
+            }
+            break;
+        case THREAD_SORT_INDEX:
+            sortIndex = (String) args.get(SORT_INDEX);
+            if (sortIndex != null) {
+                fProperties.put(name + '-' + field.getTid(), sortIndex);
+            }
+            break;
+        default:
+            fProperties.put(name, String.valueOf(args));
+            break;
+        }
+
     }
 
     @Override
@@ -234,7 +365,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
 
     @Override
     public @NonNull Map<@NonNull String, @NonNull String> getProperties() {
-        return Collections.singletonMap("Type", "Trace-Event"); //$NON-NLS-1$ //$NON-NLS-2$
+        return fProperties;
     }
 
     @Override
@@ -248,8 +379,8 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
     }
 
     /**
-     * Wrapper to get a character reader, allows to reconcile between java.nio
-     * and java.io
+     * Wrapper to get a character reader, allows to reconcile between java.nio and
+     * java.io
      *
      * @author Matthew Khouzam
      *
@@ -343,4 +474,33 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
         return length > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) length;
     }
 
+    /**
+     * Get the Process name
+     */
+    public class ProcessNameAspect extends org.eclipse.tracecompass.incubator.analysis.core.aspects.ProcessNameAspect {
+
+        @Override
+        public @Nullable String resolve(@NonNull ITmfEvent event) {
+            if (event instanceof TraceEventEvent) {
+                TraceEventField field = ((TraceEventEvent) event).getField();
+                return fPidNames.get(field.getPid());
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Get the Thread name
+     */
+    public class ThreadNameAspect extends org.eclipse.tracecompass.incubator.analysis.core.aspects.ThreadNameAspect {
+
+        @Override
+        public @Nullable String resolve(@NonNull ITmfEvent event) {
+            if (event instanceof TraceEventEvent) {
+                TraceEventField field = ((TraceEventEvent) event).getField();
+                return fTidNames.get(field.getTid());
+            }
+            return null;
+        }
+    }
 }

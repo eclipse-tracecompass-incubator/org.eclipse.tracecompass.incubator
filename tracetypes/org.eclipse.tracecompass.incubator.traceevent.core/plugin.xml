@@ -32,6 +32,7 @@
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.counter.TraceEventCounterAnalysis"
             automatic="true"
+            icon="icons/counter.png"
             id="org.eclipse.tracecompass.incubator.traceevent.core.counter"
             name="%counter.name">
          <tracetype

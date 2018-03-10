@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -22,6 +23,7 @@ import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEv
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.project.model.ITmfPropertiesProvider;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
@@ -50,10 +52,10 @@ public class TraceEventTraceTest {
         Map<String, ITmfEventAspect<?>> eventAspects = getEventAspects(path);
         ITmfEvent event = getFirstEvent(path);
         assertNotNull(event);
-        ImmutableSet<String> aspectNames = ImmutableSet.of("Thread ID", "Args", "Phase", "Category", "PID", "Duration", "ID", "Callsite", "Timestamp", "LogLevel", "Name");
+        ImmutableSet<String> aspectNames = ImmutableSet.of("TID", "Args", "Phase", "Category", "PID", "Duration", "ID", "Callsite", "Timestamp", "LogLevel", "Name", "Process Name", "Thread Name");
 
         assertEquals(aspectNames, eventAspects.keySet());
-        testAspect(eventAspects.get("Thread ID"), event, 0);
+        testAspect(eventAspects.get("TID"), event, 0);
         testAspect(eventAspects.get("Phase"), event, "C");
         testAspect(eventAspects.get("Category"), event, null);
         testAspect(eventAspects.get("Name"), event, "foo");
@@ -139,14 +141,44 @@ public class TraceEventTraceTest {
      */
     @Test
     public void testChromeosTrace() throws TmfTraceException {
+        String[] env = { "Type", "Trace-Event",
+                "process_sort_index-5044", "-1",
+                "pid-5044", "GPU Process",
+                "tid-5051", "Chrome_ChildIOThread",
+                "process_sort_index-5075", "-5",
+                "pid-5075", "Renderer",
+                "pidLabel-5075", "chrome://tracing",
+                "thread_sort_index-12", "-1",
+                "tid-13", "Chrome_ChildIOThread",
+                "process_sort_index-5243", "-5",
+                "pid-5243", "Renderer",
+                "pidLabel-5243", "The New York Times - Breaking News, World News & Multimedia",
+                "thread_sort_index-73", "-1",
+                "process_sort_index-5145", "-5",
+                "pid-5145", "Renderer",
+                "pidLabel-5145", "The New York Times - Breaking News, World News & Multimedia",
+                "thread_sort_index-27", "-1",
+                "process_sort_index-5173", "-5",
+                "pid-5173", "Renderer",
+                "pidLabel-5173", "The New York Times - Breaking News, World News & Multimedia",
+                "thread_sort_index-43", "-1",
+                "process_sort_index-5014", "-6",
+                "pid-5014", "Browser",
+                "tid-5036", "Chrome_IOThread",
+                "tid-5014", "CrBrowserMain" };
+        Map<String, String> expectedProperties = new LinkedHashMap<>();
+        for (int i = 0; i < env.length; i += 2) {
+            expectedProperties.put(env[i], env[i + 1]);
+        }
         String path = "traces/chromeos_system_trace.json";
-        int nbEvents = 36;
-        ITmfTimestamp startTime = TmfTimestamp.fromNanos(0);
+        int nbEvents = 12;
+        ITmfTimestamp startTime = TmfTimestamp.fromMicros(5443650636079L);
         ITmfTimestamp endTime = TmfTimestamp.fromMicros(5443672642443L);
-        testTrace(path, nbEvents, startTime, endTime);
+        Map<String, String> properties = testTrace(path, nbEvents, startTime, endTime);
+        assertEquals(expectedProperties, properties);
     }
 
-    private static void testTrace(String path, int nbEvents, ITmfTimestamp startTime, ITmfTimestamp endTime) throws TmfTraceException {
+    private static Map<String, String> testTrace(String path, int nbEvents, ITmfTimestamp startTime, ITmfTimestamp endTime) throws TmfTraceException {
         ITmfTrace trace = new TraceEventTrace();
         try {
             assertTrue(trace.validate(null, path).isOK());
@@ -168,6 +200,8 @@ public class TraceEventTraceTest {
             assertEquals(nbEvents, trace.getNbEvents());
             assertEquals(startTime.toNanos(), trace.getStartTime().toNanos());
             assertEquals(endTime.toNanos(), trace.getEndTime().toNanos());
+            assertTrue(trace instanceof ITmfPropertiesProvider);
+            return ((ITmfPropertiesProvider) trace).getProperties();
         } finally {
             trace.dispose();
         }
