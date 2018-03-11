@@ -10,8 +10,8 @@
 package org.eclipse.tracecompass.incubator.internal.traceevent.core.event;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -20,8 +20,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 /**
  * Trace Event fields. Used as a quick wrapper for Trace Event log data.
@@ -43,6 +46,8 @@ public class TraceEventField {
     private final @Nullable Long fDuration;
     private final @Nullable Object fPid;
 
+    private static final Gson G_SON = new Gson();
+
     /**
      * Parse a JSON string
      *
@@ -53,84 +58,85 @@ public class TraceEventField {
     public static @Nullable TraceEventField parseJson(String fieldsString) {
         // looks like this
         // {"ts":94824347413117,"phase":"B","tid":39,"name":"TimeGraphView:BuildThread","args"={"trace":"django-httpd"}}
-        JSONObject root;
+        JsonObject root;
         Map<@NonNull String, @NonNull Object> argsMap = new HashMap<>();
-        try {
-            root = new JSONObject(fieldsString);
-            long ts = 0;
+        root = G_SON.fromJson(fieldsString, JsonObject.class);
+        long ts = 0;
 
-            Double tso = optDouble(root, ITraceEventConstants.TIMESTAMP);
-            if (Double.isFinite(tso)) {
-                ts = (long) (tso * MICRO_TO_NANO);
-            }
-            String phase = optString(root, ITraceEventConstants.PHASE, "I"); //$NON-NLS-1$
-            if (phase == null) {
-                // FIXME: Easy way to avoid null warning
-                phase = "I"; //$NON-NLS-1$
-            }
-            String name = String.valueOf(optString(root,ITraceEventConstants.NAME, "E".equals(phase) ? "exit" : "unknown")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            Integer tid = optInt(root, ITraceEventConstants.TID);
-            if (tid == Integer.MIN_VALUE) {
-                tid = null;
-            }
-            Object pid = root.opt(ITraceEventConstants.PID);
-            Double duration = optDouble(root, ITraceEventConstants.DURATION);
-            if (Double.isFinite(duration)) {
-                duration = (duration * MICRO_TO_NANO);
-            }
-            String category = optString(root, ITraceEventConstants.CATEGORY);
-            String id = optString(root, ITraceEventConstants.ID);
-            JSONObject args = optJSONObject(root, ITraceEventConstants.ARGS);
-            if (args != null) {
-                Iterator<?> keys = args.keys();
-                while (keys.hasNext()) {
-                    String key = String.valueOf(keys.next());
-                    String value = args.optString(key);
-                    argsMap.put("arg/" + key, String.valueOf(value)); //$NON-NLS-1$
-                }
-            }
-            argsMap.put(ITraceEventConstants.TIMESTAMP, ts);
-            argsMap.put(ITraceEventConstants.PHASE, phase);
-            argsMap.put(ITraceEventConstants.NAME, name);
-            if (tid != null) {
-                argsMap.put(ITraceEventConstants.TID, tid);
-            }
-            if (pid != null) {
-                argsMap.put(ITraceEventConstants.PID, pid);
-            }
-            if (Double.isFinite(duration)) {
-                argsMap.put(ITraceEventConstants.DURATION, duration);
-            }
-            if (category != null) {
-                argsMap.put(ITraceEventConstants.CATEGORY, category);
-            }
-            if (id != null) {
-                argsMap.put(ITraceEventConstants.ID, id);
-            }
-            return new TraceEventField(name, ts, phase, pid, tid, category, id, duration, argsMap);
-        } catch (JSONException e1) {
-            // invalid, return null and it will fail
+        Double tso = optDouble(root, ITraceEventConstants.TIMESTAMP);
+        if (Double.isFinite(tso)) {
+            ts = (long) (tso * MICRO_TO_NANO);
         }
-        return null;
+        String phase = optString(root, ITraceEventConstants.PHASE, "I"); //$NON-NLS-1$
+        if (phase == null) {
+            // FIXME: Easy way to avoid null warning
+            phase = "I"; //$NON-NLS-1$
+        }
+        String name = String.valueOf(optString(root, ITraceEventConstants.NAME, TraceEventPhases.DURATION_END.equals(phase) ? "exit" : "unknown")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        Integer tid = optInt(root, ITraceEventConstants.TID);
+        if (tid == Integer.MIN_VALUE) {
+            tid = null;
+        }
+        JsonElement jsonElement = root.get(ITraceEventConstants.PID);
+        JsonPrimitive primitive = jsonElement == null ? null : jsonElement.isJsonPrimitive() ? jsonElement.getAsJsonPrimitive() : null;
+        Object pid = primitive == null ? null : primitive.isNumber() ? primitive.getAsNumber() : primitive.isString() ? primitive.getAsString() : null;
+        Double duration = optDouble(root, ITraceEventConstants.DURATION);
+        if (Double.isFinite(duration)) {
+            duration = (duration * MICRO_TO_NANO);
+        }
+        String category = optString(root, ITraceEventConstants.CATEGORY);
+        String id = optString(root, ITraceEventConstants.ID);
+        JsonObject args = optJSONObject(root, ITraceEventConstants.ARGS);
+        if (args != null) {
+            for (Entry<String, JsonElement> entry : args.entrySet()) {
+                String key = Objects.requireNonNull(entry.getKey());
+                JsonElement element = Objects.requireNonNull(entry.getValue());
+                String value = String.valueOf(element.isJsonPrimitive() ? element.getAsJsonPrimitive().getAsString() : element.toString());
+                argsMap.put(ITraceEventConstants.ARGS + "/" + key, value); //$NON-NLS-1$
+            }
+        }
+        argsMap.put(ITraceEventConstants.TIMESTAMP, ts);
+        argsMap.put(ITraceEventConstants.PHASE, phase);
+        argsMap.put(ITraceEventConstants.NAME, name);
+        if (tid != null) {
+            argsMap.put(ITraceEventConstants.TID, tid);
+        }
+        if (pid != null) {
+            argsMap.put(ITraceEventConstants.PID, pid);
+        }
+        if (Double.isFinite(duration)) {
+            argsMap.put(ITraceEventConstants.DURATION, duration);
+        }
+        if (category != null) {
+            argsMap.put(ITraceEventConstants.CATEGORY, category);
+        }
+        if (id != null) {
+            argsMap.put(ITraceEventConstants.ID, id);
+        }
+        return new TraceEventField(name, ts, phase, pid, tid, category, id, duration, argsMap);
     }
 
-    private static double optDouble(JSONObject root, String key) {
-        return root.has(key) ? root.optDouble(key) : Double.NaN;
+    private static double optDouble(JsonObject root, String key) {
+        JsonElement jsonElement = root.get(key);
+        return jsonElement != null ? jsonElement.getAsDouble() : Double.NaN;
     }
 
-    private static int optInt(JSONObject root, String key) {
-        return root.has(key) ? root.optInt(key) : Integer.MIN_VALUE;
+    private static int optInt(JsonObject root, String key) {
+        JsonElement jsonElement = root.get(key);
+        return jsonElement != null ? jsonElement.getAsInt() : Integer.MIN_VALUE;
     }
 
-    private static @Nullable JSONObject optJSONObject(JSONObject root, String key){
-        return root.has(key) ? root.optJSONObject(key) : null;
+    private static @Nullable JsonObject optJSONObject(JsonObject root, String key) {
+        JsonElement jsonElement = root.get(key);
+        return jsonElement != null ? jsonElement.getAsJsonObject() : null;
     }
 
-    private static @Nullable String optString(JSONObject root, String key, @Nullable String defaultValue) {
-        return root.has(key) ? root.optString(key) : defaultValue;
+    private static @Nullable String optString(JsonObject root, String key, @Nullable String defaultValue) {
+        JsonElement jsonElement = root.get(key);
+        return jsonElement != null ? jsonElement.getAsString() : defaultValue;
     }
 
-    private static @Nullable String optString(JSONObject root, String key) {
+    private static @Nullable String optString(JsonObject root, String key) {
         return optString(root, key, null);
     }
 
@@ -172,9 +178,9 @@ public class TraceEventField {
         @SuppressWarnings("null")
         Map<@NonNull String, @NonNull Object> args = fields.entrySet().stream()
                 .filter(entry -> {
-                    return entry.getKey().startsWith("arg/"); //$NON-NLS-1$
+                    return entry.getKey().startsWith(ITraceEventConstants.ARGS + "/"); //$NON-NLS-1$
                 })
-                .collect(Collectors.toMap(entry -> entry.getKey().substring(4), Entry::getValue));
+                .collect(Collectors.toMap(entry -> entry.getKey().substring(5), Entry::getValue));
         fArgs = args.isEmpty() ? null : args;
 
     }

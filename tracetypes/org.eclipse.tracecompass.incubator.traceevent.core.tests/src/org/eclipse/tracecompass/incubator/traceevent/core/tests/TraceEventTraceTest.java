@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -134,6 +135,21 @@ public class TraceEventTraceTest {
     }
 
     /**
+     * Test a trace with duplicate entries
+     *
+     * @throws TmfTraceException
+     *             should not happen
+     */
+    @Test
+    public void testDubs() throws TmfTraceException {
+        String path = "traces/instant-events-duplicates.json";
+        int nbEvents = 2;
+        ITmfTimestamp startTime = TmfTimestamp.fromMicros(510075891653L);
+        ITmfTimestamp endTime = TmfTimestamp.fromMicros(510075907469L);
+        testTrace(path, nbEvents, startTime, endTime);
+    }
+
+    /**
      * Test a chromeOs system trace
      *
      * @throws TmfTraceException
@@ -181,7 +197,8 @@ public class TraceEventTraceTest {
     private static Map<String, String> testTrace(String path, int nbEvents, ITmfTimestamp startTime, ITmfTimestamp endTime) throws TmfTraceException {
         ITmfTrace trace = new TraceEventTrace();
         try {
-            assertTrue(trace.validate(null, path).isOK());
+            IStatus validate = trace.validate(null, path);
+            assertTrue(validate.getMessage(), validate.isOK());
             trace.initTrace(null, path, ITmfEvent.class);
             ITmfContext context = trace.seekEvent(0.0);
             ITmfEvent event = trace.getNext(context);
