@@ -10,6 +10,9 @@
 package org.eclipse.tracecompass.incubator.internal.traceevent.ui;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
+import org.eclipse.tracecompass.incubator.internal.traceevent.ui.markers.ContextMarkerFactory;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceAdapterManager;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -24,33 +27,26 @@ public class Activator extends AbstractUIPlugin {
     // The shared instance
     private static @Nullable Activator plugin;
 
+    private @Nullable ContextMarkerFactory fContextMarkerFactory;
+
     /**
      * The constructor
      */
     public Activator() {
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.
-     * BundleContext)
-     */
     @Override
     public void start(@Nullable BundleContext context) throws Exception {
         super.start(context);
+        fContextMarkerFactory = new ContextMarkerFactory();
+        TmfTraceAdapterManager.registerFactory(fContextMarkerFactory, TraceEventTrace.class);
         plugin = this;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.
-     * BundleContext)
-     */
     @Override
     public void stop(@Nullable BundleContext context) throws Exception {
         plugin = null;
+        TmfTraceAdapterManager.unregisterFactory(fContextMarkerFactory);
         super.stop(context);
     }
 

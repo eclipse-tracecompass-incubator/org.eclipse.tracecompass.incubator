@@ -51,6 +51,17 @@
                class="org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context.ContextAnalysis"
+            automatic="true"
+            icon="icons/context.png"
+            id="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context"
+            name="%context.name">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.analysis.xml.core.files">
@@ -63,6 +74,10 @@
       <dataProviderFactory
             class="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.objectlife.ObjectLifeDataProviderFactory"
             id="org.eclipse.tracecompass.incubator.traceevent.analysis.objectlife.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context.ContextDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context.dataprovider">
       </dataProviderFactory>
    </extension>
 
