@@ -30,6 +30,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventAspects;
+import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventPhases;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
@@ -186,7 +187,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     private static boolean isEntry(ITmfEvent event) {
         String phase = event.getContent().getFieldValue(String.class, ITraceEventConstants.PHASE);
-        return "B".equals(phase) || "s".equals(phase); //$NON-NLS-1$ //$NON-NLS-2$
+        return TraceEventPhases.NESTABLE_START.equals(phase) || TraceEventPhases.DURATION_START.equals(phase) || TraceEventPhases.FLOW_START.equals(phase);
     }
 
     @Override
@@ -199,7 +200,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     private static boolean isExit(ITmfEvent event) {
         String phase = event.getContent().getFieldValue(String.class, ITraceEventConstants.PHASE);
-        return "E".equals(phase) || "f".equals(phase); //$NON-NLS-1$//$NON-NLS-2$
+        return TraceEventPhases.NESTABLE_END.equals(phase) || TraceEventPhases.DURATION_END.equals(phase) || TraceEventPhases.FLOW_END.equals(phase);
     }
 
     @Override
@@ -218,35 +219,32 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             return;
         }
         switch (ph) {
-        case "B": //$NON-NLS-1$
+        case TraceEventPhases.NESTABLE_START:
+        case TraceEventPhases.DURATION_START:
             handleStart(event, ss, timestamp, processName);
             break;
 
-        case "s": //$NON-NLS-1$
+        case TraceEventPhases.FLOW_START:
             handleStart(event, ss, timestamp, processName);
             updateSLinks(event);
             break;
 
-        case "X": //$NON-NLS-1$
+        case TraceEventPhases.DURATION:
             Number duration = event.getContent().getFieldValue(Number.class, ITraceEventConstants.DURATION);
             if (duration != null) {
                 handleComplete(event, ss, processName);
             }
             break;
 
-        case "E": //$NON-NLS-1$
+        case TraceEventPhases.NESTABLE_END:
+        case TraceEventPhases.DURATION_END:
             handleEnd(event, ss, timestamp, processName);
             break;
 
-        case "f": //$NON-NLS-1$
+        case TraceEventPhases.FLOW_END:
             handleEnd(event, ss, timestamp, processName);
             updateFLinks(event);
             break;
-
-        case "b": //$NON-NLS-1$
-            handleStart(event, ss, timestamp, processName);
-            break;
-
         default:
             return;
         }

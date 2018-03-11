@@ -30,9 +30,14 @@ import com.google.common.collect.ImmutableList;
 public class TraceEventAspects {
 
     /**
+     * Argumnts aspect
+     */
+    public static final ITmfEventAspect<Map<String, Object>> ARGS_ASPECT = new TraceCompassScopeLogArgsAspect();
+
+    /**
      * An ID aspect, can be used to identify flows.
      */
-    public static final TraceCompassScopeLogIdAspect ID_ASPECT = new TraceCompassScopeLogIdAspect();
+    public static final ITmfEventAspect<String> ID_ASPECT = new TraceCompassScopeLogIdAspect();
 
     /**
      * Apects of a trace
@@ -58,7 +63,7 @@ public class TraceEventAspects {
                     new TraceCompassScopeLogCategoryAspect(),
                     new TraceCompassScopeLogDurationAspect(),
                     ID_ASPECT,
-                    new TraceCompassScopeLogArgsAspect(),
+                    ARGS_ASPECT,
                     new TraceCompassScopeLogCallsiteAspect());
             aspects = aspectSet;
         }

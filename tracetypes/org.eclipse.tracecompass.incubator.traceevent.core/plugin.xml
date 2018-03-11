@@ -30,6 +30,17 @@
          </tracetype>
       </module>
       <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.objectlife.ObjectLifeAnalysis"
+            automatic="true"
+            icon="icons/life.png"
+            id="org.eclipse.tracecompass.incubator.traceevent.analysis.objectlife"
+            name="%objectLife.name">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace">
+         </tracetype>
+      </module>
+      <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.counter.TraceEventCounterAnalysis"
             automatic="true"
             icon="icons/counter.png"
@@ -46,6 +57,13 @@
       <xmlfile
             file="xml_analysis/GroupedTasksTraceEvent.xml">
       </xmlfile>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.objectlife.ObjectLifeDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.traceevent.analysis.objectlife.dataprovider">
+      </dataProviderFactory>
    </extension>
 
 </plugin>

@@ -1,0 +1,21 @@
+[
+  {"name": "Mufasa","pid": 52, "ts": 100, "cat": "King of the Lions", "tid": 53,
+      "ph": "N", id="0x100"},
+  {"name": "Sarabi", "pid": 53, "ts": 110, "cat": "King of the Lions", "tid": 53,
+      "ph": "N", id="0x101"},
+  {"name": "Scar", "pid": 52, "ts": 120, "cat": "King of the Lions", "tid": 53,
+      "ph": "N", id="0x102"},
+  {"name": "Simba", "args": {"song": "circle of life"},"pid": 110, "ts": 220, "cat": "King of the Lions", "tid": 53,
+      "ph": "N", id="0x103"},
+  {"name": "Sarabi","pid": 53, "ts": 230, "cat": "King of the Lions", "tid": 53,"args": {"Killer": "Offscreen"},
+      "ph": "D", id="0x101"},
+  {"name": "Mufasa", "pid": 52, "ts": 300, "cat": "King of the Lions", "tid": 53,"args": {"Killer": "Scar"},
+      "ph": "D", id="0x100"},
+  {"name": "Scar", "pid": 52, "ts": 310, "cat": "King of the Lions", "tid": 53,"args": {"Killer": "Hyenas"},
+      "ph": "D", id="0x102"},
+ {"name": "Simba", "pid": 52, "ts": 400, "cat": "King of the Lions", "tid": 53,"args": {"Snapshot": {"Hakuna":"Matatta"}},
+      "ph": "O", id="0x103"},
+  {"name": "Simba", "pid": 52, "ts": 500, "cat": "King of the Lions", "tid": 53,"args": {"Killer": "Nope"},
+      "ph": "D", id="0x103"},
+
+]
