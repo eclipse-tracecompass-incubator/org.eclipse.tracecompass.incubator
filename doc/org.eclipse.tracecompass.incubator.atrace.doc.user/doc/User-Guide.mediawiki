@@ -1,0 +1,16 @@
+= Traces for Android (tm) =
+
+Supports direct output from atrace or HTML output from systrace.py
+
+''Android is a trademark of Google LLC''
+
+== Generating a trace ==
+There are two ways to generate a trace either using Systrace.py or atrace directly
+
+===Systrace.py===
+Follow procedures found here: https://developer.android.com/studio/command-line/systrace.html  and then import resulting HTML file in Trace Compass
+
+===atrace===
+Open shell on phone using adb. When running an atrace tracing make sure to use option -o in order to write the output to a file. Once tracing is done just import the output file in Trace Compass.
+ex:
+# adb shell atrace -o gfx

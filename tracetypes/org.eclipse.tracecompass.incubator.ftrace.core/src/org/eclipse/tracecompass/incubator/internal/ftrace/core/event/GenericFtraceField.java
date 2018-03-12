@@ -59,10 +59,10 @@ public class GenericFtraceField {
     }
 
     private final Long fTs;
-    private final String fName;
+    private String fName;
     private final Integer fCpu;
-    private final @Nullable Integer fTid;
-    private final @Nullable Integer fPid;
+    private @Nullable Integer fTid;
+    private @Nullable Integer fPid;
     private ITmfEventField fContent;
 
     /**
@@ -108,6 +108,20 @@ public class GenericFtraceField {
 
             String attributes = matcher.group(IGenericFtraceConstants.FTRACE_DATA_GROUP);
 
+            /*
+             * There's no distinction between pid and tid in scheduling events. However,when there's a mismatch
+             * between the tgid and the pid, we know the event happened on a thread and that
+             * the tgid is the actual pid, and the pid the tid.
+             */
+            String tgid = matcher.group(IGenericFtraceConstants.FTRACE_TGID_GROUP);
+            if (tgid != null) {
+                Integer tgidNumeric = Integer.parseInt(tgid);
+                if (!tgidNumeric.equals(pid)) {
+                    pid = tgidNumeric;
+                }
+            }
+
+
             Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
             fields.put(IGenericFtraceConstants.TIMESTAMP, timestampInNano);
             fields.put(IGenericFtraceConstants.NAME, name);
@@ -142,6 +156,18 @@ public class GenericFtraceField {
     }
 
     /**
+     * Set the event's content
+     *
+     * @param fields Map of field values
+     */
+    public void setContent(Map<String, Object> fields) {
+        ITmfEventField[] array = fields.entrySet().stream()
+                .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
+                .toArray(ITmfEventField[]::new);
+        fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array);
+    }
+
+    /**
      * Get the name of the event
      *
      * @return the event name
@@ -151,12 +177,30 @@ public class GenericFtraceField {
     }
 
     /**
+     * Set the event's name
+     *
+     * @param name New name of the event
+     */
+    public void setName(String name) {
+        fName = name;
+    }
+
+    /**
      * Get the TID of the event
      *
      * @return the event TID
      */
     public @Nullable Integer getTid() {
         return fTid;
+    }
+
+    /**
+     * Set the TID of the event
+     *
+     * @param tid The new tid
+     */
+    public void setTid(Integer tid) {
+        fTid = tid;
     }
 
     /**
@@ -176,6 +220,15 @@ public class GenericFtraceField {
     @Nullable
     public Integer getPid() {
         return fPid;
+    }
+
+    /**
+     * Set the PID of the event
+     *
+     * @param pid The new pid
+     */
+    public void setPid(Integer pid) {
+        fPid = pid;
     }
 
     /**

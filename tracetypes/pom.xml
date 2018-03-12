@@ -45,6 +45,9 @@
     <module>org.eclipse.tracecompass.incubator.ftrace</module>
     <module>org.eclipse.tracecompass.incubator.ftrace.core</module>
     <module>org.eclipse.tracecompass.incubator.ftrace.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.atrace</module>
+    <module>org.eclipse.tracecompass.incubator.atrace.core</module>
+    <module>org.eclipse.tracecompass.incubator.atrace.core.tests</module>
     <!-- insert modules here -->
   </modules>
 

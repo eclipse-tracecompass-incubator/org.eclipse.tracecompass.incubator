@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <category
+            id="org.eclipse.tracecompass.incubator.atrace.core"
+            name="%trace.category">
+      </category>
+      <type
+            category="org.eclipse.tracecompass.incubator.atrace.core"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.atrace.core"
+            isDirectory="false"
+            name="%trace.android"
+            trace_type="org.eclipse.tracecompass.incubator.internal.atrace.trace.ATrace">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack.TraceEventCallstackAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.traceevent.analysis.callstack"
+            name="%callstack.name">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.atrace.trace.ATrace">
+         </tracetype>
+      </module>
+   </extension>
+
+</plugin>
