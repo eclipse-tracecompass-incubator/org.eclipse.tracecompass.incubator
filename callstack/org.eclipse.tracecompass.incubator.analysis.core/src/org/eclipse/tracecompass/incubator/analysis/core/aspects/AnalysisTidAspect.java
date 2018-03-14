@@ -51,7 +51,7 @@ public class AnalysisTidAspect extends LinuxTidAspect {
             return null;
         }
         IHostModel model = ModelManager.getModelFor(hostId);
-        int tid = model.getThreadOnCpu((Integer) cpuObj, event.getTimestamp().toNanos());
+        int tid = model.getThreadOnCpu((Integer) cpuObj, event.getTimestamp().toNanos(), true);
         if (tid == IHostModel.UNKNOWN_TID) {
             return null;
         }

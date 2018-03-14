@@ -262,7 +262,7 @@ public class VmOverheadStateProvider extends AbstractTmfStateProvider {
             final long ts = event.getTimestamp().getValue();
             VirtualMachine vm = vcpu.getVm();
             IHostModel model = ModelManager.getModelFor(vm.getHostId());
-            int guestTid = model.getThreadOnCpu(vcpu.getCpuId().intValue(), ts);
+            int guestTid = model.getThreadOnCpu(vcpu.getCpuId().intValue(), ts, true);
             if (guestTid != IHostModel.UNKNOWN_TID) {
                 int quark = ss.getQuarkAbsoluteAndAdd(TRACES, vm.getTraceName(), THREADS, buildThreadAttributeName(guestTid, vcpu.getCpuId().intValue()), InstrumentedCallStackAnalysis.CALL_STACK);
                 // Just make sure this attribute exists, at the beginning of trace or if lost
@@ -292,7 +292,7 @@ public class VmOverheadStateProvider extends AbstractTmfStateProvider {
             Long exitReason = event.getContent().getFieldValue(Long.class, FIELD_EXIT_REASON);
             VirtualMachine vm = vcpu.getVm();
             IHostModel model = ModelManager.getModelFor(vm.getHostId());
-            int guestTid = model.getThreadOnCpu(vcpu.getCpuId().intValue(), ts);
+            int guestTid = model.getThreadOnCpu(vcpu.getCpuId().intValue(), ts, true);
             if (guestTid != IHostModel.UNKNOWN_TID) {
                 int quark = ss.getQuarkAbsoluteAndAdd(TRACES, vm.getTraceName(), THREADS, buildThreadAttributeName(guestTid, vcpu.getCpuId().intValue()), InstrumentedCallStackAnalysis.CALL_STACK);
                 // Just make sure this attribute exists, at the beginning of trace or if lost
@@ -404,7 +404,7 @@ public class VmOverheadStateProvider extends AbstractTmfStateProvider {
         if (vcpu != null) {
             VirtualMachine vm = vcpu.getVm();
             IHostModel model = ModelManager.getModelFor(vm.getHostId());
-            int guestTid = model.getThreadOnCpu(vcpu.getCpuId().intValue(), ts);
+            int guestTid = model.getThreadOnCpu(vcpu.getCpuId().intValue(), ts, true);
             if (guestTid != IHostModel.UNKNOWN_TID) {
 
                 int quark = ss.getQuarkAbsoluteAndAdd(TRACES, vm.getTraceName(), THREADS, buildThreadAttributeName(guestTid, vcpu.getCpuId().intValue()), InstrumentedCallStackAnalysis.CALL_STACK);
