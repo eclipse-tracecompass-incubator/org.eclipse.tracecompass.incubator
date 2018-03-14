@@ -27,6 +27,12 @@
    <feature url="features/org.eclipse.tracecompass.incubator.tracecompass_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.tracecompass" version="0.0.1.qualifier">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.atrace_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.atrace" version="0.0.1.qualifier">
+      <category name="trace-types"/>
+   </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.ftrace_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.ftrace" version="0.0.1.qualifier">
+      <category name="trace-types"/>
+   </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.1.qualifier">
       <category name="analyses"/>
    </bundle>
