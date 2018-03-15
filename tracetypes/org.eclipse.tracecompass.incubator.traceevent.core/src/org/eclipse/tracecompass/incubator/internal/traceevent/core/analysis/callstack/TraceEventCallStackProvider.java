@@ -14,29 +14,30 @@ import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.function.Function;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackEdge;
+import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventAspects;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventPhases;
-import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
+import org.eclipse.tracecompass.tmf.core.statesystem.TmfAttributePool;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -51,65 +52,53 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  */
 public class TraceEventCallStackProvider extends CallStackStateProvider {
 
+    private static final int VERSION_NUMBER = 3;
     private static final int UNSET_ID = -1;
+    static final String EDGES = "EDGES"; //$NON-NLS-1$
 
-    /**
-     * Link builder between events
-     */
-    private final class EdgeBuilder {
-
-        /**
-         *
-         */
-        private @NonNull String fSrc = StringUtils.EMPTY;
-        private @NonNull String fDst = StringUtils.EMPTY;
-        private long fSrcTime = Long.MAX_VALUE;
-        private int fSrcTid = IHostModel.UNKNOWN_TID;
-        private int fDstTid = IHostModel.UNKNOWN_TID;
-        private long fDur = 0;
-        private int fId = UNSET_ID;
-
-        public long getTime() {
-            return fSrcTime;
+    private static final Function<String, Integer> FUNCTION = s -> {
+        try {
+            return Integer.decode(s);
+        } catch (NumberFormatException e) {
+            return UNSET_ID;
         }
-
-        public @NonNull CallStackEdge build() {
-            return new CallStackEdge(new HostThread(fSrc, fSrcTid), new HostThread(fDst, fDstTid), fSrcTime, fDur, fId);
-        }
-
-    }
-
-    private Map<String, Integer> fLinkIdCache = new HashMap<>();
+    };
 
     private ITmfTimestamp fSafeTime;
-
-    private final Map<String, EdgeBuilder> fLinks = new HashMap<>();
 
     /**
      * A map of tid/stacks of timestamps
      */
     private final Map<Integer, Deque<Long>> fStack = new TreeMap<>();
 
-    private final ISegmentStore<@NonNull CallStackEdge> fLinksStore;
-
     private final ITmfEventAspect<?> fIdAspect;
+
+    /**
+     * Map of trace event scope ID string to their start times
+     */
+    private final Map<String, Long> fEdgeStartTimes = new HashMap<>();
+    /**
+     * Map of trace event scope ID string to the source {@link HostThread} of the edge.
+     */
+    private final Map<String, HostThread> fEdgeSrcHosts = new HashMap<>();
+    /**
+     * Cache of trace event scope ID string to their parsed values
+     */
+    private final Map<String, Integer> fIdCache = new HashMap<>();
 
     /**
      * Constructor
      *
      * @param trace
      *            the trace to follow
-     * @param segStore
-     *            Segment store to populate
      */
-    public TraceEventCallStackProvider(@NonNull ITmfTrace trace, ISegmentStore<@NonNull CallStackEdge> segStore) {
+    public TraceEventCallStackProvider(@NonNull ITmfTrace trace) {
         super(trace);
         ITmfStateSystemBuilder stateSystemBuilder = getStateSystemBuilder();
         if (stateSystemBuilder != null) {
             int quark = stateSystemBuilder.getQuarkAbsoluteAndAdd("dummy entry to make gpu entries work"); //$NON-NLS-1$
-            stateSystemBuilder.modifyAttribute(0, TmfStateValue.newValueInt(0), quark);
+            stateSystemBuilder.modifyAttribute(0, 0, quark);
         }
-        fLinksStore = segStore;
         fSafeTime = trace.getStartTime();
         fIdAspect = TraceEventAspects.ID_ASPECT;
     }
@@ -158,17 +147,16 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             tid = event.getContent().getFieldValue(Integer.class, ITraceEventConstants.TID);
         }
         return tid == null ? IHostModel.UNKNOWN_TID : tid.intValue();
-
     }
 
     @Override
     public int getVersion() {
-        return 2;
+        return VERSION_NUMBER;
     }
 
     @Override
     public @NonNull CallStackStateProvider getNewInstance() {
-        return new TraceEventCallStackProvider(getTrace(), fLinksStore);
+        return new TraceEventCallStackProvider(getTrace());
     }
 
     @Override
@@ -267,11 +255,8 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
     }
 
     private void updateFLinks(ITmfEvent event) {
-        String fId = event.getContent().getFieldValue(String.class, ITraceEventConstants.ID);
-        EdgeBuilder fLink = fLinks.get(fId);
-        if (fLink != null && fLink.getTime() == Long.MAX_VALUE) {
-            fLink.fSrcTime = event.getTimestamp().toNanos();
-        }
+        String id = event.getContent().getFieldValue(String.class, ITraceEventConstants.ID);
+        fEdgeStartTimes.putIfAbsent(id, event.getTimestamp().toNanos());
     }
 
     private void updateSLinks(ITmfEvent event) {
@@ -283,60 +268,55 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             }
             sId = String.valueOf(resolve);
         }
-        EdgeBuilder sLink = fLinks.get(sId);
-        int tid = Long.valueOf(getThreadId(event)).intValue();
-        if (sLink != null) {
-            if (sLink.getTime() == Long.MAX_VALUE) {
-                if (sLink.fId == UNSET_ID) {
-                    sLink.fId = fLinkIdCache.getOrDefault(sId, -1);
-                }
-                sLink.fDur = 0;
-                sLink.fSrcTime = event.getTimestamp().toNanos();
-                sLink.fDstTid = tid;
-                sLink.fDst = event.getTrace().getHostId();
-
-                fLinksStore.add(sLink.build());
-                EdgeBuilder builder = new EdgeBuilder();
-                builder.fSrcTid = tid;
-                builder.fSrc = event.getTrace().getHostId();
-                fLinks.put(sId, builder);
-            } else {
-                /*
-                 * start time = time
-                 *
-                 * end time = traceEvent.getTimestamp().toNanos()
-                 */
-                if (sLink.fId == UNSET_ID) {
-                    sLink.fId = fLinkIdCache.getOrDefault(sId, -1);
-                }
-                sLink.fDur = event.getTimestamp().toNanos() - sLink.fSrcTime;
-                sLink.fDstTid = tid;
-                sLink.fDst = event.getTrace().getHostId();
-
-                fLinksStore.add(sLink.build());
-                EdgeBuilder builder = new EdgeBuilder();
-                builder.fSrcTime = event.getTimestamp().toNanos();
-                builder.fSrcTid = tid;
-                builder.fSrc = event.getTrace().getHostId();
-
-                fLinks.put(sId, builder);
-            }
-        } else {
-            EdgeBuilder builder = new EdgeBuilder();
-            builder.fSrcTime = event.getTimestamp().toNanos();
-            builder.fSrcTid = tid;
-            builder.fSrc = event.getTrace().getHostId();
-            if (!fLinkIdCache.containsKey(sId)) {
-                try {
-                    Integer id = Integer.decode(sId);
-                    fLinkIdCache.put(sId, id);
-                } catch (NumberFormatException e) {
-                    fLinkIdCache.put(sId, UNSET_ID);
-                }
-            }
-            builder.fId = fLinkIdCache.getOrDefault(sId, UNSET_ID);
-            fLinks.put(sId, builder);
+        int tid = (int) getThreadId(event);
+        ITmfStateSystemBuilder ssb = getStateSystemBuilder();
+        if (ssb == null) {
+            return;
         }
+
+        long ts = event.getTimestamp().toNanos();
+        long startTime = fEdgeStartTimes.getOrDefault(sId, ts);
+
+        HostThread srcHostThread = fEdgeSrcHosts.remove(sId);
+        HostThread currHostThread = new HostThread(event.getTrace().getHostId(), tid);
+        if (srcHostThread != null) {
+            int edgeQuark = getAvailableEdgeQuark(ssb, startTime);
+
+            Object edgeStateValue = new EdgeStateValue(fIdCache.computeIfAbsent(sId, FUNCTION), srcHostThread, currHostThread);
+            ssb.modifyAttribute(startTime, edgeStateValue, edgeQuark);
+            ssb.modifyAttribute(ts, (Object) null, edgeQuark);
+
+        }
+        fEdgeStartTimes.put(sId, ts);
+        fEdgeSrcHosts.put(sId, currHostThread);
+    }
+
+    /**
+     * Get an available quark to insert an {@link EdgeStateValue} from startTime to
+     * the current end time. The {@link TmfAttributePool} cannot be used as it
+     * cannot tell that a quark is available for a time range
+     *
+     * @param ssb
+     *            the {@link ITmfStateSystemBuilder} for this analysis.
+     * @param startTime
+     *            the start time of the {@link EdgeStateValue}.
+     * @return a quark which is available from start time to now (i.e. its ongoing
+     *         value is <code>null</code> and its start time is smaller than the
+     *         queried start time).
+     */
+    private static int getAvailableEdgeQuark(ITmfStateSystemBuilder ssb, long startTime) {
+        int edgeRoot = ssb.getQuarkAbsoluteAndAdd(EDGES);
+        List<@NonNull Integer> subQuarks = ssb.getSubAttributes(edgeRoot, false);
+
+        for (int quark : subQuarks) {
+            long start = ssb.getOngoingStartTime(quark);
+            Object value = ssb.queryOngoing(quark);
+            if (value == null && start < startTime) {
+                return quark;
+            }
+        }
+
+        return ssb.getQuarkRelativeAndAdd(edgeRoot, Integer.toString(subQuarks.size()));
     }
 
     private void handleStart(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp, String processName) {
@@ -410,15 +390,9 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         ss.modifyAttribute(event.getTimestamp().toNanos(), threadId, threadQuark);
 
         int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.CALL_STACK);
-        ITmfStateValue functionEntry = TmfStateValue.newValueString(event.getName());
-        ss.pushAttribute(startTime, functionEntry, callStackQuark);
-        Deque<Long> stack = fStack.get(callStackQuark);
-        if (stack == null) {
-            stack = new ArrayDeque<>();
-            fStack.put(callStackQuark, stack);
-        }
+        ss.pushAttribute(startTime, event.getName(), callStackQuark);
+        Deque<Long> stack = fStack.computeIfAbsent(callStackQuark, ArrayDeque::new);
         stack.push(end);
-
     }
 
     @Override
@@ -426,15 +400,10 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
         for (Entry<Integer, Deque<Long>> stackEntry : fStack.entrySet()) {
             Deque<Long> stack = stackEntry.getValue();
-            if (!stack.isEmpty()) {
-                Long closeCandidate = stack.pop();
-                while (closeCandidate != null) {
-                    ss.popAttribute(closeCandidate, stackEntry.getKey());
-                    closeCandidate = (stack.isEmpty()) ? null : stack.pop();
-                }
+            while (!stack.isEmpty()) {
+                ss.popAttribute(stack.pop(), stackEntry.getKey());
             }
         }
-        fLinksStore.close(false);
         super.done();
     }
 

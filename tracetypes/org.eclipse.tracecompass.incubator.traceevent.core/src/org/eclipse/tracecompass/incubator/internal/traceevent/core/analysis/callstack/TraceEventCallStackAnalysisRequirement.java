@@ -11,7 +11,6 @@ package org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.cal
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
@@ -19,8 +18,6 @@ import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceE
 import org.eclipse.tracecompass.tmf.core.analysis.requirements.TmfAbstractAnalysisRequirement;
 import org.eclipse.tracecompass.tmf.core.analysis.requirements.TmfAnalysisEventFieldRequirement;
 import org.eclipse.tracecompass.tmf.core.analysis.requirements.TmfCompositeAnalysisRequirement;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Requirements to run a trace event based analysis
@@ -38,12 +35,9 @@ public class TraceEventCallStackAnalysisRequirement extends TmfCompositeAnalysis
     }
 
     private static Collection<@NonNull TmfAbstractAnalysisRequirement> getSubRequirements() {
-        Set<@NonNull String> requiredEventsFields = ImmutableSet.of(
-                ITraceEventConstants.DURATION);
-
         TmfAnalysisEventFieldRequirement entryReq = new TmfAnalysisEventFieldRequirement(
                 StringUtils.EMPTY,
-                requiredEventsFields);
+                Collections.singleton(ITraceEventConstants.DURATION));
         return Collections.singleton(entryReq);
     }
 

@@ -29,4 +29,5 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.traceevent.core;x-fr
 Import-Package: com.google.common.collect,
  com.google.common.primitives,
  org.apache.commons.lang3,
+ org.eclipse.tracecompass.datastore.core.serialization,
  org.json

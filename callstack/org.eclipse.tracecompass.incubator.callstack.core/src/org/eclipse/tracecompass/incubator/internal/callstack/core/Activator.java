@@ -10,6 +10,8 @@
 package org.eclipse.tracecompass.incubator.internal.callstack.core;
 
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
+import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
+import org.eclipse.tracecompass.internal.provisional.statesystem.core.statevalue.CustomStateValue;
 
 /**
  * Activator
@@ -37,6 +39,7 @@ public class Activator extends TraceCompassActivator {
 
     @Override
     protected void startActions() {
+        CustomStateValue.registerCustomFactory(EdgeStateValue.CUSTOM_TYPE_ID, EdgeStateValue.EDGE_STATE_VALUE_FACTORY);
     }
 
     @Override

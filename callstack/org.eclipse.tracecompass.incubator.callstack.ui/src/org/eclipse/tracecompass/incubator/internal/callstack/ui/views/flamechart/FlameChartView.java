@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -54,18 +53,17 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
+import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackEdge;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.Activator;
 import org.eclipse.tracecompass.internal.analysis.os.linux.ui.actions.FollowThreadAction;
-import org.eclipse.tracecompass.segmentstore.core.ISegment;
-import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
+import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
@@ -84,9 +82,7 @@ import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
 import org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProviderPreferencePage;
 import org.eclipse.tracecompass.tmf.ui.symbols.SymbolProviderConfigDialog;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.AbstractTimeGraphView;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphTimeListener;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphContentProvider;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ILinkEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
@@ -410,12 +406,7 @@ public class FlameChartView extends AbstractTimeGraphView {
     public void createPartControl(Composite parent) {
         super.createPartControl(parent);
 
-        getTimeGraphViewer().addTimeListener(new ITimeGraphTimeListener() {
-            @Override
-            public void timeSelected(TimeGraphTimeEvent event) {
-                synchingToTime(event.getBeginTime());
-            }
-        });
+        getTimeGraphViewer().addTimeListener(event -> synchingToTime(event.getBeginTime()));
 
         getTimeGraphViewer().getTimeGraphControl().addMouseListener(new MouseAdapter() {
             @Override
@@ -642,30 +633,28 @@ public class FlameChartView extends AbstractTimeGraphView {
         }
         csModule = iterator.next();
         csModule.schedule();
-        ISegmentStore<@NonNull CallStackEdge> store = csModule.getLinks();
-        if (!store.isEmpty()) {
-            List<TimeGraphEntry> entryList = getEntryList(trace);
-            if (entryList == null) {
-                return baseLinks;
-            }
-            Iterable<org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackEdge> intersectingElements = store.getIntersectingElements(startTime, endTime);
-            if (Iterables.isEmpty(intersectingElements)) {
-                return baseLinks;
-            }
-            List<@NonNull ILinkEvent> links = new ArrayList<>();
-            links.addAll(baseLinks);
+        List<@NonNull ITmfStateInterval> edges = csModule.getLinks(startTime, endTime, monitor);
+        List<TimeGraphEntry> entryList = getEntryList(trace);
+        if (!edges.isEmpty() && entryList != null) {
+            List<@NonNull ILinkEvent> links = new ArrayList<>(baseLinks);
 
-            for (ISegment arrow : intersectingElements) {
+            for (ITmfStateInterval interval : edges) {
                 if (monitor.isCanceled()) {
                     return Collections.emptyList();
                 }
-                if (arrow instanceof CallStackEdge) {
-                    CallStackEdge edge = (CallStackEdge) arrow;
-                    ITimeGraphEntry src = findEntry(entryList, edge.getSrcHost(), edge.getSrcTid(), edge.getStart());
-                    ITimeGraphEntry dst = findEntry(entryList, edge.getDstHost(), edge.getDstTid(), edge.getStart() + edge.getDuration());
-                    if (src != null && dst != null) {
-                        links.add(SpanLinkEvent.create(src, dst, edge.getStart(), edge.getDuration(), edge.getId()));
-                    }
+                EdgeStateValue edge = (EdgeStateValue) interval.getValue();
+                if (edge == null) {
+                    /*
+                     * by contract all the intervals should have EdgeStateValues but need to check
+                     * to avoid NPE
+                     */
+                    continue;
+                }
+                ITimeGraphEntry src = findEntry(entryList, edge.getSource(), interval.getStartTime());
+                ITimeGraphEntry dst = findEntry(entryList, edge.getDestination(), interval.getEndTime() + 1);
+                if (src != null && dst != null) {
+                    long duration = interval.getEndTime() - interval.getStartTime() + 1;
+                    links.add(SpanLinkEvent.create(src, dst, interval.getStartTime(), duration, edge.getId()));
                 }
             }
             return links;
@@ -673,21 +662,13 @@ public class FlameChartView extends AbstractTimeGraphView {
         return baseLinks;
     }
 
-    private static ITimeGraphEntry findEntry(List<TimeGraphEntry> entryList, @NonNull String host, int tid, long ts) {
-        List<TraceEntry> traceEntries = entryList.stream().filter(e -> e instanceof TraceEntry)
-                .map(e -> (TraceEntry) e)
-                .filter(te -> te.fHostId.equals(host))
-                .collect(Collectors.toList());
-        if (traceEntries.isEmpty()) {
-            return null;
-        }
-        for (TraceEntry traceEntry : traceEntries) {
-            List<FlameChartEntry> tidEntries = findInChildren(traceEntry, tid, ts);
-            if (tidEntries.isEmpty()) {
-                continue;
+    private static ITimeGraphEntry findEntry(List<TimeGraphEntry> entryList, @NonNull HostThread hostThread, long ts) {
+        Iterable<TraceEntry> traceEntries = Iterables.filter(entryList, TraceEntry.class);
+        for (TraceEntry traceEntry : Iterables.filter(traceEntries, te -> hostThread.getHost().equals(te.fHostId))) {
+            List<FlameChartEntry> tidEntries = findInChildren(traceEntry, hostThread.getTid(), ts);
+            if (!tidEntries.isEmpty()) {
+                return Collections.max(tidEntries, Comparator.comparingInt(FlameChartEntry::getStackLevel));
             }
-            tidEntries.sort((o1, o2) -> Integer.compare(o2.getStackLevel(), o1.getStackLevel()));
-            return tidEntries.get(0);
         }
         return null;
     }
@@ -726,7 +707,7 @@ public class FlameChartView extends AbstractTimeGraphView {
             return;
         }
         // Intermediate element, process children
-        element.getChildren().stream().forEach(e -> processCallStackElement(symbolProviders, e, entry));
+        element.getChildren().forEach(e -> processCallStackElement(symbolProviders, e, entry));
     }
 
     private void addUnavailableEntry(ITmfTrace trace, ITmfTrace parentTrace) {
@@ -820,14 +801,13 @@ public class FlameChartView extends AbstractTimeGraphView {
                         FlameChartEntry callStackEntry = (FlameChartEntry) entry;
                         ICalledFunction currentFunction = callStackEntry.updateAt(time);
 
-                        if (fLocalSyncTime == time && currentFunction != null) {
-                            if (time == currentFunction.getStart()) {
-                                fLocalSyncTime = -1;
-                                Display.getDefault().asyncExec(() -> {
-                                    getTimeGraphViewer().setSelection(callStackEntry, true);
-                                    getTimeGraphViewer().getTimeGraphControl().fireSelectionChanged();
-                                });
-                            }
+                        if (fLocalSyncTime == time && currentFunction != null
+                                && time == currentFunction.getStart()) {
+                            fLocalSyncTime = -1;
+                            Display.getDefault().asyncExec(() -> {
+                                getTimeGraphViewer().setSelection(callStackEntry, true);
+                                getTimeGraphViewer().getTimeGraphControl().fireSelectionChanged();
+                            });
                         }
                     }
                 };
@@ -836,9 +816,7 @@ public class FlameChartView extends AbstractTimeGraphView {
                     return Status.CANCEL_STATUS;
                 }
 
-                Display.getDefault().asyncExec(() -> {
-                    getTimeGraphViewer().refresh();
-                });
+                Display.getDefault().asyncExec(() -> getTimeGraphViewer().refresh());
                 return Status.OK_STATUS;
             }
         };
@@ -901,7 +879,6 @@ public class FlameChartView extends AbstractTimeGraphView {
         ISelection selection = getSite().getSelectionProvider().getSelection();
         if (selection instanceof StructuredSelection) {
             StructuredSelection sSel = (StructuredSelection) selection;
-            System.out.println(sSel);
             if (sSel.getFirstElement() instanceof LevelEntry) {
                 LevelEntry entry = (LevelEntry) sSel.getFirstElement();
                 HostThread hostThread = entry.getHostThread(getTimeGraphViewer().getSelectionBegin());

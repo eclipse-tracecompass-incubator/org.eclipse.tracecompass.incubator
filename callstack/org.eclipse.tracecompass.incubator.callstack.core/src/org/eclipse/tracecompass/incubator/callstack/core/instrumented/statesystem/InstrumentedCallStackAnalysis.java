@@ -8,17 +8,10 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
@@ -27,6 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.IAnalysisProgressListener;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
+import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
@@ -34,20 +28,19 @@ import org.eclipse.tracecompass.incubator.callstack.core.callgraph.SymbolAspect;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.TraceHostIdResolver;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
-import org.eclipse.tracecompass.segmentstore.core.SegmentStoreFactory;
-import org.eclipse.tracecompass.segmentstore.core.SegmentStoreFactory.SegmentStoreType;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
+import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
+import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.segment.ISegmentAspect;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 
 import com.google.common.collect.ImmutableList;
 
@@ -76,12 +69,6 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
 
     private final CallGraphAnalysis fCallGraph;
 
-    private static final String LINKS_SUFFIX = ".links.ht"; //$NON-NLS-1$
-    /**
-     * Arrows, not really nullable, but lazy initialized
-     */
-    private @Nullable ISegmentStore<CallStackEdge> fLinks = null;
-
     /**
      * Listeners
      */
@@ -98,28 +85,6 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     protected InstrumentedCallStackAnalysis() {
         super();
         fCallGraph = new CallGraphAnalysis(this);
-    }
-
-    private @Nullable ISegmentStore<CallStackEdge> buildOnDiskSegmentStore(String fileName) {
-        ITmfTrace trace = checkNotNull(getTrace());
-
-        /* See if the data file already exists on disk */
-        String dir = TmfTraceManager.getSupplementaryFileDir(trace);
-        final Path file = Paths.get(dir, fileName);
-
-        ISegmentStore<CallStackEdge> segmentStore;
-        try {
-            segmentStore = SegmentStoreFactory.createOnDiskSegmentStore(Objects.requireNonNull(file), CallStackEdge.READER);
-        } catch (IOException e) {
-            try {
-                Files.deleteIfExists(file);
-            } catch (IOException e1) {
-                // Ignore
-            }
-            Activator.getInstance().logError("Error creating segment store", e); //$NON-NLS-1$
-            return null;
-        }
-        return segmentStore;
     }
 
     @Override
@@ -212,16 +177,41 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     /**
      * Get the edges (links) of the callstack
      *
-     * @return a list of the edges
+     * @param start
+     *            start time of the arrows to sample
+     * @param end
+     *            end time of the arrows to sample
+     * @param monitor
+     *            monitor to cancel the job
+     *
+     * @return a list of the edges, as {@link ITmfStateInterval}s with {@link EdgeStateValue}s.
      */
-    public synchronized ISegmentStore<CallStackEdge> getLinks() {
-        ISegmentStore<CallStackEdge> links = fLinks;
-        if (fLinks == null) {
-            links = buildOnDiskSegmentStore(String.valueOf(getId()) + LINKS_SUFFIX);
-            links = links != null ? links : SegmentStoreFactory.createSegmentStore(SegmentStoreType.Fast);
-            fLinks = links;
+    public List<ITmfStateInterval> getLinks(long start, long end, IProgressMonitor monitor) {
+        ITmfStateSystem ss = getStateSystem();
+        if (ss == null) {
+            return Collections.emptyList();
         }
-        return Objects.requireNonNull(links);
+
+        Collection<Integer> quarks = getEdgeQuarks();
+        if (quarks.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // collect all the sampled edge intervals
+        List<ITmfStateInterval> list = new ArrayList<>();
+        try {
+            for (ITmfStateInterval interval : ss.query2D(quarks, start, end)) {
+                Object value = interval.getValue();
+                if (monitor.isCanceled()) {
+                    return Collections.emptyList();
+                } else if (value instanceof EdgeStateValue) {
+                    list.add(interval);
+                }
+            }
+        } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
+            return Collections.emptyList();
+        }
+        return list;
     }
 
     @Override
@@ -323,6 +313,15 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
      */
     public void triggerAutomatically(boolean trigger) {
         fAutomaticCallgraph = trigger;
+    }
+
+    /**
+     * Get the quarks to query to get the Edges in the call stack
+     *
+     * @return list of quarks who's intervals should have {@link EdgeStateValue}s
+     */
+    protected Collection<Integer> getEdgeQuarks() {
+        return Collections.emptyList();
     }
 
 }

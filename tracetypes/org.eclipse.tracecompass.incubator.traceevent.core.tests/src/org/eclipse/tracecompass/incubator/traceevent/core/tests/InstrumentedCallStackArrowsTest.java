@@ -10,25 +10,27 @@
 package org.eclipse.tracecompass.incubator.traceevent.core.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackEdge;
+import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack.TraceEventCallstackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
-import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.junit.Test;
 
 /**
@@ -57,10 +59,10 @@ public class InstrumentedCallStackArrowsTest {
      */
     @Test
     public void testArrows() throws TmfTraceException, TmfAnalysisException, IOException {
-        ITmfTrace trace = new TraceEventTrace();
+        TraceEventTrace trace = new TraceEventTrace();
         TraceEventCallstackAnalysis analysis = new TraceEventCallstackAnalysis();
         try {
-            trace.initTrace(null, TRACE_PATH, ITmfEvent.class);
+            trace.initTrace(null, TRACE_PATH, TmfEvent.class);
 
             /*
              * Overcome the default start time which is at Long.MIN_VALUE
@@ -68,43 +70,53 @@ public class InstrumentedCallStackArrowsTest {
             ITmfContext ctx = trace.seekEvent(0L);
             trace.getNext(ctx);
 
-            analysis.setTrace(trace);
+            assertTrue(analysis.setTrace(trace));
             analysis.schedule();
-            analysis.waitForCompletion();
+            assertTrue(analysis.waitForCompletion());
 
-            List<CallStackEdge> expected = readEdges("resources/expectedArrows.csv");
+            ITmfStateSystem ss = analysis.getStateSystem();
+            assertNotNull(ss);
 
-            // copy the segment store into a list for easier comparison
-            ISegmentStore<@NonNull CallStackEdge> links = analysis.getLinks();
-            List<CallStackEdge> actual = new ArrayList<>();
-            links.forEach(actual::add);
+            List<@NonNull ITmfStateInterval> actual = analysis.getLinks(ss.getStartTime(), ss.getCurrentEndTime(), new NullProgressMonitor());
 
-            assertEquals(expected, actual);
+            assertEqualsEdges("resources/expectedArrows.csv", actual);
         } finally {
             analysis.dispose();
             trace.dispose();
         }
     }
 
-    private static List<CallStackEdge> readEdges(String path) throws IOException {
+    private static void assertEqualsEdges(String path, List<@NonNull ITmfStateInterval> actual) throws IOException {
         List<String> expectedStrings = Files.readAllLines(Paths.get(path));
-        List<CallStackEdge> edges = new ArrayList<>(expectedStrings.size());
+        /*
+         * we could build intervals and compare the lists but that would require a
+         * separate equals method for intervals to avoid comparing quarks...
+         */
+        assertEquals("wrong number of arrows", expectedStrings.size(), actual.size());
 
-        for (String string : expectedStrings) {
+        Iterator<String> stringIterator = expectedStrings.iterator();
+        Iterator<ITmfStateInterval> intervalIterator = actual.iterator();
+        while (stringIterator.hasNext() && intervalIterator.hasNext()) {
+            String[] split = stringIterator.next().split(",");
+            ITmfStateInterval interval = intervalIterator.next();
 
-            String[] split = string.split(",");
-            long start = Long.parseLong(split[0]);
-            long duration = Long.parseLong(split[1]);
-            String srcHost = Objects.requireNonNull(split[2]);
-            int srcTid = Integer.parseInt(split[3]);
-            String dstHost = Objects.requireNonNull(split[4]);
-            int dstTid = Integer.parseInt(split[5]);
-            int id = Integer.parseInt(split[6]);
+            assertEquals("Wrong start time", Long.parseLong(split[0]), interval.getStartTime());
+            assertEquals("Wrong duration", Long.parseLong(split[1]), interval.getEndTime() - interval.getStartTime() + 1);
 
-            edges.add(new CallStackEdge(new HostThread(srcHost, srcTid), new HostThread(dstHost, dstTid), start, duration, id));
+            Object value = interval.getValue();
+            assertTrue(value instanceof EdgeStateValue);
+            EdgeStateValue edge = (EdgeStateValue) value;
+
+            assertEquals("Wrong source host", split[2], edge.getSource().getHost());
+            Integer srcTid = Integer.parseInt(split[3]);
+            assertEquals("Wrong source TID", srcTid, edge.getSource().getTid());
+
+            assertEquals("Wrong destination host", Objects.requireNonNull(split[4]), edge.getDestination().getHost());
+            Integer dstTid = Integer.parseInt(split[5]);
+            assertEquals("Wrong destination TID", dstTid, edge.getDestination().getTid());
+
+            assertEquals("Wrong edge id", Integer.parseInt(split[6]), edge.getId());
         }
-
-        return edges;
     }
 
 }

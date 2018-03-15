@@ -9,11 +9,13 @@
 
 package org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.analysis.requirements.TmfAbstractAnalysisRequirement;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 
@@ -34,7 +36,7 @@ public class TraceEventCallstackAnalysis extends InstrumentedCallStackAnalysis {
 
     @Override
     protected ITmfStateProvider createStateProvider() {
-        return new TraceEventCallStackProvider(Objects.requireNonNull(getTrace()), getLinks());
+        return new TraceEventCallStackProvider(Objects.requireNonNull(getTrace()));
     }
 
     @Override
@@ -47,6 +49,19 @@ public class TraceEventCallstackAnalysis extends InstrumentedCallStackAnalysis {
 //            fAnalysisRequirements = requirements;
 //        }
 //        return requirements;
+    }
+
+    @Override
+    protected @NonNull Collection<@NonNull Integer> getEdgeQuarks() {
+        ITmfStateSystem ss = getStateSystem();
+        if (ss == null) {
+            return Collections.emptyList();
+        }
+        int edgeQuark = ss.optQuarkAbsolute(TraceEventCallStackProvider.EDGES);
+        if (edgeQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+            return Collections.emptyList();
+        }
+        return ss.getSubAttributes(edgeQuark, false);
     }
 
 }
