@@ -34,8 +34,7 @@ The current implementation of the Server exposes 5 services:
 * Trace Manager Service: to import and open and manage traces on the server's file system
 * Experiment Manager Service: to combine traces into experiments
 * Data Provider Service: to expose data provider APIs to access analysis results
-* Event Table Service (soon to be built into Data Provider Service): to expose the events of a trace.
-* XML Manager Service: to extend the server's features from XML analysis and views on the server's file system.
+* XML Manager Service: to extend the server's features from XML analysis and views on the server's file system
 
 === Extension model ===
 Being built on Eclipse RCP, the Trace Server supports the same extension mechanism as Trace Compass.

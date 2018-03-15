@@ -39,6 +39,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.fasterxml.jackson.jaxrs.jackson-jaxrs-base
 Import-Package: com.google.common.base,
  com.google.common.collect,
+ com.google.common.primitives,
  org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module,
  org.eclipse.tracecompass.tmf.analysis.xml.core.module
 Bundle-ClassPath: .,

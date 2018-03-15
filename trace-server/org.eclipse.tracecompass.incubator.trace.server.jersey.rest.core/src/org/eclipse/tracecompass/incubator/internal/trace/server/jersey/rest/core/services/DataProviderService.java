@@ -10,28 +10,42 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableFilterModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.EventTableQueryFilter;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TimeQueryFilter;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.VirtualTableQueryFilter;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.EventTableLine;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableDataProvider;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphEntryModel;
@@ -51,6 +65,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.w3c.dom.Element;
 
 import com.google.common.collect.Iterables;
+import com.google.common.primitives.Longs;
 
 /**
  * Service to query the {@link ITmfTreeDataProvider}s
@@ -290,6 +305,115 @@ public class DataProviderService {
             provider = getXmlProvider(trace, providerId, EnumSet.of(OutputType.TIME_GRAPH));
         }
         return provider;
+    }
+
+    /**
+     * Query the provider for table lines
+     *
+     * @param uuid
+     *            Trace UUID
+     * @param providerId
+     *            Eclipse extension point ID for the data provider to query
+     * @param low
+     *            Low index
+     * @param size
+     *            Number of lines to return
+     * @param columnIds
+     *            Desired column IDs
+     * @return A {@link GenericView} with the results
+     */
+    @GET
+    @Path("/lines")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getLines(@PathParam("uuid") UUID uuid,
+            @PathParam("providerId") String providerId,
+            @QueryParam("low") @Min(0) long low,
+            @QueryParam("size") @Min(0) int size,
+            @QueryParam("columnId") List<@NonNull Long> columnIds) {
+
+        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+        if (trace == null) {
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        }
+
+        ITmfVirtualTableDataProvider<? extends IVirtualTableLine, ? extends ITmfTreeDataModel> provider = manager.getDataProvider(trace, providerId, ITmfVirtualTableDataProvider.class);
+        if (provider == null) {
+            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+        }
+
+        VirtualTableQueryFilter queryFilter = new VirtualTableQueryFilter(columnIds, low, size);
+        TmfModelResponse<?> response = provider.fetchLines(queryFilter, null);
+        return Response.ok(new GenericView<>(trace, response)).build();
+    }
+
+    /**
+     * Query the provider for event table lines with filters
+     *
+     * @param uuid
+     *            Trace UUID
+     * @param providerId
+     *            Eclipse extension point ID for the data provider to query
+     * @param low
+     *            Low index
+     * @param size
+     *            Number of lines to return
+     * @param columnIds
+     *            Desired column IDs
+     * @param presetFilter
+     *            List of preset filter IDs to apply
+     * @param isCollapseFilterEnabled
+     *            True if a collapse filter should be applied
+     * @param multivaluedMap
+     *            Map that contains the table filter (column ID with the associated
+     *            regex)
+     * @return A {@link GenericView} with the results
+     */
+    @PUT
+    @Path("/lines")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getLines(@PathParam("uuid") UUID uuid,
+            @PathParam("providerId") String providerId,
+            @QueryParam("low") @Min(0) long low,
+            @QueryParam("size") @Min(0) int size,
+            @QueryParam("columnId") List<@NonNull Long> columnIds,
+            @FormParam("presetFilterId") List<@NonNull String> presetFilter,
+            @FormParam("collapseFilter") boolean isCollapseFilterEnabled,
+            MultivaluedMap<@NonNull String, @NonNull String> multivaluedMap) {
+
+        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+        if (trace == null) {
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        }
+
+        TmfEventTableDataProvider provider = manager.getDataProvider(trace, providerId, TmfEventTableDataProvider.class);
+        if (provider == null) {
+            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+        }
+
+        /*
+         * The multivaluedMap contains all the entry from the form, including the
+         * presetFilter list and the collapse boolean. In order to extract the table
+         * filters (mapping between column ID and regex) the tryParse is use to capture
+         * just the keys that are longs (column IDs)
+         */
+        Map<@NonNull Long, @NonNull String> tableFilter = null;
+        for (Entry<String, List<String>> paramEntry : multivaluedMap.entrySet()) {
+            Long columnId = Longs.tryParse(paramEntry.getKey());
+            if (columnId == null) {
+                continue;
+            }
+
+            if (tableFilter == null) {
+                tableFilter = new HashMap<>();
+            }
+            tableFilter.put(columnId, paramEntry.getValue().get(0));
+        }
+
+        TmfEventTableFilterModel filters = new TmfEventTableFilterModel(tableFilter, null, presetFilter, null, isCollapseFilterEnabled);
+        EventTableQueryFilter queryFilter = new EventTableQueryFilter(columnIds, low, size, filters);
+        TmfModelResponse<@NonNull ITmfVirtualTableModel<@NonNull EventTableLine>> response = provider.fetchLines(queryFilter, null);
+        return Response.ok(new GenericView<>(trace, response)).build();
     }
 
     /**
