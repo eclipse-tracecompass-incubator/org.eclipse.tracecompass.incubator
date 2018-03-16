@@ -4,13 +4,26 @@ Supports direct output from atrace or HTML output from systrace.py
 
 ''Android is a trademark of Google LLC''
 
+== Installing Required Plugins in Trace Compass==
+In order to import traces generated on Android systems, you need to install two features from the Trace Compass Incubator: ''Trace Compass ftrace (Incubation)'' and ''Trace Compass for Android Traces (Incubation)'' features.
+
+It’s preferable to use a development snapshot of Trace Compass, as the Incubator feature may require the latest master to work correctly. These snapshots can be found here: [http://download.eclipse.org/tracecompass/master/rcp/]
+
+Once you have Trace Compass Installed, click '''Tools''' -> '''Add-ons…'''
+
+A new window listing all the available incubator features will open. You can select the ''Trace Compass ftrace (Incubation)'' and ''Trace Compass for Android Traces (Incubation)'' features, click ''Finish'' and follow the ''Install new software'' wizard to complete the installation.
+
+You can now import traces generated on the Android Platform.
+
+''Note: Please refer to [http://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/Trace-Compass-Incubator.html#Trace_Compass_Incubator the full documentation to install Trace Compass Incubator] to more information on installation incubator features.''
+
 == Generating a trace ==
 There are two ways to generate a trace either using Systrace.py or atrace directly
 
-===Systrace.py===
+=== systrace.py ===
 Follow procedures found here: https://developer.android.com/studio/command-line/systrace.html  and then import resulting HTML file in Trace Compass
 
-===atrace===
+=== atrace ===
 Open shell on phone using adb. When running an atrace tracing make sure to use option -o in order to write the output to a file. Once tracing is done just import the output file in Trace Compass.
 ex:
 # adb shell atrace -o gfx
