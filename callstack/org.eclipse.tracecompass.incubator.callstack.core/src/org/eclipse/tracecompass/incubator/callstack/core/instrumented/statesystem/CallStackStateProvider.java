@@ -16,6 +16,8 @@ import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.tracecompass.incubator.analysis.core.aspects.ProcessNameAspect;
+import org.eclipse.tracecompass.incubator.analysis.core.aspects.ThreadNameAspect;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.Messages;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
@@ -25,6 +27,7 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * The default base state provider for traces that implement the default
@@ -251,7 +254,8 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
      */
     protected @Nullable String getProcessName(ITmfEvent event) {
         /* Override to provide a process name */
-        return null;
+        Object resolved = TmfTraceUtils.resolveEventAspectOfClassForEvent(event.getTrace(), ProcessNameAspect.class, event);
+        return (resolved instanceof String) ? (String) resolved : null;
     }
 
     /**
@@ -274,6 +278,7 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
      */
     protected @Nullable String getThreadName(ITmfEvent event) {
         /* Override to provide a thread name */
-        return null;
+        Object resolved = TmfTraceUtils.resolveEventAspectOfClassForEvent(event.getTrace(), ThreadNameAspect.class, event);
+        return (resolved instanceof String) ? (String) resolved : null;
     }
 }
