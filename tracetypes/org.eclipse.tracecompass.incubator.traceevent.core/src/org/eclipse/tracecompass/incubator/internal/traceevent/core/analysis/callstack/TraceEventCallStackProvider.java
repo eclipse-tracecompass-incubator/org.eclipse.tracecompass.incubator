@@ -115,7 +115,10 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     @Override
     protected @Nullable String getProcessName(@NonNull ITmfEvent event) {
-        String pName = event.getContent().getFieldValue(String.class, "pid"); //$NON-NLS-1$
+        String pName = super.getProcessName(event);
+        if (pName == null) {
+            pName = event.getContent().getFieldValue(String.class, ITraceEventConstants.PID);
+        }
 
         if (pName == null) {
             int processId = getProcessId(event);
@@ -127,7 +130,10 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     @Override
     protected @Nullable String getThreadName(@NonNull ITmfEvent event) {
-        String tName = event.getContent().getFieldValue(String.class, "tname"); //$NON-NLS-1$
+        String tName = super.getThreadName(event);
+        if (tName == null) {
+            tName = event.getContent().getFieldValue(String.class, "tname"); //$NON-NLS-1$
+        }
 
         if (tName == null) {
             long threadId = getThreadId(event);
@@ -156,7 +162,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     @Override
     public int getVersion() {
-        return 1;
+        return 2;
     }
 
     @Override
