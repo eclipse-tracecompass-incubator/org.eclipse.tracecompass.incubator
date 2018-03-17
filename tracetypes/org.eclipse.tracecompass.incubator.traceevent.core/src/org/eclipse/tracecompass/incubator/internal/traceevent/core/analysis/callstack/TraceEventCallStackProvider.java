@@ -222,7 +222,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             break;
 
         case "X": //$NON-NLS-1$
-            Long duration = event.getContent().getFieldValue(Long.class, ITraceEventConstants.DURATION);
+            Number duration = event.getContent().getFieldValue(Number.class, ITraceEventConstants.DURATION);
             if (duration != null) {
                 handleComplete(event, ss, processName);
             }
@@ -393,9 +393,9 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         int processQuark = ss.getQuarkAbsoluteAndAdd(PROCESSES, currentProcessName);
         long startTime = event.getTimestamp().toNanos();
         long end = startTime;
-        Long duration = event.getContent().getFieldValue(Long.class, ITraceEventConstants.DURATION);
+        Number duration = event.getContent().getFieldValue(Number.class, ITraceEventConstants.DURATION);
         if (duration != null) {
-            end += Math.max(duration - 1, 0);
+            end += Math.max(duration.longValue() - 1, 0);
         }
         String threadName = getThreadName(event);
         long threadId = getThreadId(event);
