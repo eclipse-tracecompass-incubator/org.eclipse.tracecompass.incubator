@@ -151,7 +151,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
             goToCorrectStart(rafile);
             int lineCount = 0;
             int matches = 0;
-            String line = readNextEventString(() -> (char) rafile.read());
+            String line = readNextEventString(() -> rafile.read());
             while ((line != null) && (lineCount++ < MAX_LINES)) {
                 try {
                     TraceEventField field = TraceEventField.parseJson(line);
@@ -163,7 +163,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
                 }
 
                 confidence = MAX_CONFIDENCE * matches / lineCount;
-                line = readNextEventString(() -> (char) rafile.read());
+                line = readNextEventString(() -> rafile.read());
             }
             if (matches == 0) {
                 return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Most assuredly NOT a traceevent trace"); //$NON-NLS-1$
@@ -289,7 +289,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
                     if (!locationInfo.equals(fFileInput.getFilePointer())) {
                         fFileInput.seek(locationInfo);
                     }
-                    String nextJson = readNextEventString(() -> (char) fFileInput.read());
+                    String nextJson = readNextEventString(() -> fFileInput.read());
                     while (nextJson != null) {
                         TraceEventField field = TraceEventField.parseJson(nextJson);
                         if (field == null) {
@@ -299,7 +299,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
                             return new TraceEventEvent(this, context.getRank(), field);
                         }
                         parseMetadata(field);
-                        nextJson = readNextEventString(() -> (char) fFileInput.read());
+                        nextJson = readNextEventString(() -> fFileInput.read());
                     }
                 } catch (IOException e) {
                     Activator.getInstance().logError("Error parsing event", e); //$NON-NLS-1$
@@ -395,7 +395,7 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
          * @throws IOException
          *             out of chars to read
          */
-        char read() throws IOException;
+        int read() throws IOException;
     }
 
     /**
@@ -412,8 +412,8 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
         int scope = -1;
         int arrScope = 0;
         boolean inQuotes = false;
-        char elem = parser.read();
-        while (elem != (char) -1) {
+        int elem = parser.read();
+        while (elem != -1) {
             if (elem == '"') {
                 inQuotes = !inQuotes;
             } else {
@@ -433,13 +433,13 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
                     if (scope > 0) {
                         scope--;
                     } else {
-                        sb.append(elem);
+                        sb.append((char) elem);
                         return sb.toString();
                     }
                 }
             }
             if (scope >= 0) {
-                sb.append(elem);
+                sb.append((char) elem);
             }
             elem = parser.read();
         }
