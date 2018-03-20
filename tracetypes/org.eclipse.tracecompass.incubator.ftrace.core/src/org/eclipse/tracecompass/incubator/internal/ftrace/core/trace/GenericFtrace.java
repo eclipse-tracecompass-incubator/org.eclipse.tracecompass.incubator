@@ -145,7 +145,13 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
                     if (!locationInfo.equals(fFileInput.getFilePointer())) {
                         fFileInput.seek(locationInfo);
                     }
-                    String nextLine = fFileInput.readLine();
+
+                    // Sometimes ftrace traces are contains comments starting with '#' between events
+                    String nextLine;
+                    do {
+                        nextLine = fFileInput.readLine();
+                    } while (nextLine != null && nextLine.startsWith(IGenericFtraceConstants.FTRACE_COMMENT_CHAR));
+
                     GenericFtraceField field = parseLine(nextLine);
                     if (field != null) {
                         return new GenericFtraceEvent(this, context.getRank(), field);

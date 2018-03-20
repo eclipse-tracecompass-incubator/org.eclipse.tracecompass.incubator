@@ -26,6 +26,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public interface IGenericFtraceConstants {
 
     /**
+     * Character that identifies a comment when at the start of a line
+     */
+    String FTRACE_COMMENT_CHAR = "#"; //$NON-NLS-1$
+
+    /**
      * Timestamp field name
      */
     String TIMESTAMP = "ts"; //$NON-NLS-1$

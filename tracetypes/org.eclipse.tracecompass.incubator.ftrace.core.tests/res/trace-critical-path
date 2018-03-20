@@ -1,0 +1,155 @@
+# tracer: nop
+#
+#                              _-----=> irqs-off
+#                             / _----=> need-resched
+#                            | / _---=> hardirq/softirq
+#                            || / _--=> preempt-depth
+#                            ||| /     delay
+#           TASK-PID   CPU#  ||||    TIMESTAMP  FUNCTION
+#              | |       |   ||||       |         |
+      Compositor-3487  [000] d.h. 26186.336630: irq_handler_entry: irq=28 name=radeon
+     Web Content-2711  [003] d... 26186.336632: sched_waking: comm=Timer pid=2745 prio=120 target_cpu=001
+     Web Content-2711  [003] d... 26186.336639: sched_wakeup: comm=Timer pid=2745 prio=120 target_cpu=001
+      Compositor-3487  [000] d.h. 26186.336653: irq_handler_exit: irq=28 ret=handled
+     gnome-shell-1746  [002] d... 26186.336659: sched_waking: comm=kworker/2:0H pid=24678 prio=100 target_cpu=002
+     gnome-shell-1746  [002] dN.. 26186.336661: sched_wakeup: comm=kworker/2:0H pid=24678 prio=100 target_cpu=002
+     gnome-shell-1746  [002] d... 26186.336663: sched_switch: prev_comm=gnome-shell prev_pid=1746 prev_prio=120 prev_state=R ==> next_comm=kworker/2:0H next_pid=24678 next_prio=100
+    kworker/2:0H-24678 [002] d... 26186.336680: sched_switch: prev_comm=kworker/2:0H prev_pid=24678 prev_prio=100 prev_state=D ==> next_comm=gnome-shell next_pid=1746 next_prio=120
+      Compositor-3487  [000] .... 26186.336703: hrtimer_init: hrtimer=ffffaf6e0126bd18 clockid=CLOCK_MONOTONIC mode=HRTIMER_MODE_ABS
+      Compositor-3487  [000] d... 26186.336705: hrtimer_start: hrtimer=ffffaf6e0126bd18 function=hrtimer_wakeup expires=26193635601343 softexpires=26193635551343
+      Compositor-3487  [000] d... 26186.336715: sched_switch: prev_comm=Compositor prev_pid=3487 prev_prio=120 prev_state=S ==> next_comm=swapper/0 next_pid=0 next_prio=120
+     Web Content-2711  [003] d... 26186.336716: sched_switch: prev_comm=Web Content prev_pid=2711 prev_prio=120 prev_state=S ==> next_comm=CompositorTileW next_pid=3490 next_prio=120
+          <idle>-0     [000] d... 26186.336771: sched_switch: prev_comm=swapper/0 prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=java next_pid=4555 next_prio=120
+ CompositorTileW-3490  [003] d... 26186.336819: sched_waking: comm=Compositor pid=3487 prio=120 target_cpu=000
+ CompositorTileW-3490  [003] d... 26186.336823: sched_wakeup: comm=Compositor pid=3487 prio=120 target_cpu=001
+ CompositorTileW-3490  [003] d... 26186.336832: sched_switch: prev_comm=CompositorTileW prev_pid=3490 prev_prio=120 prev_state=S ==> next_comm=swapper/3 next_pid=0 next_prio=120
+          <idle>-0     [003] d... 26186.336837: tick_stop: success=1 dependency=NONE
+          <idle>-0     [003] d... 26186.336837: hrtimer_cancel: hrtimer=ffff90949dd98620
+          <idle>-0     [003] d... 26186.336839: hrtimer_start: hrtimer=ffff90949dd98620 function=tick_sched_timer expires=26193999000000 softexpires=26193999000000
+            java-4555  [000] .... 26186.336874: hrtimer_init: hrtimer=ffffaf6e021efa70 clockid=CLOCK_MONOTONIC mode=HRTIMER_MODE_ABS
+            java-4555  [000] d... 26186.336875: hrtimer_start: hrtimer=ffffaf6e021efa70 function=hrtimer_wakeup expires=26193649953687 softexpires=26193649903687
+            java-4555  [000] d... 26186.336879: sched_switch: prev_comm=java prev_pid=4555 prev_prio=120 prev_state=S ==> next_comm=swapper/0 next_pid=0 next_prio=120
+          <idle>-0     [000] d.h. 26186.336971: hrtimer_cancel: hrtimer=ffff90949dc18620
+     gnome-shell-1746  [002] d.h. 26186.336971: hrtimer_cancel: hrtimer=ffff90949dd18620
+          <idle>-0     [000] d.h. 26186.336971: hrtimer_expire_entry: hrtimer=ffff90949dc18620 function=tick_sched_timer now=26193633001886
+     gnome-shell-1746  [002] d.h. 26186.336972: hrtimer_expire_entry: hrtimer=ffff90949dd18620 function=tick_sched_timer now=26193633001714
+          <idle>-0     [000] d.h. 26186.336974: softirq_raise: vec=1 [action=TIMER]
+          <idle>-0     [000] d.h. 26186.336974: softirq_raise: vec=9 [action=RCU]
+     gnome-shell-1746  [002] d.h. 26186.336974: softirq_raise: vec=1 [action=TIMER]
+     gnome-shell-1746  [002] d.h. 26186.336975: softirq_raise: vec=9 [action=RCU]
+          <idle>-0     [000] d.h. 26186.336975: hrtimer_expire_exit: hrtimer=ffff90949dc18620
+          <idle>-0     [000] d.h. 26186.336976: hrtimer_start: hrtimer=ffff90949dc18620 function=tick_sched_timer expires=26193634000000 softexpires=26193634000000
+          <idle>-0     [000] ..s. 26186.336977: softirq_entry: vec=1 [action=TIMER]
+          <idle>-0     [000] ..s. 26186.336978: softirq_exit: vec=1 [action=TIMER]
+          <idle>-0     [000] ..s. 26186.336978: softirq_entry: vec=9 [action=RCU]
+     gnome-shell-1746  [002] d.h. 26186.336979: hrtimer_expire_exit: hrtimer=ffff90949dd18620
+          <idle>-0     [000] ..s. 26186.336979: softirq_exit: vec=9 [action=RCU]
+     gnome-shell-1746  [002] d.h. 26186.336979: hrtimer_start: hrtimer=ffff90949dd18620 function=tick_sched_timer expires=26193634000000 softexpires=26193634000000
+     gnome-shell-1746  [002] ..s. 26186.336981: softirq_entry: vec=1 [action=TIMER]
+     gnome-shell-1746  [002] ..s. 26186.336982: softirq_exit: vec=1 [action=TIMER]
+     gnome-shell-1746  [002] ..s. 26186.336983: softirq_entry: vec=9 [action=RCU]
+     gnome-shell-1746  [002] ..s. 26186.336984: softirq_exit: vec=9 [action=RCU]
+          <idle>-0     [000] d.h. 26186.337335: irq_handler_entry: irq=28 name=radeon
+          <idle>-0     [000] d.h. 26186.337346: sched_waking: comm=kworker/2:0H pid=24678 prio=100 target_cpu=002
+          <idle>-0     [000] d.h. 26186.337351: sched_wakeup: comm=kworker/2:0H pid=24678 prio=100 target_cpu=002
+          <idle>-0     [000] d.h. 26186.337352: irq_handler_exit: irq=28 ret=handled
+     gnome-shell-1746  [002] d... 26186.337355: sched_switch: prev_comm=gnome-shell prev_pid=1746 prev_prio=120 prev_state=R ==> next_comm=kworker/2:0H next_pid=24678 next_prio=100
+          <idle>-0     [003] dN.. 26186.337374: hrtimer_cancel: hrtimer=ffff90949dd98620
+          <idle>-0     [003] dN.. 26186.337376: hrtimer_start: hrtimer=ffff90949dd98620 function=tick_sched_timer expires=26193634000000 softexpires=26193634000000
+          <idle>-0     [003] d... 26186.337380: sched_switch: prev_comm=swapper/3 prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=Chrome_IOThread next_pid=3470 next_prio=120
+ Chrome_IOThread-3470  [003] d... 26186.337384: hrtimer_cancel: hrtimer=ffffaf6e0ba2bde0
+    kworker/2:0H-24678 [002] d... 26186.337384: sched_switch: prev_comm=kworker/2:0H prev_pid=24678 prev_prio=100 prev_state=t ==> next_comm=gnome-shell next_pid=1746 next_prio=120
+          <idle>-0     [000] d... 26186.337404: sched_switch: prev_comm=swapper/0 prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=spotify next_pid=3483 next_prio=120
+         spotify-3483  [000] d... 26186.337410: hrtimer_cancel: hrtimer=ffffaf6e01003d18
+ Chrome_IOThread-3470  [003] d... 26186.337458: sched_waking: comm=spotify pid=3450 prio=120 target_cpu=002
+         spotify-3483  [000] .... 26186.337460: hrtimer_init: hrtimer=ffffaf6e01003d18 clockid=CLOCK_MONOTONIC mode=HRTIMER_MODE_ABS
+         spotify-3483  [000] d... 26186.337462: hrtimer_start: hrtimer=ffffaf6e01003d18 function=hrtimer_wakeup expires=26193648909798 softexpires=26193648859798
+ Chrome_IOThread-3470  [003] d... 26186.337464: sched_wakeup: comm=spotify pid=3450 prio=120 target_cpu=001
+         spotify-3483  [000] d... 26186.337466: sched_switch: prev_comm=spotify prev_pid=3483 prev_prio=120 prev_state=S ==> next_comm=swapper/0 next_pid=0 next_prio=120
+ Chrome_IOThread-3470  [003] .... 26186.337478: hrtimer_init: hrtimer=ffffaf6e0ba2bde0 clockid=CLOCK_MONOTONIC mode=HRTIMER_MODE_ABS
+ Chrome_IOThread-3470  [003] d... 26186.337478: hrtimer_start: hrtimer=ffffaf6e0ba2bde0 function=hrtimer_wakeup expires=26251227044064 softexpires=26251169508065
+ Chrome_IOThread-3470  [003] d... 26186.337482: sched_switch: prev_comm=Chrome_IOThread prev_pid=3470 prev_prio=120 prev_state=S ==> next_comm=swapper/3 next_pid=0 next_prio=120
+          <idle>-0     [003] d... 26186.337488: tick_stop: success=1 dependency=NONE
+          <idle>-0     [003] d... 26186.337489: hrtimer_cancel: hrtimer=ffff90949dd98620
+          <idle>-0     [003] d... 26186.337490: hrtimer_start: hrtimer=ffff90949dd98620 function=tick_sched_timer expires=26193999000000 softexpires=26193999000000
+          <idle>-0     [003] dN.. 26186.337831: hrtimer_cancel: hrtimer=ffff90949dd98620
+          <idle>-0     [003] dN.. 26186.337833: hrtimer_start: hrtimer=ffff90949dd98620 function=tick_sched_timer expires=26193634000000 softexpires=26193634000000
+          <idle>-0     [003] d... 26186.337837: sched_switch: prev_comm=swapper/3 prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=Chrome_ChildIOT next_pid=3485 next_prio=120
+ Chrome_ChildIOT-3485  [003] d... 26186.337882: sched_waking: comm=Compositor pid=3487 prio=120 target_cpu=001
+ Chrome_ChildIOT-3485  [003] d... 26186.337889: sched_wakeup: comm=Compositor pid=3487 prio=120 target_cpu=000
+ Chrome_ChildIOT-3485  [003] d... 26186.337901: sched_switch: prev_comm=Chrome_ChildIOT prev_pid=3485 prev_prio=120 prev_state=S ==> next_comm=swapper/3 next_pid=0 next_prio=120
+          <idle>-0     [000] d... 26186.337902: sched_switch: prev_comm=swapper/0 prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=Compositor next_pid=3487 next_prio=120
+      Compositor-3487  [000] d... 26186.337904: hrtimer_cancel: hrtimer=ffffaf6e0126bd18
+          <idle>-0     [003] d... 26186.337906: tick_stop: success=1 dependency=NONE
+          <idle>-0     [003] d... 26186.337907: hrtimer_cancel: hrtimer=ffff90949dd98620
+          <idle>-0     [003] d... 26186.337908: hrtimer_start: hrtimer=ffff90949dd98620 function=tick_sched_timer expires=26193999000000 softexpires=26193999000000
+      Compositor-3487  [000] d... 26186.337949: sched_waking: comm=spotify pid=3483 prio=120 target_cpu=000
+      Compositor-3487  [000] d... 26186.337955: sched_wakeup: comm=spotify pid=3483 prio=120 target_cpu=003
+     gnome-shell-1746  [002] d.h. 26186.337970: hrtimer_cancel: hrtimer=ffff90949dd18620
+      Compositor-3487  [000] d.h. 26186.337971: hrtimer_cancel: hrtimer=ffff90949dc18620
+     gnome-shell-1746  [002] d.h. 26186.337972: hrtimer_expire_entry: hrtimer=ffff90949dd18620 function=tick_sched_timer now=26193634001389
+      Compositor-3487  [000] d.h. 26186.337972: hrtimer_expire_entry: hrtimer=ffff90949dc18620 function=tick_sched_timer now=26193634001564
+     gnome-shell-1746  [002] d.h. 26186.337973: softirq_raise: vec=1 [action=TIMER]
+     gnome-shell-1746  [002] d.h. 26186.337973: softirq_raise: vec=9 [action=RCU]
+      Compositor-3487  [000] d.h. 26186.337974: softirq_raise: vec=1 [action=TIMER]
+          <idle>-0     [003] dN.. 26186.337976: hrtimer_cancel: hrtimer=ffff90949dd98620
+     gnome-shell-1746  [002] d.h. 26186.337976: hrtimer_expire_exit: hrtimer=ffff90949dd18620
+     gnome-shell-1746  [002] d.h. 26186.337977: hrtimer_start: hrtimer=ffff90949dd18620 function=tick_sched_timer expires=26193635000000 softexpires=26193635000000
+     gnome-shell-1746  [002] d.h. 26186.337977: hrtimer_cancel: hrtimer=ffffaf6e00d93a70
+     gnome-shell-1746  [002] d.h. 26186.337978: hrtimer_expire_entry: hrtimer=ffffaf6e00d93a70 function=hrtimer_wakeup now=26193634001389
+          <idle>-0     [003] dN.. 26186.337978: hrtimer_start: hrtimer=ffff90949dd98620 function=tick_sched_timer expires=26193635000000 softexpires=26193635000000
+     gnome-shell-1746  [002] d.h. 26186.337978: sched_waking: comm=Network Thread pid=3481 prio=120 target_cpu=002
+      Compositor-3487  [000] d.h. 26186.337979: hrtimer_expire_exit: hrtimer=ffff90949dc18620
+      Compositor-3487  [000] d.h. 26186.337979: hrtimer_start: hrtimer=ffff90949dc18620 function=tick_sched_timer expires=26193635000000 softexpires=26193635000000
+      Compositor-3487  [000] ..s. 26186.337981: softirq_entry: vec=1 [action=TIMER]
+      Compositor-3487  [000] ..s. 26186.337981: softirq_exit: vec=1 [action=TIMER]
+     gnome-shell-1746  [002] dNh. 26186.337982: sched_wakeup: comm=Network Thread pid=3481 prio=120 target_cpu=002
+     gnome-shell-1746  [002] dNh. 26186.337982: hrtimer_expire_exit: hrtimer=ffffaf6e00d93a70
+          <idle>-0     [003] d... 26186.337983: sched_switch: prev_comm=swapper/3 prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=spotify next_pid=3483 next_prio=120
+     gnome-shell-1746  [002] .Ns. 26186.337983: softirq_entry: vec=1 [action=TIMER]
+      Compositor-3487  [000] .... 26186.337983: hrtimer_init: hrtimer=ffffaf6e0126bd18 clockid=CLOCK_MONOTONIC mode=HRTIMER_MODE_ABS
+     gnome-shell-1746  [002] .Ns. 26186.337984: softirq_exit: vec=1 [action=TIMER]
+     gnome-shell-1746  [002] .Ns. 26186.337984: softirq_entry: vec=9 [action=RCU]
+      Compositor-3487  [000] d... 26186.337984: hrtimer_start: hrtimer=ffffaf6e0126bd18 function=hrtimer_wakeup expires=26193635601385 softexpires=26193635551385
+     gnome-shell-1746  [002] .Ns. 26186.337985: softirq_exit: vec=9 [action=RCU]
+         spotify-3483  [003] d... 26186.337986: hrtimer_cancel: hrtimer=ffffaf6e01003d18
+     gnome-shell-1746  [002] d... 26186.337988: sched_switch: prev_comm=gnome-shell prev_pid=1746 prev_prio=120 prev_state=R+ ==> next_comm=Network Thread next_pid=3481 next_prio=120
+      Compositor-3487  [000] d... 26186.337991: sched_switch: prev_comm=Compositor prev_pid=3487 prev_prio=120 prev_state=S ==> next_comm=swapper/0 next_pid=0 next_prio=120
+         spotify-3483  [003] .... 26186.338031: hrtimer_init: hrtimer=ffffaf6e01003d18 clockid=CLOCK_MONOTONIC mode=HRTIMER_MODE_ABS
+         spotify-3483  [003] d... 26186.338033: hrtimer_start: hrtimer=ffffaf6e01003d18 function=hrtimer_wakeup expires=26193648909267 softexpires=26193648859267
+         spotify-3483  [003] d... 26186.338043: sched_switch: prev_comm=spotify prev_pid=3483 prev_prio=120 prev_state=S ==> next_comm=swapper/3 next_pid=0 next_prio=120
+          <idle>-0     [003] d... 26186.338047: tick_stop: success=1 dependency=NONE
+          <idle>-0     [003] d... 26186.338048: hrtimer_cancel: hrtimer=ffff90949dd98620
+          <idle>-0     [003] d... 26186.338049: hrtimer_start: hrtimer=ffff90949dd98620 function=tick_sched_timer expires=26193999000000 softexpires=26193999000000
+  Network Thread-3481  [002] d... 26186.338675: sched_waking: comm=threaded-ml pid=3534 prio=120 target_cpu=002
+  Network Thread-3481  [002] d... 26186.338679: sched_wakeup: comm=threaded-ml pid=3534 prio=120 target_cpu=003
+          <idle>-0     [003] dN.. 26186.338703: hrtimer_cancel: hrtimer=ffff90949dd98620
+          <idle>-0     [003] dN.. 26186.338705: hrtimer_start: hrtimer=ffff90949dd98620 function=tick_sched_timer expires=26193635000000 softexpires=26193635000000
+          <idle>-0     [003] d... 26186.338710: sched_switch: prev_comm=swapper/3 prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=threaded-ml next_pid=3534 next_prio=120
+           <...>-3534  [003] d... 26186.338713: hrtimer_cancel: hrtimer=ffffaf6e0ad8ba70
+  Network Thread-3481  [002] d... 26186.338715: sched_switch: prev_comm=Network Thread prev_pid=3481 prev_prio=120 prev_state=S ==> next_comm=gnome-shell next_pid=1746 next_prio=120
+           <...>-3534  [003] d... 26186.338734: sched_waking: comm=pulseaudio pid=1806 prio=109 target_cpu=000
+           <...>-3534  [003] d... 26186.338739: sched_wakeup: comm=pulseaudio pid=1806 prio=109 target_cpu=000
+           <...>-3534  [003] .... 26186.338758: hrtimer_init: hrtimer=ffffaf6e0ad8ba70 clockid=CLOCK_MONOTONIC mode=HRTIMER_MODE_ABS
+           <...>-3534  [003] d... 26186.338759: hrtimer_start: hrtimer=ffffaf6e0ad8ba70 function=hrtimer_wakeup expires=26193990141325 softexpires=26193989786326
+          <idle>-0     [000] d... 26186.338762: sched_switch: prev_comm=swapper/0 prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=pulseaudio next_pid=1806 next_prio=109
+           <...>-3534  [003] d... 26186.338767: sched_switch: prev_comm=threaded-ml prev_pid=3534 prev_prio=120 prev_state=S ==> next_comm=swapper/3 next_pid=0 next_prio=120
+          <idle>-0     [003] d... 26186.338771: tick_stop: success=1 dependency=NONE
+          <idle>-0     [003] d... 26186.338772: hrtimer_cancel: hrtimer=ffff90949dd98620
+          <idle>-0     [003] d... 26186.338773: hrtimer_start: hrtimer=ffff90949dd98620 function=tick_sched_timer expires=26193999000000 softexpires=26193999000000
+           <...>-1806  [000] d... 26186.338828: sched_waking: comm=alsa-sink-ALC88 pid=1809 prio=94 target_cpu=001
+           <...>-1806  [000] d... 26186.338833: sched_wakeup: comm=alsa-sink-ALC88 pid=1809 prio=94 target_cpu=001
+           <...>-1806  [000] d... 26186.338851: sched_switch: prev_comm=pulseaudio prev_pid=1806 prev_prio=109 prev_state=S ==> next_comm=swapper/0 next_pid=0 next_prio=120
+     gnome-shell-1746  [002] d... 26186.338901: timer_start: timer=ffff90948efe4e40 function=delayed_work_timer_fn expires=4320860941 [timeout=10] cpu=2 idx=53 flags=I
+          <idle>-0     [000] d... 26186.338906: sched_switch: prev_comm=swapper/0 prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=pulseaudio next_pid=1806 next_prio=109
+           <...>-1806  [000] d... 26186.338926: sched_waking: comm=threaded-ml pid=3534 prio=120 target_cpu=003
+           <...>-1806  [000] d... 26186.338929: sched_wakeup: comm=threaded-ml pid=3534 prio=120 target_cpu=003
+          <idle>-0     [003] dN.. 26186.338951: hrtimer_cancel: hrtimer=ffff90949dd98620
+          <idle>-0     [003] dN.. 26186.338954: hrtimer_start: hrtimer=ffff90949dd98620 function=tick_sched_timer expires=26193635000000 softexpires=26193635000000
+          <idle>-0     [003] d... 26186.338958: sched_switch: prev_comm=swapper/3 prev_pid=0 prev_prio=120 prev_state=R ==> next_comm=threaded-ml next_pid=3534 next_prio=120
+           <...>-3534  [003] d... 26186.338960: hrtimer_cancel: hrtimer=ffffaf6e0ad8ba70
+           <...>-1806  [000] d... 26186.338962: sched_switch: prev_comm=pulseaudio prev_pid=1806 prev_prio=109 prev_state=S ==> next_comm=swapper/0 next_pid=0 next_prio=120
+           <...>-3534  [003] d.h. 26186.338970: hrtimer_cancel: hrtimer=ffff90949dd98620
+     gnome-shell-1746  [002] d.h. 26186.338970: hrtimer_cancel: hrtimer=ffff90949dd18620
+           <...>-3534  [003] d.h. 26186.338971: hrtimer_expire_entry: hrtimer=ffff90949dd98620 function=tick_sched_timer now=26193635001137
+     gnome-shell-1746  [002] d.h. 26186.338971: hrtimer_expire_entry: hrtimer=ffff90949dd18620 function=tick_sched_timer now=26193635001240
