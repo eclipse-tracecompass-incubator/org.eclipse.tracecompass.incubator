@@ -19,6 +19,7 @@ import java.util.WeakHashMap;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.analysis.os.linux.core.tid.TidAnalysisModule;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICpuTimeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ISamplingDataProvider;
@@ -98,6 +99,15 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
                 if (model instanceof CompositeHostModel) {
                     ((CompositeHostModel) model).setSamplingDataProvider(provider);
                 }
+            }
+        }
+
+        if (module instanceof KernelAnalysisModule) {
+            KernelAnalysisModule provider = (KernelAnalysisModule) module;
+            ITmfTrace trace = provider.getTrace();
+            if (trace != null) {
+                IHostModel model = ModelManager.getModelFor(trace.getHostId());
+                ((CompositeHostModel) model).setKernelModule(trace, provider);
             }
         }
     }
