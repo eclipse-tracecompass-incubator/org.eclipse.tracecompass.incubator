@@ -180,4 +180,10 @@ public final class CallStackEdge implements ISegment {
     public int getSizeOnDisk() {
         return BASE_SIZE + SafeByteBufferFactory.getStringSizeInBuffer(fSrc.getHost()) + SafeByteBufferFactory.getStringSizeInBuffer(fDst.getHost());
     }
+
+    @SuppressWarnings("nls")
+    @Override
+    public String toString() {
+        return "start=" + getStart() + ", end=" + getEnd() + ", source=" + fSrc + ", destination=" + fDst + ", id=" + fId;
+    }
 }
