@@ -13,10 +13,12 @@ import java.text.Format;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedCalledFunction;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
@@ -103,6 +105,38 @@ public class FlamegraphEvent extends TimeEvent {
             return ((AggregatedCalledFunction) callSite).getNbCalls();
         }
         return callSite.getLength();
+    }
+
+    /**
+     * Get the object with minimal duration in this aggregated call site.
+     *
+     * @return The minimal duration object, or <code>null</code> if no such object
+     *         exists
+     */
+    public @Nullable ICalledFunction getMinObject() {
+        AggregatedCallSite callSite = fCallSite;
+        // Return the number of calls if this is an instrumented function, otherwise,
+        // the length will be the number of samples
+        if (callSite instanceof AggregatedCalledFunction) {
+            return ((AggregatedCalledFunction) callSite).getFunctionStatistics().getDurationStatistics().getMinObject();
+        }
+        return null;
+    }
+
+    /**
+     * Get the object with maximum duration in this aggregated call site.
+     *
+     * @return The maximum duration object, or <code>null</code> if no such object
+     *         exists
+     */
+    public @Nullable ICalledFunction getMaxObject() {
+        AggregatedCallSite callSite = fCallSite;
+        // Return the number of calls if this is an instrumented function, otherwise,
+        // the length will be the number of samples
+        if (callSite instanceof AggregatedCalledFunction) {
+            return ((AggregatedCalledFunction) callSite).getFunctionStatistics().getDurationStatistics().getMaxObject();
+        }
+        return null;
     }
 
 }

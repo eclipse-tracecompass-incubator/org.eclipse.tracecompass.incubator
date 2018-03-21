@@ -65,8 +65,10 @@ import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescr
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraphGroupBy;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.Activator;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
@@ -74,6 +76,7 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
 import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -475,30 +478,28 @@ public class FlameGraphView extends TmfView {
         if (selection instanceof IStructuredSelection) {
             for (Object object : ((IStructuredSelection) selection).toList()) {
                 if (object instanceof FlamegraphEvent) {
-//                    final FlamegraphEvent flamegraphEvent = (FlamegraphEvent) object;
-//                    menuManager.add(new Action(Messages.FlameGraphView_GotoMaxDuration) {
-//                        @Override
-//                        public void run() {
-//                            ISegment maxSeg = flamegraphEvent.getStatistics().getDurationStatistics().getMaxObject();
-//                            if (maxSeg == null) {
-//                                return;
-//                            }
-//                            TmfSelectionRangeUpdatedSignal sig = new TmfSelectionRangeUpdatedSignal(this, TmfTimestamp.fromNanos(maxSeg.getStart()), TmfTimestamp.fromNanos(maxSeg.getEnd()));
-//                            broadcast(sig);
-//                        }
-//                    });
-//
-//                    menuManager.add(new Action(Messages.FlameGraphView_GotoMinDuration) {
-//                        @Override
-//                        public void run() {
-//                            ISegment minSeg = flamegraphEvent.getStatistics().getDurationStatistics().getMinObject();
-//                            if (minSeg == null) {
-//                                return;
-//                            }
-//                            TmfSelectionRangeUpdatedSignal sig = new TmfSelectionRangeUpdatedSignal(this, TmfTimestamp.fromNanos(minSeg.getStart()), TmfTimestamp.fromNanos(minSeg.getEnd()));
-//                            broadcast(sig);
-//                        }
-//                    });
+                    final FlamegraphEvent flamegraphEvent = (FlamegraphEvent) object;
+                    final ICalledFunction maxSeg = flamegraphEvent.getMaxObject();
+                    if (maxSeg != null) {
+                        menuManager.add(new Action(Messages.FlameGraphView_GotoMaxDuration) {
+                            @Override
+                            public void run() {
+                                TmfSelectionRangeUpdatedSignal sig = new TmfSelectionRangeUpdatedSignal(this, TmfTimestamp.fromNanos(maxSeg.getStart()), TmfTimestamp.fromNanos(maxSeg.getEnd()), fTrace);
+                                broadcast(sig);
+                            }
+                        });
+                    }
+
+                    final ICalledFunction minSeg = flamegraphEvent.getMinObject();
+                    if (minSeg != null) {
+                        menuManager.add(new Action(Messages.FlameGraphView_GotoMinDuration) {
+                            @Override
+                            public void run() {
+                                TmfSelectionRangeUpdatedSignal sig = new TmfSelectionRangeUpdatedSignal(this, TmfTimestamp.fromNanos(minSeg.getStart()), TmfTimestamp.fromNanos(minSeg.getEnd()), fTrace);
+                                broadcast(sig);
+                            }
+                        });
+                    }
                 }
             }
         }
