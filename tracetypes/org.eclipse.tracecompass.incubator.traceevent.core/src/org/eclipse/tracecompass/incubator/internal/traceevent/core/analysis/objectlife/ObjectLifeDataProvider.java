@@ -11,8 +11,8 @@ package org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.obj
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -85,18 +85,18 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         int quark = quarks.iterator().next();
 
         try {
-            Map<String, String> retMap = new LinkedHashMap<>(1);
-            List<ITmfStateInterval> full = ss.queryFullState(start);
-            Object object = full.get(quark).getValue();
+            Map<String, String> retMap = null;
+            ITmfStateInterval state = ss.querySingleState(start, quark);
+            Object object = state.getValue();
             if (object instanceof String) {
-                retMap.put("value", object.toString()); //$NON-NLS-1$
+                retMap = Collections.singletonMap("value", object.toString()); //$NON-NLS-1$
+            } else {
+                retMap = Collections.emptyMap();
             }
             return new TmfModelResponse<>(retMap, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
         } catch (StateSystemDisposedException e) {
-            // do nothing
+            return new TmfModelResponse<>(null, ITmfResponse.Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
         }
-
-        return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
     @Override
