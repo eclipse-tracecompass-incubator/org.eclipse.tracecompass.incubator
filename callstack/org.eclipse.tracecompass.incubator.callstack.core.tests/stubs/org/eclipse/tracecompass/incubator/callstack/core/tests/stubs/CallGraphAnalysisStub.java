@@ -9,8 +9,6 @@
 
 package org.eclipse.tracecompass.incubator.callstack.core.tests.stubs;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -78,9 +76,9 @@ public class CallGraphAnalysisStub extends CallGraphAnalysis {
         }
 
         @Override
-        public Collection<CallStackSeries> getCallStackSeries() {
+        public @Nullable CallStackSeries getCallStackSeries() {
             List<String @NonNull []> patterns = fPatterns;
-            return Collections.singleton(new CallStackSeries(fSs, patterns == null ? PATTERNS : patterns, 0, "", new CallStackHostUtils.TraceHostIdResolver(getTrace()), new CallStackSeries.AttributeValueThreadResolver(1))); //$NON-NLS-1$
+            return new CallStackSeries(fSs, patterns == null ? PATTERNS : patterns, 0, "", new CallStackHostUtils.TraceHostIdResolver(getTrace()), new CallStackSeries.AttributeValueThreadResolver(1)); //$NON-NLS-1$
         }
 
         @Override
@@ -130,7 +128,11 @@ public class CallGraphAnalysisStub extends CallGraphAnalysis {
      * @return The return value of the iteration
      */
     public boolean iterate() {
-        return iterateOverCallstackSerie(fCsProvider.getCallStackSeries().iterator().next(), ModelManager.getModelFor(""), getCallGraph(), 0, Long.MAX_VALUE, new NullProgressMonitor());
+        CallStackSeries callStackSeries = fCsProvider.getCallStackSeries();
+        if (callStackSeries == null) {
+            throw new NullPointerException();
+        }
+        return iterateOverCallstackSerie(callStackSeries, ModelManager.getModelFor(""), getCallGraph(), 0, Long.MAX_VALUE, new NullProgressMonitor());
     }
 
     @Override

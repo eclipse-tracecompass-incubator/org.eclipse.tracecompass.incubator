@@ -65,7 +65,7 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
 
     private static final List<String[]> PATTERNS = ImmutableList.of(DEFAULT_PROCESSES_PATTERN, DEFAULT_THREADS_PATTERN);
 
-    private @Nullable Collection<CallStackSeries> fCallStacks;
+    private @Nullable CallStackSeries fCallStacks;
 
     private final CallGraphAnalysis fCallGraph;
 
@@ -102,15 +102,15 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     }
 
     @Override
-    public Collection<CallStackSeries> getCallStackSeries() {
-        Collection<CallStackSeries> callstacks = fCallStacks;
+    public @Nullable CallStackSeries getCallStackSeries() {
+        CallStackSeries callstacks = fCallStacks;
         if (callstacks == null) {
             ITmfStateSystem ss = getStateSystem();
             ITmfTrace trace = getTrace();
             if (ss == null || trace == null) {
-                return Collections.emptySet();
+                return null;
             }
-            callstacks = Collections.singleton(new CallStackSeries(ss, getPatterns(), 0, "", getCallStackHostResolver(trace), getCallStackTidResolver())); //$NON-NLS-1$
+            callstacks = new CallStackSeries(ss, getPatterns(), 0, "", getCallStackHostResolver(trace), getCallStackTidResolver()); //$NON-NLS-1$
             fCallStacks = callstacks;
         }
         return callstacks;
@@ -253,11 +253,11 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
      */
     @Override
     public @Nullable ISegmentStore<ISegment> getSegmentStore() {
-        Collection<CallStackSeries> callStacks = getCallStackSeries();
-        if (callStacks.isEmpty()) {
+        CallStackSeries series = getCallStackSeries();
+        if (series == null) {
             return null;
         }
-        return callStacks.iterator().next();
+        return series;
     }
 
     @Override

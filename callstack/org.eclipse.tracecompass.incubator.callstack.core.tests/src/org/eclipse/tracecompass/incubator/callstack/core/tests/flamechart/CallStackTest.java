@@ -54,9 +54,7 @@ public class CallStackTest extends CallStackTestBase {
         CallStackAnalysisStub module = getModule();
         assertNotNull(module);
 
-        Collection<CallStackSeries> callStacks = module.getCallStackSeries();
-        assertEquals(1, callStacks.size());
-        CallStackSeries callstack = callStacks.iterator().next();
+        CallStackSeries callstack = module.getCallStackSeries();
         assertNotNull(callstack);
 
         Collection<ICallStackElement> processes = callstack.getRootElements();
@@ -241,9 +239,7 @@ public class CallStackTest extends CallStackTestBase {
         CallStackAnalysisStub module = getModule();
         assertNotNull(module);
 
-        Collection<CallStackSeries> callStacks = module.getCallStackSeries();
-        assertEquals(1, callStacks.size());
-        CallStackSeries callstack = callStacks.iterator().next();
+        CallStackSeries callstack = module.getCallStackSeries();
         assertNotNull(callstack);
 
         Collection<ICallStackElement> processes = callstack.getRootElements();

@@ -14,14 +14,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.tracecompass.common.core.StreamUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
@@ -139,7 +137,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
             IFlameChartProvider callstackModule = (IFlameChartProvider) module;
             IHostModel model = ModelManager.getModelFor(callstackModule.getHostId());
 
-            for (CallStackSeries callstack : callstackModule.getCallStackSeries()) {
+            CallStackSeries callstack = callstackModule.getCallStackSeries();
+            if (callstack != null) {
                 long time0 = range.getStartTime().toNanos();
                 long time1 = range.getEndTime().toNanos();
                 long start = Math.min(time0, time1);
@@ -252,14 +251,14 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
      *
      * @return The collection of callstack series
      */
-    public Collection<CallStackSeries> getSeries() {
-        List<CallStackSeries> series = new ArrayList<>();
+    public @Nullable CallStackSeries getSeries() {
+        CallStackSeries series = null;
         for (IAnalysisModule dependent : getDependentAnalyses()) {
             if (!(dependent instanceof IFlameChartProvider)) {
                 continue;
             }
             IFlameChartProvider csProvider = (IFlameChartProvider) dependent;
-            series.addAll(csProvider.getCallStackSeries());
+            series = csProvider.getCallStackSeries();
         }
         return series;
     }
@@ -283,10 +282,16 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
 
     @Override
     public Collection<ICallStackGroupDescriptor> getGroupDescriptors() {
-        return StreamUtils.getStream(getDependentAnalyses())
-                .flatMap(m -> StreamUtils.getStream(((IFlameChartProvider) m).getCallStackSeries()))
-                .map(CallStackSeries::getRootGroup)
-                .collect(Collectors.toList());
+        List<ICallStackGroupDescriptor> descriptors = new ArrayList<>();
+        for (IAnalysisModule module : getDependentAnalyses()) {
+            if (module instanceof IFlameChartProvider) {
+                CallStackSeries serie = ((IFlameChartProvider) module).getCallStackSeries();
+                if (serie != null) {
+                    descriptors.add(serie.getRootGroup());
+                }
+            }
+        }
+        return descriptors;
     }
 
     @Override

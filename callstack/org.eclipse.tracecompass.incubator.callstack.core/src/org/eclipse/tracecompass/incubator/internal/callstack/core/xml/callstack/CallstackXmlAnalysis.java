@@ -33,6 +33,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdResolver;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.xml.callstack.CallstackXmlModuleHelper.ISubModuleHelper;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
@@ -48,8 +49,6 @@ import org.eclipse.tracecompass.tmf.core.statesystem.ITmfAnalysisModuleWithState
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  *
@@ -61,7 +60,7 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
     private final Path fSourceFile;
     private final ISubModuleHelper fHelper;
     private @Nullable IAnalysisModule fModule = null;
-    private @Nullable Collection<CallStackSeries> fCallStacks = null;
+    private @Nullable CallStackSeries fCallStacks = null;
     private final CallGraphAnalysis fCallGraph;
 
     private final ListenerList fListeners = new ListenerList(ListenerList.IDENTITY);
@@ -82,85 +81,84 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
     }
 
     @Override
-    public Collection<CallStackSeries> getCallStackSeries() {
-        Collection<CallStackSeries> callstacks = fCallStacks;
-        if (callstacks == null) {
+    public @Nullable CallStackSeries getCallStackSeries() {
+        CallStackSeries series = fCallStacks;
+        if (series == null) {
             IAnalysisModule module = getAnalysisModule();
             if (!(module instanceof ITmfAnalysisModuleWithStateSystems)) {
-                return Collections.EMPTY_SET;
+                return null;
             }
             Iterator<@NonNull ITmfStateSystem> stateSystems = ((ITmfAnalysisModuleWithStateSystems) module).getStateSystems().iterator();
             if (!stateSystems.hasNext()) {
-                return Collections.EMPTY_SET;
+                return null;
             }
             ITmfStateSystem ss = stateSystems.next();
             Path xmlFile = fSourceFile;
             final String pathString = xmlFile.toString();
             Element doc = TmfXmlUtils.getElementInFile(pathString, CallstackXmlStrings.CALLSTACK, getId());
             if (doc == null) {
-                fCallStacks = Collections.EMPTY_SET;
-                return Collections.EMPTY_SET;
+                fCallStacks = null;
+                return null;
             }
 
             /* parser for defined Fields */
-            NodeList callstackNodes = doc.getElementsByTagName(CallstackXmlStrings.CALLSTACK_GROUP);
-            NodeList childNodes = doc.getChildNodes();
-            for (int i = 0; i<childNodes.getLength(); i++) {
-                Node item = childNodes.item(i);
-                System.out.println(item.getNodeName());
+            List<Element> callStackElements = TmfXmlUtils.getChildElements(doc, CallstackXmlStrings.CALLSTACK_GROUP);
+            if (callStackElements.size() > 1) {
+                Activator.getInstance().logWarning("More than one callstack series defined. Only the first one will be displayed"); //$NON-NLS-1$
+            } else if (callStackElements.isEmpty()) {
+                fCallStacks = null;
+                return null;
             }
-            callstacks = new ArrayList<>();
-            for (int i = 0; i < callstackNodes.getLength(); i++) {
-                Element element = (Element) callstackNodes.item(i);
-                List<String[]> patterns = new ArrayList<>();
-                for (Element child : TmfXmlUtils.getChildElements(element, CallstackXmlStrings.CALLSTACK_LEVEL)) {
-                    String attribute = child.getAttribute(CallstackXmlStrings.CALLSTACK_PATH);
-                    patterns.add(attribute.split("/")); //$NON-NLS-1$
-                }
+            Element callStackElement = callStackElements.get(0);
 
-                // Build the thread resolver
-                List<Element> childElements = TmfXmlUtils.getChildElements(element, CallstackXmlStrings.CALLSTACK_THREAD);
-                IThreadIdResolver resolver = null;
-                if (childElements.size() > 0) {
-                    Element threadElement = childElements.get(0);
-                    String attribute = threadElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADCPU);
-                    if (!attribute.isEmpty()) {
-                        resolver = new CallStackSeries.CpuResolver(attribute.split("/")); //$NON-NLS-1$
-                    } else {
-                        attribute = threadElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL);
-                        if (!attribute.isEmpty()) {
-                            String type = threadElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL_TYPE);
-                            if (type.equals(CallstackXmlStrings.CALLSTACK_THREADLEVEL_VALUE)) {
-                                resolver = new CallStackSeries.AttributeValueThreadResolver(Integer.valueOf(attribute));
-                            } else {
-                                resolver = new CallStackSeries.AttributeNameThreadResolver(Integer.valueOf(attribute));
-                            }
-                        }
-                    }
-                }
+            List<String[]> patterns = new ArrayList<>();
+            for (Element child : TmfXmlUtils.getChildElements(callStackElement, CallstackXmlStrings.CALLSTACK_LEVEL)) {
+                String attribute = child.getAttribute(CallstackXmlStrings.CALLSTACK_PATH);
+                patterns.add(attribute.split("/")); //$NON-NLS-1$
+            }
 
-                // Build the host resolver
-                childElements = TmfXmlUtils.getChildElements(element, CallstackXmlStrings.CALLSTACK_HOST);
-                IHostIdResolver hostResolver = null;
-                if (childElements.size() > 0) {
-                    Element hostElement = childElements.get(0);
-                    String attribute = hostElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL);
+            // Build the thread resolver
+            List<Element> childElements = TmfXmlUtils.getChildElements(callStackElement, CallstackXmlStrings.CALLSTACK_THREAD);
+            IThreadIdResolver resolver = null;
+            if (childElements.size() > 0) {
+                Element threadElement = childElements.get(0);
+                String attribute = threadElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADCPU);
+                if (!attribute.isEmpty()) {
+                    resolver = new CallStackSeries.CpuResolver(attribute.split("/")); //$NON-NLS-1$
+                } else {
+                    attribute = threadElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL);
                     if (!attribute.isEmpty()) {
-                        String type = hostElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL_TYPE);
+                        String type = threadElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL_TYPE);
                         if (type.equals(CallstackXmlStrings.CALLSTACK_THREADLEVEL_VALUE)) {
-                            hostResolver = new CallStackHostUtils.AttributeValueHostResolver(Integer.valueOf(attribute));
+                            resolver = new CallStackSeries.AttributeValueThreadResolver(Integer.valueOf(attribute));
                         } else {
-                            hostResolver = new CallStackHostUtils.AttributeNameHostResolver(Integer.valueOf(attribute));
+                            resolver = new CallStackSeries.AttributeNameThreadResolver(Integer.valueOf(attribute));
                         }
                     }
                 }
-                hostResolver = hostResolver == null ? new CallStackHostUtils.TraceHostIdResolver(Objects.requireNonNull(getTrace())) : hostResolver;
-
-                callstacks.add(new CallStackSeries(ss, patterns, 0, element.getAttribute(TmfXmlStrings.NAME), hostResolver, resolver));
             }
-            fCallStacks = callstacks;
+
+            // Build the host resolver
+            childElements = TmfXmlUtils.getChildElements(callStackElement, CallstackXmlStrings.CALLSTACK_HOST);
+            IHostIdResolver hostResolver = null;
+            if (childElements.size() > 0) {
+                Element hostElement = childElements.get(0);
+                String attribute = hostElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL);
+                if (!attribute.isEmpty()) {
+                    String type = hostElement.getAttribute(CallstackXmlStrings.CALLSTACK_THREADLEVEL_TYPE);
+                    if (type.equals(CallstackXmlStrings.CALLSTACK_THREADLEVEL_VALUE)) {
+                        hostResolver = new CallStackHostUtils.AttributeValueHostResolver(Integer.valueOf(attribute));
+                    } else {
+                        hostResolver = new CallStackHostUtils.AttributeNameHostResolver(Integer.valueOf(attribute));
+                    }
+                }
+            }
+            hostResolver = hostResolver == null ? new CallStackHostUtils.TraceHostIdResolver(Objects.requireNonNull(getTrace())) : hostResolver;
+
+            series = new CallStackSeries(ss, patterns, 0, callStackElement.getAttribute(TmfXmlStrings.NAME), hostResolver, resolver);
+            fCallStacks = series;
         }
-        return callstacks;
+        return series;
     }
 
     @Override
@@ -327,11 +325,11 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
 
     @Override
     public @Nullable ISegmentStore<ISegment> getSegmentStore() {
-        Collection<CallStackSeries> series = getCallStackSeries();
-        if (series.isEmpty()) {
+        CallStackSeries series = getCallStackSeries();
+        if (series == null) {
             return null;
         }
-        return series.iterator().next();
+        return series;
     }
 
     /**

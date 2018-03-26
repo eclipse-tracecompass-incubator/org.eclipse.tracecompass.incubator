@@ -18,7 +18,6 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
@@ -56,9 +55,8 @@ public class CallStackStateSystemTest extends CallStackTestBase {
         assertNotNull(module);
 
         // There should be only 1 callstack series
-        Collection<CallStackSeries> callStacks = module.getCallStackSeries();
-        assertEquals(1, callStacks.size());
-        CallStackSeries callstack = callStacks.iterator().next();
+        CallStackSeries callstack = module.getCallStackSeries();
+        assertNotNull(callstack);
 
         // Get the patterns for each level of the callstack
         List<String[]> patterns = module.getPatterns();
@@ -95,9 +93,8 @@ public class CallStackStateSystemTest extends CallStackTestBase {
         assertNotNull(module);
 
         // There should be 1 callstack series
-        Collection<CallStackSeries> callStacks = module.getCallStackSeries();
-        assertEquals(1, callStacks.size());
-        CallStackSeries callstack = callStacks.iterator().next();
+        CallStackSeries callstack = module.getCallStackSeries();
+        assertNotNull(callstack);
 
         ITmfStateSystem ss = module.getStateSystem();
         assertNotNull(ss);

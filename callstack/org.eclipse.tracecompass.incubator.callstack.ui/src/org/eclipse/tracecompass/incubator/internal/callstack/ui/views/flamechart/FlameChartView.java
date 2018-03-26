@@ -570,8 +570,8 @@ public class FlameChartView extends AbstractTimeGraphView {
         setEndTime(getEndTime() == SWT.DEFAULT ? end + 1 : Math.max(getEndTime(), end + 1));
 
         Map<ITmfTrace, TraceEntry> traceEntryMap = new HashMap<>();
-        Collection<CallStackSeries> callStacks = csProvider.getCallStackSeries();
-        if (callStacks.isEmpty()) {
+        CallStackSeries callstack = csProvider.getCallStackSeries();
+        if (callstack == null) {
             return;
         }
 
@@ -585,16 +585,9 @@ public class FlameChartView extends AbstractTimeGraphView {
             traceEntry.updateEndTime(end);
         }
 
-        for (CallStackSeries callstack : callStacks) {
-            // If there is more than one callstack objects in the analysis
-            TimeGraphEntry callStackRootEntry = traceEntry;
-            if (callStacks.size() > 1) {
-                callStackRootEntry = new TimeGraphEntry(callstack.getName(), start, end + 1);
-                traceEntry.addChild(callStackRootEntry);
-            }
-            for (ICallStackElement element : callstack.getRootElements()) {
-                processCallStackElement(symbolProviders, element, callStackRootEntry);
-            }
+        TimeGraphEntry callStackRootEntry = traceEntry;
+        for (ICallStackElement element : callstack.getRootElements()) {
+            processCallStackElement(symbolProviders, element, callStackRootEntry);
         }
         final long entryStart = getStartTime();
         final long entryEnd = getEndTime();

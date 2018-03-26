@@ -9,8 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.callstack.core.instrumented;
 
-import java.util.Collection;
-
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.ISegmentStoreProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
@@ -25,11 +24,11 @@ import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 public interface IFlameChartProvider extends IAnalysisModule, ISegmentStoreProvider {
 
     /**
-     * Get all the callstacks provided by this analysis.
+     * Get the callstacks series provided by this analysis.
      *
-     * @return A collection of call stacks
+     * @return The callstack series or null if it is not available yet
      */
-    Collection<CallStackSeries> getCallStackSeries();
+    @Nullable CallStackSeries getCallStackSeries();
 
     /**
      * Get the ID of the host this callstack provider is for
