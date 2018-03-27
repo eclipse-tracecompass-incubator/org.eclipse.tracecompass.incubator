@@ -1,0 +1,73 @@
+
+= Trace Server =
+
+The Trace Server is a prototype implementation of the [https://theia-ide.github.io/trace-server-protocol/ Trace Server Protocol].
+It was built to decouple the front-end and back-end of Trace Compass and allow visualization of traces which are stored and analyzed on a remote machine.
+
+== Starting the Trace Server ==
+=== From Eclipse ===
+Open '''traceserver.product''' and launch it as an Eclipse application.
+
+=== From the Command Line ===
+* Build the incubator from the command line:
+   mvn clean install
+
+* The built product should be found at:
+   trace-server/org.eclipse.tracecompass.incubator.trace.server.product/target/products/traceserver/linux/gtk/x86_64/trace-compass-server/tracecompass-server
+
+=== Failure to start ===
+* Try resetting the product run configuration in Eclipse.
+
+== Querying the Trace Server ==
+The Trace Server is ready to query once the following line is logged:
+   Server:app thread - org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id.0: Started @1970ms
+
+The Trace Server can be queried via any http client (curl, Postman, Jersey client). By default it's url will be:
+   http://localhost:8080
+
+
+== Architecture ==
+The Trace Server combines an Eclipse RCP with the backend program from Trace Compass and a Jetty server / servlet engine which runs the Jersey services which expose the relevant Trace Compass APIs as a REST protocol.
+
+=== Available Services ===
+The current implementation of the Server exposes 5 services:
+* Trace Manager Service: to import and open and manage traces on the server's file system
+* Experiment Manager Service: to combine traces into experiments
+* Data Provider Service: to expose data provider APIs to access analysis results
+* Event Table Service (soon to be built into Data Provider Service): to expose the events of a trace.
+* XML Manager Service: to extend the server's features from XML analysis and views on the server's file system.
+
+=== Extension model ===
+Being built on Eclipse RCP, the Trace Server supports the same extension mechanism as Trace Compass.
+
+== Developing the Trace Server ==
+
+=== Adding a Service ===
+To add a service, it just needs to be registered programmatically in the '''WebApplication'''.
+
+=== Adding a new data model ===
+To serialize data from Java objects, these are the following options:
+
+==== Serialize an entire POJO ====
+Just encapsulate the POJO in a '''Response''', and it will most likely be directly serializable to '''JSON'''.
+However anything that is accessible via a getter will be serialized. This can be a problem if that represents a large volume of data, or if the objects returned by the getter are not serializable.
+
+The following exceptions may indicate that a data type cannot be serialized:
+   com.fasterxml.jackson.databind.JsonMappingException
+
+==== Annotate a POJO ====
+If the POJO to serialize is editable, '''javax.xml.bind.annotation''' and '''com.fasterxml.jackson.annotation''' annotations are supported.
+
+==== Implement a serializer ====
+Finally, if a packaged type requires custom serialization, we recommend implementing a '''com.fasterxml.jackson.databind.ser.std.StdSerializer''' and registering it to the data type in the web application.
+
+== Testing a Trace Server Feature ==
+The simplest way to test a new feature is to write a test extending:
+   org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest
+which handles launching a trace server, and provides a client targeted at this server, as well as utilities to load traces and clean up after.
+
+=== Deserializing data ===
+Typically one has to be able to read returned data to ensure that it is correct.
+
+Most TraceCompass POJOs will not be readable out of the box as immutability was a key design decision, and Jersey deserializers require a default constructor and setters.
+The alternative is to implement a '''com.fasterxml.jackson.databind.deser.std.StdDeserializer<T>''' or annotate a POJO's constructor with '''@JsonCreator''' and '''@JsonProperty'''.
