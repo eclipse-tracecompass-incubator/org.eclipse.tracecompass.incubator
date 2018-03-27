@@ -140,7 +140,11 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
             IHostModel model = ModelManager.getModelFor(callstackModule.getHostId());
 
             for (CallStackSeries callstack : callstackModule.getCallStackSeries()) {
-                if (!iterateOverCallstackSerie(callstack, model, callgraph, range.getStartTime().toNanos(), range.getEndTime().toNanos(), monitor)) {
+                long time0 = range.getStartTime().toNanos();
+                long time1 = range.getEndTime().toNanos();
+                long start = Math.min(time0, time1);
+                long end = Math.max(time0, time1);
+                if (!iterateOverCallstackSerie(callstack, model, callgraph, start, end, monitor)) {
                     return false;
                 }
             }
