@@ -51,7 +51,6 @@ abstract class AbstractCalledFunction implements ICalledFunction {
 
     protected final long fStart;
     protected final long fEnd;
-    protected final int fDepth;
     private final List<ICalledFunction> fChildren = new ArrayList<>();
     private final @Nullable ICalledFunction fParent;
     protected long fSelfTime = 0;
@@ -61,13 +60,12 @@ abstract class AbstractCalledFunction implements ICalledFunction {
     private final transient IHostModel fModel;
     private transient long fCpuTime = Long.MIN_VALUE;
 
-    public AbstractCalledFunction(long start, long end, int depth, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
+    public AbstractCalledFunction(long start, long end, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
         if (start > end) {
             throw new IllegalArgumentException(Messages.TimeError + "[" + start + "," + end + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
         fStart = start;
         fEnd = end;
-        fDepth = depth;
         fParent = parent;
         // It'll be modified once we add a child to it
         fSelfTime = fEnd - fStart;
@@ -146,11 +144,6 @@ abstract class AbstractCalledFunction implements ICalledFunction {
     }
 
     @Override
-    public int getDepth() {
-        return fDepth;
-    }
-
-    @Override
     public int getProcessId() {
         return fProcessId;
     }
@@ -175,7 +168,7 @@ abstract class AbstractCalledFunction implements ICalledFunction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fDepth, fEnd, fParent, fSelfTime, fStart, getSymbol());
+        return Objects.hash(fEnd, fParent, fSelfTime, fStart, getSymbol());
     }
 
     @Override
@@ -190,25 +183,11 @@ abstract class AbstractCalledFunction implements ICalledFunction {
             return false;
         }
         AbstractCalledFunction other = (AbstractCalledFunction) obj;
-        if (fDepth != other.fDepth) {
-            return false;
-        }
-        if (fEnd != other.fEnd) {
-            return false;
-        }
-        if (fSelfTime != other.fSelfTime) {
-            return false;
-        }
-        if (fStart != other.fStart) {
-            return false;
-        }
-        if (!Objects.equals(fParent, other.getParent())) {
-            return false;
-        }
-        if (!Objects.equals(getSymbol(), other.getSymbol())) {
-            return false;
-        }
-        return true;
+        return (fEnd == other.fEnd &&
+                fSelfTime == other.fSelfTime &&
+                fStart == other.fStart &&
+                Objects.equals(fParent, other.getParent()) &&
+                Objects.equals(getSymbol(), other.getSymbol()));
     }
 
 }

@@ -41,8 +41,6 @@ public class CalledStringFunction extends AbstractCalledFunction {
      *            End position of the segment
      * @param symbol
      *            The symbol of the call stack function
-     * @param depth
-     *            The depth in the call stack of a function
      * @param processId
      *            The process ID of the traced application
      * @param threadId
@@ -52,8 +50,8 @@ public class CalledStringFunction extends AbstractCalledFunction {
      * @param model
      *            The model for the host the traced application is running on
      */
-    protected CalledStringFunction(long start, long end, String symbol, int depth, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
-        super(start, end, depth, processId, threadId, parent, model);
+    protected CalledStringFunction(long start, long end, String symbol, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
+        super(start, end, processId, threadId, parent, model);
         fSymbol = symbol;
     }
 

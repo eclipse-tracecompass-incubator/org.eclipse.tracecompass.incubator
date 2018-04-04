@@ -67,13 +67,6 @@ public interface ICalledFunction extends INamedSegment {
     long getCpuTime();
 
     /**
-     * The depth in the call stack of a function
-     *
-     * @return The depth of a function
-     */
-    int getDepth();
-
-    /**
      * The process ID of the traced application
      *
      * @return The process ID

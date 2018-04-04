@@ -35,8 +35,6 @@ public final class CalledFunctionFactory {
      *            the start time
      * @param end
      *            the end time
-     * @param depth
-     *            the depth
      * @param stateValue
      *            the symbol
      * @param processId
@@ -50,14 +48,14 @@ public final class CalledFunctionFactory {
      *            The operating system model this function is a part of
      * @return an ICalledFunction with the specified properties
      */
-    public static AbstractCalledFunction create(long start, long end, int depth, ITmfStateValue stateValue, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
+    public static AbstractCalledFunction create(long start, long end, ITmfStateValue stateValue, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
         switch (stateValue.getType()) {
         case INTEGER:
-            return create(start, end, depth, stateValue.unboxInt(), processId, threadId, parent, model);
+            return create(start, end, stateValue.unboxInt(), processId, threadId, parent, model);
         case LONG:
-            return create(start, end, depth, stateValue.unboxLong(), processId, threadId, parent, model);
+            return create(start, end, stateValue.unboxLong(), processId, threadId, parent, model);
         case STRING:
-            return create(start, end, depth, stateValue.unboxStr(), processId, threadId, parent, model);
+            return create(start, end, stateValue.unboxStr(), processId, threadId, parent, model);
         case CUSTOM:
             // Fall through
         case DOUBLE:
@@ -77,8 +75,6 @@ public final class CalledFunctionFactory {
      *            the start time
      * @param end
      *            the end time
-     * @param depth
-     *            the depth
      * @param value
      *            the symbol
      * @param processId
@@ -87,11 +83,11 @@ public final class CalledFunctionFactory {
      *            the parent node
      * @return an ICalledFunction with the specified propertiess
      */
-    private static CalledFunction create(long start, long end, int depth, long value, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
+    private static CalledFunction create(long start, long end, long value, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
         if (start > end) {
             throw new IllegalArgumentException(Messages.TimeError + '[' + start + ',' + end + ']');
         }
-        return new CalledFunction(start, end, value, depth, processId, threadId, parent, model);
+        return new CalledFunction(start, end, value, processId, threadId, parent, model);
     }
 
     /**
@@ -102,8 +98,6 @@ public final class CalledFunctionFactory {
      *            the start time
      * @param end
      *            the end time
-     * @param depth
-     *            the depth
      * @param value
      *            the symbol
      * @param processId
@@ -117,11 +111,11 @@ public final class CalledFunctionFactory {
      *            The operating system model this function is a part of
      * @return an ICalledFunction with the specified properties
      */
-    public static CalledStringFunction create(long start, long end, int depth, String value, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
+    public static CalledStringFunction create(long start, long end, String value, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
         if (start > end) {
             throw new IllegalArgumentException(Messages.TimeError + '[' + start + ',' + end + ']');
         }
-        return new CalledStringFunction(start, end, value, depth, processId, threadId, parent, model);
+        return new CalledStringFunction(start, end, value, processId, threadId, parent, model);
     }
 
 }

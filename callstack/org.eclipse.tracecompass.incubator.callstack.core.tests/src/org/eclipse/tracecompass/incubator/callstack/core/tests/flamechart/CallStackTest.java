@@ -108,18 +108,18 @@ public class CallStackTest extends CallStackTestBase {
                 /* Check the first level */
                 List<ICalledFunction> callList = callStack.getCallListAtDepth(1, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(2, callList.size());
-                assertEquals(CalledFunctionFactory.create(1L, 10L, 1, "op1", 1, 2, null, model), callList.get(0));
-                assertEquals(CalledFunctionFactory.create(12L, 20L, 1, "op4", 1, 2, null, model), callList.get(1));
+                assertEquals(CalledFunctionFactory.create(1L, 10L, "op1", 1, 2, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(12L, 20L, "op4", 1, 2, null, model), callList.get(1));
 
                 /* Check the second level */
                 callList = callStack.getCallListAtDepth(2, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(1, callList.size());
-                assertEquals(CalledFunctionFactory.create(3L, 7L, 2, "op2", 1, 2, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(3L, 7L, "op2", 1, 2, null, model), callList.get(0));
 
                 /* Check the third level */
                 callList = callStack.getCallListAtDepth(3, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(1, callList.size());
-                assertEquals(CalledFunctionFactory.create(4L, 5L, 3, "op3", 1, 2, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(4L, 5L, "op3", 1, 2, null, model), callList.get(0));
 
                 /* Check the host thread */
                 assertEquals(new HostThread(trace.getHostId(), 2), callStack.getHostThread(1L));
@@ -137,13 +137,13 @@ public class CallStackTest extends CallStackTestBase {
                 /* Check the first level */
                 List<ICalledFunction> callList = callStack.getCallListAtDepth(1, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(1, callList.size());
-                assertEquals(CalledFunctionFactory.create(3L, 20L, 1, "op2", 1, 3, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(3L, 20L, "op2", 1, 3, null, model), callList.get(0));
 
                 /* Check the second level */
                 callList = callStack.getCallListAtDepth(2, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(2, callList.size());
-                assertEquals(CalledFunctionFactory.create(5L, 6L, 2, "op3", 1, 3, null, model), callList.get(0));
-                assertEquals(CalledFunctionFactory.create(7L, 13L, 2, "op2", 1, 3, null, model), callList.get(1));
+                assertEquals(CalledFunctionFactory.create(5L, 6L, "op3", 1, 3, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(7L, 13L, "op2", 1, 3, null, model), callList.get(1));
 
                 /* Check the host thread */
                 assertEquals(new HostThread(trace.getHostId(), 3), callStack.getHostThread(1L));
@@ -179,20 +179,20 @@ public class CallStackTest extends CallStackTestBase {
                 /* Check the first level */
                 List<ICalledFunction> callList = callStack.getCallListAtDepth(1, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(1, callList.size());
-                assertEquals(CalledFunctionFactory.create(1L, 20L, 1, "op1", 1, 6, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(1L, 20L, "op1", 1, 6, null, model), callList.get(0));
 
                 /* Check the second level */
                 callList = callStack.getCallListAtDepth(2, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(3, callList.size());
-                assertEquals(CalledFunctionFactory.create(2L, 7L, 2, "op3", 1, 6, null, model), callList.get(0));
-                assertEquals(CalledFunctionFactory.create(8L, 11L, 2, "op2", 1, 6, null, model), callList.get(1));
-                assertEquals(CalledFunctionFactory.create(12L, 20L, 2, "op4", 1, 6, null, model), callList.get(2));
+                assertEquals(CalledFunctionFactory.create(2L, 7L, "op3", 1, 6, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(8L, 11L, "op2", 1, 6, null, model), callList.get(1));
+                assertEquals(CalledFunctionFactory.create(12L, 20L, "op4", 1, 6, null, model), callList.get(2));
 
                 /* Check the third level */
                 callList = callStack.getCallListAtDepth(3, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(2, callList.size());
-                assertEquals(CalledFunctionFactory.create(4L, 6L, 3, "op1", 1, 6, null, model), callList.get(0));
-                assertEquals(CalledFunctionFactory.create(9L, 10L, 3, "op3", 1, 6, null, model), callList.get(1));
+                assertEquals(CalledFunctionFactory.create(4L, 6L, "op1", 1, 6, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(9L, 10L, "op3", 1, 6, null, model), callList.get(1));
 
                 /* Check the host thread */
                 assertEquals(new HostThread(trace.getHostId(), 6), callStack.getHostThread(1L));
@@ -210,19 +210,19 @@ public class CallStackTest extends CallStackTestBase {
                 /* Check the first level */
                 List<ICalledFunction> callList = callStack.getCallListAtDepth(1, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(1, callList.size());
-                assertEquals(CalledFunctionFactory.create(1L, 20L, 1, "op5", 1, 6, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(1L, 20L, "op5", 1, 6, null, model), callList.get(0));
 
                 /* Check the second level */
                 callList = callStack.getCallListAtDepth(2, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(3, callList.size());
-                assertEquals(CalledFunctionFactory.create(2L, 6L, 2, "op2", 1, 6, null, model), callList.get(0));
-                assertEquals(CalledFunctionFactory.create(9L, 13L, 2, "op2", 1, 6, null, model), callList.get(1));
-                assertEquals(CalledFunctionFactory.create(15L, 19L, 2, "op2", 1, 6, null, model), callList.get(2));
+                assertEquals(CalledFunctionFactory.create(2L, 6L, "op2", 1, 6, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(9L, 13L, "op2", 1, 6, null, model), callList.get(1));
+                assertEquals(CalledFunctionFactory.create(15L, 19L, "op2", 1, 6, null, model), callList.get(2));
 
                 /* Check the third level */
                 callList = callStack.getCallListAtDepth(3, START_TIME, END_TIME, 1, MONITOR);
                 assertEquals(1, callList.size());
-                assertEquals(CalledFunctionFactory.create(10L, 11L, 3, "op3", 1, 6, null, model), callList.get(0));
+                assertEquals(CalledFunctionFactory.create(10L, 11L, "op3", 1, 6, null, model), callList.get(0));
 
                 /* Check the host thread */
                 assertEquals(new HostThread(trace.getHostId(), 7), callStack.getHostThread(1L));
@@ -323,15 +323,15 @@ public class CallStackTest extends CallStackTestBase {
 
         ICalledFunction function = element.getNextFunction(START_TIME, 2);
         assertNotNull(function);
-        assertEquals(CalledFunctionFactory.create(2L, 6L, 2, "op2", 1, 6, null, model), function);
+        assertEquals(CalledFunctionFactory.create(2L, 6L, "op2", 1, 6, null, model), function);
 
         function = element.getNextFunction(function.getEnd(), 2);
         assertNotNull(function);
-        assertEquals(CalledFunctionFactory.create(9L, 13L, 2, "op2", 1, 6, null, model), function);
+        assertEquals(CalledFunctionFactory.create(9L, 13L, "op2", 1, 6, null, model), function);
 
         function = element.getNextFunction(function.getEnd(), 2);
         assertNotNull(function);
-        assertEquals(CalledFunctionFactory.create(15L, 19L, 2, "op2", 1, 6, null, model), function);
+        assertEquals(CalledFunctionFactory.create(15L, 19L, "op2", 1, 6, null, model), function);
 
         function = element.getNextFunction(function.getEnd(), 2);
         assertNull(function);

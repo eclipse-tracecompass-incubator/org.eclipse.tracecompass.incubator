@@ -39,8 +39,6 @@ public class CalledFunction extends AbstractCalledFunction {
      *            End position of the segment
      * @param symbol
      *            The symbol of the call stack function
-     * @param depth
-     *            The depth in the call stack of a function
      * @param processId
      *            The process ID of the traced application
      * @param threadId
@@ -50,8 +48,8 @@ public class CalledFunction extends AbstractCalledFunction {
      * @param model
      *            The operating system model to provide CPU times
      */
-    protected CalledFunction(long start, long end, long symbol, int depth, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
-        super(start, end, depth, processId, threadId, parent, model);
+    protected CalledFunction(long start, long end, long symbol, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
+        super(start, end, processId, threadId, parent, model);
         fSymbol = symbol;
     }
 
