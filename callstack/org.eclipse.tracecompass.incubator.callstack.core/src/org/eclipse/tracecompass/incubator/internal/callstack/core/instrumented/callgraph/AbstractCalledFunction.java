@@ -55,9 +55,11 @@ abstract class AbstractCalledFunction implements ICalledFunction {
     private final List<ICalledFunction> fChildren = new ArrayList<>();
     private final @Nullable ICalledFunction fParent;
     protected long fSelfTime = 0;
-    private final long fCpuTime;
     private final int fProcessId;
     private final int fThreadId;
+
+    private final transient IHostModel fModel;
+    private transient long fCpuTime = Long.MIN_VALUE;
 
     public AbstractCalledFunction(long start, long end, int depth, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
         if (start > end) {
@@ -74,7 +76,7 @@ abstract class AbstractCalledFunction implements ICalledFunction {
         if (parent instanceof AbstractCalledFunction) {
             ((AbstractCalledFunction) parent).addChild(this);
         }
-        fCpuTime = model.getCpuTime(threadId, start, end);
+        fModel = model;
     }
 
     @Override
@@ -135,7 +137,12 @@ abstract class AbstractCalledFunction implements ICalledFunction {
 
     @Override
     public long getCpuTime() {
-        return fCpuTime;
+        long cpuTime = fCpuTime;
+        if (cpuTime == Long.MIN_VALUE) {
+            cpuTime = fModel.getCpuTime(fThreadId, fStart, fEnd);
+            fCpuTime = cpuTime;
+        }
+        return cpuTime;
     }
 
     @Override

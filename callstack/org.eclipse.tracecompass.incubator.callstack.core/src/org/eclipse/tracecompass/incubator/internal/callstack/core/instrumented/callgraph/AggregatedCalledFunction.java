@@ -221,7 +221,7 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
 
     private void addToCpuTime(long cpuTime) {
         if (cpuTime != IHostModel.TIME_UNKNOWN) {
-            if (fCpuTime == IHostModel.TIME_UNKNOWN) {
+            if (fCpuTime < 0) {
                 fCpuTime = 0;
             }
             fCpuTime += cpuTime;
