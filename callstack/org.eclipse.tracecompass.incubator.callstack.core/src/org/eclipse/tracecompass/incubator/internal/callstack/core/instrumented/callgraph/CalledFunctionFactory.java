@@ -12,7 +12,6 @@ package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 
 /**
  * Factory to create {@link ICalledFunction}s.
@@ -20,9 +19,6 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
  * @author Matthew Khouzam
  */
 public final class CalledFunctionFactory {
-
-    private static final String SEPARATOR = ": "; //$NON-NLS-1$
-    private static final String ERROR_MSG = "Cannot create a called function of type : "; //$NON-NLS-1$
 
     private CalledFunctionFactory() {
         // do nothing
@@ -35,7 +31,7 @@ public final class CalledFunctionFactory {
      *            the start time
      * @param end
      *            the end time
-     * @param stateValue
+     * @param symbolValue
      *            the symbol
      * @param processId
      *            The process ID of the traced application
@@ -48,23 +44,14 @@ public final class CalledFunctionFactory {
      *            The operating system model this function is a part of
      * @return an ICalledFunction with the specified properties
      */
-    public static AbstractCalledFunction create(long start, long end, ITmfStateValue stateValue, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
-        switch (stateValue.getType()) {
-        case INTEGER:
-            return create(start, end, stateValue.unboxInt(), processId, threadId, parent, model);
-        case LONG:
-            return create(start, end, stateValue.unboxLong(), processId, threadId, parent, model);
-        case STRING:
-            return create(start, end, stateValue.unboxStr(), processId, threadId, parent, model);
-        case CUSTOM:
-            // Fall through
-        case DOUBLE:
-            // Fall through
-        case NULL:
-            // Fall through
-        default:
-            throw new IllegalArgumentException(ERROR_MSG + stateValue.getType() + SEPARATOR + stateValue.toString());
+    public static AbstractCalledFunction create(long start, long end, @Nullable Object symbolValue, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
+        if (symbolValue == null) {
+            throw new IllegalArgumentException("Symbol value is null");
         }
+        if (symbolValue instanceof Number) {
+            return create(start, end, ((Number) symbolValue).longValue(), processId, threadId, parent, model);
+        }
+        return create(start, end, String.valueOf(symbolValue), processId, threadId, parent, model);
     }
 
     /**

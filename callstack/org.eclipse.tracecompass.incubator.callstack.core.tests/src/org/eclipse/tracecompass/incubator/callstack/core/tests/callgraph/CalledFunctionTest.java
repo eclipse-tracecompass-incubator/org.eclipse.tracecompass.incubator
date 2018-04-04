@@ -24,7 +24,6 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFun
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CalledFunction;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CalledFunctionFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CalledStringFunction;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,10 +47,10 @@ public class CalledFunctionTest {
      */
     @Before
     public void setup() {
-        ICalledFunction fixture = CalledFunctionFactory.create(10, 1010, TmfStateValue.newValueString("Hello"), 0, 0, null, fModel);
+        ICalledFunction fixture = CalledFunctionFactory.create(10, 1010, "Hello", 0, 0, null, fModel);
         assertTrue(fixture instanceof CalledStringFunction);
         fFixture = (CalledStringFunction) fixture;
-        ICalledFunction fixture42 = CalledFunctionFactory.create(400, 500, TmfStateValue.newValueLong(0x42), 0, 0, fFixture, fModel);
+        ICalledFunction fixture42 = CalledFunctionFactory.create(400, 500, 0x42L, 0, 0, fFixture, fModel);
         f42Fixture = fixture42;
         ICalledFunction hiFixture = CalledFunctionFactory.create(20, 50, "Hi", 0, 0, fFixture, fModel);
         fHiFixture = hiFixture;
@@ -62,17 +61,17 @@ public class CalledFunctionTest {
      * value
      */
     public void createValid() {
-        assertNotNull(CalledFunctionFactory.create(0, 0, TmfStateValue.newValueLong(0), 0, 0, null, fModel));
-        assertNotNull(CalledFunctionFactory.create(0, 0, TmfStateValue.newValueInt(0), 0, 0, null, fModel));
-        assertNotNull(CalledFunctionFactory.create(0, 0, TmfStateValue.newValueString(""), 0, 0, null, fModel));
+        assertNotNull(CalledFunctionFactory.create(0, 0, 0L, 0, 0, null, fModel));
+        assertNotNull(CalledFunctionFactory.create(0, 0, 0, 0, 0, null, fModel));
+        assertNotNull(CalledFunctionFactory.create(0, 0, "", 0, 0, null, fModel));
     }
 
     /**
      * Test a value with a floating point memory address.
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createInvalidDouble() {
-        CalledFunctionFactory.create(0, 0, TmfStateValue.newValueDouble(3.14), 0, 0, null, fModel);
+        assertNotNull(CalledFunctionFactory.create(0, 0, 3.14, 0, 0, null, fModel));
     }
 
     /**
@@ -80,7 +79,7 @@ public class CalledFunctionTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void createInvalidNull() {
-        CalledFunctionFactory.create(0, 0, TmfStateValue.nullValue(), 0, 0, null, fModel);
+        CalledFunctionFactory.create(0, 0, (Object) null, 0, 0, null, fModel);
     }
 
     /**
@@ -96,7 +95,7 @@ public class CalledFunctionTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void createInvalidTimeRangeStateLong() {
-        CalledFunctionFactory.create(10, -10, TmfStateValue.newValueLong(42), 0, 0, null, fModel);
+        CalledFunctionFactory.create(10, -10, 42L, 0, 0, null, fModel);
     }
 
     /**
@@ -104,7 +103,7 @@ public class CalledFunctionTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void createInvalidTimeRangeStateInteger() {
-        CalledFunctionFactory.create(10, -10, TmfStateValue.newValueInt(42), 0, 0, null, fModel);
+        CalledFunctionFactory.create(10, -10, 42, 0, 0, null, fModel);
     }
 
     /**
@@ -112,7 +111,7 @@ public class CalledFunctionTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void createInvalidTimeRangeStateString() {
-        CalledFunctionFactory.create(10, -10, TmfStateValue.newValueString("42"), 0, 0, null, fModel);
+        CalledFunctionFactory.create(10, -10, "42", 0, 0, null, fModel);
     }
 
     /**
@@ -121,7 +120,7 @@ public class CalledFunctionTest {
     @Test
     public void testAddChildOk1() {
         assertNotNull(fFixture);
-        CalledFunction newchild = (CalledFunction) CalledFunctionFactory.create(100, 200, TmfStateValue.newValueInt(0x64), 0, 0, fFixture, fModel);
+        CalledFunction newchild = (CalledFunction) CalledFunctionFactory.create(100, 200, 0x64, 0, 0, fFixture, fModel);
         ICalledFunction hiFixture = fHiFixture;
         ICalledFunction fixture42 = f42Fixture;
         assertNotNull(hiFixture);
@@ -268,7 +267,7 @@ public class CalledFunctionTest {
     @Test
     public void testHashCode() {
         assertEquals(f42Fixture.hashCode(), f42Fixture.hashCode());
-        ICalledFunction calledFunction = CalledFunctionFactory.create(400, 500, TmfStateValue.newValueLong(0x42), 0, 0, fFixture, fModel);
+        ICalledFunction calledFunction = CalledFunctionFactory.create(400, 500, 0x42L, 0, 0, fFixture, fModel);
         assertEquals(f42Fixture, calledFunction);
         assertEquals(f42Fixture.hashCode(), calledFunction.hashCode());
         calledFunction = CalledFunctionFactory.create(20, 50, "Hi", 0, 0, fFixture, fModel);
