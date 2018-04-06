@@ -12,7 +12,6 @@ package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -210,9 +209,10 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
             iterateOverCallstack(element, callStack, nextFunction, 2, aggregatedChild, model, start, end, monitor);
             aggregatedChild.addFunctionCall(nextFunction);
             // Add the kernel statuses if available
-            Iterator<ProcessStatusInterval> kernelStatuses = callStack.getKernelStatuses(nextFunction, -1);
-            kernelStatuses.forEachRemaining(aggregatedChild::addKernelStatus);
-
+            Iterable<ProcessStatusInterval> kernelStatuses = callStack.getKernelStatuses(nextFunction, -1);
+            for (ProcessStatusInterval status : kernelStatuses) {
+                aggregatedChild.addKernelStatus(status);
+            }
             callgraph.addAggregatedCallSite(element, aggregatedChild);
             nextFunction = (AbstractCalledFunction) callStack.getNextFunction(nextFunction.getEnd(), 1, null, model, start, end);
         }

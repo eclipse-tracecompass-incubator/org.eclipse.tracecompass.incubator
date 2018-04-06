@@ -239,17 +239,44 @@ public class CompositeHostModel implements IHostModel {
 
     }
 
+    /**
+     * Iterator class to allow 2-way iteration over intervals of a given attribute.
+     * Not thread-safe!
+     */
+    private static class ThreadStatusIterable implements Iterable<ProcessStatusInterval> {
+
+        private final long fStart;
+        private final long fEnd;
+        private KernelAnalysisModule fModule;
+        private int fTid;
+        private long fResolution;
+
+        public ThreadStatusIterable(long start, long end, KernelAnalysisModule module, int tid, long resolution) {
+            fStart = start;
+            fEnd = end;
+            fModule = module;
+            fTid = tid;
+            fResolution = resolution;
+        }
+
+        @Override
+        public Iterator<ProcessStatusInterval> iterator() {
+            return new ThreadStatusIterator(fStart, fEnd, KernelThreadInformationProvider.getStatusIntervalsForThread(fModule, fTid, fStart, fEnd, fResolution));
+        }
+
+    }
+
     @Override
-    public Iterator<ProcessStatusInterval> getThreadStatusIntervals(int tid, long start, long end, long resolution) {
+    public Iterable<ProcessStatusInterval> getThreadStatusIntervals(int tid, long start, long end, long resolution) {
         if (tid == IHostModel.UNKNOWN_TID) {
-            return Objects.requireNonNull(Collections.emptyListIterator());
+            return Objects.requireNonNull(Collections.emptyList());
         }
         Iterable<KernelAnalysisModule> modules = TmfTraceUtils.getAnalysisModulesOfClass(fHostId, KernelAnalysisModule.class);
         if (modules.iterator().hasNext()) {
             KernelAnalysisModule module = modules.iterator().next();
-            return new ThreadStatusIterator(start, end, KernelThreadInformationProvider.getStatusIntervalsForThread(module, tid, start, end, resolution));
+            return new ThreadStatusIterable(start, end, module, tid, resolution);
         }
-        return Objects.requireNonNull(Collections.emptyListIterator());
+        return Objects.requireNonNull(Collections.emptyList());
     }
 
     @Override

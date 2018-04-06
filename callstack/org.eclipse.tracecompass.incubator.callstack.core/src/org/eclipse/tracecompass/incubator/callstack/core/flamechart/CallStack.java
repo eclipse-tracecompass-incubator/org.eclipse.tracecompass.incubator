@@ -11,7 +11,6 @@ package org.eclipse.tracecompass.incubator.callstack.core.flamechart;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -400,7 +399,7 @@ public class CallStack {
      *         statuses are not available or if the function is outside the range of
      *         the available data.
      */
-    public Iterator<ProcessStatusInterval> getKernelStatuses(ICalledFunction function, long resolution) {
+    public Iterable<ProcessStatusInterval> getKernelStatuses(ICalledFunction function, long resolution) {
         IHostModel model = ModelManager.getModelFor(getHostId(function.getStart()));
         return model.getThreadStatusIntervals(function.getThreadId(), function.getStart(), function.getEnd(), resolution);
     }

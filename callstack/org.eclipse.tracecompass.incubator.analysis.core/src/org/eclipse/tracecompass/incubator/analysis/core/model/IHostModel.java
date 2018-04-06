@@ -10,7 +10,7 @@
 package org.eclipse.tracecompass.incubator.analysis.core.model;
 
 import java.util.Collection;
-import java.util.Iterator;
+
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
@@ -126,7 +126,7 @@ public interface IHostModel {
     Collection<AggregatedCallSite> getSamplingData(int tid, long start, long end);
 
     /**
-     * Get an iterator over the status intervals of a thread
+     * Get an iterable over the status intervals of a thread
      *
      * @param tid
      *            The ID of the thread
@@ -139,7 +139,7 @@ public interface IHostModel {
      *            queries. A value lower or equal to 1 will return all intervals.
      * @return An iterator over the status intervals for the thread
      */
-    Iterator<ProcessStatusInterval> getThreadStatusIntervals(int tid, long start, long end, long resolution);
+    Iterable<ProcessStatusInterval> getThreadStatusIntervals(int tid, long start, long end, long resolution);
 
     /**
      * Get whether sampling data is available for this host

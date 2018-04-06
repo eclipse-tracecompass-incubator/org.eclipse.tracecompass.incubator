@@ -10,7 +10,6 @@
 package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.flamechart;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -77,9 +76,8 @@ public class ProcessStatusEntry extends TimeGraphEntry {
             ICalledFunction function = fcEvent.getFunction();
             // FIXME: This gets all the statuses, that can be big for large time ranges. Use
             // a method with resolution when it is available
-            Iterator<@NonNull ProcessStatusInterval> statuses = fCallStack.getKernelStatuses(function, resolution);
-            while (statuses.hasNext()) {
-                ProcessStatusInterval status = statuses.next();
+            Iterable<@NonNull ProcessStatusInterval> statuses = fCallStack.getKernelStatuses(function, resolution);
+            for (ProcessStatusInterval status : statuses) {
                 events.add(new TimeEvent(this, status.getStart(), status.getLength(), status.getProcessStatus().getStateValue().unboxInt()));
             }
         }
