@@ -61,11 +61,11 @@ public class OneQemuKvmTestCase extends VmTestCase {
 
         /* Verify the third level of overhead */
         intervals = ImmutableList.of(new StateIntervalStub(1, 194, TmfStateValue.nullValue()),
-                new StateIntervalStub(195, 209, TmfStateValue.newValueString("null")),
+                new StateIntervalStub(195, 209, TmfStateValue.newValueString("32")),
                 new StateIntervalStub(210, 294, TmfStateValue.nullValue()),
-                new StateIntervalStub(295, 299, TmfStateValue.newValueString("null")),
+                new StateIntervalStub(295, 299, TmfStateValue.newValueString("32")),
                 new StateIntervalStub(300, 349, TmfStateValue.newValueString("0")),
-                new StateIntervalStub(350, 354, TmfStateValue.newValueString("null")),
+                new StateIntervalStub(350, 354, TmfStateValue.newValueString("32")),
                 new StateIntervalStub(355, 375, TmfStateValue.nullValue()));
         info.add(new IntervalInfo(intervals, VmOverheadStateProvider.TRACES, VmTraces.GUEST_ONE_QEMUKVM.getHostId(), VmOverheadStateProvider.THREADS, "130", "CallStack", "3"));
 

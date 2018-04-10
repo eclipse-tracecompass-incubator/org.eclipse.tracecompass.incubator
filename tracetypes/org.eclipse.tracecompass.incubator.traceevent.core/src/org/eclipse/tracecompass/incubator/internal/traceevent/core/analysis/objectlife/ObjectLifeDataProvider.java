@@ -37,6 +37,7 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedE
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.TreeMultimap;
 
@@ -73,7 +74,8 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
     @Override
     public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
         ITmfStateSystem ss = getAnalysisModule().getStateSystem();
-        Set<@NonNull Integer> quarks = getSelectedQuarks(filter);
+        BiMap<@NonNull Long, @NonNull Integer> entries = getSelectedEntries(filter);
+        Set<@NonNull Integer> quarks = entries.values();
         long start = filter.getStart();
         if (ss == null || quarks.size() != 1 || !getAnalysisModule().isQueryable(start)) {
             /*
@@ -111,7 +113,7 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         Map<@NonNull Long, @NonNull Integer> entries = getSelectedEntries(filter);
         Collection<Long> times = getTimes(filter, ss.getStartTime(), ss.getCurrentEndTime());
         /* Do the actual query */
-        for (ITmfStateInterval interval : ss.query2D(getSelectedQuarks(filter), times)) {
+        for (ITmfStateInterval interval : ss.query2D(entries.values(), times)) {
             if (monitor != null && monitor.isCanceled()) {
                 return null;
             }

@@ -37,6 +37,8 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedE
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
+import com.google.common.collect.BiMap;
+
 /**
  * Context analysis datasource. Provides the locations of contexts.
  *
@@ -136,7 +138,8 @@ public class ContextDataProvider extends AbstractTimeGraphDataProvider<@NonNull 
 
         Collection<Long> times = getTimes(filter, ss.getStartTime(), ss.getCurrentEndTime());
         Set<Integer> quarks = new HashSet<>();
-        for (Integer quark : getSelectedQuarks(filter)) {
+        BiMap<@NonNull Long, @NonNull Integer> selectedEntries = getSelectedEntries(filter);
+        for (Integer quark : selectedEntries.values()) {
             quarks.addAll(ss.getSubAttributes(quark, true));
         }
         /* resolve the names */

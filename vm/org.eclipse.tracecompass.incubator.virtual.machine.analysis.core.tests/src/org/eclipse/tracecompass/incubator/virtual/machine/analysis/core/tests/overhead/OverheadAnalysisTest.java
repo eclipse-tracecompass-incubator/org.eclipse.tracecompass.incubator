@@ -136,8 +136,7 @@ public class OverheadAnalysisTest {
         ITmfStateSystem ss = module.getStateSystem();
         assertNotNull(ss);
 
-        for (@NonNull
-        IntervalInfo info : fTestCase.getTestIntervals()) {
+        for (@NonNull IntervalInfo info : fTestCase.getTestIntervals()) {
             StateSystemTestUtils.testIntervalForAttributes(ss, info.getIntervals(), info.getAttributePath());
         }
     }
