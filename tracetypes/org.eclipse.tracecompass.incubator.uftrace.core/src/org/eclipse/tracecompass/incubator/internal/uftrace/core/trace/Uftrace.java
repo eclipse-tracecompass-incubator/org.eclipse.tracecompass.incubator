@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxPidAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.SymParser.Symbol;
@@ -313,12 +314,7 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
      *
      * @author Matthew Khouzam
      */
-    public final class PidAspect implements ITmfEventAspect<Integer> {
-        @Override
-        public @NonNull String getName() {
-            return "Pid"; //$NON-NLS-1$
-        }
-
+    public final class PidAspect extends LinuxPidAspect {
         @Override
         public @Nullable Integer resolve(ITmfEvent event) {
             if (event.getContent().getValue() instanceof DatEvent) {
@@ -327,11 +323,6 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
                 return fTasks.getPid(tid);
             }
             return null;
-        }
-
-        @Override
-        public @NonNull String getHelpText() {
-            return ""; //$NON-NLS-1$
         }
     }
 
