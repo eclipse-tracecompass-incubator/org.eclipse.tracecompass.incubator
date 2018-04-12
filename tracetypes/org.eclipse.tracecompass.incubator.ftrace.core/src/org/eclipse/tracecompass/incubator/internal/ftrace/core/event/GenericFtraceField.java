@@ -135,7 +135,7 @@ public class GenericFtraceField {
                     if (key.equals("prev_state")) { //$NON-NLS-1$
                         fields.put(key, PREV_STATE_LUT.getOrDefault(value.charAt(0), 0L));
                     } else if (StringUtils.isNumeric(value)) {
-                        fields.put(key, Long.parseLong(value));
+                        fields.put(key, Long.parseUnsignedLong(value));
                     } else {
                         fields.put(key, value);
                     }

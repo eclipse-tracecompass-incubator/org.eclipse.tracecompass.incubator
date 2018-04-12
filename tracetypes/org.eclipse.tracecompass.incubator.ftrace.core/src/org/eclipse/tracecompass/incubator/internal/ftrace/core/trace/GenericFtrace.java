@@ -107,11 +107,17 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
             if (location == null) {
                 fFileInput.seek(0);
                 long lineStartOffset = fFileInput.getFilePointer();
-                String line = fFileInput.readLine();
+                @Nullable String line = fFileInput.readLine();
+                if (line == null) {
+                    return context;
+                }
                 Matcher matcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
                 while (!matcher.matches()) {
                     lineStartOffset = fFileInput.getFilePointer();
                     line = fFileInput.readLine();
+                    if (line == null) {
+                        break;
+                    }
                     matcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
                 }
                 fFileInput.seek(lineStartOffset);
