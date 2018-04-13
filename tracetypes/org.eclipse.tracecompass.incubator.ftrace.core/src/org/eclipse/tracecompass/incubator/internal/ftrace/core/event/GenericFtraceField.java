@@ -133,8 +133,11 @@ public class GenericFtraceField {
                 if (value != null) {
                     // This is a temporary solution. Refactor suggestions are welcome.
                     if (key.equals("prev_state")) { //$NON-NLS-1$
-                        fields.put(key, PREV_STATE_LUT.getOrDefault(value.charAt(0), 0L));
+                        fields.put(key, parsePrevStateValue(value));
                     } else if (StringUtils.isNumeric(value)) {
+                        if (key.equals("parent_pid") && name.equals("sched_process_fork")) {//$NON-NLS-1$ //$NON-NLS-2$
+                            key = "pid"; //$NON-NLS-1$
+                        }
                         fields.put(key, Long.parseUnsignedLong(value));
                     } else {
                         fields.put(key, decodeString(value));
@@ -250,5 +253,21 @@ public class GenericFtraceField {
      */
     public Integer getCpu() {
         return fCpu;
+    }
+
+    /**
+     * Parse the prev_state field on sched_switch event depending on wether it is a number or a character.
+     *
+     *
+     * @return the state as a Long
+     */
+    private static Long parsePrevStateValue(String value) {
+        Long state = 0L;
+        if (StringUtils.isNumeric(value)) {
+            state = Long.parseUnsignedLong(value);
+        } else {
+            state = PREV_STATE_LUT.getOrDefault(value.charAt(0), 0L);
+        }
+        return state;
     }
 }
