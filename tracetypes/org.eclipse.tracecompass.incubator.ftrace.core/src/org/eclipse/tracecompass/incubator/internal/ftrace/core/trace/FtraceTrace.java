@@ -9,6 +9,11 @@
 
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.trace;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -17,9 +22,6 @@ import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.GenericFtra
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Ftrace trace.
@@ -35,6 +37,8 @@ public class FtraceTrace extends GenericFtrace {
     private static final int MAX_LINES = 100;
     private static final int MAX_CONFIDENCE = 100;
 
+    private static final byte[] TRACE_CMD_DAT_MAGIC = {0x17, 0x08,  0x44, 't', 'r','a','c','i','n','g'};
+
     @Override
     public IStatus validate(IProject project, String path) {
         File file = new File(path);
@@ -47,6 +51,17 @@ public class FtraceTrace extends GenericFtrace {
         int confidence = 0;
         try {
             if (!TmfTraceUtils.isText(file)) {
+                int magicLength = TRACE_CMD_DAT_MAGIC.length;
+                if (file.length() > magicLength) {
+                    try (FileInputStream fis = new FileInputStream(file)) {
+                        byte[] start = new byte[magicLength];
+                        int read = fis.read(start);
+                        if (read == magicLength && Arrays.equals(TRACE_CMD_DAT_MAGIC, start)) {
+                            // TODO: offer to do this programatically
+                            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "This file looks like a binary trace-cmd, try running 'trace-cmd report -R' on it."); //$NON-NLS-1$
+                        }
+                    }
+                }
                 return new TraceValidationStatus(confidence, Activator.PLUGIN_ID);
             }
         } catch (IOException e) {
@@ -71,7 +86,7 @@ public class FtraceTrace extends GenericFtrace {
                 line = rafile.readLine();
             }
             if (matches == 0) {
-                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Most assuredly NOT a traceevent trace"); //$NON-NLS-1$
+                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Most assuredly NOT an fTrace text trace"); //$NON-NLS-1$
             }
         } catch (IOException e) {
             Activator.getInstance().logError("Error validating file: " + path, e); //$NON-NLS-1$
