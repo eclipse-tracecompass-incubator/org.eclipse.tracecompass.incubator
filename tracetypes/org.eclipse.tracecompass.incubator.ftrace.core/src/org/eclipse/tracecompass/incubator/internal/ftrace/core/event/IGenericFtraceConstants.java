@@ -25,6 +25,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public interface IGenericFtraceConstants {
 
+    String PROCESS_DUMP_EVENT_NAME = "ftrace_process_dump"; //$NON-NLS-1$
+
+    String PROCESS_DUMP_EVENT_TYPE = "ftrace_process_dump_event"; //$NON-NLS-1$
+
     /**
      * Character that identifies a comment when at the start of a line
      */

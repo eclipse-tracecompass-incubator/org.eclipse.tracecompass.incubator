@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.internal.ftrace.core.layout;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.DefaultEventLayout;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.IGenericFtraceConstants;
 
 /**
  * Event and field definitions for ftrace traces.
@@ -78,4 +79,10 @@ public class GenericFtraceEventLayout extends DefaultEventLayout {
     public @NonNull String eventCpuFrequency() {
         return CPU_FREQUENCY;
     }
+
+    @Override
+    public @NonNull String eventStatedumpProcessState() {
+        return IGenericFtraceConstants.PROCESS_DUMP_EVENT_NAME;
+    }
+
 }
