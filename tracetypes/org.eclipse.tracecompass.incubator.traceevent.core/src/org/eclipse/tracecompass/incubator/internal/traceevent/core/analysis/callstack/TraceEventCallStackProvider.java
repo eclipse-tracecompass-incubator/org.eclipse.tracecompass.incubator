@@ -23,6 +23,7 @@ import java.util.function.Function;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxPidAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
@@ -50,7 +51,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  */
 public class TraceEventCallStackProvider extends CallStackStateProvider {
 
-    private static final int VERSION_NUMBER = 3;
+    private static final int VERSION_NUMBER = 4;
     private static final int UNSET_ID = -1;
     static final String EDGES = "EDGES"; //$NON-NLS-1$
 
@@ -125,7 +126,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
         if (tName == null) {
             long threadId = getThreadId(event);
-            tName = (threadId == UNKNOWN_PID) ? UNKNOWN : Long.toString(threadId);
+            tName = (threadId == IHostModel.UNKNOWN_TID) ? UNKNOWN : Long.toString(threadId);
         }
 
         return tName;
@@ -133,8 +134,12 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     @Override
     protected int getProcessId(@NonNull ITmfEvent event) {
-        Integer fieldValue = event.getContent().getFieldValue(Integer.class, ITraceEventConstants.PID);
-        return fieldValue == null ? -1 : fieldValue.intValue();
+        Integer pid = TmfTraceUtils.resolveIntEventAspectOfClassForEvent(event.getTrace(), LinuxPidAspect.class, event);
+        if (pid == null) {
+            // Fallback to a pid field in the event
+            pid = event.getContent().getFieldValue(Integer.class, ITraceEventConstants.PID);
+        }
+        return pid == null ? UNKNOWN_PID : pid.intValue();
     }
 
     @Override
@@ -321,6 +326,8 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         Object functionBeginName = functionEntry(event);
         if (functionBeginName != null) {
             int processQuark = ss.getQuarkAbsoluteAndAdd(PROCESSES, processName);
+            int pid = getProcessId(event);
+            ss.modifyAttribute(timestamp, pid, processQuark);
 
             String threadName = getThreadName(event);
             long threadId = getThreadId(event);
@@ -328,7 +335,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
                 threadName = Long.toString(threadId);
             }
             int threadQuark = ss.getQuarkRelativeAndAdd(processQuark, threadName);
-            ss.modifyAttribute(event.getTimestamp().toNanos(), threadId, threadQuark);
+            ss.modifyAttribute(timestamp, threadId, threadQuark);
 
             int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.CALL_STACK);
             ss.pushAttribute(timestamp, functionBeginName, callStackQuark);
