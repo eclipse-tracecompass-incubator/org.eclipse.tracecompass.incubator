@@ -303,6 +303,21 @@ public class CallStack {
     }
 
     /**
+     * Return whether the TID is variable through time for this callstack or if it
+     * fixed
+     *
+     * @return <code>true</code> if the TID may vary during the trace or if it is
+     *         fixed and can be cached.
+     */
+    public boolean isTidVariable() {
+        if (fThreadIdProvider != null) {
+            return fThreadIdProvider.variesInTime();
+        }
+        // No TID provider, so does not vary
+        return false;
+    }
+
+    /**
      * Get the start time of this callstack
      *
      * @return The start time of the callstack

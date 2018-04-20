@@ -107,6 +107,18 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
          */
         int getThreadId(long time);
 
+        /**
+         * Return whether the value returned by this provider is variable through time
+         * (ie, each function of a stack may have a different thread ID), or is fixed
+         * (ie, all functions in a stack have the same thread ID)
+         *
+         * @return If <code>true</code>, the thread ID will be identical for a stack all
+         *         throughout its life, it can be therefore be used to provider other
+         *         thread-related information on stack even when there are no function
+         *         calls.
+         */
+        boolean variesInTime();
+
     }
 
     /**
@@ -118,6 +130,7 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
         private final int fQuark;
         private @Nullable ITmfStateInterval fInterval;
         private int fLastThreadId = IHostModel.UNKNOWN_TID;
+        private boolean fVariesInTime = true;
 
         public AttributeValueThreadProvider(ITmfStateSystem ss, int quark) {
             fSs = ss;
@@ -154,6 +167,12 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
                     break;
 
                 }
+                // If the interval spans the whole state system, the tid does not vary in time
+                if (fSs.waitUntilBuilt(0)) {
+                    if (interval.intersects(fSs.getStartTime()) && interval.intersects(fSs.getCurrentEndTime() - 1)) {
+                        fVariesInTime = false;
+                    }
+                }
             } catch (StateSystemDisposedException e) {
                 interval = null;
                 tid = IHostModel.UNKNOWN_TID;
@@ -161,6 +180,11 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
             fInterval = interval;
             fLastThreadId = tid;
             return tid;
+        }
+
+        @Override
+        public boolean variesInTime() {
+            return fVariesInTime;
         }
 
     }
@@ -186,6 +210,11 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
         @Override
         public int getThreadId(long time) {
             return fTid;
+        }
+
+        @Override
+        public boolean variesInTime() {
+            return false;
         }
 
     }
@@ -228,6 +257,11 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
 
             }
             return IHostModel.UNKNOWN_TID;
+        }
+
+        @Override
+        public boolean variesInTime() {
+            return true;
         }
 
     }

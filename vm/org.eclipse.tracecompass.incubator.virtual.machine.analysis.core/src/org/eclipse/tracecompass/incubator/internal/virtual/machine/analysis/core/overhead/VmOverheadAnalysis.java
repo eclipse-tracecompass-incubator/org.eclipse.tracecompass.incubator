@@ -126,6 +126,11 @@ public class VmOverheadAnalysis extends InstrumentedCallStackAnalysis {
             return IHostModel.UNKNOWN_TID;
         }
 
+        @Override
+        public boolean variesInTime() {
+            return true;
+        }
+
     }
 
     /**
