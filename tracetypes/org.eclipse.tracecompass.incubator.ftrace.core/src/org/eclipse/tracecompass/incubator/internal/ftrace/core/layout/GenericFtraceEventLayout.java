@@ -29,6 +29,7 @@ public class GenericFtraceEventLayout extends DefaultEventLayout {
     private static final @NonNull String PREV_PID = "prev_pid"; //$NON-NLS-1$
     private static final @NonNull String CHILD_TID = "child_pid"; //$NON-NLS-1$
     private static final @NonNull String TID = "pid"; //$NON-NLS-1$
+    private static final @NonNull String CPU_FREQUENCY = "cpu_frequency"; //$NON-NLS-1$
     private static @Nullable GenericFtraceEventLayout INSTANCE;
 
     /**
@@ -71,5 +72,10 @@ public class GenericFtraceEventLayout extends DefaultEventLayout {
     @Override
     public String fieldChildTid() {
         return CHILD_TID;
+    }
+
+    @Override
+    public @NonNull String eventCpuFrequency() {
+        return CPU_FREQUENCY;
     }
 }
