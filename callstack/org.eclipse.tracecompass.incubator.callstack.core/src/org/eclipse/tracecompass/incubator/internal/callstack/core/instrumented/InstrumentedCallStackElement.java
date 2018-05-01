@@ -236,9 +236,11 @@ public class InstrumentedCallStackElement extends CallStackElement {
             callstack =  new CallStack(getStateSystem(), subAttributes, this, hostProvider, threadIdProvider);
             fCallstack = callstack;
         } else {
-            // Update the callstack if attributes were added
-            if (callstack.getMaxDepth() < subAttributes.size() ) {
-                callstack.updateAttributes(subAttributes);
+            synchronized (fCallstack) {
+                // Update the callstack if attributes were added
+                if (callstack.getMaxDepth() < subAttributes.size()) {
+                    callstack.updateAttributes(subAttributes);
+                }
             }
         }
         return Objects.requireNonNull(callstack);

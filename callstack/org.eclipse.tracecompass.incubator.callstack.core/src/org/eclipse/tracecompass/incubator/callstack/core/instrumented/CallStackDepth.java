@@ -59,7 +59,10 @@ public class CallStackDepth {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(fCallstack, fDepth);
+        // Compare with the actual callstack object, as the callstack's own hash may
+        // change as the callstack is built. Here, we are looking for the same object,
+        // no matter its content
+        return Objects.hashCode(System.identityHashCode(fCallstack), fDepth);
     }
 
     @Override
@@ -68,7 +71,10 @@ public class CallStackDepth {
             return false;
         }
         CallStackDepth csd = (CallStackDepth) obj;
-        return Objects.equal(fCallstack, csd.fCallstack) && (fDepth == csd.fDepth);
+        // Compare with the actual callstack object, as the callstack's own hash may
+        // change as the callstack is built. Here, we are looking for the same object,
+        // no matter its content
+        return Objects.equal(System.identityHashCode(fCallstack), System.identityHashCode(csd.fCallstack)) && (fDepth == csd.fDepth);
     }
 
     @Override
