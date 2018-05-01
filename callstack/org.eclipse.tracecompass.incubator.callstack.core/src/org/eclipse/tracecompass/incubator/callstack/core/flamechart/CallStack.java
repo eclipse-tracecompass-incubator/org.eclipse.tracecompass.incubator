@@ -260,6 +260,34 @@ public class CallStack {
     }
 
     /**
+     * Get the depth of this callstack, at the time of query.
+     *
+     * @param time
+     *            The reference time from which to calculate the next depth
+     * @return The depth of the callstack at the time of query. If there is no
+     *         value, it will return 0
+     */
+    public int getCurrentDepth(long time) {
+        // Check the time
+        if (time < fStateSystem.getStartTime() || time > fStateSystem.getCurrentEndTime()) {
+            return 0;
+        }
+        Integer oneQuark = fQuarks.get(0);
+        int parent = fStateSystem.getParentAttributeQuark(oneQuark);
+        try {
+            ITmfStateInterval currentDepth = fStateSystem.querySingleState(time, parent);
+            Object value = currentDepth.getValue();
+            if (!(value instanceof Integer)) {
+                return 0;
+            }
+            return (Integer) value;
+        } catch (StateSystemDisposedException e) {
+            // Do nothing
+        }
+        return 0;
+    }
+
+    /**
      * Iterate over the callstack in a depth-first manner
      *
      * @param startTime

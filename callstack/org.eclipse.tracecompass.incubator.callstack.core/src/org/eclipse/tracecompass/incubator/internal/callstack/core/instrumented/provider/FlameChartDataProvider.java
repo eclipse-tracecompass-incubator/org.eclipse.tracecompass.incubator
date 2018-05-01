@@ -35,6 +35,7 @@ import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
+import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.CallStackDepth;
@@ -53,6 +54,7 @@ import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.IT
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphState;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphArrow;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphRowModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphState;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.response.ITmfResponse;
@@ -206,6 +208,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
 
     private final String fAnalysisId;
     private final ReentrantReadWriteLock fLock = new ReentrantReadWriteLock(false);
+    private final FlameChartArrowProvider fArrowProvider;
     private @Nullable TmfModelResponse<List<FlameChartEntryModel>> fCached;
     private @Nullable ThreadData fThreadData = null;
 
@@ -223,13 +226,59 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
         super(trace);
         fFcProvider = module;
         fAnalysisId = secondaryId;
+        fArrowProvider = new FlameChartArrowProvider(trace);
         resetFunctionNames(new NullProgressMonitor());
     }
 
     @Override
     public TmfModelResponse<List<ITimeGraphArrow>> fetchArrows(TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        // TODO Implement
-        return new TmfModelResponse<>(null, Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        List<ITmfStateInterval> arrows = fArrowProvider.fetchArrows(filter, monitor);
+        List<ITimeGraphArrow> tgArrows = new ArrayList<>();
+        // First, get the distinct callstacks
+        Set<CallStack> callstacks = fIdToCallstack.values().stream()
+                .map(CallStackDepth::getCallStack)
+                .distinct()
+                .collect(Collectors.toSet());
+        // Find the source and destination entry for each arrow
+        for (ITmfStateInterval interval : arrows) {
+            if (monitor != null && monitor.isCanceled()) {
+                return new TmfModelResponse<>(null, Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
+            }
+            EdgeStateValue edge = (EdgeStateValue) interval.getValue();
+            if (edge == null) {
+                /*
+                 * by contract all the intervals should have EdgeStateValues but need to check
+                 * to avoid NPE
+                 */
+                continue;
+            }
+            Long src = findEntry(callstacks, edge.getSource(), interval.getStartTime());
+            Long dst = findEntry(callstacks, edge.getDestination(), interval.getEndTime() + 1);
+            if (src != null && dst != null) {
+                long duration = interval.getEndTime() - interval.getStartTime() + 1;
+                tgArrows.add(new TimeGraphArrow(src, dst, interval.getStartTime(), duration, edge.getId()));
+            }
+        }
+        return new TmfModelResponse<>(tgArrows, Status.COMPLETED, CommonStatusMessage.COMPLETED);
+    }
+
+    private @Nullable Long findEntry(Set<CallStack> callstacks, @NonNull HostThread hostThread, long ts) {
+        // Get the
+        for (CallStack callstack : callstacks) {
+            HostThread csHt = callstack.getHostThread(ts);
+            if (csHt == null || !csHt.equals(hostThread)) {
+                continue;
+            }
+            // We found the callstack, find the right depth and its entry id
+            int currentDepth = callstack.getCurrentDepth(ts);
+            for (Entry<Long, CallStackDepth> csdEntry : fIdToCallstack.entrySet()) {
+                CallStackDepth csd = csdEntry.getValue();
+                if (csd.getDepth() == currentDepth && csd.getCallStack().equals(callstack)) {
+                    return csdEntry.getKey();
+                }
+            }
+        }
+        return null;
     }
 
     @Override

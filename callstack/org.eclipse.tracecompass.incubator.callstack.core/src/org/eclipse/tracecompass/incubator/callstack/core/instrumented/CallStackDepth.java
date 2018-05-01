@@ -57,6 +57,15 @@ public class CallStackDepth {
         return fCallstack;
     }
 
+    /**
+     * Get the depth in the callstack this object represents
+     *
+     * @return The depth in the callstack
+     */
+    public int getDepth() {
+        return fDepth;
+    }
+
     @Override
     public int hashCode() {
         // Compare with the actual callstack object, as the callstack's own hash may
