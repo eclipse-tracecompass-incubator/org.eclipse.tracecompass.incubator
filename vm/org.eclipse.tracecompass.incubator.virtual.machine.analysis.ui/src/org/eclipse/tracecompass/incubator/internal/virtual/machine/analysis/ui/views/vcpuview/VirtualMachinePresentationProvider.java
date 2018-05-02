@@ -9,21 +9,28 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vcpuview;
 
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VcpuStateValues;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vcpuview.VirtualMachineCommon.Type;
+import org.eclipse.tracecompass.tmf.core.presentation.RGBAColor;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEventStyleStrings;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Presentation provider for the Virtual Machine view, based on the generic TMF
@@ -40,24 +47,83 @@ public class VirtualMachinePresentationProvider extends TimeGraphPresentationPro
      * provider because it actually is the same data as from the control flow
      * view. Ideally, we should reuse what is there instead of rewriting it here
      */
-    private enum State {
-        UNKNOWN(new RGB(100, 100, 100)),
-        IDLE(new RGB(200, 200, 200)),
-        USERMODE(new RGB(0, 200, 0)),
-        WAIT_VMM(new RGB(200, 0, 0)),
-        VCPU_PREEMPTED(new RGB(120, 40, 90)),
-        THREAD_UNKNOWN(new RGB(100, 100, 100)),
-        THREAD_WAIT_BLOCKED(new RGB(200, 200, 0)),
-        THREAD_WAIT_FOR_CPU(new RGB(200, 100, 0)),
-        THREAD_USERMODE(new RGB(0, 200, 0)),
-        THREAD_SYSCALL(new RGB(0, 0, 200)),
-        THREAD_INTERRUPTED(new RGB(200, 0, 100));
+    enum VCPUStyle {
 
-        private final RGB fRgb;
+        UNKNOWN(Messages.VcpuStyles_unknow, 83, 156, 83, 255, 1.00f),
+        IDLE(Messages.VcpuStyles_idle, 200, 200, 200, 255, 0.66f),
+        USERMODE(Messages.VcpuStyles_vcpuUsermode, 0, 200, 0, 255, 1.00f),
+        WAIT_VMM(Messages.VcpuStyles_waitVmm, 179, 6, 6, 255, 0.66f),
+        VCPU_PREEMPTED(Messages.VcpuStyles_vcpuPreempted, 207, 127, 47, 255, 0.50f),
 
-        private State(RGB rgb) {
-            fRgb = rgb;
+        THREAD_UNKNOWN(Messages.VcpuStyles_wait, 200, 200, 200, 255, 0.50f),
+        THREAD_WAIT_BLOCKED(Messages.VcpuStyles_waitBlocked, 200, 200, 0, 255, 0.50f),
+        THREAD_WAIT_FOR_CPU(Messages.VcpuStyles_waitForCPU, 200, 100, 0, 255, 0.50f),
+        THREAD_USERMODE(Messages.VcpuStyles_usermode, 0, 200, 0, 255, 1.00f),
+        THREAD_SYSCALL(Messages.VcpuStyles_systemCall, 0, 0, 200, 255, 1.00f),
+        THREAD_INTERRUPTED(Messages.VcpuStyles_Interrupt, 200, 0, 100, 255, 0.75f);
+
+        private final Map<String, Object> fMap;
+
+        private VCPUStyle(@Nullable String label, int red, int green, int blue, int alpha, float heightFactor) {
+            if (label == null) {
+                throw new IllegalArgumentException("Label cannot be null"); //$NON-NLS-1$
+            }
+            if (red > 255 || red < 0) {
+                throw new IllegalArgumentException("Red needs to be between 0 and 255"); //$NON-NLS-1$
+            }
+            if (green > 255 || green < 0) {
+                throw new IllegalArgumentException("Green needs to be between 0 and 255"); //$NON-NLS-1$
+            }
+            if (blue > 255 || blue < 0) {
+                throw new IllegalArgumentException("Blue needs to be between 0 and 255"); //$NON-NLS-1$
+            }
+            if (alpha > 255 || alpha < 0) {
+                throw new IllegalArgumentException("alpha needs to be between 0 and 255"); //$NON-NLS-1$
+            }
+            if (heightFactor > 1.0 || heightFactor < 0) {
+                throw new IllegalArgumentException("Height factor needs to be between 0 and 1.0, given hint : " + heightFactor); //$NON-NLS-1$
+            }
+            fMap = ImmutableMap.of(ITimeEventStyleStrings.label(), label,
+                    ITimeEventStyleStrings.fillStyle(), ITimeEventStyleStrings.solidColorFillStyle(),
+                    ITimeEventStyleStrings.fillColor(), new RGBAColor(red, green, blue, alpha).toInt(),
+                    ITimeEventStyleStrings.heightFactor(), heightFactor);
         }
+
+        public String getLabel() {
+            return (String) fMap.get(ITimeEventStyleStrings.label());
+        }
+
+        /**
+         * Get a map of the values corresponding to the fields in
+         * {@link ITimeEventStyleStrings}
+         *
+         * @return the map corresponding to the api defined in
+         *         {@link ITimeEventStyleStrings}
+         */
+        public Map<String, Object> toMap() {
+            return fMap;
+        }
+    }
+
+    private static final List<StateItem> STATE_LIST;
+    private static final StateItem[] STATE_TABLE;
+
+    static {
+        /*
+         * DO NOT MODIFY AFTER
+         */
+        STATE_LIST = ImmutableList.of(new StateItem(VCPUStyle.UNKNOWN.toMap()),
+                new StateItem(VCPUStyle.IDLE.toMap()),
+                new StateItem(VCPUStyle.USERMODE.toMap()),
+                new StateItem(VCPUStyle.WAIT_VMM.toMap()),
+                new StateItem(VCPUStyle.VCPU_PREEMPTED.toMap()),
+                new StateItem(VCPUStyle.THREAD_UNKNOWN.toMap()),
+                new StateItem(VCPUStyle.THREAD_WAIT_BLOCKED.toMap()),
+                new StateItem(VCPUStyle.THREAD_WAIT_FOR_CPU.toMap()),
+                new StateItem(VCPUStyle.THREAD_USERMODE.toMap()),
+                new StateItem(VCPUStyle.THREAD_SYSCALL.toMap()),
+                new StateItem(VCPUStyle.THREAD_INTERRUPTED.toMap()));
+        STATE_TABLE = STATE_LIST.toArray(new StateItem[STATE_LIST.size()]);
     }
 
     /**
@@ -67,48 +133,44 @@ public class VirtualMachinePresentationProvider extends TimeGraphPresentationPro
         super();
     }
 
-    private static State[] getStateValues() {
-        return State.values();
-    }
-
-    private static State getStateForVcpu(int value) {
+    private static VCPUStyle getStateForVcpu(int value) {
         if ((value & VcpuStateValues.VCPU_PREEMPT) > 0) {
-            return State.VCPU_PREEMPTED;
+            return VCPUStyle.VCPU_PREEMPTED;
         } else if ((value & VcpuStateValues.VCPU_VMM) > 0) {
-            return State.WAIT_VMM;
+            return VCPUStyle.WAIT_VMM;
         } else if (value == 2) {
-            return State.USERMODE;
+            return VCPUStyle.USERMODE;
         } else if (value == 1) {
-            return State.IDLE;
+            return VCPUStyle.IDLE;
         } else {
-            return State.UNKNOWN;
+            return VCPUStyle.UNKNOWN;
         }
     }
 
-    private static @Nullable State getStateForThread(int value) {
+    private static @Nullable VCPUStyle getStateForThread(int value) {
         if (value == VcpuStateValues.VCPU_PREEMPT) {
             return null;
         }
         switch (value) {
         case StateValues.PROCESS_STATUS_RUN_USERMODE:
-            return State.THREAD_USERMODE;
+            return VCPUStyle.THREAD_USERMODE;
         case StateValues.PROCESS_STATUS_RUN_SYSCALL:
-            return State.THREAD_SYSCALL;
+            return VCPUStyle.THREAD_SYSCALL;
         case StateValues.PROCESS_STATUS_WAIT_FOR_CPU:
-            return State.THREAD_WAIT_FOR_CPU;
+            return VCPUStyle.THREAD_WAIT_FOR_CPU;
         case StateValues.PROCESS_STATUS_WAIT_BLOCKED:
-            return State.THREAD_WAIT_BLOCKED;
+            return VCPUStyle.THREAD_WAIT_BLOCKED;
         case StateValues.PROCESS_STATUS_INTERRUPTED:
-            return State.THREAD_INTERRUPTED;
+            return VCPUStyle.THREAD_INTERRUPTED;
         case StateValues.PROCESS_STATUS_UNKNOWN:
         case StateValues.PROCESS_STATUS_WAIT_UNKNOWN:
-            return State.THREAD_UNKNOWN;
+            return VCPUStyle.THREAD_UNKNOWN;
         default:
             return null;
         }
     }
 
-    private static @Nullable State getEventState(TimeEvent event) {
+    private static @Nullable VCPUStyle getEventState(TimeEvent event) {
         if (event.hasValue()) {
             VirtualMachineViewEntry entry = (VirtualMachineViewEntry) event.getEntry();
             int value = event.getValue();
@@ -127,7 +189,7 @@ public class VirtualMachinePresentationProvider extends TimeGraphPresentationPro
         if (event == null) {
             return TRANSPARENT;
         }
-        State state = getEventState((TimeEvent) event);
+        VCPUStyle state = getEventState((TimeEvent) event);
         if (state != null) {
             return state.ordinal();
         }
@@ -139,13 +201,7 @@ public class VirtualMachinePresentationProvider extends TimeGraphPresentationPro
 
     @Override
     public StateItem[] getStateTable() {
-        State[] states = getStateValues();
-        StateItem[] stateTable = new StateItem[states.length];
-        for (int i = 0; i < stateTable.length; i++) {
-            State state = states[i];
-            stateTable[i] = new StateItem(state.fRgb, state.toString());
-        }
-        return stateTable;
+        return STATE_TABLE;
     }
 
     @Override
@@ -153,7 +209,7 @@ public class VirtualMachinePresentationProvider extends TimeGraphPresentationPro
         if (event == null) {
             return null;
         }
-        State state = getEventState((TimeEvent) event);
+        VCPUStyle state = getEventState((TimeEvent) event);
         if (state != null) {
             return state.toString();
         }

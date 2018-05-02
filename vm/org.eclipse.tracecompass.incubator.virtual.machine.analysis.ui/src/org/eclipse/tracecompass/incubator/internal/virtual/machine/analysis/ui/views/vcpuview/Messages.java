@@ -16,6 +16,18 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = Messages.class.getPackage().getName() + ".messages"; //$NON-NLS-1$"
 
+    public static @Nullable String VcpuStyles_idle = null;
+    public static @Nullable String VcpuStyles_vcpuUsermode = null;
+    public static @Nullable String VcpuStyles_waitVmm = null;
+    public static @Nullable String VcpuStyles_vcpuPreempted = null;
+    public static @Nullable String VcpuStyles_wait = null;
+    public static @Nullable String VcpuStyles_waitBlocked = null;
+    public static @Nullable String VcpuStyles_waitForCPU = null;
+    public static @Nullable String VcpuStyles_usermode = null;
+    public static @Nullable String VcpuStyles_systemCall = null;
+    public static @Nullable String VcpuStyles_Interrupt = null;
+    public static @Nullable String VcpuStyles_unknow;
+
     public static @Nullable String VmView_threads;
     public static @Nullable String VmView_stateTypeName;
     public static @Nullable String VmView_multipleStates;
