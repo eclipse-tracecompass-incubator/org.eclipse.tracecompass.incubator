@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallStackAnalysisStub;

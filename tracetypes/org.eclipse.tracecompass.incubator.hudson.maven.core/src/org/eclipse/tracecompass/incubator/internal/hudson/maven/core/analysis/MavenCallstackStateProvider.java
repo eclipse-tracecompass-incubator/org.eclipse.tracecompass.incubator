@@ -16,7 +16,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.hudson.maven.core.trace.MavenEvent;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -101,7 +100,7 @@ public class MavenCallstackStateProvider extends CallStackStateProvider {
         int threadQuark = ssb.getQuarkRelativeAndAdd(processQuark, getThreadName(event));
         int callStackQuark = ssb.getQuarkRelativeAndAdd(threadQuark, CALL_STACK);
 
-        TmfStateValue stateValue = TmfStateValue.newValueString(MavenEvent.GROUP_ASPECT.resolve(event));
+        String groupAspect = MavenEvent.GROUP_ASPECT.resolve(event);
         if (event.getType().equals(MavenEvent.GOAL_TYPE)) {
             fSafeTime = Math.max(fSafeTime + 1, event.getTimestamp().toNanos());
             if (fDepth == 2) {
@@ -113,7 +112,7 @@ public class MavenCallstackStateProvider extends CallStackStateProvider {
                 ssb.popAttribute(fSafeTime, callStackQuark);
             }
             ssb.popAttribute(fSafeTime - 1, callStackQuark);
-            ssb.pushAttribute(fSafeTime, stateValue, callStackQuark);
+            ssb.pushAttribute(fSafeTime, groupAspect, callStackQuark);
             fNextClose = Long.MAX_VALUE;
             fDepth = 1;
         } else if (event.getType().equals(MavenEvent.SUMMARY_TYPE)) {
@@ -122,18 +121,18 @@ public class MavenCallstackStateProvider extends CallStackStateProvider {
             }
             fSafeTime = fNextClose != Long.MAX_VALUE ? fNextClose + 1 : fSafeTime;
             long duration = (long) Math.ceil(Objects.requireNonNull(MavenEvent.DURATION_ASPECT.resolve(event)) * NANOS_IN_SEC);
-            ssb.pushAttribute(fSafeTime, stateValue, callStackQuark);
+            ssb.pushAttribute(fSafeTime, groupAspect, callStackQuark);
             fNextClose = fSafeTime + duration;
             fDepth = 2;
         } else if (event.getType().equals(MavenEvent.TEST_TYPE)) {
             if (fDepth == 1) {
                 // attempt to re-create a group
                 String fullGroup = Objects.requireNonNull(MavenEvent.FULL_GROUP_ASPECT.resolve(event));
-                ssb.pushAttribute(fSafeTime, TmfStateValue.newValueString(fullGroup.substring(fullGroup.indexOf('(') + 1, fullGroup.length() - 1)), callStackQuark);
+                ssb.pushAttribute(fSafeTime, fullGroup.substring(fullGroup.indexOf('(') + 1, fullGroup.length() - 1), callStackQuark);
             }
             long testDuration = (long) Math.ceil(Objects.requireNonNull(MavenEvent.DURATION_ASPECT.resolve(event)) * NANOS_IN_SEC);
             fSafeTime++;
-            ssb.pushAttribute(fSafeTime, stateValue, callStackQuark);
+            ssb.pushAttribute(fSafeTime, groupAspect, callStackQuark);
             fSafeTime += testDuration;
             ssb.popAttribute(fSafeTime, callStackQuark);
             fDepth = 2;

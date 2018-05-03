@@ -15,8 +15,6 @@ import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -64,20 +62,23 @@ public class IrqEntryHandler extends VMKernelEventHandler {
          */
         int quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeIRQs(cpu, ss), irqId.toString());
 
-        ITmfStateValue value = TmfStateValue.newValueInt(cpu.intValue());
+        Object value = cpu.intValue();
         long timestamp = FusedVMEventHandlerUtils.getTimestamp(event);
         ss.modifyAttribute(timestamp, value, quark);
 
         /* Change the status of the running process to interrupted */
         quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getCurrentThreadNode(cpu, ss), FusedAttributes.STATUS);
-        value = StateValues.PROCESS_STATUS_INTERRUPTED_VALUE;
+        value = StateValues.PROCESS_STATUS_INTERRUPTED;
         ss.modifyAttribute(timestamp, value, quark);
 
         /* Change the status of the CPU to be interrupted */
         quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getCurrentCPUNode(cpu, ss), FusedAttributes.STATUS);
-        value = ss.queryOngoingState(quark);
-        cpuObject.setStateBeforeIRQ(value);
-        value = StateValues.CPU_STATUS_IRQ_VALUE;
+        value = ss.queryOngoing(quark);
+        if (value == null) {
+            return;
+        }
+        cpuObject.setStateBeforeIRQ((int) value);
+        value = StateValues.CPU_STATUS_IRQ;
         ss.modifyAttribute(timestamp, value, quark);
     }
 

@@ -16,8 +16,6 @@ import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -51,14 +49,12 @@ public class SysEntryHandler extends VMKernelEventHandler {
         /* Assign the new system call to the process */
         int currentThreadNode = FusedVMEventHandlerUtils.getCurrentThreadNode(cpu, ss);
         int quark = ss.getQuarkRelativeAndAdd(currentThreadNode, FusedAttributes.SYSTEM_CALL);
-        ITmfStateValue value = TmfStateValue.newValueString(event.getName());
         long timestamp = FusedVMEventHandlerUtils.getTimestamp(event);
-        ss.modifyAttribute(timestamp, value, quark);
+        ss.modifyAttribute(timestamp, event.getName(), quark);
 
         /* Put the process in system call mode */
         quark = ss.getQuarkRelativeAndAdd(currentThreadNode, FusedAttributes.STATUS);
-        value = StateValues.PROCESS_STATUS_RUN_SYSCALL_VALUE;
-        ss.modifyAttribute(timestamp, value, quark);
+        ss.modifyAttribute(timestamp, StateValues.PROCESS_STATUS_RUN_SYSCALL, quark);
 
         /* Put the CPU in system call (kernel) mode */
         int currentCPUNode = FusedVMEventHandlerUtils.getCurrentCPUNode(cpu, ss);
@@ -78,11 +74,10 @@ public class SysEntryHandler extends VMKernelEventHandler {
         }
 
         quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
-        value = StateValues.CPU_STATUS_RUN_SYSCALL_VALUE;
         if (modify) {
-            ss.modifyAttribute(timestamp, value, quark);
+            ss.modifyAttribute(timestamp, StateValues.CPU_STATUS_RUN_SYSCALL, quark);
         }
-        cpuObject.setCurrentState(value);
+        cpuObject.setCurrentState(StateValues.CPU_STATUS_RUN_SYSCALL);
     }
 
 }

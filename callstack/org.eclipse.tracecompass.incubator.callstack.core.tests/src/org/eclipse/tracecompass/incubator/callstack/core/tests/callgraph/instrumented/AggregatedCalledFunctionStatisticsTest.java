@@ -101,20 +101,20 @@ public class AggregatedCalledFunctionStatisticsTest {
         // Build the state system
         int parentQuark = fixture.getQuarkAbsoluteAndAdd(CallGraphAnalysisStub.PROCESS_PATH, CallGraphAnalysisStub.THREAD_PATH, CallGraphAnalysisStub.CALLSTACK_PATH);
         int quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_0);
-        TmfStateValue statev = TmfStateValue.newValueLong(0);
+        long statev = 0L;
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(100, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(100, (Object) null, quark);
 
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_1);
-        statev = TmfStateValue.newValueLong(1);
+        statev = 1L;
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(50, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(50, (Object) null, quark);
         fixture.modifyAttribute(60, statev, quark);
-        fixture.modifyAttribute(90, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(90, (Object) null, quark);
 
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_2);
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(30, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(30, (Object) null, quark);
         fixture.closeHistory(102);
 
         // Execute the CallGraphAnalysis
@@ -186,24 +186,24 @@ public class AggregatedCalledFunctionStatisticsTest {
         // Build the state system
         int parentQuark = fixture.getQuarkAbsoluteAndAdd(CallGraphAnalysisStub.PROCESS_PATH, CallGraphAnalysisStub.THREAD_PATH, CallGraphAnalysisStub.CALLSTACK_PATH);
         int quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_0);
-        TmfStateValue statev = TmfStateValue.newValueLong(0);
+        Object statev = 0L;
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(100, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(100, (Object) null, quark);
 
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_1);
         statev = TmfStateValue.newValueLong(1);
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(50, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(50, (Object) null, quark);
         fixture.modifyAttribute(60, statev, quark);
-        fixture.modifyAttribute(90, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(90, (Object) null, quark);
 
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_2);
         statev = TmfStateValue.newValueLong(2);
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(30, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(30, (Object) null, quark);
         statev = TmfStateValue.newValueLong(3);
         fixture.modifyAttribute(60, statev, quark);
-        fixture.modifyAttribute(80, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(80, (Object) null, quark);
         fixture.closeHistory(102);
 
         // Execute the CallGraphAnalysis
@@ -287,21 +287,21 @@ public class AggregatedCalledFunctionStatisticsTest {
         int parentQuark = fixture.getQuarkAbsoluteAndAdd(CallGraphAnalysisStub.PROCESS_PATH, CallGraphAnalysisStub.THREAD_PATH, CallGraphAnalysisStub.CALLSTACK_PATH);
         // Create the first root function
         int quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_0);
-        TmfStateValue statev = TmfStateValue.newValueLong(1);
+        Object statev = 1L;
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(20, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(20, (Object) null, quark);
         // Create the second root function
         fixture.modifyAttribute(30, statev, quark);
-        fixture.modifyAttribute(80, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(80, (Object) null, quark);
         // Create the first root function's callee
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_1);
         statev = TmfStateValue.newValueLong(2);
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(10, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(10, (Object) null, quark);
         // Create the second root function's callee
         statev = TmfStateValue.newValueLong(3);
         fixture.modifyAttribute(30, statev, quark);
-        fixture.modifyAttribute(40, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(40, (Object) null, quark);
         fixture.closeHistory(81);
 
         // Execute the callGraphAnalysis
@@ -370,39 +370,39 @@ public class AggregatedCalledFunctionStatisticsTest {
         int parentQuark = fixture.getQuarkAbsoluteAndAdd(CallGraphAnalysisStub.PROCESS_PATH, CallGraphAnalysisStub.THREAD_PATH, CallGraphAnalysisStub.CALLSTACK_PATH);
         // Create the first function
         int quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_0);
-        TmfStateValue statev = TmfStateValue.newValueLong(0);
+        Object statev = 0L;
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(150, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(150, (Object) null, quark);
         // Create the first level functions
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_1);
         statev = TmfStateValue.newValueLong(1);
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(50, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(50, (Object) null, quark);
         fixture.modifyAttribute(60, statev, quark);
-        fixture.modifyAttribute(100, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(100, (Object) null, quark);
         fixture.modifyAttribute(130, statev, quark);
-        fixture.modifyAttribute(150, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(150, (Object) null, quark);
         // Create the third function
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_2);
         statev = TmfStateValue.newValueLong(2);
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(10, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(10, (Object) null, quark);
 
         statev = TmfStateValue.newValueLong(3);
         fixture.modifyAttribute(20, statev, quark);
-        fixture.modifyAttribute(30, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(30, (Object) null, quark);
 
         statev = TmfStateValue.newValueLong(2);
         fixture.modifyAttribute(60, statev, quark);
-        fixture.modifyAttribute(90, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(90, (Object) null, quark);
 
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_3);
         statev = TmfStateValue.newValueLong(4);
         fixture.modifyAttribute(0, statev, quark);
-        fixture.modifyAttribute(10, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(10, (Object) null, quark);
 
         fixture.modifyAttribute(60, statev, quark);
-        fixture.modifyAttribute(80, TmfStateValue.nullValue(), quark);
+        fixture.modifyAttribute(80, (Object) null, quark);
         fixture.closeHistory(151);
     }
 

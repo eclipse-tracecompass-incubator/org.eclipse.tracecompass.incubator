@@ -31,8 +31,8 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * The default base state provider for traces that implement the default
- * {@link InstrumentedCallStackAnalysis} with a process / thread grouping, using the default
- * values.
+ * {@link InstrumentedCallStackAnalysis} with a process / thread grouping, using
+ * the default values.
  *
  * Specific analyses will need to override it to specify the function
  * entry/exit, as well as how to get the process ID and thread ID.
@@ -77,6 +77,9 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  * int or long representing the function name or address in the call stack. The
  * type of value used must be constant for a particular CallStack.</li>
  * </ul>
+ *
+ * TODO: Use the same state provider as the one currently in trace Compass. It
+ * just needs the ProcessName and ThreadName Aspects.
  *
  * @author Patrick Tasse
  */
@@ -130,7 +133,7 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
 
     private void handleFunctionEntry(ITmfStateSystemBuilder ss, ITmfEvent event) {
         /* Check if the event is a function entry */
-        ITmfStateValue functionEntryName = functionEntry(event);
+        Object functionEntryName = functionEntry(event);
         if (functionEntryName != null) {
             long timestamp = event.getTimestamp().toNanos();
 
@@ -151,15 +154,15 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
             ss.updateOngoingState(TmfStateValue.newValueLong(threadId), threadQuark);
 
             int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.CALL_STACK);
-            ITmfStateValue value = functionEntryName;
-            ss.pushAttribute(timestamp, value, callStackQuark);
+            ss.pushAttribute(timestamp, functionEntryName, callStackQuark);
             return;
         }
     }
 
     private void handleFunctionExit(ITmfStateSystemBuilder ss, ITmfEvent event) {
         /* Check if the event is a function exit */
-        ITmfStateValue functionExitState = functionExit(event);
+        Object functionExitState = functionExit(event);
+        // FIXME: since
         if (functionExitState != null) {
             long timestamp = event.getTimestamp().toNanos();
             String processName = getProcessName(event);
@@ -177,7 +180,7 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
              * Verify that the value we are popping matches the one in the
              * event field, unless the latter is undefined.
              */
-            if (!functionExitState.isNull() && !functionExitState.equals(poppedValue)) {
+            if (!functionExitState.equals(poppedValue)) {
                 Activator.getInstance().logWarning(NLS.bind(Messages.CallStackStateProvider_EventDescription, event.getName(),
                         event.getTimestamp().getValue()) + ": " + NLS.bind( //$NON-NLS-1$
                         Messages.CallStackStateProvider_UnmatchedPoppedValue,
@@ -213,23 +216,23 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
      *
      * @param event
      *            An event to check for function entry
-     * @return The state value representing the function being entered, or null
+     * @return The object representing the function being entered, or null
      *         if not a function entry
      * @since 2.0
      */
-    protected abstract @Nullable ITmfStateValue functionEntry(ITmfEvent event);
+    protected abstract @Nullable Object functionEntry(ITmfEvent event);
 
     /**
      * Check an event if it indicates a function exit.
      *
      * @param event
      *            An event to check for function exit
-     * @return The state value representing the function being exited, or
+     * @return The object representing the function being exited, or
      *         TmfStateValue#nullValue() if the exited function is undefined,
      *         or null if not a function exit.
      * @since 2.0
      */
-    protected abstract @Nullable ITmfStateValue functionExit(ITmfEvent event);
+    protected abstract @Nullable Object functionExit(ITmfEvent event);
 
     /**
      * Return the process ID of a function entry event.

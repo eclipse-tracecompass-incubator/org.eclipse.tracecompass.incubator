@@ -21,8 +21,6 @@ import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 
 /**
@@ -83,11 +81,10 @@ public class FusedVMEventHandlerUtils {
          * querying the current CPU's current thread.
          */
         int quark = ss.getQuarkRelativeAndAdd(getCurrentCPUNode(cpuNumber, ss), FusedAttributes.CURRENT_THREAD);
-        ITmfStateValue value = ss.queryOngoingState(quark);
-        int thread = value.isNull() ? -1 : value.unboxInt();
+        Object value = ss.queryOngoing(quark);
+        int thread = (value instanceof Integer) ? (int) value : -1;
         quark = ss.getQuarkRelativeAndAdd(getCurrentCPUNode(cpuNumber, ss), FusedAttributes.MACHINE_NAME);
-        value = ss.queryOngoingState(quark);
-        String machineName = value.unboxStr();
+        String machineName = (String) ss.queryOngoing(quark);
         return ss.getQuarkRelativeAndAdd(getNodeThreads(ss, machineName), buildThreadAttributeName(thread, cpuNumber));
     }
 
@@ -163,15 +160,15 @@ public class FusedVMEventHandlerUtils {
     public static void setProcessToRunning(long timestamp, int currentThreadNode, ITmfStateSystemBuilder ssb)
             throws TimeRangeException, StateValueTypeException {
         int quark;
-        ITmfStateValue value;
+        Object value;
 
         quark = ssb.getQuarkRelativeAndAdd(currentThreadNode, FusedAttributes.SYSTEM_CALL);
         if (ssb.queryOngoingState(quark).isNull()) {
             /* We were in user mode before the interruption */
-            value = StateValues.PROCESS_STATUS_RUN_USERMODE_VALUE;
+            value = StateValues.PROCESS_STATUS_RUN_USERMODE;
         } else {
             /* We were previously in kernel mode */
-            value = StateValues.PROCESS_STATUS_RUN_SYSCALL_VALUE;
+            value = StateValues.PROCESS_STATUS_RUN_SYSCALL;
         }
         quark = ssb.getQuarkRelativeAndAdd(currentThreadNode, FusedAttributes.STATUS);
         ssb.modifyAttribute(timestamp, value, quark);
@@ -198,7 +195,7 @@ public class FusedVMEventHandlerUtils {
         int currentCPUNode = getCurrentCPUNode(cpuNumber, ssb);
 
         quark = ssb.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
-        ITmfStateValue value = getCpuStatus(ssb, currentCPUNode);
+        Object value = getCpuStatus(ssb, currentCPUNode);
         ssb.modifyAttribute(timestamp, value, quark);
     }
 
@@ -223,15 +220,15 @@ public class FusedVMEventHandlerUtils {
      *            NOT the CPU number (or attribute name)!
      * @return The state value that represents the status of the given CPU
      */
-    private static ITmfStateValue getCpuStatus(ITmfStateSystemBuilder ssb, int cpuQuark) {
+    private static @Nullable Integer getCpuStatus(ITmfStateSystemBuilder ssb, int cpuQuark) {
 
         /* Check if there is a IRQ running */
         int irqQuarks = ssb.getQuarkRelativeAndAdd(cpuQuark, FusedAttributes.IRQS);
         List<Integer> irqs = ssb.getSubAttributes(irqQuarks, false);
         for (Integer quark : irqs) {
-            final ITmfStateValue irqState = ssb.queryOngoingState(quark.intValue());
-            if (!irqState.isNull()) {
-                return irqState;
+            final Object irqState = ssb.queryOngoing(quark.intValue());
+            if (irqState instanceof Integer) {
+                return (Integer) irqState;
             }
         }
 
@@ -239,9 +236,9 @@ public class FusedVMEventHandlerUtils {
         int softIrqQuarks = ssb.getQuarkRelativeAndAdd(cpuQuark, FusedAttributes.SOFT_IRQS);
         List<Integer> softIrqs = ssb.getSubAttributes(softIrqQuarks, false);
         for (Integer quark : softIrqs) {
-            final ITmfStateValue softIrqState = ssb.queryOngoingState(quark.intValue());
-            if (!softIrqState.isNull()) {
-                return softIrqState;
+            final Object softIrqState = ssb.queryOngoing(quark.intValue());
+            if (softIrqState instanceof Integer) {
+                return (Integer) softIrqState;
             }
         }
 
@@ -250,18 +247,18 @@ public class FusedVMEventHandlerUtils {
          * report the running state of the thread (usermode or system call).
          */
         int currentThreadQuark = ssb.getQuarkRelativeAndAdd(cpuQuark, FusedAttributes.CURRENT_THREAD);
-        ITmfStateValue currentThreadState = ssb.queryOngoingState(currentThreadQuark);
-        if (currentThreadState.isNull()) {
-            return TmfStateValue.nullValue();
+        Object currentThreadState = ssb.queryOngoing(currentThreadQuark);
+        if (!(currentThreadState instanceof Integer)) {
+            return null;
         }
-        int tid = currentThreadState.unboxInt();
+        int tid = (Integer) currentThreadState;
         if (tid == 0) {
-            return StateValues.CPU_STATUS_IDLE_VALUE;
+            return StateValues.CPU_STATUS_IDLE;
         }
         int currentMachineQuark = ssb.getQuarkRelativeAndAdd(cpuQuark, FusedAttributes.MACHINE_NAME);
-        String machineName = ssb.queryOngoingState(currentMachineQuark).unboxStr();
+        String machineName = (String) ssb.queryOngoing(currentMachineQuark);
         int threadSystemCallQuark = ssb.getQuarkRelativeAndAdd(getNodeThreads(ssb, machineName), Integer.toString(tid), FusedAttributes.SYSTEM_CALL);
-        return (ssb.queryOngoingState(threadSystemCallQuark).isNull() ? StateValues.CPU_STATUS_RUN_USERMODE_VALUE : StateValues.CPU_STATUS_RUN_SYSCALL_VALUE);
+        return (ssb.queryOngoingState(threadSystemCallQuark).isNull() ? StateValues.CPU_STATUS_RUN_USERMODE : StateValues.CPU_STATUS_RUN_SYSCALL);
     }
 
     /**
@@ -336,9 +333,11 @@ public class FusedVMEventHandlerUtils {
         if (maxLvQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
             return namespaces;
         }
-        ITmfStateValue value;
-        value = ss.queryOngoingState(maxLvQuark);
-        int nsMaxLevel = value.unboxInt();
+        Object value = ss.queryOngoing(maxLvQuark);
+        if (value == null) {
+            return namespaces;
+        }
+        int nsMaxLevel = (int) value;
         if (nsMaxLevel > 1) {
             int currentLevel = 1;
             int vtidQuark = threadQuark;

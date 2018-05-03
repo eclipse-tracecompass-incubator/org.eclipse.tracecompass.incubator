@@ -358,18 +358,15 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
     }
 
     @Override
-    public void initializeDataSource() {
-        ITmfTrace trace = getTrace();
-        if (trace != null) {
-            Set<ICallGraphProvider> modules = getCallGraphs();
+    public void initializeDataSource(ITmfTrace trace) {
+        Set<ICallGraphProvider> modules = getCallGraphs();
 
-            fSymbolProviders  = SymbolProviderManager.getInstance().getSymbolProviders(trace);
-            modules.forEach(m -> {
-                if (m instanceof IAnalysisModule) {
-                    ((IAnalysisModule) m).schedule();
-                }
-            });
-        }
+        fSymbolProviders = SymbolProviderManager.getInstance().getSymbolProviders(trace);
+        modules.forEach(m -> {
+            if (m instanceof IAnalysisModule) {
+                ((IAnalysisModule) m).schedule();
+            }
+        });
     }
 
     /**
@@ -541,7 +538,7 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
     }
 
     @Override
-    protected @Nullable ITmfTreeViewerEntry updateElements(long start, long end, boolean isSelection) {
+    protected @Nullable ITmfTreeViewerEntry updateElements(ITmfTrace trace, long start, long end, boolean isSelection) {
 
         Set<ICallGraphProvider> modules = getCallGraphs();
 

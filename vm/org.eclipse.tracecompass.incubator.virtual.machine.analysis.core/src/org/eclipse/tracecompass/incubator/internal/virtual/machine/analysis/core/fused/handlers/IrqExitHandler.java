@@ -15,8 +15,6 @@ import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualCPU;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -51,9 +49,8 @@ public class IrqExitHandler extends VMKernelEventHandler {
         Integer irqId = ((Long) event.getContent().getField(getLayout().fieldIrq()).getValue()).intValue();
         /* Put this IRQ back to inactive in the resource tree */
         int quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeIRQs(cpu, ss), irqId.toString());
-        ITmfStateValue value = TmfStateValue.nullValue();
         long timestamp = FusedVMEventHandlerUtils.getTimestamp(event);
-        ss.modifyAttribute(timestamp, value, quark);
+        ss.modifyAttribute(timestamp, (Object) null, quark);
 
         /* Set the previous process back to running */
         FusedVMEventHandlerUtils.setProcessToRunning(timestamp, currentThreadNode, ss);
@@ -61,7 +58,7 @@ public class IrqExitHandler extends VMKernelEventHandler {
         /* Set the CPU status back to running or "idle" */
         FusedVMEventHandlerUtils.cpuExitInterrupt(timestamp, cpu, ss);
         quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getCurrentCPUNode(cpu, ss), FusedAttributes.STATUS);
-        value = cpuObject.getStateBeforeIRQ();
+        Integer value = cpuObject.getStateBeforeIRQ();
         ss.modifyAttribute(timestamp, value, quark);
     }
 

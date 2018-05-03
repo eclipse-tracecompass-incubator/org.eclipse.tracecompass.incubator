@@ -52,8 +52,9 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.ui.views.FormatTimeUtils;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.AbstractStateSystemTimeGraphView;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphPresentationProvider2;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphSelectionListener;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphTimeListener;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphSelectionEvent;
@@ -63,9 +64,6 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.Resolution;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.TimeFormat;
 
 /**
  * A view showing the virtual resources / CPUs for traces and their contained
@@ -851,7 +849,7 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
      * @return the FusedVMViewProvider
      */
     public VirtualResourcePresentationProvider getFusedVMViewPresentationProvider() {
-        ITimeGraphPresentationProvider2 pp = getPresentationProvider();
+        ITimeGraphPresentationProvider pp = getPresentationProvider();
         if (!(pp instanceof VirtualResourcePresentationProvider)) {
             return null;
         }
@@ -862,8 +860,8 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         long begin = getBeginSelectedTime();
         long end = getEndSelectedTime();
 
-        System.out.println("Begin time: " + Utils.formatTime(begin, TimeFormat.CALENDAR, Resolution.NANOSEC)); //$NON-NLS-1$
-        System.out.println("End time: " + Utils.formatTime(end, TimeFormat.CALENDAR, Resolution.NANOSEC)); //$NON-NLS-1$
+        System.out.println("Begin time: " + FormatTimeUtils.formatTime(begin, FormatTimeUtils.TimeFormat.CALENDAR, FormatTimeUtils.Resolution.NANOSEC)); //$NON-NLS-1$
+        System.out.println("End time: " + FormatTimeUtils.formatTime(end, FormatTimeUtils.TimeFormat.CALENDAR, FormatTimeUtils.Resolution.NANOSEC)); //$NON-NLS-1$
         System.out.println();
 
     }
@@ -951,18 +949,18 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         Machine host = null;
         List<Machine> guests = new LinkedList<>();
         for (String machineHost : FusedVMInformationProvider.getMachinesTraced(ssq)) {
-            ITmfStateValue typeMachine = FusedVMInformationProvider.getTypeMachine(ssq, machineHost);
+            int typeMachine = FusedVMInformationProvider.getTypeMachine(ssq, machineHost);
 
-            if (typeMachine.isNull()) {
+            if (typeMachine < 0) {
                 continue;
             }
             String machineName = FusedVMInformationProvider.getMachineName(ssq, machineHost);
             Machine machine = null;
-            if ((typeMachine.unboxInt() & StateValues.MACHINE_GUEST) == StateValues.MACHINE_GUEST) {
+            if ((typeMachine & StateValues.MACHINE_GUEST) == StateValues.MACHINE_GUEST) {
                 machine = new Machine(machineName, machineHost, typeMachine, FusedVMInformationProvider.getPhysicalCpusUsedByMachine(ssq, machineHost));
                 fMachines.put(machine.getMachineName(), machine);
                 guests.add(machine);
-            } else if (typeMachine.unboxInt() == StateValues.MACHINE_HOST) {
+            } else if (typeMachine == StateValues.MACHINE_HOST) {
                 machine = new Machine(machineName, machineHost, typeMachine);
                 for (String cpus : FusedVMInformationProvider.getCpusUsedByMachine(ssq, machineHost)) {
                     machine.addPCpu(cpus);

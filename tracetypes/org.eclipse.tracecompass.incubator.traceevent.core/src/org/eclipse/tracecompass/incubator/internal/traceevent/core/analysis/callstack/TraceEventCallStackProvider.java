@@ -33,8 +33,6 @@ import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceE
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventAspects;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventPhases;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfAttributePool;
@@ -166,9 +164,9 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
     }
 
     @Override
-    protected @Nullable ITmfStateValue functionEntry(@NonNull ITmfEvent event) {
+    protected @Nullable Object functionEntry(@NonNull ITmfEvent event) {
         if (isEntry(event)) {
-            return TmfStateValue.newValueString(event.getName());
+            return event.getName();
         }
         return null;
     }
@@ -179,9 +177,9 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
     }
 
     @Override
-    protected @Nullable ITmfStateValue functionExit(@NonNull ITmfEvent event) {
+    protected @Nullable Object functionExit(@NonNull ITmfEvent event) {
         if (isExit(event)) {
-            return TmfStateValue.newValueString(event.getName());
+            return event.getName();
         }
         return null;
     }
@@ -320,7 +318,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
     }
 
     private void handleStart(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp, String processName) {
-        ITmfStateValue functionBeginName = functionEntry(event);
+        Object functionBeginName = functionEntry(event);
         if (functionBeginName != null) {
             int processQuark = ss.getQuarkAbsoluteAndAdd(PROCESSES, processName);
 
@@ -333,14 +331,13 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             ss.modifyAttribute(event.getTimestamp().toNanos(), threadId, threadQuark);
 
             int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.CALL_STACK);
-            ITmfStateValue value = functionBeginName;
-            ss.pushAttribute(timestamp, value, callStackQuark);
+            ss.pushAttribute(timestamp, functionBeginName, callStackQuark);
         }
     }
 
     private void handleEnd(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp, String processName) {
         /* Check if the event is a function exit */
-        ITmfStateValue functionExitState = functionExit(event);
+        Object functionExitState = functionExit(event);
         if (functionExitState != null) {
             String pName = processName;
 

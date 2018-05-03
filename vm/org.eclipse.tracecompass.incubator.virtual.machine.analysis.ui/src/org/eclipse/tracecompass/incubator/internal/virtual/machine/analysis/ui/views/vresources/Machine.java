@@ -18,7 +18,6 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 
 /**
  * Represents a machine in the ui
@@ -37,7 +36,7 @@ public class Machine {
     private Set<Processor> fPcpus = new HashSet<>();
     private Set<Machine> fContainers = new HashSet<>();
     private Set<Machine> fVirtualMachines = new HashSet<>();
-    private ITmfStateValue fMachineType;
+    private int fMachineType;
 
     /**
      * Constructor
@@ -49,7 +48,7 @@ public class Machine {
      * @param type
      *            The type state value of the machine
      */
-    public Machine(String name, String hostId, ITmfStateValue type) {
+    public Machine(String name, String hostId, int type) {
         this(name, hostId, type, Collections.emptyList());
     }
 
@@ -65,7 +64,7 @@ public class Machine {
      * @param pcpus
      *            The list of CPUs used by this machine
      */
-    public Machine(String name, String hostId, ITmfStateValue type, Collection<String> pcpus) {
+    public Machine(String name, String hostId, int type, Collection<String> pcpus) {
         fMachineName = name;
         fMachineType = type;
         fHostId = hostId;
@@ -88,7 +87,7 @@ public class Machine {
      * @return The newly created container.
      */
     public Machine createContainer(String name, String hostId, List<String> physCpus) {
-        Machine container = new Machine(name, hostId, StateValues.MACHINE_CONTAINER_VALUE, physCpus);
+        Machine container = new Machine(name, hostId, StateValues.MACHINE_CONTAINER, physCpus);
         container.setHost(this);
         fContainers.add(container);
         return container;
@@ -100,7 +99,7 @@ public class Machine {
      * @return whether the machine is a container
      */
     public boolean isContainer() {
-        return fMachineType == StateValues.MACHINE_CONTAINER_VALUE;
+        return fMachineType == StateValues.MACHINE_CONTAINER;
     }
 
     /**
@@ -186,7 +185,7 @@ public class Machine {
      *            The machine to add as a guest
      */
     public void addVirtualMachine(Machine machine) {
-        if ((machine.fMachineType.unboxInt() & StateValues.MACHINE_GUEST) != StateValues.MACHINE_GUEST) {
+        if ((machine.fMachineType & StateValues.MACHINE_GUEST) != StateValues.MACHINE_GUEST) {
             return;
         }
         fVirtualMachines.add(machine);

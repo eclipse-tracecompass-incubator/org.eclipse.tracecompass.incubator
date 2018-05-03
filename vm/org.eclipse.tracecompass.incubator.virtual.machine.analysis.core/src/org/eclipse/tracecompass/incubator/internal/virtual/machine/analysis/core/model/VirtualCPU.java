@@ -16,8 +16,6 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -37,10 +35,10 @@ public final class VirtualCPU {
     private final VirtualMachine fVm;
     private final Long fCpuId;
     /* Current state of the cpu. */
-    private ITmfStateValue fCurrentState;
+    private Integer fCurrentState;
     /* Current thread of the cpu. */
-    private ITmfStateValue fCurrentThread;
-    private ITmfStateValue fStateBeforeIRQ;
+    private Integer fCurrentThread;
+    private Integer fStateBeforeIRQ;
     private @Nullable VirtualCPU fNextLayerVCPU;
 
     /**
@@ -75,9 +73,9 @@ public final class VirtualCPU {
     private VirtualCPU(VirtualMachine vm, Long cpu) {
         fVm = vm;
         fCpuId = cpu;
-        fCurrentState = StateValues.CPU_STATUS_IDLE_VALUE;
-        fCurrentThread = TmfStateValue.newValueInt(-1);
-        fStateBeforeIRQ = StateValues.CPU_STATUS_IDLE_VALUE;
+        fCurrentState = StateValues.CPU_STATUS_IDLE;
+        fCurrentThread = -1;
+        fStateBeforeIRQ = StateValues.CPU_STATUS_IDLE;
         fNextLayerVCPU = null;
     }
 
@@ -109,7 +107,7 @@ public final class VirtualCPU {
      *
      * @return the currentState
      */
-    public ITmfStateValue getCurrentState() {
+    public Integer getCurrentState() {
         return fCurrentState;
     }
 
@@ -119,7 +117,7 @@ public final class VirtualCPU {
      * @param currentState
      *            the currentState to set
      */
-    public void setCurrentState(ITmfStateValue currentState) {
+    public void setCurrentState(Integer currentState) {
         this.fCurrentState = currentState;
     }
 
@@ -128,7 +126,7 @@ public final class VirtualCPU {
      *
      * @return the currentThread
      */
-    public ITmfStateValue getCurrentThread() {
+    public Integer getCurrentThread() {
         return fCurrentThread;
     }
 
@@ -138,14 +136,14 @@ public final class VirtualCPU {
      * @param currentThread
      *            the currentThread to set
      */
-    public void setCurrentThread(ITmfStateValue currentThread) {
+    public void setCurrentThread(Integer currentThread) {
         this.fCurrentThread = currentThread;
     }
 
     /**
      * @return the stateBeforeIRQ
      */
-    public ITmfStateValue getStateBeforeIRQ() {
+    public Integer getStateBeforeIRQ() {
         return fStateBeforeIRQ;
     }
 
@@ -153,7 +151,7 @@ public final class VirtualCPU {
      * @param state
      *            the stateBeforeIRQ to set
      */
-    public void setStateBeforeIRQ(ITmfStateValue state) {
+    public void setStateBeforeIRQ(Integer state) {
         fStateBeforeIRQ = state;
     }
 

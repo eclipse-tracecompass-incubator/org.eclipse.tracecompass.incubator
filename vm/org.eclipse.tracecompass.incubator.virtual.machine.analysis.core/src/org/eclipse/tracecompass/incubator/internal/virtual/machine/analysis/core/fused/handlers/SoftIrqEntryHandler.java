@@ -16,7 +16,6 @@ import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -72,24 +71,23 @@ public class SoftIrqEntryHandler extends VMKernelEventHandler {
          * the CPU on which this SoftIRQ is processed
          */
         int quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeSoftIRQs(cpu, ss), softIrqId.toString());
-        ITmfStateValue value = StateValues.CPU_STATUS_SOFTIRQ_VALUE;
+        int value = StateValues.CPU_STATUS_SOFTIRQ;
         ss.modifyAttribute(timestamp, value, quark);
 
         /* Change the status of the running process to interrupted */
         quark = ss.getQuarkRelativeAndAdd(currentThreadNode, FusedAttributes.STATUS);
-        value = StateValues.PROCESS_STATUS_INTERRUPTED_VALUE;
+        value = StateValues.PROCESS_STATUS_INTERRUPTED;
         ss.modifyAttribute(timestamp, value, quark);
 
         /* Change the status of the CPU to interrupted */
         quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
-        value = ss.queryOngoingState(quark);
         value = cpuObject.getCurrentState();
 //        cpuObject.setCurrentState(value);
-        if (value != StateValues.CPU_STATUS_SOFTIRQ_VALUE && value != StateValues.SOFT_IRQ_RAISED_VALUE) {
+        if (value != StateValues.CPU_STATUS_SOFTIRQ && value != StateValues.CPU_STATUS_SOFT_IRQ_RAISED) {
             /* Save only if we are not doing multiple soft irqs */
             cpuObject.setStateBeforeIRQ(value);
         }
-        value = StateValues.CPU_STATUS_SOFTIRQ_VALUE;
+        value = StateValues.CPU_STATUS_SOFTIRQ;
         cpuObject.setCurrentState(value);
         if (modify) {
             ss.modifyAttribute(timestamp, value, quark);

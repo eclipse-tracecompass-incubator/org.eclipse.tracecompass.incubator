@@ -15,7 +15,6 @@ import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEven
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -51,16 +50,15 @@ public class SoftIrqRaiseHandler extends VMKernelEventHandler {
          */
         int quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeSoftIRQs(cpu, ss), softIrqId.toString());
 
-        ITmfStateValue value = (isInSoftirq(ss.queryOngoingState(quark)) ?
-                StateValues.SOFT_IRQ_RAISED_RUNNING_VALUE :
-                StateValues.SOFT_IRQ_RAISED_VALUE);
+        int value = (isInSoftirq(ss.queryOngoingState(quark)) ?
+                StateValues.CPU_STATUS_SOFT_IRQ_RAISED_RUNNING :
+                StateValues.CPU_STATUS_SOFT_IRQ_RAISED);
         ss.modifyAttribute(FusedVMEventHandlerUtils.getTimestamp(event), value, quark);
 
     }
 
-    private static boolean isInSoftirq(@Nullable ITmfStateValue state) {
-        return (state != null &&
-                !state.isNull() &&
-                (state.unboxInt() & StateValues.CPU_STATUS_SOFTIRQ) == StateValues.CPU_STATUS_SOFTIRQ);
+    private static boolean isInSoftirq(@Nullable Object state) {
+        return ((state instanceof Integer) &&
+                ((int) state & StateValues.CPU_STATUS_SOFTIRQ) == StateValues.CPU_STATUS_SOFTIRQ);
     }
 }

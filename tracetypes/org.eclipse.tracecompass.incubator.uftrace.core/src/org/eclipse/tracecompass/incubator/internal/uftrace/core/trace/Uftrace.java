@@ -464,16 +464,6 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
             return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
         }
 
-        @Deprecated
-        @Override
-        public @Nullable String getSymbolText(int pid, long timestamp, long address) {
-            TmfResolvedSymbol symbol = getSymbol(pid, timestamp, address);
-            if (symbol != null) {
-                return symbol.getSymbolName();
-            }
-            return ""; //$NON-NLS-1$
-        }
-
         /* needed for ISymbolProvider */
         @Override
         public @NonNull ITmfTrace getTrace() {
@@ -485,16 +475,9 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
             // do nothing
         }
 
-        @Deprecated
         @Override
-        public @Nullable String getSymbolText(long address) {
-            if (fTasks.getTids().size() == 1) {
-                TmfResolvedSymbol symbol = getSymbol(Iterables.getFirst(fTasks.getTids(), -1), 0, address);
-                if (symbol != null) {
-                    return symbol.getSymbolName();
-                }
-            }
-            return ""; //$NON-NLS-1$
+        public @Nullable TmfResolvedSymbol getSymbol(long address) {
+            return getSymbol(Iterables.getFirst(fTasks.getTids(), -1), 0, address);
         }
 
     }

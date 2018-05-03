@@ -28,12 +28,6 @@ public interface StateValues {
     int MACHINE_CONTAINER = (1 << 2);
     int MACHINE_UNKNOWN = (1 << 3);
 
-    ITmfStateValue MACHINE_HOST_VALUE = TmfStateValue.newValueInt(MACHINE_HOST);
-    ITmfStateValue MACHINE_GUEST_VALUE = TmfStateValue.newValueInt(MACHINE_GUEST);
-    ITmfStateValue MACHINE_HOST_AND_GUEST_VALUE = TmfStateValue.newValueInt(MACHINE_HOST + MACHINE_GUEST);
-    ITmfStateValue MACHINE_CONTAINER_VALUE = TmfStateValue.newValueInt(MACHINE_CONTAINER);
-    ITmfStateValue MACHINE_UNKNOWN_VALUE = TmfStateValue.newValueInt(MACHINE_UNKNOWN);
-
     /* CPU Status */
     int CPU_STATUS_IDLE = 0;
     /**
@@ -59,9 +53,9 @@ public interface StateValues {
     int CONDITION_OUT_VM = 1;
     int CONDITION_UNKNOWN = 3;
 
-    ITmfStateValue CONDITION_IN_VM_VALUE = TmfStateValue.newValueInt(CONDITION_IN_VM);
-    ITmfStateValue CONDITION_OUT_VM_VALUE = TmfStateValue.newValueInt(CONDITION_OUT_VM);
-    ITmfStateValue CONDITION_UNKNOWN_VALUE = TmfStateValue.newValueInt(CONDITION_UNKNOWN);
+//    ITmfStateValue CONDITION_IN_VM_VALUE = TmfStateValue.newValueInt(CONDITION_IN_VM);
+//    ITmfStateValue CONDITION_OUT_VM_VALUE = TmfStateValue.newValueInt(CONDITION_OUT_VM);
+//    ITmfStateValue CONDITION_UNKNOWN_VALUE = TmfStateValue.newValueInt(CONDITION_UNKNOWN);
 
     /* Process status */
     int PROCESS_STATUS_UNKNOWN = 0;
@@ -71,21 +65,21 @@ public interface StateValues {
     int PROCESS_STATUS_INTERRUPTED = 4;
     int PROCESS_STATUS_WAIT_FOR_CPU = 5;
     int PROCESS_STATUS_WAIT_UNKNOWN = 6;
-
-    ITmfStateValue PROCESS_STATUS_UNKNOWN_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_UNKNOWN);
-    /**
-     * @since 1.0
-     */
-    ITmfStateValue PROCESS_STATUS_WAIT_UNKNOWN_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_WAIT_UNKNOWN);
-    ITmfStateValue PROCESS_STATUS_WAIT_BLOCKED_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_WAIT_BLOCKED);
-    ITmfStateValue PROCESS_STATUS_RUN_USERMODE_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_RUN_USERMODE);
-    ITmfStateValue PROCESS_STATUS_RUN_SYSCALL_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_RUN_SYSCALL);
-    ITmfStateValue PROCESS_STATUS_INTERRUPTED_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_INTERRUPTED);
-    ITmfStateValue PROCESS_STATUS_WAIT_FOR_CPU_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_WAIT_FOR_CPU);
-
-    /** Soft IRQ is raised, CPU is in user mode */
-    ITmfStateValue SOFT_IRQ_RAISED_VALUE = TmfStateValue.newValueInt(CPU_STATUS_SOFT_IRQ_RAISED);
+//
+//    ITmfStateValue PROCESS_STATUS_UNKNOWN_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_UNKNOWN);
+//    /**
+//     * @since 1.0
+//     */
+//    ITmfStateValue PROCESS_STATUS_WAIT_UNKNOWN_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_WAIT_UNKNOWN);
+//    ITmfStateValue PROCESS_STATUS_WAIT_BLOCKED_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_WAIT_BLOCKED);
+//    ITmfStateValue PROCESS_STATUS_RUN_USERMODE_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_RUN_USERMODE);
+//    ITmfStateValue PROCESS_STATUS_RUN_SYSCALL_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_RUN_SYSCALL);
+//    ITmfStateValue PROCESS_STATUS_INTERRUPTED_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_INTERRUPTED);
+//    ITmfStateValue PROCESS_STATUS_WAIT_FOR_CPU_VALUE = TmfStateValue.newValueInt(PROCESS_STATUS_WAIT_FOR_CPU);
+//
+//    /** Soft IRQ is raised, CPU is in user mode */
+//    ITmfStateValue SOFT_IRQ_RAISED_VALUE = TmfStateValue.newValueInt(CPU_STATUS_SOFT_IRQ_RAISED);
 
     /** If the softirq is running and another is raised at the same time. */
-    ITmfStateValue SOFT_IRQ_RAISED_RUNNING_VALUE = TmfStateValue.newValueInt(CPU_STATUS_SOFT_IRQ_RAISED | CPU_STATUS_SOFTIRQ);
+    int CPU_STATUS_SOFT_IRQ_RAISED_RUNNING = CPU_STATUS_SOFT_IRQ_RAISED | CPU_STATUS_SOFTIRQ;
 }

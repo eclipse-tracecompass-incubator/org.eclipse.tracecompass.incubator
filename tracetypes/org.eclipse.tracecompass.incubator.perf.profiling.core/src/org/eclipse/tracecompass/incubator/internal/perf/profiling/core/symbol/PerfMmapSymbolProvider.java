@@ -138,11 +138,4 @@ public class PerfMmapSymbolProvider implements ISymbolProvider {
         return null;
     }
 
-    @Deprecated
-    @Override
-    public @Nullable String getSymbolText(long address) {
-        // Need to implement this unfortunately
-        return null;
-    }
-
 }

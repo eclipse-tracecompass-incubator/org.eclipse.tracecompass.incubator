@@ -13,8 +13,6 @@ import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEven
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
@@ -59,7 +57,6 @@ public class PiSetprioHandler extends VMKernelEventHandler {
 
         /* Set the current prio for the new process */
         int quark = ss.getQuarkRelativeAndAdd(updateThreadNode, FusedAttributes.PRIO);
-        ITmfStateValue value = TmfStateValue.newValueInt(prio);
-        ss.modifyAttribute(FusedVMEventHandlerUtils.getTimestamp(event), value, quark);
+        ss.modifyAttribute(FusedVMEventHandlerUtils.getTimestamp(event), prio, quark);
     }
 }

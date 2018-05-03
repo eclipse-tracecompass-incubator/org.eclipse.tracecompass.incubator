@@ -11,7 +11,6 @@ package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.cor
 
 import java.util.List;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
@@ -20,8 +19,6 @@ import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -60,16 +57,16 @@ public class SoftIrqExitHandler extends VMKernelEventHandler {
         int quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getNodeSoftIRQs(cpu, ss), softIrqId.toString());
         long timestamp = FusedVMEventHandlerUtils.getTimestamp(event);
 
-        if (isSoftIrqRaised(ss.queryOngoingState(quark))) {
-            ss.modifyAttribute(timestamp, StateValues.SOFT_IRQ_RAISED_VALUE, quark);
+        if (isSoftIrqRaised(ss.queryOngoing(quark))) {
+            ss.modifyAttribute(timestamp, StateValues.CPU_STATUS_SOFT_IRQ_RAISED, quark);
         } else {
-            ss.modifyAttribute(timestamp, TmfStateValue.nullValue(), quark);
+            ss.modifyAttribute(timestamp, (Object) null, quark);
         }
         List<Integer> softIrqs = ss.getSubAttributes(ss.getParentAttributeQuark(quark), false);
         /* Only set status to running and no exit if ALL softirqs are exited. */
         for (Integer softIrq : softIrqs) {
-            @NonNull ITmfStateValue irqStateValue = ss.queryOngoingState(softIrq);
-            if (!irqStateValue.isNull()) { // && !(irqStateValue.unboxInt() == StateValues.CPU_STATUS_IRQ)) {
+            Object irqStateValue = ss.queryOngoing(softIrq);
+            if (irqStateValue != null) { // && !(irqStateValue.unboxInt() == StateValues.CPU_STATUS_IRQ)) {
                 return;
             }
         }
@@ -93,7 +90,7 @@ public class SoftIrqExitHandler extends VMKernelEventHandler {
 
         /* Set the CPU status back to "busy" or "idle" */
         quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
-        ITmfStateValue value = cpuObject.getStateBeforeIRQ();
+        Integer value = cpuObject.getStateBeforeIRQ();
         cpuObject.setCurrentState(value);
         if (modify) {
             ss.modifyAttribute(timestamp, value, quark);
@@ -108,10 +105,9 @@ public class SoftIrqExitHandler extends VMKernelEventHandler {
      *            the state to check
      * @return true if in a softirq. The softirq may be pre-empted by an irq
      */
-    private static boolean isSoftIrqRaised(@Nullable ITmfStateValue state) {
-        return (state != null &&
-                !state.isNull() &&
-                (state.unboxInt() & StateValues.CPU_STATUS_SOFT_IRQ_RAISED) == StateValues.CPU_STATUS_SOFT_IRQ_RAISED);
+    private static boolean isSoftIrqRaised(@Nullable Object state) {
+        return ((state instanceof Integer) &&
+                ((int) state & StateValues.CPU_STATUS_SOFT_IRQ_RAISED) == StateValues.CPU_STATUS_SOFT_IRQ_RAISED);
     }
 
 }

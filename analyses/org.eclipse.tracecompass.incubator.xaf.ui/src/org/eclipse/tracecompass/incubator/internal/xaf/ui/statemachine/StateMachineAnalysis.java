@@ -9,11 +9,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -519,11 +516,6 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
     protected void canceling() {
         // TODO Auto-generated method stub
 
-    }
-
-    @Override
-    protected Object @NonNull [] readObject(@NonNull ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        return checkNotNull((Object[]) ois.readObject());
     }
 
 }

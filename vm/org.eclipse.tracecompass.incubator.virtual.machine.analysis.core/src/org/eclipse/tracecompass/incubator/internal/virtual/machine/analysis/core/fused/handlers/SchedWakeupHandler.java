@@ -14,8 +14,6 @@ import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -62,13 +60,15 @@ public class SchedWakeupHandler extends VMKernelEventHandler {
          * running.
          */
         int quark = ss.getQuarkRelativeAndAdd(threadNode, FusedAttributes.STATUS);
-        int status = ss.queryOngoingState(quark).unboxInt();
-        ITmfStateValue value = null;
+        Object value = ss.queryOngoing(quark);
+        if (!(value instanceof Integer)) {
+            return;
+        }
+        int status = (int) value;
         long timestamp = FusedVMEventHandlerUtils.getTimestamp(event);
         if (status != StateValues.PROCESS_STATUS_RUN_SYSCALL &&
                 status != StateValues.PROCESS_STATUS_RUN_USERMODE) {
-            value = StateValues.PROCESS_STATUS_WAIT_FOR_CPU_VALUE;
-            ss.modifyAttribute(timestamp, value, quark);
+            ss.modifyAttribute(timestamp, StateValues.PROCESS_STATUS_WAIT_FOR_CPU, quark);
         }
 
         /*
@@ -76,7 +76,6 @@ public class SchedWakeupHandler extends VMKernelEventHandler {
          * it shows in ftrace with a sched_wakeup.
          */
         quark = ss.getQuarkRelativeAndAdd(threadNode, FusedAttributes.PRIO);
-        value = TmfStateValue.newValueInt(prio);
-        ss.modifyAttribute(timestamp, value, quark);
+        ss.modifyAttribute(timestamp, prio, quark);
     }
 }

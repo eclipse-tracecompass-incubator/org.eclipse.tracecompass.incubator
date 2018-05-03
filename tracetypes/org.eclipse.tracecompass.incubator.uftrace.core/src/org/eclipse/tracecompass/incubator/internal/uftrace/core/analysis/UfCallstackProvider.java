@@ -17,8 +17,6 @@ import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.DatEvent;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.UfEventType;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.Uftrace.ExecAspect;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.Uftrace.PidAspect;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
@@ -67,26 +65,26 @@ public class UfCallstackProvider extends CallStackStateProvider {
     }
 
     @Override
-    protected @Nullable ITmfStateValue functionEntry(@NonNull ITmfEvent event) {
+    protected @Nullable Object functionEntry(@NonNull ITmfEvent event) {
         ITmfEventField content = event.getContent();
         Object payload = content.getValue();
         if (payload instanceof DatEvent) {
             DatEvent ev = (DatEvent) payload;
             if (event.getType().equals(UfEventType.ENTRY)) {
-                return TmfStateValue.newValueLong(ev.getAddress());
+                return ev.getAddress();
             }
         }
         return null;
     }
 
     @Override
-    protected @Nullable ITmfStateValue functionExit(@NonNull ITmfEvent event) {
+    protected @Nullable Object functionExit(@NonNull ITmfEvent event) {
         ITmfEventField content = event.getContent();
         Object payload = content.getValue();
         if (payload instanceof DatEvent) {
             DatEvent ev = (DatEvent) payload;
             if (event.getType().equals(UfEventType.EXIT)) {
-                return TmfStateValue.newValueLong(ev.getAddress());
+                return ev.getAddress();
             }
         }
         return null;

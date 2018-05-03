@@ -16,8 +16,6 @@ import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -51,14 +49,12 @@ public class SysExitHandler extends VMKernelEventHandler {
         /* Assign the new system call to the process */
         int currentThreadNode = FusedVMEventHandlerUtils.getCurrentThreadNode(cpu, ss);
         int quark = ss.getQuarkRelativeAndAdd(currentThreadNode, FusedAttributes.SYSTEM_CALL);
-        ITmfStateValue value = TmfStateValue.nullValue();
         long timestamp = FusedVMEventHandlerUtils.getTimestamp(event);
-        ss.modifyAttribute(timestamp, value, quark);
+        ss.modifyAttribute(timestamp, (Object) null, quark);
 
         /* Put the process in user mode */
         quark = ss.getQuarkRelativeAndAdd(currentThreadNode, FusedAttributes.STATUS);
-        value = StateValues.PROCESS_STATUS_RUN_USERMODE_VALUE;
-        ss.modifyAttribute(timestamp, value, quark);
+        ss.modifyAttribute(timestamp, StateValues.PROCESS_STATUS_RUN_USERMODE, quark);
 
         /*
          * If the trace that generates the event doesn't match the currently
@@ -77,11 +73,10 @@ public class SysExitHandler extends VMKernelEventHandler {
 
         /* Put the CPU in user mode */
         quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
-        value = StateValues.CPU_STATUS_RUN_USERMODE_VALUE;
         if (modify) {
-            ss.modifyAttribute(timestamp, value, quark);
+            ss.modifyAttribute(timestamp, StateValues.CPU_STATUS_RUN_USERMODE, quark);
         }
-        cpuObject.setCurrentState(value);
+        cpuObject.setCurrentState(StateValues.CPU_STATUS_RUN_USERMODE);
     }
 
 }

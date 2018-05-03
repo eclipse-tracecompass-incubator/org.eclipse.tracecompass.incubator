@@ -24,7 +24,6 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundExc
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 
 /**
  * Utility methods to retrieve information from the virtual machine analysis
@@ -140,20 +139,21 @@ public final class FusedVMInformationProvider {
      *            The state system
      * @param hostId
      *            The host ID of the machine
-     * @return The state value corresponding to this machine's type
+     * @return The type of the host machine. A negative value means the machine is
+     *         not a known machine
      */
-    public static ITmfStateValue getTypeMachine(ITmfStateSystem ssq, String hostId) {
+    public static int getTypeMachine(ITmfStateSystem ssq, String hostId) {
         int quark;
         try {
             quark = ssq.optQuarkAbsolute(FusedAttributes.HOSTS, hostId);
             if (quark == ITmfStateSystem.INVALID_ATTRIBUTE) {
-                return TmfStateValue.nullValue();
+                return -1;
             }
-            return ssq.querySingleState(ssq.getStartTime(), quark).getStateValue();
+            return ssq.querySingleState(ssq.getStartTime(), quark).getStateValue().unboxInt();
         } catch (StateSystemDisposedException e) {
             // About to close, ignore
         }
-        return TmfStateValue.nullValue();
+        return -1;
     }
 
     public static int getNodeNsInum(ITmfStateSystem ssq, long time, String machineName, int threadID) throws AttributeNotFoundException, StateSystemDisposedException {
@@ -333,13 +333,13 @@ public final class FusedVMInformationProvider {
     public static Collection<String> getPhysicalCpusUsedByMachine(ITmfStateSystem ssq, String hostId) {
         List<String> pcpus = new LinkedList<>();
         List<Integer> pCpuquarks = new LinkedList<>();
-        ITmfStateValue type = getTypeMachine(ssq, hostId);
-        if (type.isNull()) {
+        int type = getTypeMachine(ssq, hostId);
+        if (type < 0) {
             return pcpus;
         }
-        if ((type.unboxInt() & StateValues.MACHINE_GUEST) == StateValues.MACHINE_GUEST) {
+        if ((type & StateValues.MACHINE_GUEST) == StateValues.MACHINE_GUEST) {
             pCpuquarks = ssq.getQuarks(FusedAttributes.HOSTS, hostId, FusedAttributes.PCPUS, "*"); //$NON-NLS-1$
-        } else if (type.unboxInt() == StateValues.MACHINE_HOST) {
+        } else if (type == StateValues.MACHINE_HOST) {
             pCpuquarks = ssq.getQuarks(FusedAttributes.HOSTS, hostId, FusedAttributes.CPUS, "*"); //$NON-NLS-1$
         }
         for (Integer quark : pCpuquarks) {
@@ -361,8 +361,8 @@ public final class FusedVMInformationProvider {
     public static Collection<String> getCpusUsedByMachine(ITmfStateSystem ssq, String hostId) {
         List<String> cpus = new LinkedList<>();
         List<Integer> cpuQuarks = new LinkedList<>();
-        ITmfStateValue type = getTypeMachine(ssq, hostId);
-        if (type.isNull()) {
+        int type = getTypeMachine(ssq, hostId);
+        if (type < 0) {
             return cpus;
         }
         cpuQuarks = ssq.getQuarks(FusedAttributes.HOSTS, hostId, FusedAttributes.CPUS, "*"); //$NON-NLS-1$

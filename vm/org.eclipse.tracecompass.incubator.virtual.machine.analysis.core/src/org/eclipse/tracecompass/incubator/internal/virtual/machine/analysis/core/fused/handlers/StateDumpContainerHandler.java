@@ -15,8 +15,6 @@ import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
@@ -96,13 +94,13 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
                  * If the next layer is the last we can add the info contained
                  * in the event
                  */
-                ss.modifyAttribute(ts, TmfStateValue.newValueInt(vtid.intValue()), layerQuark);
+                ss.modifyAttribute(ts, vtid.intValue(), layerQuark);
             }
             ss.getQuarkRelativeAndAdd(layerQuark, FusedAttributes.VPPID);
             int quark = ss.getQuarkRelativeAndAdd(layerQuark, FusedAttributes.NS_LEVEL);
             if (ss.queryOngoingState(quark).isNull()) {
                 /* If the value didn't exist previously, set it */
-                ss.modifyAttribute(ts, TmfStateValue.newValueInt(i + 1), quark);
+                ss.modifyAttribute(ts, i + 1, quark);
             }
         }
         return layerQuark;
@@ -123,7 +121,6 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
         ITmfEventField content = event.getContent();
         long ts = event.getTimestamp().getValue();
         int quark;
-        ITmfStateValue value;
         String hostId = event.getTrace().getHostId();
         Long tid = content.getFieldValue(Long.class, TID_FIELD);
         Long pid = content.getFieldValue(Long.class, PID_FIELD);
@@ -159,8 +156,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
              * Events are coming from the deepest layers first so no need to
              * update the ns_max_level.
              */
-            value = TmfStateValue.newValueInt(nsLevel.intValue() + 1);
-            ss.modifyAttribute(ts, value, quark);
+            ss.modifyAttribute(ts, nsLevel.intValue() + 1, quark);
         }
         int maxLevel = ss.queryOngoingState(quark).unboxInt();
 
@@ -168,10 +164,11 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
          * Set the process' status. Only for level 0.
          */
         quark = ss.getQuarkRelativeAndAdd(threadNode, FusedAttributes.STATUS);
-        if (ss.queryOngoingState(quark).isNull()) {
+        int processStatus = StateValues.PROCESS_STATUS_UNKNOWN;
+        if (ss.queryOngoing(quark) == null) {
             switch (status.intValue()) {
             case LinuxValues.STATEDUMP_PROCESS_STATUS_WAIT_CPU:
-                value = StateValues.PROCESS_STATUS_WAIT_FOR_CPU_VALUE;
+                processStatus = StateValues.PROCESS_STATUS_WAIT_FOR_CPU;
                 break;
             case LinuxValues.STATEDUMP_PROCESS_STATUS_WAIT:
                 /*
@@ -180,22 +177,21 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
                  * WAIT_UNKNOWN state instead of the "normal" WAIT_BLOCKED
                  * state.
                  */
-                value = StateValues.PROCESS_STATUS_WAIT_UNKNOWN_VALUE;
+                processStatus = StateValues.PROCESS_STATUS_WAIT_UNKNOWN;
                 break;
             default:
-                value = StateValues.PROCESS_STATUS_UNKNOWN_VALUE;
+                processStatus = StateValues.PROCESS_STATUS_UNKNOWN;
             }
-            ss.modifyAttribute(ts, value, quark);
+            ss.modifyAttribute(ts, processStatus, quark);
         }
 
         /*
          * Set the process' name. Only for level 0.
          */
         quark = ss.getQuarkRelativeAndAdd(threadNode, FusedAttributes.EXEC_NAME);
-        if (ss.queryOngoingState(quark).isNull()) {
+        if (ss.queryOngoing(quark) == null) {
             /* If the value didn't exist previously, set it */
-            value = TmfStateValue.newValueString(name);
-            ss.modifyAttribute(ts, value, quark);
+            ss.modifyAttribute(ts, name, quark);
         }
 
         String attributePpid = FusedAttributes.PPID;
@@ -206,25 +202,27 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
 
         /* Set the process' PPID */
         quark = ss.getQuarkRelativeAndAdd(layerNode, attributePpid);
-        ITmfStateValue valuePpid;
-        if (ss.queryOngoingState(quark).isNull()) {
+
+        if (ss.queryOngoing(quark) == null) {
+            int setPpid;
+            int setVppid;
             if (vpid.equals(vtid)) {
                 /* We have a process. Use the 'PPID' field. */
-                value = TmfStateValue.newValueInt(vppid.intValue());
-                valuePpid = TmfStateValue.newValueInt(ppid.intValue());
+                setVppid = vppid.intValue();
+                setPpid = ppid.intValue();
             } else {
                 /*
                  * We have a thread, use the 'PID' field for the parent.
                  */
-                value = TmfStateValue.newValueInt(vpid.intValue());
-                valuePpid = TmfStateValue.newValueInt(pid.intValue());
+                setVppid = vpid.intValue();
+                setPpid = pid.intValue();
             }
-            ss.modifyAttribute(ts, value, quark);
+            ss.modifyAttribute(ts, setVppid, quark);
             if (nsLevel != 0) {
                 /* Set also for the root layer */
                 quark = ss.getQuarkRelativeAndAdd(threadNode, FusedAttributes.PPID);
-                if (ss.queryOngoingState(quark).isNull()) {
-                    ss.modifyAttribute(ts, valuePpid, quark);
+                if (ss.queryOngoing(quark) == null) {
+                    ss.modifyAttribute(ts, setPpid, quark);
                 }
             }
         }
@@ -233,16 +231,14 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
         quark = ss.getQuarkRelativeAndAdd(layerNode, FusedAttributes.NS_LEVEL);
         if (ss.queryOngoingState(quark).isNull()) {
             /* If the value didn't exist previously, set it */
-            value = TmfStateValue.newValueInt(nsLevel.intValue());
-            ss.modifyAttribute(ts, value, quark);
+            ss.modifyAttribute(ts, nsLevel.intValue(), quark);
         }
 
         /* Set the namespace identification number */
         quark = ss.getQuarkRelativeAndAdd(layerNode, FusedAttributes.NS_INUM);
         if (ss.queryOngoingState(quark).isNull()) {
             /* If the value didn't exist previously, set it */
-            value = TmfStateValue.newValueLong(nsInum);
-            ss.modifyAttribute(ts, value, quark);
+            ss.modifyAttribute(ts, nsInum, quark);
         }
 
         /* Save the namespace id somewhere so it can be reused */
@@ -250,7 +246,7 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
 
         /* Save the tid in the container. We also keep the vtid */
         quark = ss.getQuarkRelativeAndAdd(quark, FusedAttributes.THREADS, String.valueOf(tid));
-        ss.modifyAttribute(ts, TmfStateValue.newValueInt(vtid.intValue()), quark);
+        ss.modifyAttribute(ts, vtid.intValue(), quark);
 
         if (nsLevel != maxLevel - 1) {
             /*
@@ -262,14 +258,14 @@ public class StateDumpContainerHandler extends VMKernelEventHandler {
             Long childNSInum = ss.queryOngoingState(quark).unboxLong();
             if (childNSInum > 0) {
                 quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getMachinesNode(ss), hostId, FusedAttributes.CONTAINERS, Long.toString(childNSInum), FusedAttributes.PARENT);
-                ss.modifyAttribute(ss.getStartTime(), TmfStateValue.newValueLong(nsInum), quark);
+                ss.modifyAttribute(ss.getStartTime(), nsInum, quark);
             }
         }
 
         if (nsLevel == 0) {
             /* Root namespace => no parent */
             quark = ss.getQuarkRelativeAndAdd(FusedVMEventHandlerUtils.getMachinesNode(ss), hostId, FusedAttributes.CONTAINERS, Long.toString(nsInum), FusedAttributes.PARENT);
-            ss.modifyAttribute(ss.getStartTime(), TmfStateValue.newValueLong(-1), quark);
+            ss.modifyAttribute(ss.getStartTime(), -1L, quark);
         }
 
     }

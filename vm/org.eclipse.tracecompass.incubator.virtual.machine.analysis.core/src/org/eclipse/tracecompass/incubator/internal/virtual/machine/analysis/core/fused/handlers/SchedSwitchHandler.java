@@ -21,8 +21,6 @@ import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
@@ -113,10 +111,10 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
             e.printStackTrace();
         }
 
-        ITmfStateValue stateProcess = setCpuProcess(ss, nextTid, timestamp, currentCPUNode, modify);
+        setCpuProcess(ss, nextTid, timestamp, currentCPUNode, modify);
 
         /* Set the status of the CPU itself */
-        ITmfStateValue stateCpu = setCpuStatus(ss, nextTid, newCurrentThreadNode, timestamp, currentCPUNode, modify);
+        int stateCpu = setCpuStatus(ss, nextTid, newCurrentThreadNode, timestamp, currentCPUNode, modify);
 
         /* Remember the cpu used by the namespaces containing the next thread */
         if (nextTid != 0) {
@@ -128,11 +126,11 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
         }
 
         cpuObject.setCurrentState(stateCpu);
-        cpuObject.setCurrentThread(stateProcess);
+        cpuObject.setCurrentThread(nextTid);
     }
 
     private static void setOldProcessStatus(ITmfStateSystemBuilder ss, Long prevState, Integer formerThreadNode, long timestamp) {
-        ITmfStateValue value;
+        Integer status;
         /*
          * Empirical observations and look into the linux code have shown that
          * the TASK_STATE_MAX flag is used internally and |'ed with other
@@ -146,16 +144,16 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
         int state = (int) (prevState & (LinuxValues.TASK_NOLOAD - 1));
 
         if (isRunning(state)) {
-            value = StateValues.PROCESS_STATUS_WAIT_FOR_CPU_VALUE;
+            status = StateValues.PROCESS_STATUS_WAIT_FOR_CPU;
         } else if (isWaiting(state)) {
-            value = StateValues.PROCESS_STATUS_WAIT_BLOCKED_VALUE;
+            status = StateValues.PROCESS_STATUS_WAIT_BLOCKED;
         } else if (isDead(state)) {
-            value = TmfStateValue.nullValue();
+            status = null;
         } else {
-            value = StateValues.PROCESS_STATUS_WAIT_UNKNOWN_VALUE;
+            status = StateValues.PROCESS_STATUS_WAIT_UNKNOWN;
         }
         int quark = ss.getQuarkRelativeAndAdd(formerThreadNode, FusedAttributes.STATUS);
-        ss.modifyAttribute(timestamp, value, quark);
+        ss.modifyAttribute(timestamp, status, quark);
 
     }
 
@@ -173,58 +171,51 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
         return state == 0;
     }
 
-    private static ITmfStateValue setCpuStatus(ITmfStateSystemBuilder ss, Integer nextTid, Integer newCurrentThreadNode, long timestamp, int currentCPUNode, boolean modify) {
+    private static int setCpuStatus(ITmfStateSystemBuilder ss, Integer nextTid, Integer newCurrentThreadNode, long timestamp, int currentCPUNode, boolean modify) {
         int quark;
-        ITmfStateValue value;
+        int status;
         if (nextTid > 0) {
             /* Check if the entering process is in kernel or user mode */
             quark = ss.getQuarkRelativeAndAdd(newCurrentThreadNode, FusedAttributes.SYSTEM_CALL);
-            ITmfStateValue queryOngoingState = ss.queryOngoingState(quark);
-            if (queryOngoingState.isNull()) {
-                value = StateValues.CPU_STATUS_RUN_USERMODE_VALUE;
+            Object syscall = ss.queryOngoing(quark);
+            if (syscall == null) {
+                status = StateValues.CPU_STATUS_RUN_USERMODE;
             } else {
-                value = StateValues.CPU_STATUS_RUN_SYSCALL_VALUE;
+                status = StateValues.CPU_STATUS_RUN_SYSCALL;
             }
             if (modify) {
                 quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
-                ss.modifyAttribute(timestamp, value, quark);
+                ss.modifyAttribute(timestamp, status, quark);
             }
         } else {
-            value = StateValues.CPU_STATUS_IDLE_VALUE;
+            status = StateValues.CPU_STATUS_IDLE;
             if (modify) {
                 quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.STATUS);
-                ss.modifyAttribute(timestamp, value, quark);
+                ss.modifyAttribute(timestamp, status, quark);
             }
         }
-        return value;
+        return status;
 
     }
 
-    private static ITmfStateValue setCpuProcess(ITmfStateSystemBuilder ss, Integer nextTid, long timestamp, int currentCPUNode, boolean modify) {
+    private static void setCpuProcess(ITmfStateSystemBuilder ss, Integer nextTid, long timestamp, int currentCPUNode, boolean modify) {
         int quark;
-        ITmfStateValue value;
         quark = ss.getQuarkRelativeAndAdd(currentCPUNode, FusedAttributes.CURRENT_THREAD);
-        value = TmfStateValue.newValueInt(nextTid);
         if (modify) {
-            ss.modifyAttribute(timestamp, value, quark);
+            ss.modifyAttribute(timestamp, nextTid, quark);
         }
-        return value;
     }
 
     private static void setNewProcessPio(ITmfStateSystemBuilder ss, Integer nextPrio, Integer newCurrentThreadNode, long timestamp) {
         int quark;
-        ITmfStateValue value;
         quark = ss.getQuarkRelativeAndAdd(newCurrentThreadNode, FusedAttributes.PRIO);
-        value = TmfStateValue.newValueInt(nextPrio);
-        ss.modifyAttribute(timestamp, value, quark);
+        ss.modifyAttribute(timestamp, nextPrio, quark);
     }
 
     private static void setNewProcessExecName(ITmfStateSystemBuilder ss, String nextProcessName, Integer newCurrentThreadNode, long timestamp) {
         int quark;
-        ITmfStateValue value;
         quark = ss.getQuarkRelativeAndAdd(newCurrentThreadNode, FusedAttributes.EXEC_NAME);
-        value = TmfStateValue.newValueString(nextProcessName);
-        ss.modifyAttribute(timestamp, value, quark);
+        ss.modifyAttribute(timestamp, nextProcessName, quark);
     }
 
 }
