@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTestCase;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTestExperiment;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTraces;
@@ -85,10 +86,12 @@ public class OneQemuKvmFusedTestCase extends VmTestCase {
 
         // Check the 'Machines' sub-tree towards the end of the trace
         PunctualInfo oneInfo = new PunctualInfo(300L);
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.HOST_ONE_QEMUKVM.getHostId()), StateValues.MACHINE_HOST);
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.HOST_ONE_QEMUKVM.getHostId(), FusedAttributes.CPUS, "0"), null);
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.HOST_ONE_QEMUKVM.getHostId(), FusedAttributes.PARENT), null);
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.HOST_ONE_QEMUKVM.getHostId(), FusedAttributes.CONTAINERS), null);
 
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.GUEST_ONE_QEMUKVM.getHostId()), StateValues.MACHINE_GUEST);
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.GUEST_ONE_QEMUKVM.getHostId(), FusedAttributes.CPUS, "0"), 31);
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.GUEST_ONE_QEMUKVM.getHostId(), FusedAttributes.PARENT), VmTraces.HOST_ONE_QEMUKVM.getHostId());
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.GUEST_ONE_QEMUKVM.getHostId(), FusedAttributes.PCPUS, "0"), null);

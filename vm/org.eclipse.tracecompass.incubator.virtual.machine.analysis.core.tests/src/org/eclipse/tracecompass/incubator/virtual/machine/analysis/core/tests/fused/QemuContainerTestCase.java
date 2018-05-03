@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.IVirtualMachineModel;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTestCase;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTestExperiment;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTraces;
@@ -89,11 +90,13 @@ public class QemuContainerTestCase extends VmTestCase {
 
         // Check the 'Machines' sub-tree towards the end of the trace
         PunctualInfo oneInfo = new PunctualInfo(300L);
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.HOST_QEMUKVM_CONTAINER.getHostId()), StateValues.MACHINE_HOST);
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.HOST_QEMUKVM_CONTAINER.getHostId(), FusedAttributes.CPUS, "0"), null);
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.HOST_QEMUKVM_CONTAINER.getHostId(), FusedAttributes.PARENT), null);
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.HOST_QEMUKVM_CONTAINER.getHostId(), FusedAttributes.CONTAINERS), null);
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.HOST_QEMUKVM_CONTAINER.getHostId(), FusedAttributes.MACHINE_NAME), VmTraces.HOST_QEMUKVM_CONTAINER.getFileName());
 
+        oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.GUEST_QEMUKVM_CONTAINER.getHostId()), StateValues.MACHINE_GUEST);
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.GUEST_QEMUKVM_CONTAINER.getHostId(), FusedAttributes.CPUS, "0"), 31);
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.GUEST_QEMUKVM_CONTAINER.getHostId(), FusedAttributes.PARENT), VmTraces.HOST_QEMUKVM_CONTAINER.getHostId());
         oneInfo.addValue(StateSystemTestUtils.makeAttribute(FusedAttributes.HOSTS, VmTraces.GUEST_QEMUKVM_CONTAINER.getHostId(), FusedAttributes.PCPUS, "0"), null);

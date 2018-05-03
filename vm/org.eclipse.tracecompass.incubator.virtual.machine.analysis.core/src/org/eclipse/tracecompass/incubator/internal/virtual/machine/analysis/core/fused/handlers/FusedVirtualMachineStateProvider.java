@@ -512,7 +512,7 @@ public class FusedVirtualMachineStateProvider extends AbstractTmfStateProvider {
             }
             // Set the type
             Object machineType = ss.queryOngoing(machineQuark);
-            if (!(machineType instanceof Integer)) {
+            if (machineType instanceof Integer) {
                 continue;
             }
             ss.updateOngoingState(machine.getType(), machineQuark);
