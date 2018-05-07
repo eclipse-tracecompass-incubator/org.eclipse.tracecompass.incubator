@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
@@ -37,7 +36,6 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedE
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
-import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.TreeMultimap;
 
@@ -74,8 +72,8 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
     @Override
     public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
         ITmfStateSystem ss = getAnalysisModule().getStateSystem();
-        BiMap<@NonNull Long, @NonNull Integer> entries = getSelectedEntries(filter);
-        Set<@NonNull Integer> quarks = entries.values();
+        Map<@NonNull Long, @NonNull Integer> entries = getSelectedEntries(filter);
+        Collection<@NonNull Integer> quarks = entries.values();
         long start = filter.getStart();
         if (ss == null || quarks.size() != 1 || !getAnalysisModule().isQueryable(start)) {
             /*
