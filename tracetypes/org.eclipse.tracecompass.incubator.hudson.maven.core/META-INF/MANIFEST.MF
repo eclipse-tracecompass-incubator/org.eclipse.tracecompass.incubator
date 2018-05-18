@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.analysis.timing.core,
  org.eclipse.tracecompass.segmentstore.core,
- org.eclipse.tracecompass.datastore.core
+ org.eclipse.tracecompass.datastore.core,
+ org.eclipse.tracecompass.analysis.profiling.core
 Export-Package: org.eclipse.tracecompass.incubator.internal.hudson.maven.core;x-friends:="org.eclipse.tracecompass.incubator.husdon.maven.core.tests",
  org.eclipse.tracecompass.incubator.internal.hudson.maven.core.analysis;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.hudson.maven.core.trace;x-friends:="org.eclipse.tracecompass.incubator.hudson.maven.ui"

@@ -21,14 +21,14 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.objectlife.ObjectLifeAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.objectlife.ObjectLifeDataProvider;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.SelectionTimeQueryFilter;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TimeQueryFilter;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphRowModel;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphEntryModel;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.response.ITmfResponse.Status;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.response.ITmfResponse.Status;
+import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
@@ -144,7 +144,6 @@ public class ObjectLifeAnalysisTest {
         assertEquals("", simbaRow.getStates().get(1).getLabel());
     }
 
-    @SuppressWarnings("restriction")
     private static TimeGraphEntryModel getValueEntry(List<@NonNull TimeGraphEntryModel> treeModel, String name) {
         Long parentID = null;
         for (TimeGraphEntryModel entryModel : treeModel) {

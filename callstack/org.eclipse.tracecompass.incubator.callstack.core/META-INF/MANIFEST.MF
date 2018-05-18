@@ -21,7 +21,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.tmf.ctf.core,
  org.eclipse.tracecompass.lttng2.common.core,
  org.eclipse.tracecompass.lttng2.ust.core,
- org.eclipse.tracecompass.analysis.os.linux.core
+ org.eclipse.tracecompass.analysis.os.linux.core,
+ org.eclipse.tracecompass.analysis.profiling.core
 Export-Package: org.eclipse.tracecompass.incubator.callstack.core.base,
  org.eclipse.tracecompass.incubator.callstack.core.callgraph,
  org.eclipse.tracecompass.incubator.callstack.core.flamechart,

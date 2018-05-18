@@ -19,21 +19,21 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.CommonStatusMessage;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.SelectionTimeQueryFilter;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TimeQueryFilter;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphArrow;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphRowModel;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphState;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphEntryModel;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphRowModel;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphState;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.response.ITmfResponse;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
+import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
+import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
+import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
+import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.ImmutableList.Builder;
@@ -117,7 +117,7 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
             }
             intervals.put(interval.getAttribute(), interval);
         }
-        List<ITimeGraphRowModel> rows = new ArrayList<>();
+        List<@NonNull ITimeGraphRowModel> rows = new ArrayList<>();
         for (Map.Entry<Long, Integer> entry : entries.entrySet()) {
             if (monitor != null && monitor.isCanceled()) {
                 return null;
@@ -128,8 +128,8 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
                 long startTime = interval.getStartTime();
                 long duration = interval.getEndTime() - startTime + 1;
                 Object state = interval.getValue();
-                String value = state == null ? null : state.toString();
-                eventList.add(new TimeGraphState(startTime, duration, entry.getKey(), value));
+                TimeGraphState value = state == null ? new TimeGraphState(startTime, duration, Math.max(entry.getKey().intValue(), 0)) : new TimeGraphState(startTime, duration, Math.max(entry.getKey().intValue(), 0), String.valueOf(state));
+                eventList.add(value);
             }
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));
 

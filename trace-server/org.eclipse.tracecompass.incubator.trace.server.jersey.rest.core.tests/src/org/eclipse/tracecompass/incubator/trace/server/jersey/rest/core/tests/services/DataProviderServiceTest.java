@@ -26,7 +26,7 @@ import org.junit.Test;
  */
 public class DataProviderServiceTest extends RestServerTest {
     static final String PROVIDERS_PATH = "providers";
-    private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.tmf.core.callstack.provider.CallStackDataProvider";
+    private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
     static final String TREE_PATH = "tree";
 
     /**

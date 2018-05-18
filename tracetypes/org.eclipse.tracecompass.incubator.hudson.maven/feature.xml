@@ -20,7 +20,6 @@
    </license>
 
    <requires>
-      <import plugin="org.eclipse.tracecompass.tmf.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.tracecompass.common.core"/>
@@ -30,6 +29,8 @@
       <import plugin="org.eclipse.tracecompass.datastore.core"/>
       <import plugin="com.google.guava"/>
       <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.tracecompass.tmf.ui"/>
+      <import plugin="org.eclipse.tracecompass.analysis.profiling.core"/>
    </requires>
 
    <plugin

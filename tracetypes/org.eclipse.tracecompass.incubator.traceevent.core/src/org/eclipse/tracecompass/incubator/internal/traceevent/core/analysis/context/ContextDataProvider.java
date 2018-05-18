@@ -21,20 +21,20 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.SelectionTimeQueryFilter;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TimeQueryFilter;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphArrow;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphRowModel;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphState;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphEntryModel;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphRowModel;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphState;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.response.ITmfResponse.Status;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
+import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
+import org.eclipse.tracecompass.tmf.core.response.ITmfResponse.Status;
+import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
@@ -44,6 +44,9 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  */
 public class ContextDataProvider extends AbstractTimeGraphDataProvider<@NonNull ContextAnalysis, @NonNull TimeGraphEntryModel> {
 
+    /**
+     * ID of this analysis
+     */
     public static final @NonNull String ID = ContextAnalysis.ID + ".dataprovider"; //$NON-NLS-1$
 
     /**

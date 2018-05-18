@@ -32,13 +32,13 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.p
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartDataProviderFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel.EntryType;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.SelectionTimeQueryFilter;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TimeQueryFilter;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphRowModel;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.ITimeGraphState;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphState;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.response.ITmfResponse;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
+import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
+import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
+import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -49,7 +49,6 @@ import com.google.common.collect.Lists;
  *
  * @author Geneviève Bastien
  */
-@SuppressWarnings("restriction")
 public class FlameChartDataProviderTest extends CallStackTestBase {
 
     private static final @Nullable IProgressMonitor MONITOR = new NullProgressMonitor();
@@ -200,30 +199,30 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
         verifyStates(rowModels, pid5, Collections.emptyList());
         verifyStates(rowModels, tid6, Collections.emptyList());
         // Verify function level 1 of tid 3
-        verifyStates(rowModels, findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Long.MIN_VALUE, "op2")));
+        verifyStates(rowModels, findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Integer.MIN_VALUE, "op2")));
         // Verify function level 2 of tid 3
         verifyStates(rowModels, findEntryByDepthAndType(tid3Children, 2, EntryType.FUNCTION), ImmutableList.of(
-                new TimeGraphState(1, 4, Long.MIN_VALUE),
-                new TimeGraphState(5, 1, Long.MIN_VALUE, "op3"),
-                new TimeGraphState(6, 1, Long.MIN_VALUE),
-                new TimeGraphState(7, 6, Long.MIN_VALUE, "op2"),
-                new TimeGraphState(13, 8, Long.MIN_VALUE)));
+                new TimeGraphState(1, 4, Integer.MIN_VALUE),
+                new TimeGraphState(5, 1, Integer.MIN_VALUE, "op3"),
+                new TimeGraphState(6, 1, Integer.MIN_VALUE),
+                new TimeGraphState(7, 6, Integer.MIN_VALUE, "op2"),
+                new TimeGraphState(13, 8, Integer.MIN_VALUE)));
         // Verify function level 1 of tid 6
-        verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Long.MIN_VALUE, "op1")));
+        verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Integer.MIN_VALUE, "op1")));
         // Verify function level 2 of tid 6
         verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 2, EntryType.FUNCTION), ImmutableList.of(
-                new TimeGraphState(2, 5, Long.MIN_VALUE, "op3"),
-                new TimeGraphState(7, 1, Long.MIN_VALUE),
-                new TimeGraphState(8, 3, Long.MIN_VALUE, "op2"),
-                new TimeGraphState(11, 1, Long.MIN_VALUE),
-                new TimeGraphState(12, 8, Long.MIN_VALUE, "op4")));
+                new TimeGraphState(2, 5, Integer.MIN_VALUE, "op3"),
+                new TimeGraphState(7, 1, Integer.MIN_VALUE),
+                new TimeGraphState(8, 3, Integer.MIN_VALUE, "op2"),
+                new TimeGraphState(11, 1, Integer.MIN_VALUE),
+                new TimeGraphState(12, 8, Integer.MIN_VALUE, "op4")));
         // Verify function level 3 of tid 6
         verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 3, EntryType.FUNCTION), ImmutableList.of(
-                new TimeGraphState(1, 3, Long.MIN_VALUE),
-                new TimeGraphState(4, 2, Long.MIN_VALUE, "op1"),
-                new TimeGraphState(6, 3, Long.MIN_VALUE),
-                new TimeGraphState(9, 1, Long.MIN_VALUE, "op3"),
-                new TimeGraphState(10, 11, Long.MIN_VALUE)));
+                new TimeGraphState(1, 3, Integer.MIN_VALUE),
+                new TimeGraphState(4, 2, Integer.MIN_VALUE, "op1"),
+                new TimeGraphState(6, 3, Integer.MIN_VALUE),
+                new TimeGraphState(9, 1, Integer.MIN_VALUE, "op3"),
+                new TimeGraphState(10, 11, Integer.MIN_VALUE)));
 
         // Get the row model for those entries with low resolution
         rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(3, 15, 2, selectedIds), new NullProgressMonitor());
@@ -238,21 +237,21 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
         verifyStates(rowModels, pid5, Collections.emptyList());
         verifyStates(rowModels, tid6, Collections.emptyList());
         // Verify function level 1 of tid 3
-        verifyStates(rowModels, findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Long.MIN_VALUE, "op2")));
+        verifyStates(rowModels, findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Integer.MIN_VALUE, "op2")));
         // Verify function level 2 of tid 3
         verifyStates(rowModels, findEntryByDepthAndType(tid3Children, 2, EntryType.FUNCTION), ImmutableList.of(
-                new TimeGraphState(1, 4, Long.MIN_VALUE),
-                new TimeGraphState(13, 8, Long.MIN_VALUE)));
+                new TimeGraphState(1, 4, Integer.MIN_VALUE),
+                new TimeGraphState(13, 8, Integer.MIN_VALUE)));
         // Verify function level 1 of tid 6
-        verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Long.MIN_VALUE, "op1")));
+        verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Integer.MIN_VALUE, "op1")));
         // Verify function level 2 of tid 6
         verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 2, EntryType.FUNCTION), ImmutableList.of(
-                new TimeGraphState(2, 5, Long.MIN_VALUE, "op3"),
-                new TimeGraphState(12, 8, Long.MIN_VALUE, "op4")));
+                new TimeGraphState(2, 5, Integer.MIN_VALUE, "op3"),
+                new TimeGraphState(12, 8, Integer.MIN_VALUE, "op4")));
         // Verify function level 3 of tid 6
         verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 3, EntryType.FUNCTION), ImmutableList.of(
-                new TimeGraphState(1, 3, Long.MIN_VALUE),
-                new TimeGraphState(10, 11, Long.MIN_VALUE)));
+                new TimeGraphState(1, 3, Integer.MIN_VALUE),
+                new TimeGraphState(10, 11, Integer.MIN_VALUE)));
     }
 
     /**

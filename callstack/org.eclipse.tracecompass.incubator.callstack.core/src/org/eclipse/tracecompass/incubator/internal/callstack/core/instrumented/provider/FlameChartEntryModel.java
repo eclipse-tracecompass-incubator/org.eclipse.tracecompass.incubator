@@ -12,14 +12,13 @@ package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 
 /**
  * {@link TimeGraphEntryModel} for the Flame chart data
  *
  * @author Geneviève Bastien
  */
-@SuppressWarnings("restriction")
 public class FlameChartEntryModel extends TimeGraphEntryModel {
 
     /**

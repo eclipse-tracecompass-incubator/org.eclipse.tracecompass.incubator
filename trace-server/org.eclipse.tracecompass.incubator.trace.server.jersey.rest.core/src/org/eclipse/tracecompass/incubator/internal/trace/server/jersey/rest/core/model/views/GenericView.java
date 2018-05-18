@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.response.TmfModelResponse;
+import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
@@ -22,7 +22,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  * @param <R> Type of model to return
  * @author Loic Prieur-Drevon
  */
-@SuppressWarnings("restriction")
 @XmlRootElement
 public class GenericView<R> {
     private final ITmfTrace fTrace;

@@ -41,6 +41,8 @@
       <import plugin="org.swtchart"/>
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.help"/>
+      <import plugin="org.eclipse.tracecompass.analysis.profiling.core"/>
+      <import plugin="org.eclipse.tracecompass.analysis.os.linux.ui"/>
    </requires>
 
    <plugin
