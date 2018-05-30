@@ -81,7 +81,7 @@ public class CallstackXmlModuleHelper extends TmfAnalysisModuleHelperXml {
             Multimap<String, IAnalysisModuleHelper> analysisModules = TmfAnalysisManager.getAnalysisModules();
             Collection<IAnalysisModuleHelper> collection = analysisModules.get(fAnalysisId);
             if (collection.isEmpty()) {
-                throw new NullPointerException("Callstack XML analysis: no analysis called " + fAnalysisId); //$NON-NLS-1$
+                Activator.getInstance().logWarning("Callstack XML analysis: no analysis called " + fAnalysisId); //$NON-NLS-1$
             }
             return collection;
         }
