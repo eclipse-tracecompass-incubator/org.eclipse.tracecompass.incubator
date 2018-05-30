@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
+import org.eclipse.tracecompass.analysis.os.linux.core.tid.TidAnalysisModule;
 import org.eclipse.tracecompass.incubator.analysis.core.aspects.AnalysisThreadNameAspect;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
@@ -71,10 +72,14 @@ public class AnalysisThreadNameAspectTest {
     public void setUp() {
         LttngKernelTrace trace = LttngKernelTestTraceUtils.getTrace(TRACE);
         trace.traceOpened(new TmfTraceOpenedSignal(this, trace, null));
-        IAnalysisModule kernelModule = trace.getAnalysisModule(KernelAnalysisModule.ID);
-        assertNotNull(kernelModule);
-        kernelModule.schedule();
-        assertTrue(kernelModule.waitForCompletion());
+        IAnalysisModule module = trace.getAnalysisModule(KernelAnalysisModule.ID);
+        assertNotNull(module);
+        module.schedule();
+        assertTrue(module.waitForCompletion());
+        module = trace.getAnalysisModule(TidAnalysisModule.ID);
+        assertNotNull(module);
+        module.schedule();
+        assertTrue(module.waitForCompletion());
         fTrace = trace;
     }
 
