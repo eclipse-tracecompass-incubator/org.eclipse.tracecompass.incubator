@@ -64,6 +64,9 @@ public class TraceEventField {
         long ts = 0;
 
         Double tso = optDouble(root, ITraceEventConstants.TIMESTAMP);
+        if (tso == Double.NaN) {
+            return null;
+        }
         if (Double.isFinite(tso)) {
             ts = (long) (tso * MICRO_TO_NANO);
         }
@@ -72,7 +75,7 @@ public class TraceEventField {
             // FIXME: Easy way to avoid null warning
             phase = "I"; //$NON-NLS-1$
         }
-        String name = String.valueOf(optString(root, ITraceEventConstants.NAME, TraceEventPhases.DURATION_END.equals(phase) ? "exit" : "unknown")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        String name = String.valueOf(optString(root, ITraceEventConstants.NAME, TraceEventPhases.DURATION_END.equals(phase) ? "exit" : "unknown")); //$NON-NLS-1$ //$NON-NLS-2$
         Integer tid = optInt(root, ITraceEventConstants.TID);
         if (tid == Integer.MIN_VALUE) {
             tid = null;

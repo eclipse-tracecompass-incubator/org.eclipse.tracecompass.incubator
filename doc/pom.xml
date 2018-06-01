@@ -38,6 +38,7 @@
     <module>org.eclipse.tracecompass.incubator.lttng2.ust.extras.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.atrace.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.trace.server.doc.dev</module>
+    <module>org.eclipse.tracecompass.incubator.opentracing.doc.user</module>
     <!-- insert modules here -->
   </modules>
 

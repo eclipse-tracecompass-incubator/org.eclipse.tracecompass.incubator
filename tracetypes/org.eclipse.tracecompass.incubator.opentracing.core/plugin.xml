@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <category
+            id="org.eclipse.tracecompass.incubator.opentracing.core"
+            name="Open Tracing Format">
+      </category>
+      <type
+            category="org.eclipse.tracecompass.incubator.opentracing.core"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.opentracing.core"
+            isDirectory="false"
+            name="Generic Open Tracing Trace"
+            trace_type="org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.OpenTracingTrace">
+      </type>
+   </extension>
+</plugin>

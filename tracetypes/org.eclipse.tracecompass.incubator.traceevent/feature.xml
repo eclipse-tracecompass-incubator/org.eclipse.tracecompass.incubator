@@ -41,6 +41,7 @@
       <import plugin="com.google.gson"/>
       <import plugin="org.eclipse.tracecompass.datastore.core"/>
       <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.tracecompass.incubator.jsontrace.core"/>
    </requires>
 
    <plugin

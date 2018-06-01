@@ -1,0 +1,8 @@
+
+= Open tracing trace =
+
+From [https://github.com/opentracing the Open tracing github page]. The Open tracing API is a vendor-neutral API for distributed tracing and context propagation.
+
+Trace compass currently support the Jaeger tracer [https://github.com/jaegertracing] trace format which is a .json file.
+
+The parser handles jaeger traces. In order to open one, select the .json file of the trace obtained with Jaeger UI.

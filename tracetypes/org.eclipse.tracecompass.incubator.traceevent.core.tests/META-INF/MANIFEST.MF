@@ -12,7 +12,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.incubator.traceevent.core,
  org.junit,
  org.eclipse.tracecompass.tmf.core,
- org.eclipse.tracecompass.incubator.callstack.core
+ org.eclipse.tracecompass.incubator.callstack.core,
+ org.eclipse.tracecompass.incubator.jsontrace.core,
+ org.eclipse.jdt.annotation
 Export-Package: org.eclipse.tracecompass.incubator.traceevent.core.tests
 Import-Package: com.google.common.base,
  com.google.common.collect,

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
+      <type
+            icon="icons/open-tracing.png"
+            tracetype="org.eclipse.tracecompass.incubator.opentracing.core">
+      </type>
+   </extension>
+</plugin>

@@ -19,7 +19,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.analysis.counters.core,
  org.eclipse.tracecompass.analysis.timing.core,
  org.eclipse.tracecompass.tmf.analysis.xml.core,
- org.eclipse.tracecompass.analysis.profiling.core
+ org.eclipse.tracecompass.analysis.profiling.core,
+ org.eclipse.tracecompass.incubator.jsontrace.core,
+ org.eclipse.jdt.annotation
 Export-Package: org.eclipse.tracecompass.incubator.internal.traceevent.core;x-friends:="org.eclipse.tracecompass.incubator.traceevent.core.tests",
  org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context;x-friends:="org.eclipse.tracecompass.incubator.traceevent.ui",

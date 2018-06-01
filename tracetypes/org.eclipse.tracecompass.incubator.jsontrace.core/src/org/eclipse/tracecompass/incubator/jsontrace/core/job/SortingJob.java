@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Ericsson
+ * Copyright (c) 2018 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.traceevent.core.trace;
+package org.eclipse.tracecompass.incubator.jsontrace.core.job;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -30,7 +30,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils;
-import org.eclipse.tracecompass.incubator.internal.traceevent.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.jsontrace.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.jsontrace.core.job.Messages;
+import org.eclipse.tracecompass.incubator.jsontrace.core.trace.JsonTrace;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 
@@ -41,7 +43,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
  *
  * @author Matthew Khouzam
  */
-final class SortingJob extends Job {
+public final class SortingJob extends Job {
 
     private static final int CHARS_PER_LINE_ESTIMATE = 50;
     private static final @NonNull Logger LOGGER = TraceCompassLog.getLogger(SortingJob.class);
@@ -50,9 +52,8 @@ final class SortingJob extends Job {
     private static final class Pair implements Comparable<Pair> {
         private static final @NonNull BigDecimal MINUS_ONE = BigDecimal.valueOf(-1);
 
-        public Pair(String string, int i) {
+        public Pair(String key, String string, int i) {
             line = string;
-            String key = "\"ts\":"; //$NON-NLS-1$
             int indexOf = string.indexOf(key);
             if (indexOf < 0) {
                 ts = MINUS_ONE;
@@ -81,14 +82,17 @@ final class SortingJob extends Job {
         }
     }
 
+    private final Integer fBracketsToSkip;
+    private final String fTsKey;
     private final String fPath;
     private final ITmfTrace fTrace;
 
-    public SortingJob(ITmfTrace trace, String path) {
+    public SortingJob(ITmfTrace trace, String path, String tsKey, int bracketsToSkip) {
         super(Messages.SortingJob_description);
         fTrace = trace;
         fPath = path;
-
+        fTsKey = tsKey;
+        fBracketsToSkip = bracketsToSkip;
     }
 
     @Override
@@ -105,19 +109,22 @@ final class SortingJob extends Job {
         tempDir.mkdirs();
         List<File> tracelings = new ArrayList<>();
         try (BufferedInputStream parser = new BufferedInputStream(new FileInputStream(fPath))) {
-            int data = parser.read();
-            while (data != '[') {
+            int data = 0;
+            for (int nbBracket = 0; nbBracket < fBracketsToSkip; nbBracket++) {
                 data = parser.read();
-                if (data == -1) {
-                    return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Missing symbol \'[\' or \']\' in " + fPath); //$NON-NLS-1$
+                while (data != '[') {
+                    data = parser.read();
+                    if (data == -1) {
+                        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Missing symbol \'[\' or \']\' in " + fPath); //$NON-NLS-1$
+                    }
                 }
             }
             List<Pair> events = new ArrayList<>(CHUNK_SIZE);
-            String eventString = TraceEventTrace.readNextEventString(() -> (char) parser.read());
+            String eventString = JsonTrace.readNextEventString(() -> (char) parser.read());
             if (eventString == null) {
                 return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Empty event in " + fPath); //$NON-NLS-1$
             }
-            Pair line = new Pair(eventString, 0);
+            Pair line = new Pair(fTsKey, eventString, 0);
             line.line = data + '"' + line.line;
             int cnt = 0;
             int filen = 0;
@@ -128,11 +135,11 @@ final class SortingJob extends Job {
                     if (subMonitor.isCanceled()) {
                         return Status.CANCEL_STATUS;
                     }
-                    eventString = TraceEventTrace.readNextEventString(() -> (char) parser.read());
+                    eventString = JsonTrace.readNextEventString(() -> (char) parser.read());
                     if (eventString == null) {
                         break;
                     }
-                    line = new Pair(eventString, 0);
+                    line = new Pair(fTsKey, eventString, 0);
                     cnt++;
                 }
                 events.sort((o1, o2) -> o1.ts.compareTo(o2.ts));
@@ -172,8 +179,8 @@ final class SortingJob extends Job {
                         break;
                     }
                 }
-                eventString = TraceEventTrace.readNextEventString(() -> (char) createParser.read());
-                Pair parse = new Pair(eventString, i);
+                eventString = JsonTrace.readNextEventString(() -> (char) createParser.read());
+                Pair parse = new Pair(fTsKey, eventString, i);
                 evs.add(parse);
                 i++;
                 parsers.add(createParser);
@@ -192,7 +199,7 @@ final class SortingJob extends Job {
                 tempWriter.println('[');
                 while (!evs.isEmpty()) {
                     Pair sortedEvent = evs.poll();
-                    Pair parse = readNextEvent(parsers.get(sortedEvent.pos), sortedEvent.pos);
+                    Pair parse = readNextEvent(parsers.get(sortedEvent.pos), fTsKey, sortedEvent.pos);
                     if (parse != null) {
                         tempWriter.println(sortedEvent.line.trim() + ',');
                         evs.add(parse);
@@ -223,9 +230,9 @@ final class SortingJob extends Job {
 
     }
 
-    private static @Nullable Pair readNextEvent(BufferedInputStream parser, int i) throws IOException {
-        String event = TraceEventTrace.readNextEventString(() -> (char) parser.read());
-        return event == null ? null : new Pair(event, i);
+    private static @Nullable Pair readNextEvent(BufferedInputStream parser, String key, int i) throws IOException {
+        String event = JsonTrace.readNextEventString(() -> (char) parser.read());
+        return event == null ? null : new Pair(key, event, i);
 
     }
 }
