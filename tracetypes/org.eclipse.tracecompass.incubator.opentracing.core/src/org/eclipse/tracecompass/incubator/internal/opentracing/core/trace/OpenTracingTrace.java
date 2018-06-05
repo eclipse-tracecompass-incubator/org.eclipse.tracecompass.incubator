@@ -21,13 +21,17 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.IOpenTracingConstants;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.OpenTracingAspects;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.OpenTracingEvent;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.OpenTracingField;
 import org.eclipse.tracecompass.incubator.jsontrace.core.trace.JsonTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.ITmfLostEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
@@ -186,5 +190,30 @@ public class OpenTracingTrace extends JsonTrace {
             }
         }
         return null;
+    }
+
+    @Override
+    protected synchronized void updateAttributes(final ITmfContext context, final @NonNull ITmfEvent event) {
+        ITmfTimestamp timestamp = event.getTimestamp();
+        Long duration = event.getContent().getFieldValue(Long.class, IOpenTracingConstants.DURATION);
+        ITmfTimestamp endTime = duration != null ? TmfTimestamp.fromNanos(timestamp.toNanos() + duration) : timestamp;
+        if (event instanceof ITmfLostEvent) {
+            endTime = ((ITmfLostEvent) event).getTimeRange().getEndTime();
+        }
+        if (getStartTime().equals(TmfTimestamp.BIG_BANG) || (getStartTime().compareTo(timestamp) > 0)) {
+            setStartTime(timestamp);
+        }
+        if (getEndTime().equals(TmfTimestamp.BIG_CRUNCH) || (getEndTime().compareTo(endTime) < 0)) {
+            setEndTime(endTime);
+        }
+        if (context.hasValidRank()) {
+            long rank = context.getRank();
+            if (getNbEvents() <= rank) {
+                setNbEvents(rank + 1);
+            }
+            if (getIndexer() != null) {
+                getIndexer().updateIndex(context, timestamp);
+            }
+        }
     }
 }

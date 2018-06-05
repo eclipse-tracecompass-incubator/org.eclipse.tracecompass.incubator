@@ -8,4 +8,25 @@
             tracetype="org.eclipse.tracecompass.incubator.opentracing.core">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="org.eclipse.tracecompass.incubator.internal.opentracing.ui.view.life.SpanLifeView"
+            class="org.eclipse.tracecompass.incubator.internal.opentracing.ui.view.spanlife.SpanLifeView"
+            icon="icons/spanslife.png"
+            id="org.eclipse.tracecompass.incubator.opentracing.ui.view.life.spanlife.view"
+            name="Spans Life"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.opentracing.ui.view.life.spanlife.view">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeAnalysis">
+         </analysisModuleClass>
+      </output>
+   </extension>
 </plugin>

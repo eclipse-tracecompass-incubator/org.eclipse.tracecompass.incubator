@@ -17,4 +17,25 @@
             trace_type="org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.OpenTracingTrace">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeAnalysis"
+            automatic="true"
+            icon="icons/spanslife.png"
+            id="org.eclipse.tracecompass.incubator.opentracing.analysis.spanlife"
+            name="Spans Life">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.OpenTracingTrace">
+         </tracetype>
+      </module>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.opentracing.analysis.spanlife.dataprovider">
+      </dataProviderFactory>
+   </extension>
 </plugin>

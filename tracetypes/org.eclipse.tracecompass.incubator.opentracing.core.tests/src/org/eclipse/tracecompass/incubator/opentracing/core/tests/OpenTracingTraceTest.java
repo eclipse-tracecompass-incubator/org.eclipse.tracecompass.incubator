@@ -84,7 +84,7 @@ public class OpenTracingTraceTest {
         String path = "traces/simple.json";
         int nbEvents = 3;
         Double start = 1526674498419000.0;
-        Double end = 1526674498435000.0;
+        Double end = 1526674498436163.0;
         ITmfTimestamp startTime = TmfTimestamp.fromMicros(start.longValue());
         ITmfTimestamp endTime = TmfTimestamp.fromMicros(end.longValue());
         testTrace(path, nbEvents, startTime, endTime);
@@ -101,7 +101,7 @@ public class OpenTracingTraceTest {
         String path = "traces/multiple_services.json";
         int nbEvents = 5;
         Double start = 1527684461617000.0;
-        Double end = 1527684462096000.0;
+        Double end = 1527684462133362.0;
         ITmfTimestamp startTime = TmfTimestamp.fromMicros(start.longValue());
         ITmfTimestamp endTime = TmfTimestamp.fromMicros(end.longValue());
         testTrace(path, nbEvents, startTime, endTime);
