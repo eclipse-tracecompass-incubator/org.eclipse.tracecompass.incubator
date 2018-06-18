@@ -21,6 +21,7 @@
 
    <windowImages/>
 
+
    <launcher name="tracecompass-server">
       <win useIco="false">
          <bmp/>
@@ -114,6 +115,7 @@
       <plugin id="org.eclipse.tracecompass.tmf.chart.core"/>
       <plugin id="org.eclipse.tracecompass.tmf.core"/>
       <plugin id="org.eclipse.tracecompass.tmf.ctf.core"/>
+      <plugin id="org.eclipse.tracecompass.tmf.filter.parser"/>
       <plugin id="org.glassfish.hk2.api"/>
       <plugin id="org.glassfish.hk2.locator"/>
       <plugin id="org.glassfish.hk2.osgi-resource-locator"/>
