@@ -177,7 +177,11 @@ public class TraceEventTrace extends TmfTrace implements ITmfPersistentlyIndexab
 
     private static void goToCorrectStart(RandomAccessFile rafile) throws IOException {
         // skip start if it's {"traceEvents":
-        if (rafile.readLine().startsWith("{\"traceEvents\":")) { //$NON-NLS-1$
+        String readLine = rafile.readLine();
+        if (readLine == null) {
+            return;
+        }
+        if (readLine.startsWith("{\"traceEvents\":")) { //$NON-NLS-1$
             rafile.seek(14);
         } else {
             rafile.seek(0);
