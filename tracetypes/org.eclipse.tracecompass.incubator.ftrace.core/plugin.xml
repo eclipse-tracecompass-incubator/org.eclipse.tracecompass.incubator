@@ -23,5 +23,11 @@
             tracetype="org.eclipse.tracecompass.incubator.ftrace.core">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.analysis.xml.core.files">
+      <xmlfile
+            file="xml_analyses/FunctionGraph.xml">
+      </xmlfile>
+   </extension>
 
 </plugin>

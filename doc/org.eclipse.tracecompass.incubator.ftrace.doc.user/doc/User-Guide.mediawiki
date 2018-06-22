@@ -1,7 +1,21 @@
 
 = ftrace =
 
-Support is currently limited to event tracing. The expected format is the human readable raw format.
+Trace Compass supports the raw textual format of various ftrace plugins.
+
+== Supported ftrace features ==
+
+=== Event tracing ===
+
+ftrace traces with kernel events are kernel traces and all analyses available with other kernel traces in Trace Compass are made available for those traces: Kernel resources and threads analyses, I/O, memory, critical path, etc.
+
+[[Image:images/kernelAnalyses.png]]
+
+=== function graph ===
+
+The function graph plugin of trace allows to record the function entry and exits of various kernel functions. With this kind of trace, we can obtain a callstack / flame chart / flame graph for the various threads on the machine.
+
+[[Image:images/FuncGraph.png]]
 
 == Generating a trace ==
 
@@ -41,3 +55,5 @@ The recorded trace would contain only ''sched_switch'' and ''sched_wakeup'' even
   # trace-cmd report -R
 
 The ''-R'' argument is needed to get the raw format.
+
+See the [https://linux.die.net/man/1/trace-cmd trace-cmd documentation] for more tracing options.

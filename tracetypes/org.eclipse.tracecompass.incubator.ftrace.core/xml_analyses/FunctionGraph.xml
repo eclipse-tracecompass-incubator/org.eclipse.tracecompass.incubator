@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tmfxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../org.eclipse.tracecompass.tmf.analysis.xml.core/src/org/eclipse/tracecompass/tmf/analysis/xml/core/module/xmlDefinition.xsd">
+	<callstack id="org.eclipse.tracecompass.incubator.ftrace.function.graph">
+		<callstackGroup name="FTrace function graph">
+			<level path="Threads/*" />
+			<thread level="1" />
+		</callstackGroup>
+		<!-- callstack process="Views/*" thread="Threads/*" callstack="callstack" 
+			/ -->
+
+		<pattern version="1"
+			id="org.eclipse.tracecompass.incubator.ftrace.function.graph.pattern">
+			<head>
+				<traceType id="org.eclipse.tracecompass.incubator.ftrace.core" />
+				<label value="Function Graph" />
+			</head>
+
+			<patternHandler>
+
+				<action id="push_event">
+					<!-- Push the current event to the thread's callstack -->
+					<stateChange>
+						<stateAttribute type="constant" value="Threads" />
+						<stateAttribute type="eventField" value="pid" />
+						<stateAttribute type="constant" value="CallStack" />
+						<stateValue type="eventField" value="func" stack="push" />
+					</stateChange>
+				</action>
+
+				<action id="pop_event">
+					<!-- Pop the current event from the callstack -->
+					<stateChange>
+						<stateAttribute type="constant" value="Threads" />
+						<stateAttribute type="eventField" value="pid" />
+						<stateAttribute type="constant" value="CallStack" />
+						<stateValue type="eventField" value="func" stack="pop" />
+					</stateChange>
+				</action>
+
+				<!-- FSMs -->
+
+				<fsm id="functionGraph" initial="func_graph">
+					<state id="func_graph">
+						<!-- The state will stay here until we have a thread start event -->
+						<transition event="funcgraph_entry" target="func_graph"
+							action="push_event" />
+						<transition event="funcgraph_exit" target="func_graph"
+							action="pop_event" />
+					</state>
+				</fsm>
+
+			</patternHandler>
+		</pattern>
+	</callstack>
+
+</tmfxml>

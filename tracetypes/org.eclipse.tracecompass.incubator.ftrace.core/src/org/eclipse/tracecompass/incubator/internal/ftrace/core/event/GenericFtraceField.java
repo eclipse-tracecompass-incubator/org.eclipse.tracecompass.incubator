@@ -137,13 +137,25 @@ public class GenericFtraceField {
                     } else if (StringUtils.isNumeric(value)) {
                         fields.put(key, Long.parseUnsignedLong(value));
                     } else {
-                        fields.put(key, value);
+                        fields.put(key, decodeString(value));
                     }
                 }
             }
             return new GenericFtraceField(name, cpu, timestampInNano, pid, tid, fields);
         }
         return null;
+    }
+
+    private static Object decodeString(String val) {
+        try {
+            if (val.startsWith("0x") || val.startsWith("0X")) { //$NON-NLS-1$ //$NON-NLS-2$
+                // Chances are this is an hexadecimal string. Parse the value
+                return Long.parseUnsignedLong(val.substring(2), 16);
+            }
+        } catch (NumberFormatException e) {
+            // Fall back to returning the string
+        }
+        return val;
     }
 
     /**

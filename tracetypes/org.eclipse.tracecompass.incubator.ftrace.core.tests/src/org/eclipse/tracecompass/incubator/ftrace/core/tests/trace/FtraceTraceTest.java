@@ -9,11 +9,16 @@
 
 package org.eclipse.tracecompass.incubator.ftrace.core.tests.trace;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.tracecompass.incubator.ftrace.core.tests.ActivatorTest;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.FtraceTrace;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
 
 /**
  * Ftrace Trace Test Class
@@ -26,18 +31,24 @@ import static org.junit.Assert.assertEquals;
  */
 public class FtraceTraceTest {
 
+    private static final String TRACE_PATH = "res";
+
     /**
-     * Test validation of ftrace trace
+     * Test validation of ftrace traces
      */
     @Test
     public void testValidate() {
+        IPath path = ActivatorTest.getAbsoluteFilePath(TRACE_PATH);
+        File file = path.toFile();
 
+        File[] traceFiles = file.listFiles();
+        assertTrue(traceFiles.length > 0);
         FtraceTrace ftraceTrace = new FtraceTrace();
+        for (File f : traceFiles) {
+            IStatus status = ftraceTrace.validate(null, f.getAbsolutePath());
 
-        IStatus status = ftraceTrace.validate(null, "res/trace-android-sched");
-
-        assertEquals(0, status.getSeverity());
-
+            assertEquals("trace " + f, 0, status.getSeverity());
+        }
     }
 
     /**
