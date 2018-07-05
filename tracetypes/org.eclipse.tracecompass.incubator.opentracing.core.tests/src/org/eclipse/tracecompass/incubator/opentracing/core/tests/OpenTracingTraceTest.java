@@ -51,15 +51,23 @@ public class OpenTracingTraceTest {
         Map<String, ITmfEventAspect<?>> eventAspects = getEventAspects(path);
         ITmfEvent event = getFirstEvent(path);
         assertNotNull(event);
-        ImmutableSet<String> aspectNames = ImmutableSet.of("Name", "Timestamp", "Duration", "ID", "PID", "Tags");
+        ImmutableSet<String> aspectNames = ImmutableSet.of("Duration", "Process", "ID", "Timestamp", "Process tags", "Tags", "Name");
 
         assertEquals(aspectNames, eventAspects.keySet());
         testAspect(eventAspects.get("Name"), event, "say-hello");
+
         Double ts = 1526674498419000.0;
         testAspect(eventAspects.get("Timestamp"), event, TmfTimestamp.fromMicros(ts.longValue()));
         testAspect(eventAspects.get("Duration"), event, (long) 16961000);
         testAspect(eventAspects.get("ID"), event, "cf46871fbf4f262b");
-        testAspect(eventAspects.get("PID"), event, "p1");
+        testAspect(eventAspects.get("Process"), event, "hello-world");
+
+        Map<@NonNull String, @NonNull Object> processTagsMap = new HashMap<>();
+        processTagsMap.put("hostname", "mystery");
+        processTagsMap.put("jaeger.version", "Java-0.26.0");
+        processTagsMap.put("ip", "127.0.1.1");
+        testAspect(eventAspects.get("Process tags"), event, processTagsMap);
+
         Map<@NonNull String, @NonNull Object> tagsMap = new HashMap<>();
         tagsMap.put("sampler.type", "const");
         tagsMap.put("hello-to", "Kath");

@@ -17,22 +17,14 @@ import java.nio.ByteBuffer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.jsontrace.core.Activator;
-import org.eclipse.tracecompass.incubator.jsontrace.core.job.SortingJob;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
-import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.core.project.model.ITmfPropertiesProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceKnownSize;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfPersistentlyIndexable;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
@@ -42,7 +34,8 @@ import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
  *
  * @author Katherine Nadeau
  */
-public abstract class JsonTrace extends TmfTrace implements ITmfPersistentlyIndexable, ITmfPropertiesProvider, ITmfTraceKnownSize {
+public abstract class JsonTrace extends TmfTrace
+        implements ITmfPersistentlyIndexable, ITmfPropertiesProvider, ITmfTraceKnownSize {
 
     private static final int CHECKPOINT_SIZE = 10000;
     private static final int ESTIMATED_EVENT_SIZE = 50;
@@ -56,43 +49,6 @@ public abstract class JsonTrace extends TmfTrace implements ITmfPersistentlyInde
     protected File fFile;
 
     protected RandomAccessFile fFileInput;
-
-    public abstract void goToCorrectStart(RandomAccessFile rafile) throws IOException;
-
-    public abstract String getTraceType();
-
-    public abstract String getTsKey();
-
-    public abstract Integer getBracketsToSkip();
-
-    @Override
-    public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
-        super.initTrace(resource, path, type);
-        fProperties.put("Type", getTraceType()); //$NON-NLS-1$
-        String dir = TmfTraceManager.getSupplementaryFileDir(this);
-        fFile = new File(dir + new File(path).getName());
-        if (!fFile.exists()) {
-            Job sortJob = new SortingJob(this, path, getTsKey(), getBracketsToSkip());
-            sortJob.schedule();
-            while (sortJob.getResult() == null) {
-                try {
-                    sortJob.join();
-                } catch (InterruptedException e) {
-                    throw new TmfTraceException(e.getMessage(), e);
-                }
-            }
-            IStatus result = sortJob.getResult();
-            if (!result.isOK()) {
-                throw new TmfTraceException("Job failed " + result.getMessage()); //$NON-NLS-1$
-            }
-        }
-        try {
-            fFileInput = new BufferedRandomAccessFile(fFile, "r"); //$NON-NLS-1$
-            goToCorrectStart(fFileInput);
-        } catch (IOException e) {
-            throw new TmfTraceException(e.getMessage(), e);
-        }
-    }
 
     @Override
     public synchronized void dispose() {
@@ -227,7 +183,7 @@ public abstract class JsonTrace extends TmfTrace implements ITmfPersistentlyInde
                 } else if (elem == '}') {
                     if (scope > 0) {
                         scope--;
-                    } else {
+                    } else if (scope == 0) {
                         sb.append((char) elem);
                         return sb.toString();
                     }

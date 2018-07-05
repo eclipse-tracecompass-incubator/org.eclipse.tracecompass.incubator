@@ -43,7 +43,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
  *
  * @author Matthew Khouzam
  */
-public final class SortingJob extends Job {
+public abstract class SortingJob extends Job {
 
     private static final int CHARS_PER_LINE_ESTIMATE = 50;
     private static final @NonNull Logger LOGGER = TraceCompassLog.getLogger(SortingJob.class);
@@ -95,6 +95,15 @@ public final class SortingJob extends Job {
         fBracketsToSkip = bracketsToSkip;
     }
 
+    /**
+     * Getter for the trace path
+     *
+     * @return the path
+     */
+    public String getPath() {
+        return fPath;
+    }
+
     @Override
     protected IStatus run(IProgressMonitor monitor) {
         ITmfTrace trace = fTrace;
@@ -115,7 +124,8 @@ public final class SortingJob extends Job {
                 while (data != '[') {
                     data = parser.read();
                     if (data == -1) {
-                        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Missing symbol \'[\' or \']\' in " + fPath); //$NON-NLS-1$
+                        return new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+                                "Missing symbol \'[\' or \']\' in " + fPath); //$NON-NLS-1$
                     }
                 }
             }
@@ -192,6 +202,9 @@ public final class SortingJob extends Job {
             if (subMonitor.isCanceled()) {
                 return Status.CANCEL_STATUS;
             }
+
+            processMetadata(trace, dir);
+
             File file = new File(dir + File.separator + new File(trace.getPath()).getName());
             file.createNewFile();
 
@@ -217,7 +230,8 @@ public final class SortingJob extends Job {
                 tmpParser.close();
             }
         } catch (IOException e) {
-            TraceCompassLogUtils.traceInstant(LOGGER, Level.WARNING, "IOException in sorting job", "trace", fPath, "exception", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            TraceCompassLogUtils.traceInstant(LOGGER, Level.WARNING, "IOException in sorting job", "trace", fPath, //$NON-NLS-1$ //$NON-NLS-2$
+                    "exception", e); //$NON-NLS-1$
         } finally {
             for (File tl : tracelings) {
                 tl.delete();
@@ -229,6 +243,18 @@ public final class SortingJob extends Job {
         return Status.OK_STATUS;
 
     }
+
+    /**
+     * Process whatever metadata that can be found after the event list in the trace file
+     * file
+     *
+     * @param trace
+     *            the trace to be sort
+     * @param dir
+     *            the path to the trace file
+     * @throws IOException
+     */
+    protected abstract void processMetadata(ITmfTrace trace, String dir) throws IOException;
 
     private static @Nullable Pair readNextEvent(BufferedInputStream parser, String key, int i) throws IOException {
         String event = JsonTrace.readNextEventString(() -> (char) parser.read());

@@ -54,11 +54,19 @@ public class Messages extends NLS {
     /**
      * Process Id
      */
-    public static @Nullable String OpenTracingAspects_Pid;
+    public static @Nullable String OpenTracingAspects_Process;
     /**
      * Process Id Description
      */
-    public static @Nullable String OpenTracingAspects_PidD;
+    public static @Nullable String OpenTracingAspects_ProcessD;
+    /**
+     * Process Tags
+     */
+    public static @Nullable String OpenTracingAspects_ProcessTags;
+    /**
+     * Process Tags Description
+     */
+    public static @Nullable String OpenTracingAspects_ProcessTagsD;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

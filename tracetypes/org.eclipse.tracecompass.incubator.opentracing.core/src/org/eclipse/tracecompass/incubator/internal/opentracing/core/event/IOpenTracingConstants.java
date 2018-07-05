@@ -33,6 +33,10 @@ public interface IOpenTracingConstants {
      */
     String REFERENCES = "references"; //$NON-NLS-1$
     /**
+     * reference type field name
+     */
+    String REFERENCE_TYPE = "refType"; //$NON-NLS-1$
+    /**
      * startTime field name
      */
     String START_TIME = "startTime"; //$NON-NLS-1$
@@ -48,5 +52,25 @@ public interface IOpenTracingConstants {
      * processID field name
      */
     String PROCESS_ID = "processID"; //$NON-NLS-1$
+    /**
+     * processID field name
+     */
+    String PROCESS_NAME = "processName"; //$NON-NLS-1$
+    /**
+     * service field name
+     */
+    String SERVICE_NAME = "serviceName"; //$NON-NLS-1$
+    /**
+     * process tags field name
+     */
+    String PROCESS_TAGS = "processTags"; //$NON-NLS-1$
+    /**
+     * key field name
+     */
+    String KEY = "key"; //$NON-NLS-1$
+    /**
+     * value field name
+     */
+    String VALUE = "value"; //$NON-NLS-1$
 
 }

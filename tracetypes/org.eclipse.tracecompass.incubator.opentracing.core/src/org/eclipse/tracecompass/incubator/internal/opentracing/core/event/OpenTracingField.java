@@ -39,18 +39,35 @@ public class OpenTracingField {
     private final Long fStartTime;
     private final Long fDuration;
     private final @Nullable Map<String, Object> fTags;
-    private final String fPid;
+    private final @Nullable Map<String, Object> fProcessTags;
+    private String fProcessName;
 
     private static final Gson G_SON = new Gson();
+
+    /**
+     * Get the process id
+     *
+     * @param eventString
+     *            the event string
+     * @return the process id
+     */
+    public static @Nullable String getProcess(String eventString) {
+        @Nullable
+        JsonObject root = G_SON.fromJson(eventString, JsonObject.class);
+        String process = optString(root, IOpenTracingConstants.PROCESS_ID);
+        return process == null ? "" : process; //$NON-NLS-1$
+    }
 
     /**
      * Parse a JSON string
      *
      * @param fieldsString
      *            the string
+     * @param processField
+     *            the process name and tags
      * @return an event field
      */
-    public static @Nullable OpenTracingField parseJson(String fieldsString) {
+    public static @Nullable OpenTracingField parseJson(String fieldsString, @Nullable String processField) {
         @Nullable
         JsonObject root = G_SON.fromJson(fieldsString, JsonObject.class);
 
@@ -68,18 +85,63 @@ public class OpenTracingField {
         if (Double.isFinite(duration)) {
             duration = TmfTimestamp.fromMicros(duration).toNanos();
         }
-        String pid = optString(root, IOpenTracingConstants.PROCESS_ID);
 
         Map<@NonNull String, @NonNull Object> fieldsMap = new HashMap<>();
 
         JsonArray refs = optJSONArray(root, IOpenTracingConstants.REFERENCES);
         if (refs != null) {
             for (int i = 0; i < refs.size(); i++) {
-                String key = Objects.requireNonNull(refs.get(i).getAsJsonObject().get("refType").getAsString()); //$NON-NLS-1$
-                JsonElement element = Objects.requireNonNull(refs.get(i).getAsJsonObject().get("spanID")); //$NON-NLS-1$
+                String key = Objects.requireNonNull(refs.get(i).getAsJsonObject().get(IOpenTracingConstants.REFERENCE_TYPE).getAsString());
+                JsonElement element = Objects.requireNonNull(refs.get(i).getAsJsonObject().get(IOpenTracingConstants.SPAN_ID));
                 String value = String.valueOf(element.isJsonPrimitive() ? element.getAsJsonPrimitive().getAsString() : element.toString());
-                fieldsMap.put(IOpenTracingConstants.REFERENCES + "/" + key, value); //$NON-NLS-1$
+                fieldsMap.put(IOpenTracingConstants.REFERENCES + '/' + key, value);
             }
+        }
+
+        JsonArray tags = optJSONArray(root, IOpenTracingConstants.TAGS);
+        if (tags != null) {
+            for (int i = 0; i < tags.size(); i++) {
+                String key = Objects.requireNonNull(tags.get(i).getAsJsonObject().get(IOpenTracingConstants.KEY).getAsString());
+                JsonElement element = Objects.requireNonNull(tags.get(i).getAsJsonObject().get(IOpenTracingConstants.VALUE));
+                String value = String.valueOf(element.isJsonPrimitive() ? element.getAsJsonPrimitive().getAsString() : element.toString());
+                fieldsMap.put(IOpenTracingConstants.TAGS + '/' + key, value);
+            }
+        }
+
+        if (id == null) {
+            return null;
+        }
+
+        fieldsMap.put(IOpenTracingConstants.OPERATION_NAME, name);
+        fieldsMap.put(IOpenTracingConstants.SPAN_ID, id);
+        if (flags != Integer.MIN_VALUE) {
+            fieldsMap.put(IOpenTracingConstants.FLAGS, flags);
+        }
+        fieldsMap.put(IOpenTracingConstants.START_TIME, startTime);
+        fieldsMap.put(IOpenTracingConstants.DURATION, duration);
+
+        String processName = processField == null ? "" : parseProcess(processField, fieldsMap); //$NON-NLS-1$
+        fieldsMap.put(IOpenTracingConstants.PROCESS_NAME, processName);
+
+        return new OpenTracingField(name, fieldsMap, id, startTime, duration, processName);
+    }
+
+    /**
+     * Parse a JSON string of the process and add it in fieldsMap
+     *
+     * @param processField
+     *            the string
+     * @param fieldsMap
+     *            processes list
+     * @return the process name
+     */
+    public static String parseProcess(String processField, Map<String, Object> fieldsMap) {
+        @Nullable
+        JsonObject root = G_SON.fromJson(processField, JsonObject.class);
+
+        String name = String.valueOf(optString(root, IOpenTracingConstants.SERVICE_NAME));
+        if (name == "null") { //$NON-NLS-1$
+            return ""; //$NON-NLS-1$
         }
 
         JsonArray tags = optJSONArray(root, IOpenTracingConstants.TAGS);
@@ -88,23 +150,11 @@ public class OpenTracingField {
                 String key = Objects.requireNonNull(tags.get(i).getAsJsonObject().get("key").getAsString()); //$NON-NLS-1$
                 JsonElement element = Objects.requireNonNull(tags.get(i).getAsJsonObject().get("value")); //$NON-NLS-1$
                 String value = String.valueOf(element.isJsonPrimitive() ? element.getAsJsonPrimitive().getAsString() : element.toString());
-                fieldsMap.put(IOpenTracingConstants.TAGS + "/" + key, value); //$NON-NLS-1$
+                fieldsMap.put(IOpenTracingConstants.PROCESS_TAGS + '/' + key, value);
             }
         }
 
-        if (id == null || pid == null) {
-            return null;
-        }
-        fieldsMap.put(IOpenTracingConstants.OPERATION_NAME, name);
-        fieldsMap.put(IOpenTracingConstants.SPAN_ID, id);
-        if (flags != Integer.MIN_VALUE) {
-            fieldsMap.put(IOpenTracingConstants.FLAGS, flags);
-        }
-        fieldsMap.put(IOpenTracingConstants.START_TIME, startTime);
-        fieldsMap.put(IOpenTracingConstants.DURATION, duration);
-        fieldsMap.put(IOpenTracingConstants.PROCESS_ID, pid);
-
-        return new OpenTracingField(name, fieldsMap, id, startTime, duration, pid);
+        return name;
     }
 
     private static long optLong(JsonObject root, String key) {
@@ -140,10 +190,10 @@ public class OpenTracingField {
      *            the span start time
      * @param duration
      *            the span duration
-     * @param pid
-     *            the span process id
+     * @param processName
+     *            the span process name
      */
-    private OpenTracingField(String name, Map<String, Object> fields, String spanId, Long startTime, Long duration, String pid) {
+    private OpenTracingField(String name, Map<String, Object> fields, String spanId, Long startTime, Long duration, String processName) {
         fOperationName = name;
         ITmfEventField[] array = fields.entrySet().stream()
                 .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
@@ -153,13 +203,20 @@ public class OpenTracingField {
         fStartTime = startTime;
         fDuration = duration;
         @SuppressWarnings("null")
-        Map<@NonNull String, @NonNull Object> tgs = fields.entrySet().stream()
+        Map<@NonNull String, @NonNull Object> tags = fields.entrySet().stream()
                 .filter(entry -> {
                     return entry.getKey().startsWith(IOpenTracingConstants.TAGS + '/');
                 })
                 .collect(Collectors.toMap(entry -> entry.getKey().substring(5), Entry::getValue));
-        fTags = tgs.isEmpty() ? null : tgs;
-        fPid = pid;
+        fTags = tags.isEmpty() ? null : tags;
+        @SuppressWarnings("null")
+        Map<@NonNull String, @NonNull Object> processTags = fields.entrySet().stream()
+                .filter(entry -> {
+                    return entry.getKey().startsWith(IOpenTracingConstants.PROCESS_TAGS + '/');
+                })
+                .collect(Collectors.toMap(entry -> entry.getKey().substring(12), Entry::getValue));
+        fProcessTags = processTags.isEmpty() ? null : processTags;
+        fProcessName = processName;
     }
 
     /**
@@ -218,11 +275,21 @@ public class OpenTracingField {
     }
 
     /**
-     * Get the span processId
+     * Get the span process tags
      *
-     * @return the process ID
+     * @return a map of the process tags and their field names
      */
-    public String getPid() {
-        return fPid;
+    @Nullable
+    public Map<String, Object> getProcessTags() {
+        return fProcessTags;
+    }
+
+    /**
+     * Get the span processName
+     *
+     * @return the process name
+     */
+    public String getProcessName() {
+        return fProcessName;
     }
 }

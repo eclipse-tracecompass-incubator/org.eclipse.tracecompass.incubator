@@ -44,7 +44,8 @@ public class OpenTracingAspects {
                     TmfBaseAspects.getTimestampAspect(),
                     new OpenTracingDurationAspect(),
                     new OpenTracingSpanIdAspect(),
-                    new OpenTracingPidAspect(),
+                    new OpenTracingProcessAspect(),
+                    new OpenTracingProcessTagsAspect(),
                     new OpenTracingTagsAspect());
             aspects = aspectSet;
         }
@@ -69,22 +70,21 @@ public class OpenTracingAspects {
         }
     }
 
-    private static class OpenTracingPidAspect implements IOpenTracingAspect<String> {
+    private static class OpenTracingProcessAspect implements IOpenTracingAspect<String> {
 
         @Override
         public @NonNull String getName() {
-            return String.valueOf(Messages.OpenTracingAspects_Pid);
+            return String.valueOf(Messages.OpenTracingAspects_Process);
         }
 
         @Override
         public @NonNull String getHelpText() {
-            return String.valueOf(
-                    Messages.OpenTracingAspects_PidD);
+            return String.valueOf(Messages.OpenTracingAspects_ProcessD);
         }
 
         @Override
         public String resolveOpenTracingLogs(@NonNull OpenTracingEvent event) {
-            Object field = event.getField().getPid();
+            Object field = event.getField().getProcessName();
             return String.valueOf(field);
         }
     }
@@ -122,6 +122,25 @@ public class OpenTracingAspects {
         @Override
         public String resolveOpenTracingLogs(@NonNull OpenTracingEvent event) {
             return event.getField().getSpanId();
+        }
+    }
+
+    private static class OpenTracingProcessTagsAspect implements IOpenTracingAspect<Map<String, Object>> {
+
+        @Override
+        public String getName() {
+            return String.valueOf(Messages.OpenTracingAspects_ProcessTags);
+        }
+
+        @Override
+        public String getHelpText() {
+            return String.valueOf(Messages.OpenTracingAspects_ProcessTagsD);
+        }
+
+        @Override
+        public Map<String, Object> resolveOpenTracingLogs(@NonNull OpenTracingEvent event) {
+            Map<String, Object> processTags = event.getField().getProcessTags();
+            return processTags == null ? Collections.emptyMap() : processTags;
         }
     }
 

@@ -21,8 +21,10 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.Activator;
@@ -32,8 +34,10 @@ import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEv
 import org.eclipse.tracecompass.incubator.jsontrace.core.trace.JsonTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
@@ -156,7 +160,35 @@ public class TraceEventTrace extends JsonTrace {
     }
 
     @Override
-    public void goToCorrectStart(RandomAccessFile rafile) throws IOException {
+    public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
+        super.initTrace(resource, path, type);
+        fProperties.put("Type", "Trace-Event"); //$NON-NLS-1$ //$NON-NLS-2$
+        String dir = TmfTraceManager.getSupplementaryFileDir(this);
+        fFile = new File(dir + new File(path).getName());
+        if (!fFile.exists()) {
+            Job sortJob = new TraceEventSortingJob(this, path);
+            sortJob.schedule();
+            while (sortJob.getResult() == null) {
+                try {
+                    sortJob.join();
+                } catch (InterruptedException e) {
+                    throw new TmfTraceException(e.getMessage(), e);
+                }
+            }
+            IStatus result = sortJob.getResult();
+            if (!result.isOK()) {
+                throw new TmfTraceException("Job failed " + result.getMessage()); //$NON-NLS-1$
+            }
+        }
+        try {
+            fFileInput = new BufferedRandomAccessFile(fFile, "r"); //$NON-NLS-1$
+            goToCorrectStart(fFileInput);
+        } catch (IOException e) {
+            throw new TmfTraceException(e.getMessage(), e);
+        }
+    }
+
+    private static void goToCorrectStart(RandomAccessFile rafile) throws IOException {
         // skip start if it's {"traceEvents":
         String traceEventsKey = "\"traceEvents\""; //$NON-NLS-1$
         StringBuilder sb = new StringBuilder();
@@ -183,21 +215,6 @@ public class TraceEventTrace extends JsonTrace {
         } else {
             rafile.seek(0);
         }
-    }
-
-    @Override
-    public String getTraceType() {
-        return "Trace-Event"; //$NON-NLS-1$
-    }
-
-    @Override
-    public String getTsKey() {
-        return "\"ts\":"; //$NON-NLS-1$
-    }
-
-    @Override
-    public Integer getBracketsToSkip() {
-        return 1;
     }
 
     @Override
