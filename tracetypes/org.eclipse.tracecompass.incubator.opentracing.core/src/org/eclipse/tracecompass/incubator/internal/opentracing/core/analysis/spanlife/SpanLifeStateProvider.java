@@ -9,7 +9,9 @@
 
 package org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -37,14 +39,14 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
      * @param trace
      *            the trace to follow
      */
-    public SpanLifeStateProvider(@NonNull ITmfTrace trace) {
+    public SpanLifeStateProvider(ITmfTrace trace) {
         super(trace, SpanLifeAnalysis.ID);
         spanMap = new HashMap<>();
     }
 
     @Override
     public int getVersion() {
-        return 1;
+        return 2;
     }
 
     @Override
@@ -78,9 +80,31 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
             }
             quark = ss.getQuarkRelativeAndAdd(parentQuark, name + '/' + spanId);
         }
+
         ss.modifyAttribute(timestamp, name, quark);
+
+        Map<Long, Map<String, String>> logs = event.getContent().getFieldValue(Map.class, IOpenTracingConstants.LOGS);
+        if (logs != null) {
+            // We put all the logs in the state system under the LOGS attribute
+            Integer logsQuark = ss.getQuarkAbsoluteAndAdd(IOpenTracingConstants.LOGS);
+            for (Map.Entry<Long, Map<String, String>> log : logs.entrySet()) {
+                List<String> logString = new ArrayList<>();
+                for (Map.Entry<String, String> entry : log.getValue().entrySet()) {
+                    logString.add(entry.getKey() + ':' + entry.getValue());
+                }
+                // One attribute for each span where each state value is the logs at the timestamp
+                // corresponding to the start time of the state
+                Integer logQuark = ss.getQuarkRelativeAndAdd(logsQuark, spanId);
+                Long logTimestamp = log.getKey();
+                ss.modifyAttribute(logTimestamp, String.join("~", logString), logQuark); //$NON-NLS-1$
+                ss.modifyAttribute(logTimestamp + 1, (Object) null, logQuark);
+            }
+        }
+
         ss.modifyAttribute(timestamp + duration, (Object) null, quark);
-        spanMap.put(event.getContent().getFieldValue(String.class, IOpenTracingConstants.SPAN_ID), quark);
+        if (spanId != null) {
+            spanMap.put(spanId, quark);
+        }
     }
 
 }

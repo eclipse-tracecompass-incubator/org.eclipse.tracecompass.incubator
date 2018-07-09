@@ -108,6 +108,27 @@ public class OpenTracingField {
             }
         }
 
+        JsonArray logs = optJSONArray(root, IOpenTracingConstants.LOGS);
+        if (logs != null) {
+            Map<Long, Map<String, String>> timestampList = new HashMap();
+            for (int i = 0; i < logs.size(); i++) {
+                Long timestamp = optLong(logs.get(i).getAsJsonObject(), IOpenTracingConstants.TIMESTAMP);
+                if (Double.isFinite(timestamp)) {
+                    timestamp = TmfTimestamp.fromMicros(timestamp).toNanos();
+                }
+                JsonArray fields = Objects.requireNonNull(logs.get(i).getAsJsonObject().get(IOpenTracingConstants.FIELDS).getAsJsonArray());
+                Map<String, String> fieldsList = new HashMap();
+                for (int j = 0; j < fields.size(); j++) {
+                    String key = Objects.requireNonNull(fields.get(j).getAsJsonObject().get(IOpenTracingConstants.KEY).getAsString());
+                    JsonElement element = Objects.requireNonNull(fields.get(j).getAsJsonObject().get(IOpenTracingConstants.VALUE));
+                    String value = String.valueOf(element.isJsonPrimitive() ? element.getAsJsonPrimitive().getAsString() : element.toString());
+                    fieldsList.put(key, value);
+                }
+                timestampList.put(timestamp.longValue(), fieldsList);
+            }
+            fieldsMap.put(IOpenTracingConstants.LOGS, timestampList);
+        }
+
         if (id == null) {
             return null;
         }
@@ -155,6 +176,7 @@ public class OpenTracingField {
         }
 
         return name;
+
     }
 
     private static long optLong(JsonObject root, String key) {

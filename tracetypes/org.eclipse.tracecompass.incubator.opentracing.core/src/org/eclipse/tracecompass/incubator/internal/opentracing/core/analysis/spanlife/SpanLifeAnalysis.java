@@ -12,7 +12,6 @@ package org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.sp
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -22,7 +21,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  *
  * @author Katherine Nadeau
  */
-@NonNullByDefault
 public class SpanLifeAnalysis extends TmfStateSystemAnalysisModule {
 
     /**

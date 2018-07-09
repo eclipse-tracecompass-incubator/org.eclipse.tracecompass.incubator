@@ -49,6 +49,10 @@ public interface IOpenTracingConstants {
      */
     String TAGS = "tags"; //$NON-NLS-1$
     /**
+     * logs field name
+     */
+    String LOGS = "logs"; //$NON-NLS-1$
+    /**
      * processID field name
      */
     String PROCESS_ID = "processID"; //$NON-NLS-1$
@@ -72,5 +76,13 @@ public interface IOpenTracingConstants {
      * value field name
      */
     String VALUE = "value"; //$NON-NLS-1$
+    /**
+     * timestamp field name
+     */
+    String TIMESTAMP = "timestamp"; //$NON-NLS-1$
+    /**
+     * fields field name
+     */
+    String FIELDS = "fields"; //$NON-NLS-1$
 
 }
