@@ -13,9 +13,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.eclipse.core.resources.IProject;
@@ -156,11 +158,27 @@ public class TraceEventTrace extends JsonTrace {
     @Override
     public void goToCorrectStart(RandomAccessFile rafile) throws IOException {
         // skip start if it's {"traceEvents":
-        String readLine = rafile.readLine();
-        if (readLine == null) {
-            return;
+        String traceEventsKey = "\"traceEvents\""; //$NON-NLS-1$
+        StringBuilder sb = new StringBuilder();
+        int val = rafile.read();
+        /*
+         * Skip list contains all the odd control characters
+         */
+        Set<Integer> skipList = new HashSet<>();
+        skipList.add((int) ':');
+        skipList.add((int) '\t');
+        skipList.add((int) '\n');
+        skipList.add((int) '\r');
+        skipList.add((int) ' ');
+        skipList.add((int) '\b');
+        skipList.add((int) '\f');
+        while (val != -1 && val != ':' && sb.length() < 14) {
+            if (!skipList.contains(val)) {
+                sb.append(val);
+            }
+            val = rafile.read();
         }
-        if (readLine.startsWith("{\"traceEvents\":")) { //$NON-NLS-1$
+        if (sb.toString().startsWith('{' + traceEventsKey) && rafile.length() > 14) {
             rafile.seek(14);
         } else {
             rafile.seek(0);
