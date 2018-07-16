@@ -11,18 +11,22 @@
 import argparse
 import shutil
 import os
+import time
 
 parser = argparse.ArgumentParser(description='Creates the plugins and feature for a new incubator functionnality.')
 parser.add_argument('name', help='The human readable name of the plugins and feature to add. The plugin names will the the dot-separated lowercase name. For example if name is "My Test Plugin", plugins will be named org.eclipse.tracecompass.incubator.my.test.plugin')
 parser.add_argument('--dir', help='Directory in which to add the plugins')
 parser.add_argument('--no-ui', dest='noUi', action='store_const', const=True, default=False, help='Whether to add a UI plugin for this feature')
 parser.add_argument('--no-help', dest='noHelp', action='store_const', const=True, default=False, help='Whether to add an help plugin for this feature')
+parser.add_argument('--year', default=time.strftime("%Y"), help='The current year (defaults to current year from system time)')
 parser.add_argument('--copyright', default="École Polytechnique de Montréal", help='The organisation that has the copyright on the new files')
 
 args = parser.parse_args()
 idPlaceholder = "{%skeleton}"
 namePlaceholder = "{%skeletonName}"
+yearPlaceholder = "{%year}"
 copyrightPlaceholder = "{%copyright}"
+year = args.year
 copyright = args.copyright
 
 baseDir = os.path.dirname(os.path.realpath(__file__))
@@ -53,6 +57,7 @@ def copyAndUpdate(srcDir, destDir, name, id):
                     s = f.read()
                 s = s.replace(idPlaceholder, id)
                 s = s.replace(namePlaceholder, name)
+                s = s.replace(yearPlaceholder, year)
                 s = s.replace(copyrightPlaceholder, copyright)
                 with open(fpath, encoding = "utf-8", mode = "w") as f:
                     f.write(s)
@@ -78,6 +83,7 @@ def updatePom(baseDir, destDir, id, moduleStr):
         s = f.read();
     s = s.replace("{%dir}", destDir)
     s = s.replace(pomModulePlaceholder, moduleStr + pomModulePlaceholder)
+    s = s.replace(yearPlaceholder, year)
     s = s.replace(copyrightPlaceholder, copyright)
     with open(destPom, encoding = "utf-8", mode = 'w+') as f:
         f.write(s)
