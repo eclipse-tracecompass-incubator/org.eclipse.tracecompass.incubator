@@ -40,6 +40,7 @@
     <module>org.eclipse.tracecompass.incubator.trace.server.doc.dev</module>
     <module>org.eclipse.tracecompass.incubator.opentracing.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.kernel.doc.user</module>
+    <module>org.eclipse.tracecompass.incubator.ros.doc.user</module>
     <!-- insert modules here -->
   </modules>
 

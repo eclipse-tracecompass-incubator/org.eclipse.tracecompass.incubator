@@ -1,0 +1,7 @@
+
+= ROS traces and analyses =
+
+
+ROS traces can be generated using the [https://github.com/bosch-robotics-cr/tracetools tracetools ROS package] and a [https://github.com/bosch-robotics-cr/ros_comm modified version of the ros_comm package] (for the moment).
+
+Trace generation examples and test traces can be found [https://github.com/christophebedard/tracecompass_ros_testcases here].

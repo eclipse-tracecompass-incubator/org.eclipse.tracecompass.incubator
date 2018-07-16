@@ -52,6 +52,10 @@
     <module>org.eclipse.tracecompass.incubator.atrace</module>
     <module>org.eclipse.tracecompass.incubator.atrace.core</module>
     <module>org.eclipse.tracecompass.incubator.atrace.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.ros</module>
+    <module>org.eclipse.tracecompass.incubator.ros.core</module>
+    <module>org.eclipse.tracecompass.incubator.ros.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.ros.ui</module>
     <!-- insert modules here -->
   </modules>
 
