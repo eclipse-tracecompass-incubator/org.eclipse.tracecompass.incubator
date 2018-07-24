@@ -41,4 +41,32 @@
             name="Open Tracing">
       </perspective>
    </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.eclipse.tracecompass.incubator.opentracing.ui.split"
+            name="%opentracing.split.name">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.handlers.SplitTracesHandler"
+            commandId="org.eclipse.tracecompass.incubator.opentracing.ui.split">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+        <command
+               commandId="org.eclipse.tracecompass.incubator.opentracing.ui.split"
+               label="%opentracing.split.label"
+               style="push">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
 </plugin>
