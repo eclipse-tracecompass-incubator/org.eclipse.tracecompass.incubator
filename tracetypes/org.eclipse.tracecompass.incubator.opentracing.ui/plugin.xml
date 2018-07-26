@@ -6,6 +6,9 @@
       <type
             icon="icons/open-tracing.png"
             tracetype="org.eclipse.tracecompass.incubator.opentracing.core">
+         <perspective
+               id="org.eclipse.tracecompass.incubator.opentracing.ui.perspective">
+         </perspective>
       </type>
    </extension>
    <extension
@@ -28,5 +31,14 @@
                class="org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeAnalysis">
          </analysisModuleClass>
       </output>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.eclipse.tracecompass.incubator.internal.opentracing.ui.views.OpenTracingPerspectiveFactory"
+            icon="icons/open-tracing.png"
+            id="org.eclipse.tracecompass.incubator.opentracing.ui.perspective"
+            name="Open Tracing">
+      </perspective>
    </extension>
 </plugin>
