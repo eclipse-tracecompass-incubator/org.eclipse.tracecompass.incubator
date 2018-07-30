@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackAnalysis;
 import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.internal.hudson.maven.core.trace.MavenEvent;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
@@ -98,7 +99,7 @@ public class MavenCallstackStateProvider extends CallStackStateProvider {
         }
         int processQuark = ssb.getQuarkAbsoluteAndAdd(PROCESSES, getProcessName(event));
         int threadQuark = ssb.getQuarkRelativeAndAdd(processQuark, getThreadName(event));
-        int callStackQuark = ssb.getQuarkRelativeAndAdd(threadQuark, CALL_STACK);
+        int callStackQuark = ssb.getQuarkRelativeAndAdd(threadQuark, CallStackAnalysis.CALL_STACK);
 
         String groupAspect = MavenEvent.GROUP_ASPECT.resolve(event);
         if (event.getType().equals(MavenEvent.GOAL_TYPE)) {
