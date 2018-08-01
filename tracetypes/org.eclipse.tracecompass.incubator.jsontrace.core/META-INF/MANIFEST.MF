@@ -8,7 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.tracecompass.common.core,
  org.eclipse.core.runtime,
  org.eclipse.tracecompass.tmf.core,
- org.eclipse.jdt.annotation,
  org.eclipse.core.resources
 Export-Package: org.eclipse.tracecompass.incubator.internal.jsontrace.core;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.jsontrace.core.job;x-internal:=true,
