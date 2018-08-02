@@ -75,7 +75,8 @@ public class OpenTracingField {
         if (name == "null") { //$NON-NLS-1$
             return null;
         }
-        String id = optString(root, IOpenTracingConstants.SPAN_ID);
+        String traceId = optString(root, IOpenTracingConstants.TRACE_ID);
+        String spanId = optString(root, IOpenTracingConstants.SPAN_ID);
         Integer flags = optInt(root, IOpenTracingConstants.FLAGS);
         Long startTime = optLong(root, IOpenTracingConstants.START_TIME);
         if (Double.isFinite(startTime)) {
@@ -129,12 +130,13 @@ public class OpenTracingField {
             fieldsMap.put(IOpenTracingConstants.LOGS, timestampList);
         }
 
-        if (id == null) {
+        if (traceId == null || spanId == null) {
             return null;
         }
 
         fieldsMap.put(IOpenTracingConstants.OPERATION_NAME, name);
-        fieldsMap.put(IOpenTracingConstants.SPAN_ID, id);
+        fieldsMap.put(IOpenTracingConstants.TRACE_ID, traceId);
+        fieldsMap.put(IOpenTracingConstants.SPAN_ID, spanId);
         if (flags != Integer.MIN_VALUE) {
             fieldsMap.put(IOpenTracingConstants.FLAGS, flags);
         }
@@ -144,7 +146,7 @@ public class OpenTracingField {
         String processName = processField == null ? "" : parseProcess(processField, fieldsMap); //$NON-NLS-1$
         fieldsMap.put(IOpenTracingConstants.PROCESS_NAME, processName);
 
-        return new OpenTracingField(name, fieldsMap, id, startTime, duration, processName);
+        return new OpenTracingField(name, fieldsMap, spanId, startTime, duration, processName);
     }
 
     /**

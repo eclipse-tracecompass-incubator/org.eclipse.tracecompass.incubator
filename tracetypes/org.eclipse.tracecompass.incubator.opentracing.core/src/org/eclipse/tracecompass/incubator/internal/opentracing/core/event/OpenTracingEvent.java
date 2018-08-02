@@ -37,7 +37,7 @@ public class OpenTracingEvent extends TmfEvent {
      *            the event field, contains all the needed data
      */
     public OpenTracingEvent(ITmfTrace trace, long rank, OpenTracingField field) {
-        super(trace, rank, TmfTimestamp.fromNanos(field.getStartTime()), new TmfEventType("Complete", null), field.getContent()); //$NON-NLS-1$
+        super(trace, rank, TmfTimestamp.fromNanos(field.getStartTime()), new TmfEventType("OpenTracingSpan", null), field.getContent()); //$NON-NLS-1$
         fField = field;
         fName = field.getName();
     }

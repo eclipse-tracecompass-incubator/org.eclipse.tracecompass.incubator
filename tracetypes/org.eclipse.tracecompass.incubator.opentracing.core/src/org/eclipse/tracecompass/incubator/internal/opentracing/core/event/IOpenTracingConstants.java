@@ -17,6 +17,10 @@ package org.eclipse.tracecompass.incubator.internal.opentracing.core.event;
 public interface IOpenTracingConstants {
 
     /**
+     * traceID field name
+     */
+    String TRACE_ID = "traceID"; //$NON-NLS-1$
+    /**
      * spanID field name
      */
     String SPAN_ID = "spanID"; //$NON-NLS-1$

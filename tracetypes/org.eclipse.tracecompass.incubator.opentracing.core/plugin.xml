@@ -16,6 +16,12 @@
             name="Generic Open Tracing Trace"
             trace_type="org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.OpenTracingTrace">
       </type>
+      <experiment
+            category="org.eclipse.tracecompass.incubator.opentracing.core"
+            experiment_type="org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.OpenTracingExperiment"
+            id="org.eclipse.tracecompass.incubator.opentracing.core.experiment"
+            name="%opentracing.experiment.name">
+      </experiment>
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
@@ -28,6 +34,10 @@
          <tracetype
                applies="true"
                class="org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.OpenTracingTrace">
+         </tracetype>
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.OpenTracingExperiment">
          </tracetype>
       </module>
    </extension>

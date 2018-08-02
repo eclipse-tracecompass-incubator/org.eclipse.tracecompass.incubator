@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.IOpenTracingConstants;
@@ -31,7 +32,19 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  */
 public class SpanLifeStateProvider extends AbstractTmfStateProvider {
 
-    private final Map<String, Integer> spanMap;
+    /**
+     * Quark name for open tracing spans
+     */
+    public static final String OPEN_TRACING_ATTRIBUTE = "openTracingSpans"; //$NON-NLS-1$
+
+    /**
+     * Quark name for ust spans
+     */
+    public static final String UST_ATTRIBUTE = "ustSpans"; //$NON-NLS-1$
+
+    private final Map<String, Integer> fSpanMap;
+
+    private final Map<String, BiConsumer<ITmfEvent, ITmfStateSystemBuilder>> fHandlers;
 
     /**
      * Constructor
@@ -41,12 +54,16 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
      */
     public SpanLifeStateProvider(ITmfTrace trace) {
         super(trace, SpanLifeAnalysis.ID);
-        spanMap = new HashMap<>();
+        fSpanMap = new HashMap<>();
+        fHandlers = new HashMap<>();
+        fHandlers.put("OpenTracingSpan", this::handleSpan); //$NON-NLS-1$
+        fHandlers.put("jaeger_ust:start_span", this::handleStart); //$NON-NLS-1$
+        fHandlers.put("jaeger_ust:end_span", this::handleEnd); //$NON-NLS-1$
     }
 
     @Override
     public int getVersion() {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -60,39 +77,51 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
         if (ss == null) {
             return;
         }
+        BiConsumer<ITmfEvent, ITmfStateSystemBuilder> handler = fHandlers.get(event.getType().getName());
+        if (handler != null) {
+            handler.accept(event, ss);
+        }
+    }
 
+    private void handleSpan(ITmfEvent event, ITmfStateSystemBuilder ss) {
         long timestamp = event.getTimestamp().toNanos();
         Long duration = event.getContent().getFieldValue(Long.class, IOpenTracingConstants.DURATION);
         if (duration == null) {
             return;
         }
 
-        int quark;
+        String traceId = event.getContent().getFieldValue(String.class, IOpenTracingConstants.TRACE_ID);
+        int traceQuark = ss.getQuarkAbsoluteAndAdd(traceId);
+
+        int openTracingSpansQuark = ss.getQuarkRelativeAndAdd(traceQuark, OPEN_TRACING_ATTRIBUTE);
+
+        int spanQuark;
         String name = String.valueOf(TmfTraceUtils.resolveAspectOfNameForEvent(event.getTrace(), "Name", event)); //$NON-NLS-1$
         String spanId = event.getContent().getFieldValue(String.class, IOpenTracingConstants.SPAN_ID);
         String refId = event.getContent().getFieldValue(String.class, IOpenTracingConstants.REFERENCES + "/CHILD_OF"); //$NON-NLS-1$
         if (refId == null) {
-            quark = ss.getQuarkAbsoluteAndAdd(name + '/' + spanId);
+            spanQuark = ss.getQuarkRelativeAndAdd(openTracingSpansQuark, name + '/' + spanId);
         } else {
-            Integer parentQuark = spanMap.get(refId);
+            Integer parentQuark = fSpanMap.get(refId);
             if (parentQuark == null) {
                 return;
             }
-            quark = ss.getQuarkRelativeAndAdd(parentQuark, name + '/' + spanId);
+            spanQuark = ss.getQuarkRelativeAndAdd(parentQuark, name + '/' + spanId);
         }
 
-        ss.modifyAttribute(timestamp, name, quark);
+        ss.modifyAttribute(timestamp, name, spanQuark);
 
         Map<Long, Map<String, String>> logs = event.getContent().getFieldValue(Map.class, IOpenTracingConstants.LOGS);
         if (logs != null) {
             // We put all the logs in the state system under the LOGS attribute
-            Integer logsQuark = ss.getQuarkAbsoluteAndAdd(IOpenTracingConstants.LOGS);
+            Integer logsQuark = ss.getQuarkRelativeAndAdd(traceQuark, IOpenTracingConstants.LOGS);
             for (Map.Entry<Long, Map<String, String>> log : logs.entrySet()) {
                 List<String> logString = new ArrayList<>();
                 for (Map.Entry<String, String> entry : log.getValue().entrySet()) {
                     logString.add(entry.getKey() + ':' + entry.getValue());
                 }
-                // One attribute for each span where each state value is the logs at the timestamp
+                // One attribute for each span where each state value is the logs at the
+                // timestamp
                 // corresponding to the start time of the state
                 Integer logQuark = ss.getQuarkRelativeAndAdd(logsQuark, spanId);
                 Long logTimestamp = log.getKey();
@@ -101,10 +130,40 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
             }
         }
 
-        ss.modifyAttribute(timestamp + duration, (Object) null, quark);
+        ss.modifyAttribute(timestamp + duration, (Object) null, spanQuark);
         if (spanId != null) {
-            spanMap.put(spanId, quark);
+            fSpanMap.put(spanId, spanQuark);
         }
     }
 
+    private void handleStart(ITmfEvent event, ITmfStateSystemBuilder ss) {
+        String traceId = event.getContent().getFieldValue(String.class, "trace_id_low"); //$NON-NLS-1$
+        traceId = Long.toHexString(Long.decode(traceId));
+        int traceQuark = ss.getQuarkAbsoluteAndAdd(traceId);
+
+        int ustSpansQuark = ss.getQuarkRelativeAndAdd(traceQuark, UST_ATTRIBUTE);
+
+        String spanId = event.getContent().getFieldValue(String.class, "span_id"); //$NON-NLS-1$
+        spanId = Long.toHexString(Long.decode(spanId));
+        int spanQuark = ss.getQuarkRelativeAndAdd(ustSpansQuark, spanId);
+
+        long timestamp = event.getTimestamp().toNanos();
+        String name = event.getContent().getFieldValue(String.class, "op_name"); //$NON-NLS-1$
+        ss.modifyAttribute(timestamp, name, spanQuark);
+    }
+
+    private void handleEnd(ITmfEvent event, ITmfStateSystemBuilder ss) {
+        String traceId = event.getContent().getFieldValue(String.class, "trace_id_low"); //$NON-NLS-1$
+        traceId = Long.toHexString(Long.decode(traceId));
+        int traceQuark = ss.getQuarkAbsoluteAndAdd(traceId);
+
+        int ustSpansQuark = ss.getQuarkRelativeAndAdd(traceQuark, UST_ATTRIBUTE);
+
+        String spanId = event.getContent().getFieldValue(String.class, "span_id"); //$NON-NLS-1$
+        spanId = Long.toHexString(Long.decode(spanId));
+        int spanQuark = ss.getQuarkRelativeAndAdd(ustSpansQuark, spanId);
+
+        long timestamp = event.getTimestamp().toNanos();
+        ss.modifyAttribute(timestamp, (Object) null, spanQuark);
+    }
 }
