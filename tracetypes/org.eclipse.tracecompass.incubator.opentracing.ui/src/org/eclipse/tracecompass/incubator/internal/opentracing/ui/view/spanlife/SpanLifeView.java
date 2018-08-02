@@ -18,13 +18,13 @@ import org.eclipse.swt.graphics.RGBA;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeAnalysis;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeDataProvider;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel;
+import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel.LogEvent;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.IMarkerEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.MarkerEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 
 /**
@@ -38,6 +38,7 @@ public class SpanLifeView extends BaseDataProviderTimeGraphView {
      * Span life view Id
      */
     public static final String ID = "org.eclipse.tracecompass.incubator.opentracing.ui.view.life.spanlife.view"; //$NON-NLS-1$
+    private static final RGBA MARKER_COLOR = new RGBA(200, 0, 0, 150);
 
     /**
      * Constructor
@@ -68,8 +69,8 @@ public class SpanLifeView extends BaseDataProviderTimeGraphView {
         for (ITimeGraphEntry element : expandedElements) {
             if (((TimeGraphEntry) element).getModel() instanceof SpanLifeEntryModel) {
                 SpanLifeEntryModel model = (SpanLifeEntryModel) ((TimeGraphEntry) element).getModel();
-                for (Long log : model.getLogs()) {
-                    markers.add(new MarkerEvent(element, log, 0, "sample", new RGBA(200, 0, 0, 150), null, true)); //$NON-NLS-1$
+                for (LogEvent log : model.getLogs()) {
+                    markers.add(new SpanMarkerEvent(element, log.getTime(), MARKER_COLOR, log.getType()));
                 }
             }
         }

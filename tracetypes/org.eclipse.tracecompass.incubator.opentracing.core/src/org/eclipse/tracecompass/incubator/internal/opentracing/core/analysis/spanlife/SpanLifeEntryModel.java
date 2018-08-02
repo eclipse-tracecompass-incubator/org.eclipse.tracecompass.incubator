@@ -21,7 +21,46 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
  */
 public class SpanLifeEntryModel extends TimeGraphEntryModel {
 
-    private final List<Long> fLogs;
+    /**
+     * Log event
+     */
+    public static class LogEvent {
+        private final long fTime;
+        private final String fType;
+
+        /**
+         * Constructor
+         *
+         * @param time
+         *            timestamp of the log
+         * @param type
+         *            type of the log
+         */
+        public LogEvent(long time, String type) {
+            fTime = time;
+            fType = type;
+        }
+
+        /**
+         * Timestamp of the event
+         *
+         * @return timestamp
+         */
+        public long getTime() {
+            return fTime;
+        }
+
+        /**
+         * Type of event
+         *
+         * @return event
+         */
+        public String getType() {
+            return fType;
+        }
+    }
+
+    private final List<LogEvent> fLogs;
 
     /**
      * Constructor
@@ -39,7 +78,7 @@ public class SpanLifeEntryModel extends TimeGraphEntryModel {
      * @param logs
      *            Span logs timestamps
      */
-    public SpanLifeEntryModel(long id, long parentId, String name, long startTime, long endTime, List<Long> logs) {
+    public SpanLifeEntryModel(long id, long parentId, String name, long startTime, long endTime, List<LogEvent> logs) {
         super(id, parentId, name, startTime, endTime);
         fLogs = logs;
     }
@@ -49,7 +88,7 @@ public class SpanLifeEntryModel extends TimeGraphEntryModel {
      *
      * @return the logs timestamps
      */
-    public List<Long> getLogs() {
+    public List<LogEvent> getLogs() {
         return fLogs;
     }
 

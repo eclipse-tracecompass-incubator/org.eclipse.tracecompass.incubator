@@ -21,6 +21,7 @@ import java.util.function.Predicate;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel.LogEvent;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.IOpenTracingConstants;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.TimeGraphStateQueryFilter;
 import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
@@ -223,18 +224,20 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
         for (Integer child : ss.getSubAttributes(quark, false)) {
             long childId = getId(child);
             String childName = ss.getAttributeName(child);
-            List<Long> logs = new ArrayList<>();
-            int logQuark = getLogQuark(ss, childName, logsQuarks);
-            try {
-                for (ITmfStateInterval interval : ss.query2D(Collections.singletonList(logQuark), ss.getStartTime(), ss.getCurrentEndTime())) {
-                    if (!interval.getStateValue().isNull()) {
-                        logs.add(interval.getStartTime());
+            if (!childName.equals(IOpenTracingConstants.LOGS)) {
+                List<LogEvent> logs = new ArrayList<>();
+                int logQuark = getLogQuark(ss, childName, logsQuarks);
+                try {
+                    for (ITmfStateInterval interval : ss.query2D(Collections.singletonList(logQuark), ss.getStartTime(), ss.getCurrentEndTime())) {
+                        if (!interval.getStateValue().isNull()) {
+                            logs.add(new LogEvent(interval.getStartTime(), String.valueOf(interval.getValue())));
+                        }
                     }
+                } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
                 }
-            } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
+                builder.add(new SpanLifeEntryModel(childId, parentId, getSpanName(childName), ss.getStartTime(), ss.getCurrentEndTime(), logs));
+                addChildren(ss, builder, child, childId, logsQuarks);
             }
-            builder.add(new SpanLifeEntryModel(childId, parentId, getSpanName(childName), ss.getStartTime(), ss.getCurrentEndTime(), logs));
-            addChildren(ss, builder, child, childId, logsQuarks);
         }
     }
 
@@ -242,12 +245,12 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
         for (Integer child : ss.getSubAttributes(openTracingQuark, false)) {
             String childName = ss.getAttributeName(child);
 
-            List<Long> logs = new ArrayList<>();
+            List<LogEvent> logs = new ArrayList<>();
             int logQuark = getLogQuark(ss, childName, logsQuarks);
             try {
                 for (ITmfStateInterval interval : ss.query2D(Collections.singletonList(logQuark), ss.getStartTime(), ss.getCurrentEndTime())) {
                     if (!interval.getStateValue().isNull()) {
-                        logs.add(interval.getStartTime());
+                        logs.add(new LogEvent(interval.getStartTime(), String.valueOf(interval.getValue())));
                     }
                 }
             } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {

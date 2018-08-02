@@ -11,6 +11,7 @@ package org.eclipse.tracecompass.incubator.internal.opentracing.ui.view.spanlife
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,11 +22,14 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.presentation.IYAppearance;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
+import org.eclipse.tracecompass.tmf.ui.colors.RGBAUtil;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEventStyleStrings;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
@@ -39,6 +43,11 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphContro
  */
 public class SpanLifePresentationProvider extends TimeGraphPresentationProvider {
 
+    private static final String STACK = "stack"; //$NON-NLS-1$
+    private static final String MESSAGE = "message"; //$NON-NLS-1$
+    private static final String EVENT = "event"; //$NON-NLS-1$
+    private static final String ERROR_OBJECT = "error.object"; //$NON-NLS-1$
+    private static final String ERROR_KIND = "error.kind"; //$NON-NLS-1$
     /**
      * Only states available
      */
@@ -89,6 +98,35 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
             }
         }
         return eventHoverToolTipInfo;
+    }
+
+    @Override
+    public Map<String, Object> getSpecificEventStyle(ITimeEvent event) {
+        Map<String, Object> specificEventStyle = super.getSpecificEventStyle(event);
+        if (event instanceof SpanMarkerEvent) {
+            SpanMarkerEvent markerEvent = (SpanMarkerEvent) event;
+            Map<String, Object> ret = new HashMap<>(specificEventStyle);
+            ret.put(ITimeEventStyleStrings.fillColor(), RGBAUtil.fromRGBA(markerEvent.getColor()));
+            String type = markerEvent.getType();
+            String fillStyle = ITimeEventStyleStrings.symbolStyle();
+            if (type.contains(ERROR_KIND)) {
+                ret.put(fillStyle, IYAppearance.SymbolStyle.PLUS);
+            } else if (type.contains(ERROR_OBJECT)) {
+                ret.put(fillStyle, IYAppearance.SymbolStyle.CROSS);
+            } else if (type.contains(EVENT)) {
+                ret.put(fillStyle, IYAppearance.SymbolStyle.CIRCLE);
+            } else if (type.contains(MESSAGE)) {
+                ret.put(fillStyle, IYAppearance.SymbolStyle.TRIANGLE);
+            } else if (type.contains(STACK)) {
+                ret.put(fillStyle, IYAppearance.SymbolStyle.INVERTED_TRIANGLE);
+            } else {
+                ret.put(fillStyle, IYAppearance.SymbolStyle.DIAMOND);
+            }
+            ret.put(ITimeEventStyleStrings.heightFactor(), 0.5f);
+            ret.put(ITimeEventStyleStrings.label(), markerEvent.getLabel());
+            return ret;
+        }
+        return specificEventStyle;
     }
 
     @Override
