@@ -43,3 +43,4 @@ Import-Package: com.google.common.annotations,
  com.google.common.cache,
  com.google.common.collect,
  org.apache.commons.lang3
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.callstack.core

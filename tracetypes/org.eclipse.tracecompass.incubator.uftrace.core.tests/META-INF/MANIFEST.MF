@@ -14,3 +14,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.tmf.core
 Export-Package: org.eclipse.tracecompass.incubator.uftrace.core.tests,
  org.eclipse.tracecompass.incubator.uftrace.core.tests.trace
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.uftrace.core.tests

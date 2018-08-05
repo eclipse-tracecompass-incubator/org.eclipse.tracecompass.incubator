@@ -22,3 +22,4 @@ Require-Bundle: org.eclipse.core.runtime,
 Export-Package: org.eclipse.tracecompass.incubator.internal.xaf.core;x-friends:="org.eclipse.tracecompass.incubator.xaf.core.tests"
 Import-Package: com.google.common.base;version="21.0.0",
  com.google.common.collect
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.xaf.core

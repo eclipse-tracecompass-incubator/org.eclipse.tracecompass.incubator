@@ -26,3 +26,4 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.tracecompass.core;x-
 Import-Package: org.json,
  com.google.common.collect,
  org.apache.commons.lang3
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.tracecompass.core

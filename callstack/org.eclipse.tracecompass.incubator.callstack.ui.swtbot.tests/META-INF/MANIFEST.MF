@@ -28,3 +28,4 @@ Require-Bundle: org.eclipse.core.resources,
 Import-Package: org.apache.log4j,
  org.swtchart
 Export-Package: org.eclipse.tracecompass.incubator.callstack.core.ui.swtbot.tests.flamegraph
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.callstack.ui.swtbot.tests

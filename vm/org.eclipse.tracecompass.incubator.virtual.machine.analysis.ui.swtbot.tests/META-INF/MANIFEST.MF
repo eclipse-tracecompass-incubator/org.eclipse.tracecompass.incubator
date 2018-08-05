@@ -25,3 +25,4 @@ Export-Package: org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui.s
 Import-Package: com.google.common.collect,
  org.apache.log4j,
  org.swtchart
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui.swtbot.tests

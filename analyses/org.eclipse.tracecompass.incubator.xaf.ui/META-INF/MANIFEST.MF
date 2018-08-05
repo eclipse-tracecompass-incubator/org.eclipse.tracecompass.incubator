@@ -46,4 +46,4 @@ Import-Package: com.google.common.collect,
  org.apache.commons.lang3,
  org.apache.commons.math3.util,
  org.eclipse.core.filesystem
-
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.xaf.ui

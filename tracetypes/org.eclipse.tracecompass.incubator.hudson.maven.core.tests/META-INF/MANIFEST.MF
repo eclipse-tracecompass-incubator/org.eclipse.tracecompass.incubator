@@ -12,3 +12,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.junit,
  org.eclipse.tracecompass.incubator.hudson.maven.core
 Export-Package: org.eclipse.tracecompass.incubator.hudson.maven.core.tests
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.hudson.maven.core.tests

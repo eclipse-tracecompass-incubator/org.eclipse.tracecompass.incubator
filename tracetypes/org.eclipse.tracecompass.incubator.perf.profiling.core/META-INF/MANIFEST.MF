@@ -25,3 +25,4 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.perf.profiling.core;
  org.eclipse.tracecompass.incubator.internal.perf.profiling.core.trace;x-internal:=true
 Import-Package: com.google.common.collect,
  org.eclipse.tracecompass.internal.tmf.ui.symbols
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.perf.profiling.core

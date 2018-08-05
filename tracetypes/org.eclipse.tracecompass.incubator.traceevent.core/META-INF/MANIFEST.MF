@@ -34,3 +34,4 @@ Import-Package: com.google.common.collect,
  org.apache.commons.lang3,
  org.eclipse.tracecompass.datastore.core.serialization,
  org.json
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.traceevent.core

@@ -19,3 +19,4 @@ Import-Package: com.google.common.base,
  com.google.common.collect,
  org.eclipse.tracecompass.analysis.os.linux.core.model,
  org.eclipse.tracecompass.segmentstore.core
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.traceevent.core.tests

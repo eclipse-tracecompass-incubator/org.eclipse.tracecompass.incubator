@@ -17,3 +17,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.tracecompass.tmf.ui
 Export-Package: org.eclipse.tracecompass.incubator.internal.contextswitch.ui;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.contextswitch.ui.view;x-internal:=true
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.contextswitch.ui

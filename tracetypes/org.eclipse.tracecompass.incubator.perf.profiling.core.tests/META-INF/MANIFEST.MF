@@ -19,3 +19,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.incubator.callstack.core
 Export-Package: org.eclipse.tracecompass.incubator.perf.profiling.core.tests,
  org.eclipse.tracecompass.incubator.perf.profiling.core.tests.callgraph
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.perf.profiling.core.tests

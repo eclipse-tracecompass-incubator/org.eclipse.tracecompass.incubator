@@ -14,3 +14,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.junit
 Export-Package: org.eclipse.tracecompass.incubator.atrace.core.tests,
  org.eclipse.tracecompass.incubator.atrace.core.tests.trace
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.atrace.core.tests

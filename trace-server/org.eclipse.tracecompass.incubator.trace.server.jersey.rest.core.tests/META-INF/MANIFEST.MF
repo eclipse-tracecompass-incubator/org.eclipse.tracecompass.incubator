@@ -27,3 +27,4 @@ Import-Package: com.fasterxml.jackson.annotation,
  org.eclipse.tracecompass.testtraces.ctf,
  org.eclipse.tracecompass.tmf.ctf.core.tests.shared,
  org.eclipse.tracecompass.tmf.ctf.core.trace
+Automatic-Module-Name: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests
