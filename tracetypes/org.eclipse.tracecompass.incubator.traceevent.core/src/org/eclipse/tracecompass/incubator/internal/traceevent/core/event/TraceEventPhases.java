@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  *
  * @author Matthew Khouzam
  */
+@SuppressWarnings("javadoc")
 @NonNullByDefault
 public final class TraceEventPhases {
 

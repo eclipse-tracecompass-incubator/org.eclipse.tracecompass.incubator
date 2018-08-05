@@ -23,7 +23,8 @@ import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModul
  */
 public class ContextAnalysis extends TmfStateSystemAnalysisModule {
 
-    public static final @NonNull String ID = "org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context";
+    /** Analysis ID */
+    public static final @NonNull String ID = "org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context"; //$NON-NLS-1$
 
     @Override
     protected @NonNull ITmfStateProvider createStateProvider() {

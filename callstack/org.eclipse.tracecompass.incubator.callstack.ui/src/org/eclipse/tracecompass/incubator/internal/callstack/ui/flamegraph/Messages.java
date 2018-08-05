@@ -67,6 +67,18 @@ public class Messages extends NLS {
      * Execution of the callGraph Analysis
      */
     public static String FlameGraphView_RetrievingData;
+    /**
+     * TimeGraphEntry name for the FlameGraph content provider
+     */
+    public static String FlameGraphContentProvider_EntryName;
+    /**
+     * Symbols provider action text
+     */
+    public static String FlameGraphView_ConfigureSymbolProvidersText;
+    /**
+     * Symbols provider action tooltip
+     */
+    public static String FlameGraphView_ConfigureSymbolProvidersTooltip;
 
     static {
         // initialize resource bundle

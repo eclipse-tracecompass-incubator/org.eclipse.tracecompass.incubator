@@ -37,7 +37,7 @@ public interface ICallGraphProvider {
     /**
      * Get the call graph for a given time range. This callgraph is for all the
      * elements. The caller can then group the result by calling
-     * {@link CallGraphGroupBy#groupCallGraphBy(ICallStackGroupDescriptor, Collection, CallGraph)}
+     * {@link CallGraphGroupBy#groupCallGraphBy(ICallStackGroupDescriptor, CallGraph)}
      * method
      *
      * @param start

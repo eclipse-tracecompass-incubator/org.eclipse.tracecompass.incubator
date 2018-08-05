@@ -17,6 +17,7 @@ import org.eclipse.osgi.util.NLS;
  *
  * @author Matthew Khouzam
  */
+@SuppressWarnings("javadoc")
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.analysis.core.aspects.messages"; //$NON-NLS-1$
     public static @Nullable String ProcessNameAspect_description;

@@ -32,8 +32,6 @@ public final class CallGraphGroupBy {
      *
      * @param groupBy
      *            The group descriptor by which to group the call graph elements.
-     * @param elements
-     *            The full expanded data from the groups
      * @param callGraph
      *            The call graph data provider
      * @return A collection of data that is the result of the grouping by the
@@ -63,7 +61,7 @@ public final class CallGraphGroupBy {
     private static CallGraph groupCallGraphByAll(CallGraph callGraph) {
         CallGraph cg = new CallGraph();
         // Fast return: just aggregate all groups together
-        ICallStackElement allGroup = new CallStackElement("All", AllGroupDescriptor.getInstance(), null, null);
+        ICallStackElement allGroup = new CallStackElement("All", AllGroupDescriptor.getInstance(), null, null); //$NON-NLS-1$
         callGraph.getElements().forEach(g -> {
             addGroupData(g, callGraph, allGroup, cg);
         });

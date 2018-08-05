@@ -52,7 +52,7 @@ public class ObjectLifePresentationProvider extends TimeGraphPresentationProvide
             retMap = new LinkedHashMap<>(1);
         }
         if (event instanceof NamedTimeEvent) {
-            retMap.put("Snapshot", ((NamedTimeEvent) event).getLabel());
+            retMap.put("Snapshot", ((NamedTimeEvent) event).getLabel()); //$NON-NLS-1$
         }
         return retMap;
     }

@@ -26,23 +26,42 @@ public class AggregatedThreadStatus extends AggregatedCallSite {
 
     /**
      * Constructor
+     *
      * @param status
+     *            the process status
      */
     public AggregatedThreadStatus(ProcessStatus status) {
         super(new StringSymbol(status));
         fStatus = status;
     }
 
+    /**
+     * Constructor
+     *
+     * @param status
+     *            the aggregated thread status
+     */
     public AggregatedThreadStatus(AggregatedThreadStatus status) {
         super(status.getSymbol());
         fStatus = status.fStatus;
         fLength = status.fLength;
     }
 
+    /**
+     * Update length
+     *
+     * @param interval
+     *            the interval
+     */
     public void update(ProcessStatusInterval interval) {
         fLength += interval.getLength();
     }
 
+    /**
+     * Get the process status
+     *
+     * @return the process status
+     */
     public ProcessStatus getProcessStatus() {
         return fStatus;
     }

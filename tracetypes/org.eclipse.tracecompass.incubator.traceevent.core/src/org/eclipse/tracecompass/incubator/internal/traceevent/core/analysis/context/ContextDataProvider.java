@@ -121,12 +121,12 @@ public class ContextDataProvider extends AbstractTimeGraphDataProvider<@NonNull 
 
     @Override
     public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        return new TmfModelResponse<>(null, Status.COMPLETED, "Not supported");
+        return new TmfModelResponse<>(null, Status.COMPLETED, "Not supported"); //$NON-NLS-1$
     }
 
     @Override
     public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        return new TmfModelResponse<>(null, Status.COMPLETED, "Not supported");
+        return new TmfModelResponse<>(null, Status.COMPLETED, "Not supported"); //$NON-NLS-1$
     }
 
     @Override

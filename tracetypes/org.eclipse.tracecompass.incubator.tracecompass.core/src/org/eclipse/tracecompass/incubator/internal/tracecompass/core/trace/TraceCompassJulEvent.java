@@ -90,7 +90,7 @@ public class TraceCompassJulEvent extends CtfTmfEvent {
             baseContent.getFields().stream().forEach(t -> fields.add(t));
             try {
                 JSONObject root = new JSONObject(msg);
-                char phase = root.optString("ph", "i").charAt(0); //$NON-NLS-1$
+                char phase = root.optString("ph", "i").charAt(0); //$NON-NLS-1$ //$NON-NLS-2$
                 fields.add(new TmfEventField("ph", String.valueOf(phase), null)); //$NON-NLS-1$
                 fEventName = root.optString("name"); //$NON-NLS-1$
                 fields.add(new TmfEventField("evName", fEventName, null)); //$NON-NLS-1$
@@ -102,17 +102,17 @@ public class TraceCompassJulEvent extends CtfTmfEvent {
                 if (id != null) {
                     fields.add(new TmfEventField("cat", id, null)); //$NON-NLS-1$
                 }
-                String ts = root.optString("ts");
+                String ts = root.optString("ts"); //$NON-NLS-1$
                 if (ts != null) {
-                    fields.add(new TmfEventField("ts", ts, null));
+                    fields.add(new TmfEventField("ts", ts, null)); //$NON-NLS-1$
                 }
-                JSONObject args = root.optJSONObject("args");
+                JSONObject args = root.optJSONObject("args"); //$NON-NLS-1$
                 if (args != null) {
                     Iterator<?> keys = args.keys();
                     while (keys.hasNext()) {
                         String key = String.valueOf(keys.next());
                         String value = args.optString(key);
-                        fields.add(new TmfEventField("args." + key, value, null));
+                        fields.add(new TmfEventField("args." + key, value, null)); //$NON-NLS-1$
                     }
                 }
             } catch (JSONException e1) {

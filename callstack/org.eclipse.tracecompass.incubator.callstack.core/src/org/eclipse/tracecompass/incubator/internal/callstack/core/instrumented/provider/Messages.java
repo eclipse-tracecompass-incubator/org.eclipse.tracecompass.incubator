@@ -25,6 +25,9 @@ public class Messages extends NLS {
     /** Title of kernel status rows */
     public static @Nullable String FlameChartDataProvider_KernelStatusTitle;
 
+    /** Title of the dataprovider */
+    public static @Nullable String FlameChartDataProvider_Title;
+
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

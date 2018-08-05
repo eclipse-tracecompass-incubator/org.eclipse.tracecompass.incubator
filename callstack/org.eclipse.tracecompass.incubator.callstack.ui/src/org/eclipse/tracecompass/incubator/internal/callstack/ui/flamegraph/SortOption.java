@@ -14,15 +14,22 @@ package org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph;
  * @author Bernd Hufmann
  */
 public enum SortOption {
-    /** Sort by thread name*/
+    /** Sort by thread name */
     BY_NAME,
     /** Sort by thread name reverse */
     BY_NAME_REV,
     /** Sort by thread ID */
     BY_ID,
-    /** Sort by thread ID reverse*/
+    /** Sort by thread ID reverse */
     BY_ID_REV;
 
+    /**
+     * Get a sort option corresponding to a given name
+     *
+     * @param name
+     *            the desired sort option name
+     * @return the corresponding sort option
+     */
     public static SortOption fromName(String name) {
         if (name.equals(SortOption.BY_NAME.name())) {
             return SortOption.BY_NAME;

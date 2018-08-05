@@ -50,6 +50,9 @@ public class ContextMarkers implements IMarkerEventSource {
      */
     private static final RGBA ONE_TRUE_COLOUR = new RGBA(44, 33, 88, 93);
 
+    /**
+     * Constructor
+     */
     public ContextMarkers() {
         // Do nothing
     }

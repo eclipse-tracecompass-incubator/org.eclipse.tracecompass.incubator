@@ -12,6 +12,7 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -93,7 +94,7 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
 
     @Override
     public String getStateTypeName() {
-        return Messages.FlameGraph_Depth;
+        return Objects.requireNonNull(Messages.FlameGraph_Depth);
     }
 
     @NonNullByDefault({})
@@ -109,7 +110,7 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
         if (activeTrace != null) {
             funcSymbol = fgEvent.getSymbol().resolve(SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
         }
-        builder.put(Messages.FlameGraph_Symbol, funcSymbol == null ? String.valueOf(fgEvent.getSymbol()) : funcSymbol + " (" + fgEvent.getSymbol() + ")");
+        builder.put(Messages.FlameGraph_Symbol, funcSymbol == null ? String.valueOf(fgEvent.getSymbol()) : funcSymbol + " (" + fgEvent.getSymbol() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
         long nb = (fgEvent.getNumberOfCalls());
         builder.put(Messages.FlameGraph_NbCalls, NumberFormat.getIntegerInstance().format(nb)); // $NON-NLS-1$
         Map<String, String> tooltip = ((FlamegraphEvent) event).getTooltip(FORMATTER);

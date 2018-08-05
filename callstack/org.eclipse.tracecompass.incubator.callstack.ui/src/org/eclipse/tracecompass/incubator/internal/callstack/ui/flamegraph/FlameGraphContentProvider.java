@@ -83,7 +83,7 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         }
         // Get or add the entry
         if (extraEntries.isEmpty()) {
-            TimeGraphEntry entry = new TimeGraphEntry("extra", 0, 0);
+            TimeGraphEntry entry = new TimeGraphEntry(Messages.FlameGraphContentProvider_EntryName, 0, 0);
             extraEntries.add(entry);
         }
         TimeGraphEntry entry = extraEntries.get(0);

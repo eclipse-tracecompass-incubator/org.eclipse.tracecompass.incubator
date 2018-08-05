@@ -155,10 +155,21 @@ public final class VirtualCPU {
         fStateBeforeIRQ = state;
     }
 
+    /**
+     * Set the next layer's virtual CPU
+     *
+     * @param vcpu
+     *            the virtual CPU
+     */
     public void setNextLayerVCPU(VirtualCPU vcpu) {
         fNextLayerVCPU = vcpu;
     }
 
+    /**
+     * Get the next layer's virtual CPU
+     *
+     * @return the next layer's virtual CPU
+     */
     public @Nullable VirtualCPU getNextLayerVCPU() {
         return fNextLayerVCPU;
     }

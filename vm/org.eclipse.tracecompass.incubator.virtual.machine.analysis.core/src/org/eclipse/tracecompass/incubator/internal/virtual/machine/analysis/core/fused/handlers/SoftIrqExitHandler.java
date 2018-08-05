@@ -28,6 +28,14 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  */
 public class SoftIrqExitHandler extends VMKernelEventHandler {
 
+    /**
+     * Constructor
+     *
+     * @param layout
+     *            the layout
+     * @param sp
+     *            the state provider
+     */
     public SoftIrqExitHandler(IKernelAnalysisEventLayout layout, FusedVirtualMachineStateProvider sp) {
         super(layout, sp);
     }

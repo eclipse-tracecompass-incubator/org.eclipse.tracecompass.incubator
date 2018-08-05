@@ -9,7 +9,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.handlers;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
@@ -24,7 +23,15 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  */
 public class SoftIrqRaiseHandler extends VMKernelEventHandler {
 
-    public SoftIrqRaiseHandler(@NonNull IKernelAnalysisEventLayout layout, FusedVirtualMachineStateProvider sp) {
+    /**
+     * Constructor
+     *
+     * @param layout
+     *            the layout
+     * @param sp
+     *            the state provider
+     */
+    public SoftIrqRaiseHandler(IKernelAnalysisEventLayout layout, FusedVirtualMachineStateProvider sp) {
         super(layout, sp);
     }
 

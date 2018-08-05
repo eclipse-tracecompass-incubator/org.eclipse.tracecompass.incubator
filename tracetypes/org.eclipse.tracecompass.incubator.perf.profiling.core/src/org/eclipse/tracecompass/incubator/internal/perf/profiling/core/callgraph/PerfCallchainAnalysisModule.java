@@ -66,8 +66,8 @@ public class PerfCallchainAnalysisModule extends ProfilingCallGraphAnalysisModul
      */
     public PerfCallchainAnalysisModule() {
         // Create group descriptors
-        fThreadDescriptor = new CallStackGroupDescriptor("Threads", null, false);
-        fProcessDescriptor = new CallStackGroupDescriptor("Process", fThreadDescriptor, true);
+        fThreadDescriptor = new CallStackGroupDescriptor("Threads", null, false); //$NON-NLS-1$
+        fProcessDescriptor = new CallStackGroupDescriptor("Process", fThreadDescriptor, true); //$NON-NLS-1$
     }
 
     @Override
@@ -160,7 +160,7 @@ public class PerfCallchainAnalysisModule extends ProfilingCallGraphAnalysisModul
             longList.add(callsite);
         }
         Collections.reverse(longList);
-        return ImmutableMap.of("Callchain", longList);
+        return ImmutableMap.of("Callchain", longList); //$NON-NLS-1$
 
     }
 

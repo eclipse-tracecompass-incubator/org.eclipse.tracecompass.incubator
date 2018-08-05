@@ -45,6 +45,8 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 /**
+ * TODO Review this class
+ *
  * @author Raphaël Beamonte
  */
 public class BuilderInstanceGroup {
@@ -82,6 +84,10 @@ public class BuilderInstanceGroup {
      *            the state machine state system analysis modules
      * @param lttngKernelExecutionGraphModules
      *            the critical path analysis modules
+     * @param variableTypes
+     *            the types
+     * @param timeRanges
+     *            the time intervals
      */
     public BuilderInstanceGroup(List<StateMachineBackendAnalysis> stateMachineBackendAnalysis, List<OsExecutionGraph> lttngKernelExecutionGraphModules, Collection<String> variableTypes, Collection<TimestampInterval> timeRanges) {
         this.stateMachineBackendAnalysis = stateMachineBackendAnalysis;
@@ -90,6 +96,12 @@ public class BuilderInstanceGroup {
         this.timeRangesList = (timeRanges == null || timeRanges.isEmpty()) ? null : new ArrayList<>(new TreeSet<>(timeRanges));
     }
 
+    /**
+     * Build on an expirement and its events
+     *
+     * @param exp
+     *            the experiment
+     */
     public void buildOn(TmfExperiment exp) {
         this.currentTimeRange = 0;
         this.fExperiment = exp;
@@ -101,6 +113,12 @@ public class BuilderInstanceGroup {
         }
     }
 
+    /**
+     * Event reception handling
+     *
+     * @param event
+     *            the event
+     */
     public void receivedEvent(ITmfEvent event) {
         if (event.getName().startsWith(LTTNG_UST_STATEDUMP)) {
             return;
@@ -137,10 +155,31 @@ public class BuilderInstanceGroup {
         beiList.add(new BuilderEventInfo(event));
     }
 
+    /**
+     * Get the longest common subsequence between two lists
+     *
+     * @param l0
+     *            the first list
+     * @param l1
+     *            the second list
+     * @return the longest common subsequence
+     */
     public static <T> List<T> lcs(List<T> l0, List<T> l1) {
         return lcs(l0, l1, new EqualityRunner<>());
     }
 
+    /**
+     * Get the longest common subsequence between two lists using an equality
+     * runner
+     *
+     * @param l0
+     *            the first list
+     * @param l1
+     *            the second list
+     * @param eq
+     *            the equality runner for comparison
+     * @return the longest common subsequence
+     */
     public static <T> List<T> lcs(List<T> l0, List<T> l1, @NonNull EqualityRunner<T> eq) {
         int[][] lengths = new int[l0.size() + 1][l1.size() + 1];
 
@@ -322,6 +361,9 @@ public class BuilderInstanceGroup {
         return eventListPerGroup;
     }
 
+    /**
+     * Test
+     */
     public void doTest() {
         System.out.println("DEBUG: Number of instances: " + eventsPerTid.size()); //$NON-NLS-1$
         for (Entry<Integer, List<BuilderEventInfo>> entry : eventsPerTid.entrySet()) {
@@ -387,6 +429,11 @@ public class BuilderInstanceGroup {
         // UNCOMMENT System.out.println("Finished.");
     }
 
+    /**
+     * Get the list of basic initial transitions
+     *
+     * @return the list of basic initial transitions
+     */
     public List<StateMachineTransition> getBasicInitialTransitions() {
         List<StateMachineTransition> initialTransitions = new ArrayList<>();
         Collection<List<BuilderEventInfo>> eventListPerGroup = getModelFlows();
@@ -465,6 +512,12 @@ public class BuilderInstanceGroup {
         return initialTransitions;
     }
 
+    /**
+     * Clean unused variables and constraints
+     *
+     * @param initialTransitions
+     *            the initial transitions
+     */
     public void cleanUnusedVariablesAndConstraints(List<StateMachineTransition> initialTransitions) {
         Set<String> variablesUsed = new HashSet<>();
         Set<StateMachineNode> readNode = new HashSet<>();

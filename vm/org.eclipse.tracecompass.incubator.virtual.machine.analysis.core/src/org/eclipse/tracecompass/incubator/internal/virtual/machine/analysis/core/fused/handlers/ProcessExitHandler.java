@@ -9,7 +9,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.handlers;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -19,7 +18,15 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
  */
 public class ProcessExitHandler extends VMKernelEventHandler {
 
-    public ProcessExitHandler(@NonNull IKernelAnalysisEventLayout layout, FusedVirtualMachineStateProvider sp) {
+    /**
+     * Constructor
+     *
+     * @param layout
+     *            the layout
+     * @param sp
+     *            the state provider
+     */
+    public ProcessExitHandler(IKernelAnalysisEventLayout layout, FusedVirtualMachineStateProvider sp) {
         super(layout, sp);
     }
 

@@ -81,7 +81,7 @@ public final class FusedVMInformationProvider {
      */
     public static List<String> getMachineContainers(ITmfStateSystem ssq, String hostId) {
         List<String> containers = new LinkedList<>();
-        List<Integer> containersQuark = ssq.getQuarks(FusedAttributes.HOSTS, hostId, FusedAttributes.CONTAINERS, "*");
+        List<Integer> containersQuark = ssq.getQuarks(FusedAttributes.HOSTS, hostId, FusedAttributes.CONTAINERS, "*"); //$NON-NLS-1$
         for (Integer containerQuark : containersQuark) {
             containers.add(ssq.getAttributeName(containerQuark));
         }
@@ -118,10 +118,24 @@ public final class FusedVMInformationProvider {
         return ssq.optQuarkAbsolute(FusedAttributes.HOSTS, hostId, FusedAttributes.CONTAINERS, containerID);
     }
 
+    /**
+     * Add threads attribute and get quark
+     *
+     * @param ssq
+     *            the state system
+     * @return the matching quark
+     */
     public static int getNodeThreadsAndAdd(ITmfStateSystemBuilder ssq) {
         return ssq.getQuarkAbsoluteAndAdd(FusedAttributes.THREADS);
     }
 
+    /**
+     * Get threads quark
+     *
+     * @param ssq
+     *            the state system
+     * @return the matching quark, or -1 if not found
+     */
     public static int getNodeThreads(ITmfStateSystem ssq) {
         try {
             return ssq.getQuarkAbsolute(FusedAttributes.THREADS);
@@ -156,6 +170,23 @@ public final class FusedVMInformationProvider {
         return -1;
     }
 
+    /**
+     * Get the ns_inum quark from a machine and a tid
+     *
+     * @param ssq
+     *            the state system
+     * @param time
+     *            the time
+     * @param machineName
+     *            the machine name
+     * @param threadID
+     *            the thread ID
+     * @return the matching quark
+     * @throws AttributeNotFoundException
+     *             if sub-attribute was not found
+     * @throws StateSystemDisposedException
+     *             if the query is sent after the state system has been disposed
+     */
     public static int getNodeNsInum(ITmfStateSystem ssq, long time, String machineName, int threadID) throws AttributeNotFoundException, StateSystemDisposedException {
         int quark = ssq.getQuarkRelative(FusedVMInformationProvider.getNodeThreads(ssq), machineName, Integer.toString(threadID), FusedAttributes.NS_MAX_LEVEL);
         ITmfStateInterval interval = ssq.querySingleState(time, quark);
@@ -167,6 +198,15 @@ public final class FusedVMInformationProvider {
         return ssq.getQuarkRelative(quark, FusedAttributes.NS_INUM);
     }
 
+    /**
+     * Get parent container
+     *
+     * @param ssq
+     *            the state system
+     * @param containerQuark
+     *            the container quark
+     * @return the parent container ID
+     */
     public static Long getParentContainer(ITmfStateSystem ssq, int containerQuark) {
         int parentContainerIDQuark;
         long parentContainerID = -1;
@@ -372,17 +412,32 @@ public final class FusedVMInformationProvider {
         return cpus;
     }
 
+    /**
+     * Get the pCPUs used by a container
+     *
+     * @param ssq
+     *            the state system
+     * @param quark
+     *            the container quark
+     * @return the list of pCPUs used
+     */
     public static List<String> getPCpusUsedByContainer(ITmfStateSystem ssq, int quark) {
         List<String> pcpus = new LinkedList<>();
-        List<Integer> pCpusQuarks = ssq.getQuarks(quark, FusedAttributes.PCPUS, "*");
+        List<Integer> pCpusQuarks = ssq.getQuarks(quark, FusedAttributes.PCPUS, "*"); //$NON-NLS-1$
         for (int pCpuqQuark : pCpusQuarks) {
             pcpus.add(ssq.getAttributeName(pCpuqQuark));
         }
         return pcpus;
     }
 
-    // Method for debug purpose
-    // Transform timestamp to something readable: hh:mm:ss
+    /**
+     * Method for debug purpose. Transform timestamp to something readable:
+     * hh:mm:ss
+     *
+     * @param time
+     *            the time
+     * @return the readable formatted time
+     */
     public static String formatTime(long time) {
 
         return formatTimeAbs(time);
@@ -401,7 +456,7 @@ public final class FusedVMInformationProvider {
         StringBuffer str = new StringBuffer();
 
         // format time from nanoseconds to calendar time HH:MM:SS
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
         String stime = timeFormat.format(new Date(time / 1000000));
         str.append(stime);
         str.append('.');

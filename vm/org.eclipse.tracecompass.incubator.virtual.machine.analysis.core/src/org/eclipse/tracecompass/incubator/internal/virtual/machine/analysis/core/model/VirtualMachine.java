@@ -284,7 +284,8 @@ public final class VirtualMachine {
      *
      * @param hostThread
      *            the thread
-     * @return
+     * @return true if the thread is ready to go to the next layer, false
+     *         otherwise
      */
     public boolean isThreadReadyForNextLayer(HostThread hostThread) {
         return fThreadsReadyForNextLayer.contains(hostThread);

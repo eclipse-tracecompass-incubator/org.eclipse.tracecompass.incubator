@@ -17,6 +17,7 @@ import org.eclipse.osgi.util.NLS;
  *
  * @author Geneviève Bastien
  */
+@SuppressWarnings("javadoc")
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.callstack.ui.views.cct.messages"; //$NON-NLS-1$
     public static @Nullable String CallingContextTreeViewer_CallSite;
@@ -24,6 +25,9 @@ public class Messages extends NLS {
     public static @Nullable String CallingContextTreeViewer_Duration;
     public static @Nullable String CallingContextTreeViewer_NbCalls;
     public static @Nullable String CallingContextTreeViewer_SelfTime;
+    public static @Nullable String CallingContextTreeViewer_LabelType;
+    public static @Nullable String CallingContextTreeViewer_LabelTotal;
+    public static @Nullable String CallingContextTreeViewer_LabelSelection;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

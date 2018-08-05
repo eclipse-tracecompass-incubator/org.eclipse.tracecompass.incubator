@@ -43,6 +43,15 @@ public class FlameChartArrowProvider {
         fTrace = trace;
     }
 
+    /**
+     * Fetch arrows with query
+     *
+     * @param filter
+     *            the query filter
+     * @param monitor
+     *            the monitor
+     * @return the corresponding state intervals
+     */
     public List<ITmfStateInterval> fetchArrows(TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
         long start = filter.getStart();
         long end = filter.getEnd();

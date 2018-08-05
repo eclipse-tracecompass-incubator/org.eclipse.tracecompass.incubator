@@ -52,7 +52,7 @@ public class FlameChartDataProviderFactory implements IDataProviderFactory {
         if (traces.size() > 1) {
             // Try creating a composite only if there are many traces, otherwise, the
             // previous call to create should have returned the data provider
-            return TmfTreeXYCompositeDataProvider.create(traces, Objects.requireNonNull("FlameChart"), FlameChartDataProvider.ID, secondaryId);
+            return TmfTreeXYCompositeDataProvider.create(traces, Objects.requireNonNull(Messages.FlameChartDataProvider_Title), FlameChartDataProvider.ID, secondaryId);
         }
         return null;
 

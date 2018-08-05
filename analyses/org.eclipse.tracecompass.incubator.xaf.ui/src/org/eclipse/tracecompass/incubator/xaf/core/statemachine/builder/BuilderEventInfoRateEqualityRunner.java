@@ -10,12 +10,20 @@
 package org.eclipse.tracecompass.incubator.xaf.core.statemachine.builder;
 
 /**
+ * TODO Review this class
+ *
  * @author Raphaël Beamonte
  */
 public class BuilderEventInfoRateEqualityRunner extends EqualityRunner<BuilderEventInfo> {
 
     private final double rate;
 
+    /**
+     * Constructor
+     *
+     * @param rate
+     *            the rate
+     */
     public BuilderEventInfoRateEqualityRunner(double rate) {
         this.rate = rate;
     }

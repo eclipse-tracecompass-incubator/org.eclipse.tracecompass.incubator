@@ -53,7 +53,7 @@ public class VirtualResourceEntry extends TimeGraphEntry implements Comparable<I
         public String toString() {
             /* Every CPU displayed is a physical CPU. */
             if (this == Type.CPU || this == Type.PCPU_VM || this == Type.PCPU_CONTAINER) {
-                return "PCPU";
+                return "PCPU"; //$NON-NLS-1$
             }
             return super.toString();
         }

@@ -87,7 +87,7 @@ public class SymParser {
             }
             long range = Long.parseUnsignedLong(match.group(1), 16);
             char c = match.group(2).charAt(0);
-            String name = (match.groupCount() < 3) ? "Anonymous" : match.group(3);
+            String name = (match.groupCount() < 3) ? "Anonymous" : match.group(3); //$NON-NLS-1$
             Symbol sym = new Symbol(c, name);
             sp.fMap.put(range, sym);
         }

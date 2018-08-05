@@ -301,6 +301,17 @@ public class FusedVMEventHandlerUtils {
         return ss.getQuarkAbsoluteAndAdd(FusedAttributes.THREADS);
     }
 
+    /**
+     * Save container thread ID by adding it
+     *
+     * @param ss
+     *            the state system
+     * @param quark
+     *            the quark
+     * @param tid
+     *            the tid
+     * @return the matching quark
+     */
     public static int saveContainerThreadID(ITmfStateSystemBuilder ss, int quark, int tid) {
         return ss.getQuarkRelativeAndAdd(quark, FusedAttributes.THREADS, Integer.toString(tid));
     }
@@ -359,8 +370,14 @@ public class FusedVMEventHandlerUtils {
         return namespaces;
     }
 
-    // Method for debug purpose
-    // Transform timestamp to something readable: hh:mm:ss
+    /**
+     * Method for debug purpose. Transform timestamp to something readable:
+     * hh:mm:ss
+     *
+     * @param time
+     *            the time
+     * @return a readable formatted string
+     */
     public static String formatTime(long time) {
 
         return formatTimeAbs(time);

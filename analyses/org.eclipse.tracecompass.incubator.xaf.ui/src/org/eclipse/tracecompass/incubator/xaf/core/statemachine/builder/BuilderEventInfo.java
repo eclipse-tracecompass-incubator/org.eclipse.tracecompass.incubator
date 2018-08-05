@@ -19,12 +19,20 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 
 /**
+ * TODO Review this class
+ *
  * @author Raphaël Beamonte
  */
 public class BuilderEventInfo implements Comparable<BuilderEventInfo> {
     private String name;
     private Map<String, String> content;
 
+    /**
+     * Constructor
+     *
+     * @param event
+     *            the event
+     */
     public BuilderEventInfo(ITmfEvent event) {
         name = event.getName();
         content = new HashMap<>();
@@ -36,24 +44,53 @@ public class BuilderEventInfo implements Comparable<BuilderEventInfo> {
         }
     }
 
+    /**
+     * Constructor
+     *
+     * @param eventName
+     *            the event name
+     */
     public BuilderEventInfo(String eventName) {
         this.name = eventName;
         this.content = new HashMap<>();
     }
 
+    /**
+     * Constructor
+     *
+     * @param eventName
+     *            the event name
+     * @param content
+     *            the event content
+     */
     public BuilderEventInfo(String eventName, Map<String, String> content) {
         this.name = eventName;
         this.content = content;
     }
 
+    /**
+     * Get the event name
+     *
+     * @return the event name
+     */
     public String getEventName() {
         return name;
     }
 
+    /**
+     * Get the content
+     *
+     * @return the content
+     */
     public Map<String, String> getContent() {
         return content;
     }
 
+    /**
+     * Get the content size
+     *
+     * @return the content size
+     */
     public int getContentSize() {
         return content.size();
     }
@@ -150,6 +187,13 @@ public class BuilderEventInfo implements Comparable<BuilderEventInfo> {
         return cmp;
     }
 
+    /**
+     * Get the matching rate between this and another instance
+     *
+     * @param other
+     *            the other instance to compare to
+     * @return the matching rate
+     */
     public double getMatchingRate(BuilderEventInfo other) {
         if (!name.equals(other.name)) {
             return -1;
@@ -177,6 +221,13 @@ public class BuilderEventInfo implements Comparable<BuilderEventInfo> {
         return (max - discrepancy) * 1. / max;
     }
 
+    /**
+     * Get an instance with common event info between this and another instance
+     *
+     * @param other
+     *            the other instance
+     * @return an instance with common content
+     */
     public BuilderEventInfo getCommonBuilderEventInfo(BuilderEventInfo other) {
         if (!name.equals(other.name)) {
             return null;

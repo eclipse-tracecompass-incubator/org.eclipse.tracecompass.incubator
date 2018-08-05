@@ -46,7 +46,7 @@ public final class CalledFunctionFactory {
      */
     public static AbstractCalledFunction create(long start, long end, @Nullable Object symbolValue, int processId, int threadId, @Nullable ICalledFunction parent, IHostModel model) {
         if (symbolValue == null) {
-            throw new IllegalArgumentException("Symbol value is null");
+            throw new IllegalArgumentException("Symbol value is null"); //$NON-NLS-1$
         }
         if (symbolValue instanceof Number) {
             return create(start, end, ((Number) symbolValue).longValue(), processId, threadId, parent, model);

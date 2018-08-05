@@ -25,9 +25,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public interface IAtraceConstants {
 
+    /** Process dump pattern */
     Pattern PROCESS_DUMP_PATTERN = Pattern
             .compile("^\\s*(?<user>.*?)\\s+(?<pid>\\d+)\\s+(?<ppid>\\d+)\\s+(?<vsz>\\d+)\\s+(?<rss>\\d+)\\s+(?<wchan>.*?)\\s+(?<pc>.*?)\\s+(?<s>.*?)\\s+(?<name>.*?)?"); //$NON-NLS-1$
 
+    /** Trace event pattern */
     Pattern TRACE_EVENT_PATTERN = Pattern.compile("(?<phase>\\w)(\\|(?<tid>\\d+)\\|(?<content>[^\\|]+))?"); //$NON-NLS-1$
 
 }

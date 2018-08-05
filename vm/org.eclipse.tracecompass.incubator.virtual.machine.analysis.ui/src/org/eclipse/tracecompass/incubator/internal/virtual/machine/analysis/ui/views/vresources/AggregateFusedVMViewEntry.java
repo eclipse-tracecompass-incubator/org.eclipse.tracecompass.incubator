@@ -96,6 +96,12 @@ public class AggregateFusedVMViewEntry extends VirtualResourceEntry {
         return new AggregateEventIterator(fContributors, startTime, stopTime, visibleDuration, COMPARATOR);
     }
 
+    /**
+     * Add entry to contributors
+     *
+     * @param entry
+     *            the timegraph entry
+     */
     public void addContributor(ITimeGraphEntry entry) {
         fContributors.add(entry);
     }

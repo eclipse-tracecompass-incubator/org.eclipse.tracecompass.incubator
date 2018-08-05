@@ -23,9 +23,12 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 
 /**
+ * TODO Review this class
+ *
  * @author Raphaël Beamonte
  *
  * @param <T>
+ *            the contained object type
  */
 public class SuffixTree<T extends Comparable<? super T>> {
     private final int oo = Integer.MAX_VALUE / 2;
@@ -83,6 +86,12 @@ public class SuffixTree<T extends Comparable<? super T>> {
         }
     }
 
+    /**
+     * Constructor
+     *
+     * @param orig
+     *            the origin content
+     */
     public SuffixTree(List<T> orig) {
         origContent = orig;
         content = new ArrayList<>(orig);
@@ -115,6 +124,12 @@ public class SuffixTree<T extends Comparable<? super T>> {
         return l0.subList(0, min);
     }
 
+    /**
+     * Get the list of longest non-overlapping repeated substring without repeat
+     *
+     * @return the list of longest non-overlapping repeated substring without
+     *         repeat
+     */
     public List<T> getLongestNonOverlappingRepeatedSubstringWithoutRepeat() {
         List<T> longest = getLongestNonOverlappingRepeatedSubstring();
 
@@ -343,6 +358,11 @@ public class SuffixTree<T extends Comparable<? super T>> {
      * //suffixArray.removeIf(l -> l.isEmpty()); return suffixArray; }
      */
 
+    /**
+     * Get the suffix array iterator
+     *
+     * @return the suffix array iterator
+     */
     public Iterator<List<T>> getSuffixArrayIterator() {
         return new SuffixArrayIterator();
     }
@@ -485,6 +505,12 @@ public class SuffixTree<T extends Comparable<? super T>> {
         return currentNode;
     }
 
+    /**
+     * Add an object
+     *
+     * @param object
+     * the object to add
+     */
     public void addObject(@Nullable T object) {
         content.set(++position, object);
         needSuffixLink = -1;
@@ -577,6 +603,9 @@ public class SuffixTree<T extends Comparable<? super T>> {
         return content.subList(nodes.get(node).start, Math.min(position + 1, nodes.get(node).end)).toString();
     }
 
+    /**
+     * Print the tree
+     */
     public void printTree() {
         out.println("digraph {"); //$NON-NLS-1$
         out.println("\trankdir = LR;"); //$NON-NLS-1$

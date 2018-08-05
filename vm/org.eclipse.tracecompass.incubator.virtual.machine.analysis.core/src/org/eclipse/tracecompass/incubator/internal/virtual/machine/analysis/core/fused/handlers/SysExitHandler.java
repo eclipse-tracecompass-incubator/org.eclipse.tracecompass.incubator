@@ -25,6 +25,14 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  */
 public class SysExitHandler extends VMKernelEventHandler {
 
+    /**
+     * Constructor
+     *
+     * @param layout
+     *            the layout
+     * @param sp
+     *            the state provider
+     */
     public SysExitHandler(IKernelAnalysisEventLayout layout, FusedVirtualMachineStateProvider sp) {
         super(layout, sp);
     }

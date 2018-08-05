@@ -8,8 +8,6 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.cct;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.ArrayList;
@@ -17,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -78,11 +77,11 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
     private Collection<ISymbolProvider> fSymbolProviders = Collections.emptyList();
 
     private static final String[] COLUMN_NAMES = new String[] {
-            checkNotNull(Messages.CallingContextTreeViewer_CallSite),
-            checkNotNull(Messages.CallingContextTreeViewer_NbCalls),
-            checkNotNull(Messages.CallingContextTreeViewer_Duration),
-            checkNotNull(Messages.CallingContextTreeViewer_SelfTime),
-            checkNotNull(Messages.CallingContextTreeViewer_CpuTime)
+            Objects.requireNonNull(Messages.CallingContextTreeViewer_CallSite),
+            Objects.requireNonNull(Messages.CallingContextTreeViewer_NbCalls),
+            Objects.requireNonNull(Messages.CallingContextTreeViewer_Duration),
+            Objects.requireNonNull(Messages.CallingContextTreeViewer_SelfTime),
+            Objects.requireNonNull(Messages.CallingContextTreeViewer_CpuTime)
     };
 
     /**
@@ -142,7 +141,7 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
                     value = getStringForColumn((AggregatedStackTraces) callSite, columnIndex);
                 }
             }
-            return checkNotNull(value);
+            return Objects.requireNonNull(value);
         }
 
         private static String getStringForColumn(AggregatedStackTraces callsite, int columnIndex) {
@@ -603,7 +602,7 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
      * @since 1.2
      */
     protected String getTypeLabel() {
-        return checkNotNull("type");
+        return Objects.requireNonNull(Messages.CallingContextTreeViewer_LabelType);
     }
 
     /**
@@ -613,7 +612,7 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
      * @since 1.2
      */
     protected String getTotalLabel() {
-        return checkNotNull("label");
+        return Objects.requireNonNull(Messages.CallingContextTreeViewer_LabelTotal);
     }
 
     /**
@@ -623,7 +622,7 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
      * @since 1.2
      */
     protected String getSelectionLabel() {
-        return checkNotNull("selection");
+        return Objects.requireNonNull(Messages.CallingContextTreeViewer_LabelSelection);
     }
 
     /**

@@ -192,7 +192,7 @@ public class CallStackTableView extends TmfView {
         tree.setHeaderVisible(true);
         tree.setLinesVisible(true);
         TreeViewerColumn column = new TreeViewerColumn(treeViewer, SWT.LEFT);
-        column.getColumn().setText("CallSite");
+        column.getColumn().setText("CallSite"); //$NON-NLS-1$
         column.getColumn().setWidth(50);
         treeViewer.setContentProvider(new TreeContentProvider());
         treeViewer.setLabelProvider(new TreeLabelProvider());
@@ -204,7 +204,10 @@ public class CallStackTableView extends TmfView {
     }
 
     /**
+     * Event selection handling
+     *
      * @param signal
+     *            the selection signal
      */
     @TmfSignalHandler
     public void eventSelected(TmfEventSelectedSignal signal) {

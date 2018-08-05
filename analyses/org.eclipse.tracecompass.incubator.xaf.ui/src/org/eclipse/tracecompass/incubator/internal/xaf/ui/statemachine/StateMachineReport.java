@@ -24,6 +24,8 @@ import com.google.common.base.Strings;
 /**
  * A basic printer class to manage tabulation levels
  *
+ * TODO Review this class
+ *
  * @author Raphaël Beamonte
  */
 public class StateMachineReport {
@@ -1304,6 +1306,12 @@ public class StateMachineReport {
         }
     }
 
+    /**
+     * Manually set the output stream
+     *
+     * @param consoleStream
+     *            the stream
+     */
     public void setOutput(MessageConsoleStream consoleStream) {
         output = new RTOutputStream(consoleStream);
     }

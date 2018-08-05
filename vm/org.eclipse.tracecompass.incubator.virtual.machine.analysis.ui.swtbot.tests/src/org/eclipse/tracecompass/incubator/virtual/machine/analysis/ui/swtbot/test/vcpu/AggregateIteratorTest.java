@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vresources.AggregateEventIterator;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
@@ -36,7 +35,6 @@ import com.google.common.collect.Iterators;
  * @author Matthew Khouzam
  *
  */
-@NonNullByDefault
 public class AggregateIteratorTest {
 
     /**

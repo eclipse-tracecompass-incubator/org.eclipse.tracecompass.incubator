@@ -632,7 +632,7 @@ public class FlameGraphView extends TmfView {
             return fConfigureSymbolsAction;
         }
 
-        fConfigureSymbolsAction = new Action("get symbols") {
+        fConfigureSymbolsAction = new Action(Messages.FlameGraphView_ConfigureSymbolProvidersText) {
             @Override
             public void run() {
                 SymbolProviderConfigDialog dialog = new SymbolProviderConfigDialog(getSite().getShell(), getProviderPages());
@@ -643,7 +643,7 @@ public class FlameGraphView extends TmfView {
             }
         };
 
-        fConfigureSymbolsAction.setToolTipText("get symbols");
+        fConfigureSymbolsAction.setToolTipText(Messages.FlameGraphView_ConfigureSymbolProvidersTooltip);
         fConfigureSymbolsAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(SYMBOL_MAPPING_ICON_PATH));
 
         /*
