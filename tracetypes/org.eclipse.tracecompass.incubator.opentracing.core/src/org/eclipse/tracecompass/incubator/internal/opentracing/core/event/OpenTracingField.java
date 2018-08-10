@@ -273,16 +273,16 @@ public class OpenTracingField {
     /**
      * Get the span start time
      *
-     * @return the start time or null
+     * @return the start time
      */
     public Long getStartTime() {
         return fStartTime;
     }
 
     /**
-     * Get the event duration if applicable
+     * Get the event duration
      *
-     * @return the duration or null
+     * @return the duration
      */
     public Long getDuration() {
         return fDuration;
@@ -293,8 +293,7 @@ public class OpenTracingField {
      *
      * @return a map of the tags and their field names
      */
-    @Nullable
-    public Map<String, Object> getTags() {
+    public @Nullable Map<String, Object> getTags() {
         return fTags;
     }
 
