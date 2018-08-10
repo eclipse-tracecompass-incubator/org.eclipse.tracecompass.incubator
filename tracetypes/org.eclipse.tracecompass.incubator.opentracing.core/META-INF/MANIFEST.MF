@@ -15,9 +15,9 @@ Require-Bundle: org.eclipse.core.runtime,
  com.google.gson,
  com.google.guava,
  org.apache.commons.lang3,
- org.eclipse.tracecompass.incubator.jsontrace.core,
  org.eclipse.tracecompass.ctf.core,
- org.eclipse.tracecompass.tmf.ctf.core
+ org.eclipse.tracecompass.incubator.jsontrace.core,
+ org.eclipse.tracecompass.analysis.timing.ui
 Export-Package: org.eclipse.tracecompass.incubator.internal.opentracing.core;x-friends:="org.eclipse.tracecompass.incubator.opentracing.core.tests",
  org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife;x-friends:="org.eclipse.tracecompass.incubator.opentracing.core.tests,org.eclipse.tracecompass.incubator.opentracing.ui",
  org.eclipse.tracecompass.incubator.internal.opentracing.core.event,

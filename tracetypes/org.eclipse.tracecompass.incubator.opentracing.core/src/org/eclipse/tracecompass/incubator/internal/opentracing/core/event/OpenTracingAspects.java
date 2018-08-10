@@ -9,11 +9,13 @@
 
 package org.eclipse.tracecompass.incubator.internal.opentracing.core.event;
 
+import java.text.Format;
 import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.SubSecondTimeWithUnitFormat;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
 
@@ -89,7 +91,8 @@ public class OpenTracingAspects {
         }
     }
 
-    private static class OpenTracingDurationAspect implements IOpenTracingAspect<Long> {
+    private static class OpenTracingDurationAspect implements IOpenTracingAspect<@Nullable String> {
+        private static final Format FORMATTER = new SubSecondTimeWithUnitFormat();
 
         @Override
         public @NonNull String getName() {
@@ -102,8 +105,8 @@ public class OpenTracingAspects {
         }
 
         @Override
-        public Long resolveOpenTracingLogs(@NonNull OpenTracingEvent event) {
-            return event.getField().getDuration();
+        public @Nullable String resolveOpenTracingLogs(@NonNull OpenTracingEvent event) {
+            return FORMATTER.format(event.getField().getDuration());
         }
     }
 
