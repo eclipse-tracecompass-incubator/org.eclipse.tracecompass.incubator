@@ -18,10 +18,15 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.annotation,
  org.eclipse.ui.ide
 Export-Package: org.eclipse.tracecompass.incubator.internal.opentracing.ui;x-internal:=true,
- org.eclipse.tracecompass.incubator.internal.opentracing.ui.view.spanlife;x-internal:=true
+ org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.handlers;x-internal:=true,
+ org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.wizards;x-internal:=true,
+ org.eclipse.tracecompass.incubator.internal.opentracing.ui.view.spanlife;x-internal:=true,
+ org.eclipse.tracecompass.incubator.internal.opentracing.ui.views;x-internal:=true
 Import-Package: com.google.common.collect,
  com.google.gson,
  com.google.gson.stream,
+ javax.ws.rs.client,
+ javax.ws.rs.core,
  org.apache.commons.compress.utils,
  org.eclipse.tracecompass.incubator.jsontrace.core.trace
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.opentracing.ui

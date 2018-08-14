@@ -1,0 +1,136 @@
+/*******************************************************************************
+ * Copyright (c) 2018 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
+package org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.wizards;
+
+import java.net.URI;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+/**
+ * Jaeger REST utility class
+ *
+ * @author Simon Delisle
+ */
+public class JaegerRestUtils {
+
+    private static final String SERVICES_ENDPOINT = "services"; //$NON-NLS-1$
+    private static final String TRACES_ENDPOINT = "traces"; //$NON-NLS-1$
+
+    private static final String SERVICES_DATA_KEY = "data"; //$NON-NLS-1$
+
+    /**
+     * Parameters key for traces request
+     */
+    private static final String SERVICE_NAME = "service"; //$NON-NLS-1$
+    private static final String SEARCH_START_TIME = "start"; //$NON-NLS-1$
+    private static final String SEARCH_END_TIME = "end"; //$NON-NLS-1$
+    private static final String NB_TRACES_LIMIT = "limit"; //$NON-NLS-1$
+
+    private JaegerRestUtils() {
+    }
+
+    /**
+     * Fetch the available services from Jaeger, used to create the URL to fetch
+     * traces
+     *
+     * @param baseUrl
+     *            Base URL of Jaeger API
+     * @return Array of service names
+     */
+    public static String[] fetchServices(String baseUrl) {
+        URI uri = UriBuilder.fromUri(baseUrl).path(SERVICES_ENDPOINT).build();
+        String response = jaegerGet(uri.toString());
+        Gson gson = new Gson();
+        JsonObject jsonResponse = gson.fromJson(response, JsonObject.class);
+        JsonArray servicesArray = jsonResponse.get(SERVICES_DATA_KEY).getAsJsonArray();
+        String[] services = new String[servicesArray.size()];
+        for (int i = 0; i < servicesArray.size(); i++) {
+            services[i] = servicesArray.get(i).getAsString();
+        }
+        return services;
+    }
+
+    /**
+     * Build the correct URL with the given parameters that will be use to fetch
+     * traces
+     *
+     * @param baseUrl
+     *            Base URL of Jaeger API
+     * @param service
+     *            Service name
+     * @param startTime
+     *            Search start time
+     * @param endTime
+     *            Search end time
+     * @param limit
+     *            Limit on the number of traces returned
+     * @return The built URL
+     */
+    public static String buildTracesUrl(String baseUrl, String service, String startTime, String endTime, String limit) {
+        URI uri = UriBuilder.fromUri(baseUrl).path(TRACES_ENDPOINT).queryParam(SERVICE_NAME, service)
+                .queryParam(SEARCH_START_TIME, startTime)
+                .queryParam(SEARCH_END_TIME, endTime)
+                .queryParam(NB_TRACES_LIMIT, limit).build();
+        return uri.toString();
+    }
+
+    /**
+     * Fetch the traces from Jaeger
+     *
+     * @param url
+     *            The complete URL (built from buildTracesUrl)
+     * @return A JSon string that contains all the traces or null if there is a
+     *         problem with the connection
+     */
+    public static String fetchJaegerTraces(String url) {
+        return jaegerGet(url);
+    }
+
+    private static String jaegerGet(String url) {
+        Client client = ClientBuilder.newClient();
+        WebTarget resource = client.target(url);
+        Builder request = resource.request();
+        request.accept(MediaType.APPLICATION_JSON);
+        try {
+            return request.get(String.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Verify the connection with the API URL
+     *
+     * @param url
+     *            URL of Jaeger API
+     * @return True if the connection can be establish
+     */
+    public static boolean jaegerCheckConnection(String url) {
+        Client client = ClientBuilder.newClient();
+        WebTarget resource = client.target(url);
+        Builder request = resource.request();
+        try {
+            int status = request.get().getStatus();
+            return Response.Status.fromStatusCode(status) == Response.Status.OK;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}

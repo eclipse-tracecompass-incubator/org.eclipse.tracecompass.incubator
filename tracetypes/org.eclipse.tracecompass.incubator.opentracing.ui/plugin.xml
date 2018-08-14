@@ -47,6 +47,13 @@
             id="org.eclipse.tracecompass.incubator.opentracing.ui.split"
             name="%opentracing.split.name">
       </command>
+      <command
+            categoryId="org.eclipse.ui.category.file"
+            defaultHandler="org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.handlers.FetchJaegerTracesHandler"
+            description="%command.fetch.jaeger.description"
+            id="org.eclipse.tracecompass.incubator.opentracing.ui.fetchJaeger"
+            name="%command.fetch.jaeger.name">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -65,6 +72,30 @@
                style="push">
             <visibleWhen
                   checkEnabled="true">
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any?after=group.open">
+         <command
+               commandId="org.eclipse.tracecompass.incubator.opentracing.ui.fetchJaeger"
+               label="%command.fetch.jaeger.label"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <count
+                        value="1">
+                  </count>
+                  <iterate
+                        operator="and">
+                     <instanceof
+                           value="org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceFolder">
+                     </instanceof>
+                  </iterate>
+               </with>
             </visibleWhen>
          </command>
       </menuContribution>

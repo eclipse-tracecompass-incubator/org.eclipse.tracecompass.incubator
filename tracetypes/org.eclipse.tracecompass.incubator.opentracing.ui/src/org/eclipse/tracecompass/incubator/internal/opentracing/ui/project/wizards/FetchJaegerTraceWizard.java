@@ -1,0 +1,45 @@
+/*******************************************************************************
+ * Copyright (c) 2018 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
+package org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.wizards;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.ui.IImportWizard;
+import org.eclipse.ui.IWorkbench;
+
+/**
+ * Wizard to import traces from Jaeger
+ *
+ * @author Simon Delisle
+ */
+public class FetchJaegerTraceWizard extends Wizard implements IImportWizard {
+
+    private IStructuredSelection fSelection;
+    private FetchJaegerTracesWizardPage fPage;
+
+    @Override
+    public void init(IWorkbench workbench, IStructuredSelection selection) {
+        fSelection = selection;
+        setWindowTitle(Messages.FetchJaegerTraceWizard_wizardTitle);
+    }
+
+    @Override
+    public boolean performFinish() {
+        return fPage.performFinish();
+    }
+
+    @Override
+    public void addPages() {
+        super.addPages();
+        fPage = new FetchJaegerTracesWizardPage(fSelection);
+        addPage(fPage);
+    }
+
+}
