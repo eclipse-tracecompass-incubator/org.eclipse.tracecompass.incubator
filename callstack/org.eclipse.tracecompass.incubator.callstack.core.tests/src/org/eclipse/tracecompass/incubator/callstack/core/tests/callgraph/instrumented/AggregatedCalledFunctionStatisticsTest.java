@@ -28,7 +28,6 @@ import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.StateSystemFactory;
 import org.eclipse.tracecompass.statesystem.core.backend.IStateHistoryBackend;
 import org.eclipse.tracecompass.statesystem.core.backend.StateHistoryBackendFactory;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.junit.After;
 import org.junit.Test;
 
@@ -191,17 +190,17 @@ public class AggregatedCalledFunctionStatisticsTest {
         fixture.modifyAttribute(100, (Object) null, quark);
 
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_1);
-        statev = TmfStateValue.newValueLong(1);
+        statev = 1L;
         fixture.modifyAttribute(0, statev, quark);
         fixture.modifyAttribute(50, (Object) null, quark);
         fixture.modifyAttribute(60, statev, quark);
         fixture.modifyAttribute(90, (Object) null, quark);
 
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_2);
-        statev = TmfStateValue.newValueLong(2);
+        statev = 2L;
         fixture.modifyAttribute(0, statev, quark);
         fixture.modifyAttribute(30, (Object) null, quark);
-        statev = TmfStateValue.newValueLong(3);
+        statev = 3L;
         fixture.modifyAttribute(60, statev, quark);
         fixture.modifyAttribute(80, (Object) null, quark);
         fixture.closeHistory(102);
@@ -295,11 +294,11 @@ public class AggregatedCalledFunctionStatisticsTest {
         fixture.modifyAttribute(80, (Object) null, quark);
         // Create the first root function's callee
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_1);
-        statev = TmfStateValue.newValueLong(2);
+        statev = 2L;
         fixture.modifyAttribute(0, statev, quark);
         fixture.modifyAttribute(10, (Object) null, quark);
         // Create the second root function's callee
-        statev = TmfStateValue.newValueLong(3);
+        statev = 3L;
         fixture.modifyAttribute(30, statev, quark);
         fixture.modifyAttribute(40, (Object) null, quark);
         fixture.closeHistory(81);
@@ -375,7 +374,7 @@ public class AggregatedCalledFunctionStatisticsTest {
         fixture.modifyAttribute(150, (Object) null, quark);
         // Create the first level functions
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_1);
-        statev = TmfStateValue.newValueLong(1);
+        statev = 1L;
         fixture.modifyAttribute(0, statev, quark);
         fixture.modifyAttribute(50, (Object) null, quark);
         fixture.modifyAttribute(60, statev, quark);
@@ -384,20 +383,20 @@ public class AggregatedCalledFunctionStatisticsTest {
         fixture.modifyAttribute(150, (Object) null, quark);
         // Create the third function
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_2);
-        statev = TmfStateValue.newValueLong(2);
+        statev = 2L;
         fixture.modifyAttribute(0, statev, quark);
         fixture.modifyAttribute(10, (Object) null, quark);
 
-        statev = TmfStateValue.newValueLong(3);
+        statev = 3L;
         fixture.modifyAttribute(20, statev, quark);
         fixture.modifyAttribute(30, (Object) null, quark);
 
-        statev = TmfStateValue.newValueLong(2);
+        statev = 2L;
         fixture.modifyAttribute(60, statev, quark);
         fixture.modifyAttribute(90, (Object) null, quark);
 
         quark = fixture.getQuarkRelativeAndAdd(parentQuark, QUARK_3);
-        statev = TmfStateValue.newValueLong(4);
+        statev = 4L;
         fixture.modifyAttribute(0, statev, quark);
         fixture.modifyAttribute(10, (Object) null, quark);
 

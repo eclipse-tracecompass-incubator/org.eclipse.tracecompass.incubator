@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.io.File;
+import java.util.Objects;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -27,6 +28,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlAnalysisModuleSource;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 /**
@@ -86,7 +88,7 @@ public class XmlManagerService {
         if (!XmlUtils.listFiles().containsKey(name)) {
             return Response.status(Status.NOT_FOUND).build();
         }
-        XmlUtils.deleteFile(name);
+        XmlUtils.deleteFiles(ImmutableList.of(Objects.requireNonNull(name)));
         return Response.ok().build();
     }
 
