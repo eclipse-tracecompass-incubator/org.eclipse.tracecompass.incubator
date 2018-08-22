@@ -72,6 +72,25 @@
                style="push">
             <visibleWhen
                   checkEnabled="true">
+               <with
+                     variable="selection">
+                  <count
+                        value="1">
+                  </count>
+                  <iterate
+                        ifEmpty="false"
+                        operator="and">
+                     <instanceof
+                           value="org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceElement">
+                     </instanceof>
+                     <and>
+                        <test
+                              property="org.eclipse.linuxtools.tmf.ui.traceType"
+                              value="org.eclipse.tracecompass.incubator.opentracing.core">
+                        </test>
+                     </and>
+                  </iterate>
+               </with>
             </visibleWhen>
          </command>
       </menuContribution>
