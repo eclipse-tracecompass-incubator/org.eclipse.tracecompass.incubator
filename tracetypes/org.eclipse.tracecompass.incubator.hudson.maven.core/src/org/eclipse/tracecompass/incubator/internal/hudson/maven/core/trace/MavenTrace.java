@@ -35,7 +35,7 @@ public class MavenTrace extends TextTrace<MavenEvent> {
     private static final String DATE_PATTERN = "([0-2]?\\d:[0-5]\\d:[0-5]\\d)"; //$NON-NLS-1$
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING, TmfTimePreferences.getLocale());
 
-    private static final String ELAPSED_TIME_STRING = "Time\\selapsed:\\s*([\\d|\\.]+)\\s*sec"; //$NON-NLS-1$
+    private static final String ELAPSED_TIME_STRING = "Time\\selapsed:\\s*([\\d|\\.|\\,]+)\\s*sec"; //$NON-NLS-1$
     /*
      * 16:17:03 [INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @
      * org.eclipse.tracecompass ---
@@ -46,7 +46,7 @@ public class MavenTrace extends TextTrace<MavenEvent> {
      * - in org.eclipse.tracecompass.analysis.os.linux.ui.swtbot.tests.latency.
      * SystemCallLatencyTableAnalysisTest
      */
-    private static final String TEST_SUMMARY_PATTERN = START_REGEX + DATE_PATTERN + "\\s*Tests\\srun:\\s(\\d+),\\sFailures:\\s(\\d+),\\sErrors:\\s(\\d+),\\sSkipped:\\s(\\d+),\\s*" + ELAPSED_TIME_STRING + "\\s*-\\sin\\s(.*)$"; //$NON-NLS-1$ //$NON-NLS-2$
+    private static final String TEST_SUMMARY_PATTERN = START_REGEX + DATE_PATTERN + "\\s*Tests\\srun:\\s(\\d+),\\sFailures:\\s(\\d+),\\sErrors:\\s(\\d+),\\sSkipped:\\s(\\d+),\\s*" + ELAPSED_TIME_STRING + "\\s*[^-]*-\\sin\\s(.*)$"; //$NON-NLS-1$ //$NON-NLS-2$
     /*
      * 16:42:14
      * climbTest(org.eclipse.tracecompass.analysis.os.linux.ui.swtbot.tests.
@@ -84,13 +84,13 @@ public class MavenTrace extends TextTrace<MavenEvent> {
             group = matcher.group(6);
             if (group != null) {
                 Date parse = DATE_FORMAT.parse(group);
-                MavenEvent event = MavenEvent.createSummary(this, TmfTimestamp.fromMillis(parse.getTime()), matcher.group(12), matcher.group(12), Double.parseDouble(matcher.group(11)));
+                MavenEvent event = MavenEvent.createSummary(this, TmfTimestamp.fromMillis(parse.getTime()), matcher.group(12), matcher.group(12), parseDouble(matcher.group(11)));
                 return event;
             }
             group = matcher.group(13);
             if (group != null) {
                 Date parse = DATE_FORMAT.parse(group);
-                MavenEvent event = MavenEvent.createTest(this, TmfTimestamp.fromMillis(parse.getTime()), matcher.group(15), matcher.group(14), Double.parseDouble(matcher.group(16)));
+                MavenEvent event = MavenEvent.createTest(this, TmfTimestamp.fromMillis(parse.getTime()), matcher.group(15), matcher.group(14), parseDouble(matcher.group(16)));
                 return event;
             }
         } catch (Exception e) {
@@ -107,6 +107,12 @@ public class MavenTrace extends TextTrace<MavenEvent> {
     @Override
     public Iterable<ITmfEventAspect<?>> getEventAspects() {
         return MavenEvent.EVENT_ASPECTS;
+    }
+
+    private static Double parseDouble(String original) {
+        // Replace ',' separating thousands by nothing
+        String dblString = original.replace(",", ""); //$NON-NLS-1$//$NON-NLS-2$
+        return Double.parseDouble(dblString);
     }
 
 }

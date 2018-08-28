@@ -1,0 +1,310 @@
+12:53:55 Démarré par l'utilisateur admin
+12:53:55 [EnvInject] - Loading node environment variables.
+12:53:55 Building in workspace /var/lib/jenkins/workspace/TraceCompassPerformanceTests
+12:53:55  > git rev-parse --is-inside-work-tree # timeout=10
+12:53:55 Fetching changes from the remote Git repository
+12:53:55  > git config remote.origin.url git://git.eclipse.org/gitroot/tracecompass/org.eclipse.tracecompass.git # timeout=10
+12:53:55 Fetching upstream changes from git://git.eclipse.org/gitroot/tracecompass/org.eclipse.tracecompass.git
+12:53:55  > git --version # timeout=10
+12:53:55  > git fetch --tags --progress git://git.eclipse.org/gitroot/tracecompass/org.eclipse.tracecompass.git +refs/heads/*:refs/remotes/origin/*
+12:54:07  > git rev-parse origin/master^{commit} # timeout=10
+12:54:07 Checking out Revision 22c01d9d1565ed64807e3e64195c8330ba0fb3e3 (origin/master)
+12:54:07  > git config core.sparsecheckout # timeout=10
+12:54:07  > git checkout -f 22c01d9d1565ed64807e3e64195c8330ba0fb3e3
+12:54:07 Commit message: "releng: Update release script with the new Eclipse release cycle"
+12:54:07  > git rev-list --no-walk 22c01d9d1565ed64807e3e64195c8330ba0fb3e3 # timeout=10
+12:54:07 [TraceCompassPerformanceTests] $ /bin/sh -xe /tmp/jenkins4654191829007689110.sh
+12:54:07 + rm -rf /var/lib/jenkins/.m2
+12:54:07 ++ git log -n1 --pretty=format:%h
+12:54:07 + GIT_SHORT_COMMIT=22c01d9d1
+12:54:07 +++ git log -n1 --format=%ct
+12:54:07 ++ date -d @1533296692 +%Y%m%d-%H%M
+12:54:07 + GIT_COMMIT_DATE=20180803-0744
+12:54:07 + rm -f envvars.properties
+12:58:29 [INFO] ------------------------------------------------------------------------
+12:58:29 [INFO] Building Trace Compass All Tests 1.0.4-SNAPSHOT
+12:58:29 [INFO] ------------------------------------------------------------------------
+12:58:29 [INFO] 
+12:58:29 [INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @ org.eclipse.tracecompass.alltests ---
+12:58:29 [INFO] Deleting /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target
+12:58:29 [INFO] 
+12:58:29 [INFO] --- maven-clean-plugin:3.0.0:clean (clean-performance-files) @ org.eclipse.tracecompass.alltests ---
+12:58:29 [INFO] Deleting /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests (includes = [*.json, *.js], excludes = [])
+12:58:29 [INFO] 
+12:58:29 [INFO] --- tycho-packaging-plugin:1.1.0:build-qualifier (default-build-qualifier) @ org.eclipse.tracecompass.alltests ---
+12:58:29 [INFO] The project's OSGi version is 1.0.4.201808031658
+12:58:29 [INFO] 
+12:58:29 [INFO] --- tycho-packaging-plugin:1.1.0:validate-id (default-validate-id) @ org.eclipse.tracecompass.alltests ---
+12:58:29 [INFO] 
+12:58:29 [INFO] --- tycho-packaging-plugin:1.1.0:validate-version (default-validate-version) @ org.eclipse.tracecompass.alltests ---
+12:58:29 [INFO] 
+12:58:29 [INFO] --- maven-enforcer-plugin:1.4.1:enforce (enforce-maven-version) @ org.eclipse.tracecompass.alltests ---
+12:58:30 [INFO] 
+12:58:30 [INFO] --- jacoco-maven-plugin:0.7.9:prepare-agent (pre-test) @ org.eclipse.tracecompass.alltests ---
+12:58:30 [INFO] tycho.testArgLine set to -javaagent:/var/lib/jenkins/workspace/TraceCompassPerformanceTests/.repository/org/jacoco/org.jacoco.agent/0.7.9/org.jacoco.agent-0.7.9-runtime.jar=destfile=/var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/../../target/jacoco.exec,append=true,includes=org.eclipse.tracecompass.*
+12:58:30 [INFO] 
+12:58:30 [INFO] --- maven-resources-plugin:3.0.2:resources (default-resources) @ org.eclipse.tracecompass.alltests ---
+12:58:30 [INFO] Using 'UTF-8' encoding to copy filtered resources.
+12:58:30 [INFO] skip non existing resourceDirectory /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/src/main/resources
+12:58:30 [INFO] 
+12:58:30 [INFO] --- tycho-compiler-plugin:1.1.0:compile (default-compile) @ org.eclipse.tracecompass.alltests ---
+12:58:30 [INFO] Compiling 8 source files to /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/classes
+12:58:31 [INFO] 
+12:58:31 [INFO] --- maven-resources-plugin:3.0.2:testResources (default-testResources) @ org.eclipse.tracecompass.alltests ---
+12:58:31 [INFO] Using 'UTF-8' encoding to copy filtered resources.
+12:58:31 [INFO] skip non existing resourceDirectory /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/src/test/resources
+12:58:31 [INFO] 
+12:58:31 [INFO] --- tycho-source-plugin:1.1.0:plugin-source (plugin-source) @ org.eclipse.tracecompass.alltests ---
+12:58:31 [INFO] Building jar: /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/org.eclipse.tracecompass.alltests-1.0.4-SNAPSHOT-sources.jar
+12:58:31 [INFO] 
+12:58:31 [INFO] --- target-platform-configuration:1.1.0:target-platform (default-target-platform) @ org.eclipse.tracecompass.alltests ---
+12:58:31 [INFO] 
+12:58:31 [INFO] --- tycho-packaging-plugin:1.1.0:package-plugin (default-package-plugin) @ org.eclipse.tracecompass.alltests ---
+12:58:31 [INFO] Building jar: /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/org.eclipse.tracecompass.alltests-1.0.4-SNAPSHOT.jar
+12:58:31 [INFO] 
+12:58:31 [INFO] --- tycho-p2-plugin:1.1.0:p2-metadata-default (default-p2-metadata-default) @ org.eclipse.tracecompass.alltests ---
+12:58:31 [INFO] 
+12:58:31 [INFO] --- tycho-source-feature-plugin:1.1.0:source-feature (source-feature) @ org.eclipse.tracecompass.alltests ---
+12:58:31 [INFO] 
+12:58:31 [INFO] --- tycho-pack200b-plugin:1.1.0:pack (pack200-pack) @ org.eclipse.tracecompass.alltests ---
+12:58:31 [INFO] Pack200 packing jar /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/org.eclipse.tracecompass.alltests-1.0.4-SNAPSHOT.jar
+12:58:31 [INFO] 
+12:58:31 [INFO] --- tycho-p2-plugin:1.1.0:p2-metadata (p2-metadata) @ org.eclipse.tracecompass.alltests ---
+12:58:32 [INFO] 
+12:58:32 [INFO] --- tycho-surefire-plugin:1.1.0:test (default-test) @ org.eclipse.tracecompass.alltests ---
+12:58:37 [INFO] Expected eclipse log file: /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/work/data/.metadata/.log
+12:58:37 [INFO] Command line:
+12:58:37 	[/usr/lib/jvm/java-8-openjdk/jre/bin/java, -Dosgi.noShutdown=false, -Dosgi.os=linux, -Dosgi.ws=gtk, -Dosgi.arch=x86_64, -Declipse.perf.dbloc=//javaderby.dorsal.polymtl.ca;dbname=perfDBBench, -Declipse.perf.config=build=20180803-0744-22c01d9d1;host=wilbrod;config=linux;jvm=openjdk8, -Dosgi.clean=true, -jar, /var/lib/jenkins/workspace/TraceCompassPerformanceTests/.repository/p2/osgi/bundle/org.eclipse.equinox.launcher/1.5.0.v20180512-1130/org.eclipse.equinox.launcher-1.5.0.v20180512-1130.jar, -data, /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/work/data, -install, /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/work, -configuration, /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/work/configuration, -application, org.eclipse.tycho.surefire.osgibooter.headlesstest, -testproperties, /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/surefire.properties, -product, org.eclipse.platform.ide, -consoleLog]
+12:58:38 !SESSION 2018-08-03 12:58:37.582 -----------------------------------------------
+12:58:38 eclipse.buildId=unknown
+12:58:38 java.version=1.8.0_172
+12:58:38 java.vendor=Oracle Corporation
+12:58:38 BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=fr_CA
+12:58:38 Framework arguments:  -application org.eclipse.tycho.surefire.osgibooter.headlesstest -testproperties /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/surefire.properties -product org.eclipse.platform.ide
+12:58:38 Command-line arguments:  -data /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/work/data -application org.eclipse.tycho.surefire.osgibooter.headlesstest -testproperties /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/surefire.properties -product org.eclipse.platform.ide -consoleLog
+12:58:38 
+12:58:38 !ENTRY org.eclipse.compare.win32 4 0 2018-08-03 12:58:38.720
+12:58:38 !MESSAGE FrameworkEvent ERROR
+12:58:38 !STACK 0
+12:58:38 org.osgi.framework.BundleException: Could not resolve module: org.eclipse.compare.win32 [79]
+12:58:38   Unresolved requirement: Require-Capability: eclipse.platform; filter:="(osgi.os=win32)"
+12:58:38 
+12:58:38 	at org.eclipse.osgi.container.Module.start(Module.java:444)
+12:58:38 	at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.incStartLevel(ModuleContainer.java:1682)
+12:58:38 	at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.incStartLevel(ModuleContainer.java:1661)
+12:58:38 	at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.doContainerStartLevel(ModuleContainer.java:1624)
+12:58:38 	at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.dispatchEvent(ModuleContainer.java:1555)
+12:58:38 	at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.dispatchEvent(ModuleContainer.java:1)
+12:58:38 	at org.eclipse.osgi.framework.eventmgr.EventManager.dispatchEvent(EventManager.java:230)
+12:58:38 	at org.eclipse.osgi.framework.eventmgr.EventManager$EventThread.run(EventManager.java:340)
+12:58:39 
+12:58:39 -------------------------------------------------------
+12:58:39  T E S T S
+12:58:39 -------------------------------------------------------
+12:58:39 Running org.eclipse.tracecompass.alltests.perf.RunAllPerfTests
+12:58:39
+14:19:23 Tests run: 42, Failures: 0, Errors: 1, Skipped: 1, Time elapsed: 4,843.655 sec <<< FAILURE! - in org.eclipse.tracecompass.alltests.perf.RunAllPerfTests
+14:19:23 testKernelTrace(org.eclipse.tracecompass.ctf.core.tests.perf.trace.TraceReadBenchmark)  Time elapsed: 17.489 sec
+14:19:23 testKernelVmTrace(org.eclipse.tracecompass.ctf.core.tests.perf.trace.TraceReadBenchmark)  Time elapsed: 49.373 sec
+14:19:23 testKernelTrace(org.eclipse.tracecompass.ctf.core.tests.perf.trace.TraceSeekBenchmark)  Time elapsed: 49.375 sec
+14:19:23 runAllBenchmarks(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.execgraph.KernelExecutionGraphBenchmark)  Time elapsed: 373.587 sec
+14:19:23 testManyThreads[0: NORMAL_EXECUTION](org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.kernel.KernelAnalysisBenchmark)  Time elapsed: 47.979 sec
+14:19:23 testDjangoHttpd[0: NORMAL_EXECUTION](org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.kernel.KernelAnalysisBenchmark)  Time elapsed: 81.808 sec
+14:19:23 testTrace2[0: NORMAL_EXECUTION](org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.kernel.KernelAnalysisBenchmark)  Time elapsed: 55.592 sec
+14:19:23 testManyThreads[1: NULL_BACKEND](org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.kernel.KernelAnalysisBenchmark)  Time elapsed: 38.9 sec
+14:19:23 testDjangoHttpd[1: NULL_BACKEND](org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.kernel.KernelAnalysisBenchmark)  Time elapsed: 65.605 sec
+14:19:23 testTrace2[1: NULL_BACKEND](org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.kernel.KernelAnalysisBenchmark)  Time elapsed: 43.244 sec
+14:19:23 testManyThreads(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.kernel.KernelAnalysisUsageBenchmark)  Time elapsed: 82.054 sec
+14:19:23 testDjangoHttpd(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.kernel.KernelAnalysisUsageBenchmark)  Time elapsed: 36.749 sec
+14:19:23 testTrace2(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.kernel.KernelAnalysisUsageBenchmark)  Time elapsed: 22.662 sec
+14:19:23 testManyThreads(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.syscall.SystemCallAnalysisBenchmark)  Time elapsed: 229.066 sec
+14:19:23 testDjangoHttpd(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.syscall.SystemCallAnalysisBenchmark)  Time elapsed: 348.142 sec
+14:19:23 testTrace2(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.syscall.SystemCallAnalysisBenchmark)  Time elapsed: 332.386 sec
+14:19:23 testManyThreads(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.syscall.SystemCallAnalysisUsageBenchmark)  Time elapsed: 24.956 sec
+14:19:23 testDjangoHttpd(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.syscall.SystemCallAnalysisUsageBenchmark)  Time elapsed: 27.3 sec
+14:19:23 testTrace2(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.syscall.SystemCallAnalysisUsageBenchmark)  Time elapsed: 25.477 sec
+14:19:23 testManyThreads(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.tid.TidAnalysisUsageBenchmark)  Time elapsed: 2.309 sec
+14:19:23 testDjangoHttpd(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.tid.TidAnalysisUsageBenchmark)  Time elapsed: 3.382 sec
+14:19:23 testTrace2(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.tid.TidAnalysisUsageBenchmark)  Time elapsed: 2.593 sec
+14:19:23 testDjangoHttpd(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.StatisticsAnalysisBenchmark)  Time elapsed: 66.7 sec
+14:19:23 testDjangoClient(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis.StatisticsAnalysisBenchmark)  Time elapsed: 60.734 sec
+14:19:23 testSmallTraces(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.event.matching.EventMatchingBenchmark)  Time elapsed: 40.617 sec
+14:19:23 testDjangoTraces(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.event.matching.EventMatchingBenchmark)  Time elapsed: 167.305 sec
+14:19:23 testSmallTraces(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.event.matching.TraceSynchronizationBenchmark)  Time elapsed: 16.637 sec
+14:19:23 testDjangoTraces(org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.event.matching.TraceSynchronizationBenchmark)  Time elapsed: 173.121 sec
+14:19:23 initializationError(org.eclipse.tracecompass.lttng2.ust.core.tests.perf.cygprofile.CallStackAndGraphBenchmark)  Time elapsed: 0.262 sec  <<< ERROR!
+14:19:23 java.lang.NullPointerException: null
+14:19:23 	at org.eclipse.tracecompass.ctf.core.tests.CtfCoreTestPlugin.getAbsolutePath(CtfCoreTestPlugin.java:134)
+14:19:23 	at org.eclipse.tracecompass.ctf.core.tests.shared.CtfBenchmarkTrace.getTracePath(CtfBenchmarkTrace.java:69)
+14:19:23 	at org.eclipse.tracecompass.lttng2.ust.core.tests.perf.cygprofile.CallStackAndGraphBenchmark.getParameters(CallStackAndGraphBenchmark.java:78)
+14:19:23 
+14:19:23 testPcapTrace(org.eclipse.tracecompass.pcap.core.tests.perf.trace.PcapReadBenchmark)  Time elapsed: 363.409 sec
+14:19:23 testPcapTrace(org.eclipse.tracecompass.pcap.core.tests.perf.trace.PcapSeekBenchmark)  Time elapsed: 395.025 sec
+14:19:23 testBenchmark[0: Average case: 1500 attributes, integers, interval duration random around limit l with 75 percent within [0.5l, 1.5l]](org.eclipse.tracecompass.statesystem.core.tests.perf.historytree.HistoryTreeBackendBenchmark)  Time elapsed: 15.858 sec
+14:19:23 testBenchmark[1: Vertical scaling (more attributes)](org.eclipse.tracecompass.statesystem.core.tests.perf.historytree.HistoryTreeBackendBenchmark)  Time elapsed: 8.015 sec
+14:19:23 testBenchmark[2: Horizontal scaling (more intervals/attribute)](org.eclipse.tracecompass.statesystem.core.tests.perf.historytree.HistoryTreeBackendBenchmark)  Time elapsed: 432.435 sec
+14:19:23 testBenchmark[3: Interval durations uniformly distributed within [1, 2l]](org.eclipse.tracecompass.statesystem.core.tests.perf.historytree.HistoryTreeBackendBenchmark)  Time elapsed: 29.728 sec
+14:19:23 testBenchmark[4: Interval durations with 10 percent outliers > 2l](org.eclipse.tracecompass.statesystem.core.tests.perf.historytree.HistoryTreeBackendBenchmark)  Time elapsed: 10.567 sec
+14:19:23 testBenchmark[5: Data type: strings](org.eclipse.tracecompass.statesystem.core.tests.perf.historytree.HistoryTreeBackendBenchmark)  Time elapsed: 13.9 sec
+14:19:23 testBenchmark[6: Data type: longs](org.eclipse.tracecompass.statesystem.core.tests.perf.historytree.HistoryTreeBackendBenchmark)  Time elapsed: 11.572 sec
+14:19:23 testBenchmark[7: Data type: doubles](org.eclipse.tracecompass.statesystem.core.tests.perf.historytree.HistoryTreeBackendBenchmark)  Time elapsed: 11.892 sec
+14:19:23 testTimestampTransformPerformance(org.eclipse.tracecompass.tmf.core.tests.perf.synchronization.TimestampTransformBenchmark)  Time elapsed: 3.127 sec
+14:19:23 testCompareTimestampTransformPerformance(org.eclipse.tracecompass.tmf.core.tests.perf.synchronization.TimestampTransformBenchmark) skipped
+14:19:23 benchmarkExperimentSizeRequest(org.eclipse.tracecompass.tmf.ctf.core.tests.perf.experiment.ExperimentBenchmark)  Time elapsed: 1,061.619 sec
+14:19:23 Running org.eclipse.tracecompass.alltests.perf.PerfResultsToJSon
+14:19:57 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 34.238 sec - in org.eclipse.tracecompass.alltests.perf.PerfResultsToJSon
+14:19:57 parseResults(org.eclipse.tracecompass.alltests.perf.PerfResultsToJSon)  Time elapsed: 34.234 sec
+14:19:57 
+14:19:57 Results :
+14:19:57 
+14:19:57 Tests in error: 
+14:19:57   CallStackAndGraphBenchmark.getParameters:78 » NullPointer
+14:19:57 
+14:19:57 Tests run: 43, Failures: 0, Errors: 1, Skipped: 1
+14:19:57 
+14:19:57 Resource leak: [TmfExperiment (Test experiment)] was not deregistered.
+14:19:57 	org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager.registerVIP(TmfSignalManager.java:182)
+14:19:57 	org.eclipse.tracecompass.tmf.core.trace.TmfTrace.initialize(TmfTrace.java:258)
+14:19:57 	org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment.initExperiment(TmfExperiment.java:243)
+14:19:57 	org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment.<init>(TmfExperiment.java:171)
+14:19:57 	org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.event.matching.TraceSynchronizationBenchmark.testDjangoTraces(TraceSynchronizationBenchmark.java:84)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+14:19:57 	sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+14:19:57 	java.lang.reflect.Method.invoke(Method.java:498)
+14:19:57 	org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+14:19:57 	org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+14:19:57 	org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+14:19:57 	org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+14:19:57 	org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
+14:19:57 	org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
+14:19:57 	org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
+14:19:57 	org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+14:19:57 	org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+14:19:57 	org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+14:19:57 	org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+14:19:57 	org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+14:19:57 	org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
+14:19:57 	org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+14:19:57 	org.junit.runners.Suite.runChild(Suite.java:128)
+14:19:57 	org.junit.runners.Suite.runChild(Suite.java:27)
+14:19:57 	org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+14:19:57 	org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+14:19:57 	org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+14:19:57 	org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+14:19:57 	org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+14:19:57 	org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+14:19:57 	org.apache.maven.surefire.junit4.JUnit4Provider.execute(JUnit4Provider.java:264)
+14:19:57 	org.apache.maven.surefire.junit4.JUnit4Provider.executeTestSet(JUnit4Provider.java:153)
+14:19:57 	org.apache.maven.surefire.junit4.JUnit4Provider.invoke(JUnit4Provider.java:124)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+14:19:57 	sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+14:19:57 	java.lang.reflect.Method.invoke(Method.java:498)
+14:19:57 	org.apache.maven.surefire.util.ReflectionUtils.invokeMethodWithArray2(ReflectionUtils.java:208)
+14:19:57 	org.apache.maven.surefire.booter.ProviderFactory$ProviderProxy.invoke(ProviderFactory.java:156)
+14:19:57 	org.apache.maven.surefire.booter.ProviderFactory.invokeProvider(ProviderFactory.java:82)
+14:19:57 	org.eclipse.tycho.surefire.osgibooter.OsgiSurefireBooter.run(OsgiSurefireBooter.java:95)
+14:19:57 	org.eclipse.tycho.surefire.osgibooter.HeadlessTestApplication.run(HeadlessTestApplication.java:21)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+14:19:57 	sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+14:19:57 	java.lang.reflect.Method.invoke(Method.java:498)
+14:19:57 	org.eclipse.equinox.internal.app.EclipseAppContainer.callMethodWithException(EclipseAppContainer.java:587)
+14:19:57 	org.eclipse.equinox.internal.app.EclipseAppHandle.run(EclipseAppHandle.java:198)
+14:19:57 	org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.runApplication(EclipseAppLauncher.java:134)
+14:19:57 	org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.start(EclipseAppLauncher.java:104)
+14:19:57 	org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:388)
+14:19:57 	org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:243)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+14:19:57 	sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+14:19:57 	java.lang.reflect.Method.invoke(Method.java:498)
+14:19:57 	org.eclipse.equinox.launcher.Main.invokeFramework(Main.java:656)
+14:19:57 	org.eclipse.equinox.launcher.Main.basicRun(Main.java:592)
+14:19:57 	org.eclipse.equinox.launcher.Main.run(Main.java:1498)
+14:19:57 	org.eclipse.equinox.launcher.Main.main(Main.java:1471)
+14:19:57 Resource leak: [TmfExperiment (Test experiment)] was not deregistered.
+14:19:57 	org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager.registerVIP(TmfSignalManager.java:182)
+14:19:57 	org.eclipse.tracecompass.tmf.core.trace.TmfTrace.initialize(TmfTrace.java:258)
+14:19:57 	org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment.initExperiment(TmfExperiment.java:243)
+14:19:57 	org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment.<init>(TmfExperiment.java:171)
+14:19:57 	org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.event.matching.TraceSynchronizationBenchmark.testSmallTraces(TraceSynchronizationBenchmark.java:67)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+14:19:57 	sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+14:19:57 	java.lang.reflect.Method.invoke(Method.java:498)
+14:19:57 	org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+14:19:57 	org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+14:19:57 	org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+14:19:57 	org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+14:19:57 	org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
+14:19:57 	org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
+14:19:57 	org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
+14:19:57 	org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+14:19:57 	org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+14:19:57 	org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+14:19:57 	org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+14:19:57 	org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+14:19:57 	org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
+14:19:57 	org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+14:19:57 	org.junit.runners.Suite.runChild(Suite.java:128)
+14:19:57 	org.junit.runners.Suite.runChild(Suite.java:27)
+14:19:57 	org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+14:19:57 	org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+14:19:57 	org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+14:19:57 	org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+14:19:57 	org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+14:19:57 	org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+14:19:57 	org.apache.maven.surefire.junit4.JUnit4Provider.execute(JUnit4Provider.java:264)
+14:19:57 	org.apache.maven.surefire.junit4.JUnit4Provider.executeTestSet(JUnit4Provider.java:153)
+14:19:57 	org.apache.maven.surefire.junit4.JUnit4Provider.invoke(JUnit4Provider.java:124)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+14:19:57 	sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+14:19:57 	java.lang.reflect.Method.invoke(Method.java:498)
+14:19:57 	org.apache.maven.surefire.util.ReflectionUtils.invokeMethodWithArray2(ReflectionUtils.java:208)
+14:19:57 	org.apache.maven.surefire.booter.ProviderFactory$ProviderProxy.invoke(ProviderFactory.java:156)
+14:19:57 	org.apache.maven.surefire.booter.ProviderFactory.invokeProvider(ProviderFactory.java:82)
+14:19:57 	org.eclipse.tycho.surefire.osgibooter.OsgiSurefireBooter.run(OsgiSurefireBooter.java:95)
+14:19:57 	org.eclipse.tycho.surefire.osgibooter.HeadlessTestApplication.run(HeadlessTestApplication.java:21)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+14:19:57 	sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+14:19:57 	java.lang.reflect.Method.invoke(Method.java:498)
+14:19:57 	org.eclipse.equinox.internal.app.EclipseAppContainer.callMethodWithException(EclipseAppContainer.java:587)
+14:19:57 	org.eclipse.equinox.internal.app.EclipseAppHandle.run(EclipseAppHandle.java:198)
+14:19:57 	org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.runApplication(EclipseAppLauncher.java:134)
+14:19:57 	org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.start(EclipseAppLauncher.java:104)
+14:19:57 	org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:388)
+14:19:57 	org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:243)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+14:19:57 	sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+14:19:57 	sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+14:19:57 	java.lang.reflect.Method.invoke(Method.java:498)
+14:19:57 	org.eclipse.equinox.launcher.Main.invokeFramework(Main.java:656)
+14:19:57 	org.eclipse.equinox.launcher.Main.basicRun(Main.java:592)
+14:19:57 	org.eclipse.equinox.launcher.Main.run(Main.java:1498)
+14:19:57 	org.eclipse.equinox.launcher.Main.main(Main.java:1471)
+14:19:58 stored 108 new datapoints in DB
+14:19:58 disconnecting from DB
+14:19:58 [INFO] ------------------------------------------------------------------------
+14:19:58 [INFO] BUILD FAILURE
+14:19:58 [INFO] ------------------------------------------------------------------------
+14:19:58 [INFO] Total time: 01:21 h
+14:19:58 [INFO] Finished at: 2018-08-03T14:19:58-04:00
+14:20:00 [INFO] Final Memory: 48M/431M
+14:20:00 [INFO] ------------------------------------------------------------------------
+14:20:00 [ERROR] Failed to execute goal org.eclipse.tycho:tycho-surefire-plugin:1.1.0:test (default-test) on project org.eclipse.tracecompass.alltests: There are test failures.
+14:20:00 [ERROR] 
+14:20:00 [ERROR] Please refer to /var/lib/jenkins/workspace/TraceCompassPerformanceTests/releng/org.eclipse.tracecompass.alltests/target/surefire-reports for the individual test results.
+14:20:00 [ERROR] -> [Help 1]
+14:20:00 [ERROR] 
+14:20:00 [ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+14:20:00 [ERROR] Re-run Maven using the -X switch to enable full debug logging.
+14:20:00 [ERROR] 
+14:20:00 [ERROR] For more information about the errors and possible solutions, please read the following articles:
+14:20:00 [ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+14:20:01 Build step 'Invoquer les cibles Maven de haut niveau' marked build as failure
+14:20:01 [TraceCompassPerformanceTests] $ /bin/sh -xe /tmp/jenkins2601243847622796339.sh
+14:20:04 Finished: FAILURE

@@ -29,6 +29,9 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 public class MavenCallstackStateProvider extends CallStackStateProvider {
 
     private static final double NANOS_IN_SEC = 1e9;
+    private static final int GROUP_DEPTH = 2;
+    private static final int FINAL_DEPTH = 3;
+    private static final int VERSION = 2;
 
     long fSafeTime = 0;
 
@@ -48,7 +51,7 @@ public class MavenCallstackStateProvider extends CallStackStateProvider {
 
     @Override
     public int getVersion() {
-        return 1;
+        return VERSION;
     }
 
     @Override
@@ -104,40 +107,74 @@ public class MavenCallstackStateProvider extends CallStackStateProvider {
         String groupAspect = MavenEvent.GROUP_ASPECT.resolve(event);
         if (event.getType().equals(MavenEvent.GOAL_TYPE)) {
             fSafeTime = Math.max(fSafeTime + 1, event.getTimestamp().toNanos());
-            if (fDepth == 2) {
+            if (fDepth == FINAL_DEPTH) {
                 ssb.popAttribute(Math.min(fNextClose, fSafeTime), callStackQuark);
                 fDepth--;
             }
-            while (fDepth > 1) {
+            while (fDepth > GROUP_DEPTH) {
                 fDepth--;
                 ssb.popAttribute(fSafeTime, callStackQuark);
             }
             ssb.popAttribute(fSafeTime - 1, callStackQuark);
+            // Change the element if necessary
+            String element = MavenEvent.ELEMENT_ASPECT.resolve(event);
+            updateStackTop(ssb, callStackQuark, String.valueOf(element));
             ssb.pushAttribute(fSafeTime, groupAspect, callStackQuark);
             fNextClose = Long.MAX_VALUE;
-            fDepth = 1;
+            fDepth = GROUP_DEPTH;
         } else if (event.getType().equals(MavenEvent.SUMMARY_TYPE)) {
             if (fNextClose != Long.MAX_VALUE) {
-                ssb.popAttribute(fNextClose, callStackQuark);
+                while (fDepth > GROUP_DEPTH) {
+                    fDepth--;
+                    ssb.popAttribute(fNextClose, callStackQuark);
+                }
             }
             fSafeTime = fNextClose != Long.MAX_VALUE ? fNextClose + 1 : fSafeTime;
             long duration = (long) Math.ceil(Objects.requireNonNull(MavenEvent.DURATION_ASPECT.resolve(event)) * NANOS_IN_SEC);
             ssb.pushAttribute(fSafeTime, groupAspect, callStackQuark);
             fNextClose = fSafeTime + duration;
-            fDepth = 2;
+            fDepth = FINAL_DEPTH;
         } else if (event.getType().equals(MavenEvent.TEST_TYPE)) {
-            if (fDepth == 1) {
-                // attempt to re-create a group
-                String fullGroup = Objects.requireNonNull(MavenEvent.FULL_GROUP_ASPECT.resolve(event));
-                ssb.pushAttribute(fSafeTime, fullGroup.substring(fullGroup.indexOf('(') + 1, fullGroup.length() - 1), callStackQuark);
+            String fullGroup = Objects.requireNonNull(MavenEvent.FULL_GROUP_ASPECT.resolve(event));
+            String group = fullGroup.substring(fullGroup.indexOf('(') + 1, fullGroup.length() - 1);
+            if (fDepth == GROUP_DEPTH) {
+                // Push the group for the first time
+                ssb.pushAttribute(fSafeTime, group, callStackQuark);
+                fDepth = FINAL_DEPTH;
+            } else {
+                String topGroup = peekStackTop(ssb, callStackQuark);
+                if (!group.equals(topGroup)) {
+                    // If the group of this test is not the same as the stack
+                    // top, it means the test groups spans many test classes, so
+                    // add a level
+                    while (fDepth > GROUP_DEPTH + 1) {
+                        fDepth--;
+                        ssb.popAttribute(fSafeTime, callStackQuark);
+                    }
+                    ssb.pushAttribute(fSafeTime, group, callStackQuark);
+                    fDepth = FINAL_DEPTH + 1;
+                }
             }
             long testDuration = (long) Math.ceil(Objects.requireNonNull(MavenEvent.DURATION_ASPECT.resolve(event)) * NANOS_IN_SEC);
             fSafeTime++;
             ssb.pushAttribute(fSafeTime, groupAspect, callStackQuark);
             fSafeTime += testDuration;
             ssb.popAttribute(fSafeTime, callStackQuark);
-            fDepth = 2;
         }
 
     }
+
+    private void updateStackTop(ITmfStateSystemBuilder ssb, int callStackQuark, String value) {
+        Object currentDepth = ssb.queryOngoing(callStackQuark);
+        int currentGroupQuark = ssb.getQuarkRelativeAndAdd(callStackQuark, String.valueOf(currentDepth));
+        ssb.modifyAttribute(fSafeTime, value, currentGroupQuark);
+    }
+
+    private static @Nullable String peekStackTop(ITmfStateSystemBuilder ssb, int callStackQuark) {
+        Object currentDepth = ssb.queryOngoing(callStackQuark);
+        int currentGroupQuark = ssb.getQuarkRelativeAndAdd(callStackQuark, String.valueOf(currentDepth));
+        Object currentTop = ssb.queryOngoing(currentGroupQuark);
+        return (currentTop instanceof String) ? (String) currentTop : null;
+    }
+
 }

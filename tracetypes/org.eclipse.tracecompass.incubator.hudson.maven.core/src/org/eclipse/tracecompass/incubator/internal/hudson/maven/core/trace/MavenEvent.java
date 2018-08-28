@@ -70,7 +70,10 @@ public class MavenEvent extends TextTraceEvent {
         return null;
     });
 
-    private static final @NonNull ITmfEventAspect<String> ELEMENT_ASPECT = new MavenEventAspect<>("Element", "Element of the event", event -> { //$NON-NLS-1$ //$NON-NLS-2$
+    /**
+     * The element aspect of this event
+     */
+    public static final @NonNull ITmfEventAspect<String> ELEMENT_ASPECT = new MavenEventAspect<>("Element", "Element of the event", event -> { //$NON-NLS-1$ //$NON-NLS-2$
         if (event instanceof MavenEvent) {
             return ((MavenEvent) event).fElement;
         }
