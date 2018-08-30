@@ -504,7 +504,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
             // Check if vtid is available
             ITmfEvent event = t.getNext(t.seekEvent(0));
 
-            if (event != null && !event.getContent().getFieldNames().contains(vtidContext)) {
+            if (event != null && event.getContent() != null && !event.getContent().getFieldNames().contains(vtidContext)) {
                 return false;
             }
         }
