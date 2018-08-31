@@ -47,7 +47,7 @@ public class GenericFtraceField {
 
         builder.put('R', (long) LinuxValues.TASK_STATE_RUNNING);
         builder.put('S', (long) LinuxValues.TASK_INTERRUPTIBLE);
-        builder.put('D', (long) LinuxValues.TASK_INTERRUPTIBLE);
+        builder.put('D', (long) LinuxValues.TASK_UNINTERRUPTIBLE);
         builder.put('T', (long) LinuxValues.TASK_STOPPED__);
         builder.put('t', (long) LinuxValues.TASK_TRACED__);
         builder.put('X', (long) LinuxValues.EXIT_ZOMBIE);
