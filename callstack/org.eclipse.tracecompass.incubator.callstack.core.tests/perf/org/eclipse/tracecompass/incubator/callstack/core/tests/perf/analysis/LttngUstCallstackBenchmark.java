@@ -52,7 +52,7 @@ public class LttngUstCallstackBenchmark extends CallStackAndGraphBenchmark {
     public static Iterable<Object[]> getParameters() {
         return Arrays.asList(new Object[][] {
                 { CtfTestTrace.CYG_PROFILE.name(), getPathFromCtfTestTrace(CtfTestTrace.CYG_PROFILE) },
-                { CtfBenchmarkTrace.UST_QMLSCENE.name(), CtfBenchmarkTrace.UST_QMLSCENE.getTracePath().toOSString() },
+                { CtfBenchmarkTrace.UST_QMLSCENE.name(), CtfBenchmarkTrace.UST_QMLSCENE.getTracePath().toString() },
         });
     }
 
