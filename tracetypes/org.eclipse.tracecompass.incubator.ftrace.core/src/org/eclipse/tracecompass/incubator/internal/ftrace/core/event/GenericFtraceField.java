@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 @NonNullByDefault
 public class GenericFtraceField {
 
-    private static final Pattern KEYVAL_PATTERN = Pattern.compile("(?<key>[^\\s=\\[\\]]+)=(?<val>[^\\s=\\[\\]]+)"); //$NON-NLS-1$
+    private static final Pattern KEYVAL_PATTERN = Pattern.compile("(?<key>[^\\s=\\[\\],]+)(=|:)\\s*(?<val>[^\\s=\\[\\],]+)"); //$NON-NLS-1$
     private static final String KEYVAL_KEY_GROUP = "key"; //$NON-NLS-1$
     private static final String KEYVAL_VAL_GROUP = "val"; //$NON-NLS-1$
 
@@ -104,9 +104,13 @@ public class GenericFtraceField {
 
             String name = matcher.group(IGenericFtraceConstants.FTRACE_NAME_GROUP);
             name = name.trim();
-            name = name.substring(0, name.length() - 1);
+
+            String separator = matcher.group(IGenericFtraceConstants.FTRACE_SEPARATOR_GROUP);
+            separator = separator.trim();
 
             String attributes = matcher.group(IGenericFtraceConstants.FTRACE_DATA_GROUP);
+
+            name = eventNameRewrite(name, separator);
 
             /*
              * There's no distinction between pid and tid in scheduling events. However,when there's a mismatch
@@ -121,10 +125,7 @@ public class GenericFtraceField {
                 }
             }
 
-
             Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
-            fields.put(IGenericFtraceConstants.TIMESTAMP, timestampInNano);
-            fields.put(IGenericFtraceConstants.NAME, name);
 
             Matcher keyvalMatcher = KEYVAL_PATTERN.matcher(attributes);
             while (keyvalMatcher.find()) {
@@ -144,6 +145,19 @@ public class GenericFtraceField {
                     }
                 }
             }
+
+            /*
+             * If anything else fails, but we have discovered sort of a valid event
+             * attributes lets just add the unparsed attributes with key "data".
+             */
+            if (fields.isEmpty() && attributes != null && !attributes.isEmpty()) {
+                String key = "data"; //$NON-NLS-1$
+                if (name.equals(IGenericFtraceConstants.FTRACE_EXIT_SYSCALL)) {
+                    key = "ret"; //$NON-NLS-1$
+                }
+                fields.put(key, decodeString(attributes));
+            }
+
             return new GenericFtraceField(name, cpu, timestampInNano, pid, tid, fields);
         }
         return null;
@@ -256,7 +270,7 @@ public class GenericFtraceField {
     }
 
     /**
-     * Parse the prev_state field on sched_switch event depending on wether it is a number or a character.
+     * Parse the prev_state field on sched_switch event depending on whether it is a number or a character.
      *
      *
      * @return the state as a Long
@@ -269,5 +283,38 @@ public class GenericFtraceField {
             state = PREV_STATE_LUT.getOrDefault(value.charAt(0), 0L);
         }
         return state;
+    }
+
+    /**
+     * Searches for certain event names and rewrites them in order for different analysis to work.
+     *
+     *
+     * @return the new or original event name
+     */
+    private static String eventNameRewrite(@Nullable String name, @Nullable String separator) {
+        if (name == null) {
+            return ""; //$NON-NLS-1$
+        }
+
+        /*
+         * Rewrite syscall exit events to conform to syscall analysis.
+         */
+        if ((name.startsWith(IGenericFtraceConstants.FTRACE_SYSCALL_PREFIX) && separator != null && separator.equals(IGenericFtraceConstants.FTRACE_EXIT_SYSCALL_SEPARATOR)) ||
+             name.startsWith(IGenericFtraceConstants.FTRACE_SYSCALL_EXIT_TRACECMD_PREFIX)
+           ) {
+            return IGenericFtraceConstants.FTRACE_EXIT_SYSCALL;
+        }
+
+        /*
+         * Rewrite syscall enter from trace-cmd traces to conform to syscall analysis.
+         */
+        if (name.startsWith(IGenericFtraceConstants.FTRACE_SYSCALL_ENTER_TRACECMD_PREFIX)) {
+            String newname = name.replaceFirst(IGenericFtraceConstants.FTRACE_SYSCALL_ENTER_TRACECMD_PREFIX, IGenericFtraceConstants.FTRACE_SYSCALL_PREFIX);
+            if (newname != null) {
+                return newname;
+            }
+        }
+
+        return name;
     }
 }
