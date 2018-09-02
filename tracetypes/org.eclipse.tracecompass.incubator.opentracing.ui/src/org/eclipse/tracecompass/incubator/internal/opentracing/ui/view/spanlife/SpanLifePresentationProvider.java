@@ -11,20 +11,20 @@ package org.eclipse.tracecompass.incubator.internal.opentracing.ui.view.spanlife
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.RGBA;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.presentation.IYAppearance;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
-import org.eclipse.tracecompass.tmf.ui.colors.RGBAUtil;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
@@ -36,6 +36,8 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.ITmfTimeGraphDrawingHelper;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
 
+import com.google.common.collect.ImmutableMap;
+
 /**
  * Span life presentation provider
  *
@@ -43,15 +45,35 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphContro
  */
 public class SpanLifePresentationProvider extends TimeGraphPresentationProvider {
 
-    private static final String STACK = "stack"; //$NON-NLS-1$
-    private static final String MESSAGE = "message"; //$NON-NLS-1$
-    private static final String EVENT = "event"; //$NON-NLS-1$
-    private static final String ERROR_OBJECT = "error.object"; //$NON-NLS-1$
-    private static final String ERROR_KIND = "error.kind"; //$NON-NLS-1$
+    private static final @NonNull String UNKNOWN = "UNKNOWN"; //$NON-NLS-1$
+    private static final @NonNull String QUESTION_EMOJI = "🤷"; //$NON-NLS-1$
+    private static final @NonNull String ERROR_KIND = "error.kind"; //$NON-NLS-1$
+    private static final @NonNull String ERROR_OBJECT = "error.object"; //$NON-NLS-1$
+    private static final @NonNull String ERROR = "error"; //$NON-NLS-1$
+    private static final @NonNull String EVENT = "event"; //$NON-NLS-1$
+    private static final @NonNull String MESSAGE = "message"; //$NON-NLS-1$
+    private static final @NonNull String STACK = "stack"; //$NON-NLS-1$
+
+    private static final @NonNull RGBA MARKER_COLOR = new RGBA(200, 0, 0, 150);
+    private static final int MARKER_COLOR_INT = MARKER_COLOR.hashCode();
     /**
      * Only states available
      */
-    private static final StateItem[] STATE_TABLE = { new StateItem(new RGB(0, 0, 140), "Active") }; //$NON-NLS-1$
+    private static final StateItem[] STATE_TABLE = { new StateItem(new RGB(0, 0, 140), "Active"), //$NON-NLS-1$
+            new StateItem(
+                    ImmutableMap.of(ITimeEventStyleStrings.label(), ERROR_KIND, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.PLUS, ITimeEventStyleStrings.heightFactor(), 0.4f)),
+            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), ERROR_OBJECT, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.CROSS, ITimeEventStyleStrings.heightFactor(),
+                    0.4f)),
+            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), ERROR, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.SQUARE, ITimeEventStyleStrings.heightFactor(),
+                    0.4f)),
+            new StateItem(
+                    ImmutableMap.of(ITimeEventStyleStrings.label(), EVENT, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.DIAMOND, ITimeEventStyleStrings.heightFactor(), 0.3f)),
+            new StateItem(
+                    ImmutableMap.of(ITimeEventStyleStrings.label(), MESSAGE, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.TRIANGLE, ITimeEventStyleStrings.heightFactor(), 0.3f)),
+            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), STACK, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.INVERTED_TRIANGLE,
+                    ITimeEventStyleStrings.heightFactor(), 0.5f)),
+            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), UNKNOWN, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), QUESTION_EMOJI, ITimeEventStyleStrings.heightFactor(), 0.3f))
+    };
 
     /**
      * Constructor
@@ -101,36 +123,29 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
     }
 
     @Override
-    public Map<String, Object> getSpecificEventStyle(ITimeEvent event) {
-        Map<String, Object> specificEventStyle = super.getSpecificEventStyle(event);
+    public int getStateTableIndex(@Nullable ITimeEvent event) {
         if (event instanceof SpanMarkerEvent) {
             SpanMarkerEvent markerEvent = (SpanMarkerEvent) event;
-            Map<String, Object> ret = new HashMap<>(specificEventStyle);
-            ret.put(ITimeEventStyleStrings.fillColor(), RGBAUtil.fromRGBA(markerEvent.getColor()));
             String type = markerEvent.getType();
-            String fillStyle = ITimeEventStyleStrings.symbolStyle();
             if (type.contains(ERROR_KIND)) {
-                ret.put(fillStyle, IYAppearance.SymbolStyle.PLUS);
+                return 1;
             } else if (type.contains(ERROR_OBJECT)) {
-                ret.put(fillStyle, IYAppearance.SymbolStyle.CROSS);
+                return 2;
+            } else if (type.contains(ERROR)) {
+                return 3;
             } else if (type.contains(EVENT)) {
-                ret.put(fillStyle, IYAppearance.SymbolStyle.CIRCLE);
+                return 4;
             } else if (type.contains(MESSAGE)) {
-                ret.put(fillStyle, IYAppearance.SymbolStyle.TRIANGLE);
+                return 5;
             } else if (type.contains(STACK)) {
-                ret.put(fillStyle, IYAppearance.SymbolStyle.INVERTED_TRIANGLE);
+                return 6;
             } else {
-                ret.put(fillStyle, IYAppearance.SymbolStyle.DIAMOND);
+                return 7;
             }
-            ret.put(ITimeEventStyleStrings.heightFactor(), 0.5f);
-            ret.put(ITimeEventStyleStrings.label(), markerEvent.getLabel());
-            return ret;
         }
-        return specificEventStyle;
-    }
-
-    @Override
-    public int getStateTableIndex(ITimeEvent event) {
-        return (event instanceof TimeEvent && ((TimeEvent) event).getValue() != Integer.MIN_VALUE) ? 0 : -1;
+        if ((event instanceof TimeEvent) && ((TimeEvent) event).getValue() != Integer.MIN_VALUE) {
+            return 0;
+        }
+        return -1;
     }
 }
