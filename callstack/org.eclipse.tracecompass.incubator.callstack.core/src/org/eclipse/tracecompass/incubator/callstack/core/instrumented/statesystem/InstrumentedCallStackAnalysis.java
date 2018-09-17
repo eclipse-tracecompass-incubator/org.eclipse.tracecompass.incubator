@@ -29,6 +29,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.callgraph.SymbolAspect;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.TraceHostIdResolver;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.FunctionTidAspect;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
@@ -272,6 +273,9 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
 
     @Override
     public Iterable<ISegmentAspect> getSegmentAspects() {
+        if (getCallStackTidResolver() != null) {
+            return ImmutableList.of(FunctionTidAspect.TID_ASPECT, SymbolAspect.SYMBOL_ASPECT);
+        }
         return Collections.singletonList(SymbolAspect.SYMBOL_ASPECT);
     }
 

@@ -34,6 +34,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.FunctionTidAspect;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.xml.callstack.CallstackXmlModuleHelper.ISubModuleHelper;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
@@ -50,6 +51,8 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.w3c.dom.Element;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  *
  *
@@ -62,6 +65,7 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
     private @Nullable IAnalysisModule fModule = null;
     private @Nullable CallStackSeries fCallStacks = null;
     private final CallGraphAnalysis fCallGraph;
+    private boolean fHasTid = false;
 
     private final ListenerList fListeners = new ListenerList(ListenerList.IDENTITY);
 
@@ -137,6 +141,7 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
                     }
                 }
             }
+            fHasTid = (resolver != null);
 
             // Build the host resolver
             childElements = TmfXmlUtils.getChildElements(callStackElement, CallstackXmlStrings.CALLSTACK_HOST);
@@ -154,7 +159,7 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
                 }
             }
             hostResolver = hostResolver == null ? new CallStackHostUtils.TraceHostIdResolver(Objects.requireNonNull(getTrace())) : hostResolver;
-
+            fHasTid = resolver != null;
             series = new CallStackSeries(ss, patterns, 0, callStackElement.getAttribute(TmfXmlStrings.NAME), hostResolver, resolver);
             fCallStacks = series;
         }
@@ -320,6 +325,9 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
 
     @Override
     public Iterable<ISegmentAspect> getSegmentAspects() {
+        if (fHasTid) {
+            return ImmutableList.of(FunctionTidAspect.TID_ASPECT, SymbolAspect.SYMBOL_ASPECT);
+        }
         return Collections.singletonList(SymbolAspect.SYMBOL_ASPECT);
     }
 
