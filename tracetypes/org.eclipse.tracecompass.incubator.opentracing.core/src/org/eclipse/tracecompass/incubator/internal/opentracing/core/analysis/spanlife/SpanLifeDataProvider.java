@@ -241,7 +241,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
                     }
                 } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
                 }
-                builder.add(new SpanLifeEntryModel(childId, parentId, getSpanName(childName), ss.getStartTime(), ss.getCurrentEndTime(), logs));
+                builder.add(new SpanLifeEntryModel(childId, parentId, getSpanName(childName), ss.getStartTime(), ss.getCurrentEndTime(), logs, getErrorTag(childName)));
                 addChildren(ss, builder, child, childId, logsQuarks);
             }
         }
@@ -262,7 +262,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
             } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
             }
 
-            String spanId = childName.substring(childName.lastIndexOf('/') + 1, childName.length());
+            String spanId = getSpanId(childName);
 
             int ustSpan;
             try {
@@ -271,14 +271,14 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
                 return;
             }
             long childId = getId(ustSpan);
-            builder.add(new SpanLifeEntryModel(childId, parentId, getSpanName(ss.getAttributeName(child)), ss.getStartTime(), ss.getCurrentEndTime(), logs));
+            builder.add(new SpanLifeEntryModel(childId, parentId, getSpanName(childName), ss.getStartTime(), ss.getCurrentEndTime(), logs, getErrorTag(childName)));
             addUstChildren(ss, builder, child, ustQuark, childId, logsQuarks);
         }
     }
 
     private static int getLogQuark(ITmfStateSystem ss, String spanName, List<Integer> logsQuarks) {
         for (int logsQuark : logsQuarks) {
-            if (ss.getAttributeName(logsQuark).equals(spanName.substring(spanName.lastIndexOf('/') + 1, spanName.length()))) {
+            if (ss.getAttributeName(logsQuark).equals(getSpanId(spanName))) {
                 return logsQuark;
             }
         }
@@ -286,7 +286,15 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
     }
 
     private static String getSpanName(String attributeName) {
-        return attributeName.substring(0, attributeName.lastIndexOf('/'));
+        return attributeName.split("/")[0]; //$NON-NLS-1$
+    }
+
+    private static String getSpanId(String attributeName) {
+        return attributeName.split("/")[1]; //$NON-NLS-1$
+    }
+
+    private static Boolean getErrorTag(String attributeName) {
+        return attributeName.split("/")[2].equals("true"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     private static String getLogType(String logs) {

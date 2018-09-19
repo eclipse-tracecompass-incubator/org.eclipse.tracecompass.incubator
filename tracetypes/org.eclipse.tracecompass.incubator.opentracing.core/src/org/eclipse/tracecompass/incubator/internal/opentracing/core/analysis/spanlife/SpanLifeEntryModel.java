@@ -62,6 +62,8 @@ public class SpanLifeEntryModel extends TimeGraphEntryModel {
 
     private final List<LogEvent> fLogs;
 
+    private final boolean fErrorTag;
+
     /**
      * Constructor
      *
@@ -77,10 +79,13 @@ public class SpanLifeEntryModel extends TimeGraphEntryModel {
      *            End time
      * @param logs
      *            Span logs timestamps
+     * @param errorTag
+     *            true if the span has an error tag
      */
-    public SpanLifeEntryModel(long id, long parentId, String name, long startTime, long endTime, List<LogEvent> logs) {
+    public SpanLifeEntryModel(long id, long parentId, String name, long startTime, long endTime, List<LogEvent> logs, boolean errorTag) {
         super(id, parentId, name, startTime, endTime);
         fLogs = logs;
+        fErrorTag = errorTag;
     }
 
     /**
@@ -90,6 +95,15 @@ public class SpanLifeEntryModel extends TimeGraphEntryModel {
      */
     public List<LogEvent> getLogs() {
         return fLogs;
+    }
+
+    /**
+     * Getter for the error tag
+     *
+     * @return true if the span was tagged with an error
+     */
+    public boolean getErrorTag() {
+        return fErrorTag;
     }
 
 }
