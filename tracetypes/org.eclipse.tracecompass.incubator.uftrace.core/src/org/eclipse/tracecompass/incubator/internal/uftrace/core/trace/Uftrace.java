@@ -145,6 +145,9 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
         if (dir.isDirectory()) {
             confidence += 5;
             List<File> data = Arrays.asList(dir.listFiles());
+            boolean hasDat = false;
+            boolean hasMap = false;
+            boolean hasSym = false;
             for (File file : data) {
                 String extension = FilenameUtils.getExtension(file.getName());
                 if (extension.equals("dat")) { //$NON-NLS-1$
@@ -152,27 +155,31 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
                         DatParser dp = new DatParser(file);
                         // read first event (really check magic number header)
                         dp.iterator().next();
+                        confidence += 4;
+                        hasDat = true;
                     } catch (IllegalArgumentException e) {
                         // we don't want a failing trace
-                        confidence = Integer.MIN_VALUE;
+                        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "dat parsing error", e); //$NON-NLS-1$
                     }
-                    confidence += 4;
+
                 }
                 if (extension.equals("map")) { //$NON-NLS-1$
                     try {
                         if (MapParser.create(file) != null) {
                             confidence += 4;
                         }
+                        hasMap = true;
                     } catch (IOException e) {
                         // we don't want a failing trace
-                        confidence = Integer.MIN_VALUE;
+                        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "map parsing error", e); //$NON-NLS-1$
                     }
                 }
                 if (extension.equals("sym")) { //$NON-NLS-1$
+                    hasSym = true;
                     confidence += 3;
                 }
             }
-            if (confidence > 10) {
+            if (hasMap && hasDat && hasSym && confidence > 10) {
                 return new TraceValidationStatus(confidence, Activator.class.getCanonicalName());
             }
         }
