@@ -534,8 +534,8 @@ public class FlameChartView extends AbstractTimeGraphView {
     }
 
     @Override
-    protected void refresh() {
-        super.refresh();
+    protected void rebuild() {
+        super.rebuild();
         updateConfigureSymbolsAction();
     }
 
