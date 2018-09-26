@@ -30,10 +30,11 @@ Mount the debugfs filesystem using the following command:
 The filesystem could be mounted elsewhere.
 
 Before starting the tracer, traced events must be enabled by echoing ''1'' in the correct files.
-For example, enabling ''sched_switch'' and ''sched_wakeup'' is done with the following commands:
+For example, enabling ''sched_switch'', ''sched_wakeup'' and ''syscall'' tracing is done with the following commands:
 
   # echo 1 > /sys/kernel/debug/tracing/events/sched/sched_wakeup/enable
   # echo 1 > /sys/kernel/debug/tracing/events/sched/sched_switch/enable
+  # echo 1 > /sys/kernel/debug/tracing/events/syscalls/enable
 
 Recording of a trace is started by echoing ''1'' in ''tracing_on'':
 
@@ -42,7 +43,7 @@ Recording of a trace is started by echoing ''1'' in ''tracing_on'':
 Recording is stopped by echoing ''0'' in the same file.
 The trace can be obtained in raw format in the ''trace'' file:
 
-  # cat /sys/kernel/debug/tracing/trace
+  # cat /sys/kernel/debug/tracing/trace > myFtraceFile.txt
 
 === trace-cmd ===
 
@@ -55,5 +56,11 @@ The recorded trace would contain only ''sched_switch'' and ''sched_wakeup'' even
   # trace-cmd report -R
 
 The ''-R'' argument is needed to get the raw format.
+
+To obtain a function graph with ftrace, tracing can be done with the following command. As the function graph can be quite big, using the -F flag allows to trace the calls only for the command being traced, here ''ls''. The resulting trace will contain symbols. To resolve the symbols, the kernel symbols should be exported from the command line and [http://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/LTTng-UST-Analyses.html#Importing_a_binary_or_function_name_mapping_file_.28for_LTTng-UST_.3C2.8_traces.29 configured in Trace Compass].
+
+  # sudo trace-cmd record -p function_graph -F ls
+  # sudo trace-cmd report -R
+  # cat /proc/kallsyms > kallsyms
 
 See the [https://linux.die.net/man/1/trace-cmd trace-cmd documentation] for more tracing options.

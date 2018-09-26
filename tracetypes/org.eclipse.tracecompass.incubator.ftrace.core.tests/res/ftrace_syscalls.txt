@@ -1,0 +1,1052 @@
+           <...>-4083  [004] ....   395.705673: sys_rt_sigprocmask -> 0x0
+           xfwm4-3252  [005] ....   395.705675: sys_recvmsg -> 0x24
+           <...>-4083  [004] ....   395.705679: sys_ioctl(fd: ff, cmd: 5410, arg: 7ffe0babe8fc)
+           xfwm4-3252  [005] ....   395.705680: sys_recvmsg(fd: 3, msg: 7ffe3ce41670, flags: 0)
+           xfwm4-3252  [005] ....   395.705681: sys_recvmsg -> 0xfffffffffffffff5
+           <...>-4083  [004] ....   395.705681: sys_ioctl -> 0x0
+            sshd-3977  [003] ....   395.705682: sys_clock_gettime(which_clock: 7, tp: 7ffdea2525f0)
+            sshd-3977  [003] ....   395.705682: sys_clock_gettime -> 0x0
+            sshd-3977  [003] ....   395.705685: sys_select(n: d, inp: 561b41569210, outp: 561b41583530, exp: 0, tvp: 0)
+           <...>-4083  [004] ....   395.705685: sys_rt_sigprocmask(how: 2, nset: 7ffe0babe990, oset: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705685: sys_rt_sigprocmask -> 0x0
+           xfwm4-3252  [005] ....   395.705687: sys_recvmsg(fd: 3, msg: 7ffe3ce41790, flags: 0)
+            bash-3979  [000] ....   395.705687: sys_rt_sigprocmask(how: 0, nset: 7ffe0babea00, oset: 7ffe0babea80, sigsetsize: 8)
+           xfwm4-3252  [005] ....   395.705688: sys_recvmsg -> 0xfffffffffffffff5
+            bash-3979  [000] ....   395.705688: sys_rt_sigprocmask -> 0x0
+            sshd-3977  [003] ....   395.705689: sys_select -> 0x1
+            bash-3979  [000] ....   395.705690: sys_close(fd: 3)
+           xfwm4-3252  [005] ....   395.705690: sys_recvmsg(fd: 3, msg: 7ffe3ce417a0, flags: 0)
+            sshd-3977  [003] ....   395.705690: sys_rt_sigprocmask(how: 0, nset: 7ffdea252680, oset: 7ffdea252600, sigsetsize: 8)
+           xfwm4-3252  [005] ....   395.705691: sys_recvmsg -> 0xfffffffffffffff5
+            bash-3979  [000] ....   395.705691: sys_close -> 0x0
+            sshd-3977  [003] ....   395.705691: sys_rt_sigprocmask -> 0x0
+            sshd-3977  [003] ....   395.705692: sys_rt_sigprocmask(how: 2, nset: 7ffdea252600, oset: 0, sigsetsize: 8)
+            bash-3979  [000] ....   395.705692: sys_close(fd: 4)
+           <...>-4083  [004] ....   395.705692: sys_close(fd: 4)
+            sshd-3977  [003] ....   395.705692: sys_rt_sigprocmask -> 0x0
+            bash-3979  [000] ....   395.705692: sys_close -> 0x0
+           <...>-4083  [004] ....   395.705693: sys_close -> 0x0
+           xfwm4-3252  [005] ....   395.705693: sys_recvmsg(fd: 3, msg: 7ffe3ce417a0, flags: 0)
+            sshd-3977  [003] ....   395.705693: sys_clock_gettime(which_clock: 7, tp: 7ffdea2526a0)
+            sshd-3977  [003] ....   395.705694: sys_clock_gettime -> 0x0
+           xfwm4-3252  [005] ....   395.705694: sys_recvmsg -> 0xfffffffffffffff5
+            sshd-3977  [003] ....   395.705696: sys_write(fd: a, buf: 561b4156be90, count: 1)
+           xfwm4-3252  [005] ....   395.705696: sys_recvmsg(fd: 3, msg: 7ffe3ce417b0, flags: 0)
+           <...>-4083  [004] ....   395.705697: sys_read(fd: 3, buf: 7ffe0babea5f, count: 1)
+           xfwm4-3252  [005] ....   395.705697: sys_recvmsg -> 0xfffffffffffffff5
+           <...>-4083  [004] ....   395.705699: sys_read -> 0x0
+            sshd-3977  [003] d...   395.705699: sched_waking: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+            sshd-3977  [003] d...   395.705702: sched_wake_idle_without_ipi: cpu=7
+            bash-3979  [000] ....   395.705702: sys_ioctl(fd: ff, cmd: 540f, arg: 7ffe0babe9c4)
+            sshd-3977  [003] d...   395.705703: sched_wakeup: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+            bash-3979  [000] ....   395.705704: sys_ioctl -> 0x0
+           xfwm4-3252  [005] ....   395.705704: sys_recvmsg(fd: 3, msg: 7ffe3ce41a00, flags: 0)
+            sshd-3977  [003] ....   395.705704: sys_write -> 0x1
+            bash-3979  [000] ....   395.705705: sys_rt_sigprocmask(how: 2, nset: 7ffe0babea80, oset: 0, sigsetsize: 8)
+           xfwm4-3252  [005] ....   395.705705: sys_recvmsg -> 0xfffffffffffffff5
+           <...>-4083  [004] ....   395.705706: sys_close(fd: 3)
+            bash-3979  [000] ....   395.705706: sys_rt_sigprocmask -> 0x0
+           <...>-4083  [004] ....   395.705706: sys_close -> 0x0
+           xfwm4-3252  [005] ....   395.705707: sys_recvmsg(fd: 3, msg: 7ffe3ce41a10, flags: 0)
+            bash-3979  [000] ....   395.705707: sys_rt_sigprocmask(how: 0, nset: 7ffe0babeb00, oset: 7ffe0babeb80, sigsetsize: 8)
+           xfwm4-3252  [005] ....   395.705708: sys_recvmsg -> 0xfffffffffffffff5
+            bash-3979  [000] ....   395.705708: sys_rt_sigprocmask -> 0x0
+            sshd-3977  [003] ....   395.705708: sys_clock_gettime(which_clock: 7, tp: 7ffdea2525f0)
+          <idle>-0     [007] d...   395.705709: sched_switch: prev_comm=swapper/7 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=kworker/u32:4 next_pid=184 next_prio=120
+            sshd-3977  [003] ....   395.705709: sys_clock_gettime -> 0x0
+            bash-3979  [000] ....   395.705710: sys_wait4(upid: ffffffff, stat_addr: 7ffe0babeaa0, options: a, ru: 0)
+            sshd-3977  [003] ....   395.705711: sys_select(n: d, inp: 561b41569210, outp: 561b41583530, exp: 0, tvp: 0)
+           xfwm4-3252  [005] ....   395.705711: sys_recvmsg(fd: 3, msg: 7ffe3ce41af0, flags: 0)
+            bash-3979  [000] ....   395.705712: sched_process_wait: comm=bash pid=0 prio=120
+           xfwm4-3252  [005] ....   395.705712: sys_recvmsg -> 0xfffffffffffffff5
+   kworker/u32:4-184   [007] d...   395.705713: sched_waking: comm=bash pid=4065 prio=120 target_cpu=002
+           <...>-4083  [004] ....   395.705713: sys_rt_sigaction(sig: 1, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+            bash-3979  [000] d...   395.705714: sched_stat_runtime: comm=bash pid=3979 runtime=320327 [ns] vruntime=275920664 [ns]
+           xfwm4-3252  [005] ....   395.705714: sys_recvmsg(fd: 3, msg: 7ffe3ce41b00, flags: 0)
+           <...>-4083  [004] ....   395.705714: sys_rt_sigaction -> 0x0
+           xfwm4-3252  [005] ....   395.705715: sys_recvmsg -> 0xfffffffffffffff5
+           <...>-4083  [004] ....   395.705715: sys_rt_sigaction(sig: 4, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705716: sys_rt_sigaction -> 0x0
+            sshd-3977  [003] d...   395.705716: sched_stat_runtime: comm=sshd pid=3977 runtime=148235 [ns] vruntime=493359374 [ns]
+           <...>-4083  [004] ....   395.705717: sys_rt_sigaction(sig: 5, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+            bash-3979  [000] d...   395.705717: sched_switch: prev_comm=bash prev_pid=3979 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+   kworker/u32:4-184   [007] d...   395.705717: sched_wake_idle_without_ipi: cpu=2
+           <...>-4083  [004] ....   395.705717: sys_rt_sigaction -> 0x0
+   kworker/u32:4-184   [007] d...   395.705718: sched_wakeup: comm=bash pid=4065 prio=120 target_cpu=002
+           <...>-4083  [004] ....   395.705718: sys_rt_sigaction(sig: 6, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705719: sys_rt_sigaction -> 0x0
+            sshd-3977  [003] d...   395.705719: sched_switch: prev_comm=sshd prev_pid=3977 prev_prio=120 prev_state=D ==> next_comm=swapper/3 next_pid=0 next_prio=120
+   kworker/u32:4-184   [007] d...   395.705719: sched_stat_runtime: comm=kworker/u32:4 pid=184 runtime=18827 [ns] vruntime=60776626577 [ns]
+           <...>-4083  [004] ....   395.705720: sys_rt_sigaction(sig: 8, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705720: sys_rt_sigaction -> 0x0
+           xfwm4-3252  [005] ....   395.705720: sys_poll(ufds: 557615bfeac0, nfds: 4, timeout_msecs: ffffffff)
+   kworker/u32:4-184   [007] d...   395.705721: sched_switch: prev_comm=kworker/u32:4 prev_pid=184 prev_prio=120 prev_state=R+ ==> next_comm=swapper/7 next_pid=0 next_prio=120
+           <...>-4083  [004] ....   395.705721: sys_rt_sigaction(sig: 7, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705722: sys_rt_sigaction -> 0x0
+           <...>-4083  [004] ....   395.705723: sys_rt_sigaction(sig: b, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705723: sys_rt_sigaction -> 0x0
+           xfwm4-3252  [005] d...   395.705723: sched_stat_runtime: comm=xfwm4 pid=3252 runtime=98157 [ns] vruntime=20984709767 [ns]
+           <...>-4083  [004] ....   395.705727: sys_rt_sigaction(sig: 1f, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705727: sys_rt_sigaction -> 0x0
+           xfwm4-3252  [005] d...   395.705728: sched_switch: prev_comm=xfwm4 prev_pid=3252 prev_prio=120 prev_state=D ==> next_comm=swapper/5 next_pid=0 next_prio=120
+           <...>-4083  [004] ....   395.705728: sys_rt_sigaction(sig: d, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705728: sys_rt_sigaction -> 0x0
+           <...>-4083  [004] ....   395.705729: sys_rt_sigaction(sig: e, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705730: sys_rt_sigaction -> 0x0
+           <...>-4083  [004] ....   395.705730: sys_rt_sigaction(sig: 18, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705731: sys_rt_sigaction -> 0x0
+           <...>-4083  [004] ....   395.705732: sys_rt_sigaction(sig: 19, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705732: sys_rt_sigaction -> 0x0
+           <...>-4083  [004] ....   395.705733: sys_rt_sigaction(sig: 1a, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705733: sys_rt_sigaction -> 0x0
+           <...>-4083  [004] ....   395.705734: sys_rt_sigaction(sig: a, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705734: sys_rt_sigaction -> 0x0
+           <...>-4083  [004] ....   395.705735: sys_rt_sigaction(sig: c, act: 7ffe0babe9a0, oact: 0, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705736: sys_rt_sigaction -> 0x0
+           <...>-4083  [004] ....   395.705742: sys_rt_sigaction(sig: 2, act: 7ffe0babe8a0, oact: 7ffe0babe940, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705743: sys_rt_sigaction -> 0x0
+           <...>-4083  [004] ....   395.705747: sys_rt_sigaction(sig: 3, act: 7ffe0babe8a0, oact: 7ffe0babe940, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705748: sys_rt_sigaction -> 0x0
+           <...>-4083  [004] ....   395.705749: sys_rt_sigaction(sig: f, act: 7ffe0babe8a0, oact: 7ffe0babe940, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705749: sys_rt_sigaction -> 0x0
+           <...>-4083  [004] ....   395.705750: sys_rt_sigaction(sig: 11, act: 7ffe0babe8a0, oact: 7ffe0babe940, sigsetsize: 8)
+           <...>-4083  [004] ....   395.705750: sys_rt_sigaction -> 0x0
+          <idle>-0     [002] d...   395.705791: sched_switch: prev_comm=swapper/2 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=bash next_pid=4065 next_prio=120
+            bash-4065  [002] ....   395.705798: sys_pselect6 -> 0x1
+            bash-4065  [002] ....   395.705800: sys_read(fd: 0, buf: 7ffdb77387ff, count: 1)
+            bash-4065  [002] ....   395.705804: sys_read -> 0x1
+            bash-4065  [002] ....   395.705807: sys_write(fd: 2, buf: 56181cc41a00, count: 1)
+            bash-4065  [002] d...   395.705811: sched_waking: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+            bash-4065  [002] d...   395.705814: sched_wake_idle_without_ipi: cpu=7
+            bash-4065  [002] d...   395.705815: sched_wakeup: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+          <idle>-0     [007] d...   395.705816: sched_switch: prev_comm=swapper/7 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=kworker/u32:4 next_pid=184 next_prio=120
+            bash-4065  [002] ....   395.705816: sys_write -> 0x1
+   kworker/u32:4-184   [007] d...   395.705818: sched_waking: comm=sshd pid=3977 prio=120 target_cpu=003
+   kworker/u32:4-184   [007] d...   395.705819: sched_wake_idle_without_ipi: cpu=3
+   kworker/u32:4-184   [007] d...   395.705820: sched_wakeup: comm=sshd pid=3977 prio=120 target_cpu=003
+   kworker/u32:4-184   [007] d...   395.705821: sched_stat_runtime: comm=kworker/u32:4 pid=184 runtime=8303 [ns] vruntime=60776634880 [ns]
+            bash-4065  [002] ....   395.705821: sys_ioctl(fd: 0, cmd: 5401, arg: 7ffdb77388f0)
+   kworker/u32:4-184   [007] d...   395.705822: sched_switch: prev_comm=kworker/u32:4 prev_pid=184 prev_prio=120 prev_state=R+ ==> next_comm=swapper/7 next_pid=0 next_prio=120
+            bash-4065  [002] ....   395.705822: sys_ioctl -> 0x0
+          <idle>-0     [003] d...   395.705823: sched_switch: prev_comm=swapper/3 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=sshd next_pid=3977 next_prio=120
+            bash-4065  [002] ....   395.705824: sys_ioctl(fd: 0, cmd: 5403, arg: 7ffdb77388c0)
+            bash-4065  [002] ....   395.705827: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.705827: sys_ioctl(fd: 0, cmd: 5401, arg: 7ffdb77388c0)
+            bash-4065  [002] ....   395.705828: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.705830: sys_rt_sigaction(sig: 2, act: 7ffdb77386b0, oact: 7ffdb7738750, sigsetsize: 8)
+            sshd-3977  [003] ....   395.705830: sys_select -> 0x1
+            bash-4065  [002] ....   395.705830: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.705831: sys_rt_sigaction(sig: f, act: 7ffdb77386b0, oact: 7ffdb7738750, sigsetsize: 8)
+            sshd-3977  [003] ....   395.705831: sys_rt_sigprocmask(how: 0, nset: 7ffdea252680, oset: 7ffdea252600, sigsetsize: 8)
+            bash-4065  [002] ....   395.705832: sys_rt_sigaction -> 0x0
+            sshd-3977  [003] ....   395.705832: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.705833: sys_rt_sigaction(sig: 1, act: 7ffdb77386b0, oact: 7ffdb7738750, sigsetsize: 8)
+            sshd-3977  [003] ....   395.705833: sys_rt_sigprocmask(how: 2, nset: 7ffdea252600, oset: 0, sigsetsize: 8)
+            bash-4065  [002] ....   395.705833: sys_rt_sigaction -> 0x0
+            sshd-3977  [003] ....   395.705833: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.705834: sys_rt_sigaction(sig: e, act: 7ffdb77386b0, oact: 7ffdb7738750, sigsetsize: 8)
+            sshd-3977  [003] ....   395.705835: sys_clock_gettime(which_clock: 7, tp: 7ffdea2526a0)
+            bash-4065  [002] ....   395.705835: sys_rt_sigaction -> 0x0
+            sshd-3977  [003] ....   395.705835: sys_clock_gettime -> 0x0
+            bash-4065  [002] ....   395.705836: sys_rt_sigaction(sig: 1c, act: 7ffdb7738770, oact: 7ffdb7738810, sigsetsize: 8)
+            bash-4065  [002] ....   395.705837: sys_rt_sigaction -> 0x0
+            sshd-3977  [003] ....   395.705837: sys_read(fd: c, buf: 7ffdea24e5e0, count: 4000)
+            bash-4065  [002] ....   395.705838: sys_rt_sigaction(sig: 2, act: 7ffdb77386d0, oact: 7ffdb7738770, sigsetsize: 8)
+            bash-4065  [002] ....   395.705838: sys_rt_sigaction -> 0x0
+            sshd-3977  [003] ....   395.705839: sys_read -> 0x2
+            sshd-3977  [003] ....   395.705844: sys_getpid()
+           <...>-4083  [004] ....   395.705844: sys_write(fd: 2, buf: 558d3348e2f0, count: 1d)
+            sshd-3977  [003] ....   395.705845: sys_getpid -> 0xf89
+           <...>-4083  [004] d...   395.705849: sched_waking: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+            sshd-3977  [003] ....   395.705849: sys_clock_gettime(which_clock: 7, tp: 7ffdea2525f0)
+            sshd-3977  [003] ....   395.705850: sys_clock_gettime -> 0x0
+           <...>-4083  [004] d...   395.705851: sched_wake_idle_without_ipi: cpu=7
+            sshd-3977  [003] ....   395.705852: sys_select(n: d, inp: 561b41569210, outp: 561b41583530, exp: 0, tvp: 0)
+           <...>-4083  [004] d...   395.705852: sched_wakeup: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+           <...>-4083  [004] ....   395.705854: sys_write -> 0x1d
+            sshd-3977  [003] ....   395.705855: sys_select -> 0x1
+          <idle>-0     [007] d...   395.705855: sched_switch: prev_comm=swapper/7 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=kworker/u32:4 next_pid=184 next_prio=120
+            sshd-3977  [003] ....   395.705856: sys_rt_sigprocmask(how: 0, nset: 7ffdea252680, oset: 7ffdea252600, sigsetsize: 8)
+            sshd-3977  [003] ....   395.705857: sys_rt_sigprocmask -> 0x0
+   kworker/u32:4-184   [007] d...   395.705858: sched_waking: comm=sshd pid=3976 prio=120 target_cpu=003
+            sshd-3977  [003] ....   395.705858: sys_rt_sigprocmask(how: 2, nset: 7ffdea252600, oset: 0, sigsetsize: 8)
+            sshd-3977  [003] ....   395.705859: sys_rt_sigprocmask -> 0x0
+            sshd-3977  [003] ....   395.705860: sys_clock_gettime(which_clock: 7, tp: 7ffdea2526a0)
+   kworker/u32:4-184   [007] d...   395.705860: sched_migrate_task: comm=sshd pid=3976 prio=120 orig_cpu=3 dest_cpu=1
+            sshd-3977  [003] ....   395.705861: sys_clock_gettime -> 0x0
+            bash-4065  [002] ....   395.705862: sys_newstat(filename: 56181c4c7093, statbuf: 7ffdb77396d0)
+            sshd-3977  [003] ....   395.705863: sys_write(fd: 3, buf: 561b415670c0, count: 24)
+   kworker/u32:4-184   [007] d...   395.705863: sched_wake_idle_without_ipi: cpu=1
+   kworker/u32:4-184   [007] d...   395.705864: sched_wakeup: comm=sshd pid=3976 prio=120 target_cpu=001
+   kworker/u32:4-184   [007] d...   395.705865: sched_stat_runtime: comm=kworker/u32:4 pid=184 runtime=14961 [ns] vruntime=60776649841 [ns]
+   kworker/u32:4-184   [007] d...   395.705866: sched_switch: prev_comm=kworker/u32:4 prev_pid=184 prev_prio=120 prev_state=R+ ==> next_comm=swapper/7 next_pid=0 next_prio=120
+            bash-4065  [002] ....   395.705867: sys_newstat -> 0x0
+            bash-4065  [002] ....   395.705869: sys_newstat(filename: 56181cc6d0d0, statbuf: 7ffdb77395c0)
+            bash-4065  [002] ....   395.705872: sys_newstat -> 0xfffffffffffffffe
+            bash-4065  [002] ....   395.705874: sys_newstat(filename: 56181cc6d0d0, statbuf: 7ffdb77395c0)
+            bash-4065  [002] ....   395.705875: sys_newstat -> 0xfffffffffffffffe
+            bash-4065  [002] ....   395.705877: sys_newstat(filename: 56181cc6d0d0, statbuf: 7ffdb77395c0)
+            bash-4065  [002] ....   395.705878: sys_newstat -> 0xfffffffffffffffe
+            bash-4065  [002] ....   395.705880: sys_newstat(filename: 56181cc6d0d0, statbuf: 7ffdb77395c0)
+            bash-4065  [002] ....   395.705881: sys_newstat -> 0xfffffffffffffffe
+            bash-4065  [002] ....   395.705882: sys_newstat(filename: 56181cc6d0d0, statbuf: 7ffdb77395c0)
+            bash-4065  [002] ....   395.705884: sys_newstat -> 0xfffffffffffffffe
+            bash-4065  [002] ....   395.705885: sys_newstat(filename: 56181cc6d0d0, statbuf: 7ffdb77395c0)
+            sshd-3977  [003] d...   395.705887: softirq_raise: vec=3 [action=NET_RX]
+            bash-4065  [002] ....   395.705887: sys_newstat -> 0x0
+            sshd-3977  [003] ..s1   395.705888: softirq_entry: vec=3 [action=NET_RX]
+            bash-4065  [002] ....   395.705888: sys_newstat(filename: 56181cc6d0d0, statbuf: 7ffdb77394e0)
+            bash-4065  [002] ....   395.705890: sys_newstat -> 0x0
+            bash-4065  [002] ....   395.705891: sys_geteuid()
+            bash-4065  [002] ....   395.705891: sys_geteuid -> 0x0
+            bash-4065  [002] ....   395.705892: sys_getegid()
+            bash-4065  [002] ....   395.705893: sys_getegid -> 0x0
+            bash-4065  [002] ....   395.705894: sys_getuid()
+            bash-4065  [002] ....   395.705894: sys_getuid -> 0x0
+            bash-4065  [002] ....   395.705895: sys_getgid()
+            bash-4065  [002] ....   395.705895: sys_getgid -> 0x0
+            bash-4065  [002] ....   395.705896: sys_access(filename: 56181cc6d0d0, mode: 1)
+            sshd-3977  [003] d.s1   395.705899: sched_waking: comm=ssh pid=3962 prio=120 target_cpu=002
+            bash-4065  [002] ....   395.705900: sys_access -> 0x0
+            bash-4065  [002] ....   395.705901: sys_newstat(filename: 56181cc6d0d0, statbuf: 7ffdb77394e0)
+            sshd-3977  [003] d.s1   395.705901: sched_migrate_task: comm=ssh pid=3962 prio=120 orig_cpu=2 dest_cpu=5
+            bash-4065  [002] ....   395.705903: sys_newstat -> 0x0
+            bash-4065  [002] ....   395.705903: sys_geteuid()
+            bash-4065  [002] ....   395.705904: sys_geteuid -> 0x0
+            bash-4065  [002] ....   395.705904: sys_getegid()
+            bash-4065  [002] ....   395.705905: sys_getegid -> 0x0
+            bash-4065  [002] ....   395.705905: sys_getuid()
+            sshd-3977  [003] d.s1   395.705906: sched_wake_idle_without_ipi: cpu=5
+            bash-4065  [002] ....   395.705906: sys_getuid -> 0x0
+            sshd-3977  [003] d.s1   395.705906: sched_wakeup: comm=ssh pid=3962 prio=120 target_cpu=005
+            bash-4065  [002] ....   395.705906: sys_getgid()
+            bash-4065  [002] ....   395.705907: sys_getgid -> 0x0
+            bash-4065  [002] ....   395.705907: sys_access(filename: 56181cc6d0d0, mode: 4)
+            bash-4065  [002] ....   395.705909: sys_access -> 0x0
+            bash-4065  [002] ....   395.705910: sys_newstat(filename: 56181cc6d0d0, statbuf: 7ffdb77395f0)
+            bash-4065  [002] ....   395.705911: sys_newstat -> 0x0
+            bash-4065  [002] ....   395.705912: sys_newstat(filename: 56181cc6d0d0, statbuf: 7ffdb7739510)
+            bash-4065  [002] ....   395.705914: sys_newstat -> 0x0
+            bash-4065  [002] ....   395.705914: sys_geteuid()
+            bash-4065  [002] ....   395.705915: sys_geteuid -> 0x0
+            bash-4065  [002] ....   395.705915: sys_getegid()
+            bash-4065  [002] ....   395.705915: sys_getegid -> 0x0
+            bash-4065  [002] ....   395.705916: sys_getuid()
+            bash-4065  [002] ....   395.705917: sys_getuid -> 0x0
+            bash-4065  [002] ....   395.705917: sys_getgid()
+            bash-4065  [002] ....   395.705917: sys_getgid -> 0x0
+            bash-4065  [002] ....   395.705918: sys_access(filename: 56181cc6d0d0, mode: 1)
+            sshd-3977  [003] ..s1   395.705919: softirq_exit: vec=3 [action=NET_RX]
+            bash-4065  [002] ....   395.705920: sys_access -> 0x0
+            bash-4065  [002] ....   395.705920: sys_newstat(filename: 56181cc6d0d0, statbuf: 7ffdb7739510)
+            bash-4065  [002] ....   395.705922: sys_newstat -> 0x0
+            bash-4065  [002] ....   395.705922: sys_geteuid()
+            bash-4065  [002] ....   395.705923: sys_geteuid -> 0x0
+            bash-4065  [002] ....   395.705923: sys_getegid()
+            bash-4065  [002] ....   395.705924: sys_getegid -> 0x0
+            bash-4065  [002] ....   395.705924: sys_getuid()
+            sshd-3977  [003] ....   395.705925: sys_write -> 0x24
+            bash-4065  [002] ....   395.705925: sys_getuid -> 0x0
+            bash-4065  [002] ....   395.705925: sys_getgid()
+            bash-4065  [002] ....   395.705926: sys_getgid -> 0x0
+            bash-4065  [002] ....   395.705926: sys_access(filename: 56181cc6d0d0, mode: 4)
+            bash-4065  [002] ....   395.705928: sys_access -> 0x0
+            sshd-3977  [003] ....   395.705929: sys_clock_gettime(which_clock: 7, tp: 7ffdea2525f0)
+            sshd-3977  [003] ....   395.705929: sys_clock_gettime -> 0x0
+            sshd-3977  [003] ....   395.705931: sys_select(n: d, inp: 561b41569210, outp: 561b41583530, exp: 0, tvp: 0)
+            bash-4065  [002] ....   395.705932: sys_rt_sigprocmask(how: 0, nset: 7ffdb77396b0, oset: 7ffdb7739730, sigsetsize: 8)
+            bash-4065  [002] ....   395.705933: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.705934: sys_rt_sigprocmask(how: 0, nset: 7ffdb7739550, oset: 7ffdb77395d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.705934: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.705935: sys_rt_sigprocmask(how: 2, nset: 7ffdb77395d0, oset: 0, sigsetsize: 8)
+          <idle>-0     [001] d...   395.705935: sched_switch: prev_comm=swapper/1 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=sshd next_pid=3976 next_prio=120
+          <idle>-0     [005] d...   395.705935: sched_switch: prev_comm=swapper/5 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=ssh next_pid=3962 next_prio=120
+            bash-4065  [002] ....   395.705935: sys_rt_sigprocmask -> 0x0
+            sshd-3977  [003] d...   395.705936: sched_stat_runtime: comm=sshd pid=3977 runtime=117002 [ns] vruntime=493476376 [ns]
+            bash-4065  [002] ....   395.705937: sys_pipe(fildes: 56181c4fce18)
+            sshd-3977  [003] d...   395.705939: sched_switch: prev_comm=sshd prev_pid=3977 prev_prio=120 prev_state=D ==> next_comm=swapper/3 next_pid=0 next_prio=120
+            sshd-3976  [001] ....   395.705943: sys_select -> 0x1
+             ssh-3962  [005] ....   395.705943: sys_select -> 0x1
+            bash-4065  [002] ....   395.705944: sys_pipe -> 0x0
+            bash-4065  [002] ....   395.705946: sys_clone(clone_flags: 1200011, newsp: 0, parent_tidptr: 0, child_tidptr: 7f1f01eeea10, tls: 7f1f01eee740)
+            sshd-3976  [001] ....   395.705946: sys_rt_sigprocmask(how: 0, nset: 7ffe5afdea70, oset: 7ffe5afde9f0, sigsetsize: 8)
+            sshd-3976  [001] ....   395.705947: sys_rt_sigprocmask -> 0x0
+             ssh-3962  [005] ....   395.705948: sys_clock_gettime(which_clock: 7, tp: 7ffce5b63640)
+            sshd-3976  [001] ....   395.705948: sys_rt_sigprocmask(how: 2, nset: 7ffe5afde9f0, oset: 0, sigsetsize: 8)
+             ssh-3962  [005] ....   395.705949: sys_clock_gettime -> 0x0
+            sshd-3976  [001] ....   395.705949: sys_rt_sigprocmask -> 0x0
+            sshd-3976  [001] ....   395.705951: sys_clock_gettime(which_clock: 7, tp: 7ffe5afdea90)
+            sshd-3976  [001] ....   395.705952: sys_clock_gettime -> 0x0
+             ssh-3962  [005] ....   395.705952: sys_read(fd: 3, buf: 7ffce5b616c0, count: 2000)
+            sshd-3976  [001] ....   395.705954: sys_read(fd: c, buf: 7ffe5afda9d0, count: 4000)
+            sshd-3976  [001] ....   395.705958: sys_read -> 0x1e
+             ssh-3962  [005] ....   395.705959: sys_read -> 0x24
+            bash-4065  [002] d...   395.705963: sched_stat_runtime: comm=bash pid=4065 runtime=247754 [ns] vruntime=204434473 [ns]
+            sshd-3976  [001] ....   395.705965: sys_getpid()
+            sshd-3976  [001] ....   395.705966: sys_getpid -> 0xf88
+            sshd-3976  [001] ....   395.705973: sys_clock_gettime(which_clock: 7, tp: 7ffe5afde9e0)
+             ssh-3962  [005] ....   395.705974: sys_clock_gettime(which_clock: 7, tp: 7ffce5b636b0)
+            sshd-3976  [001] ....   395.705975: sys_clock_gettime -> 0x0
+             ssh-3962  [005] ....   395.705975: sys_clock_gettime -> 0x0
+            sshd-3976  [001] ....   395.705977: sys_select(n: d, inp: 5638b60d1580, outp: 5638b60d27c0, exp: 0, tvp: 0)
+             ssh-3962  [005] ....   395.705978: sys_clock_gettime(which_clock: 7, tp: 7ffce5b63590)
+             ssh-3962  [005] ....   395.705979: sys_clock_gettime -> 0x0
+            sshd-3976  [001] ....   395.705982: sys_select -> 0x1
+             ssh-3962  [005] ....   395.705983: sys_select(n: 7, inp: 56296e8d3240, outp: 56296e8d9dd0, exp: 0, tvp: 0)
+            sshd-3976  [001] ....   395.705984: sys_rt_sigprocmask(how: 0, nset: 7ffe5afdea70, oset: 7ffe5afde9f0, sigsetsize: 8)
+            sshd-3976  [001] ....   395.705986: sys_rt_sigprocmask -> 0x0
+            sshd-3976  [001] ....   395.705987: sys_rt_sigprocmask(how: 2, nset: 7ffe5afde9f0, oset: 0, sigsetsize: 8)
+            sshd-3976  [001] ....   395.705987: sys_rt_sigprocmask -> 0x0
+             ssh-3962  [005] ....   395.705987: sys_select -> 0x1
+            sshd-3976  [001] ....   395.705989: sys_clock_gettime(which_clock: 7, tp: 7ffe5afdea90)
+             ssh-3962  [005] ....   395.705990: sys_clock_gettime(which_clock: 7, tp: 7ffce5b63640)
+            sshd-3976  [001] ....   395.705990: sys_clock_gettime -> 0x0
+             ssh-3962  [005] ....   395.705991: sys_clock_gettime -> 0x0
+            sshd-3976  [001] ....   395.705992: sys_write(fd: 3, buf: 5638b60cd0c0, count: 44)
+             ssh-3962  [005] ....   395.705993: sys_write(fd: 5, buf: 56296e8bee20, count: 2)
+             ssh-3962  [005] d...   395.705997: sched_waking: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+             ssh-3962  [005] d...   395.706001: sched_wake_idle_without_ipi: cpu=7
+             ssh-3962  [005] d...   395.706002: sched_wakeup: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+             ssh-3962  [005] ....   395.706004: sys_write -> 0x2
+             ssh-3962  [005] ....   395.706009: sys_clock_gettime(which_clock: 7, tp: 7ffce5b636b0)
+            sshd-3976  [001] d...   395.706010: softirq_raise: vec=3 [action=NET_RX]
+             ssh-3962  [005] ....   395.706010: sys_clock_gettime -> 0x0
+            sshd-3976  [001] ..s1   395.706011: softirq_entry: vec=3 [action=NET_RX]
+             ssh-3962  [005] ....   395.706013: sys_clock_gettime(which_clock: 7, tp: 7ffce5b63590)
+             ssh-3962  [005] ....   395.706013: sys_clock_gettime -> 0x0
+             ssh-3962  [005] ....   395.706016: sys_select(n: 7, inp: 56296e8d3240, outp: 56296e8d9dd0, exp: 0, tvp: 0)
+           <...>-4083  [004] ....   395.706020: sys_exit_group(error_code: 7f)
+             ssh-3962  [005] d...   395.706020: sched_stat_runtime: comm=ssh pid=3962 runtime=117566 [ns] vruntime=20979712827 [ns]
+            sshd-3976  [001] d.s1   395.706024: sched_waking: comm=ssh pid=3963 prio=120 target_cpu=006
+             ssh-3962  [005] d...   395.706026: sched_switch: prev_comm=ssh prev_pid=3962 prev_prio=120 prev_state=D ==> next_comm=swapper/5 next_pid=0 next_prio=120
+            sshd-3976  [001] d.s1   395.706028: sched_wake_idle_without_ipi: cpu=6
+            sshd-3976  [001] d.s1   395.706029: sched_wakeup: comm=ssh pid=3963 prio=120 target_cpu=006
+            sshd-3976  [001] ..s1   395.706033: softirq_exit: vec=3 [action=NET_RX]
+          <idle>-0     [006] d...   395.706034: sched_switch: prev_comm=swapper/6 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=ssh next_pid=3963 next_prio=120
+             ssh-3963  [006] ....   395.706041: sys_select -> 0x1
+            sshd-3976  [001] ....   395.706041: sys_write -> 0x44
+             ssh-3963  [006] ....   395.706044: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfba0)
+             ssh-3963  [006] ....   395.706045: sys_clock_gettime -> 0x0
+            sshd-3976  [001] ....   395.706045: sys_clock_gettime(which_clock: 7, tp: 7ffe5afde9e0)
+            sshd-3976  [001] ....   395.706046: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706047: sys_read(fd: 3, buf: 7ffd4e9bdc20, count: 2000)
+            sshd-3976  [001] ....   395.706048: sys_select(n: d, inp: 5638b60d1580, outp: 5638b60d27c0, exp: 0, tvp: 0)
+            sshd-3976  [001] d...   395.706053: sched_stat_runtime: comm=sshd pid=3976 runtime=191136 [ns] vruntime=197557739 [ns]
+             ssh-3963  [006] ....   395.706053: sys_read -> 0x44
+            sshd-3976  [001] d...   395.706056: sched_switch: prev_comm=sshd prev_pid=3976 prev_prio=120 prev_state=D ==> next_comm=swapper/1 next_pid=0 next_prio=120
+          <idle>-0     [001] d.h.   395.706059: sched_waking: comm=kworker/1:2 pid=264 prio=120 target_cpu=001
+          <idle>-0     [001] dNh.   395.706060: sched_wakeup: comm=kworker/1:2 pid=264 prio=120 target_cpu=001
+          <idle>-0     [001] d...   395.706061: sched_switch: prev_comm=swapper/1 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=kworker/1:2 next_pid=264 next_prio=120
+     kworker/1:2-264   [001] d...   395.706064: sched_stat_runtime: comm=kworker/1:2 pid=264 runtime=4854 [ns] vruntime=53733663504 [ns]
+     kworker/1:2-264   [001] d...   395.706065: sched_switch: prev_comm=kworker/1:2 prev_pid=264 prev_prio=120 prev_state=R+ ==> next_comm=swapper/1 next_pid=0 next_prio=120
+             ssh-3963  [006] ....   395.706066: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfc10)
+             ssh-3963  [006] ....   395.706067: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706069: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfaf0)
+             ssh-3963  [006] ....   395.706070: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706073: sys_select(n: 7, inp: 561a828ce860, outp: 561a828d4450, exp: 0, tvp: 0)
+          <idle>-0     [007] d...   395.706074: sched_switch: prev_comm=swapper/7 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=kworker/u32:4 next_pid=184 next_prio=120
+             ssh-3963  [006] ....   395.706078: sys_select -> 0x1
+   kworker/u32:4-184   [007] d...   395.706078: sched_waking: comm=xfce4-terminal pid=3279 prio=120 target_cpu=005
+             ssh-3963  [006] ....   395.706079: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfba0)
+             ssh-3963  [006] ....   395.706080: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706082: sys_write(fd: 5, buf: 561a828bb070, count: 1e)
+   kworker/u32:4-184   [007] d...   395.706084: sched_wake_idle_without_ipi: cpu=5
+   kworker/u32:4-184   [007] d...   395.706085: sched_wakeup: comm=xfce4-terminal pid=3279 prio=120 target_cpu=005
+   kworker/u32:4-184   [007] d...   395.706087: sched_stat_runtime: comm=kworker/u32:4 pid=184 runtime=87584 [ns] vruntime=60776737425 [ns]
+   kworker/u32:4-184   [007] d...   395.706089: sched_switch: prev_comm=kworker/u32:4 prev_pid=184 prev_prio=120 prev_state=R+ ==> next_comm=swapper/7 next_pid=0 next_prio=120
+          <idle>-0     [005] d...   395.706094: sched_switch: prev_comm=swapper/5 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=xfce4-terminal next_pid=3279 next_prio=120
+  xfce4-terminal-3279  [005] ....   395.706102: sys_poll -> 0x1
+  xfce4-terminal-3279  [005] ....   395.706110: sys_write(fd: 4, buf: 7ffc24f78030, count: 8)
+  xfce4-terminal-3279  [005] ....   395.706112: sys_write -> 0x8
+  xfce4-terminal-3279  [005] ....   395.706115: sys_read(fd: b, buf: 55b9b5a7d89c, count: 1ff0)
+  xfce4-terminal-3279  [005] ....   395.706118: sys_read -> 0x3
+             ssh-3963  [006] ....   395.706120: sys_write -> 0x1e
+  xfce4-terminal-3279  [005] ....   395.706120: sys_read(fd: b, buf: 55b9b5a7d89e, count: 1fee)
+  xfce4-terminal-3279  [005] ....   395.706121: sys_read -> 0xfffffffffffffff5
+             ssh-3963  [006] ....   395.706124: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfc10)
+             ssh-3963  [006] ....   395.706125: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706126: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfaf0)
+             ssh-3963  [006] ....   395.706127: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706129: sys_select(n: 7, inp: 561a828ce860, outp: 561a828d4450, exp: 0, tvp: 0)
+  xfce4-terminal-3279  [005] ....   395.706132: sys_write(fd: 4, buf: 7ffc24f78030, count: 8)
+             ssh-3963  [006] d...   395.706133: sched_stat_runtime: comm=ssh pid=3963 runtime=107156 [ns] vruntime=527368663 [ns]
+  xfce4-terminal-3279  [005] ....   395.706134: sys_write -> 0x8
+            bash-4065  [002] ....   395.706136: sched_process_fork: comm=bash pid=4065 child_comm=bash child_pid=4084
+             ssh-3963  [006] d...   395.706137: sched_switch: prev_comm=ssh prev_pid=3963 prev_prio=120 prev_state=D ==> next_comm=swapper/6 next_pid=0 next_prio=120
+  xfce4-terminal-3279  [005] ....   395.706139: sys_recvmsg(fd: 5, msg: 7ffc24f77eb0, flags: 0)
+  xfce4-terminal-3279  [005] ....   395.706141: sys_recvmsg -> 0xfffffffffffffff5
+            bash-4065  [002] d...   395.706142: sched_stat_runtime: comm=bash pid=4065 runtime=176843 [ns] vruntime=204611316 [ns]
+            bash-4065  [002] d...   395.706144: sched_wakeup_new: comm=bash pid=4084 prio=120 target_cpu=002
+  xfce4-terminal-3279  [005] ....   395.706146: sys_poll(ufds: 55b9b59f7180, nfds: 6, timeout_msecs: a)
+            bash-4065  [002] d.h.   395.706149: sched_waking: comm=kworker/2:2 pid=221 prio=120 target_cpu=002
+            bash-4065  [002] d.h.   395.706150: sched_wakeup: comm=kworker/2:2 pid=221 prio=120 target_cpu=002
+  xfce4-terminal-3279  [005] ....   395.706150: sys_poll -> 0x1
+            bash-4065  [002] ....   395.706151: sys_clone -> 0xff4
+  xfce4-terminal-3279  [005] ....   395.706152: sys_read(fd: 4, buf: 7ffc24f78050, count: 10)
+  xfce4-terminal-3279  [005] ....   395.706153: sys_read -> 0x8
+  xfce4-terminal-3279  [005] ....   395.706158: sys_recvmsg(fd: 5, msg: 7ffc24f77eb0, flags: 0)
+  xfce4-terminal-3279  [005] ....   395.706159: sys_recvmsg -> 0xfffffffffffffff5
+  xfce4-terminal-3279  [005] ....   395.706162: sys_poll(ufds: 55b9b59f7180, nfds: 6, timeout_msecs: a)
+  xfce4-terminal-3279  [005] d...   395.706167: sched_stat_runtime: comm=xfce4-terminal pid=3279 runtime=85645 [ns] vruntime=20988066058 [ns]
+            bash-4065  [002] ....   395.706172: sys_setpgid(pid: ff4, pgid: ff4)
+            bash-4065  [002] ....   395.706173: sys_setpgid -> 0x0
+           <...>-4083  [004] ....   395.706174: sched_process_exit: comm=bash pid=4083 prio=120
+           <...>-4083  [004] d...   395.706180: sched_stat_runtime: comm=bash pid=4083 runtime=607537 [ns] vruntime=239668781 [ns]
+           <...>-4083  [004] d.h.   395.706187: sched_waking: comm=kworker/4:3 pid=1995 prio=120 target_cpu=004
+            bash-4065  [002] ....   395.706188: sys_rt_sigprocmask(how: 2, nset: 7ffdb7739730, oset: 0, sigsetsize: 8)
+           <...>-4083  [004] d.h.   395.706189: sched_wakeup: comm=kworker/4:3 pid=1995 prio=120 target_cpu=004
+            bash-4065  [002] ....   395.706189: sys_rt_sigprocmask -> 0x0
+  xfce4-terminal-3279  [005] d...   395.706193: sched_stat_runtime: comm=bash pid=4065 runtime=53227 [ns] vruntime=204664543 [ns]
+           <...>-4083  [004] d...   395.706193: sched_waking: comm=bash pid=3979 prio=120 target_cpu=000
+  xfce4-terminal-3279  [005] d...   395.706195: sched_migrate_task: comm=bash pid=4084 prio=120 orig_cpu=2 dest_cpu=5
+           <...>-4083  [004] d...   395.706195: sched_wake_idle_without_ipi: cpu=0
+           <...>-4083  [004] d...   395.706196: sched_wakeup: comm=bash pid=3979 prio=120 target_cpu=000
+           <...>-4083  [004] d...   395.706198: sched_stat_runtime: comm=bash pid=4083 runtime=17670 [ns] vruntime=239686451 [ns]
+           <...>-4083  [004] d...   395.706200: sched_switch: prev_comm=bash prev_pid=4083 prev_prio=120 prev_state=P ==> next_comm=kworker/4:3 next_pid=1995 next_prio=120
+          <idle>-0     [000] d...   395.706200: sched_switch: prev_comm=swapper/0 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=bash next_pid=3979 next_prio=120
+  xfce4-terminal-3279  [005] d...   395.706201: sched_switch: prev_comm=xfce4-terminal prev_pid=3279 prev_prio=120 prev_state=D ==> next_comm=bash next_pid=4084 next_prio=120
+           <...>-4084  [005] d.h.   395.706204: sched_waking: comm=kworker/5:0 pid=43 prio=120 target_cpu=005
+           <...>-4084  [005] d.h.   395.706206: sched_wakeup: comm=kworker/5:0 pid=43 prio=120 target_cpu=005
+            bash-3979  [000] ....   395.706211: sys_wait4 -> 0xff3
+     kworker/4:3-1995  [004] d...   395.706212: sched_stat_runtime: comm=kworker/4:3 pid=1995 runtime=14806 [ns] vruntime=58702669778 [ns]
+           <...>-4084  [005] ....   395.706215: sys_clone -> 0x0
+            bash-3979  [000] ....   395.706216: sys_rt_sigprocmask(how: 0, nset: 7ffe0babe9c0, oset: 7ffe0babea40, sigsetsize: 8)
+            bash-3979  [000] ....   395.706217: sys_rt_sigprocmask -> 0x0
+            bash-3979  [000] ....   395.706219: sys_ioctl(fd: ff, cmd: 5410, arg: 7ffe0babe9ac)
+            bash-3979  [000] ....   395.706221: sys_ioctl -> 0x0
+            bash-3979  [000] ....   395.706222: sys_rt_sigprocmask(how: 2, nset: 7ffe0babea40, oset: 0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706222: sys_rt_sigprocmask -> 0x0
+     kworker/4:3-1995  [004] d...   395.706223: sched_switch: prev_comm=kworker/4:3 prev_pid=1995 prev_prio=120 prev_state=R+ ==> next_comm=swapper/4 next_pid=0 next_prio=120
+            bash-3979  [000] ....   395.706224: sys_ioctl(fd: ff, cmd: 5401, arg: 7ffe0babeaa0)
+            bash-3979  [000] ....   395.706226: sys_ioctl -> 0x0
+            bash-3979  [000] ....   395.706227: sys_ioctl(fd: ff, cmd: 5413, arg: 7ffe0babeab0)
+            bash-3979  [000] ....   395.706228: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.706231: sys_rt_sigprocmask(how: 0, nset: 7ffdb7739650, oset: 7ffdb77396d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.706231: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.706232: sys_close(fd: 3)
+            bash-4065  [002] ....   395.706233: sys_close -> 0x0
+            bash-4065  [002] ....   395.706234: sys_close(fd: 4)
+            bash-4065  [002] ....   395.706235: sys_close -> 0x0
+           <...>-4084  [005] ....   395.706235: sys_set_robust_list(head: 7f1f01eeea20, len: 18)
+           <...>-4084  [005] ....   395.706236: sys_set_robust_list -> 0x0
+            bash-4065  [002] ....   395.706244: sys_ioctl(fd: ff, cmd: 540f, arg: 7ffdb7739614)
+            bash-4065  [002] ....   395.706245: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.706246: sys_rt_sigprocmask(how: 0, nset: 7ffdb7739500, oset: 7ffdb7739580, sigsetsize: 8)
+            bash-4065  [002] ....   395.706247: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.706248: sys_ioctl(fd: ff, cmd: 5410, arg: 7ffdb77394ec)
+            bash-4065  [002] ....   395.706249: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.706250: sys_rt_sigprocmask(how: 2, nset: 7ffdb7739580, oset: 0, sigsetsize: 8)
+            bash-4065  [002] ....   395.706250: sys_rt_sigprocmask -> 0x0
+           <...>-4084  [005] ....   395.706250: sys_getpid()
+           <...>-4084  [005] ....   395.706251: sys_getpid -> 0xff4
+            bash-4065  [002] ....   395.706251: sys_rt_sigprocmask(how: 2, nset: 7ffdb77396d0, oset: 0, sigsetsize: 8)
+            bash-4065  [002] ....   395.706251: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.706252: sys_rt_sigprocmask(how: 0, nset: 7ffdb7739750, oset: 7ffdb77397d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.706253: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.706254: sys_wait4(upid: ffffffff, stat_addr: 7ffdb77396f0, options: a, ru: 0)
+            bash-4065  [002] ....   395.706255: sched_process_wait: comm=bash pid=0 prio=120
+            bash-4065  [002] d...   395.706257: sched_stat_runtime: comm=bash pid=4065 runtime=63633 [ns] vruntime=204728176 [ns]
+           <...>-4084  [005] ....   395.706257: sys_rt_sigprocmask(how: 2, nset: 56181c50e1e0, oset: 0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706257: sys_rt_sigprocmask(how: 2, nset: 7ffe0babeb80, oset: 0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706258: sys_rt_sigprocmask -> 0x0
+           <...>-4084  [005] ....   395.706258: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] d...   395.706260: sched_switch: prev_comm=bash prev_pid=4065 prev_prio=120 prev_state=D ==> next_comm=kworker/2:2 next_pid=221 next_prio=120
+            bash-3979  [000] ....   395.706262: sys_wait4(upid: ffffffff, stat_addr: 7ffe0babe610, options: b, ru: 0)
+            bash-3979  [000] ....   395.706262: sched_process_wait: comm=bash pid=0 prio=120
+            bash-3979  [000] ....   395.706263: sys_wait4 -> 0xfffffffffffffff6
+     kworker/2:2-221   [002] d...   395.706263: sched_stat_runtime: comm=kworker/2:2 pid=221 runtime=6972 [ns] vruntime=59814806501 [ns]
+           <...>-4084  [005] ....   395.706265: sys_rt_sigaction(sig: 14, act: 7ffdb77393d0, oact: 7ffdb7739470, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706265: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706265: sys_rt_sigreturn()
+           <...>-4084  [005] ....   395.706266: sys_rt_sigaction(sig: 15, act: 7ffdb77393d0, oact: 7ffdb7739470, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706267: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706268: sys_rt_sigaction(sig: 16, act: 7ffdb77393e0, oact: 7ffdb7739480, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706268: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706269: sys_setpgid(pid: ff4, pgid: ff4)
+           <...>-4084  [005] ....   395.706270: sys_setpgid -> 0x0
+           <...>-4084  [005] ....   395.706271: sys_rt_sigprocmask(how: 0, nset: 7ffdb7739560, oset: 7ffdb77395e0, sigsetsize: 8)
+     kworker/2:2-221   [002] d...   395.706271: sched_switch: prev_comm=kworker/2:2 prev_pid=221 prev_prio=120 prev_state=R+ ==> next_comm=swapper/2 next_pid=0 next_prio=120
+           <...>-4084  [005] ....   395.706272: sys_rt_sigprocmask -> 0x0
+           <...>-4084  [005] ....   395.706279: sys_ioctl(fd: ff, cmd: 5410, arg: 7ffdb773954c)
+            bash-3979  [000] ....   395.706279: sys_rt_sigaction(sig: 2, act: 7ffe0babeaa0, oact: 7ffe0babeb40, sigsetsize: 8)
+            bash-3979  [000] ....   395.706280: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706281: sys_ioctl -> 0x0
+           <...>-4084  [005] ....   395.706283: sys_rt_sigprocmask(how: 2, nset: 7ffdb77395e0, oset: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706284: sys_rt_sigprocmask -> 0x0
+           <...>-4084  [005] ....   395.706285: sys_close(fd: 4)
+           <...>-4084  [005] ....   395.706286: sys_close -> 0x0
+           <...>-4084  [005] ....   395.706289: sys_read(fd: 3, buf: 7ffdb77396af, count: 1)
+           <...>-4084  [005] ....   395.706291: sys_read -> 0x0
+           <...>-4084  [005] ....   395.706295: sys_close(fd: 3)
+           <...>-4084  [005] ....   395.706296: sys_close -> 0x0
+           <...>-4084  [005] ....   395.706302: sys_rt_sigaction(sig: 1, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706302: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706303: sys_rt_sigaction(sig: 4, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706304: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706304: sys_rt_sigaction(sig: 5, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706305: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706306: sys_rt_sigaction(sig: 6, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706306: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706307: sys_rt_sigaction(sig: 8, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706307: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706308: sys_rt_sigaction(sig: 7, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706308: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706309: sys_rt_sigaction(sig: b, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706310: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706311: sys_rt_sigaction(sig: 1f, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706311: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706312: sys_rt_sigaction(sig: d, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706313: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706314: sys_rt_sigaction(sig: e, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706314: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706315: sys_rt_sigaction(sig: 18, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706315: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706316: sys_rt_sigaction(sig: 19, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706316: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706317: sys_rt_sigaction(sig: 1a, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706317: sys_rt_sigprocmask(how: 0, nset: 7ffe0babdc00, oset: 7ffe0babdc80, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706318: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706318: sys_rt_sigaction(sig: a, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706319: sys_rt_sigprocmask -> 0x0
+           <...>-4084  [005] ....   395.706319: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706320: sys_rt_sigaction(sig: c, act: 7ffdb77395f0, oact: 0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706320: sys_ioctl(fd: ff, cmd: 5410, arg: 7ffe0babdbec)
+           <...>-4084  [005] ....   395.706320: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706321: sys_ioctl -> 0x0
+            bash-3979  [000] ....   395.706322: sys_rt_sigprocmask(how: 2, nset: 7ffe0babdc80, oset: 0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706322: sys_rt_sigprocmask -> 0x0
+            bash-3979  [000] ....   395.706323: sys_rt_sigaction(sig: 2, act: 7ffe0babda80, oact: 7ffe0babdb20, sigsetsize: 8)
+            bash-3979  [000] ....   395.706324: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706325: sys_rt_sigaction(sig: 2, act: 7ffdb77394f0, oact: 7ffdb7739590, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706326: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706330: sys_rt_sigaction(sig: 3, act: 7ffdb77394f0, oact: 7ffdb7739590, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706330: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706331: sys_rt_sigaction(sig: f, act: 7ffdb77394f0, oact: 7ffdb7739590, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706332: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706333: sys_rt_sigaction(sig: 11, act: 7ffdb77394f0, oact: 7ffdb7739590, sigsetsize: 8)
+           <...>-4084  [005] ....   395.706333: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706354: sys_ioctl(fd: 0, cmd: 5413, arg: 7ffe0babdc70)
+            bash-3979  [000] ....   395.706354: sys_ioctl -> 0x0
+            bash-3979  [000] ....   395.706355: sys_ioctl(fd: 0, cmd: 5414, arg: 7ffe0babdc70)
+            bash-3979  [000] ....   395.706356: sys_ioctl -> 0x0
+            bash-3979  [000] ....   395.706357: sys_ioctl(fd: 0, cmd: 5401, arg: 7ffe0babdc40)
+            bash-3979  [000] ....   395.706358: sys_ioctl -> 0x0
+            bash-3979  [000] ....   395.706360: sys_ioctl(fd: 0, cmd: 5401, arg: 7ffe0babdc30)
+            bash-3979  [000] ....   395.706361: sys_ioctl -> 0x0
+            bash-3979  [000] ....   395.706362: sys_ioctl(fd: 0, cmd: 5403, arg: 7ffe0babdc00)
+            bash-3979  [000] ....   395.706364: sys_ioctl -> 0x0
+            bash-3979  [000] ....   395.706365: sys_ioctl(fd: 0, cmd: 5401, arg: 7ffe0babdc00)
+            bash-3979  [000] ....   395.706366: sys_ioctl -> 0x0
+            bash-3979  [000] ....   395.706370: sys_rt_sigprocmask(how: 0, nset: 558d31bbaa40, oset: 558d31bba9c0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706371: sys_rt_sigprocmask -> 0x0
+            bash-3979  [000] ....   395.706372: sys_rt_sigaction(sig: 2, act: 7ffe0babd8e0, oact: 7ffe0babd980, sigsetsize: 8)
+            bash-3979  [000] ....   395.706372: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706373: sys_rt_sigaction(sig: f, act: 7ffe0babd8e0, oact: 7ffe0babd980, sigsetsize: 8)
+            bash-3979  [000] ....   395.706374: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706375: sys_rt_sigaction(sig: 1, act: 7ffe0babd8e0, oact: 7ffe0babd980, sigsetsize: 8)
+            bash-3979  [000] ....   395.706375: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706376: sys_rt_sigaction(sig: 3, act: 7ffe0babd8e0, oact: 7ffe0babd980, sigsetsize: 8)
+            bash-3979  [000] ....   395.706376: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706377: sys_rt_sigaction(sig: 3, act: 7ffe0babda50, oact: 7ffe0babdaf0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706378: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706378: sys_rt_sigaction(sig: e, act: 7ffe0babd9b0, oact: 7ffe0babda50, sigsetsize: 8)
+            bash-3979  [000] ....   395.706379: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706380: sys_rt_sigaction(sig: 14, act: 7ffe0babd8e0, oact: 7ffe0babd980, sigsetsize: 8)
+            bash-3979  [000] ....   395.706380: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706381: sys_rt_sigaction(sig: 14, act: 7ffe0babda50, oact: 7ffe0babdaf0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706381: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706382: sys_rt_sigaction(sig: 16, act: 7ffe0babd8e0, oact: 7ffe0babd980, sigsetsize: 8)
+            bash-3979  [000] ....   395.706383: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706383: sys_rt_sigaction(sig: 16, act: 7ffe0babda50, oact: 7ffe0babdaf0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706384: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706385: sys_rt_sigaction(sig: 15, act: 7ffe0babd8e0, oact: 7ffe0babd980, sigsetsize: 8)
+            bash-3979  [000] ....   395.706385: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706386: sys_rt_sigaction(sig: 15, act: 7ffe0babda50, oact: 7ffe0babdaf0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706386: sys_rt_sigaction -> 0x0
+            bash-3979  [000] ....   395.706387: sys_rt_sigprocmask(how: 2, nset: 558d31bba9c0, oset: 0, sigsetsize: 8)
+            bash-3979  [000] ....   395.706388: sys_rt_sigprocmask -> 0x0
+            bash-3979  [000] ....   395.706388: sys_rt_sigaction(sig: 1c, act: 7ffe0babd8e0, oact: 7ffe0babd980, sigsetsize: 8)
+            bash-3979  [000] ....   395.706389: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.706398: sys_execve(filename: 56181cc6d0d0, argv: 56181cc67440, envp: 56181cc51650)
+            bash-3979  [000] ....   395.706402: sys_write(fd: 2, buf: 558d3348e2f0, count: f)
+            bash-3979  [000] d...   395.706405: sched_waking: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+            bash-3979  [000] d...   395.706408: sched_wake_idle_without_ipi: cpu=7
+            bash-3979  [000] d...   395.706409: sched_wakeup: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+            bash-3979  [000] ....   395.706410: sys_write -> 0xf
+            bash-3979  [000] ....   395.706414: sys_pselect6(n: 1, inp: 7ffe0babdc30, outp: 0, exp: 0, tsp: 0, sig: 7ffe0babdb60)
+            bash-3979  [000] d...   395.706417: sched_stat_runtime: comm=bash pid=3979 runtime=222666 [ns] vruntime=276143330 [ns]
+            bash-3979  [000] d...   395.706425: sched_switch: prev_comm=bash prev_pid=3979 prev_prio=120 prev_state=D ==> next_comm=swapper/0 next_pid=0 next_prio=120
+          <idle>-0     [007] d...   395.706475: sched_switch: prev_comm=swapper/7 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=kworker/u32:4 next_pid=184 next_prio=120
+   kworker/u32:4-184   [007] d...   395.706483: sched_waking: comm=sshd pid=3976 prio=120 target_cpu=001
+   kworker/u32:4-184   [007] d...   395.706486: sched_wake_idle_without_ipi: cpu=1
+   kworker/u32:4-184   [007] d...   395.706487: sched_wakeup: comm=sshd pid=3976 prio=120 target_cpu=001
+   kworker/u32:4-184   [007] d...   395.706489: sched_stat_runtime: comm=kworker/u32:4 pid=184 runtime=81715 [ns] vruntime=60776819140 [ns]
+   kworker/u32:4-184   [007] d...   395.706491: sched_switch: prev_comm=kworker/u32:4 prev_pid=184 prev_prio=120 prev_state=R+ ==> next_comm=swapper/7 next_pid=0 next_prio=120
+          <idle>-0     [001] d...   395.706494: sched_switch: prev_comm=swapper/1 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=sshd next_pid=3976 next_prio=120
+            sshd-3976  [001] ....   395.706500: sys_select -> 0x1
+            sshd-3976  [001] ....   395.706503: sys_rt_sigprocmask(how: 0, nset: 7ffe5afdea70, oset: 7ffe5afde9f0, sigsetsize: 8)
+            sshd-3976  [001] ....   395.706504: sys_rt_sigprocmask -> 0x0
+            sshd-3976  [001] ....   395.706505: sys_rt_sigprocmask(how: 2, nset: 7ffe5afde9f0, oset: 0, sigsetsize: 8)
+            sshd-3976  [001] ....   395.706505: sys_rt_sigprocmask -> 0x0
+            sshd-3976  [001] ....   395.706507: sys_clock_gettime(which_clock: 7, tp: 7ffe5afdea90)
+            sshd-3976  [001] ....   395.706508: sys_clock_gettime -> 0x0
+            sshd-3976  [001] ....   395.706510: sys_read(fd: c, buf: 7ffe5afda9d0, count: 4000)
+            sshd-3976  [001] ....   395.706513: sys_read -> 0xf
+            sshd-3976  [001] ....   395.706519: sys_getpid()
+            sshd-3976  [001] ....   395.706520: sys_getpid -> 0xf88
+            sshd-3976  [001] ....   395.706527: sys_clock_gettime(which_clock: 7, tp: 7ffe5afde9e0)
+            sshd-3976  [001] ....   395.706528: sys_clock_gettime -> 0x0
+            sshd-3976  [001] ....   395.706530: sys_select(n: d, inp: 5638b60d1580, outp: 5638b60d27c0, exp: 0, tvp: 0)
+            sshd-3976  [001] ....   395.706534: sys_select -> 0x1
+            sshd-3976  [001] ....   395.706535: sys_rt_sigprocmask(how: 0, nset: 7ffe5afdea70, oset: 7ffe5afde9f0, sigsetsize: 8)
+            sshd-3976  [001] ....   395.706536: sys_rt_sigprocmask -> 0x0
+            sshd-3976  [001] ....   395.706537: sys_rt_sigprocmask(how: 2, nset: 7ffe5afde9f0, oset: 0, sigsetsize: 8)
+            sshd-3976  [001] ....   395.706537: sys_rt_sigprocmask -> 0x0
+            sshd-3976  [001] ....   395.706539: sys_clock_gettime(which_clock: 7, tp: 7ffe5afdea90)
+            sshd-3976  [001] ....   395.706539: sys_clock_gettime -> 0x0
+            sshd-3976  [001] ....   395.706541: sys_write(fd: 3, buf: 5638b60cd0c0, count: 34)
+            sshd-3976  [001] d...   395.706557: softirq_raise: vec=3 [action=NET_RX]
+            sshd-3976  [001] ..s1   395.706559: softirq_entry: vec=3 [action=NET_RX]
+            sshd-3976  [001] d.s1   395.706570: sched_waking: comm=ssh pid=3963 prio=120 target_cpu=006
+            sshd-3976  [001] d.s1   395.706573: sched_wake_idle_without_ipi: cpu=6
+            sshd-3976  [001] d.s1   395.706574: sched_wakeup: comm=ssh pid=3963 prio=120 target_cpu=006
+            sshd-3976  [001] ..s1   395.706579: softirq_exit: vec=3 [action=NET_RX]
+            sshd-3976  [001] ....   395.706585: sys_write -> 0x34
+            sshd-3976  [001] ....   395.706589: sys_clock_gettime(which_clock: 7, tp: 7ffe5afde9e0)
+            sshd-3976  [001] ....   395.706590: sys_clock_gettime -> 0x0
+            sshd-3976  [001] ....   395.706593: sys_select(n: d, inp: 5638b60d1580, outp: 5638b60d27c0, exp: 0, tvp: 0)
+            sshd-3976  [001] d...   395.706598: sched_stat_runtime: comm=sshd pid=3976 runtime=113123 [ns] vruntime=197670862 [ns]
+            sshd-3976  [001] d...   395.706610: sched_switch: prev_comm=sshd prev_pid=3976 prev_prio=120 prev_state=D ==> next_comm=swapper/1 next_pid=0 next_prio=120
+          <idle>-0     [006] d...   395.706623: sched_switch: prev_comm=swapper/6 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=ssh next_pid=3963 next_prio=120
+             ssh-3963  [006] ....   395.706630: sys_select -> 0x1
+             ssh-3963  [006] ....   395.706633: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfba0)
+             ssh-3963  [006] ....   395.706633: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706635: sys_read(fd: 3, buf: 7ffd4e9bdc20, count: 2000)
+             ssh-3963  [006] ....   395.706641: sys_read -> 0x34
+             ssh-3963  [006] ....   395.706652: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfc10)
+             ssh-3963  [006] ....   395.706653: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706654: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfaf0)
+             ssh-3963  [006] ....   395.706655: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706657: sys_select(n: 7, inp: 561a828ce860, outp: 561a828d4450, exp: 0, tvp: 0)
+             ssh-3963  [006] ....   395.706661: sys_select -> 0x1
+             ssh-3963  [006] ....   395.706663: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfba0)
+             ssh-3963  [006] ....   395.706663: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706665: sys_write(fd: 5, buf: 561a828bb070, count: f)
+             ssh-3963  [006] ....   395.706684: sys_write -> 0xf
+             ssh-3963  [006] ....   395.706687: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfc10)
+             ssh-3963  [006] ....   395.706688: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706690: sys_clock_gettime(which_clock: 7, tp: 7ffd4e9bfaf0)
+             ssh-3963  [006] ....   395.706690: sys_clock_gettime -> 0x0
+             ssh-3963  [006] ....   395.706692: sys_select(n: 7, inp: 561a828ce860, outp: 561a828d4450, exp: 0, tvp: 0)
+             ssh-3963  [006] d...   395.706695: sched_stat_runtime: comm=ssh pid=3963 runtime=123542 [ns] vruntime=527492205 [ns]
+           <...>-4084  [005] ....   395.706703: sched_process_exec: filename=/bin/ls pid=4084 old_pid=4084
+             ssh-3963  [006] d...   395.706705: sched_switch: prev_comm=ssh prev_pid=3963 prev_prio=120 prev_state=D ==> next_comm=swapper/6 next_pid=0 next_prio=120
+           <...>-4084  [005] ....   395.706706: sys_execve -> 0x0
+           <...>-4084  [005] ....   395.706733: sys_brk(brk: 0)
+           <...>-4084  [005] ....   395.706734: sys_brk -> 0x5612c5aca000
+           <...>-4084  [005] ....   395.706753: sys_access(filename: 7fd6455e25a2, mode: 0)
+           <...>-4084  [005] ....   395.706757: sys_access -> 0xfffffffffffffffe
+           <...>-4084  [005] ....   395.706760: sys_access(filename: 7fd6455e52d0, mode: 4)
+           <...>-4084  [005] ....   395.706763: sys_access -> 0xfffffffffffffffe
+           <...>-4084  [005] ....   395.706769: sys_openat(dfd: ffffff9c, filename: 7fd6455e2948, flags: 80000, mode: 0)
+           <...>-4084  [005] ....   395.706775: sys_openat -> 0x3
+           <...>-4084  [005] ....   395.706776: sys_newfstat(fd: 3, statbuf: 7fffc1904f80)
+           <...>-4084  [005] ....   395.706778: sys_newfstat -> 0x0
+           <...>-4084  [005] ....   395.706779: sys_mmap(addr: 0, len: 1ef9c, prot: 1, flags: 2, fd: 3, off: 0)
+           <...>-4084  [005] ....   395.706783: sys_mmap -> 0x7fd6455a3000
+           <...>-4084  [005] ....   395.706784: sys_close(fd: 3)
+           <...>-4084  [005] ....   395.706785: sys_close -> 0x0
+           <...>-4084  [005] ....   395.706790: sys_access(filename: 7fd6455e25a2, mode: 0)
+           <...>-4084  [005] ....   395.706792: sys_access -> 0xfffffffffffffffe
+           <...>-4084  [005] ....   395.706799: sys_openat(dfd: ffffff9c, filename: 7fd6455ebdd0, flags: 80000, mode: 0)
+           <...>-4084  [005] ....   395.706802: sys_openat -> 0x3
+           <...>-4084  [005] ....   395.706803: sys_read(fd: 3, buf: 7fffc1905138, count: 340)
+           <...>-4084  [005] ....   395.706806: sys_read -> 0x340
+           <...>-4084  [005] ....   395.706808: sys_newfstat(fd: 3, statbuf: 7fffc1904fd0)
+           <...>-4084  [005] ....   395.706809: sys_newfstat -> 0x0
+           <...>-4084  [005] ....   395.706810: sys_mmap(addr: 0, len: 2000, prot: 3, flags: 22, fd: ffffffff, off: 0)
+           <...>-4084  [005] ....   395.706813: sys_mmap -> 0x7fd6455a1000
+           <...>-4084  [005] ....   395.706818: sys_mmap(addr: 0, len: 227ab0, prot: 5, flags: 802, fd: 3, off: 0)
+           <...>-4084  [005] ....   395.706822: sys_mmap -> 0x7fd645379000
+           <...>-4084  [005] ....   395.706823: sys_mprotect(start: 7fd64539e000, len: 1ff000, prot: 0)
+           <...>-4084  [005] ....   395.706832: sys_mprotect -> 0x0
+           <...>-4084  [005] ....   395.706833: sys_mmap(addr: 7fd64559d000, len: 2000, prot: 3, flags: 812, fd: 3, off: 24000)
+           <...>-4084  [005] ....   395.706841: sys_mmap -> 0x7fd64559d000
+           <...>-4084  [005] ....   395.706846: sys_mmap(addr: 7fd64559f000, len: 1ab0, prot: 3, flags: 32, fd: ffffffff, off: 0)
+           <...>-4084  [005] ....   395.706850: sys_mmap -> 0x7fd64559f000
+           <...>-4084  [005] ....   395.706858: sys_close(fd: 3)
+           <...>-4084  [005] ....   395.706858: sys_close -> 0x0
+           <...>-4084  [005] ....   395.706866: sys_access(filename: 7fd6455e25a2, mode: 0)
+           <...>-4084  [005] ....   395.706869: sys_access -> 0xfffffffffffffffe
+           <...>-4084  [005] ....   395.706872: sys_openat(dfd: ffffff9c, filename: 7fd6455a14d0, flags: 80000, mode: 0)
+           <...>-4084  [005] ....   395.706877: sys_openat -> 0x3
+           <...>-4084  [005] ....   395.706878: sys_read(fd: 3, buf: 7fffc1905108, count: 340)
+           <...>-4084  [005] ....   395.706880: sys_read -> 0x340
+           <...>-4084  [005] ....   395.706882: sys_newfstat(fd: 3, statbuf: 7fffc1904fa0)
+           <...>-4084  [005] ....   395.706883: sys_newfstat -> 0x0
+           <...>-4084  [005] ....   395.706884: sys_mmap(addr: 0, len: 1bcae0, prot: 1, flags: 802, fd: 3, off: 0)
+           <...>-4084  [005] ....   395.706888: sys_mmap -> 0x7fd6451bc000
+           <...>-4084  [005] ....   395.706889: sys_mmap(addr: 7fd6451de000, len: 146000, prot: 5, flags: 812, fd: 3, off: 22000)
+           <...>-4084  [005] ....   395.706898: sys_mmap -> 0x7fd6451de000
+           <...>-4084  [005] ....   395.706899: sys_mmap(addr: 7fd645324000, len: 4b000, prot: 1, flags: 812, fd: 3, off: 168000)
+           <...>-4084  [005] ....   395.706905: sys_mmap -> 0x7fd645324000
+           <...>-4084  [005] ....   395.706905: sys_mmap(addr: 7fd64536f000, len: 6000, prot: 3, flags: 812, fd: 3, off: 1b2000)
+           <...>-4084  [005] ....   395.706911: sys_mmap -> 0x7fd64536f000
+           <...>-4084  [005] ....   395.706917: sys_mmap(addr: 7fd645375000, len: 3ae0, prot: 3, flags: 32, fd: ffffffff, off: 0)
+           <...>-4084  [005] ....   395.706921: sys_mmap -> 0x7fd645375000
+           <...>-4084  [005] ....   395.706929: sys_close(fd: 3)
+           <...>-4084  [005] ....   395.706929: sys_close -> 0x0
+           <...>-4084  [005] ....   395.706940: sys_access(filename: 7fd6455e25a2, mode: 0)
+           <...>-4084  [005] ....   395.706943: sys_access -> 0xfffffffffffffffe
+           <...>-4084  [005] ....   395.706946: sys_openat(dfd: ffffff9c, filename: 7fd6455a19b0, flags: 80000, mode: 0)
+           <...>-4084  [005] ....   395.706951: sys_openat -> 0x3
+           <...>-4084  [005] ....   395.706951: sys_read(fd: 3, buf: 7fffc1904fc8, count: 340)
+           <...>-4084  [005] ....   395.706953: sys_read -> 0x340
+           <...>-4084  [005] ....   395.706955: sys_newfstat(fd: 3, statbuf: 7fffc1904e60)
+           <...>-4084  [005] ....   395.706956: sys_newfstat -> 0x0
+           <...>-4084  [005] ....   395.706957: sys_mmap(addr: 0, len: 73108, prot: 1, flags: 802, fd: 3, off: 0)
+           <...>-4084  [005] ....   395.706961: sys_mmap -> 0x7fd645148000
+           <...>-4084  [005] ....   395.706962: sys_mmap(addr: 7fd64514a000, len: 52000, prot: 5, flags: 812, fd: 3, off: 2000)
+           <...>-4084  [005] ....   395.706970: sys_mmap -> 0x7fd64514a000
+           <...>-4084  [005] ....   395.706971: sys_mmap(addr: 7fd64519c000, len: 1e000, prot: 1, flags: 812, fd: 3, off: 54000)
+           <...>-4084  [005] ....   395.706976: sys_mmap -> 0x7fd64519c000
+           <...>-4084  [005] ....   395.706977: sys_mmap(addr: 7fd6451ba000, len: 2000, prot: 3, flags: 812, fd: 3, off: 71000)
+           <...>-4084  [005] ....   395.706981: sys_mmap -> 0x7fd6451ba000
+           <...>-4084  [005] ....   395.706993: sys_close(fd: 3)
+           <...>-4084  [005] ....   395.706993: sys_close -> 0x0
+           <...>-4084  [005] ....   395.706998: sys_access(filename: 7fd6455e25a2, mode: 0)
+           <...>-4084  [005] ....   395.707001: sys_access -> 0xfffffffffffffffe
+           <...>-4084  [005] ....   395.707003: sys_openat(dfd: ffffff9c, filename: 7fd6455a1eb0, flags: 80000, mode: 0)
+           <...>-4084  [005] ....   395.707007: sys_openat -> 0x3
+           <...>-4084  [005] ....   395.707008: sys_read(fd: 3, buf: 7fffc1904f98, count: 340)
+           <...>-4084  [005] ....   395.707010: sys_read -> 0x340
+           <...>-4084  [005] ....   395.707012: sys_newfstat(fd: 3, statbuf: 7fffc1904e30)
+           <...>-4084  [005] ....   395.707013: sys_newfstat -> 0x0
+           <...>-4084  [005] ....   395.707017: sys_mmap(addr: 0, len: 4110, prot: 1, flags: 802, fd: 3, off: 0)
+           <...>-4084  [005] ....   395.707021: sys_mmap -> 0x7fd645143000
+           <...>-4084  [005] ....   395.707022: sys_mmap(addr: 7fd645144000, len: 1000, prot: 5, flags: 812, fd: 3, off: 1000)
+           <...>-4084  [005] ....   395.707030: sys_mmap -> 0x7fd645144000
+           <...>-4084  [005] ....   395.707031: sys_mmap(addr: 7fd645145000, len: 1000, prot: 1, flags: 812, fd: 3, off: 2000)
+           <...>-4084  [005] ....   395.707036: sys_mmap -> 0x7fd645145000
+           <...>-4084  [005] ....   395.707037: sys_mmap(addr: 7fd645146000, len: 2000, prot: 3, flags: 812, fd: 3, off: 2000)
+           <...>-4084  [005] ....   395.707040: sys_mmap -> 0x7fd645146000
+           <...>-4084  [005] ....   395.707051: sys_close(fd: 3)
+           <...>-4084  [005] ....   395.707051: sys_close -> 0x0
+           <...>-4084  [005] ....   395.707058: sys_access(filename: 7fd6455e25a2, mode: 0)
+           <...>-4084  [005] ....   395.707061: sys_access -> 0xfffffffffffffffe
+           <...>-4084  [005] ....   395.707063: sys_openat(dfd: ffffff9c, filename: 7fd6455a2440, flags: 80000, mode: 0)
+           <...>-4084  [005] ....   395.707068: sys_openat -> 0x3
+           <...>-4084  [005] ....   395.707068: sys_read(fd: 3, buf: 7fffc1904f38, count: 340)
+           <...>-4084  [005] ....   395.707070: sys_read -> 0x340
+           <...>-4084  [005] ....   395.707071: sys_newfstat(fd: 3, statbuf: 7fffc1904dd0)
+           <...>-4084  [005] ....   395.707072: sys_newfstat -> 0x0
+           <...>-4084  [005] ....   395.707074: sys_mmap(addr: 0, len: 20480, prot: 1, flags: 802, fd: 3, off: 0)
+           <...>-4084  [005] ....   395.707078: sys_mmap -> 0x7fd645122000
+           <...>-4084  [005] ....   395.707079: sys_mmap(addr: 7fd645128000, len: f000, prot: 5, flags: 812, fd: 3, off: 6000)
+           <...>-4084  [005] ....   395.707087: sys_mmap -> 0x7fd645128000
+           <...>-4084  [005] ....   395.707088: sys_mmap(addr: 7fd645137000, len: 6000, prot: 1, flags: 812, fd: 3, off: 15000)
+           <...>-4084  [005] ....   395.707093: sys_mmap -> 0x7fd645137000
+           <...>-4084  [005] ....   395.707094: sys_mmap(addr: 7fd64513d000, len: 2000, prot: 3, flags: 812, fd: 3, off: 1a000)
+           <...>-4084  [005] ....   395.707098: sys_mmap -> 0x7fd64513d000
+           <...>-4084  [005] ....   395.707104: sys_mmap(addr: 7fd64513f000, len: 3480, prot: 3, flags: 32, fd: ffffffff, off: 0)
+           <...>-4084  [005] ....   395.707108: sys_mmap -> 0x7fd64513f000
+           <...>-4084  [005] ....   395.707115: sys_close(fd: 3)
+           <...>-4084  [005] ....   395.707116: sys_close -> 0x0
+           <...>-4084  [005] ....   395.707133: sys_mmap(addr: 0, len: 2000, prot: 3, flags: 22, fd: ffffffff, off: 0)
+           <...>-4084  [005] ....   395.707135: sys_mmap -> 0x7fd645120000
+           <...>-4084  [005] ....   395.707146: sys_arch_prctl(option: 1002, arg2: 7fd645121040)
+           <...>-4084  [005] ....   395.707147: sys_arch_prctl -> 0x0
+           <...>-4084  [005] ....   395.707233: sys_mprotect(start: 7fd64536f000, len: 4000, prot: 1)
+           <...>-4084  [005] ....   395.707240: sys_mprotect -> 0x0
+           <...>-4084  [005] ....   395.707249: sys_mprotect(start: 7fd64513d000, len: 1000, prot: 1)
+           <...>-4084  [005] ....   395.707253: sys_mprotect -> 0x0
+           <...>-4084  [005] ....   395.707261: sys_mprotect(start: 7fd645146000, len: 1000, prot: 1)
+           <...>-4084  [005] ....   395.707264: sys_mprotect -> 0x0
+           <...>-4084  [005] ....   395.707286: sys_mprotect(start: 7fd6451ba000, len: 1000, prot: 1)
+           <...>-4084  [005] ....   395.707290: sys_mprotect -> 0x0
+           <...>-4084  [005] ....   395.707304: sys_mprotect(start: 7fd64559d000, len: 1000, prot: 1)
+           <...>-4084  [005] ....   395.707307: sys_mprotect -> 0x0
+           <...>-4084  [005] ....   395.707318: sys_mprotect(start: 5612c3b7b000, len: 1000, prot: 1)
+           <...>-4084  [005] ....   395.707321: sys_mprotect -> 0x0
+           <...>-4084  [005] ....   395.707327: sys_mprotect(start: 7fd6455e9000, len: 1000, prot: 1)
+           <...>-4084  [005] ....   395.707331: sys_mprotect -> 0x0
+           <...>-4084  [005] ....   395.707332: sys_munmap(addr: 7fd6455a3000, len: 1ef9c)
+           <...>-4084  [005] ....   395.707347: sys_munmap -> 0x0
+           <...>-4084  [005] ....   395.707354: sys_set_tid_address(tidptr: 7fd645121310)
+           <...>-4084  [005] ....   395.707355: sys_set_tid_address -> 0xff4
+           <...>-4084  [005] ....   395.707356: sys_set_robust_list(head: 7fd645121320, len: 18)
+           <...>-4084  [005] ....   395.707356: sys_set_robust_list -> 0x0
+           <...>-4084  [005] ....   395.707361: sys_rt_sigaction(sig: 20, act: 7fffc1905790, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.707361: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.707362: sys_rt_sigaction(sig: 21, act: 7fffc1905790, oact: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.707363: sys_rt_sigaction -> 0x0
+           <...>-4084  [005] ....   395.707363: sys_rt_sigprocmask(how: 1, nset: 7fffc1905908, oset: 0, sigsetsize: 8)
+           <...>-4084  [005] ....   395.707364: sys_rt_sigprocmask -> 0x0
+           <...>-4084  [005] ....   395.707371: sys_prlimit64(pid: 0, resource: 3, new_rlim: 0, old_rlim: 7fffc19058f0)
+           <...>-4084  [005] ....   395.707373: sys_prlimit64 -> 0x0
+           <...>-4084  [005] ....   395.707412: sys_statfs(pathname: 7fd6453976c3, buf: 7fffc19058c0)
+           <...>-4084  [005] ....   395.707425: sys_statfs -> 0xfffffffffffffffe
+           <...>-4084  [005] ....   395.707428: sys_statfs(pathname: 7fd6453976ca, buf: 7fffc19058c0)
+           <...>-4084  [005] ....   395.707429: sys_statfs -> 0xfffffffffffffffe
+           <...>-4084  [005] ....   395.707493: sys_brk(brk: 0)
+           <...>-4084  [005] ....   395.707494: sys_brk -> 0x5612c5aca000
+           <...>-4084  [005] ....   395.707494: sys_brk(brk: 5612c5aeb000)
+           <...>-4084  [005] ....   395.707497: sys_brk -> 0x5612c5aeb000
+           <...>-4084  [005] ....   395.707505: sys_openat(dfd: ffffff9c, filename: 7fd6453976a7, flags: 80000, mode: 0)
+           <...>-4084  [005] ....   395.707513: sys_openat -> 0x3
+           <...>-4084  [005] ....   395.707518: sys_newfstat(fd: 3, statbuf: 7fffc19057a0)
+           <...>-4084  [005] ....   395.707520: sys_newfstat -> 0x0
+           <...>-4084  [005] ....   395.707521: sys_read(fd: 3, buf: 5612c5aca510, count: 400)
+           <...>-4084  [005] ....   395.707544: sys_read -> 0x17a
+           <...>-4084  [005] ....   395.707549: sys_read(fd: 3, buf: 5612c5aca510, count: 400)
+           <...>-4084  [005] ....   395.707550: sys_read -> 0x0
+           <...>-4084  [005] ....   395.707554: sys_close(fd: 3)
+           <...>-4084  [005] ....   395.707555: sys_close -> 0x0
+           <...>-4084  [005] ....   395.707560: sys_access(filename: 7fd6453976eb, mode: 0)
+           <...>-4084  [005] ....   395.707564: sys_access -> 0xfffffffffffffffe
+           <...>-4084  [005] ....   395.707604: sys_openat(dfd: ffffff9c, filename: 7fd6453428c0, flags: 80000, mode: 0)
+           <...>-4084  [005] ....   395.707612: sys_openat -> 0x3
+           <...>-4084  [005] ....   395.707613: sys_newfstat(fd: 3, statbuf: 7fd645374ac0)
+           <...>-4084  [005] ....   395.707614: sys_newfstat -> 0x0
+           <...>-4084  [005] ....   395.707615: sys_mmap(addr: 0, len: 19ae40, prot: 1, flags: 2, fd: 3, off: 0)
+           <...>-4084  [005] ....   395.707620: sys_mmap -> 0x7fd644f85000
+           <...>-4084  [005] ....   395.707627: sys_close(fd: 3)
+           <...>-4084  [005] ....   395.707627: sys_close -> 0x0
+           <...>-4084  [005] ....   395.707672: sys_ioctl(fd: 1, cmd: 5401, arg: 7fffc1905840)
+           <...>-4084  [005] ....   395.707674: sys_ioctl -> 0x0
+           <...>-4084  [005] ....   395.707677: sys_ioctl(fd: 1, cmd: 5413, arg: 7fffc1905910)
+           <...>-4084  [005] ....   395.707677: sys_ioctl -> 0x0
+           <...>-4084  [005] ....   395.707695: sys_openat(dfd: ffffff9c, filename: 5612c5ad09b0, flags: 90800, mode: 0)
+           <...>-4084  [005] ....   395.707699: sys_openat -> 0x3
+           <...>-4084  [005] ....   395.707700: sys_newfstat(fd: 3, statbuf: 7fffc19054a0)
+           <...>-4084  [005] ....   395.707701: sys_newfstat -> 0x0
+           <...>-4084  [005] ....   395.707706: sys_getdents(fd: 3, dirent: 5612c5ad0a00, count: 8000)
+           <...>-4084  [005] d...   395.707737: sched_waking: comm=jbd2/sdd1-8 pid=475 prio=120 target_cpu=000
+           <...>-4084  [005] d...   395.707741: sched_wake_idle_without_ipi: cpu=0
+           <...>-4084  [005] d...   395.707741: sched_wakeup: comm=jbd2/sdd1-8 pid=475 prio=120 target_cpu=000
+           <...>-4084  [005] ....   395.707744: sys_getdents -> 0x250
+           <...>-4084  [005] ....   395.707752: sys_getdents(fd: 3, dirent: 5612c5ad0a00, count: 8000)
+           <...>-4084  [005] ....   395.707753: sys_getdents -> 0x0
+           <...>-4084  [005] ....   395.707756: sys_close(fd: 3)
+           <...>-4084  [005] ....   395.707757: sys_close -> 0x0
+           <...>-4084  [005] ....   395.707778: sys_newfstat(fd: 1, statbuf: 7fffc1902fe0)
+           <...>-4084  [005] ....   395.707779: sys_newfstat -> 0x0
+           <...>-4084  [005] ....   395.707784: sys_write(fd: 1, buf: 5612c5aca510, count: 9)
+           <...>-4084  [005] d...   395.707787: sched_waking: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+           <...>-4084  [005] d...   395.707789: sched_wake_idle_without_ipi: cpu=7
+           <...>-4084  [005] d...   395.707790: sched_wakeup: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+           <...>-4084  [005] ....   395.707791: sys_write -> 0x9
+          <idle>-0     [000] d...   395.707795: sched_switch: prev_comm=swapper/0 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=jbd2/sdd1-8 next_pid=475 next_prio=120
+           <...>-4084  [005] ....   395.707799: sys_close(fd: 1)
+           <...>-4084  [005] ....   395.707799: sys_close -> 0x0
+           <...>-4084  [005] ....   395.707801: sys_close(fd: 2)
+           <...>-4084  [005] ....   395.707802: sys_close -> 0x0
+           <...>-4084  [005] ....   395.707820: sys_exit_group(error_code: 0)
+           <...>-475   [000] d...   395.707847: sched_stat_runtime: comm=jbd2/sdd1-8 pid=475 runtime=107301 [ns] vruntime=56554292641 [ns]
+           <...>-475   [000] d...   395.707857: sched_switch: prev_comm=jbd2/sdd1-8 prev_pid=475 prev_prio=120 prev_state=T ==> next_comm=swapper/0 next_pid=0 next_prio=120
+          <idle>-0     [007] d...   395.707860: sched_switch: prev_comm=swapper/7 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=kworker/u32:4 next_pid=184 next_prio=120
+   kworker/u32:4-184   [007] d...   395.707867: sched_waking: comm=sshd pid=3977 prio=120 target_cpu=003
+   kworker/u32:4-184   [007] d...   395.707871: sched_wake_idle_without_ipi: cpu=3
+   kworker/u32:4-184   [007] d...   395.707872: sched_wakeup: comm=sshd pid=3977 prio=120 target_cpu=003
+   kworker/u32:4-184   [007] d...   395.707874: sched_stat_runtime: comm=kworker/u32:4 pid=184 runtime=85528 [ns] vruntime=60776904668 [ns]
+          <idle>-0     [003] d...   395.707876: sched_switch: prev_comm=swapper/3 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=sshd next_pid=3977 next_prio=120
+            sshd-3977  [003] ....   395.707882: sys_select -> 0x1
+            sshd-3977  [003] ....   395.707885: sys_rt_sigprocmask(how: 0, nset: 7ffdea252680, oset: 7ffdea252600, sigsetsize: 8)
+   kworker/u32:4-184   [007] d...   395.707887: sched_switch: prev_comm=kworker/u32:4 prev_pid=184 prev_prio=120 prev_state=R+ ==> next_comm=swapper/7 next_pid=0 next_prio=120
+            sshd-3977  [003] ....   395.707887: sys_rt_sigprocmask -> 0x0
+            sshd-3977  [003] ....   395.707888: sys_rt_sigprocmask(how: 2, nset: 7ffdea252600, oset: 0, sigsetsize: 8)
+            sshd-3977  [003] ....   395.707888: sys_rt_sigprocmask -> 0x0
+            sshd-3977  [003] ....   395.707891: sys_clock_gettime(which_clock: 7, tp: 7ffdea2526a0)
+            sshd-3977  [003] ....   395.707892: sys_clock_gettime -> 0x0
+            sshd-3977  [003] ....   395.707894: sys_read(fd: c, buf: 7ffdea24e5e0, count: 4000)
+            sshd-3977  [003] ....   395.707899: sys_read -> 0xa
+            sshd-3977  [003] ....   395.707905: sys_getpid()
+            sshd-3977  [003] ....   395.707906: sys_getpid -> 0xf89
+            sshd-3977  [003] ....   395.707912: sys_clock_gettime(which_clock: 7, tp: 7ffdea2525f0)
+            sshd-3977  [003] ....   395.707912: sys_clock_gettime -> 0x0
+            sshd-3977  [003] ....   395.707914: sys_select(n: d, inp: 561b41569210, outp: 561b41583530, exp: 0, tvp: 0)
+            sshd-3977  [003] ....   395.707919: sys_select -> 0x1
+           <...>-4084  [005] ....   395.707919: sched_process_exit: comm=ls pid=4084 prio=120
+            sshd-3977  [003] ....   395.707920: sys_rt_sigprocmask(how: 0, nset: 7ffdea252680, oset: 7ffdea252600, sigsetsize: 8)
+            sshd-3977  [003] ....   395.707921: sys_rt_sigprocmask -> 0x0
+            sshd-3977  [003] ....   395.707921: sys_rt_sigprocmask(how: 2, nset: 7ffdea252600, oset: 0, sigsetsize: 8)
+            sshd-3977  [003] ....   395.707922: sys_rt_sigprocmask -> 0x0
+            sshd-3977  [003] ....   395.707923: sys_clock_gettime(which_clock: 7, tp: 7ffdea2526a0)
+            sshd-3977  [003] ....   395.707923: sys_clock_gettime -> 0x0
+            sshd-3977  [003] ....   395.707925: sys_write(fd: 3, buf: 561b415670c0, count: 2c)
+           <...>-4084  [005] d...   395.707926: sched_stat_runtime: comm=ls pid=4084 runtime=1729702 [ns] vruntime=757500260 [ns]
+           <...>-4084  [005] d...   395.707934: sched_waking: comm=bash pid=4065 prio=120 target_cpu=002
+           <...>-4084  [005] d...   395.707936: sched_wake_idle_without_ipi: cpu=2
+           <...>-4084  [005] d...   395.707937: sched_wakeup: comm=bash pid=4065 prio=120 target_cpu=002
+           <...>-4084  [005] d...   395.707938: sched_stat_runtime: comm=ls pid=4084 runtime=12108 [ns] vruntime=757512368 [ns]
+           <...>-4084  [005] d...   395.707940: sched_switch: prev_comm=ls prev_pid=4084 prev_prio=120 prev_state=P ==> next_comm=kworker/5:0 next_pid=43 next_prio=120
+     kworker/5:0-43    [005] d...   395.707944: sched_stat_runtime: comm=kworker/5:0 pid=43 runtime=6260 [ns] vruntime=57962269831 [ns]
+            sshd-3977  [003] d...   395.707945: softirq_raise: vec=3 [action=NET_RX]
+            sshd-3977  [003] ..s1   395.707946: softirq_entry: vec=3 [action=NET_RX]
+     kworker/5:0-43    [005] d...   395.707952: sched_switch: prev_comm=kworker/5:0 prev_pid=43 prev_prio=120 prev_state=R+ ==> next_comm=swapper/5 next_pid=0 next_prio=120
+            sshd-3977  [003] d.s1   395.707959: sched_waking: comm=ssh pid=3962 prio=120 target_cpu=005
+            sshd-3977  [003] d.s1   395.707963: sched_wake_idle_without_ipi: cpu=5
+            sshd-3977  [003] d.s1   395.707964: sched_wakeup: comm=ssh pid=3962 prio=120 target_cpu=005
+            sshd-3977  [003] ..s1   395.707971: softirq_exit: vec=3 [action=NET_RX]
+          <idle>-0     [005] d...   395.707973: sched_switch: prev_comm=swapper/5 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=ssh next_pid=3962 next_prio=120
+            sshd-3977  [003] ....   395.707976: sys_write -> 0x2c
+            sshd-3977  [003] ....   395.707980: sys_clock_gettime(which_clock: 7, tp: 7ffdea2525f0)
+            sshd-3977  [003] ....   395.707981: sys_clock_gettime -> 0x0
+             ssh-3962  [005] ....   395.707982: sys_select -> 0x1
+            sshd-3977  [003] ....   395.707983: sys_select(n: d, inp: 561b41569210, outp: 561b41583530, exp: 0, tvp: 0)
+             ssh-3962  [005] ....   395.707986: sys_clock_gettime(which_clock: 7, tp: 7ffce5b63640)
+             ssh-3962  [005] ....   395.707987: sys_clock_gettime -> 0x0
+            sshd-3977  [003] d...   395.707988: sched_stat_runtime: comm=sshd pid=3977 runtime=118581 [ns] vruntime=493594957 [ns]
+             ssh-3962  [005] ....   395.707989: sys_read(fd: 3, buf: 7ffce5b616c0, count: 2000)
+             ssh-3962  [005] ....   395.707994: sys_read -> 0x2c
+            sshd-3977  [003] d...   395.708006: sched_switch: prev_comm=sshd prev_pid=3977 prev_prio=120 prev_state=D ==> next_comm=swapper/3 next_pid=0 next_prio=120
+             ssh-3962  [005] ....   395.708006: sys_clock_gettime(which_clock: 7, tp: 7ffce5b636b0)
+             ssh-3962  [005] ....   395.708007: sys_clock_gettime -> 0x0
+          <idle>-0     [003] d.h.   395.708008: sched_waking: comm=kworker/3:4 pid=677 prio=120 target_cpu=003
+             ssh-3962  [005] ....   395.708009: sys_clock_gettime(which_clock: 7, tp: 7ffce5b63590)
+             ssh-3962  [005] ....   395.708009: sys_clock_gettime -> 0x0
+          <idle>-0     [003] dNh.   395.708010: sched_wakeup: comm=kworker/3:4 pid=677 prio=120 target_cpu=003
+          <idle>-0     [002] dNh.   395.708011: irq_handler_entry: irq=30 name=ahci[0000:01:00.0]
+          <idle>-0     [003] d...   395.708011: sched_switch: prev_comm=swapper/3 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=kworker/3:4 next_pid=677 next_prio=120
+             ssh-3962  [005] ....   395.708012: sys_select(n: 7, inp: 56296e8d3240, outp: 56296e8d9dd0, exp: 0, tvp: 0)
+     kworker/3:4-677   [003] d...   395.708017: sched_stat_runtime: comm=kworker/3:4 pid=677 runtime=7673 [ns] vruntime=54418324275 [ns]
+             ssh-3962  [005] ....   395.708017: sys_select -> 0x1
+     kworker/3:4-677   [003] d...   395.708018: sched_switch: prev_comm=kworker/3:4 prev_pid=677 prev_prio=120 prev_state=R+ ==> next_comm=swapper/3 next_pid=0 next_prio=120
+             ssh-3962  [005] ....   395.708019: sys_clock_gettime(which_clock: 7, tp: 7ffce5b63640)
+             ssh-3962  [005] ....   395.708019: sys_clock_gettime -> 0x0
+             ssh-3962  [005] ....   395.708021: sys_write(fd: 5, buf: 56296e8bee20, count: a)
+          <idle>-0     [002] dNh.   395.708022: sched_waking: comm=jbd2/sdd1-8 pid=475 prio=120 target_cpu=000
+             ssh-3962  [005] d...   395.708025: sched_waking: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+          <idle>-0     [002] dNh.   395.708026: sched_wake_idle_without_ipi: cpu=0
+          <idle>-0     [002] dNh.   395.708027: sched_wakeup: comm=jbd2/sdd1-8 pid=475 prio=120 target_cpu=000
+             ssh-3962  [005] d...   395.708027: sched_wake_idle_without_ipi: cpu=7
+             ssh-3962  [005] d...   395.708028: sched_wakeup: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+             ssh-3962  [005] ....   395.708029: sys_write -> 0xa
+          <idle>-0     [002] dNh.   395.708031: irq_handler_exit: irq=30 ret=handled
+             ssh-3962  [005] ....   395.708033: sys_clock_gettime(which_clock: 7, tp: 7ffce5b636b0)
+             ssh-3962  [005] ....   395.708034: sys_clock_gettime -> 0x0
+          <idle>-0     [002] d...   395.708035: sched_switch: prev_comm=swapper/2 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=bash next_pid=4065 next_prio=120
+             ssh-3962  [005] ....   395.708036: sys_clock_gettime(which_clock: 7, tp: 7ffce5b63590)
+             ssh-3962  [005] ....   395.708036: sys_clock_gettime -> 0x0
+             ssh-3962  [005] ....   395.708039: sys_select(n: 7, inp: 56296e8d3240, outp: 56296e8d9dd0, exp: 0, tvp: 0)
+             ssh-3962  [005] d...   395.708042: sched_stat_runtime: comm=ssh pid=3962 runtime=81434 [ns] vruntime=20979794261 [ns]
+          <idle>-0     [007] d...   395.708043: sched_switch: prev_comm=swapper/7 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=kworker/u32:4 next_pid=184 next_prio=120
+            bash-4065  [002] ....   395.708043: sys_wait4 -> 0xff4
+   kworker/u32:4-184   [007] d...   395.708046: sched_waking: comm=xfce4-terminal pid=3279 prio=120 target_cpu=005
+            bash-4065  [002] ....   395.708047: sys_rt_sigprocmask(how: 0, nset: 7ffdb7739610, oset: 7ffdb7739690, sigsetsize: 8)
+             ssh-3962  [005] d...   395.708047: sched_switch: prev_comm=ssh prev_pid=3962 prev_prio=120 prev_state=D ==> next_comm=swapper/5 next_pid=0 next_prio=120
+            bash-4065  [002] ....   395.708048: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.708049: sys_ioctl(fd: ff, cmd: 5410, arg: 7ffdb77395fc)
+            bash-4065  [002] ....   395.708051: sys_ioctl -> 0x0
+   kworker/u32:4-184   [007] d...   395.708051: sched_wake_idle_without_ipi: cpu=5
+            bash-4065  [002] ....   395.708052: sys_rt_sigprocmask(how: 2, nset: 7ffdb7739690, oset: 0, sigsetsize: 8)
+   kworker/u32:4-184   [007] d...   395.708052: sched_wakeup: comm=xfce4-terminal pid=3279 prio=120 target_cpu=005
+            bash-4065  [002] ....   395.708052: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.708053: sys_ioctl(fd: ff, cmd: 5401, arg: 7ffdb77396f0)
+   kworker/u32:4-184   [007] d...   395.708053: sched_stat_runtime: comm=kworker/u32:4 pid=184 runtime=27298 [ns] vruntime=60776931966 [ns]
+          <idle>-0     [005] d...   395.708054: sched_switch: prev_comm=swapper/5 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=xfce4-terminal next_pid=3279 next_prio=120
+            bash-4065  [002] ....   395.708055: sys_ioctl -> 0x0
+   kworker/u32:4-184   [007] d...   395.708055: sched_switch: prev_comm=kworker/u32:4 prev_pid=184 prev_prio=120 prev_state=R+ ==> next_comm=swapper/7 next_pid=0 next_prio=120
+            bash-4065  [002] ....   395.708056: sys_ioctl(fd: ff, cmd: 5413, arg: 7ffdb7739700)
+            bash-4065  [002] ....   395.708056: sys_ioctl -> 0x0
+  xfce4-terminal-3279  [005] ....   395.708059: sys_poll -> 0x1
+          <idle>-0     [000] d...   395.708065: sched_switch: prev_comm=swapper/0 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=jbd2/sdd1-8 next_pid=475 next_prio=120
+  xfce4-terminal-3279  [005] ....   395.708066: sys_write(fd: 4, buf: 7ffc24f78030, count: 8)
+  xfce4-terminal-3279  [005] ....   395.708068: sys_write -> 0x8
+  xfce4-terminal-3279  [005] ....   395.708070: sys_read(fd: b, buf: 55b9b5a7d89e, count: 1fee)
+  xfce4-terminal-3279  [005] ....   395.708073: sys_read -> 0xb
+            bash-4065  [002] ....   395.708073: sys_rt_sigprocmask(how: 2, nset: 7ffdb77397d0, oset: 0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708074: sys_rt_sigprocmask -> 0x0
+  xfce4-terminal-3279  [005] ....   395.708074: sys_read(fd: b, buf: 55b9b5a7d8a8, count: 1fe4)
+  xfce4-terminal-3279  [005] ....   395.708075: sys_read -> 0xfffffffffffffff5
+            bash-4065  [002] ....   395.708078: sys_wait4(upid: ffffffff, stat_addr: 7ffdb7739250, options: b, ru: 0)
+  xfce4-terminal-3279  [005] ....   395.708078: sys_write(fd: 4, buf: 7ffc24f78030, count: 8)
+            bash-4065  [002] ....   395.708078: sched_process_wait: comm=bash pid=0 prio=120
+  xfce4-terminal-3279  [005] ....   395.708079: sys_write -> 0x8
+            bash-4065  [002] ....   395.708079: sys_wait4 -> 0xfffffffffffffff6
+            bash-4065  [002] ....   395.708082: sys_rt_sigreturn()
+  xfce4-terminal-3279  [005] ....   395.708083: sys_recvmsg(fd: 5, msg: 7ffc24f77eb0, flags: 0)
+           <...>-475   [000] d...   395.708085: sched_waking: comm=kworker/0:1H pid=263 prio=100 target_cpu=000
+  xfce4-terminal-3279  [005] ....   395.708085: sys_recvmsg -> 0xfffffffffffffff5
+           <...>-475   [000] d...   395.708086: sched_stat_runtime: comm=jbd2/sdd1-8 pid=475 runtime=62478 [ns] vruntime=56554355119 [ns]
+           <...>-475   [000] dN..   395.708089: sched_wakeup: comm=kworker/0:1H pid=263 prio=100 target_cpu=000
+  xfce4-terminal-3279  [005] ....   395.708089: sys_poll(ufds: 55b9b59f7180, nfds: 6, timeout_msecs: 9)
+           <...>-475   [000] d...   395.708092: sched_switch: prev_comm=jbd2/sdd1-8 prev_pid=475 prev_prio=120 prev_state=R+ ==> next_comm=kworker/0:1H next_pid=263 next_prio=100
+  xfce4-terminal-3279  [005] ....   395.708092: sys_poll -> 0x1
+            bash-4065  [002] ....   395.708094: sys_rt_sigaction(sig: 2, act: 7ffdb77396f0, oact: 7ffdb7739790, sigsetsize: 8)
+  xfce4-terminal-3279  [005] ....   395.708094: sys_read(fd: 4, buf: 7ffc24f78050, count: 10)
+            bash-4065  [002] ....   395.708095: sys_rt_sigaction -> 0x0
+  xfce4-terminal-3279  [005] ....   395.708095: sys_read -> 0x8
+  xfce4-terminal-3279  [005] ....   395.708099: sys_recvmsg(fd: 5, msg: 7ffc24f77eb0, flags: 0)
+           <...>-263   [000] d...   395.708099: sched_stat_runtime: comm=kworker/0:1H pid=263 runtime=13160 [ns] vruntime=56554185491 [ns]
+  xfce4-terminal-3279  [005] ....   395.708100: sys_recvmsg -> 0xfffffffffffffff5
+           <...>-263   [000] d...   395.708101: sched_switch: prev_comm=kworker/0:1H prev_pid=263 prev_prio=100 prev_state=R+ ==> next_comm=jbd2/sdd1-8 next_pid=475 next_prio=120
+           <...>-475   [000] d...   395.708103: sched_stat_runtime: comm=jbd2/sdd1-8 pid=475 runtime=3435 [ns] vruntime=56554358554 [ns]
+  xfce4-terminal-3279  [005] ....   395.708103: sys_poll(ufds: 55b9b59f7180, nfds: 6, timeout_msecs: 9)
+  xfce4-terminal-3279  [005] d...   395.708108: sched_stat_runtime: comm=xfce4-terminal pid=3279 runtime=59567 [ns] vruntime=20988125625 [ns]
+           <...>-475   [000] d...   395.708109: sched_switch: prev_comm=jbd2/sdd1-8 prev_pid=475 prev_prio=120 prev_state=T ==> next_comm=swapper/0 next_pid=0 next_prio=120
+  xfce4-terminal-3279  [005] d...   395.708111: sched_switch: prev_comm=xfce4-terminal prev_pid=3279 prev_prio=120 prev_state=D ==> next_comm=swapper/5 next_pid=0 next_prio=120
+            bash-4065  [002] ....   395.708129: sys_rt_sigprocmask(how: 0, nset: 7ffdb7738850, oset: 7ffdb77388d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708129: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.708130: sys_ioctl(fd: ff, cmd: 5410, arg: 7ffdb773883c)
+            bash-4065  [002] ....   395.708132: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.708133: sys_rt_sigprocmask(how: 2, nset: 7ffdb77388d0, oset: 0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708133: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.708134: sys_rt_sigaction(sig: 2, act: 7ffdb77386d0, oact: 7ffdb7738770, sigsetsize: 8)
+            bash-4065  [002] ....   395.708135: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708167: sys_ioctl(fd: 0, cmd: 5413, arg: 7ffdb77388c0)
+            bash-4065  [002] ....   395.708167: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.708168: sys_ioctl(fd: 0, cmd: 5414, arg: 7ffdb77388c0)
+            bash-4065  [002] ....   395.708169: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.708170: sys_ioctl(fd: 0, cmd: 5401, arg: 7ffdb7738890)
+            bash-4065  [002] ....   395.708171: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.708173: sys_ioctl(fd: 0, cmd: 5401, arg: 7ffdb7738880)
+            bash-4065  [002] ....   395.708174: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.708175: sys_ioctl(fd: 0, cmd: 5403, arg: 7ffdb7738850)
+            bash-4065  [002] ....   395.708177: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.708178: sys_ioctl(fd: 0, cmd: 5401, arg: 7ffdb7738850)
+            bash-4065  [002] ....   395.708179: sys_ioctl -> 0x0
+            bash-4065  [002] ....   395.708183: sys_rt_sigprocmask(how: 0, nset: 56181c508a40, oset: 56181c5089c0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708184: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.708185: sys_rt_sigaction(sig: 2, act: 7ffdb7738530, oact: 7ffdb77385d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708185: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708186: sys_rt_sigaction(sig: f, act: 7ffdb7738530, oact: 7ffdb77385d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708186: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708187: sys_rt_sigaction(sig: 1, act: 7ffdb7738530, oact: 7ffdb77385d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708188: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708189: sys_rt_sigaction(sig: 3, act: 7ffdb7738530, oact: 7ffdb77385d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708189: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708190: sys_rt_sigaction(sig: 3, act: 7ffdb77386a0, oact: 7ffdb7738740, sigsetsize: 8)
+            bash-4065  [002] ....   395.708190: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708191: sys_rt_sigaction(sig: e, act: 7ffdb7738600, oact: 7ffdb77386a0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708192: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708192: sys_rt_sigaction(sig: 14, act: 7ffdb7738530, oact: 7ffdb77385d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708193: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708194: sys_rt_sigaction(sig: 14, act: 7ffdb77386a0, oact: 7ffdb7738740, sigsetsize: 8)
+            bash-4065  [002] ....   395.708194: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708195: sys_rt_sigaction(sig: 16, act: 7ffdb7738530, oact: 7ffdb77385d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708195: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708196: sys_rt_sigaction(sig: 16, act: 7ffdb77386a0, oact: 7ffdb7738740, sigsetsize: 8)
+            bash-4065  [002] ....   395.708197: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708197: sys_rt_sigaction(sig: 15, act: 7ffdb7738530, oact: 7ffdb77385d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708198: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708199: sys_rt_sigaction(sig: 15, act: 7ffdb77386a0, oact: 7ffdb7738740, sigsetsize: 8)
+            bash-4065  [002] ....   395.708199: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708200: sys_rt_sigprocmask(how: 2, nset: 56181c5089c0, oset: 0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708200: sys_rt_sigprocmask -> 0x0
+            bash-4065  [002] ....   395.708201: sys_rt_sigaction(sig: 1c, act: 7ffdb7738530, oact: 7ffdb77385d0, sigsetsize: 8)
+            bash-4065  [002] ....   395.708202: sys_rt_sigaction -> 0x0
+            bash-4065  [002] ....   395.708211: sys_write(fd: 2, buf: 56181cc41a00, count: 10)
+            bash-4065  [002] d...   395.708215: sched_waking: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+            bash-4065  [002] d...   395.708217: sched_wake_idle_without_ipi: cpu=7
+            bash-4065  [002] d...   395.708218: sched_wakeup: comm=kworker/u32:4 pid=184 prio=120 target_cpu=007
+            bash-4065  [002] ....   395.708219: sys_write -> 0x10
+            bash-4065  [002] ....   395.708221: sys_pselect6(n: 1, inp: 7ffdb7738880, outp: 0, exp: 0, tsp: 0, sig: 7ffdb77387b0)
+            bash-4065  [002] d...   395.708225: sched_stat_runtime: comm=bash pid=4065 runtime=289332 [ns] vruntime=205017508 [ns]
+            bash-4065  [002] d...   395.708228: sched_switch: prev_comm=bash prev_pid=4065 prev_prio=120 prev_state=D ==> next_comm=swapper/2 next_pid=0 next_prio=120
+          <idle>-0     [007] d...   395.708263: sched_switch: prev_comm=swapper/7 prev_pid=0 prev_prio=120 prev_state=S ==> next_comm=kworker/u32:4 next_pid=184 next_prio=120
+   kworker/u32:4-184   [007] d...   395.708266: sched_waking: comm=sshd pid=3977 prio=120 target_cpu=003
+   kworker/u32:4-184   [007] d...   395.708269: sched_wake_idle_without_ipi: cpu=3
+   kworker/u32:4-184   [007] d...   395.708269: sched_wakeup: comm=sshd pid=3977 prio=120 target_cpu=003
+   kworker/u32:4-184   [007] d...   395.708271: sched_stat_runtime: comm=kworker/u32:4 pid=184 runtime=54322 [ns] vruntime=60776986288 [ns]
+   kworker/u32:4-184   [007] d...   395.708272: sched_switch: prev_comm=kworker/u32:4 prev_pid=184 prev_prio=120 prev_state=R+ ==> next_comm=swapper/7 next_pid=0 next_prio=120
