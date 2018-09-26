@@ -58,6 +58,12 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
 
     private static final int MARKER_SIZE = 500;
 
+    private static final String ERROR = "error"; //$NON-NLS-1$
+    private static final String EVENT = "event"; //$NON-NLS-1$
+    private static final String MESSAGE = "message"; //$NON-NLS-1$
+    private static final String STACK = "stack"; //$NON-NLS-1$
+    private static final String OTHER = "other"; //$NON-NLS-1$
+
     /**
      * Suffix for dataprovider ID
      */
@@ -230,7 +236,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
                 try {
                     for (ITmfStateInterval interval : ss.query2D(Collections.singletonList(logQuark), ss.getStartTime(), ss.getCurrentEndTime())) {
                         if (!interval.getStateValue().isNull()) {
-                            logs.add(new LogEvent(interval.getStartTime(), String.valueOf(interval.getValue())));
+                            logs.add(new LogEvent(interval.getStartTime(), getLogType(String.valueOf(interval.getValue()))));
                         }
                     }
                 } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
@@ -250,7 +256,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
             try {
                 for (ITmfStateInterval interval : ss.query2D(Collections.singletonList(logQuark), ss.getStartTime(), ss.getCurrentEndTime())) {
                     if (!interval.getStateValue().isNull()) {
-                        logs.add(new LogEvent(interval.getStartTime(), String.valueOf(interval.getValue())));
+                        logs.add(new LogEvent(interval.getStartTime(), getLogType(String.valueOf(interval.getValue()))));
                     }
                 }
             } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
@@ -281,5 +287,26 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
 
     private static String getSpanName(String attributeName) {
         return attributeName.substring(0, attributeName.lastIndexOf('/'));
+    }
+
+    private static String getLogType(String logs) {
+        String[] logsArray = logs.split("~"); //$NON-NLS-1$
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < logsArray.length; i++) {
+            builder.append(logsArray[i].substring(0, logsArray[i].indexOf(':')));
+        }
+        String types = builder.toString();
+
+        if (types.contains(ERROR)) {
+            return ERROR;
+        } else if (types.contains(EVENT)) {
+            return EVENT;
+        } else if (types.contains(MESSAGE)) {
+            return MESSAGE;
+        } else if (types.contains(STACK)) {
+            return STACK;
+        } else {
+            return OTHER;
+        }
     }
 }

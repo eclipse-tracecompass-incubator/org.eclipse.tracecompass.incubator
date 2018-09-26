@@ -45,14 +45,12 @@ import com.google.common.collect.ImmutableMap;
  */
 public class SpanLifePresentationProvider extends TimeGraphPresentationProvider {
 
-    private static final @NonNull String UNKNOWN = "UNKNOWN"; //$NON-NLS-1$
-    private static final @NonNull String QUESTION_EMOJI = "🤷"; //$NON-NLS-1$
-    private static final @NonNull String ERROR_KIND = "error.kind"; //$NON-NLS-1$
-    private static final @NonNull String ERROR_OBJECT = "error.object"; //$NON-NLS-1$
     private static final @NonNull String ERROR = "error"; //$NON-NLS-1$
     private static final @NonNull String EVENT = "event"; //$NON-NLS-1$
     private static final @NonNull String MESSAGE = "message"; //$NON-NLS-1$
     private static final @NonNull String STACK = "stack"; //$NON-NLS-1$
+    private static final @NonNull String OTHER = "other"; //$NON-NLS-1$
+    private static final @NonNull String FLAG_EMOJI = "🏳️"; //$NON-NLS-1$
 
     private static final @NonNull RGBA MARKER_COLOR = new RGBA(200, 0, 0, 150);
     private static final int MARKER_COLOR_INT = MARKER_COLOR.hashCode();
@@ -60,19 +58,15 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
      * Only states available
      */
     private static final StateItem[] STATE_TABLE = { new StateItem(new RGB(0, 0, 140), "Active"), //$NON-NLS-1$
-            new StateItem(
-                    ImmutableMap.of(ITimeEventStyleStrings.label(), ERROR_KIND, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.PLUS, ITimeEventStyleStrings.heightFactor(), 0.4f)),
-            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), ERROR_OBJECT, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.CROSS, ITimeEventStyleStrings.heightFactor(),
-                    0.4f)),
-            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), ERROR, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.SQUARE, ITimeEventStyleStrings.heightFactor(),
+            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), ERROR, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.CROSS, ITimeEventStyleStrings.heightFactor(),
                     0.4f)),
             new StateItem(
                     ImmutableMap.of(ITimeEventStyleStrings.label(), EVENT, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.DIAMOND, ITimeEventStyleStrings.heightFactor(), 0.3f)),
             new StateItem(
-                    ImmutableMap.of(ITimeEventStyleStrings.label(), MESSAGE, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.TRIANGLE, ITimeEventStyleStrings.heightFactor(), 0.3f)),
-            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), STACK, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.INVERTED_TRIANGLE,
-                    ITimeEventStyleStrings.heightFactor(), 0.5f)),
-            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), UNKNOWN, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), QUESTION_EMOJI, ITimeEventStyleStrings.heightFactor(), 0.3f))
+                    ImmutableMap.of(ITimeEventStyleStrings.label(), MESSAGE, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.CIRCLE, ITimeEventStyleStrings.heightFactor(), 0.3f)),
+            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), STACK, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.SQUARE,
+                    ITimeEventStyleStrings.heightFactor(), 0.3f)),
+            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), OTHER, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), FLAG_EMOJI, ITimeEventStyleStrings.heightFactor(), 0.3f))
     };
 
     /**
@@ -127,20 +121,17 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
         if (event instanceof SpanMarkerEvent) {
             SpanMarkerEvent markerEvent = (SpanMarkerEvent) event;
             String type = markerEvent.getType();
-            if (type.contains(ERROR_KIND)) {
+            switch (type) {
+            case ERROR:
                 return 1;
-            } else if (type.contains(ERROR_OBJECT)) {
+            case EVENT:
                 return 2;
-            } else if (type.contains(ERROR)) {
+            case MESSAGE:
                 return 3;
-            } else if (type.contains(EVENT)) {
+            case STACK:
                 return 4;
-            } else if (type.contains(MESSAGE)) {
+            default:
                 return 5;
-            } else if (type.contains(STACK)) {
-                return 6;
-            } else {
-                return 7;
             }
         }
         if ((event instanceof TimeEvent) && ((TimeEvent) event).getValue() != Integer.MIN_VALUE) {
