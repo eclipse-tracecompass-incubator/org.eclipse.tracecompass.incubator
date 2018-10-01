@@ -13,6 +13,7 @@
 			id="org.eclipse.tracecompass.incubator.ftrace.function.graph.pattern">
 			<head>
 				<traceType id="org.eclipse.tracecompass.incubator.ftrace.core" />
+				<traceType id="org.eclipse.tracecompass.incubator.ftrace.core.bin" />
 				<label value="Function Graph" />
 			</head>
 

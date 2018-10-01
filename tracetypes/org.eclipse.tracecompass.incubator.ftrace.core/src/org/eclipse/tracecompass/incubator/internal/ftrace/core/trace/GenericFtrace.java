@@ -45,17 +45,26 @@ import java.util.regex.Matcher;
  * @author Eva Terriault
  */
 public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
+    /**
+     * FTrace magic number
+     */
+    public static final byte[] TRACE_CMD_DAT_MAGIC = { 0x17, 0x08, 0x44, 't', 'r', 'a', 'c', 'i', 'n', 'g' };
+
     private static final int ESTIMATED_EVENT_SIZE = 90;
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
     private static final TmfContext INVALID_CONTEXT = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
+
+    /**
+     * Trace file locations
+     */
     private File fFile;
 
     private RandomAccessFile fFileInput;
 
     /**
      * @param line
-     * Trace line to be parsed. This method can be overridden by
-     * Trace types that inherits from GenericFtrace.
+     *            Trace line to be parsed. This method can be overridden by
+     *            Trace types that inherits from GenericFtrace.
      * @return Parsed FtraceField
      */
     protected @Nullable GenericFtraceField parseLine(String line) {
@@ -78,25 +87,19 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
 
     @Override
     public synchronized void dispose() {
-        if (fFileInput != null) {
-            try {
-                fFileInput.close();
-            } catch (IOException e) {
-                Activator.getInstance().logError("Error disposing trace. File: " + getPath(), e); //$NON-NLS-1$
-            }
-        }
+        setFileInput(null);
         super.dispose();
 
     }
 
     @Override
     public double getLocationRatio(ITmfLocation location) {
-        return ((Long) getCurrentLocation().getLocationInfo()).doubleValue() / fFile.length();
+        return ((Long) getCurrentLocation().getLocationInfo()).doubleValue() / getFile().length();
     }
 
     @Override
     public ITmfContext seekEvent(ITmfLocation location) {
-        if (fFile == null) {
+        if (getFile() == null) {
             return INVALID_CONTEXT;
         }
         final TmfContext context = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
@@ -104,29 +107,8 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
             return context;
         }
         try {
-            if (location == null) {
-                fFileInput.seek(0);
-                long lineStartOffset = fFileInput.getFilePointer();
-                @Nullable String line = fFileInput.readLine();
-                if (line == null) {
-                    return context;
-                }
-                Matcher matcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
-                while (!matcher.matches()) {
-                    lineStartOffset = fFileInput.getFilePointer();
-                    line = fFileInput.readLine();
-                    if (line == null) {
-                        break;
-                    }
-                    matcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
-                }
-                fFileInput.seek(lineStartOffset);
-            } else if (location.getLocationInfo() instanceof Long) {
-                fFileInput.seek((Long) location.getLocationInfo());
-            }
-            context.setLocation(new TmfLongLocation(fFileInput.getFilePointer()));
-            context.setRank(0);
-            return context;
+            RandomAccessFile fileInput = getFileInput();
+            return seek(fileInput, location, context);
         } catch (final FileNotFoundException e) {
             Activator.getInstance().logError("Error seeking event. File not found: " + getPath(), e); //$NON-NLS-1$
             return context;
@@ -136,35 +118,92 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
         }
     }
 
+    /**
+     * Internal seek
+     *
+     * @param fileInput
+     *            file to seek
+     * @param location
+     *            location of file
+     * @param context
+     *            context of the file
+     * @return new context
+     * @throws IOException
+     *             file not found and such
+     */
+    protected ITmfContext seek(RandomAccessFile fileInput, ITmfLocation location, final TmfContext context) throws IOException {
+        if (location == null) {
+            fileInput.seek(0);
+            long lineStartOffset = fileInput.getFilePointer();
+            String line = fileInput.readLine();
+            if (line == null) {
+                return context;
+            }
+            Matcher matcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
+            while (!matcher.matches()) {
+                lineStartOffset = fileInput.getFilePointer();
+                line = fileInput.readLine();
+                if (line == null) {
+                    break;
+                }
+                matcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
+            }
+            fileInput.seek(lineStartOffset);
+        } else if (location.getLocationInfo() instanceof Long) {
+            fileInput.seek((Long) location.getLocationInfo());
+        }
+        context.setLocation(new TmfLongLocation(fileInput.getFilePointer()));
+        context.setRank(0);
+        return context;
+    }
+
     @Override
     public ITmfEvent parseEvent(ITmfContext context) {
-        @Nullable
         ITmfLocation location = context.getLocation();
+        long rank = context.getRank();
         if (location instanceof TmfLongLocation) {
             TmfLongLocation tmfLongLocation = (TmfLongLocation) location;
-            Long locationInfo = tmfLongLocation.getLocationInfo();
-            if (location.equals(NULL_LOCATION)) {
-                locationInfo = 0L;
-            }
-            if (locationInfo != null) {
-                try {
-                    if (!locationInfo.equals(fFileInput.getFilePointer())) {
-                        fFileInput.seek(locationInfo);
-                    }
+            return parseEvent(getFileInput(), tmfLongLocation, rank);
+        }
+        return null;
+    }
 
-                    // Sometimes ftrace traces are contains comments starting with '#' between events
-                    String nextLine;
-                    do {
-                        nextLine = fFileInput.readLine();
-                    } while (nextLine != null && nextLine.startsWith(IGenericFtraceConstants.FTRACE_COMMENT_CHAR));
-
-                    GenericFtraceField field = parseLine(nextLine);
-                    if (field != null) {
-                        return new GenericFtraceEvent(this, context.getRank(), field);
-                    }
-                } catch (IOException e) {
-                    Activator.getInstance().logError("Error parsing event", e); //$NON-NLS-1$
+    /**
+     * Internal parse
+     *
+     * @param fileInput
+     *            file to read
+     * @param tmfLongLocation
+     *            location of event
+     * @param rank
+     *            rank of event
+     * @return the event or null
+     */
+    protected ITmfEvent parseEvent(RandomAccessFile fileInput, TmfLongLocation tmfLongLocation, long rank) {
+        Long locationInfo = tmfLongLocation.getLocationInfo();
+        if (tmfLongLocation.equals(NULL_LOCATION)) {
+            locationInfo = 0L;
+        }
+        if (locationInfo != null) {
+            try {
+                if (!locationInfo.equals(fileInput.getFilePointer())) {
+                    fileInput.seek(locationInfo);
                 }
+
+                // Sometimes ftrace traces are contains comments starting with
+                // '#' between
+                // events
+                String nextLine;
+                do {
+                    nextLine = fileInput.readLine();
+                } while (nextLine != null && nextLine.startsWith(IGenericFtraceConstants.FTRACE_COMMENT_CHAR));
+
+                GenericFtraceField field = parseLine(nextLine);
+                if (field != null) {
+                    return new GenericFtraceEvent(this, rank, field);
+                }
+            } catch (IOException e) {
+                Activator.getInstance().logError("Error parsing event", e); //$NON-NLS-1$
             }
         }
         return null;
@@ -174,15 +213,16 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     public ITmfLocation getCurrentLocation() {
         long temp = -1;
         try {
-            temp = fFileInput.getFilePointer();
+            temp = getFileInput().getFilePointer();
         } catch (IOException e) {
+            Activator.getInstance().logError(e.getMessage(), e);
         }
         return new TmfLongLocation(temp);
     }
 
     @Override
     public ITmfContext seekEvent(double ratio) {
-        File file = fFile;
+        File file = getFile();
         if (file == null) {
             return INVALID_CONTEXT;
         }
@@ -195,8 +235,8 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     public Iterable<ITmfEventAspect<?>> getEventAspects() {
 
         /*
-         * This method needs to fill the aspects dynamically because aspects in the
-         * parent class are not all present at the beginning of the trace
+         * This method needs to fill the aspects dynamically because aspects in
+         * the parent class are not all present at the beginning of the trace
          */
         ImmutableSet.Builder<ITmfEventAspect<?>> builder = ImmutableSet.builder();
         builder.addAll(GenericFtraceAspects.getAspects());
@@ -206,5 +246,49 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     @Override
     public IKernelAnalysisEventLayout getKernelEventLayout() {
         return GenericFtraceEventLayout.getInstance();
+    }
+
+    /**
+     * Get the fTrace file input
+     *
+     * @return the fTrace file input
+     */
+    protected RandomAccessFile getFileInput() {
+        return fFileInput;
+    }
+
+    private void setFileInput(RandomAccessFile newFileInput) {
+        try (RandomAccessFile fileInput = getFileInput()) {
+            // do nothing
+        } catch (IOException e) {
+            Activator.getInstance().logError("Error disposing trace. File: " + getPath(), e); //$NON-NLS-1$
+        }
+        fFileInput = newFileInput;
+    }
+
+    /**
+     * Get the fTrace file
+     *
+     * @return the fTrace file
+     */
+    protected File getFile() {
+        return fFile;
+    }
+
+    /**
+     * Set the fTrace file location
+     *
+     * @param file
+     *            the file location
+     * @throws TmfTraceException
+     *             IO issue
+     */
+    protected void setFile(File file) throws TmfTraceException {
+        fFile = file;
+        try {
+            setFileInput(new BufferedRandomAccessFile(file, "r"));
+        } catch (IOException e) {
+            throw new TmfTraceException(e.getMessage(), e);
+        }
     }
 }

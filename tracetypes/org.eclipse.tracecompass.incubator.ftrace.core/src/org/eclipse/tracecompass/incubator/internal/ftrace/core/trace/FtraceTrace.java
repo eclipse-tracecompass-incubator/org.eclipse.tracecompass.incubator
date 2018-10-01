@@ -37,8 +37,6 @@ public class FtraceTrace extends GenericFtrace {
     private static final int MAX_LINES = 100;
     private static final int MAX_CONFIDENCE = 100;
 
-    private static final byte[] TRACE_CMD_DAT_MAGIC = {0x17, 0x08,  0x44, 't', 'r','a','c','i','n','g'};
-
     @Override
     public IStatus validate(IProject project, String path) {
         File file = new File(path);

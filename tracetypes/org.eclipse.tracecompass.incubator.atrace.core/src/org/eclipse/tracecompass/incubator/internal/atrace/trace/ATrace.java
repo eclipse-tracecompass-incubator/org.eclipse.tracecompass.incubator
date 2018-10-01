@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
@@ -31,7 +30,6 @@ import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.IGenericFtr
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.GenericFtrace;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
@@ -64,32 +62,6 @@ public class ATrace extends GenericFtrace {
     private static final TmfContext INVALID_CONTEXT = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
 
     private long startingTimestamp;
-
-    private File fFile;
-    private RandomAccessFile fFileInput;
-
-    @Override
-    public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
-        super.initTrace(resource, path, type);
-        try {
-            fFile = new File(path);
-            fFileInput = new BufferedRandomAccessFile(fFile, "r"); //$NON-NLS-1$
-        } catch (IOException e) {
-            throw new TmfTraceException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public synchronized void dispose() {
-        if (fFileInput != null) {
-            try {
-                fFileInput.close();
-            } catch (IOException e) {
-                Activator.getInstance().logError("Error disposing trace. File: " + getPath(), e); //$NON-NLS-1$
-            }
-        }
-        super.dispose();
-    }
 
     @Override
     public IStatus validate(IProject project, String path) {
@@ -159,33 +131,34 @@ public class ATrace extends GenericFtrace {
 
     @Override
     public ITmfContext seekEvent(ITmfLocation location) {
-        if (fFile == null) {
+        if (getFile() == null) {
             return INVALID_CONTEXT;
         }
         final TmfContext context = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
         if (NULL_LOCATION.equals(location)) {
             return context;
         }
+        RandomAccessFile fileInput = getFileInput();
         try {
             if (location == null) {
-                fFileInput.seek(0);
-                long lineStartOffset = fFileInput.getFilePointer();
-                String line = fFileInput.readLine();
+                fileInput.seek(0);
+                long lineStartOffset = fileInput.getFilePointer();
+                String line = fileInput.readLine();
 
                 // Look for process dump matches
                 Matcher processDumpMatcher = IAtraceConstants.PROCESS_DUMP_PATTERN.matcher(line);
                 Matcher atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
 
                 while (!atraceMatcher.matches() && !processDumpMatcher.matches()) {
-                    lineStartOffset = fFileInput.getFilePointer();
-                    line = fFileInput.readLine();
+                    lineStartOffset = fileInput.getFilePointer();
+                    line = fileInput.readLine();
                     atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
                     processDumpMatcher = IAtraceConstants.PROCESS_DUMP_PATTERN.matcher(line);
                 }
                 if (processDumpMatcher.matches()) {
                     // Look for the first atrace event to extract timestamp
                     while (!atraceMatcher.matches()) {
-                        line = fFileInput.readLine();
+                        line = fileInput.readLine();
                         atraceMatcher = IGenericFtraceConstants.FTRACE_PATTERN.matcher(line);
                     }
                     GenericFtraceField field = GenericFtraceField.parseLine(line);
@@ -194,11 +167,11 @@ public class ATrace extends GenericFtrace {
                     }
                 }
 
-                fFileInput.seek(lineStartOffset);
+                fileInput.seek(lineStartOffset);
             } else if (location.getLocationInfo() instanceof Long) {
-                fFileInput.seek((Long) location.getLocationInfo());
+                fileInput.seek((Long) location.getLocationInfo());
             }
-            context.setLocation(new TmfLongLocation(fFileInput.getFilePointer()));
+            context.setLocation(new TmfLongLocation(fileInput.getFilePointer()));
             context.setRank(0);
         } catch (NullPointerException | IOException e) {
             Activator.getInstance().logError("Error seeking event." + getPath(), e); //$NON-NLS-1$
@@ -223,11 +196,12 @@ public class ATrace extends GenericFtrace {
             }
             super.parseEvent(context);
             if (locationInfo != null) {
+                RandomAccessFile fileInput = getFileInput();
                 try {
-                    if (!locationInfo.equals(fFileInput.getFilePointer())) {
-                        fFileInput.seek(locationInfo);
+                    if (!locationInfo.equals(fileInput.getFilePointer())) {
+                        fileInput.seek(locationInfo);
                     }
-                    String nextLine = fFileInput.readLine();
+                    String nextLine = fileInput.readLine();
                     // TODO: Check here if matches the following. If it does,
                     // skip line.
                     // - USER PID PPID ..
