@@ -9,7 +9,10 @@
 
 package org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.wizards;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -38,10 +41,14 @@ public class JaegerRestUtils {
     /**
      * Parameters key for traces request
      */
-    private static final String SERVICE_NAME = "service"; //$NON-NLS-1$
-    private static final String SEARCH_START_TIME = "start"; //$NON-NLS-1$
     private static final String SEARCH_END_TIME = "end"; //$NON-NLS-1$
     private static final String NB_TRACES_LIMIT = "limit"; //$NON-NLS-1$
+    private static final String LOOKBACK = "lookback"; //$NON-NLS-1$
+    private static final String MAX_DURATION = "maxDuration"; //$NON-NLS-1$
+    private static final String MIN_DURATION = "minDuration"; //$NON-NLS-1$
+    private static final String SERVICE_NAME = "service"; //$NON-NLS-1$
+    private static final String SEARCH_START_TIME = "start"; //$NON-NLS-1$
+    private static final String TAGS = "tags"; //$NON-NLS-1$
 
     private JaegerRestUtils() {
     }
@@ -81,14 +88,38 @@ public class JaegerRestUtils {
      *            Search end time
      * @param limit
      *            Limit on the number of traces returned
+     * @param lookback
+     *            Amount of time to go look back for traces
+     * @param maxDuration
+     *            Trace maximum duration
+     * @param minDuration
+     *            Trace minimum duration
+     * @param tags
+     *            Span tags filter
      * @return The built URL
      */
-    public static String buildTracesUrl(String baseUrl, String service, String startTime, String endTime, String limit) {
-        URI uri = UriBuilder.fromUri(baseUrl).path(TRACES_ENDPOINT).queryParam(SERVICE_NAME, service)
-                .queryParam(SEARCH_START_TIME, startTime)
+    public static String buildTracesUrl(String baseUrl, String endTime, String limit, String lookback, String maxDuration, String minDuration, String service, String startTime, String tags) {
+        UriBuilder uriBuilder = UriBuilder.fromUri(baseUrl).path(TRACES_ENDPOINT)
                 .queryParam(SEARCH_END_TIME, endTime)
-                .queryParam(NB_TRACES_LIMIT, limit).build();
-        return uri.toString();
+                .queryParam(NB_TRACES_LIMIT, limit)
+                .queryParam(LOOKBACK, lookback)
+                .queryParam(SERVICE_NAME, service)
+                .queryParam(SEARCH_START_TIME, startTime);
+        if (!maxDuration.isEmpty()) {
+            uriBuilder.queryParam(MAX_DURATION, maxDuration);
+        }
+        if (!minDuration.isEmpty()) {
+            uriBuilder.queryParam(MIN_DURATION, minDuration);
+        }
+        if (!tags.isEmpty()) {
+            try {
+                uriBuilder.queryParam(TAGS, URLEncoder.encode(tags, StandardCharsets.UTF_8.name()));
+            } catch (UnsupportedEncodingException e) {
+                // We don't add the tags if the encoding fails
+            }
+        }
+
+        return uriBuilder.build().toString();
     }
 
     /**

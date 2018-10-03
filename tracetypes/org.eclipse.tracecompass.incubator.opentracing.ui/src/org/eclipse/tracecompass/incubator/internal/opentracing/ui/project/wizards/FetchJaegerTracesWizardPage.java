@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -49,15 +50,20 @@ import com.google.gson.JsonObject;
 public class FetchJaegerTracesWizardPage extends WizardPage {
 
     private static final String DEFAULT_TRACE_FOLDER_NAME = "jaegerTraces"; //$NON-NLS-1$
-    private static final String DEFAULT_LOOKBACK = "43200"; //$NON-NLS-1$
     private static final String DEFAULT_LIMIT = "20"; //$NON-NLS-1$
     private static final String DEFAULT_BASE_URL = "http://localhost:16686/api"; //$NON-NLS-1$
+    @SuppressWarnings("nls")
+    private static final String[] DEFAULT_LOOKBACKS = {"1h", "2h", "3h", "6h", "12h", "1d", "2d"};
+    private static final Long[] DEFAULT_LOOKBACKS_SECONDS = {3600L, 7200L, 10800L, 21600L, 43200L, 86400L, 172800L};
 
     private static final String NANOSECONDS_PADDING = "000"; //$NON-NLS-1$
-    private static final String JAEGER_TRACE_ID_KEY = "traceID"; //$NON-NLS-1$
     private static final String JAEGER_DATA_KEY = "data"; //$NON-NLS-1$
     private static final String JAEGER_SPANS_KEY = "spans"; //$NON-NLS-1$
+    private static final String JAEGER_TRACE_ID_KEY = "traceID"; //$NON-NLS-1$
     private static final String JAEGER_SPAN_NAME_KEY = "operationName"; //$NON-NLS-1$
+    private static final String JAEGER_PROCESSES_KEY = "processes"; //$NON-NLS-1$
+    private static final String JAEGER_SERVICE_KEY = "serviceName"; //$NON-NLS-1$
+
 
     private Table fTracesTable;
     private String fTraceFolderName;
@@ -98,7 +104,7 @@ public class FetchJaegerTracesWizardPage extends WizardPage {
         Label serviceLabel = new Label(urlConfigurationGroup, SWT.NONE);
         serviceLabel.setText(Messages.FetchJaegerTracesWizardPage_serviceNameLabel);
         Combo serviceCombo = new Combo(urlConfigurationGroup, SWT.DROP_DOWN);
-        serviceCombo.setItems(""); //$NON-NLS-1$
+        serviceCombo.setItems();
         serviceCombo.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 
         targetUrlText.addFocusListener(new FocusListener() {
@@ -123,6 +129,12 @@ public class FetchJaegerTracesWizardPage extends WizardPage {
             }
         });
 
+        Label targetTagsLabel = new Label(urlConfigurationGroup, SWT.NONE);
+        targetTagsLabel.setText(Messages.FetchJaegerTracesWizardPage_tagsLabel);
+        Text targetTagsText = new Text(urlConfigurationGroup, SWT.NONE);
+        targetTagsText.setMessage("http.method=GET error=true"); //$NON-NLS-1$
+        targetTagsText.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
+
         Label traceNumberLimitLabel = new Label(urlConfigurationGroup, SWT.NONE);
         traceNumberLimitLabel.setText(Messages.FetchJaegerTracesWizardPage_nbTracesLimitLabel);
         Text traceNumberLimitText = new Text(urlConfigurationGroup, SWT.NONE);
@@ -130,10 +142,50 @@ public class FetchJaegerTracesWizardPage extends WizardPage {
         traceNumberLimitText.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 
         Label traceLookBackLabel = new Label(urlConfigurationGroup, SWT.NONE);
-        traceLookBackLabel.setText(Messages.FetchJaegerTracesWizardPage_loockbackLabel);
-        Text traceLookBackText = new Text(urlConfigurationGroup, SWT.NONE);
-        traceLookBackText.setText(DEFAULT_LOOKBACK);
-        traceLookBackText.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
+        traceLookBackLabel.setText(Messages.FetchJaegerTracesWizardPage_lookbackLabel);
+        Combo lookbackCombo = new Combo(urlConfigurationGroup, SWT.DROP_DOWN);
+        lookbackCombo.setItems(DEFAULT_LOOKBACKS);
+        lookbackCombo.select(0);
+        lookbackCombo.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
+
+        Label targetMinDurationLabel = new Label(urlConfigurationGroup, SWT.NONE);
+        targetMinDurationLabel.setText(Messages.FetchJaegerTracesWizardPage_minDurationLabel);
+        Text targetMinDurationText = new Text(urlConfigurationGroup, SWT.NONE);
+        targetMinDurationText.setMessage("100ms"); //$NON-NLS-1$
+        targetMinDurationText.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
+
+        // Jaeger doesn't support a request with both a tag and minimum duration filters
+        // so we deactivate one if the other is filled with a value
+        targetMinDurationText.addModifyListener(new ModifyListener() {
+            @Override
+            public void modifyText(ModifyEvent e) {
+                if (targetMinDurationText.getText().isEmpty()) {
+                    targetTagsText.setEnabled(true);
+                } else {
+                    targetTagsText.setEnabled(false);
+                }
+                updatePageCompletion();
+            }
+        });
+
+        targetTagsText.addModifyListener(new ModifyListener() {
+            @Override
+            public void modifyText(ModifyEvent e) {
+                if (targetTagsText.getText().isEmpty()) {
+                    targetMinDurationText.setEnabled(true);
+                } else {
+                    targetMinDurationText.setEnabled(false);
+                }
+                updatePageCompletion();
+            }
+        });
+
+
+        Label targetMaxDurationLabel = new Label(urlConfigurationGroup, SWT.NONE);
+        targetMaxDurationLabel.setText(Messages.FetchJaegerTracesWizardPage_maxDurationLabel);
+        Text targetMaxDurationText = new Text(urlConfigurationGroup, SWT.NONE);
+        targetMaxDurationText.setMessage("1.1s"); //$NON-NLS-1$
+        targetMaxDurationText.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 
         Label traceNameLabel = new Label(urlConfigurationGroup, SWT.NONE);
         traceNameLabel.setText(Messages.FetchJaegerTracesWizardPage_traceName);
@@ -170,9 +222,11 @@ public class FetchJaegerTracesWizardPage extends WizardPage {
         fetchJagerButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                long currentTime = Instant.now().toEpochMilli();
-                long loockBackTime = Instant.now().minusSeconds(Long.parseLong(traceLookBackText.getText())).toEpochMilli();
-                String requestUrl = JaegerRestUtils.buildTracesUrl(targetUrlText.getText(), serviceCombo.getText(), Long.toString(loockBackTime) + NANOSECONDS_PADDING, Long.toString(currentTime) + NANOSECONDS_PADDING, traceNumberLimitText.getText());
+                long endTime = Instant.now().toEpochMilli();
+                long startTime = Instant.now().minusSeconds(DEFAULT_LOOKBACKS_SECONDS[lookbackCombo.indexOf(lookbackCombo.getText())]).toEpochMilli();
+                String tags = buildTagsString(targetTagsText.getText());
+                String requestUrl = JaegerRestUtils.buildTracesUrl(targetUrlText.getText(), Long.toString(endTime) + NANOSECONDS_PADDING, traceNumberLimitText.getText(), lookbackCombo.getText(),
+                        targetMaxDurationText.getText(), targetMinDurationText.getText(), serviceCombo.getText(), Long.toString(startTime) + NANOSECONDS_PADDING, tags);
                 String jaegerTraces = JaegerRestUtils.fetchJaegerTraces(requestUrl);
                 if (jaegerTraces == null) {
                     setPageComplete(false);
@@ -183,13 +237,16 @@ public class FetchJaegerTracesWizardPage extends WizardPage {
                 JsonObject tracesObject = gson.fromJson(jaegerTraces, JsonObject.class);
                 JsonArray tracesArray = tracesObject.get(JAEGER_DATA_KEY).getAsJsonArray();
                 fTracesTable.removeAll();
+                tracesInfoGroup.setText(Messages.FetchJaegerTracesWizardPage_tracesGroup + " ("+ tracesArray.size() + ')'); //$NON-NLS-1$
                 if (tracesArray.size() > 0) {
                     for (int i = 0; i < tracesArray.size(); i++) {
                         TableItem traceItem = new TableItem(fTracesTable, SWT.NONE);
-                        traceItem.setText(0, tracesArray.get(i).getAsJsonObject().get(JAEGER_TRACE_ID_KEY).getAsString());
-                        JsonArray spans = tracesArray.get(i).getAsJsonObject().get(JAEGER_SPANS_KEY).getAsJsonArray();
-                        traceItem.setText(1, spans.get(0).getAsJsonObject().get(JAEGER_SPAN_NAME_KEY).getAsString());
-                        traceItem.setText(2, Integer.toString(spans.size()));
+                        JsonObject trace = tracesArray.get(i).getAsJsonObject();
+                        JsonArray spans = trace.get(JAEGER_SPANS_KEY).getAsJsonArray();
+                        traceItem.setText(0, spans.get(0).getAsJsonObject().get(JAEGER_SPAN_NAME_KEY).getAsString());
+                        traceItem.setText(1, Integer.toString(spans.size()));
+                        traceItem.setText(2, StringUtils.join(fetchTraceServices(trace), ", ")); //$NON-NLS-1$
+                        traceItem.setText(3, trace.get(JAEGER_TRACE_ID_KEY).getAsString());
                         traceItem.setChecked(true);
                         for(TableColumn column : fTracesTable.getColumns()) {
                             column.pack();
@@ -209,15 +266,18 @@ public class FetchJaegerTracesWizardPage extends WizardPage {
         fTracesTable.setLinesVisible(true);
         fTracesTable.setHeaderVisible(true);
 
-        TableColumn traceIdColumn = new TableColumn(fTracesTable, SWT.NONE);
-        traceIdColumn.setText(Messages.FetchJaegerTracesWizardPage_traceIdColumnName);
-        traceIdColumn.pack();
         TableColumn firstSpanColumn = new TableColumn(fTracesTable, SWT.NONE);
         firstSpanColumn.setText(Messages.FetchJaegerTracesWizardPage_spanNameColumnName);
         firstSpanColumn.pack();
         TableColumn nbSpanColumn = new TableColumn(fTracesTable, SWT.NONE);
         nbSpanColumn.setText(Messages.FetchJaegerTracesWizardPage_nbSpansColumnName);
         nbSpanColumn.pack();
+        TableColumn servicesColumn = new TableColumn(fTracesTable, SWT.NONE);
+        servicesColumn.setText(Messages.FetchJaegerTracesWizardPage_servicesColumnName);
+        servicesColumn.pack();
+        TableColumn traceIdColumn = new TableColumn(fTracesTable, SWT.NONE);
+        traceIdColumn.setText(Messages.FetchJaegerTracesWizardPage_traceIdColumnName);
+        traceIdColumn.pack();
 
         fTracesTable.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -279,7 +339,7 @@ public class FetchJaegerTracesWizardPage extends WizardPage {
         List<String> traceIdList = new ArrayList<>();
         for (TableItem traceItem : fTracesTable.getItems()) {
             if (traceItem.getChecked()) {
-                traceIdList.add(traceItem.getText(0));
+                traceIdList.add(traceItem.getText(3));
             }
         }
         return traceIdList;
@@ -304,5 +364,29 @@ public class FetchJaegerTracesWizardPage extends WizardPage {
         }
 
         setPageComplete(true);
+    }
+
+    private static String buildTagsString(String tags) {
+        if (!tags.isEmpty()) {
+            String[] tagsArray = tags.split(" "); //$NON-NLS-1$
+
+            JsonObject jsonTags = new JsonObject();
+            for (int i = 0; i < tagsArray.length; i++) {
+                String[] tagKeyValue = tagsArray[i].split("="); //$NON-NLS-1$
+                jsonTags.addProperty(tagKeyValue[0], tagKeyValue[1]);
+            }
+
+            return jsonTags.toString();
+        }
+        return tags;
+    }
+
+    private static String[] fetchTraceServices(JsonObject trace) {
+        JsonObject servicesArray = trace.get(JAEGER_PROCESSES_KEY).getAsJsonObject();
+        String[] services = new String[servicesArray.size()];
+        for (int i = 0; i < servicesArray.size(); i++) {
+            services[i] = servicesArray.get("p" + (i + 1)).getAsJsonObject().get(JAEGER_SERVICE_KEY).getAsString(); //$NON-NLS-1$
+        }
+        return services;
     }
 }

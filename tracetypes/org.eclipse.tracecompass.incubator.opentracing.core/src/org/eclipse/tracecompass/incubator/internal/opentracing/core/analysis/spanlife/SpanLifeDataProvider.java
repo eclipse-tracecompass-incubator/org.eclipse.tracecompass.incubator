@@ -286,15 +286,17 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
     }
 
     private static String getSpanName(String attributeName) {
-        return attributeName.split("/")[0]; //$NON-NLS-1$
+        String spanNameAndId = attributeName.substring(0, attributeName.lastIndexOf('/'));
+        return spanNameAndId.substring(0, spanNameAndId.lastIndexOf('/'));
     }
 
     private static String getSpanId(String attributeName) {
-        return attributeName.split("/")[1]; //$NON-NLS-1$
+        String[] attributeInfo = attributeName.split("/");  //$NON-NLS-1$
+        return attributeInfo[attributeInfo.length - 2];
     }
 
     private static Boolean getErrorTag(String attributeName) {
-        return attributeName.split("/")[2].equals("true"); //$NON-NLS-1$ //$NON-NLS-2$
+        return attributeName.substring(attributeName.lastIndexOf('/') + 1).equals("true"); //$NON-NLS-1$
     }
 
     private static String getLogType(String logs) {
