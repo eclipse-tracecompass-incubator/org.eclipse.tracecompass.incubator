@@ -48,7 +48,7 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     /**
      * FTrace magic number
      */
-    public static final byte[] TRACE_CMD_DAT_MAGIC = { 0x17, 0x08, 0x44, 't', 'r', 'a', 'c', 'i', 'n', 'g' };
+    protected static final byte[] TRACE_CMD_DAT_MAGIC = { 0x17, 0x08, 0x44, 't', 'r', 'a', 'c', 'i', 'n', 'g' };
 
     private static final int ESTIMATED_EVENT_SIZE = 90;
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
