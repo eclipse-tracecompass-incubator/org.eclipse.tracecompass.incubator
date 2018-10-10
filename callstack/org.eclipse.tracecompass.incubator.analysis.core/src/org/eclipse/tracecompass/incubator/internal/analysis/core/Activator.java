@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.internal.analysis.core;
 
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
+import org.eclipse.tracecompass.incubator.analysis.core.aspects.AnalysisPidAspect;
 import org.eclipse.tracecompass.incubator.analysis.core.aspects.AnalysisProcessNameAspect;
 import org.eclipse.tracecompass.incubator.analysis.core.aspects.AnalysisThreadNameAspect;
 import org.eclipse.tracecompass.incubator.analysis.core.aspects.AnalysisTidAspect;
@@ -45,6 +46,7 @@ public class Activator extends TraceCompassActivator {
         TmfTraceUtils.registerEventAspect(AnalysisTidAspect.getInstance());
         TmfTraceUtils.registerEventAspect(AnalysisProcessNameAspect.getInstance());
         TmfTraceUtils.registerEventAspect(AnalysisThreadNameAspect.getInstance());
+        TmfTraceUtils.registerEventAspect(AnalysisPidAspect.getInstance());
     }
 
     @Override
