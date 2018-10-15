@@ -31,7 +31,7 @@ import org.eclipse.tracecompass.incubator.internal.traceevent.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventAspects;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventEvent;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventField;
-import org.eclipse.tracecompass.incubator.jsontrace.core.trace.JsonTrace;
+import org.eclipse.tracecompass.jsontrace.core.trace.JsonTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;

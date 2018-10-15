@@ -14,7 +14,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import org.eclipse.tracecompass.incubator.jsontrace.core.job.SortingJob;
+import org.eclipse.tracecompass.jsontrace.core.job.SortingJob;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.gson.Gson;

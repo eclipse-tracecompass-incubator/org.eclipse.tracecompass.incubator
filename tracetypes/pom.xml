@@ -33,7 +33,6 @@
     <module>org.eclipse.tracecompass.incubator.hudson.maven.core</module>
     <module>org.eclipse.tracecompass.incubator.hudson.maven.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.hudson.maven.ui</module>
-    <module>org.eclipse.tracecompass.incubator.jsontrace.core</module>
     <module>org.eclipse.tracecompass.incubator.opentracing</module>
     <module>org.eclipse.tracecompass.incubator.opentracing.core</module>
     <module>org.eclipse.tracecompass.incubator.opentracing.core.tests</module>

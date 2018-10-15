@@ -30,7 +30,7 @@ import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.IOpenT
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.OpenTracingAspects;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.OpenTracingEvent;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.OpenTracingField;
-import org.eclipse.tracecompass.incubator.jsontrace.core.trace.JsonTrace;
+import org.eclipse.tracecompass.jsontrace.core.trace.JsonTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfLostEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;

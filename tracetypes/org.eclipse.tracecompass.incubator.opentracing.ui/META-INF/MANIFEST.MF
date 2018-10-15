@@ -28,5 +28,5 @@ Import-Package: com.google.common.collect,
  javax.ws.rs.core,
  org.apache.commons.compress.utils,
  org.apache.commons.lang3,
- org.eclipse.tracecompass.incubator.jsontrace.core.trace
+ org.eclipse.tracecompass.jsontrace.core.trace
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.opentracing.ui

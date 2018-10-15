@@ -41,6 +41,7 @@
       <import plugin="org.eclipse.tracecompass.tmf.ui"/>
       <import plugin="org.eclipse.swt"/>
       <import feature="org.eclipse.tracecompass.incubator.callstack"/>
+      <import plugin="org.eclipse.tracecompass.jsontrace.core"/>
    </requires>
 
    <plugin
@@ -52,13 +53,6 @@
 
    <plugin
          id="org.eclipse.tracecompass.incubator.traceevent.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.tracecompass.incubator.jsontrace.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
