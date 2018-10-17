@@ -36,6 +36,9 @@
    <feature url="features/org.eclipse.tracecompass.incubator.hudson.maven_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.hudson.maven" version="0.0.1.qualifier">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.opentracing_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.opentracing" version="0.0.1.qualifier">
+      <category name="trace-types"/>
+   </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.1.qualifier">
       <category name="analyses"/>
    </bundle>
