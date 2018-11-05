@@ -10,7 +10,6 @@
 package org.eclipse.tracecompass.incubator.internal.callstack.core.symbol;
 
 import java.util.Collection;
-import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -53,7 +52,12 @@ public class ResolvableSymbol implements ICallStackSymbol {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fAddr, fPid);
+        // Just hash on the address as it should match the flame chart's hash
+        // code
+        // FIXME: The same symbol for flame chart and flame graph should be the
+        // same. They are, but only because we made sure to convert to Long here
+        // before...
+        return Long.valueOf(fAddr).hashCode();
     }
 
     @Override

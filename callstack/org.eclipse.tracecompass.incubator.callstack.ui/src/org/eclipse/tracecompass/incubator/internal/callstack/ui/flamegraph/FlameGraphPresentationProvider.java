@@ -18,10 +18,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.SubSecondTimeWithUnitFormat;
-import org.eclipse.tracecompass.internal.analysis.os.linux.ui.views.controlflow.ControlFlowPresentationProvider;
+import org.eclipse.tracecompass.incubator.internal.callstack.ui.FlameViewPalette;
 import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
@@ -40,7 +39,6 @@ import com.google.common.collect.ImmutableMap;
  *
  * @author Sonia Farrah
  */
-@SuppressWarnings("restriction")
 public class FlameGraphPresentationProvider extends TimeGraphPresentationProvider {
     /** Number of colors used for flameGraph events */
     public static final int NUM_COLORS = 360;
@@ -51,40 +49,18 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
 
     private @Nullable Integer fAverageCharWidth;
 
-    private final ControlFlowPresentationProvider fCfProvider = new ControlFlowPresentationProvider();
-
-    private enum State {
-        MULTIPLE(new RGB(100, 100, 100)), EXEC(new RGB(0, 200, 0));
-
-        private final RGB rgb;
-
-        private State(RGB rgb) {
-            this.rgb = rgb;
-        }
-    }
+    private FlameViewPalette fFlameViewPalette;
 
     /**
      * Constructor
      */
     public FlameGraphPresentationProvider() {
-        // Do nothing
+        fFlameViewPalette = FlameViewPalette.getInstance();
     }
 
     @Override
     public StateItem[] getStateTable() {
-        final float saturation = 0.6f;
-        final float brightness = 0.6f;
-        StateItem[] cfStateTable = fCfProvider.getStateTable();
-        StateItem[] stateTable = new StateItem[NUM_COLORS + 1 + cfStateTable.length];
-        stateTable[0] = new StateItem(State.MULTIPLE.rgb, State.MULTIPLE.toString());
-        for (int i = 0; i < NUM_COLORS; i++) {
-            RGB rgb = new RGB(i, saturation, brightness);
-            stateTable[i + 1] = new StateItem(rgb, State.EXEC.toString());
-        }
-        for (int i = 0; i < cfStateTable.length; i++) {
-            stateTable[NUM_COLORS + 1 + i] = cfStateTable[i];
-        }
-        return stateTable;
+        return fFlameViewPalette.getStateTable();
     }
 
     @Override
@@ -122,16 +98,16 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
     public int getStateTableIndex(@Nullable ITimeEvent event) {
         if (event instanceof FlamegraphEvent) {
             FlamegraphEvent flameGraphEvent = (FlamegraphEvent) event;
-            return flameGraphEvent.getValue() + 1;
+            return FlameViewPalette.getIndexForValue(flameGraphEvent.getValue());
         } else if (event instanceof NullTimeEvent) {
             return INVISIBLE;
         } else if (event instanceof TimeEvent) {
-            int cfIndex = fCfProvider.getStateTableIndex(event);
+            int cfIndex = fFlameViewPalette.getControlFlowIndex(event);
             if (cfIndex >= 0) {
-                return NUM_COLORS + 1 + cfIndex;
+                return cfIndex;
             }
         }
-        return State.MULTIPLE.ordinal();
+        return FlameViewPalette.MULTIPLE_STATE_INDEX;
     }
 
     @Override

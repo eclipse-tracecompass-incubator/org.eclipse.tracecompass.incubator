@@ -409,11 +409,6 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
         }
         String label = state.getLabel();
         int value = state.getValue();
-        FlameChartEntryModel model = (FlameChartEntryModel) entry.getModel();
-        if (model.getEntryType().equals(EntryType.FUNCTION)) {
-            final int modulo = FlameChartPresentationProvider.NUM_COLORS / 2;
-            value = state.getValue() % modulo + modulo;
-        }
         if (label != null) {
             return new NamedTimeEvent(entry, state.getStartTime(), state.getDuration(), value, label);
         }

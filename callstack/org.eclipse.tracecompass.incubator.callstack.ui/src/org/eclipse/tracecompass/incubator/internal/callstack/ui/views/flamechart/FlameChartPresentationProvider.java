@@ -19,11 +19,10 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel.EntryType;
-import org.eclipse.tracecompass.internal.analysis.os.linux.ui.views.controlflow.ControlFlowPresentationProvider;
+import org.eclipse.tracecompass.incubator.internal.callstack.ui.FlameViewPalette;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
@@ -52,26 +51,7 @@ import com.google.common.collect.ImmutableMap;
  */
 public class FlameChartPresentationProvider extends TimeGraphPresentationProvider {
 
-    /** Number of colors used for call stack events */
-    public static final int NUM_COLORS = 360;
-
-    private static final ControlFlowPresentationProvider CF_PROVIDER = new ControlFlowPresentationProvider();
-
-    private static final StateItem[] STATE_TABLE;
-    static {
-        final float saturation = 0.6f;
-        final float brightness = 0.6f;
-        StateItem[] cfStateTable = CF_PROVIDER.getStateTable();
-        STATE_TABLE = new StateItem[NUM_COLORS + 1 + cfStateTable.length];
-        STATE_TABLE[0] = new StateItem(State.MULTIPLE.rgb, State.MULTIPLE.toString());
-        for (int i = 0; i < NUM_COLORS; i++) {
-            RGB rgb = new RGB(i, saturation, brightness);
-            STATE_TABLE[i + 1] = new StateItem(rgb, State.EXEC.toString());
-        }
-        for (int i = 0; i < cfStateTable.length; i++) {
-            STATE_TABLE[NUM_COLORS + 1 + i] = cfStateTable[i];
-        }
-    }
+    private FlameViewPalette fFlameViewPalette;
 
     /**
      * Minimum width of a displayed state below which we will not print any text
@@ -80,23 +60,13 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
      */
     private Integer fMinimumBarWidth;
 
-    private enum State {
-        MULTIPLE (new RGB(100, 100, 100)),
-        EXEC     (new RGB(0, 200, 0));
-
-        private final RGB rgb;
-
-        private State (RGB rgb) {
-            this.rgb = rgb;
-        }
-    }
-
     /**
      * Constructor
      *
      * @since 1.2
      */
     public FlameChartPresentationProvider() {
+        fFlameViewPalette = FlameViewPalette.getInstance();
     }
 
     /**
@@ -125,7 +95,7 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
 
     @Override
     public StateItem[] getStateTable() {
-        return STATE_TABLE;
+        return fFlameViewPalette.getStateTable();
     }
 
     @Override
@@ -134,18 +104,16 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
         TimeGraphEntry entry = (TimeGraphEntry) event.getEntry();
         FlameChartEntryModel model = (FlameChartEntryModel) entry.getModel();
         if (model.getEntryType().equals(EntryType.KERNEL)) {
-            int cfIndex = CF_PROVIDER.getStateTableIndex(event);
-            return (cfIndex >= 0) ? NUM_COLORS + 1 + cfIndex : cfIndex;
+            return fFlameViewPalette.getControlFlowIndex(event);
         }
         if (event instanceof NamedTimeEvent) {
-            NamedTimeEvent callStackEvent = (NamedTimeEvent) event;
-            return callStackEvent.getValue() + 1;
+            return FlameViewPalette.getIndexForValue(((NamedTimeEvent) event).getValue());
         } else if (event instanceof TimeLinkEvent) {
-            return (NUM_COLORS + 1 + ((TimeLinkEvent) event).getValue()) % NUM_COLORS;
+            return FlameViewPalette.getIndexForValue(((TimeLinkEvent) event).getValue());
         } else if (event instanceof NullTimeEvent) {
             return INVISIBLE;
         }
-        return State.MULTIPLE.ordinal();
+        return FlameViewPalette.MULTIPLE_STATE_INDEX;
     }
 
     @Override
@@ -153,7 +121,7 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
         if (event instanceof NamedTimeEvent) {
             return ((NamedTimeEvent) event).getLabel();
         }
-        return State.MULTIPLE.toString();
+        return ""; //$NON-NLS-1$
     }
 
     @Override

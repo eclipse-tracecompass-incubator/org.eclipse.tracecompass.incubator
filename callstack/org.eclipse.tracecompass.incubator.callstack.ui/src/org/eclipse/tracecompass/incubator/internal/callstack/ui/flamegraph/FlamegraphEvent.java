@@ -33,8 +33,6 @@ import com.google.common.collect.ImmutableMap;
  */
 public class FlamegraphEvent extends TimeEvent {
 
-    private static final int MODULO = FlameGraphPresentationProvider.NUM_COLORS / 2;
-
     private final ICallStackSymbol fSymbol;
 
     private final AggregatedCallSite fCallSite;
@@ -50,7 +48,7 @@ public class FlamegraphEvent extends TimeEvent {
      *            The function the event's presenting
      */
     public FlamegraphEvent(ITimeGraphEntry source, long beginTime, AggregatedCallSite aggregatedFunction) {
-        super(source, beginTime, aggregatedFunction.getLength(), String.valueOf(aggregatedFunction.getSymbol()).hashCode() % MODULO + MODULO);
+        super(source, beginTime, aggregatedFunction.getLength(), aggregatedFunction.getSymbol().hashCode());
         fSymbol = aggregatedFunction.getSymbol();
         fCallSite = aggregatedFunction;
     }
