@@ -61,12 +61,20 @@ public abstract class FileDescriptorStateProvider extends AbstractTmfStateProvid
      * File descriptor name
      */
     protected static final String DESCRIPTOR = "fd"; //$NON-NLS-1$
+
+    /**
+     * Read entry
+     */
+    public static final String READ = "read"; //$NON-NLS-1$
+
+    /**
+     * Write entry
+     */
+    public static final String WRITE = "write"; //$NON-NLS-1$
     private static final String COUNT = "count"; //$NON-NLS-1$
-    private static final String READ = "read"; //$NON-NLS-1$
     private static final String PREAD = "pread"; //$NON-NLS-1$
     private static final String READ64 = "read64"; //$NON-NLS-1$
     private static final String PREAD64 = "pread64"; //$NON-NLS-1$
-    private static final String WRITE = "write"; //$NON-NLS-1$
     private static final String PWRITE = "pwrite"; //$NON-NLS-1$
     private static final String WRITE64 = "write64"; //$NON-NLS-1$
     private static final String PWRITE64 = "pwrite64"; //$NON-NLS-1$

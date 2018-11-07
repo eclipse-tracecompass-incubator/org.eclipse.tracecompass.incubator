@@ -16,5 +16,12 @@
          </tracetype>
       </module>
    </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess.FileAccessDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess.dataprovider">
+      </dataProviderFactory>
+   </extension>
 
 </plugin>

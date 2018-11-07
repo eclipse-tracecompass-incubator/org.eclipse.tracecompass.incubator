@@ -22,6 +22,8 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  */
 public class FileAccessAnalysis extends TmfStateSystemAnalysisModule {
 
+    public static final String ID = "org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess";
+
     @Override
     protected @NonNull ITmfStateProvider createStateProvider() {
         ITmfTrace trace = getTrace();
@@ -31,4 +33,8 @@ public class FileAccessAnalysis extends TmfStateSystemAnalysisModule {
         throw new IllegalStateException("trace " + trace + " is not a kernel trace"); //$NON-NLS-1$//$NON-NLS-2$
     }
 
+    @Override
+    public String getId() {
+        return ID;
+    }
 }
