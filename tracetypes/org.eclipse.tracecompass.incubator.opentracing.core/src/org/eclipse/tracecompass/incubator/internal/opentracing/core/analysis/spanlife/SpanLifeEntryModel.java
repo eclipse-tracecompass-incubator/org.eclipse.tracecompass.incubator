@@ -64,6 +64,8 @@ public class SpanLifeEntryModel extends TimeGraphEntryModel {
 
     private final boolean fErrorTag;
 
+    private final String fProcessName;
+
     /**
      * Constructor
      *
@@ -81,11 +83,14 @@ public class SpanLifeEntryModel extends TimeGraphEntryModel {
      *            Span logs timestamps
      * @param errorTag
      *            true if the span has an error tag
+     * @param processName
+     *            process name
      */
-    public SpanLifeEntryModel(long id, long parentId, String name, long startTime, long endTime, List<LogEvent> logs, boolean errorTag) {
+    public SpanLifeEntryModel(long id, long parentId, String name, long startTime, long endTime, List<LogEvent> logs, boolean errorTag, String processName) {
         super(id, parentId, name, startTime, endTime);
         fLogs = logs;
         fErrorTag = errorTag;
+        fProcessName= processName;
     }
 
     /**
@@ -104,6 +109,15 @@ public class SpanLifeEntryModel extends TimeGraphEntryModel {
      */
     public boolean getErrorTag() {
         return fErrorTag;
+    }
+
+    /**
+     * Getter for the process name
+     *
+     * @return the name of the process of the span
+     */
+    public String getProcessName() {
+        return fProcessName;
     }
 
 }

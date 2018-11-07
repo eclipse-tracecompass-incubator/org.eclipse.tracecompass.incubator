@@ -14,12 +14,14 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.RGBA;
+import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
@@ -57,7 +59,11 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
     /**
      * Only states available
      */
-    private static final StateItem[] STATE_TABLE = { new StateItem(new RGB(0, 0, 140), "Active"), //$NON-NLS-1$
+    private static final StateItem[] STATE_TABLE = { new StateItem(new RGB(179,205,224), "Fist Service Class"), //$NON-NLS-1$
+            new StateItem(new RGB(100, 151, 177), "Second Service Class"), //$NON-NLS-1$
+            new StateItem(new RGB(0,91,150), "Third Service Class"), //$NON-NLS-1$
+            new StateItem(new RGB(3, 57, 108), "Forth Service Class"), //$NON-NLS-1$
+            new StateItem(new RGB(1, 31, 75), "Fifth Service Class"), //$NON-NLS-1$
             new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), ERROR, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.CROSS, ITimeEventStyleStrings.heightFactor(),
                     0.4f)),
             new StateItem(
@@ -123,18 +129,23 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
             String type = markerEvent.getType();
             switch (type) {
             case ERROR:
-                return 1;
-            case EVENT:
-                return 2;
-            case MESSAGE:
-                return 3;
-            case STACK:
-                return 4;
-            default:
                 return 5;
+            case EVENT:
+                return 6;
+            case MESSAGE:
+                return 7;
+            case STACK:
+                return 8;
+            default:
+                return 9;
             }
         }
         if ((event instanceof TimeEvent) && ((TimeEvent) event).getValue() != Integer.MIN_VALUE) {
+            if ((event.getEntry() instanceof TimeGraphEntry) && (((TimeGraphEntry) event.getEntry()).getModel() instanceof SpanLifeEntryModel)) {
+                String processName = ((SpanLifeEntryModel) ((TimeGraphEntry) event.getEntry()).getModel()).getProcessName();
+                // We want a random color but that is the same for 2 spans of the same service
+                return Objects.hash(processName) % 5;
+            }
             return 0;
         }
         return -1;

@@ -241,7 +241,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
                     }
                 } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
                 }
-                builder.add(new SpanLifeEntryModel(childId, parentId, getSpanName(childName), ss.getStartTime(), ss.getCurrentEndTime(), logs, getErrorTag(childName)));
+                builder.add(new SpanLifeEntryModel(childId, parentId, getSpanName(childName), ss.getStartTime(), ss.getCurrentEndTime(), logs, getErrorTag(childName), getProcessName(childName)));
                 addChildren(ss, builder, child, childId, logsQuarks);
             }
         }
@@ -271,7 +271,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
                 return;
             }
             long childId = getId(ustSpan);
-            builder.add(new SpanLifeEntryModel(childId, parentId, getSpanName(childName), ss.getStartTime(), ss.getCurrentEndTime(), logs, getErrorTag(childName)));
+            builder.add(new SpanLifeEntryModel(childId, parentId, getSpanName(childName), ss.getStartTime(), ss.getCurrentEndTime(), logs, getErrorTag(childName), getProcessName(childName)));
             addUstChildren(ss, builder, child, ustQuark, childId, logsQuarks);
         }
     }
@@ -287,16 +287,22 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
 
     private static String getSpanName(String attributeName) {
         String spanNameAndId = attributeName.substring(0, attributeName.lastIndexOf('/'));
+        spanNameAndId = attributeName.substring(0, spanNameAndId.lastIndexOf('/'));
         return spanNameAndId.substring(0, spanNameAndId.lastIndexOf('/'));
     }
 
     private static String getSpanId(String attributeName) {
         String[] attributeInfo = attributeName.split("/");  //$NON-NLS-1$
-        return attributeInfo[attributeInfo.length - 2];
+        return attributeInfo[attributeInfo.length - 3];
     }
 
     private static Boolean getErrorTag(String attributeName) {
-        return attributeName.substring(attributeName.lastIndexOf('/') + 1).equals("true"); //$NON-NLS-1$
+        String[] attributeInfo = attributeName.split("/");  //$NON-NLS-1$
+        return attributeInfo[attributeInfo.length - 2].equals("true"); //$NON-NLS-1$
+    }
+
+    private static String getProcessName(String attributeName) {
+        return attributeName.substring(attributeName.lastIndexOf('/') + 1);
     }
 
     private static String getLogType(String logs) {

@@ -96,19 +96,20 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
         int openTracingSpansQuark = ss.getQuarkRelativeAndAdd(traceQuark, OPEN_TRACING_ATTRIBUTE);
 
         Boolean errorTag = Boolean.parseBoolean(event.getContent().getFieldValue(String.class, IOpenTracingConstants.TAGS + "/error")); //$NON-NLS-1$
+        String processName = event.getContent().getFieldValue(String.class, IOpenTracingConstants.PROCESS_NAME);
 
         int spanQuark;
         String name = String.valueOf(TmfTraceUtils.resolveAspectOfNameForEvent(event.getTrace(), "Name", event)); //$NON-NLS-1$
         String spanId = event.getContent().getFieldValue(String.class, IOpenTracingConstants.SPAN_ID);
         String refId = event.getContent().getFieldValue(String.class, IOpenTracingConstants.REFERENCES + "/CHILD_OF"); //$NON-NLS-1$
         if (refId == null) {
-            spanQuark = ss.getQuarkRelativeAndAdd(openTracingSpansQuark, name + '/' + spanId + '/' + errorTag);
+            spanQuark = ss.getQuarkRelativeAndAdd(openTracingSpansQuark, name + '/' + spanId + '/' + errorTag + '/' + processName);
         } else {
             Integer parentQuark = fSpanMap.get(refId);
             if (parentQuark == null) {
                 return;
             }
-            spanQuark = ss.getQuarkRelativeAndAdd(parentQuark, name + '/' + spanId + '/' + errorTag);
+            spanQuark = ss.getQuarkRelativeAndAdd(parentQuark, name + '/' + spanId + '/' + errorTag + '/' + processName);
         }
 
         ss.modifyAttribute(timestamp, name, spanQuark);
