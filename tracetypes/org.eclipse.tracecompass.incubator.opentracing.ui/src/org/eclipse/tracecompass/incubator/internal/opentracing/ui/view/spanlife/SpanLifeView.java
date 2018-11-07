@@ -11,14 +11,19 @@ package org.eclipse.tracecompass.incubator.internal.opentracing.ui.view.spanlife
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGBA;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeAnalysis;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeDataProvider;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel.LogEvent;
+import org.eclipse.tracecompass.incubator.internal.opentracing.ui.Activator;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
@@ -40,11 +45,30 @@ public class SpanLifeView extends BaseDataProviderTimeGraphView {
     public static final String ID = "org.eclipse.tracecompass.incubator.opentracing.ui.view.life.spanlife.view"; //$NON-NLS-1$
     private static final RGBA MARKER_COLOR = new RGBA(200, 0, 0, 150);
 
+    private static final Image ERROR_IMAGE = Objects.requireNonNull(Activator.getDefault()).getImageFromPath("icons/delete_button.gif"); //$NON-NLS-1$
+
+
+    private static class SpanTreeLabelProvider extends TreeLabelProvider {
+
+        @Override
+        public @Nullable Image getColumnImage(@Nullable Object element, int columnIndex) {
+            if (columnIndex == 0 && element instanceof TimeGraphEntry) {
+                TimeGraphEntry entry = (TimeGraphEntry) element;
+                ITimeGraphEntryModel entryModel = entry.getModel();
+                if ((entryModel instanceof SpanLifeEntryModel) && ((SpanLifeEntryModel) entryModel).getErrorTag()) {
+                    return ERROR_IMAGE;
+                }
+            }
+            return null;
+        }
+    }
+
     /**
      * Constructor
      */
     public SpanLifeView() {
         this(ID, new SpanLifePresentationProvider(), SpanLifeAnalysis.ID + SpanLifeDataProvider.SUFFIX);
+        setTreeLabelProvider(new SpanTreeLabelProvider());
     }
 
     /**

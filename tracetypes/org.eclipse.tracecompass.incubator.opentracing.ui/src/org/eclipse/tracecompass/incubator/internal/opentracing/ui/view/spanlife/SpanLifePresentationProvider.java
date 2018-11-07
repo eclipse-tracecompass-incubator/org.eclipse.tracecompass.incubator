@@ -18,12 +18,8 @@ import java.util.Map;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.RGBA;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
@@ -142,13 +138,5 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
             return 0;
         }
         return -1;
-    }
-
-    @Override
-    public void postDrawEntry(ITimeGraphEntry entry, Rectangle bounds, GC gc) {
-        if (entry instanceof TimeGraphEntry && ((TimeGraphEntry) entry).getModel() instanceof SpanLifeEntryModel && ((SpanLifeEntryModel) ((TimeGraphEntry) entry).getModel()).getErrorTag()) {
-            gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_RED));
-            gc.drawOval(bounds.x - 24, bounds.y + 2, (int) (bounds.height * 0.7), (int) (bounds.height * 0.7));
-        }
     }
 }
