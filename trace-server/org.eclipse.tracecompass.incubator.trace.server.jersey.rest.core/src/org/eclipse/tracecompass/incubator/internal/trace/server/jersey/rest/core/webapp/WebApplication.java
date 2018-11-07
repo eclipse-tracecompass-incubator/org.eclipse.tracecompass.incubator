@@ -15,10 +15,13 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.FilterService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
 import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
+import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
+import org.eclipse.tracecompass.tmf.core.model.xy.ITmfXyModel;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -38,7 +41,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
  */
 public class WebApplication {
 
-    private static final String CONTEXT_PATH = "/tracecompass"; //$NON-NLS-1$
+    private static final String CONTEXT_PATH = "/tsp/api"; //$NON-NLS-1$
     private static final String PATH_SPEC = "/*"; //$NON-NLS-1$
     /**
      * Port value which boots the server in testing mode.
@@ -81,6 +84,7 @@ public class WebApplication {
         rc.register(TraceManagerService.class);
         rc.register(ExperimentManagerService.class);
         rc.register(DataProviderService.class);
+        rc.register(FilterService.class);
         rc.register(XmlManagerService.class);
         rc.register(CORSFilter.class);
         rc.register(registerCustomMappers());
@@ -118,6 +122,8 @@ public class WebApplication {
         module.addSerializer(ITmfTrace.class, new TraceSerializer());
         module.addSerializer(TmfExperiment.class, new ExperimentSerializer());
         module.addSerializer(DataProviderDescriptor.class, new DataProviderDescriptorSerializer());
+        module.addSerializer(ITmfXyModel.class, new XYModelSerializer());
+        module.addSerializer(ISeriesModel.class, new SeriesModelSerializer());
         mapper.registerModule(module);
         return provider;
     }

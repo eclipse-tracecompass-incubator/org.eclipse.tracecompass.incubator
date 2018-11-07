@@ -19,6 +19,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
@@ -30,8 +31,10 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -105,9 +108,10 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
     }
 
     @Override
-    protected @Nullable List<@NonNull ITimeGraphRowModel> getRowModel(@NonNull ITmfStateSystem ss, @NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
+    protected @Nullable TimeGraphModel getRowModel(@NonNull ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
         TreeMultimap<Integer, ITmfStateInterval> intervals = TreeMultimap.create(Comparator.naturalOrder(),
                 Comparator.comparing(ITmfStateInterval::getStartTime));
+        SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(parameters);
         Map<@NonNull Long, @NonNull Integer> entries = getSelectedEntries(filter);
         Collection<Long> times = getTimes(filter, ss.getStartTime(), ss.getCurrentEndTime());
         /* Do the actual query */
@@ -134,7 +138,7 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));
 
         }
-        return rows;
+        return new TimeGraphModel(rows);
     }
 
     @Override
@@ -144,12 +148,12 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
 
     @SuppressWarnings("restriction")
     @Override
-    protected @NonNull List<@NonNull TimeGraphEntryModel> getTree(@NonNull ITmfStateSystem ss, @NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
+    protected @NonNull TmfTreeModel<@NonNull TimeGraphEntryModel> getTree(@NonNull ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
         Builder<@NonNull TimeGraphEntryModel> builder = new Builder<>();
         long parentId = getId(ITmfStateSystem.ROOT_ATTRIBUTE);
-        builder.add(new TimeGraphEntryModel(parentId, -1, getTrace().getName(), ss.getStartTime(), ss.getCurrentEndTime()));
+        builder.add(new TimeGraphEntryModel(parentId, -1, Collections.singletonList(getTrace().getName()), ss.getStartTime(), ss.getCurrentEndTime()));
         addChildren(ss, builder, ITmfStateSystem.ROOT_ATTRIBUTE, parentId);
-        return builder.build();
+        return new TmfTreeModel<>(Collections.emptyList(), builder.build());
     }
 
     private void addChildren(ITmfStateSystem ss, Builder<@NonNull TimeGraphEntryModel> builder, int quark, long parentId) {

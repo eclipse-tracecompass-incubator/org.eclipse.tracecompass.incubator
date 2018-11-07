@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel.LogEvent;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.IOpenTracingConstants;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.TimeGraphStateQueryFilter;
 import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
@@ -37,8 +38,10 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
@@ -142,15 +145,16 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
     }
 
     @Override
-    protected @Nullable List<@NonNull ITimeGraphRowModel> getRowModel(@NonNull ITmfStateSystem ss, @NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
+    protected @Nullable TimeGraphModel getRowModel(@NonNull ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
         TreeMultimap<Integer, ITmfStateInterval> intervals = TreeMultimap.create(Comparator.naturalOrder(),
                 Comparator.comparing(ITmfStateInterval::getStartTime));
+        SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(parameters);
         Map<@NonNull Long, @NonNull Integer> entries = getSelectedEntries(filter);
         Collection<Long> times = getTimes(filter, ss.getStartTime(), ss.getCurrentEndTime());
         /* Do the actual query */
         for (ITmfStateInterval interval : ss.query2D(entries.values(), times)) {
             if (monitor != null && monitor.isCanceled()) {
-                return Collections.emptyList();
+                return new TimeGraphModel(Collections.emptyList());
             }
             intervals.put(interval.getAttribute(), interval);
         }
@@ -162,7 +166,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
         List<@NonNull ITimeGraphRowModel> rows = new ArrayList<>();
         for (Map.Entry<@NonNull Long, @NonNull Integer> entry : entries.entrySet()) {
             if (monitor != null && monitor.isCanceled()) {
-                return Collections.emptyList();
+                return new TimeGraphModel(Collections.emptyList());
             }
 
             List<ITimeGraphState> eventList = new ArrayList<>();
@@ -176,7 +180,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));
 
         }
-        return rows;
+        return new TimeGraphModel(rows);
     }
 
     @Override
@@ -185,7 +189,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
     }
 
     @Override
-    protected @NonNull List<@NonNull TimeGraphEntryModel> getTree(@NonNull ITmfStateSystem ss, @NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
+    protected @NonNull TmfTreeModel<@NonNull TimeGraphEntryModel> getTree(@NonNull ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
         Builder<@NonNull TimeGraphEntryModel> builder = new Builder<>();
         long rootId = getId(ITmfStateSystem.ROOT_ATTRIBUTE);
         builder.add(new TimeGraphEntryModel(rootId, -1, String.valueOf(getTrace().getName()), ss.getStartTime(), ss.getCurrentEndTime()));
@@ -194,7 +198,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
             addTrace(ss, builder, traceQuark, rootId);
         }
 
-        return builder.build();
+        return new TmfTreeModel<>(Collections.emptyList(), builder.build());
     }
 
     private void addTrace(ITmfStateSystem ss, Builder<@NonNull TimeGraphEntryModel> builder, int quark, long parentId) {

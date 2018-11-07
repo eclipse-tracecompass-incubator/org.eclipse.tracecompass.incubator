@@ -54,8 +54,9 @@ public class TraceModelStub extends AbstractModelStub {
             @JsonProperty("UUID") UUID uuid,
             @JsonProperty("nbEvents") long nbEvents,
             @JsonProperty("start") long start,
-            @JsonProperty("end") long end) {
-        super(name, uuid, nbEvents, start, end);
+            @JsonProperty("end") long end,
+            @JsonProperty("indexingStatus") String indexingStatus) {
+        super(name, uuid, nbEvents, start, end, indexingStatus);
         fPath = path;
     }
 
@@ -70,7 +71,7 @@ public class TraceModelStub extends AbstractModelStub {
      *            the stub's UUID
      */
     public TraceModelStub(String name, String path, UUID uuid) {
-        this(name, path, uuid, 0, 0L, 0L);
+        this(name, path, uuid, 0, 0L, 0L, "RUNNING");
     }
 
     /**

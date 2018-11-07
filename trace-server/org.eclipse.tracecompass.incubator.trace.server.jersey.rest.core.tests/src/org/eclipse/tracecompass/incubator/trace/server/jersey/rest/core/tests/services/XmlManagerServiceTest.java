@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.client.Entity;
@@ -29,6 +30,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.junit.Test;
@@ -40,6 +42,7 @@ import org.osgi.framework.Bundle;
  * @author Loic Prieur-Drevon
  */
 public class XmlManagerServiceTest extends RestServerTest {
+    private static final String PATH = "path";
     private static final Bundle XML_CORE_TESTS = Platform.getBundle("org.eclipse.tracecompass.tmf.analysis.xml.core.tests");
     private static final GenericType<Map<String, String>> MAP_STRING_STRING_TYPE = new GenericType<Map<String, String>>() {
     };
@@ -77,12 +80,10 @@ public class XmlManagerServiceTest extends RestServerTest {
         WebTarget traces = application.path("traces");
         assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
 
-        WebTarget xmlProviderPath = traces.path(CONTEXT_SWITCHES_KERNEL_UUID.toString())
-                .path(DataProviderServiceTest.PROVIDERS_PATH)
-                // path to the tree XY data provider from the valid XML file
-                .path("org.eclipse.linuxtools.tmf.analysis.xml.core.tests.xy")
-                .path(DataProviderServiceTest.TREE_PATH);
-        Response xmlTree = xmlProviderPath.request(MediaType.APPLICATION_JSON).get();
+        WebTarget xmlProviderPath = getXYTreeEndpoint(CONTEXT_SWITCHES_KERNEL_UUID.toString(), "org.eclipse.linuxtools.tmf.analysis.xml.core.tests.xy");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("timeRequested", Collections.emptyList());
+        Response xmlTree = xmlProviderPath.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())));
         assertEquals("The end point for the XML data provider should be available.", 200, xmlTree.getStatus());
 
         assertEquals(200, xmlEndpoint.path("test_valid.xml").request().delete().getStatus());

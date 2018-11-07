@@ -80,6 +80,14 @@ public class ExperimentManagerService {
         return Response.status(Status.NOT_FOUND).build();
     }
 
+    @GET
+    @Path("/{uuid}/outputs")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getOutputs(@PathParam("uuid") UUID uuid) {
+        return Response.status(Status.NOT_IMPLEMENTED).entity("Not implemented for " + uuid).build();
+    }
+
+
     /**
      * Delete an experiment by {@link UUID}.
      *

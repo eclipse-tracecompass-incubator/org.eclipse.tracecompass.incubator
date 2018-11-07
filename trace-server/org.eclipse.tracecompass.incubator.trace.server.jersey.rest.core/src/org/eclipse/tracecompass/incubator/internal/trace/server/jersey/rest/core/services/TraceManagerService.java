@@ -12,13 +12,12 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -40,6 +39,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
@@ -83,20 +83,20 @@ public class TraceManagerService {
      * Method to open the trace, initialize it, index it and add it to the trace
      * manager.
      *
-     * @param name
-     *            the name to assign to the trace files
-     * @param path
-     *            the path to the trace
-     * @param typeID
-     *            the ID of a trace (like "o.e.l.specifictrace" )
+     * @param queryParameters
+     *            Parameters to post a trace as described by
+     *            {@link QueryParameters}
      * @return the new trace model object or the exception if it failed to load.
      */
     @POST
-    @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public Response putTrace(@FormParam("name") @NotNull @Size(min = 1) String name,
-            @FormParam("path") String path,
-            @FormParam("typeID") String typeID) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response putTrace(QueryParameters queryParameters) {
+        Map<String, Object> parameters = queryParameters.getParameters();
+        String name = (String) parameters.get("name");
+        String path = (String) parameters.get("uri");
+        Object typeIDObject = parameters.get("typeID");
+        String typeID = typeIDObject != null ? (String) typeIDObject : "";
         Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(TmfTraceManager.getInstance().getOpenedTraces(), t -> t.getPath().equals(path));
         if (optional.isPresent()) {
             return Response.status(Status.CONFLICT).entity(optional.get()).build();

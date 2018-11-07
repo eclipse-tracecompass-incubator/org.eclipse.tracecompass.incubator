@@ -13,7 +13,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,12 +23,12 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
@@ -48,7 +50,7 @@ import com.google.common.collect.ImmutableList;
  * @author Loic Prieur-Drevon
  */
 public abstract class RestServerTest {
-    private static final String SERVER = "http://localhost:8378/tracecompass"; //$NON-NLS-1$
+    private static final String SERVER = "http://localhost:8378/tsp/api"; //$NON-NLS-1$
     private static final WebApplication fWebApp = new WebApplication(WebApplication.TEST_PORT);
     /**
      * Traces endpoint path (relative to application).
@@ -58,6 +60,27 @@ public abstract class RestServerTest {
      * Experiments endpoint path (relative to application).
      */
     public static final String EXPERIMENTS = "experiments";
+
+    /**
+     * Outputs path segment
+     */
+    public static final String OUTPUTS_PATH = "outputs";
+
+    /**
+     * Tree path segment
+     */
+    public static final String TREE_PATH = "tree";
+
+    /**
+     * Time Graph path segment
+     */
+    public static final String TIMEGRAPH_PATH = "timeGraph";
+
+    /**
+     * XY path segment
+     */
+    public static final String XY_PATH = "XY";
+
     /**
      * <b>name</b> constant
      */
@@ -65,7 +88,7 @@ public abstract class RestServerTest {
     /**
      * <b>path</b> constant
      */
-    public static final String PATH = "path";
+    public static final String URI = "uri";
 
     private static final GenericType<Set<TraceModelStub>> TRACE_MODEL_SET_TYPE = new GenericType<Set<TraceModelStub>>() {
     };
@@ -170,6 +193,42 @@ public abstract class RestServerTest {
     }
 
     /**
+     * Get the {@link WebTarget} for the time graph tree endpoint.
+     *
+     * @param UUID
+     *            Trace or experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getTimeGraphTreeEndpoint(String UUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(UUID)
+                .path(OUTPUTS_PATH)
+                .path(TIMEGRAPH_PATH)
+                .path(dataProviderId)
+                .path(TREE_PATH);
+    }
+
+    /**
+     * Get the {@link WebTarget} for the XY tree endpoint.
+     *
+     * @param UUID
+     *            Trace or experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The XY tree endpoint
+     */
+    public static WebTarget getXYTreeEndpoint(String UUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(UUID)
+                .path(OUTPUTS_PATH)
+                .path(XY_PATH)
+                .path(dataProviderId)
+                .path(TREE_PATH);
+    }
+
+    /**
      * Get the traces currently open on the server.
      *
      * @param traces
@@ -191,6 +250,13 @@ public abstract class RestServerTest {
         return experiments.request(MediaType.APPLICATION_JSON).get(EXPERIMENT_MODEL_SET_TYPE);
     }
 
+    /**
+     * Get a set of {@link DataProviderDescriptorStub}
+     *
+     * @param outputs
+     *            {@link WebTarget} for the outputs endpoint
+     * @return Set of {@link DataProviderDescriptorStub} given by the server
+     */
     public static Set<DataProviderDescriptorStub> getDataProviderDescriptors(WebTarget outputs) {
         return outputs.request(MediaType.APPLICATION_JSON).get(DATAPROVIDER_DESCR_MODEL_SET_TYPE);
     }
@@ -205,9 +271,10 @@ public abstract class RestServerTest {
      *            expected trace stub
      */
     public static void assertPost(WebTarget traces, TraceModelStub stub) {
-        Form form = new Form(PATH, stub.getPath());
-        form.param(NAME, stub.getName());
-        Response response = traces.request().post(Entity.form(form));
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(NAME, stub.getName());
+        parameters.put(URI, stub.getPath());
+        Response response = traces.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())));
         int code = response.getStatus();
         assertEquals("Failed to POST " + stub.getName() + ", error code=" + code, 200, code);
         assertEquals(stub, response.readEntity(TraceModelStub.class));
