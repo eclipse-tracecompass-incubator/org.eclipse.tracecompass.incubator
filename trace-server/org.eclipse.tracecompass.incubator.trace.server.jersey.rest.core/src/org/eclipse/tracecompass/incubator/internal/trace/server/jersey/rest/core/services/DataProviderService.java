@@ -46,7 +46,7 @@ import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.xy.ITmfTreeXYDataProvider;
@@ -151,8 +151,8 @@ public class DataProviderService {
             return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
         }
 
-        TmfModelResponse<@NonNull ITmfXyModel> response = provider.fetchXY(selectionTimeQueryFilter, null);
-        return Response.ok(new GenericView<>(trace, response)).build();
+        TmfModelResponse<@NonNull ITmfXyModel> response = provider.fetchXY(queryParameters.getParameters(), null);
+        return Response.ok(response).build();
     }
 
     /**
@@ -240,8 +240,8 @@ public class DataProviderService {
             return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
         }
 
-        TmfModelResponse<List<@NonNull ITimeGraphRowModel>> response = provider.fetchRowModel(selectionTimeQueryFilter, null);
-        return Response.ok(new GenericView<>(trace, response)).build();
+        TmfModelResponse<TimeGraphModel> response = provider.fetchRowModel(queryParameters.getParameters(), null);
+        return Response.ok(response).build();
     }
 
     /**
@@ -280,8 +280,8 @@ public class DataProviderService {
             return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
         }
 
-        TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(timeQueryFilter, null);
-        return Response.ok(new GenericView<>(trace, response)).build();
+        TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(queryParameters.getParameters(), null);
+        return Response.ok(response).build();
     }
 
     /**
@@ -318,8 +318,8 @@ public class DataProviderService {
             // The analysis cannot be run on this trace
             return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
         }
-        TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = provider.fetchTooltip(new SelectionTimeQueryFilter(time, time, 1, Arrays.asList(entryId, targetId)), null);
-        return Response.ok(new GenericView<>(trace, response)).build();
+        TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = provider.fetchTooltip(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(time, time, 1, Arrays.asList(entryId, targetId))), null);
+        return Response.ok(response).build();
     }
 
     private ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> getTimeGraphProvider(@NonNull ITmfTrace trace, String outputId) {
@@ -389,7 +389,7 @@ public class DataProviderService {
             return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
         }
         TmfModelResponse<?> response = provider.fetchLines(queryParameters.getParameters(), null);
-        return Response.ok(new GenericView<>(trace, response)).build();
+        return Response.ok(response).build();
     }
 
     /**
@@ -444,7 +444,7 @@ public class DataProviderService {
             return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
         }
 
-        TmfModelResponse<?> treeResponse = provider.fetchTree(timeQueryFilter, null);
-        return Response.ok(new GenericView<>(trace, treeResponse)).build();
+        TmfModelResponse<?> treeResponse = provider.fetchTree(queryParameters.getParameters(), null);
+        return Response.ok(treeResponse).build();
     }
 }

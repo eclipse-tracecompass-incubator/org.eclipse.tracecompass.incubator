@@ -96,8 +96,15 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         super(trace, analysisModule);
     }
 
+    @Deprecated
     @Override
     public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
+        return fetchArrows(parameters, monitor);
+    }
+
+    @Override
+    public TmfModelResponse<List<ITimeGraphArrow>> fetchArrows(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
@@ -174,9 +181,20 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         return false;
     }
 
+    @Deprecated
     @Override
     public TmfModelResponse<Map<String, String>> fetchTooltip(SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
+        return fetchTooltip(parameters, monitor);
+    }
+
+    @Override
+    public TmfModelResponse<Map<String, String>> fetchTooltip(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         ITmfStateSystem ss = getAnalysisModule().getStateSystem();
+        SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(fetchParameters);
+        if (filter == null) {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.INCORRECT_QUERY_PARAMETERS);
+        }
         Collection<@NonNull Integer> quarks = getSelectedEntries(filter).values();
         Map<String, String> retMap = new LinkedHashMap<>();
 
@@ -187,8 +205,8 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         long start = filter.getStart();
         if (ss == null || quarks.size() != 1 || !getAnalysisModule().isQueryable(start)) {
             /*
-             * We need the ss to query, we should only be querying one attribute and the
-             * query times should be valid.
+             * We need the ss to query, we should only be querying one attribute
+             * and the query times should be valid.
              */
             return new TmfModelResponse<>(retMap, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
         }
@@ -202,7 +220,8 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
             }
             int parentQuark = ss.getParentAttributeQuark(quark);
             if (parentQuark == resQuark) {
-                // This is a file name, add the number of opened fd and full file name
+                // This is a file name, add the number of opened fd and full
+                // file name
                 String fileName = ss.getAttributeName(quark);
                 retMap.put("File Name", fileName); //$NON-NLS-1$
                 Object value = current.getValue();

@@ -22,15 +22,17 @@ import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.cont
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context.ContextDataProvider;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context.ContextDataProviderFactory;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
+import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -80,25 +82,25 @@ public class ContextTest {
              */
             assertNotNull(provider);
             TimeQueryFilter filter = new TimeQueryFilter(trace.getStartTime().toNanos(), trace.getEndTime().toNanos(), 1000);
-            TmfModelResponse<@NonNull List<@NonNull TimeGraphEntryModel>> tree = provider.fetchTree(filter, new NullProgressMonitor());
+            TmfModelResponse<@NonNull TmfTreeModel<@NonNull TimeGraphEntryModel>> tree = provider.fetchTree(FetchParametersUtils.timeQueryToMap(filter), new NullProgressMonitor());
             assertEquals(tree.getStatus(), TmfModelResponse.Status.COMPLETED);
-            List<@NonNull TimeGraphEntryModel> model = tree.getModel();
+            TmfTreeModel<@NonNull TimeGraphEntryModel> model = tree.getModel();
             /*
              * Does the query have the right data?
              */
             assertNotNull(model);
-            TimeGraphEntryModel rootEntry = model.get(0);
+            TimeGraphEntryModel rootEntry = model.getEntries().get(0);
             assertEquals("blink", rootEntry.getName());
             SelectionTimeQueryFilter selectionFilter = new SelectionTimeQueryFilter(trace.getStartTime().toNanos(), trace.getEndTime().toNanos(), 1000, Collections.singleton(rootEntry.getId()));
-            TmfModelResponse<@NonNull List<@NonNull ITimeGraphRowModel>> rowModel = provider.fetchRowModel(selectionFilter, new NullProgressMonitor());
+            TmfModelResponse<@NonNull TimeGraphModel> rowModel = provider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(selectionFilter), new NullProgressMonitor());
             /*
              * Does the second query have the bookmarks?
              */
             assertNotNull(rowModel);
-            List<@NonNull ITimeGraphRowModel> markerList = rowModel.getModel();
+            TimeGraphModel markerList = rowModel.getModel();
             assertNotNull(markerList);
-            assertFalse(markerList.isEmpty());
-            List<@NonNull ITimeGraphState> bookmarks = markerList.get(0).getStates();
+            assertFalse(markerList.getRows().isEmpty());
+            List<@NonNull ITimeGraphState> bookmarks = markerList.getRows().get(0).getStates();
             assertEquals(3, bookmarks.size());
             assertEquals(Collections.singleton("FrameBlameContext"), Sets.newHashSet(Lists.transform(bookmarks, bookmark -> bookmark.getLabel())));
         } finally {

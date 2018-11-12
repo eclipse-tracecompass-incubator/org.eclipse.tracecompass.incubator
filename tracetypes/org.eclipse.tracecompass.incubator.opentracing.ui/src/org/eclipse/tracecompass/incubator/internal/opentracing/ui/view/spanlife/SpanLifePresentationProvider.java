@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.RGBA;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
@@ -113,7 +114,7 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
             times.add(windowEndTime);
 
             SelectionTimeQueryFilter filter = new SelectionTimeQueryFilter(times, Collections.singleton(id));
-            TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> tooltipResponse = provider.fetchTooltip(filter, new NullProgressMonitor());
+            TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> tooltipResponse = provider.fetchTooltip(FetchParametersUtils.selectionTimeQueryToMap(filter), new NullProgressMonitor());
             Map<@NonNull String, @NonNull String> tooltipModel = tooltipResponse.getModel();
             if (tooltipModel != null) {
                 eventHoverToolTipInfo.putAll(tooltipModel);

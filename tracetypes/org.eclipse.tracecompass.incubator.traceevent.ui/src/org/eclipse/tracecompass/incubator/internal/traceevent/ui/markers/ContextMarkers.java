@@ -21,13 +21,16 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.swt.graphics.RGBA;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context.ContextDataProvider;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context.ContextDataProvider.MarkerModel;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeDataModel;
+import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
@@ -68,14 +71,14 @@ public class ContextMarkers implements IMarkerEventSource {
         if (dataProvider == null) {
             return Collections.emptyList();
         }
-        TmfModelResponse<@NonNull List<@NonNull TimeGraphEntryModel>> tree = dataProvider.fetchTree(new TimeQueryFilter(Collections.emptyList()), new NullProgressMonitor());
-        List<@NonNull TimeGraphEntryModel> model = tree.getModel();
+        TmfModelResponse<@NonNull TmfTreeModel<@NonNull TimeGraphEntryModel>> tree = dataProvider.fetchTree(FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(Collections.emptyList())), new NullProgressMonitor());
+        TmfTreeModel<@NonNull TimeGraphEntryModel> model = tree.getModel();
 
         if (model == null) {
             return Collections.emptyList();
         }
         Set<String> data = new HashSet<>();
-        for (TmfTreeDataModel elem : model) {
+        for (TmfTreeDataModel elem : model.getEntries()) {
             data.add(elem.getName());
         }
         List<String> dataList = Lists.newArrayList(data);
@@ -93,25 +96,25 @@ public class ContextMarkers implements IMarkerEventSource {
         if (dataProvider == null) {
             return Collections.emptyList();
         }
-        TmfModelResponse<@NonNull List<@NonNull TimeGraphEntryModel>> tree = dataProvider.fetchTree(new TimeQueryFilter(Collections.emptyList()), monitor);
-        List<@NonNull TimeGraphEntryModel> treeModels = tree.getModel();
+        TmfModelResponse<@NonNull TmfTreeModel<@NonNull TimeGraphEntryModel>> tree = dataProvider.fetchTree(FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(Collections.emptyList())), monitor);
+        TmfTreeModel<@NonNull TimeGraphEntryModel> treeModels = tree.getModel();
 
         if (treeModels == null) {
             return Collections.emptyList();
         }
         List<Long> ids = new ArrayList<>();
-        for (TmfTreeDataModel treeModel : treeModels) {
+        for (TmfTreeDataModel treeModel : treeModels.getEntries()) {
             if (treeModel.getName().startsWith(category)) {
                 ids.add(treeModel.getId());
             }
         }
-        TmfModelResponse<@NonNull List<@NonNull ITimeGraphRowModel>> res = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(startTime, endTime, (int) Math.max(2, (((double) endTime - startTime) / resolution)), ids), monitor);
-        List<@NonNull ITimeGraphRowModel> rowModels = res.getModel();
-        if (rowModels == null || rowModels.isEmpty()) {
+        TmfModelResponse<@NonNull TimeGraphModel> res = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(startTime, endTime, (int) Math.max(2, (((double) endTime - startTime) / resolution)), ids)), monitor);
+        TimeGraphModel rowModels = res.getModel();
+        if (rowModels == null || rowModels.getRows().isEmpty()) {
             return Collections.emptyList();
         }
         List<IMarkerEvent> events = new ArrayList<>();
-        for (ITimeGraphRowModel rowModel : rowModels) {
+        for (ITimeGraphRowModel rowModel : rowModels.getRows()) {
             for (ITimeGraphState model : rowModel.getStates()) {
                 if (model instanceof MarkerModel) {
                     events.add(new MarkerEvent(null, model.getStartTime(), model.getDuration(), ((MarkerModel) model).getCategory(), ONE_TRUE_COLOUR, model.getLabel(), true));

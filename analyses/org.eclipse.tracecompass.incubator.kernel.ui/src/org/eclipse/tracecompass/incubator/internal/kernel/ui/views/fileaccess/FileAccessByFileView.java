@@ -42,6 +42,7 @@ import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.Ti
 import org.eclipse.tracecompass.incubator.internal.kernel.ui.Activator;
 import org.eclipse.tracecompass.internal.analysis.os.linux.ui.actions.FollowThreadAction;
 import org.eclipse.tracecompass.internal.analysis.os.linux.ui.views.resources.ResourcesView;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
@@ -244,7 +245,8 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
                 TimeGraphEntry entry = (TimeGraphEntry) event.getEntry();
                 ITimeGraphDataProvider<? extends TimeGraphEntryModel> dataProvider = BaseDataProviderTimeGraphView.getProvider(entry);
                 TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = dataProvider.fetchTooltip(
-                        new SelectionTimeQueryFilter(hoverTime, hoverTime, 1, Collections.singletonList(entry.getModel().getId())), null);
+                        FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(hoverTime, hoverTime, 1, Collections.singletonList(entry.getModel().getId()))),
+                        null);
                 Map<@NonNull String, @NonNull String> map = response.getModel();
                 if (map != null) {
                     retMap.putAll(map);

@@ -12,12 +12,14 @@ package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -52,7 +54,11 @@ public class FlameChartArrowProvider {
      *            the monitor
      * @return the corresponding state intervals
      */
-    public List<ITmfStateInterval> fetchArrows(TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+    public List<ITmfStateInterval> fetchArrows(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
+        TimeQueryFilter filter = FetchParametersUtils.createTimeQuery(fetchParameters);
+        if (filter == null) {
+            return Collections.emptyList();
+        }
         long start = filter.getStart();
         long end = filter.getEnd();
 

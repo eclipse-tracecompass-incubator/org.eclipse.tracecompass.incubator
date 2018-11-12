@@ -47,6 +47,7 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.p
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.threadstatus.ThreadEntryModel;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.threadstatus.ThreadStatusDataProvider;
 import org.eclipse.tracecompass.internal.tmf.core.model.AbstractTmfTraceDataProvider;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
@@ -60,8 +61,10 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphArrow;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse.Status;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
@@ -162,7 +165,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
         public @Nullable Map<String, String> fetchTooltip(int threadId, long time, @Nullable IProgressMonitor monitor) {
             for (ThreadEntryModel entry : fThreadTree) {
                 if (entry.getThreadId() == threadId && entry.getStartTime() <= time && entry.getEndTime() >= time) {
-                    TmfModelResponse<Map<String, String>> tooltip = fThreadDataProvider.fetchTooltip(new SelectionTimeQueryFilter(Collections.singletonList(time), Collections.singleton(entry.getId())), monitor);
+                    TmfModelResponse<Map<String, String>> tooltip = fThreadDataProvider.fetchTooltip(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Collections.singletonList(time), Collections.singleton(entry.getId()))), monitor);
                     return tooltip.getModel();
                 }
             }
@@ -209,7 +212,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
     private final String fAnalysisId;
     private final ReentrantReadWriteLock fLock = new ReentrantReadWriteLock(false);
     private final FlameChartArrowProvider fArrowProvider;
-    private @Nullable TmfModelResponse<List<FlameChartEntryModel>> fCached;
+    private @Nullable TmfModelResponse<TmfTreeModel<FlameChartEntryModel>> fCached;
     private @Nullable ThreadData fThreadData = null;
 
     /**
@@ -231,8 +234,8 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
     }
 
     @Override
-    public TmfModelResponse<List<ITimeGraphArrow>> fetchArrows(TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        List<ITmfStateInterval> arrows = fArrowProvider.fetchArrows(filter, monitor);
+    public TmfModelResponse<List<ITimeGraphArrow>> fetchArrows(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
+        List<ITmfStateInterval> arrows = fArrowProvider.fetchArrows(fetchParameters, monitor);
         List<ITimeGraphArrow> tgArrows = new ArrayList<>();
         // First, get the distinct callstacks
         fLock.readLock().lock();
@@ -290,9 +293,10 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
     }
 
     @Override
-    public TmfModelResponse<Map<String, String>> fetchTooltip(SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+    public TmfModelResponse<Map<String, String>> fetchTooltip(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameChartDataProvider#fetchTooltip") //$NON-NLS-1$
                 .setCategory(getClass().getSimpleName()).build()) {
+            SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(fetchParameters);
             Map<Long, FlameChartEntryModel> entries = getSelectedEntries(filter);
             if (entries.size() != 1) {
                 // Not the expected size of tooltip, just return empty
@@ -378,7 +382,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
     }
 
     @Override
-    public TmfModelResponse<List<FlameChartEntryModel>> fetchTree(TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+    public TmfModelResponse<TmfTreeModel<FlameChartEntryModel>> fetchTree(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         if (fCached != null) {
             return fCached;
         }
@@ -397,7 +401,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
 
             // Initialize the first element of the tree
             ImmutableList.Builder<FlameChartEntryModel> builder = ImmutableList.builder();
-            FlameChartEntryModel traceEntry = new FlameChartEntryModel(fTraceId, -1, getTrace().getName(), start, end, FlameChartEntryModel.EntryType.TRACE);
+            FlameChartEntryModel traceEntry = new FlameChartEntryModel(fTraceId, -1, Collections.singletonList(getTrace().getName()), start, end, FlameChartEntryModel.EntryType.TRACE);
             builder.add(traceEntry);
 
             FlameChartEntryModel callStackRoot = traceEntry;
@@ -417,12 +421,12 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
             List<FlameChartEntryModel> tree = builder.build();
             tree.forEach(entry -> fEntries.put(entry.getId(), entry));
             if (complete) {
-                TmfModelResponse<List<FlameChartEntryModel>> response = new TmfModelResponse<>(tree,
+                TmfModelResponse<TmfTreeModel<FlameChartEntryModel>> response = new TmfModelResponse<>(new TmfTreeModel<>(Collections.emptyList(), tree),
                         ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
                 fCached = response;
                 return response;
             }
-            return new TmfModelResponse<>(tree, ITmfResponse.Status.RUNNING, CommonStatusMessage.RUNNING);
+            return new TmfModelResponse<>(new TmfTreeModel<>(Collections.emptyList(), tree), ITmfResponse.Status.RUNNING, CommonStatusMessage.RUNNING);
         } finally {
             fLock.writeLock().unlock();
         }
@@ -440,10 +444,10 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
             ThreadStatusDataProvider dataProvider = DataProviderManager.getInstance().getDataProvider(trace, ThreadStatusDataProvider.ID, ThreadStatusDataProvider.class);
             if (dataProvider != null) {
                 // Get the tree for the trace's current range
-                TmfModelResponse<List<ThreadEntryModel>> threadTreeResp = dataProvider.fetchTree(new TimeQueryFilter(start, Long.MAX_VALUE, 2), monitor);
-                List<ThreadEntryModel> threadTree = threadTreeResp.getModel();
+                TmfModelResponse<TmfTreeModel<ThreadEntryModel>> threadTreeResp = dataProvider.fetchTree(FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(start, Long.MAX_VALUE, 2)), monitor);
+                TmfTreeModel<ThreadEntryModel> threadTree = threadTreeResp.getModel();
                 if (threadTree != null) {
-                    fThreadData = new ThreadData(dataProvider, threadTree, threadTreeResp.getStatus());
+                    fThreadData = new ThreadData(dataProvider, threadTree.getEntries(), threadTreeResp.getStatus());
                     break;
                 }
             }
@@ -453,7 +457,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
     private boolean processCallStackElement(ICallStackElement element, Builder<FlameChartEntryModel> builder, FlameChartEntryModel parentEntry) {
 
         long elementId = getEntryId(element);
-        FlameChartEntryModel entry = new FlameChartEntryModel(elementId, parentEntry.getId(), element.getName(), parentEntry.getStartTime(), parentEntry.getEndTime(), FlameChartEntryModel.EntryType.LEVEL);
+        FlameChartEntryModel entry = new FlameChartEntryModel(elementId, parentEntry.getId(), Collections.singletonList(element.getName()), parentEntry.getStartTime(), parentEntry.getEndTime(), FlameChartEntryModel.EntryType.LEVEL);
         builder.add(entry);
 
         boolean needsKernel = false;
@@ -464,12 +468,12 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
             InstrumentedCallStackElement finalElement = (InstrumentedCallStackElement) element;
             CallStack callStack = finalElement.getCallStack();
             for (int depth = 0; depth < callStack.getMaxDepth(); depth++) {
-                FlameChartEntryModel flameChartEntry = new FlameChartEntryModel(getEntryId(new CallStackDepth(callStack, depth + 1)), entry.getId(), element.getName(), parentEntry.getStartTime(), parentEntry.getEndTime(),
+                FlameChartEntryModel flameChartEntry = new FlameChartEntryModel(getEntryId(new CallStackDepth(callStack, depth + 1)), entry.getId(), Collections.singletonList(element.getName()), parentEntry.getStartTime(), parentEntry.getEndTime(),
                         FlameChartEntryModel.EntryType.FUNCTION, depth + 1);
                 builder.add(flameChartEntry);
                 if (depth == 0 && callStack.hasKernelStatuses()) {
                     needsKernel = true;
-                    builder.add(new FlameChartEntryModel(getKernelEntryId(flameChartEntry.getId()), entry.getId(), String.valueOf(Messages.FlameChartDataProvider_KernelStatusTitle), parentEntry.getStartTime(), parentEntry.getEndTime(),
+                    builder.add(new FlameChartEntryModel(getKernelEntryId(flameChartEntry.getId()), entry.getId(), Collections.singletonList(String.valueOf(Messages.FlameChartDataProvider_KernelStatusTitle)), parentEntry.getStartTime(), parentEntry.getEndTime(),
                             FlameChartEntryModel.EntryType.KERNEL));
                 }
             }
@@ -501,18 +505,26 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
     }
 
     @Override
-    public @NonNull TmfModelResponse<List<ITimeGraphRowModel>> fetchRowModel(SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+    public TmfModelResponse<TimeGraphModel> fetchRowModel(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameChartDataProvider#fetchRowModel") //$NON-NLS-1$
                 .setCategory(getClass().getSimpleName()).build()) {
 
+            SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(fetchParameters);
+            if (filter == null) {
+                return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.INCORRECT_QUERY_PARAMETERS);
+            }
             Map<Long, FlameChartEntryModel> entries = getSelectedEntries(filter);
             if (entries.size() == 1 && filter.getTimesRequested().length == 2) {
                 // this is a request for a follow event.
                 Entry<@NonNull Long, @NonNull FlameChartEntryModel> entry = entries.entrySet().iterator().next();
                 if (filter.getStart() == Long.MIN_VALUE) {
-                    return new TmfModelResponse<>(getFollowEvent(entry, filter.getEnd(), false), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+                    List<ITimeGraphRowModel> followEvents = getFollowEvent(entry, filter.getEnd(), false);
+                    TimeGraphModel model = followEvents == null ? null : new TimeGraphModel(followEvents);
+                    return new TmfModelResponse<>(model, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
                 } else if (filter.getEnd() == Long.MAX_VALUE) {
-                    return new TmfModelResponse<>(getFollowEvent(entry, filter.getStart(), true), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+                    List<ITimeGraphRowModel> followEvents = getFollowEvent(entry, filter.getStart(), true);
+                    TimeGraphModel model = followEvents == null ? null : new TimeGraphModel(followEvents);
+                    return new TmfModelResponse<>(model, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
                 }
             }
             // For each kernel status entry, add the first row of the callstack
@@ -528,7 +540,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
                 return new TmfModelResponse<>(null, ITmfResponse.Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
             }
             List<ITimeGraphRowModel> collect = csRows.entrySet().stream().map(entry -> new TimeGraphRowModel(entry.getKey(), entry.getValue())).collect(Collectors.toList());
-            return new TmfModelResponse<>(collect, complete ? Status.COMPLETED : Status.RUNNING,
+            return new TmfModelResponse<>(new TimeGraphModel(collect), complete ? Status.COMPLETED : Status.RUNNING,
                     complete ? CommonStatusMessage.COMPLETED : CommonStatusMessage.RUNNING);
         } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
             return new TmfModelResponse<>(null, Status.FAILED, String.valueOf(e.getMessage()));
@@ -627,12 +639,12 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
         // and the trace filtered the right host.
         BiMap<Long, Integer> threadModelIds = filterThreads(tree, tids);
         SelectionTimeQueryFilter tidFilter = new SelectionTimeQueryFilter(times, threadModelIds.keySet());
-        TmfModelResponse<List<ITimeGraphRowModel>> rowModel = threadData.fThreadDataProvider.fetchRowModel(tidFilter, monitor);
-        List<ITimeGraphRowModel> rowModels = rowModel.getModel();
+        TmfModelResponse<TimeGraphModel> rowModel = threadData.fThreadDataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(tidFilter), monitor);
+        TimeGraphModel rowModels = rowModel.getModel();
         if (rowModel.getStatus().equals(Status.CANCELLED) || rowModel.getStatus().equals(Status.FAILED) || rowModels == null) {
             return Collections.emptyMap();
         }
-        return mapThreadStates(rowModels, threadModelIds, tids);
+        return mapThreadStates(rowModels.getRows(), threadModelIds, tids);
     }
 
     private static Map<Long, List<ITimeGraphState>> mapThreadStates(List<ITimeGraphRowModel> rowModels, BiMap<Long, Integer> threadModelIds, List<TidInformation> tids) {
@@ -794,6 +806,47 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
             return null;
         }
         return null;
+    }
+
+    @Deprecated
+    @Override
+    public TmfModelResponse<List<FlameChartEntryModel>> fetchTree(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
+        TmfModelResponse<@NonNull TmfTreeModel<@NonNull FlameChartEntryModel>> response = fetchTree(parameters, monitor);
+        TmfTreeModel<@NonNull FlameChartEntryModel> model = response.getModel();
+        List<FlameChartEntryModel> treeModel = null;
+        if (model != null) {
+            treeModel = model.getEntries();
+        }
+        return new TmfModelResponse<>(treeModel, response.getStatus(),
+                response.getStatusMessage());
+    }
+
+    @Deprecated
+    @Override
+    public TmfModelResponse<List<ITimeGraphRowModel>> fetchRowModel(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
+        TmfModelResponse<TimeGraphModel> response = fetchRowModel(parameters, monitor);
+        TimeGraphModel model = response.getModel();
+        List<ITimeGraphRowModel> rows = null;
+        if (model != null) {
+            rows = model.getRows();
+        }
+        return new TmfModelResponse<>(rows, response.getStatus(), response.getStatusMessage());
+    }
+
+    @Deprecated
+    @Override
+    public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
+        return fetchArrows(parameters, monitor);
+    }
+
+    @Deprecated
+    @Override
+    public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
+        return fetchTooltip(parameters, monitor);
     }
 
 }

@@ -67,14 +67,32 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         super(trace, analysisModule);
     }
 
+    @Deprecated
     @Override
     public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
+        return fetchArrows(parameters, monitor);
     }
 
     @Override
+    public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
+        return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+    }
+
+    @Deprecated
+    @Override
     public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
+        return fetchTooltip(parameters, monitor);
+    }
+
+    @Override
+    public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         ITmfStateSystem ss = getAnalysisModule().getStateSystem();
+        SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(fetchParameters);
+        if (filter == null) {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.INCORRECT_QUERY_PARAMETERS);
+        }
         Map<@NonNull Long, @NonNull Integer> entries = getSelectedEntries(filter);
         Collection<@NonNull Integer> quarks = entries.values();
         long start = filter.getStart();
@@ -159,7 +177,7 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
     private void addChildren(ITmfStateSystem ss, Builder<@NonNull TimeGraphEntryModel> builder, int quark, long parentId) {
         for (Integer child : ss.getSubAttributes(quark, false)) {
             long childId = getId(child);
-            builder.add(new TimeGraphEntryModel(childId, parentId, ss.getAttributeName(child), ss.getStartTime(), ss.getCurrentEndTime()));
+            builder.add(new TimeGraphEntryModel(childId, parentId, Collections.singletonList(ss.getAttributeName(child)), ss.getStartTime(), ss.getCurrentEndTime()));
             addChildren(ss, builder, child, childId);
         }
     }

@@ -32,11 +32,14 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.p
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartDataProviderFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel.EntryType;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.junit.Test;
@@ -71,19 +74,20 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
     public void testFetchTree() {
         FlameChartDataProvider dataProvider = getDataProvider();
 
-        TmfModelResponse<List<FlameChartEntryModel>> responseTree = dataProvider.fetchTree(new TimeQueryFilter(0, Long.MAX_VALUE, 2), new NullProgressMonitor());
+        TmfModelResponse<@NonNull TmfTreeModel<@NonNull FlameChartEntryModel>> responseTree = dataProvider.fetchTree(FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(0, Long.MAX_VALUE, 2)), new NullProgressMonitor());
         assertTrue(responseTree.getStatus().equals(ITmfResponse.Status.COMPLETED));
 
         // Test the size of the tree
-        List<FlameChartEntryModel> model = responseTree.getModel();
+        TmfTreeModel<@NonNull FlameChartEntryModel> model = responseTree.getModel();
         assertNotNull(model);
-        assertEquals(18, model.size());
+        List<@NonNull FlameChartEntryModel> modelEntries = model.getEntries();
+        assertEquals(18, modelEntries.size());
 
         String traceName = getTrace().getName();
 
         // Test the hierarchy of the tree
-        for (FlameChartEntryModel entry : model) {
-            FlameChartEntryModel parent = findEntryById(model, entry.getParentId());
+        for (FlameChartEntryModel entry : modelEntries) {
+            FlameChartEntryModel parent = findEntryById(modelEntries, entry.getParentId());
             switch (entry.getEntryType()) {
             case FUNCTION:
                 assertNotNull(parent);
@@ -161,63 +165,65 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
     public void testFetchModel() {
         FlameChartDataProvider dataProvider = getDataProvider();
 
-        TmfModelResponse<List<FlameChartEntryModel>> responseTree = dataProvider.fetchTree(new TimeQueryFilter(0, Long.MAX_VALUE, 2), new NullProgressMonitor());
+        TmfModelResponse<@NonNull TmfTreeModel<@NonNull FlameChartEntryModel>> responseTree = dataProvider.fetchTree(FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(0, Long.MAX_VALUE, 2)), new NullProgressMonitor());
         assertTrue(responseTree.getStatus().equals(ITmfResponse.Status.COMPLETED));
-        List<FlameChartEntryModel> model = responseTree.getModel();
-
+        TmfTreeModel<@NonNull FlameChartEntryModel> model = responseTree.getModel();
+        assertNotNull(model);
+        List<@NonNull FlameChartEntryModel> modelEntries = model.getEntries();
         // Find the entries corresponding to threads 3 and 6 (along with pid 5)
         Set<@NonNull Long> selectedIds = new HashSet<>();
         // Thread 3
-        FlameChartEntryModel tid3 = findEntryByNameAndType(model, "3", EntryType.LEVEL);
+        FlameChartEntryModel tid3 = findEntryByNameAndType(modelEntries, "3", EntryType.LEVEL);
         assertNotNull(tid3);
         selectedIds.add(tid3.getId());
-        List<FlameChartEntryModel> tid3Children = findEntriesByParent(model, tid3.getId());
+        List<FlameChartEntryModel> tid3Children = findEntriesByParent(modelEntries, tid3.getId());
         assertEquals(2, tid3Children.size());
         tid3Children.forEach(child -> selectedIds.add(child.getId()));
         // Pid 5
-        FlameChartEntryModel pid5 = findEntryByNameAndType(model, "5", EntryType.LEVEL);
+        FlameChartEntryModel pid5 = findEntryByNameAndType(modelEntries, "5", EntryType.LEVEL);
         assertNotNull(pid5);
         selectedIds.add(pid5.getId());
         // Thread 6
-        FlameChartEntryModel tid6 = findEntryByNameAndType(model, "6", EntryType.LEVEL);
+        FlameChartEntryModel tid6 = findEntryByNameAndType(modelEntries, "6", EntryType.LEVEL);
         assertNotNull(tid6);
         selectedIds.add(tid6.getId());
-        List<FlameChartEntryModel> tid6Children = findEntriesByParent(model, tid6.getId());
+        List<FlameChartEntryModel> tid6Children = findEntriesByParent(modelEntries, tid6.getId());
         assertEquals(3, tid6Children.size());
         tid6Children.forEach(child -> selectedIds.add(child.getId()));
 
         // Get the row model for those entries with high resolution
-        TmfModelResponse<List<ITimeGraphRowModel>> rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(3, 15, 50, selectedIds), new NullProgressMonitor());
-        assertEquals(ITmfResponse.Status.COMPLETED, rowModel.getStatus());
+        TmfModelResponse<@NonNull TimeGraphModel> rowResponse = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(3, 15, 50, selectedIds)), new NullProgressMonitor());
+        assertEquals(ITmfResponse.Status.COMPLETED, rowResponse.getStatus());
 
-        List<ITimeGraphRowModel> rowModels = rowModel.getModel();
-        assertNotNull(rowModels);
-        assertEquals(8, rowModels.size());
+        TimeGraphModel rowModel = rowResponse.getModel();
+        assertNotNull(rowModel);
+        List<@NonNull ITimeGraphRowModel> rows = rowModel.getRows();
+        assertEquals(8, rows.size());
 
         // Verify the level entries
-        verifyStates(rowModels, tid3, Collections.emptyList());
-        verifyStates(rowModels, pid5, Collections.emptyList());
-        verifyStates(rowModels, tid6, Collections.emptyList());
+        verifyStates(rows, tid3, Collections.emptyList());
+        verifyStates(rows, pid5, Collections.emptyList());
+        verifyStates(rows, tid6, Collections.emptyList());
         // Verify function level 1 of tid 3
-        verifyStates(rowModels, findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Integer.MIN_VALUE, "op2")));
+        verifyStates(rows, findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Integer.MIN_VALUE, "op2")));
         // Verify function level 2 of tid 3
-        verifyStates(rowModels, findEntryByDepthAndType(tid3Children, 2, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, findEntryByDepthAndType(tid3Children, 2, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(1, 4, Integer.MIN_VALUE),
                 new TimeGraphState(5, 1, Integer.MIN_VALUE, "op3"),
                 new TimeGraphState(6, 1, Integer.MIN_VALUE),
                 new TimeGraphState(7, 6, Integer.MIN_VALUE, "op2"),
                 new TimeGraphState(13, 8, Integer.MIN_VALUE)));
         // Verify function level 1 of tid 6
-        verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Integer.MIN_VALUE, "op1")));
+        verifyStates(rows, findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Integer.MIN_VALUE, "op1")));
         // Verify function level 2 of tid 6
-        verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 2, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, findEntryByDepthAndType(tid6Children, 2, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(2, 5, Integer.MIN_VALUE, "op3"),
                 new TimeGraphState(7, 1, Integer.MIN_VALUE),
                 new TimeGraphState(8, 3, Integer.MIN_VALUE, "op2"),
                 new TimeGraphState(11, 1, Integer.MIN_VALUE),
                 new TimeGraphState(12, 8, Integer.MIN_VALUE, "op4")));
         // Verify function level 3 of tid 6
-        verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 3, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, findEntryByDepthAndType(tid6Children, 3, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(1, 3, Integer.MIN_VALUE),
                 new TimeGraphState(4, 2, Integer.MIN_VALUE, "op1"),
                 new TimeGraphState(6, 3, Integer.MIN_VALUE),
@@ -225,31 +231,32 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
                 new TimeGraphState(10, 11, Integer.MIN_VALUE)));
 
         // Get the row model for those entries with low resolution
-        rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(3, 15, 2, selectedIds), new NullProgressMonitor());
-        assertEquals(ITmfResponse.Status.COMPLETED, rowModel.getStatus());
+        rowResponse = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(3, 15, 2, selectedIds)), new NullProgressMonitor());
+        assertEquals(ITmfResponse.Status.COMPLETED, rowResponse.getStatus());
 
-        rowModels = rowModel.getModel();
-        assertNotNull(rowModels);
-        assertEquals(8, rowModels.size());
+        rowModel = rowResponse.getModel();
+        assertNotNull(rowModel);
+        rows = rowModel.getRows();
+        assertEquals(8, rows.size());
 
         // Verify the level entries
-        verifyStates(rowModels, tid3, Collections.emptyList());
-        verifyStates(rowModels, pid5, Collections.emptyList());
-        verifyStates(rowModels, tid6, Collections.emptyList());
+        verifyStates(rows, tid3, Collections.emptyList());
+        verifyStates(rows, pid5, Collections.emptyList());
+        verifyStates(rows, tid6, Collections.emptyList());
         // Verify function level 1 of tid 3
-        verifyStates(rowModels, findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Integer.MIN_VALUE, "op2")));
+        verifyStates(rows, findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Integer.MIN_VALUE, "op2")));
         // Verify function level 2 of tid 3
-        verifyStates(rowModels, findEntryByDepthAndType(tid3Children, 2, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, findEntryByDepthAndType(tid3Children, 2, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(1, 4, Integer.MIN_VALUE),
                 new TimeGraphState(13, 8, Integer.MIN_VALUE)));
         // Verify function level 1 of tid 6
-        verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Integer.MIN_VALUE, "op1")));
+        verifyStates(rows, findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Integer.MIN_VALUE, "op1")));
         // Verify function level 2 of tid 6
-        verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 2, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, findEntryByDepthAndType(tid6Children, 2, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(2, 5, Integer.MIN_VALUE, "op3"),
                 new TimeGraphState(12, 8, Integer.MIN_VALUE, "op4")));
         // Verify function level 3 of tid 6
-        verifyStates(rowModels, findEntryByDepthAndType(tid6Children, 3, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, findEntryByDepthAndType(tid6Children, 3, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(1, 3, Integer.MIN_VALUE),
                 new TimeGraphState(10, 11, Integer.MIN_VALUE)));
     }
@@ -261,68 +268,71 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
     public void testFollowEvents() {
         FlameChartDataProvider dataProvider = getDataProvider();
 
-        TmfModelResponse<List<FlameChartEntryModel>> responseTree = dataProvider.fetchTree(new TimeQueryFilter(0, Long.MAX_VALUE, 2), new NullProgressMonitor());
+        TmfModelResponse<@NonNull TmfTreeModel<@NonNull FlameChartEntryModel>> responseTree = dataProvider.fetchTree(FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(0, Long.MAX_VALUE, 2)), new NullProgressMonitor());
         assertTrue(responseTree.getStatus().equals(ITmfResponse.Status.COMPLETED));
-        List<FlameChartEntryModel> model = responseTree.getModel();
+        TmfTreeModel<@NonNull FlameChartEntryModel> model = responseTree.getModel();
+        assertNotNull(model);
+        List<@NonNull FlameChartEntryModel> modelEntries = model.getEntries();
 
         // Thread 2
-        FlameChartEntryModel tid2 = findEntryByNameAndType(model, "2", EntryType.LEVEL);
+        FlameChartEntryModel tid2 = findEntryByNameAndType(modelEntries, "2", EntryType.LEVEL);
         assertNotNull(tid2);
-        List<FlameChartEntryModel> tid2Children = findEntriesByParent(model, tid2.getId());
+        List<FlameChartEntryModel> tid2Children = findEntriesByParent(modelEntries, tid2.getId());
         assertEquals(3, tid2Children.size());
 
         // For each child, make sure the response is always the same
         for (FlameChartEntryModel tid2Child : tid2Children) {
-            TmfModelResponse<List<ITimeGraphRowModel>> rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(6, Long.MAX_VALUE, 2, Collections.singleton(tid2Child.getId())), MONITOR);
+            TmfModelResponse<@NonNull TimeGraphModel> rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(6, Long.MAX_VALUE, 2, Collections.singleton(tid2Child.getId()))), MONITOR);
             verifyFollowResponse(rowModel, 1, 7);
         }
 
         // Go forward from time 7 till the end for one of the child element
         Set<@NonNull Long> selectedEntry = Objects.requireNonNull(Collections.singleton(tid2Children.get(1).getId()));
-        TmfModelResponse<List<ITimeGraphRowModel>> rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(7, Long.MAX_VALUE, 2, selectedEntry), MONITOR);
+        TmfModelResponse<@NonNull TimeGraphModel> rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(7, Long.MAX_VALUE, 2, selectedEntry)), MONITOR);
         verifyFollowResponse(rowModel, 0, 10);
 
-        rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(10, Long.MAX_VALUE, 2, selectedEntry), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(10, Long.MAX_VALUE, 2, selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 1, 12);
 
-        rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(12, Long.MAX_VALUE, 2, selectedEntry), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(12, Long.MAX_VALUE, 2, selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 0, 20);
 
-        rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(20, Long.MAX_VALUE, 2, selectedEntry), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(20, Long.MAX_VALUE, 2, selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, -1, -1);
 
         // Go backward from the back
-        rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 20L), selectedEntry), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 20L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 1, 12);
 
         // Go backward from time 7 till the beginning
-        rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 7L), selectedEntry), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 7L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 2, 5);
 
-        rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 5L), selectedEntry), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 5L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 3, 4);
 
-        rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 4L), selectedEntry), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 4L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 2, 3);
 
-        rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 3L), selectedEntry), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 3L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 1, 1);
 
-        rowModel = dataProvider.fetchRowModel(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 1L), selectedEntry), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 1L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, -1, -1);
     }
 
-    private static void verifyFollowResponse(TmfModelResponse<List<ITimeGraphRowModel>> rowModel, int expectedDepth, int expectedTime) {
+    private static void verifyFollowResponse(TmfModelResponse<@NonNull TimeGraphModel> rowModel, int expectedDepth, int expectedTime) {
         assertEquals(ITmfResponse.Status.COMPLETED, rowModel.getStatus());
 
-        List<ITimeGraphRowModel> rowModels = rowModel.getModel();
+        TimeGraphModel model = rowModel.getModel();
         if (expectedDepth < 0) {
-            assertNull(rowModels);
+            assertNull(model);
             return;
         }
-        assertNotNull(rowModels);
-        assertEquals(1, rowModels.size());
-        List<ITimeGraphState> row = rowModels.get(0).getStates();
+        assertNotNull(model);
+        List<@NonNull ITimeGraphRowModel> rows = model.getRows();
+        assertEquals(1, rows.size());
+        List<ITimeGraphState> row = rows.get(0).getStates();
         assertEquals(1, row.size());
         ITimeGraphState stackInterval = row.get(0);
         long depth = stackInterval.getValue();
@@ -338,14 +348,15 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
         assertNotNull(rowModel);
         List<ITimeGraphState> states = rowModel.getStates();
         for (int i = 0; i < states.size(); i++) {
+            String entryName = entry.getName();
             if (i > expectedStates.size() - 1) {
-                fail("Unexpected state at position " + i + " for entry " + entry.getName() + ": " + states.get(i));
+                fail("Unexpected state at position " + i + " for entry " + entryName + ": " + states.get(i));
             }
             ITimeGraphState actual = states.get(i);
             ITimeGraphState expected = expectedStates.get(i);
-            assertEquals("State start time at " + i + " for entry " + entry.getName(), expected.getStartTime(), actual.getStartTime());
-            assertEquals("Duration at " + i + " for entry " + entry.getName(), expected.getDuration(), actual.getDuration());
-            assertEquals("Label at " + i + " for entry " + entry.getName(), expected.getLabel(), actual.getLabel());
+            assertEquals("State start time at " + i + " for entry " + entryName, expected.getStartTime(), actual.getStartTime());
+            assertEquals("Duration at " + i + " for entry " + entryName, expected.getDuration(), actual.getDuration());
+            assertEquals("Label at " + i + " for entry " + entryName, expected.getLabel(), actual.getLabel());
 
         }
     }
