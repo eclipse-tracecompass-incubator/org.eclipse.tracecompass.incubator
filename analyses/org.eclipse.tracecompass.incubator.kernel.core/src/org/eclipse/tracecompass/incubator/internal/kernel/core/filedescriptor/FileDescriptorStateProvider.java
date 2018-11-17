@@ -146,9 +146,6 @@ public abstract class FileDescriptorStateProvider extends AbstractTmfStateProvid
             return;
         }
         String name = event.getName();
-        if (name.contains("read")) { //$NON-NLS-1$
-            new Object();
-        }
         Consumer<HandlerParameter> eventHandler = fHandlers.get(name);
         if (eventHandler != null) {
             eventHandler.accept(new HandlerParameter(ssb, event, tid));

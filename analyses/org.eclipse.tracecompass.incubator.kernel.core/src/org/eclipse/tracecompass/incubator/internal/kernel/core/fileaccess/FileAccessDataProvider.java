@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess;
+package org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.Activator;
-import org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess.FileEntryModel.Type;
+import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileEntryModel.Type;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.FileDescriptorStateProvider;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.ThreadEntryModel;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.TidTimeQueryFilter;
@@ -68,11 +68,12 @@ import com.google.common.collect.TreeMultimap;
  * @author Matthew Khouzam
  */
 public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNull FileAccessAnalysis, @NonNull TimeGraphEntryModel> {
-    private static final Pattern IS_INTEGER = Pattern.compile("\\d+");
     /**
      * Suffix for dataprovider ID
      */
     public static final String SUFFIX = ".dataprovider"; //$NON-NLS-1$ ;
+
+    private static final Pattern IS_INTEGER = Pattern.compile("\\d+"); //$NON-NLS-1$
 
     private static final int OFFSET = 100000;
     private static final AtomicInteger STRING_VALUE = new AtomicInteger(OFFSET);
@@ -210,15 +211,15 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
                     String[] segments = name.split(File.separator);
                     StringBuilder sb = new StringBuilder();
                     long parent = parentId;
-                    builder.add(new FileEntryModel(getId(fileIds.computeIfAbsent("/", a -> STRING_VALUE.incrementAndGet())), parentId, "/", ss.getStartTime(), ss.getCurrentEndTime(), false, Type.Directory));
+                    builder.add(new FileEntryModel(getId(fileIds.computeIfAbsent(File.separator, a -> STRING_VALUE.incrementAndGet())), parentId, File.separator, ss.getStartTime(), ss.getCurrentEndTime(), false, Type.Directory));
                     for (int i = 0; i < segments.length - 1; i++) {
                         sb.append('/').append(segments[i]);
                         String fileName = sb.toString();
                         Long fileId = getId(fileIds.computeIfAbsent(fileName, a -> STRING_VALUE.incrementAndGet()));
-                        builder.add(new FileEntryModel(fileId, parent, segments[i] + '/', ss.getStartTime(), ss.getCurrentEndTime(), false, Type.Directory));
+                        builder.add(new FileEntryModel(fileId, parent, segments[i] + File.separator, ss.getStartTime(), ss.getCurrentEndTime(), false, Type.Directory));
                         parent = fileId;
                     }
-                    builder.add(new FileEntryModel(id, parent, name.substring(1 + name.lastIndexOf("/")), ss.getStartTime(), ss.getCurrentEndTime(), true, Type.File));
+                    builder.add(new FileEntryModel(id, parent, name.substring(1 + name.lastIndexOf(File.separator)), ss.getStartTime(), ss.getCurrentEndTime(), true, Type.File));
 
                 } else {
                     if (!hasMemfile) {

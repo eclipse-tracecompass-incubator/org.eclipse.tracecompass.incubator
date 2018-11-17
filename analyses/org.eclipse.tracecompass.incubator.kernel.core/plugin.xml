@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
-            analysis_module="org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess.FileAccessAnalysis"
+            analysis_module="org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessAnalysis"
             applies_experiment="true"
             automatic="false"
             icon="icons/fileaccess.png"
@@ -14,12 +14,16 @@
                applies="true"
                class="org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace">
          </tracetype>
+         <tracetype
+               applies="false"
+               class="org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment">
+         </tracetype>
       </module>
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
       <dataProviderFactory
-            class="org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess.FileAccessDataProviderFactory"
+            class="org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessDataProviderFactory"
             id="org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess.dataprovider">
       </dataProviderFactory>
    </extension>

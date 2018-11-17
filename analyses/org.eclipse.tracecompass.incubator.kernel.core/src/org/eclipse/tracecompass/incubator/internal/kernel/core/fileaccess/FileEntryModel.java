@@ -6,20 +6,36 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
-package org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess;
+package org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess;
 
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 
 /**
- * Tag, you're it
+ * File Entry Model, a time graph entry mapped to a file's life
  *
  * @author Matthew Khouzam
  */
 public class FileEntryModel extends TimeGraphEntryModel {
     private Type fType;
 
+    /**
+     * Type of file
+     *
+     * @author Matthew Khouzam
+     */
     public enum Type {
-        InRam, Directory, File
+        /**
+         * In Memory File
+         */
+        InRam,
+        /**
+         * Folder or directory
+         */
+        Directory,
+        /**
+         * Actual file
+         */
+        File
     }
 
     /**
@@ -45,6 +61,11 @@ public class FileEntryModel extends TimeGraphEntryModel {
         fType = type;
     }
 
+    /**
+     * Get the type of the file entry
+     *
+     * @return the type
+     */
     public Type getType() {
         return fType;
     }

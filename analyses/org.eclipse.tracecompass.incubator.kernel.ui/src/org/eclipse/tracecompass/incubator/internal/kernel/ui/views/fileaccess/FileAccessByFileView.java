@@ -32,9 +32,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.tracecompass.analysis.os.linux.core.signals.TmfThreadSelectedSignal;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
-import org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess.FileAccessAnalysis;
-import org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess.FileAccessDataProvider;
-import org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess.FileEntryModel;
+import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessAnalysis;
+import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessDataProvider;
+import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileEntryModel;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.ThreadEntryModel;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.TidTimeQueryFilter;
 import org.eclipse.tracecompass.incubator.internal.kernel.ui.Activator;
@@ -235,7 +235,7 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
         Action action = new Action(Messages.FileAccessByFileView_advanced, IAction.AS_CHECK_BOX) {
             @Override
             public String getDescription() {
-                return Messages.FileAccessByFileView_8;
+                return Messages.FileAccessByFileView_advancedDescription;
             }
 
             @Override

@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess;
+package org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
@@ -22,7 +22,10 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  */
 public class FileAccessAnalysis extends TmfStateSystemAnalysisModule {
 
-    public static final String ID = "org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess";
+    /**
+     * ID
+     */
+    public static final String ID = "org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess"; //$NON-NLS-1$
 
     @Override
     protected @NonNull ITmfStateProvider createStateProvider() {
@@ -30,7 +33,7 @@ public class FileAccessAnalysis extends TmfStateSystemAnalysisModule {
         if (trace instanceof IKernelTrace) {
             return new FileAccessStateProvider((IKernelTrace) trace);
         }
-        throw new IllegalStateException("trace " + trace + " is not a kernel trace"); //$NON-NLS-1$//$NON-NLS-2$
+        throw new IllegalStateException("Trace " + trace + "(" + (trace == null ? "null" : trace.getClass().getCanonicalName()) + ")" + " is not of the type IKernelTrace."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
     }
 
     @Override

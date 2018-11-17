@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess;
+package org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -129,7 +129,7 @@ public class FileAccessStateProvider extends FileDescriptorStateProvider {
             int fileQuark = ssb.getQuarkAbsoluteAndAdd(RESOURCES, fn);
             int fileTidQuark = ssb.getQuarkAbsoluteAndAdd(RESOURCES, fn, String.valueOf(tid));
             StateSystemBuilderUtils.incrementAttributeInt(ssb, time, fileQuark, 1);
-            ssb.modifyAttribute(time, 1, fileTidQuark);
+            ssb.modifyAttribute(time, fd, fileTidQuark);
         } catch (StateValueTypeException | AttributeNotFoundException e) {
             Activator.getInstance().logError(e.getMessage(), e);
         }

@@ -11,22 +11,55 @@ package org.eclipse.tracecompass.incubator.internal.kernel.ui.views.fileaccess;
 
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * Messages
+ *
+ * @author Matthew Khouzam
+ */
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.kernel.ui.views.fileaccess.messages"; //$NON-NLS-1$
-    public static String FileAccessByFileView_8;
+    /**
+     * Advanced mode label
+     */
     public static String FileAccessByFileView_advanced;
+    /**
+     * Advanced mode description
+     */
+    public static String FileAccessByFileView_advancedDescription;
+    /**
+     * All threads
+     */
     public static String FileAccessByFileView_all;
+    /**
+     * Prompt to follow a thread
+     */
     public static String FileAccessByFileView_follow;
+    /**
+     * Read
+     */
     public static String FileAccessByFileView_read;
-    public static String FileAccessByFileView_resource;
-    public static String FileAccessByFileView_thread;
-    public static String FileAccessByFileView_title;
+    /**
+     * Write
+     */
     public static String FileAccessByFileView_write;
+    /**
+     * Resource, file
+     */
+    public static String FileAccessByFileView_resource;
+    /**
+     * Thread
+     */
+    public static String FileAccessByFileView_thread;
+    /**
+     * Title
+     */
+    public static String FileAccessByFileView_title;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
     }
 
     private Messages() {
+        // do nothing
     }
 }

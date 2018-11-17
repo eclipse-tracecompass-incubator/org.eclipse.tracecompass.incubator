@@ -17,7 +17,7 @@
             class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
             id="org.eclipse.tracecompass.incubator.kernel.ui.filebyfile">
          <analysisModuleClass
-               class="org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess.FileAccessAnalysis">
+               class="org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessAnalysis">
          </analysisModuleClass>
       </output>
    </extension>
