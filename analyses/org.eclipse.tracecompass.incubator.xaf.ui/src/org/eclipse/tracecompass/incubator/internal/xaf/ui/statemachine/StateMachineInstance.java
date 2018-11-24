@@ -17,8 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
-import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInformationProvider;
+import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineUtils.TimestampInterval;
 import org.eclipse.tracecompass.incubator.xaf.core.statemachine.backend.StateMachineBackendAnalysis;
@@ -28,9 +27,7 @@ import org.eclipse.tracecompass.incubator.xaf.core.statemachine.constraint.Statu
 import org.eclipse.tracecompass.incubator.xaf.core.statemachine.variable.StateMachineVariable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 import com.google.common.base.Joiner;
@@ -171,36 +168,7 @@ public class StateMachineInstance implements Cloneable {
      * @return The TID
      */
     public static Integer getEventTid(ITmfEvent event, List<StateMachineBackendAnalysis> smssaList) {
-        Integer tid = null;
-
-        final String vtidContext = "context._vtid"; //$NON-NLS-1$
-        if (event.getContent().getFieldNames().contains(vtidContext)) {
-            tid = Integer.parseInt(event.getContent().getField(vtidContext).getFormattedValue());
-
-        } else if (smssaList != null) {
-            Integer cpu = (Integer)TmfTraceUtils.resolveEventAspectOfClassForEvent(event.getTrace(), TmfCpuAspect.class, event);
-            if (cpu != null) {
-                long ts = event.getTimestamp().getValue();
-
-                for (StateMachineBackendAnalysis smssa : smssaList) {
-                    ITmfTrace kernelTrace = smssa.getKernelTrace();
-                    if (kernelTrace.getStartTime().getValue() > ts || kernelTrace.getEndTime().getValue() < ts) {
-                        continue;
-                    }
-
-                    KernelAnalysisModule kernelAnalysisModule = TmfTraceUtils.getAnalysisModuleOfClass(kernelTrace, KernelAnalysisModule.class, KernelAnalysisModule.ID);
-                    if (kernelAnalysisModule != null) {
-                        Integer eventTid = KernelThreadInformationProvider.getThreadOnCpu(kernelAnalysisModule, cpu, ts);
-                        if (eventTid != null) {
-                            tid = eventTid;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        return tid;
+        return (Integer)TmfTraceUtils.resolveEventAspectOfClassForEvent(event.getTrace(), LinuxTidAspect.class, event);
     }
 
     /**

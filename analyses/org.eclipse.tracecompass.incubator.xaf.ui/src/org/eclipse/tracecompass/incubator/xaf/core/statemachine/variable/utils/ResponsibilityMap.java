@@ -13,13 +13,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
-
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 
 import com.google.common.base.Joiner;
 
@@ -33,7 +31,7 @@ import com.google.common.base.Joiner;
  */
 public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Double> {
     private static final long serialVersionUID = 1L;
-    private int weight = 1;
+    private int fWeight = 1;
 
     /**
      * Constructor
@@ -56,7 +54,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
      *                      (i.e. 0 means no value before any insertion)
      */
     public ResponsibilityMap(int initialWeight) {
-        this.weight = initialWeight;
+        fWeight = initialWeight;
     }
 
     /**
@@ -68,7 +66,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
      */
     public ResponsibilityMap(int initialWeight, Comparator<? super K> comparator) {
         super(comparator);
-        this.weight = initialWeight;
+        fWeight = initialWeight;
     }
 
     /**
@@ -87,7 +85,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
         } else if (aomk != null) {
             K key2 = key;
             for (K k : keySet()) {
-                if (k.equals(key)) {
+                if (Objects.equals(k, key)) {
                     key2 = k;
                     break;
                 }
@@ -97,7 +95,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
                 key1 = aomk.execute(key, key2);
             }
         }
-        put(key1, ((currentValue * weight) + value) / (weight + 1));
+        put(key1, ((currentValue * fWeight) + value) / (fWeight + 1));
     }
 
     /**
@@ -120,7 +118,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
         ResponsibilityMap<K> remote = rm.clone(comparator(), aomk);
         TreeMap<K, Double> newMap = new TreeMap<>();
 
-        for (Entry<K, Double> entry : entrySet()) {
+        for (Map.Entry<K, Double> entry : entrySet()) {
             K key = entry.getKey();
             Double addValue = .0;
             if (remote.containsKey(entry.getKey())) {
@@ -130,22 +128,22 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
                         key = aomk.execute(key, key2);
                     }
                 }
-                addValue = NonNullUtils.checkNotNull(remote.remove(entry.getKey()));
+                addValue = Objects.requireNonNull(remote.remove(entry.getKey()));
             }
             /*StateMachineReport.debug("  WORKING ON KEY " + entry.getKey() + " WHICH IS NOW " + key);
             StateMachineReport.debug("  PREVIOUS PROBA = " + entry.getValue() + " (W=" + weight + ")");
             StateMachineReport.debug("  ADDED PROBA = " + addValue + " (W=" + remote.weight + ")");*/
-            newMap.put(key, ((entry.getValue() * weight) + (addValue * remote.weight)) / (weight + remote.weight));
+            newMap.put(key, ((entry.getValue() * fWeight) + (addValue * remote.fWeight)) / (fWeight + remote.fWeight));
         }
 
-        for (Entry<K, Double> entry : remote.entrySet()) {
+        for (Map.Entry<K, Double> entry : remote.entrySet()) {
             /*StateMachineReport.debug("  ADDING NEW KEY " + entry.getKey());
             StateMachineReport.debug("  NO PREVIOUS PROBA (W=" + weight + ")");
             StateMachineReport.debug("  ADDED PROBA = " + entry.getValue() + " (W=" + remote.weight + ")");*/
-            newMap.put(entry.getKey(), (entry.getValue() * remote.weight) / (weight + remote.weight));
+            newMap.put(entry.getKey(), (entry.getValue() * remote.fWeight) / (fWeight + remote.fWeight));
         }
 
-        weight += remote.weight;
+        fWeight += remote.fWeight;
         clear();
         putAll(newMap);
         //StateMachineReport.debug("Now this ? " + this + "\n");
@@ -155,7 +153,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
     public ResponsibilityMap<K> clone() {
         ResponsibilityMap<K> rm = new ResponsibilityMap<K>(comparator());
         rm.putAll(this);
-        rm.weight = weight;
+        rm.fWeight = fWeight;
 
         return rm;
     }
@@ -186,7 +184,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
         }
 
         ResponsibilityMap<K> rm = new ResponsibilityMap<K>(comparator);
-        for (Entry<K, Double> entry : entrySet()) {
+        for (Map.Entry<K, Double> entry : entrySet()) {
             K key = entry.getKey();
             Double currentValue = rm.get(entry.getKey());
             if (currentValue == null) {
@@ -195,7 +193,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
                 K key2 = key;
                 for (K k : rm.keySet()) {
                     if ((comparator() != null && comparator().compare(key, k) == 0)
-                            || (comparator() == null && NonNullUtils.checkNotNull(key).compareTo(k) == 0)) {
+                            || (comparator() == null && Objects.requireNonNull(key).compareTo(k) == 0)) {
                         key2 = k;
                         break;
                     }
@@ -207,7 +205,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
             }
             rm.put(key, entry.getValue() + currentValue);
         }
-        rm.weight = weight;
+        rm.fWeight = fWeight;
 
         return rm;
     }
@@ -218,14 +216,14 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
      * @param newWeight The new weight
      */
     public void setWeight(int newWeight) {
-        weight = newWeight;
+        fWeight = newWeight;
     }
 
     /**
      * @return The weight of the responsibility map
      */
     public int getWeight() {
-        return weight;
+        return fWeight;
     }
 
     /**
@@ -234,8 +232,8 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
      *         where MAX is the responsibility of the element with the maximum responsibility,
      *         and STDEV is the standard deviation on the elements' responsibility.
      */
-    public Collection<Entry<K, Double>> getTopStdDevCollection() {
-        Set<Entry<K, Double>> entries = new TreeSet<>(new ResponsibilityMap.EntryComparator<K>());
+    public Collection<Map.Entry<K, Double>> getTopStdDevCollection() {
+        Set<Map.Entry<K, Double>> entries = new TreeSet<>(new ResponsibilityMap.EntryComparator<K>());
         entries.addAll(this.entrySet());
 
         if (!entries.isEmpty()) {
@@ -244,12 +242,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
                 substract = Math.min(substract * 2, 0.1);
             }
             double minProba = Math.max(entries.iterator().next().getValue() - substract, 0);
-            entries.removeIf(new Predicate<Entry<K, Double>>() {
-                @Override
-                public boolean test(Entry<K, Double> entry) {
-                    return entry.getValue() < minProba;
-                }
-            });
+            entries.removeIf(entry -> entry.getValue() < minProba);
         }
 
         return entries;
@@ -259,8 +252,8 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
      * @return A collection, ordered by decreasing responsibility, of the elements of the
      *         responsibility map
      */
-    public Collection<Entry<K, Double>> getCollection() {
-        Set<Entry<K, Double>> entries = new TreeSet<>(new ResponsibilityMap.EntryComparator<K>());
+    public Collection<Map.Entry<K, Double>> getCollection() {
+        Set<Map.Entry<K, Double>> entries = new TreeSet<>(new ResponsibilityMap.EntryComparator<K>());
         entries.addAll(this.entrySet());
 
         return entries;
@@ -271,7 +264,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
      */
     public double getSum() {
         double sum = 0;
-        for (Entry<K, Double> entry : entrySet()) {
+        for (Map.Entry<K, Double> entry : entrySet()) {
             sum += entry.getValue();
         }
         return sum;
@@ -325,8 +318,24 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(fWeight, super.hashCode());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (other.getClass().equals(ResponsibilityMap.class)) {
+            return fWeight == ((ResponsibilityMap<?>) other).fWeight && super.equals(other);
+        }
+        return false;
+    }
+
+    @Override
     public String toString() {
-        return String.format("[W=%d][S=%f]%s", weight, getSum(), super.toString()); //$NON-NLS-1$
+        return String.format("[W=%d][S=%f]%s", fWeight, getSum(), super.toString()); //$NON-NLS-1$
     }
 
     /**
@@ -334,14 +343,14 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
      */
     public String toStringPretty() {
         List<String> mapContent = new ArrayList<>();
-        for (Entry<K, Double> entry : getCollection()) {
+        for (Map.Entry<K, Double> entry : getCollection()) {
             mapContent.add(String.format("%s, responsibility of %.2f%%", //$NON-NLS-1$
                     entry.getKey(),
                     entry.getValue() * 100
                     ));
         }
 
-        return String.format("Responsibility[W=%d][S=%f][\n\t%s\n]", weight, getSum(), Joiner.on("\n\t").join(mapContent)); //$NON-NLS-1$ //$NON-NLS-2$
+        return String.format("Responsibility[W=%d][S=%f][%n\t%s%n]", fWeight, getSum(), Joiner.on("%n\t").join(mapContent)); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     /**
@@ -352,10 +361,10 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
      *
      * @param <K> The type of elements stored in the entry
      */
-    public static class EntryComparator<K extends Comparable<K>> implements Comparator<Entry<K, Double>> {
+    public static class EntryComparator<K extends Comparable<K>> implements Comparator<Map.Entry<K, Double>> {
         @Override
-        public int compare(Entry<K, Double> entry1, Entry<K, Double> entry2) {
-            int cmp = -entry1.getValue().compareTo(entry2.getValue());
+        public int compare(Map.Entry<K, Double> entry1, Map.Entry<K, Double> entry2) {
+            int cmp = entry2.getValue().compareTo(entry1.getValue());
             if (cmp == 0) {
                 if (entry1.getKey() == null) {
                     if (entry2.getKey() == null) {
@@ -363,7 +372,7 @@ public class ResponsibilityMap<K extends Comparable<K>> extends TreeMap<K, Doubl
                     }
                     return 1;
                 }
-                return NonNullUtils.checkNotNull(entry1.getKey()).compareTo(entry2.getKey());
+                return Objects.requireNonNull(entry1.getKey()).compareTo(entry2.getKey());
             }
             return cmp;
         }
