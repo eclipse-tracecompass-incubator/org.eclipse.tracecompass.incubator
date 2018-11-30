@@ -13,13 +13,13 @@ For example, if an application uses a thread pool to send jobs that are instrume
 
 Here are the definitions of the terms used in this plugin.
 
-* Callstack: According to [Wikipedia (as of July 2017) | https://en.wikipedia.org/wiki/Call_stack], the call stack ''is a stack data structure that stores information about the active subroutines of a computer program. It is also known as an execution stack, program stack, control stack, run-time stack or machine stack.'' In our case, it refers to all the analyses that can be done on a trace that contains call stack data.
+* Callstack: According to [https://en.wikipedia.org/wiki/Call_stack Wikipedia (as of July 2017)], the call stack ''is a stack data structure that stores information about the active subroutines of a computer program. It is also known as an execution stack, program stack, control stack, run-time stack or machine stack.'' In our case, it refers to all the analyses that can be done on a trace that contains call stack data.
 
 * Instrumented callstack: It is a callstack created by instrumenting entry and exits of methods, functions, logical operation, etc. The real time spent in each level of the stack is accurate and with some kernel data, it is possible to know the CPU time as well. Instrumenting a whole application can be costly and have large overhead for the application but one can accurately know the path the code went through and when.
 
 * Sampled callstack: The sampled callstack is obtained by profiling the application. The trace events usually contain an array of frame pointers that were being executed at the moment of the sampling. With this kind of data, only statistical analyses of the callstack can be done, like the number of sampling that were at a given frame, but no information on timing is available.
 
-* Call graph: According to [Wikipedia (as of July 2017) | https://en.wikipedia.org/wiki/Call_graph] a call graph ''represents calling relationships between subroutines'', ie the relationship between the callers and callees and how often one is called.
+* Call graph: According to [https://en.wikipedia.org/wiki/Call_graph Wikipedia (as of July 2017)] a call graph ''represents calling relationships between subroutines'', ie the relationship between the callers and callees and how often one is called.
 
 * Calling context tree: It is the most precise form of callgraph, that shows the hierarchy of calls from the very first level of the graph, ie it keeps the context of the calls when building a callgraph, unlike the less precise callgraphs, where an edge is just added from the caller to the callee, no matter who called the caller (there can be cycles).
 
