@@ -144,7 +144,7 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
             if ((event.getEntry() instanceof TimeGraphEntry) && (((TimeGraphEntry) event.getEntry()).getModel() instanceof SpanLifeEntryModel)) {
                 String processName = ((SpanLifeEntryModel) ((TimeGraphEntry) event.getEntry()).getModel()).getProcessName();
                 // We want a random color but that is the same for 2 spans of the same service
-                return Objects.hash(processName) % 5;
+                return Math.abs(Objects.hash(processName)) % 5;
             }
             return 0;
         }
