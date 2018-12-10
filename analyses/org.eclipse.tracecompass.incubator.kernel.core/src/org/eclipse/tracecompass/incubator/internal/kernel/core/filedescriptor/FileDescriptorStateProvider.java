@@ -299,11 +299,11 @@ public abstract class FileDescriptorStateProvider extends AbstractTmfStateProvid
                 StateSystemBuilderUtils.incrementAttributeInt(ssb, time, tidQuark, -1);
             }
             int tidFileQuark = ssb.getQuarkAbsoluteAndAdd(TID, String.valueOf(tid), String.valueOf(fd));
+            Object fileName = ssb.queryOngoing(tidFileQuark);
             ssb.modifyAttribute(time, (Object) null, tidFileQuark);
-            if (ssb.optQuarkAbsolute(RESOURCES) != ITmfStateSystem.INVALID_ATTRIBUTE) {
-                String fileName = String.valueOf(ssb.queryOngoing(tidFileQuark));
-                int fileQuark = ssb.getQuarkAbsoluteAndAdd(RESOURCES, fileName);
-                int fileTidQuark = ssb.getQuarkAbsoluteAndAdd(RESOURCES, fileName, String.valueOf(tid));
+            if (ssb.optQuarkAbsolute(RESOURCES) != ITmfStateSystem.INVALID_ATTRIBUTE && (fileName instanceof String)) {
+                int fileQuark = ssb.getQuarkAbsoluteAndAdd(RESOURCES, String.valueOf(fileName));
+                int fileTidQuark = ssb.getQuarkRelativeAndAdd(fileQuark, String.valueOf(tid));
                 current = ssb.queryOngoing(fileQuark);
                 if (current instanceof Integer) {
                     if (Integer.valueOf(1).equals(current)) {
