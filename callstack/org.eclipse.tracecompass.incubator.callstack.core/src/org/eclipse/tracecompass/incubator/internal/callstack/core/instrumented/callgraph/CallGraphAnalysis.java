@@ -201,8 +201,11 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
         InstrumentedCallStackElement insElement = (InstrumentedCallStackElement) element;
         CallStack callStack = insElement.getCallStack();
 
-        // Create a root segment
-
+        // If there is no children for this callstack, just return
+        if (callStack.getMaxDepth() == 0) {
+            return;
+        }
+        // Start with the first function
         AbstractCalledFunction nextFunction = (AbstractCalledFunction) callStack.getNextFunction(callStack.getStartTime(), 1, null, model, start, end);
         while (nextFunction != null) {
             AggregatedCalledFunction aggregatedChild = createCallSite(CallStackSymbolFactory.createSymbol(nextFunction.getSymbol(), element, nextFunction.getStart()));
