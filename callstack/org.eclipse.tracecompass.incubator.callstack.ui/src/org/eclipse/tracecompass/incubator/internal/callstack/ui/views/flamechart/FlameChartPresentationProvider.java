@@ -102,10 +102,13 @@ public class FlameChartPresentationProvider extends TimeGraphPresentationProvide
     public int getStateTableIndex(ITimeEvent event) {
         // See if it is a thread status state
         TimeGraphEntry entry = (TimeGraphEntry) event.getEntry();
-        FlameChartEntryModel model = (FlameChartEntryModel) entry.getModel();
-        if (model.getEntryType().equals(EntryType.KERNEL)) {
-            return fFlameViewPalette.getControlFlowIndex(event);
+        if (entry != null) {
+            FlameChartEntryModel model = (FlameChartEntryModel) entry.getModel();
+            if (model.getEntryType().equals(EntryType.KERNEL)) {
+                return fFlameViewPalette.getControlFlowIndex(event);
+            }
         }
+
         if (event instanceof NamedTimeEvent) {
             return FlameViewPalette.getIndexForValue(((NamedTimeEvent) event).getValue());
         } else if (event instanceof TimeLinkEvent) {
