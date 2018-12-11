@@ -62,6 +62,8 @@ public class FileAccessStateProvider extends FileDescriptorStateProvider {
     private static final String LTTNG_STATEDUMP_FILE_DESCRIPTOR = "lttng_statedump_file_descriptor"; //$NON-NLS-1$
     private static final Set<String> NO_NO_LIST = ImmutableSet.of("socket:", "pipe:"); //$NON-NLS-1$ //$NON-NLS-2$
 
+    private static final int VERSION = 1;
+
     private final String fFileName;
     private final Map<Integer, String> fOpenContexts = new HashMap<>();
 
@@ -84,7 +86,7 @@ public class FileAccessStateProvider extends FileDescriptorStateProvider {
 
     @Override
     public int getVersion() {
-        return 0;
+        return VERSION;
     }
 
     @Override
@@ -103,13 +105,14 @@ public class FileAccessStateProvider extends FileDescriptorStateProvider {
         ITmfEvent event = hp.getEvent();
         String fileName = fOpenContexts.remove(tid);
         Long ret = event.getContent().getFieldValue(Long.class, getLayout().fieldSyscallRet());
-        if (ret == null || fileName == null || ret < 0) {
+        if (ret == null || fileName == null) {
             return;
         }
         handleCommonOpen(ssb, time, tid, ret, fileName);
     }
 
     private static void handleCommonOpen(ITmfStateSystemBuilder ssb, long time, Integer tid, Long fd, String filename) {
+        // update the filename with fd
         String fn = filename;
         if (fd == 0) {
             fn = STDIN;
@@ -121,15 +124,26 @@ public class FileAccessStateProvider extends FileDescriptorStateProvider {
         if (fn.isEmpty()) {
             return;
         }
+
+        int fileQuark = ssb.getQuarkAbsoluteAndAdd(RESOURCES, fn);
+        int fileTidQuark = ssb.getQuarkAbsoluteAndAdd(RESOURCES, fn, String.valueOf(tid));
+        // Failed read, put the error number in fd
+        if (fd < 0) {
+            ssb.updateOngoingState(fd, fileTidQuark);
+            ssb.modifyAttribute(time, (Object) null, fileTidQuark);
+            return;
+        }
+        // successful open, reset fd to null for before, and update the fd at current time
+        ssb.updateOngoingState((Object) null, fileTidQuark);
+        ssb.modifyAttribute(time, fd, fileTidQuark);
+
         try {
+            // Update the thread's current files
             int tidQuark = ssb.getQuarkAbsoluteAndAdd(TID, String.valueOf(tid));
             StateSystemBuilderUtils.incrementAttributeInt(ssb, time, tidQuark, 1);
             int tidFileQuark = ssb.getQuarkAbsoluteAndAdd(TID, String.valueOf(tid), String.valueOf(fd));
             ssb.modifyAttribute(time, fn, tidFileQuark);
-            int fileQuark = ssb.getQuarkAbsoluteAndAdd(RESOURCES, fn);
-            int fileTidQuark = ssb.getQuarkAbsoluteAndAdd(RESOURCES, fn, String.valueOf(tid));
             StateSystemBuilderUtils.incrementAttributeInt(ssb, time, fileQuark, 1);
-            ssb.modifyAttribute(time, fd, fileTidQuark);
         } catch (StateValueTypeException | AttributeNotFoundException e) {
             Activator.getInstance().logError(e.getMessage(), e);
         }
@@ -142,6 +156,12 @@ public class FileAccessStateProvider extends FileDescriptorStateProvider {
         if (fileName == null) {
             return;
         }
+        ITmfStateSystemBuilder ssb = param.getSsb();
+        long time = param.getTime();
+        // Prepare the file access quark and save a temporary value, to be
+        // udpated in case of failure
+        int fileTidQuark = ssb.getQuarkAbsoluteAndAdd(RESOURCES, fileName, String.valueOf(tid));
+        ssb.modifyAttribute(time, 0L, fileTidQuark);
         fOpenContexts.put(tid, fileName);
     }
 
