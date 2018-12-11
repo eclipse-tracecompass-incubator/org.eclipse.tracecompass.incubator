@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +69,7 @@ import com.google.common.collect.TreeMultimap;
  * @author Matthew Khouzam
  */
 public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNull FileAccessAnalysis, @NonNull TimeGraphEntryModel> {
+
     /**
      * Suffix for dataprovider ID
      */
@@ -93,11 +95,6 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
 
     @Override
     public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
-    }
-
-    @Override
-    public TmfModelResponse<Map<String, String>> fetchTooltip(SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
         return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
@@ -168,6 +165,65 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
     protected boolean isCacheable() {
         return false;
     }
+
+    @Override
+    public TmfModelResponse<Map<String, String>> fetchTooltip(SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        ITmfStateSystem ss = getAnalysisModule().getStateSystem();
+        Collection<@NonNull Integer> quarks = getSelectedEntries(filter).values();
+        Map<String, String> retMap = new LinkedHashMap<>();
+
+        if (quarks.size() != 1) {
+            return new TmfModelResponse<>(retMap, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        }
+
+        long start = filter.getStart();
+        if (ss == null || quarks.size() != 1 || !getAnalysisModule().isQueryable(start)) {
+            /*
+             * We need the ss to query, we should only be querying one attribute and the
+             * query times should be valid.
+             */
+            return new TmfModelResponse<>(retMap, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        }
+        int quark = quarks.iterator().next();
+        try {
+            ITmfStateInterval current = ss.querySingleState(start, quark);
+
+            int resQuark = ss.optQuarkAbsolute(FileDescriptorStateProvider.RESOURCES);
+            if (resQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                return new TmfModelResponse<>(retMap, ITmfResponse.Status.FAILED, "Bizarre quark value for the file resources"); //$NON-NLS-1$
+            }
+            int parentQuark = ss.getParentAttributeQuark(quark);
+            if (parentQuark == resQuark) {
+                // This is a file name, add the number of opened fd and full file name
+                String fileName = ss.getAttributeName(quark);
+                retMap.put("File Name", fileName); //$NON-NLS-1$
+                Object value = current.getValue();
+                retMap.put("Number of opened FD", (value instanceof Number) ? String.valueOf(value) : "0"); //$NON-NLS-1$ //$NON-NLS-2$
+                return new TmfModelResponse<>(retMap, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+            }
+
+            int parentQuark2 = ss.getParentAttributeQuark(parentQuark);
+            if (parentQuark2 == resQuark) {
+                // This is a thread, add the fd and full file name
+                String fileName = ss.getAttributeName(parentQuark);
+                retMap.put("File Name", fileName); //$NON-NLS-1$
+                Object value = current.getValue();
+                if (value instanceof Number) {
+                    retMap.put("FD", String.valueOf(value)); //$NON-NLS-1$
+                }
+                return new TmfModelResponse<>(retMap, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+            }
+
+            // Not something we know what to do
+
+            return new TmfModelResponse<>(retMap, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        } catch (StateSystemDisposedException e) {
+            // Ignore, nothing to do
+        }
+
+        return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+    }
+
 
     @Override
     protected List<TimeGraphEntryModel> getTree(ITmfStateSystem ss, TimeQueryFilter filter, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
@@ -305,6 +361,17 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         } catch (StateSystemDisposedException e) {
             return null;
         }
+    }
+
+    @Override
+    public @NonNull Map<@NonNull String, @NonNull String> getFilterInput(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<@NonNull String, @NonNull String> inputs = super.getFilterInput(filter, monitor);
+        TmfModelResponse<Map<String, String>> response = fetchTooltip(filter, monitor);
+        Map<@NonNull String, @NonNull String> model = response.getModel();
+        if (model != null) {
+            inputs.putAll(model);
+        }
+        return inputs;
     }
 
 }

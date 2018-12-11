@@ -12,7 +12,9 @@ package org.eclipse.tracecompass.incubator.internal.kernel.ui.views.fileaccess;
 import java.io.File;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,6 +43,7 @@ import org.eclipse.tracecompass.incubator.internal.kernel.ui.Activator;
 import org.eclipse.tracecompass.internal.analysis.os.linux.ui.actions.FollowThreadAction;
 import org.eclipse.tracecompass.internal.analysis.os.linux.ui.views.resources.ResourcesView;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
+import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
@@ -225,6 +228,31 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
                 }
                 return super.getItemHeight(entry);
             }
+
+            @Override
+            public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event, long hoverTime) {
+                Map<String, String> retMap = super.getEventHoverToolTipInfo(event, hoverTime);
+                if (retMap == null) {
+                    retMap = new LinkedHashMap<>(1);
+                }
+
+                if (!(event instanceof TimeEvent) || !((TimeEvent) event).hasValue() ||
+                        !(event.getEntry() instanceof TimeGraphEntry)) {
+                    return retMap;
+                }
+
+                TimeGraphEntry entry = (TimeGraphEntry) event.getEntry();
+                ITimeGraphDataProvider<? extends TimeGraphEntryModel> dataProvider = BaseDataProviderTimeGraphView.getProvider(entry);
+                TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = dataProvider.fetchTooltip(
+                        new SelectionTimeQueryFilter(hoverTime, hoverTime, 1, Collections.singletonList(entry.getModel().getId())), null);
+                Map<@NonNull String, @NonNull String> map = response.getModel();
+                if (map != null) {
+                    retMap.putAll(map);
+                }
+
+                return retMap;
+            }
+
         }, FileAccessAnalysis.ID + FileAccessDataProvider.SUFFIX);
     }
 
