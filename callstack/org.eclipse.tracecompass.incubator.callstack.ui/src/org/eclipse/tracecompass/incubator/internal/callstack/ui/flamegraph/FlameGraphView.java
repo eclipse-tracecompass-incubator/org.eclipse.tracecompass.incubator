@@ -71,6 +71,7 @@ import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLo
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.AllGroupDescriptor;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.DataProviderUtils;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.FlameGraphDataProvider;
@@ -97,6 +98,7 @@ import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
+import org.eclipse.tracecompass.tmf.core.signal.TmfStartAnalysisSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
@@ -1579,6 +1581,27 @@ public class FlameGraphView extends TmfView {
     public void regexFilterApplied(TmfFilterAppliedSignal signal) {
         // Restart the zoom thread to apply the new filter
         Display.getDefault().asyncExec(() -> restartZoomThread());
+    }
+
+    /**
+     * Listen to see if one of the view's analysis is restarted
+     *
+     * @param signal
+     *            The analysis started signal
+     */
+    @TmfSignalHandler
+    public void analysisStart(TmfStartAnalysisSignal signal) {
+        ITmfTrace trace = getTrace();
+        if (trace == null) {
+            return;
+        }
+        IAnalysisModule module = signal.getAnalysisModule();
+        // It is not possible to link the module ID to the data provider, so
+        // just rebuild if the started module is a weighted tree provider
+        // FIXME This may be a performance issue
+        if (module instanceof IWeightedTreeProvider) {
+            buildFlameGraph(trace, null, null);
+        }
     }
 
 }

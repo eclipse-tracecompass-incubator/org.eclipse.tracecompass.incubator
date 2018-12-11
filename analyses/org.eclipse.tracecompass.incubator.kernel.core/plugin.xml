@@ -28,6 +28,14 @@
                class="org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.kernel.core.criticalpath.CriticalPathAggregatedModule"
+            id="org.eclipse.tracecompass.incubator.kernel.core.criticalpath.aggregated"
+            name="%analysis.criticalpath.aggregated">
+         <tracetype
+               class="org.eclipse.tracecompass.tmf.core.trace.TmfTrace">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">

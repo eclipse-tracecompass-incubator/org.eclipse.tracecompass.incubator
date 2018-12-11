@@ -350,6 +350,12 @@ public class WeightedTreeViewer extends AbstractTmfTreeViewer {
         }
     }
 
+    /**
+     * Listen to see if one of the view's analysis is restarted
+     *
+     * @param signal
+     *            The analysis started signal
+     */
     @TmfSignalHandler
     public void analysisStart(TmfStartAnalysisSignal signal) {
         ITmfTrace trace = getTrace();
@@ -358,7 +364,7 @@ public class WeightedTreeViewer extends AbstractTmfTreeViewer {
         }
         Set<IWeightedTreeProvider<?, ?, WeightedTree<?>>> modules = fView.getWeightedTrees(trace);
         if (modules.contains(signal.getAnalysisModule())) {
-            this.updateContent(trace.getStartTime().toNanos(), trace.getEndTime().toNanos(), false);
+            updateContent(trace.getStartTime().toNanos(), trace.getEndTime().toNanos(), false);
         }
 
     }
@@ -552,7 +558,7 @@ public class WeightedTreeViewer extends AbstractTmfTreeViewer {
 
         Set<IWeightedTreeProvider<?, ?, WeightedTree<?>>> modules = fView.getWeightedTrees(trace);
 
-        if (modules.isEmpty()) {
+        if (isSelection || modules.isEmpty()) {
             return null;
         }
         modules.forEach(m -> {
@@ -593,7 +599,7 @@ public class WeightedTreeViewer extends AbstractTmfTreeViewer {
      * @param monitor
      */
     private <@NonNull E> void setSelection(long start, long end, List<ITmfTreeViewerEntry> entryList, IWeightedTreeProvider<?, E, WeightedTree<?>> module, boolean isSelection, IProgressMonitor monitor) {
-
+        // Selection is not supported
     }
 
     @Override

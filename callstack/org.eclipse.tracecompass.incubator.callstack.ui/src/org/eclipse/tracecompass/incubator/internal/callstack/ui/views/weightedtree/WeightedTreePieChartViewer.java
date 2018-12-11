@@ -268,6 +268,10 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
         for (WeightedTree<?> tree : trees) {
             totalWeight += tree.getWeight();
         }
+        if (totalWeight == 0) {
+            // Children have no weight, return
+            return;
+        }
 
         long otherWeight = 0;
         // Add to the list only the trees that would be visible (> threshold),
@@ -280,7 +284,7 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
                 otherWeight += tree.getWeight();
             }
         }
-        Collections.sort(list);
+        Collections.sort(list, Collections.reverseOrder());
 
         int listSize = otherWeight == 0 ? list.size() : list.size() + 1;
         double[][] sliceValues = new double[listSize][1];

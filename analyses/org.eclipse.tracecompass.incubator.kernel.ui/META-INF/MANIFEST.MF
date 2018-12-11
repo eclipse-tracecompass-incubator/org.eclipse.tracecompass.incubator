@@ -17,7 +17,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources,
  org.eclipse.tracecompass.analysis.os.linux.core,
  org.eclipse.tracecompass.analysis.os.linux.ui,
- org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional,
+ org.eclipse.tracecompass.incubator.analysis.core,
+ org.eclipse.tracecompass.incubator.callstack.core,
+ org.eclipse.tracecompass.incubator.callstack.ui
 Export-Package: org.eclipse.tracecompass.incubator.internal.kernel.ui;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.kernel.ui.views.contextswitch;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.kernel.ui.views.fileaccess;x-internal:=true

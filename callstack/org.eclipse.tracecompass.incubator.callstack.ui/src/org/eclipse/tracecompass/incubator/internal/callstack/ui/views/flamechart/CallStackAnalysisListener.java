@@ -9,7 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.flamechart;
 
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.IEventCallStackProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphSelView;
@@ -36,7 +36,7 @@ public class CallStackAnalysisListener implements ITmfNewAnalysisModuleListener 
             module.registerOutput(new TmfAnalysisViewOutput(FlameChartView.ID, module.getId()));
             module.registerOutput(new TmfAnalysisViewOutput(FunctionDensityView.ID, module.getId()));
         }
-        if (module instanceof ICallGraphProvider) {
+        if (module instanceof IWeightedTreeProvider) {
             module.registerOutput(new TmfAnalysisViewOutput(FlameGraphView.ID, module.getId()));
             module.registerOutput(new TmfAnalysisViewOutput(FlameGraphSelView.SEL_ID, module.getId()));
             module.registerOutput(new TmfAnalysisViewOutput(WeightedTreeView.ID, module.getId()));

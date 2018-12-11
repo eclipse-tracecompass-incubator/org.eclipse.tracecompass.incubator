@@ -143,10 +143,36 @@ public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTr
     private final long fTraceId = ENTRY_ID.getAndIncrement();
 
     private final ReentrantReadWriteLock fLock = new ReentrantReadWriteLock(false);
-    private @Nullable Pair<Map<String, Object>, TmfModelResponse<TmfTreeModel<FlameChartEntryModel>>> fCached;
+    private @Nullable Pair<CacheKey, TmfModelResponse<TmfTreeModel<FlameChartEntryModel>>> fCached;
     private final Map<Long, FlameChartEntryModel> fEntries = new HashMap<>();
     private final Map<Long, WeightedTreeEntry> fCgEntries = new HashMap<>();
     private final Map<Long, Long> fEndTimes = new HashMap<>();
+
+    private class CacheKey {
+        private final Map<String, Object> fParameters;
+        private final IWeightedTreeSet<N, Object, WeightedTree<N>> fTreeSet;
+
+        public CacheKey(Map<String, Object> parameters, IWeightedTreeSet<N, Object, WeightedTree<N>> treeset) {
+            fParameters = parameters;
+            fTreeSet = treeset;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(fParameters, fTreeSet);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (!(obj instanceof FlameGraphDataProvider.CacheKey)) {
+                return false;
+            }
+            return Objects.equals(fParameters, ((FlameGraphDataProvider.CacheKey) obj).fParameters)
+                    && Objects.equals(fTreeSet, ((FlameGraphDataProvider.CacheKey) obj).fTreeSet);
+        }
+
+
+    }
 
     /** An internal class to describe the data for an entry */
     private class WeightedTreeEntry {
@@ -218,22 +244,27 @@ public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTr
         fLock.writeLock().lock();
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphDataProvider#fetchTree") //$NON-NLS-1$
                 .setCategory(getClass().getSimpleName()).build()) {
-            // Did we cache this tree with those parameters
-            Pair<Map<String, Object>, TmfModelResponse<TmfTreeModel<FlameChartEntryModel>>> cached = fCached;
-            if (cached != null && cached.getFirst().equals(fetchParameters)) {
+            // Did we cache this tree with those parameters and the callgraph?
+            // For some analyses, the returned callgraph for the same parameters
+            // may vary if the analysis was done again, we need to cache for
+            // callgraph as well
+            SubMonitor subMonitor = Objects.requireNonNull(SubMonitor.convert(monitor, "FlameGraphDataProvider#fetchRowModel", 2)); //$NON-NLS-1$
+            IWeightedTreeSet<N, Object, WeightedTree<N>> callGraph = getCallGraph(fetchParameters, subMonitor);
+            if (callGraph == null) {
+                return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.TASK_CANCELLED);
+            }
+
+            CacheKey cacheKey = new CacheKey(fetchParameters, callGraph);
+            Pair<CacheKey, TmfModelResponse<TmfTreeModel<FlameChartEntryModel>>> cached = fCached;
+            if (cached != null && cached.getFirst().equals(cacheKey)) {
                 return cached.getSecond();
             }
 
             fEntries.clear();
             fCgEntries.clear();
-            SubMonitor subMonitor = Objects.requireNonNull(SubMonitor.convert(monitor, "FlameGraphDataProvider#fetchRowModel", 2)); //$NON-NLS-1$
 
-            IWeightedTreeSet<N, Object, WeightedTree<N>> callGraph = getCallGraph(fetchParameters, subMonitor);
             if (subMonitor.isCanceled()) {
                 return new TmfModelResponse<>(null, ITmfResponse.Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
-            }
-            if (callGraph == null) {
-                return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.TASK_CANCELLED);
             }
 
             long start = 0;
@@ -261,7 +292,7 @@ public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTr
 
             TmfModelResponse<TmfTreeModel<FlameChartEntryModel>> response = new TmfModelResponse<>(new TmfTreeModel<>(Collections.emptyList(), tree),
                     ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
-            fCached = new Pair<>(fetchParameters, response);
+            fCached = new Pair<>(cacheKey, response);
             return response;
 
         } finally {
