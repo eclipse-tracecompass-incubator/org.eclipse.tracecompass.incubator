@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.WeakHashMap;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -55,6 +56,16 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
         }
 
     };
+
+    /**
+     * Interface to be implemented by module wrapper to return the module.
+     * Package-private, as only the composite model should need this
+     */
+    interface IModuleWrapper {
+
+        Optional<IAnalysisModule> getModule();
+
+    }
 
     private Map<TidAnalysisModule, TidAnalysisWrapper> fTidModules = new WeakHashMap<>();
 
@@ -112,7 +123,7 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
         }
     }
 
-    private static class TidAnalysisWrapper implements IThreadOnCpuProvider, ICpuTimeProvider {
+    private static class TidAnalysisWrapper implements IThreadOnCpuProvider, ICpuTimeProvider, IModuleWrapper {
 
         private final WeakReference<@Nullable TidAnalysisModule> fModule;
         private final Collection<String> fHostIds;
@@ -206,6 +217,12 @@ public class ModelListener implements ITmfNewAnalysisModuleListener {
                 return IHostModel.TIME_UNKNOWN;
             }
             return cpuTime;
+        }
+
+        @Override
+        public Optional<IAnalysisModule> getModule() {
+            TidAnalysisModule module = fModule.get();
+            return module == null ? Optional.empty() : Optional.of(module);
         }
     }
 

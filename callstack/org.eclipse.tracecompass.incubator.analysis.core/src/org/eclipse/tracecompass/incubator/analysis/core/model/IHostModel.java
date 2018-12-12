@@ -10,10 +10,12 @@
 package org.eclipse.tracecompass.incubator.analysis.core.model;
 
 import java.util.Collection;
+import java.util.EnumSet;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
+import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 
 /**
  * This interface represents a host system, for example a machine running Linux,
@@ -31,6 +33,25 @@ import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusIn
  * @author Geneviève Bastien
  */
 public interface IHostModel {
+
+    /**
+     * An enumeration of the types of data one can need. It will be useful to
+     * retrieve and schedule the required analysis modules for a host
+     */
+    public enum ModelDataType {
+        /** Need the current TID */
+        TID,
+        /** Need the time spent on the CPU */
+        CPU_TIME,
+        /** Need sampling data */
+        SAMPLING_DATA,
+        /** Need kernel statuses */
+        KERNEL_STATES,
+        /** Need the pids */
+        PID,
+        /** Need the executable name */
+        EXEC_NAME
+    }
 
     /**
      * Value to use for thread ID
@@ -156,6 +177,15 @@ public interface IHostModel {
      *         <code>false</code> otherwise
      */
     boolean isThreadStatusAvailable();
+
+    /**
+     * Get the analyses modules required to get the data requested
+     *
+     * @param requiredData
+     *            An enum set of model data that will be useful to the caller
+     * @return A collection of analysis modules
+     */
+    Collection<IAnalysisModule> getRequiredModules(EnumSet<ModelDataType> requiredData);
 
     /**
      * Dispose of the model when it is not needed anymore

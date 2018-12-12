@@ -9,11 +9,15 @@
 
 package org.eclipse.tracecompass.incubator.internal.analysis.core.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -28,7 +32,9 @@ import org.eclipse.tracecompass.incubator.analysis.core.concepts.ISamplingDataPr
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.IThreadOnCpuProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
+import org.eclipse.tracecompass.incubator.internal.analysis.core.model.ModelListener.IModuleWrapper;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
@@ -321,6 +327,41 @@ public class CompositeHostModel implements IHostModel {
     @Override
     public void dispose() {
         TmfSignalManager.deregister(this);
+    }
+
+    @Override
+    public Collection<IAnalysisModule> getRequiredModules(EnumSet<ModelDataType> requiredData) {
+        List<IAnalysisModule> list = new ArrayList<>();
+        if (requiredData.contains(ModelDataType.PID) || requiredData.contains(ModelDataType.EXEC_NAME) ||
+                requiredData.contains(ModelDataType.KERNEL_STATES)) {
+            // Add the kernel modules
+            list.addAll(fKernelModules);
+        }
+        if (requiredData.contains(ModelDataType.TID)) {
+            list.addAll(getModulesFrom(fThreadOnCpuProviders));
+        }
+        if (requiredData.contains(ModelDataType.CPU_TIME)) {
+            list.addAll(getModulesFrom(fCpuTimeProviders));
+        }
+        if (requiredData.contains(ModelDataType.SAMPLING_DATA)) {
+            list.addAll(getModulesFrom(fSamplingDataProviders));
+        }
+        return list;
+    }
+
+    private static Collection<IAnalysisModule> getModulesFrom(Collection<?> set) {
+        List<IAnalysisModule> list = new ArrayList<>();
+        for (Object obj : set) {
+            if (obj instanceof IAnalysisModule) {
+                list.add((IAnalysisModule) obj);
+            } else if (obj instanceof IModuleWrapper) {
+                Optional<IAnalysisModule> module = ((IModuleWrapper) obj).getModule();
+                if (module.isPresent()) {
+                    list.add(module.get());
+                }
+            }
+        }
+        return list;
     }
 
 }
