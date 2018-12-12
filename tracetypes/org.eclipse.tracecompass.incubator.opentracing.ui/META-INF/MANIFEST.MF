@@ -15,7 +15,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.tracecompass.tmf.ui,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.core.resources,
- org.eclipse.ui.ide
+ org.eclipse.ui.ide,
+ org.eclipse.tracecompass.jsontrace.core
 Export-Package: org.eclipse.tracecompass.incubator.internal.opentracing.ui;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.handlers;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.wizards;x-internal:=true,
@@ -27,6 +28,5 @@ Import-Package: com.google.common.collect,
  javax.ws.rs.client,
  javax.ws.rs.core,
  org.apache.commons.compress.utils,
- org.apache.commons.lang3,
- org.eclipse.tracecompass.jsontrace.core.trace
+ org.apache.commons.lang3
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.opentracing.ui

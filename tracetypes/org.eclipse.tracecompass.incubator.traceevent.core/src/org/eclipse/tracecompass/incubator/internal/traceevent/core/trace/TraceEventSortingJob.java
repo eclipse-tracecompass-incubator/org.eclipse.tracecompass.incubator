@@ -10,7 +10,8 @@
 package org.eclipse.tracecompass.incubator.internal.traceevent.core.trace;
 
 import java.io.IOException;
-import org.eclipse.tracecompass.jsontrace.core.job.SortingJob;
+
+import org.eclipse.tracecompass.internal.jsontrace.core.job.SortingJob;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
