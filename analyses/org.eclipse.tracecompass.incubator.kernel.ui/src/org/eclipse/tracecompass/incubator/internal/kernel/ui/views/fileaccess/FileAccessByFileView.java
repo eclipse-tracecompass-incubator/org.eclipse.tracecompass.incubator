@@ -32,6 +32,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.analysis.os.linux.core.signals.TmfThreadSelectedSignal;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessAnalysis;
@@ -41,7 +42,6 @@ import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.Th
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.TidTimeQueryFilter;
 import org.eclipse.tracecompass.incubator.internal.kernel.ui.Activator;
 import org.eclipse.tracecompass.internal.analysis.os.linux.ui.actions.FollowThreadAction;
-import org.eclipse.tracecompass.internal.analysis.os.linux.ui.views.resources.ResourcesView;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
@@ -279,8 +279,8 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
                 ITmfTrace activeTrace = TmfTraceManager.getInstance().getActiveTrace();
                 if (activeTrace != null) {
                     TmfTraceContext ctx = TmfTraceManager.getInstance().getTraceContext(activeTrace);
-                    Integer data = (Integer) ctx.getData(ResourcesView.RESOURCES_FOLLOW_CURRENT_THREAD);
-                    if (data == null || data < 0) {
+                    HostThread data = (HostThread) ctx.getData(HostThread.SELECTED_HOST_THREAD_KEY);
+                    if (data == null || data.getTid() < 0) {
                         rebuild();
                     }
                 }
@@ -351,17 +351,21 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
      */
     @TmfSignalHandler
     public void handleThreadFollowed(TmfThreadSelectedSignal signal) {
-        int threadId = signal.getThreadId();
-        int data = threadId >= 0 ? threadId : -1;
+        HostThread ht = signal.getThreadId() >= 0 ? signal.getHostThread() : null;
         ITmfTrace trace = getTrace();
         if (trace == null) {
             return;
         }
-        // TODO: move to a common model somewhere
-        TmfTraceManager.getInstance().updateTraceContext(trace,
-                builder -> builder.setData(ResourcesView.RESOURCES_FOLLOW_CURRENT_THREAD, data));
 
-        String threadName = threadId < 0 ? fAdvancedMode ? ALL : FOLLOW_A_THREAD : Integer.toString(threadId);
+        // TODO: move to a common model somewhere
+
+        TmfTraceManager.getInstance().updateTraceContext(trace,
+                builder -> builder.setData(HostThread.SELECTED_HOST_THREAD_KEY, ht));
+
+        if (ht == null) {
+            return;
+        }
+        String threadName = ht.getTid() < 0 ? fAdvancedMode ? ALL : FOLLOW_A_THREAD : Integer.toString(ht.getTid());
         setPartName(String.format(TITLE, threadName));
         rebuild();
     }
@@ -374,12 +378,16 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
 
     @Override
     protected void buildEntryList(@NonNull ITmfTrace trace, @NonNull ITmfTrace parentTrace, @NonNull IProgressMonitor monitor) {
-        TmfTraceContext ctx = TmfTraceManager.getInstance().getTraceContext(trace);
-        Integer data = (Integer) ctx.getData(ResourcesView.RESOURCES_FOLLOW_CURRENT_THREAD);
-        int tid = data != null ? data.intValue() : -1;
+        // The trace context would be in the parent trace
+        TmfTraceContext ctx = TmfTraceManager.getInstance().getTraceContext(parentTrace);
+        HostThread data = (HostThread) ctx.getData(HostThread.SELECTED_HOST_THREAD_KEY);
+        int tid = data != null ? data.getTid() : -1;
         String threadName = tid < 0 ? fAdvancedMode ? ALL : FOLLOW_A_THREAD : Integer.toString(tid);
         setPartName(String.format(TITLE, threadName));
         if (!fAdvancedMode && tid == -1) {
+            return;
+        }
+        if (data != null && !data.getHost().equals(trace.getHostId())) {
             return;
         }
         ITimeGraphDataProvider<@NonNull TimeGraphEntryModel> dataProvider = DataProviderManager
