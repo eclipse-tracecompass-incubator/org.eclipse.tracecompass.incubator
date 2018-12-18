@@ -11,9 +11,7 @@ package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -51,7 +49,6 @@ abstract class AbstractCalledFunction implements ICalledFunction {
 
     protected final long fStart;
     protected final long fEnd;
-    private final List<ICalledFunction> fChildren = new ArrayList<>();
     private final @Nullable ICalledFunction fParent;
     protected long fSelfTime = 0;
     private final int fProcessId;
@@ -88,11 +85,6 @@ abstract class AbstractCalledFunction implements ICalledFunction {
     }
 
     @Override
-    public List<ICalledFunction> getChildren() {
-        return fChildren;
-    }
-
-    @Override
     public @Nullable ICalledFunction getParent() {
         return fParent;
     }
@@ -114,7 +106,6 @@ abstract class AbstractCalledFunction implements ICalledFunction {
         if (child.getParent() != this) {
             throw new IllegalArgumentException("Child parent not the same as child being added to."); //$NON-NLS-1$
         }
-        fChildren.add(child);
         substractChildDuration(child.getEnd() - child.getStart());
     }
 

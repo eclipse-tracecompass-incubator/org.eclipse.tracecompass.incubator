@@ -9,8 +9,6 @@
 
 package org.eclipse.tracecompass.incubator.callstack.core.instrumented;
 
-import java.util.List;
-
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
@@ -31,14 +29,6 @@ public interface ICalledFunction extends INamedSegment {
      *
      */
     Object getSymbol();
-
-    /**
-     * The functions called by this function
-     *
-     * @return The functions called by this function, in a {@link List} form.
-     *
-     */
-    List<ICalledFunction> getChildren();
 
     /**
      * The segment's parent
