@@ -16,12 +16,12 @@ import java.util.Arrays;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
-import org.eclipse.tracecompass.analysis.os.linux.core.tests.stubs.LinuxTestCase.IntervalInfo;
 import org.eclipse.tracecompass.analysis.os.linux.core.tests.stubs.LinuxTestCase.PunctualInfo;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVirtualMachineAnalysis;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTestCase;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTestExperiment;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.tests.shared.utils.IntervalInfo;
 import org.eclipse.tracecompass.statesystem.core.tests.shared.utils.StateSystemTestUtils;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -135,8 +135,7 @@ public class FusedVmAnalysisTest {
         ITmfStateSystem ss = module.getStateSystem();
         assertNotNull(ss);
 
-        for (@NonNull
-        IntervalInfo info : fTestCase.getTestIntervals()) {
+        for (@NonNull IntervalInfo info : fTestCase.getTestIntervals()) {
             StateSystemTestUtils.testIntervalForAttributes(ss, info.getIntervals(), info.getAttributePath());
         }
     }
@@ -152,8 +151,7 @@ public class FusedVmAnalysisTest {
         ITmfStateSystem ss = module.getStateSystem();
         assertNotNull(ss);
 
-        for (@NonNull
-        PunctualInfo info : fTestCase.getPunctualTestData()) {
+        for (@NonNull PunctualInfo info : fTestCase.getPunctualTestData()) {
             StateSystemTestUtils.testValuesAtTime(ss, info.getTimestamp(), info.getValues());
         }
     }
