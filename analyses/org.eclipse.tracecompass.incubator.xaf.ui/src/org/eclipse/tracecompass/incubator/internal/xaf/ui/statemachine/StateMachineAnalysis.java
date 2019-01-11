@@ -39,13 +39,16 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.nebula.widgets.opal.notifier.Notifier;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsExecutionGraph;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.AbstractSegmentStoreAnalysisModule;
+import org.eclipse.tracecompass.incubator.internal.xaf.ui.Activator;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineUtils.TimestampInterval;
 import org.eclipse.tracecompass.incubator.xaf.core.statemachine.backend.StateMachineBackendAnalysis;
 import org.eclipse.tracecompass.incubator.xaf.core.statemachine.builder.BuilderInstanceGroup;
@@ -85,6 +88,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
      */
     public static final String ANALYSIS_ID = "org.eclipse.tracecompass.xaf.core.statemachine"; //$NON-NLS-1$
 
+    private static Image XAF = Activator.getImage("icons/xaf@4x.png"); //$NON-NLS-1$
     private static final @NonNull Collection<ISegmentAspect> BASE_ASPECTS =
             ImmutableList.of(
                     StateMachineSegment.TidAspect.INSTANCE,
@@ -132,7 +136,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
         if (ENV_use_env) {
             xafproperties = new Properties();
             xafproperties.setProperty(XaFParameterProvider.PROPERTY_MODEL_PROVIDED,
-                    new Boolean(Boolean.parseBoolean(env.get("PARAMETER_MODEL_PROVIDED"))).toString());
+                    Boolean.toString(Boolean.parseBoolean(env.get("PARAMETER_MODEL_PROVIDED"))));
             xafproperties.setProperty(XaFParameterProvider.PROPERTY_MODEL_LOCATION,
                     env.getOrDefault("MODEL", StringUtils.EMPTY));
             xafproperties.setProperty(XaFParameterProvider.PROPERTY_SELECTED_VARIABLES,
@@ -142,9 +146,9 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
             xafproperties.setProperty(XaFParameterProvider.PROPERTY_MODEL_LOCATION_HISTORY,
                     StringUtils.EMPTY);
             xafproperties.setProperty(XaFParameterProvider.PROPERTY_CHECK_MODEL,
-                    new Boolean(Boolean.parseBoolean(env.get("PARAMETER_CHECK_MODEL"))).toString());
+                    Boolean.toString(Boolean.parseBoolean(env.get("PARAMETER_CHECK_MODEL"))));
             xafproperties.setProperty(XaFParameterProvider.PROPERTY_ALL_INSTANCES_VALID,
-                    new Boolean(Boolean.parseBoolean(env.get("PARAMETER_ALL_INSTANCES_VALID"))).toString());
+                    Boolean.toString(Boolean.parseBoolean(env.get("PARAMETER_ALL_INSTANCES_VALID"))));
         } else {
             xafproperties = (Properties) getParameter("parameters");
         }
@@ -270,7 +274,8 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
             benchmarkObject.stop();
 
             try (PrintWriter writer = new PrintWriter("/tmp/sm.dot", "UTF-8")) { // FIXME: DEBUG PRINT SM
-                System.out.println("Saving the completed state machine..."); // FIXME: DEBUG PRINT SM
+                Display.getDefault().asyncExec(()->
+                Notifier.notify(XAF, "Saving the completed state machine...", ""));
                 writer.write(StateMachineUtils.StateMachineToDot.drawStateMachine(initialTransitions));
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
                 // TODO Auto-generated catch block
