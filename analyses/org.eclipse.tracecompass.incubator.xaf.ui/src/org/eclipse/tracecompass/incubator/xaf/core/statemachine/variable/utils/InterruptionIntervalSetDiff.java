@@ -188,7 +188,10 @@ public class InterruptionIntervalSetDiff {
             Double resp = ii.getTsIntervals().size() / total;
 
             if (responsibilityMap.containsKey(ir)) {
-                resp += responsibilityMap.get(ir);
+                Double d = responsibilityMap.get(ir);
+                if (d != null) {
+                    resp += d;
+                }
             }
 
             responsibilityMap.put(ir, resp);
