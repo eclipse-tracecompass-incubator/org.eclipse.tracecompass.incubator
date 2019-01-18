@@ -17,7 +17,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.lttng2.ust.core,
  org.eclipse.tracecompass.tmf.analysis.xml.core.tests
-Export-Package: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests
+Export-Package: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests,
+ org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services,
+ org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs,
+ org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils
 Import-Package: com.fasterxml.jackson.annotation,
  com.fasterxml.jackson.jaxrs.base,
  com.fasterxml.jackson.jaxrs.json,

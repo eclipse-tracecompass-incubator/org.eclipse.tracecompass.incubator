@@ -36,6 +36,8 @@
     <module>org.eclipse.tracecompass.incubator.kernel.core</module>
     <module>org.eclipse.tracecompass.incubator.kernel.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.kernel.ui</module>
+    <module>org.eclipse.tracecompass.incubator.global.filters</module>
+    <module>org.eclipse.tracecompass.incubator.global.filters.ui</module>
     <!-- insert modules here -->
   </modules>
 

@@ -18,6 +18,7 @@ import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.analysis.VirtualMachineModelAnalysis;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTestExperiment;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTraces;
+import org.eclipse.tracecompass.statesystem.core.tests.shared.utils.IntervalInfo;
 import org.eclipse.tracecompass.statesystem.core.tests.shared.utils.StateSystemTestUtils;
 
 import com.google.common.collect.ImmutableList;

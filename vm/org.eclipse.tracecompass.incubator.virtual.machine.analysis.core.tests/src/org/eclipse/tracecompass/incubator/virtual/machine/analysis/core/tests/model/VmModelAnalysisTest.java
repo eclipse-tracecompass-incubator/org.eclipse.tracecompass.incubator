@@ -21,7 +21,6 @@ import java.util.Collection;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.analysis.os.linux.core.tests.stubs.LinuxTestCase.IntervalInfo;
 import org.eclipse.tracecompass.analysis.os.linux.core.tests.stubs.LinuxTestCase.PunctualInfo;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.IVirtualEnvironmentModel;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
@@ -30,6 +29,7 @@ import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.analysis.VirtualMachineModelAnalysis;
 import org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.shared.vm.VmTestExperiment;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.tests.shared.utils.IntervalInfo;
 import org.eclipse.tracecompass.statesystem.core.tests.shared.utils.StateSystemTestUtils;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
@@ -149,8 +149,7 @@ public class VmModelAnalysisTest {
         ITmfStateSystem ss = module.getStateSystem();
         assertNotNull(ss);
 
-        for (@NonNull
-        IntervalInfo info : fTestCase.getTestIntervals()) {
+        for (@NonNull IntervalInfo info : fTestCase.getTestIntervals()) {
             StateSystemTestUtils.testIntervalForAttributes(ss, info.getIntervals(), info.getAttributePath());
         }
     }

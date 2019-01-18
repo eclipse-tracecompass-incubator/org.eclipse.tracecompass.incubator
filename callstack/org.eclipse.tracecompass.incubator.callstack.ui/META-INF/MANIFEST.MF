@@ -9,8 +9,11 @@ Bundle-Activator: org.eclipse.tracecompass.incubator.internal.callstack.ui.Activ
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.ui,
+ org.eclipse.ui.ide,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
+ org.eclipse.ui.navigator,
+ org.eclipse.ui.navigator.resources,
  org.eclipse.tracecompass.common.core,
  org.eclipse.tracecompass.datastore.core,
  org.eclipse.tracecompass.incubator.analysis.core,
@@ -20,7 +23,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.tmf.ui,
  org.eclipse.tracecompass.segmentstore.core,
- org.swtchart,
  org.eclipse.jface,
  org.eclipse.tracecompass.analysis.os.linux.core,
  org.eclipse.tracecompass.analysis.os.linux.ui
@@ -35,5 +37,6 @@ Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,
- org.apache.commons.lang3
+ org.apache.commons.lang3,
+ org.swtchart
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.callstack.ui
