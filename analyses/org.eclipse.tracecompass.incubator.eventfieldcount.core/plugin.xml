@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.analysis.ondemand">
+      <analysis
+            class="org.eclipse.tracecompass.incubator.internal.fieldcount.core.FieldCountAnalysis"
+            id="org.eclipse.tracecompass.incubator.eventcount.core.eventcount">
+      </analysis>
+   </extension>
+
+</plugin>

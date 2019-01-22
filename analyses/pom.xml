@@ -38,6 +38,9 @@
     <module>org.eclipse.tracecompass.incubator.kernel.ui</module>
     <module>org.eclipse.tracecompass.incubator.global.filters</module>
     <module>org.eclipse.tracecompass.incubator.global.filters.ui</module>
+    <module>org.eclipse.tracecompass.incubator.eventfieldcount</module>
+    <module>org.eclipse.tracecompass.incubator.eventfieldcount.core</module>
+    <module>org.eclipse.tracecompass.incubator.eventfieldcount.core.tests</module>
     <!-- insert modules here -->
   </modules>
 

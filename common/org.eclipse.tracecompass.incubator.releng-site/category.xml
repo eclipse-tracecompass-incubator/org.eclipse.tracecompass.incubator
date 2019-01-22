@@ -42,6 +42,9 @@
    <feature url="features/org.eclipse.tracecompass.incubator.kernel_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.kernel" version="0.0.1.qualifier">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.eventfieldcount_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.eventfieldcount" version="0.0.1.qualifier">
+      <category name="analyses"/>
+   </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.1.qualifier">
       <category name="analyses"/>
    </bundle>
