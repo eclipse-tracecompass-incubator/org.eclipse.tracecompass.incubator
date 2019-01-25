@@ -286,7 +286,7 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     protected void setFile(File file) throws TmfTraceException {
         fFile = file;
         try {
-            setFileInput(new BufferedRandomAccessFile(file, "r"));
+            setFileInput(new BufferedRandomAccessFile(file, "r")); //$NON-NLS-1$
         } catch (IOException e) {
             throw new TmfTraceException(e.getMessage(), e);
         }

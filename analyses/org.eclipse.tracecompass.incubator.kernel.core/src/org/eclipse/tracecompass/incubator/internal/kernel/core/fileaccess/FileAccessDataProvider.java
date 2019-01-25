@@ -247,7 +247,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
     private void addResources(ITmfStateSystem ss, Builder<@NonNull TimeGraphEntryModel> builder, int quark, long parentId, Collection<Integer> filter) {
         List<@NonNull Integer> fileQuarks = ss.getSubAttributes(quark, false);
 
-        String ramFiles = "in memory";
+        String ramFiles = "in memory"; //$NON-NLS-1$
         boolean hasMemfile = false;
         int ramHash = fileIds.computeIfAbsent(ramFiles, a -> STRING_VALUE.incrementAndGet());
         long ramId = getId(ramHash);
