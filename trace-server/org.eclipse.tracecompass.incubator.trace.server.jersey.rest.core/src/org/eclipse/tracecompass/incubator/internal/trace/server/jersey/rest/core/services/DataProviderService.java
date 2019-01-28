@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Ericsson
+ * Copyright (c) 2017, 2019 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -50,6 +50,7 @@ import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils.O
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.XmlDataProviderManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
@@ -73,12 +74,31 @@ import com.google.common.primitives.Longs;
  * @author Loic Prieur-Drevon
  */
 @SuppressWarnings("restriction")
-@Path("/traces/{uuid}/providers/{providerId}")
+@Path("/traces/{uuid}/providers")
 public class DataProviderService {
     private static final String NO_PROVIDER = "Analysis cannot run"; //$NON-NLS-1$
     private static final String NO_SUCH_TRACE = "No Such Trace"; //$NON-NLS-1$
 
     private final DataProviderManager manager = DataProviderManager.getInstance();
+
+    /**
+     * Getter for the list of data provider descriptions
+     *
+     * @param uuid
+     *            UUID of the trace to search for
+     * @return the data provider descriptions with the queried {@link UUID} if it exists.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getProviders(@PathParam("uuid") UUID uuid) {
+        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+        if (trace == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+        List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(trace);
+
+        return Response.ok(list).build();
+    }
 
     /**
      * Query the provider for the entry tree
@@ -96,7 +116,7 @@ public class DataProviderService {
      * @return an {@link GenericView} with the results
      */
     @GET
-    @Path("/tree")
+    @Path("/{providerId}/tree")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTree(@PathParam("uuid") UUID uuid,
             @PathParam("providerId") String providerId,
@@ -143,7 +163,7 @@ public class DataProviderService {
      * @return an {@link GenericView} with the results
      */
     @GET
-    @Path("/xy")
+    @Path("/{providerId}/xy")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getXY(@PathParam("uuid") UUID uuid,
             @PathParam("providerId") String providerId,
@@ -191,7 +211,7 @@ public class DataProviderService {
      * @return an {@link GenericView} with the results
      */
     @GET
-    @Path("/states")
+    @Path("/{providerId}/states")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStates(@PathParam("uuid") UUID uuid,
             @PathParam("providerId") String providerId,
@@ -231,7 +251,7 @@ public class DataProviderService {
      * @return an {@link GenericView} with the results
      */
     @GET
-    @Path("/arrows")
+    @Path("/{providerId}/arrows")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getArrows(@PathParam("uuid") UUID uuid,
             @PathParam("providerId") String providerId,
@@ -272,7 +292,7 @@ public class DataProviderService {
      * @return an {@link GenericView} with the results
      */
     @GET
-    @Path("/tooltip")
+    @Path("/{providerId}/tooltip")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTooltip(@PathParam("uuid") UUID uuid,
             @PathParam("providerId") String providerId,
@@ -323,7 +343,7 @@ public class DataProviderService {
      * @return A {@link GenericView} with the results
      */
     @GET
-    @Path("/lines")
+    @Path("/{providerId}/lines")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLines(@PathParam("uuid") UUID uuid,
             @PathParam("providerId") String providerId,
@@ -369,7 +389,7 @@ public class DataProviderService {
      * @return A {@link GenericView} with the results
      */
     @PUT
-    @Path("/lines")
+    @Path("/{providerId}/lines")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLines(@PathParam("uuid") UUID uuid,

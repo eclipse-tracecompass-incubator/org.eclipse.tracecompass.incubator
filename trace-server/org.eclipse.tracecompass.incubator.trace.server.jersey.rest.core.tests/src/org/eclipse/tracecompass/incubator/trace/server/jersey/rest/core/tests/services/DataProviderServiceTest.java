@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2019 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -10,12 +10,16 @@
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Set;
 
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.junit.Test;
 
@@ -28,6 +32,24 @@ public class DataProviderServiceTest extends RestServerTest {
     static final String PROVIDERS_PATH = "providers";
     private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
     static final String TREE_PATH = "tree";
+
+    /**
+     * Test getting the data provider descriptors
+     */
+    @Test
+    public void testProviders() {
+
+        WebTarget traces = getApplicationEndpoint().path(TRACES);
+        RestServerTest.assertPost(traces, CONTEXT_SWITCHES_UST_STUB);
+
+        WebTarget providers = traces.path(CONTEXT_SWITCHES_UST_UUID.toString())
+                .path(PROVIDERS_PATH);
+
+        Set<DataProviderDescriptorStub> descriptors = getDataProviderDescriptors(providers);
+        for (DataProviderDescriptorStub desc : EXPECTED_DATA_PROVIDER_DESCRIPTOR) {
+            assertTrue(desc.getName(), descriptors.contains(desc));
+        }
+    }
 
     /**
      * Ensure that the Call Stack data provider exists for the trace.

@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -27,14 +28,17 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
 import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Rest server test abstract class, handles starting the server in test mode,
@@ -67,6 +71,8 @@ public abstract class RestServerTest {
     };
     private static final GenericType<Set<ExperimentModelStub>> EXPERIMENT_MODEL_SET_TYPE = new GenericType<Set<ExperimentModelStub>>() {
     };
+    private static final GenericType<Set<DataProviderDescriptorStub>> DATAPROVIDER_DESCR_MODEL_SET_TYPE = new GenericType<Set<DataProviderDescriptorStub>>() {
+    };
 
     /**
      * {@link UUID} for {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
@@ -89,6 +95,11 @@ public abstract class RestServerTest {
     protected static TraceModelStub CONTEXT_SWITCHES_KERNEL_STUB;
 
     /**
+     * Expected toString() of all data providers for this experiment
+     */
+    protected static List<DataProviderDescriptorStub> EXPECTED_DATA_PROVIDER_DESCRIPTOR = null;
+
+    /**
      * Create the {@link TraceModelStub}s before running the tests
      *
      * @throws IOException
@@ -101,6 +112,20 @@ public abstract class RestServerTest {
 
         String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath();
         CONTEXT_SWITCHES_KERNEL_STUB = new TraceModelStub("kernel", contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_UUID);
+        ImmutableList.Builder<DataProviderDescriptorStub> b = ImmutableList.builder();
+        b.add(new DataProviderDescriptorStub("org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack",
+                "LTTng-UST CallStack - Latency vs Time",
+                "Show latencies provided by Analysis module: LTTng-UST CallStack",
+                ProviderType.TREE_TIME_XY.name()));
+        b.add(new DataProviderDescriptorStub("org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider",
+                "Flame Chart",
+                "Show a call stack over time",
+                ProviderType.TIME_GRAPH.name()));
+        b.add(new DataProviderDescriptorStub("org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
+                "Histogram",
+                "Show a histogram of number of events to time for a trace",
+                ProviderType.TREE_TIME_XY.name()));
+        EXPECTED_DATA_PROVIDER_DESCRIPTOR = b.build();
     }
 
     /**
@@ -164,6 +189,10 @@ public abstract class RestServerTest {
      */
     public static Set<ExperimentModelStub> getExperiments(WebTarget experiments) {
         return experiments.request(MediaType.APPLICATION_JSON).get(EXPERIMENT_MODEL_SET_TYPE);
+    }
+
+    public static Set<DataProviderDescriptorStub> getDataProviderDescriptors(WebTarget outputs) {
+        return outputs.request(MediaType.APPLICATION_JSON).get(DATAPROVIDER_DESCR_MODEL_SET_TYPE);
     }
 
     /**
