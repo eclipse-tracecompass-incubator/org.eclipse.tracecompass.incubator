@@ -130,7 +130,7 @@ public abstract class AbstractRosStateProvider extends AbstractTmfStateProvider 
      * @return the value of the given field name
      */
     protected static Object getField(@NonNull ITmfEvent event, @NonNull String fieldName) {
-        Object val = event.getContent().getField(fieldName).getValue();
+        Object val = event.getContent().getFieldValue(Object.class, fieldName);
         if (val == null) {
             System.out.println("woops"); //$NON-NLS-1$
         }

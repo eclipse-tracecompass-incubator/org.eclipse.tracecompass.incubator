@@ -58,7 +58,7 @@ public class RosTrace extends CtfTmfTrace {
      * Default constructor
      */
     public RosTrace() {
-        super(RosEventFactory.instance());
+        super(CtfTmfEventFactory.instance());
     }
 
     /**
@@ -119,8 +119,8 @@ public class RosTrace extends CtfTmfTrace {
         IStatus status = super.validate(project, path);
         if (status instanceof CtfTraceValidationStatus) {
             Collection<String> eventNames = ((CtfTraceValidationStatus) status).getEventNames();
-            // Make sure the trace contains an init_node event
-            if (!eventNames.contains(getLayout().eventInitNode())) {
+            // Make sure the trace contains an event from the roscpp tracepoint provider
+            if (!eventNames.stream().anyMatch(event -> event.startsWith(IRosEventLayout.PROVIDER_NAME))) {
                 return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "The trace is not a ROS trace."); //$NON-NLS-1$
             }
             // Increment confidence for each other event that is present

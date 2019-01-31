@@ -25,7 +25,8 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.ros.core;x-friends:=
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.queues;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.tasks;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.timers;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
- org.eclipse.tracecompass.incubator.internal.ros.core.trace
+ org.eclipse.tracecompass.incubator.internal.ros.core.trace;x-friends:="org.eclipse.tracecompass.incubator.ros.ui,org.eclipse.tracecompass.incubator.ros.core.tests",
+ org.eclipse.tracecompass.incubator.internal.ros.core.trace.layout
 Import-Package: com.google.common.base,
  com.google.common.collect,
  org.apache.commons.lang3

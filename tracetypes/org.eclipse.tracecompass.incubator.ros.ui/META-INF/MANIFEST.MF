@@ -18,6 +18,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.analysis.os.linux.ui
 Export-Package: org.eclipse.tracecompass.incubator.internal.ros.ui;x-internal:=true,
+ org.eclipse.tracecompass.incubator.internal.ros.ui.perspective;x-internal:=true,
+ org.eclipse.tracecompass.incubator.internal.ros.ui.views;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.ros.ui.views.connections;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.ros.ui.views.nodes;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.ros.ui.views.queues;x-internal:=true,

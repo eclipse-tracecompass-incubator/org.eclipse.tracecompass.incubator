@@ -67,8 +67,10 @@ public abstract class AbstractRosPresentationProvider extends TimeGraphPresentat
         }
     }
 
+    /** The minimum width */
     protected Integer fMinimumDisplayedTextWidth;
 
+    /** The event cache */
     protected final LoadingCache<NamedTimeEvent, Optional<String>> fTimeEventNames = CacheBuilder.newBuilder()
             .maximumSize(1000)
             .build(new CacheLoader<NamedTimeEvent, Optional<String>>() {
@@ -138,6 +140,11 @@ public abstract class AbstractRosPresentationProvider extends TimeGraphPresentat
         Utils.drawText(gc, name, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
     }
 
+    /**
+     * @param gc
+     *            the graphics content
+     * @return the average character width
+     */
     protected static int getAverageCharacterWidth(GC gc) {
         return (int) gc.getFontMetrics().getAverageCharacterWidth();
     }

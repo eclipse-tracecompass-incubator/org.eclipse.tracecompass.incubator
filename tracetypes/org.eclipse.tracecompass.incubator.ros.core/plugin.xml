@@ -5,7 +5,7 @@
          point="org.eclipse.linuxtools.tmf.core.tracetype">
       <type
             category="org.eclipse.linuxtools.tmf.ctf.core.category.ctf"
-            event_type="org.eclipse.tracecompass.incubator.internal.ros.core.trace.RosEvent"
+            event_type="org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent"
             id="org.eclipse.tracecompass.incubator.ros.core.trace"
             isDirectory="true"
             name="%tracetype.type.ros"
