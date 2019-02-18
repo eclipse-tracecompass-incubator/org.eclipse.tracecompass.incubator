@@ -11,7 +11,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.common.core,
  org.eclipse.tracecompass.incubator.ftrace.core,
  org.eclipse.tracecompass.incubator.atrace.core,
- org.junit
+ org.junit,
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.atrace.core.tests,
  org.eclipse.tracecompass.incubator.atrace.core.tests.trace
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.atrace.core.tests

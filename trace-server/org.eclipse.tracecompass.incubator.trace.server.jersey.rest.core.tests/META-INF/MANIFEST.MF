@@ -16,7 +16,8 @@ Require-Bundle: org.eclipse.core.runtime,
  com.fasterxml.jackson.core.jackson-databind,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.lttng2.ust.core,
- org.eclipse.tracecompass.tmf.analysis.xml.core.tests
+ org.eclipse.tracecompass.tmf.analysis.xml.core.tests,
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests,
  org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services,
  org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs,

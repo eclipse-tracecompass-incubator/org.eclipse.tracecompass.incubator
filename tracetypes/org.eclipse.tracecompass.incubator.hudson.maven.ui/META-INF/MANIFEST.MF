@@ -12,6 +12,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.tracecompass.common.core,
  org.eclipse.tracecompass.tmf.ui,
- org.eclipse.tracecompass.incubator.hudson.maven.core
+ org.eclipse.tracecompass.incubator.hudson.maven.core,
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.internal.hudson.maven.ui;x-internal:=true
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.hudson.maven.ui

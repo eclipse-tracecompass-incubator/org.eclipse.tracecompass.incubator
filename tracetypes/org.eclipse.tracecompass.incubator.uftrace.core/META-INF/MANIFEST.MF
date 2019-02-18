@@ -16,7 +16,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.incubator.analysis.core,
  org.eclipse.tracecompass.analysis.os.linux.core,
  org.eclipse.tracecompass.analysis.timing.core,
- org.eclipse.tracecompass.segmentstore.core
+ org.eclipse.tracecompass.segmentstore.core,
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.internal.uftrace.core;x-friends:="org.eclipse.tracecompass.incubator.uftrace.core.tests",
  org.eclipse.tracecompass.incubator.internal.uftrace.core.analysis;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.uftrace.core.trace;x-friends:="org.eclipse.tracecompass.incubator.uftrace.core.tests"
