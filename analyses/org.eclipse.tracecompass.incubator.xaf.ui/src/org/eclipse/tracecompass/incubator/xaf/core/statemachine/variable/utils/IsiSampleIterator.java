@@ -58,8 +58,11 @@ public class IsiSampleIterator implements Iterator<InstanceStepInformation> {
 
                 @Override
                 public InstanceStepInformation next() {
-                    int select = rand.nextInt(isiList.size());
-                    return isiList.remove(select);
+                    if (!isiList.isEmpty()) {
+                        int select = Math.abs(rand.nextInt(isiList.size()));
+                        return isiList.remove(select);
+                    }
+                    return null;
                 }
             };
         } else {

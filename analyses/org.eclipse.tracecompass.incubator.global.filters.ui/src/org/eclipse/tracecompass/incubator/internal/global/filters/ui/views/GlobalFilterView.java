@@ -35,7 +35,7 @@ public class GlobalFilterView extends TmfView {
      * Constructor
      */
     public GlobalFilterView() {
-        super("Global Filters View");
+        super("Global Filters View"); //$NON-NLS-1$
     }
 
     @Override

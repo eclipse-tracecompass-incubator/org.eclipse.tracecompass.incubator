@@ -21,7 +21,8 @@ Require-Bundle: org.eclipse.core.resources,
  org.eclipse.tracecompass.incubator.virtual.machine.analysis.core,
  org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests,
  org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui,
- org.eclipse.tracecompass.tmf.core
+ org.eclipse.tracecompass.tmf.core,
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui.swtbot.test.vcpu;x-internal:=true
 Import-Package: com.google.common.collect,
  org.apache.log4j,

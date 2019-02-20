@@ -17,8 +17,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.nebula.widgets.opal.notifier.Notifier;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
+import org.eclipse.tracecompass.incubator.internal.xaf.ui.Activator;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineUtils.TimestampInterval;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
@@ -277,88 +282,95 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get all the stateIntervals of an attribute for a thread
-     * between two given timestamps
+     * Allows to get all the stateIntervals of an attribute for a thread between
+     * two given timestamps
      *
-     * @param tid The thread ID
-     * @param start The start timestamp
-     * @param end The end timestamp
-     * @param attribute The name of the attribute (from {@link Attributes}
+     * @param tid
+     *            The thread ID
+     * @param start
+     *            The start timestamp
+     * @param end
+     *            The end timestamp
+     * @param attribute
+     *            The name of the attribute (from {@link Attributes}
      * @return The list of state intervals of the attribute
-     * @throws TimeRangeException If timestamp are out of range
+     * @throws TimeRangeException
+     *             If timestamp are out of range
      */
     public List<ITmfStateInterval> getAllStateIntervalInPeriod(long tid, long start, long end, String attribute) throws TimeRangeException {
         return getAllStateIntervalInPeriod(start, end, Attributes.TID, Long.toString(tid), attribute);
     }
 
     /**
-     * Allows to get all the stateIntervals of an attribute for a thread
-     * between two given timestamps
+     * Allows to get all the stateIntervals of an attribute for a thread between
+     * two given timestamps
      *
-     * @param start The start timestamp
-     * @param end The end timestamp
-     * @param attributePath The path of the attribute (from {@link Attributes}
+     * @param start
+     *            The start timestamp
+     * @param end
+     *            The end timestamp
+     * @param attributePath
+     *            The path of the attribute (from {@link Attributes}
      * @return The list of state intervals of the attribute
-     * @throws TimeRangeException If timestamp are out of range
+     * @throws TimeRangeException
+     *             If timestamp are out of range
      */
     public List<ITmfStateInterval> getAllStateIntervalInPeriod(long start, long end, String... attributePath) throws TimeRangeException {
-        //List<ITmfStateInterval> stateIntervalList = new LinkedList<>();
+        // List<ITmfStateInterval> stateIntervalList = new LinkedList<>();
 
         ITmfStateSystem ss = checkNotNull(getStateSystem());
         int quark;
-        //ITmfStateInterval intvl;
+        // ITmfStateInterval intvl;
 
         try {
             quark = ss.getQuarkAbsolute(attributePath);
             return StateSystemUtils.queryHistoryRange(ss, quark, Math.max(ss.getStartTime(), start), Math.min(ss.getCurrentEndTime(), end));
-            //intvl = ss.querySingleState(start, quark);
-        } catch (AttributeNotFoundException|TimeRangeException e) {
+            // intvl = ss.querySingleState(start, quark);
+        } catch (AttributeNotFoundException | TimeRangeException e) {
             return new LinkedList<>();
-            //return stateIntervalList;
+            // return stateIntervalList;
         } catch (StateSystemDisposedException e) {
             e.printStackTrace();
             return new LinkedList<>();
-            //return stateIntervalList;
+            // return stateIntervalList;
         } catch (RuntimeException e) { // For debugging purposes...
             e.printStackTrace();
             return new LinkedList<>();
-            //return stateIntervalList;
+            // return stateIntervalList;
         }
 
-        /*while (intvl != null && intvl.getStartTime() < end) {
-            stateIntervalList.add(intvl);
-
-            try {
-                intvl = ss.querySingleState(intvl.getEndTime() + 1, quark);
-            } catch (AttributeNotFoundException|TimeRangeException e) {
-                intvl = null;
-            } catch (StateSystemDisposedException e) {
-                e.printStackTrace();
-                intvl = null;
-            } catch (RuntimeException e) { // For debugging purposes...
-                e.printStackTrace();
-                intvl = null;
-            }
-        }
-
-        return stateIntervalList;*/
+        /*
+         * while (intvl != null && intvl.getStartTime() < end) {
+         * stateIntervalList.add(intvl);
+         *
+         * try { intvl = ss.querySingleState(intvl.getEndTime() + 1, quark); }
+         * catch (AttributeNotFoundException|TimeRangeException e) { intvl =
+         * null; } catch (StateSystemDisposedException e) { e.printStackTrace();
+         * intvl = null; } catch (RuntimeException e) { // For debugging
+         * purposes... e.printStackTrace(); intvl = null; } }
+         *
+         * return stateIntervalList;
+         */
     }
 
     /**
-     * @param tiCollection The collection of time intervals in which to search
-     * @param quarkPath The path to the quark
-     * @return a list of all the state interval which have a value in at least one of the given time interval
+     * @param tiCollection
+     *            The collection of time intervals in which to search
+     * @param quarkPath
+     *            The path to the quark
+     * @return a list of all the state interval which have a value in at least
+     *         one of the given time interval
      */
     public List<ITmfStateInterval> getAllKernelStateIntervalInPeriods(Collection<TimestampInterval> tiCollection, String... quarkPath) {
         List<ITmfStateInterval> stateIntervalList = new LinkedList<>();
         TimestampInterval largerInterval = TimestampInterval.maxTsInterval(tiCollection);
 
-        if (getKernelTrace().getStartTime().compareTo(largerInterval.getEndTime()) > 0 || getKernelTrace().getEndTime().compareTo(largerInterval.getStartTime()) < 0) {
+        ITmfTrace kernelTrace = getKernelTrace();
+        if (kernelTrace == null || kernelTrace.getStartTime().compareTo(largerInterval.getEndTime()) > 0 || kernelTrace.getEndTime().compareTo(largerInterval.getStartTime()) < 0) {
             return stateIntervalList;
         }
 
-        @SuppressWarnings("null")
-        KernelAnalysisModule kernelAnalysisModule = TmfTraceUtils.getAnalysisModuleOfClass(getKernelTrace(), KernelAnalysisModule.class, KernelAnalysisModule.ID);
+        KernelAnalysisModule kernelAnalysisModule = TmfTraceUtils.getAnalysisModuleOfClass(kernelTrace, KernelAnalysisModule.class, KernelAnalysisModule.ID);
         if (kernelAnalysisModule == null) {
             return stateIntervalList;
         }
@@ -530,10 +542,20 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
 
     /**
      * To get the kernel trace from the module
+     *
      * @return The kernel trace on which this module applies
      */
     public ITmfTrace getKernelTrace() {
         return getTrace();
     }
 
+    @Override
+    protected boolean executeAnalysis(@Nullable IProgressMonitor monitor) {
+        boolean executeAnalysis = super.executeAnalysis(monitor);
+        if (executeAnalysis) {
+            Display.getDefault().asyncExec(() -> Notifier.notify(Activator.getImage("icons/xaf@4x.png"), "Analysis Complete", "Coucou") //$NON-NLS-1$ //$NON-NLS-2$
+            );
+        }
+        return executeAnalysis;
+    }
 }

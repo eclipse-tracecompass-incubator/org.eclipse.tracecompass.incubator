@@ -9,8 +9,13 @@
 
 package org.eclipse.tracecompass.incubator.internal.xaf.ui;
 
+import java.net.URL;
+
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -51,5 +56,26 @@ public class Activator extends AbstractUIPlugin {
         return plugin;
     }
 
+    public static @Nullable Image getImage(String url) {
+        Activator currentPlugin = plugin;
+        if(currentPlugin == null) {
+            return null;
+        }
+        Bundle bundle = currentPlugin.getBundle();
+        if (bundle == null) {
+            return null;
+        }
+        String key = bundle.getSymbolicName() + "/" + url; //$NON-NLS-1$
+        Image icon = currentPlugin.getImageRegistry().get(key);
+        if (icon == null) {
+            URL imageURL = bundle.getResource(url);
+            ImageDescriptor descriptor = ImageDescriptor.createFromURL(imageURL);
+            if (descriptor != null) {
+                icon = descriptor.createImage();
+                currentPlugin.getImageRegistry().put(key, icon);
+            }
+        }
+        return icon;
+    }
 }
 

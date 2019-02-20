@@ -1,0 +1,8 @@
+
+= Event Count Analysis =
+
+Event count is an on-demand analysis that counts the number of occurrences of every event field value. It is good at finding outlyiers, for example in an SSH log, which users connect the most often. Storing the data locally would require orders of magnitude more space than the original trace, so it is an on-demand analysis instead.
+
+To use it, open **External Analyses** and run "Event Count". If a time range is selected, it will analyze that range, if not, the full time range is used.
+
+Results are similar to LAMI analyses. They are stored as reports.

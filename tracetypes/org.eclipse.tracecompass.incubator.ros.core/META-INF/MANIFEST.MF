@@ -17,7 +17,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.ctf.core,
  org.eclipse.tracecompass.tmf.ui,
  org.eclipse.tracecompass.statesystem.core,
- org.eclipse.tracecompass.analysis.os.linux.core
+ org.eclipse.tracecompass.analysis.os.linux.core,
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.internal.ros.core;x-friends:="org.eclipse.tracecompass.incubator.ros.core.tests,org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.connections;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
@@ -25,7 +26,8 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.ros.core;x-friends:=
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.queues;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.tasks;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.timers;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
- org.eclipse.tracecompass.incubator.internal.ros.core.trace
+ org.eclipse.tracecompass.incubator.internal.ros.core.trace;x-friends:="org.eclipse.tracecompass.incubator.ros.ui,org.eclipse.tracecompass.incubator.ros.core.tests",
+ org.eclipse.tracecompass.incubator.internal.ros.core.trace.layout
 Import-Package: com.google.common.base,
  com.google.common.collect,
  org.apache.commons.lang3
