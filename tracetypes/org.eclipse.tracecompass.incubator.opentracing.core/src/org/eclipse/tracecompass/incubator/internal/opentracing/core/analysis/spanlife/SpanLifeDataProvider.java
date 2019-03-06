@@ -286,9 +286,10 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
     }
 
     private static String getSpanName(String attributeName) {
-        String spanNameAndId = attributeName.substring(0, attributeName.lastIndexOf('/'));
-        spanNameAndId = attributeName.substring(0, spanNameAndId.lastIndexOf('/'));
-        return spanNameAndId.substring(0, spanNameAndId.lastIndexOf('/'));
+        int slashPos = attributeName.lastIndexOf('/');
+        slashPos = attributeName.lastIndexOf('/', slashPos);
+        slashPos = attributeName.lastIndexOf('/', slashPos);
+        return attributeName.substring(0, Math.max(0, slashPos));
     }
 
     private static String getSpanId(String attributeName) {
