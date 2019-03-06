@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackAnalysis;
 import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.internal.hudson.maven.core.trace.MavenEvent;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -100,7 +101,11 @@ public class MavenCallstackStateProvider extends CallStackStateProvider {
         if (ssb == null) {
             return;
         }
-        int processQuark = ssb.getQuarkAbsoluteAndAdd(PROCESSES, getProcessName(event));
+        int processQuark = ssb.optQuarkAbsolute(PROCESSES, getProcessName(event));
+        boolean isFirst = processQuark == ITmfStateSystem.INVALID_ATTRIBUTE;
+        if (isFirst) {
+            processQuark = ssb.getQuarkAbsoluteAndAdd(PROCESSES, getProcessName(event));
+        }
         int threadQuark = ssb.getQuarkRelativeAndAdd(processQuark, getThreadName(event));
         int callStackQuark = ssb.getQuarkRelativeAndAdd(threadQuark, CallStackAnalysis.CALL_STACK);
 
@@ -115,7 +120,11 @@ public class MavenCallstackStateProvider extends CallStackStateProvider {
                 fDepth--;
                 ssb.popAttribute(fSafeTime, callStackQuark);
             }
-            ssb.popAttribute(fSafeTime - 1, callStackQuark);
+            if (!isFirst) {
+                ssb.popAttribute(fSafeTime - 1, callStackQuark);
+            } else {
+                ssb.modifyAttribute(fSafeTime - 1, Integer.valueOf(fDepth), callStackQuark);
+            }
             // Change the element if necessary
             String element = MavenEvent.ELEMENT_ASPECT.resolve(event);
             updateStackTop(ssb, callStackQuark, String.valueOf(element));
@@ -166,6 +175,10 @@ public class MavenCallstackStateProvider extends CallStackStateProvider {
 
     private void updateStackTop(ITmfStateSystemBuilder ssb, int callStackQuark, String value) {
         Object currentDepth = ssb.queryOngoing(callStackQuark);
+        // If currentDepth returns null, we need to store stack level 1
+        if (currentDepth == null) {
+            currentDepth = 1;
+        }
         int currentGroupQuark = ssb.getQuarkRelativeAndAdd(callStackQuark, String.valueOf(currentDepth));
         ssb.modifyAttribute(fSafeTime, value, currentGroupQuark);
     }

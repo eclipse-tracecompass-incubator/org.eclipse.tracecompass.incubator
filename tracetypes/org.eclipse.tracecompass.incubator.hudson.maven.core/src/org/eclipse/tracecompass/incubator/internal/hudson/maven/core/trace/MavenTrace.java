@@ -35,13 +35,15 @@ public class MavenTrace extends TextTrace<MavenEvent> {
     private static final String DATE_PATTERN = "([0-2]?\\d:[0-5]\\d:[0-5]\\d)"; //$NON-NLS-1$
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING, TmfTimePreferences.getLocale());
 
-    private static final String ELAPSED_TIME_STRING = "Time\\selapsed:\\s*([\\d|\\.|\\,]+)\\s*sec"; //$NON-NLS-1$
+    private static final String ELAPSED_TIME_STRING = "Time\\selapsed:\\s*([\\d|\\.|\\,]+)\\s*se?c?"; //$NON-NLS-1$
     /*
      * 16:17:03 [INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @
      * org.eclipse.tracecompass ---
      */
     private static final String GOAL_PATTERN = START_REGEX + DATE_PATTERN + "\\s*\\[(\\S+)\\]\\s+---\\s((.*)\\(.*\\))\\s+@\\s+(\\S+)\\s+---$"; //$NON-NLS-1$
     /*
+     * 11:01:09 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 40.099 s - in org.eclipse.tracecompass.analysis.os.linux.ui.swtbot.tests.latency.SystemCallLatencyDensityViewTest
+
      * Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 52.34 sec
      * - in org.eclipse.tracecompass.analysis.os.linux.ui.swtbot.tests.latency.
      * SystemCallLatencyTableAnalysisTest
@@ -75,6 +77,7 @@ public class MavenTrace extends TextTrace<MavenEvent> {
     @Override
     protected MavenEvent parseFirstLine(Matcher matcher, String line) {
         try {
+            System.out.println("group(1): " + matcher.group(1));
             String group = matcher.group(1);
             if (group != null) {
                 Date parse = DATE_FORMAT.parse(group);
@@ -82,6 +85,7 @@ public class MavenTrace extends TextTrace<MavenEvent> {
                 return event;
             }
             group = matcher.group(6);
+            System.out.println("group(6): " + matcher.group(6));
             if (group != null) {
                 Date parse = DATE_FORMAT.parse(group);
                 MavenEvent event = MavenEvent.createSummary(this, TmfTimestamp.fromMillis(parse.getTime()), matcher.group(12), matcher.group(12), parseDouble(matcher.group(11)));
