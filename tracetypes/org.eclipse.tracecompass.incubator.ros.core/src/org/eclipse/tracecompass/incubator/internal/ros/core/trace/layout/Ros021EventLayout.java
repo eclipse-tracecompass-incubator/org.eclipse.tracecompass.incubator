@@ -39,7 +39,7 @@ public class Ros021EventLayout implements IRosEventLayout {
     }
 
     // ------------------------------------------------------------------------
-    // init_node event
+    // init_node
     // ------------------------------------------------------------------------
 
     @Override
@@ -48,12 +48,21 @@ public class Ros021EventLayout implements IRosEventLayout {
     }
 
     // ------------------------------------------------------------------------
-    // shutdown_node event
+    // shutdown_node
     // ------------------------------------------------------------------------
 
     @Override
     public String eventShutdownNode() {
         return "roscpp:shutdown_node";
+    }
+
+    // ------------------------------------------------------------------------
+    // new_connection
+    // ------------------------------------------------------------------------
+
+    @Override
+    public String eventNewConnection() {
+        return "roscpp:new_connection";
     }
 
     // ------------------------------------------------------------------------
@@ -63,6 +72,60 @@ public class Ros021EventLayout implements IRosEventLayout {
     @Override
     public String eventSubCallbackAdded() {
         return "roscpp:subscriber_callback_added";
+    }
+
+    // ------------------------------------------------------------------------
+    // publisher_message_queued
+    // ------------------------------------------------------------------------
+
+    @Override
+    public String eventPubMsgQueued() {
+        return "roscpp:publisher_message_queued";
+    }
+
+    // ------------------------------------------------------------------------
+    // subscriber_link_message_write
+    // ------------------------------------------------------------------------
+
+    @Override
+    public String eventSubLinkMsgWrite() {
+        return "roscpp:subscriber_link_message_write";
+    }
+
+    // ------------------------------------------------------------------------
+    // subscriber_link_message_dropped
+    // ------------------------------------------------------------------------
+
+    @Override
+    public String eventSubLinkMsgDropped() {
+        return "roscpp:subscriber_link_message_dropped";
+    }
+
+    // ------------------------------------------------------------------------
+    // publisher_link_handle_message
+    // ------------------------------------------------------------------------
+
+    @Override
+    public String eventPubLinkHandleMsg() {
+        return "roscpp:publisher_link_handle_message";
+    }
+
+    // ------------------------------------------------------------------------
+    // subscription_message_queued
+    // ------------------------------------------------------------------------
+
+    @Override
+    public String eventSubMsgQueued() {
+        return "roscpp:subscription_message_queued";
+    }
+
+    // ------------------------------------------------------------------------
+    // subscription_message_dropped
+    // ------------------------------------------------------------------------
+
+    @Override
+    public String eventSubMsgDropped() {
+        return "roscpp:subscription_message_dropped";
     }
 
     // ------------------------------------------------------------------------
@@ -102,42 +165,6 @@ public class Ros021EventLayout implements IRosEventLayout {
     }
 
     // ------------------------------------------------------------------------
-    // subscription_message_queued
-    // ------------------------------------------------------------------------
-
-    @Override
-    public String eventSubMsgQueued() {
-        return "roscpp:subscription_message_queued";
-    }
-
-    // ------------------------------------------------------------------------
-    // subscription_message_dropped
-    // ------------------------------------------------------------------------
-
-    @Override
-    public String eventSubMsgDropped() {
-        return "roscpp:subscription_message_dropped";
-    }
-
-    // ------------------------------------------------------------------------
-    // publisher_message_queued
-    // ------------------------------------------------------------------------
-
-    @Override
-    public String eventPubMsgQueued() {
-        return "roscpp:publisher_message_queued";
-    }
-
-    // ------------------------------------------------------------------------
-    // publisher_link_handle_message
-    // ------------------------------------------------------------------------
-
-    @Override
-    public String eventPubLinkHandleMsg() {
-        return "roscpp:publisher_link_handle_message";
-    }
-
-    // ------------------------------------------------------------------------
     // task_start
     // ------------------------------------------------------------------------
 
@@ -162,15 +189,6 @@ public class Ros021EventLayout implements IRosEventLayout {
     @Override
     public String eventTimerScheduled() {
         return "roscpp:timer_scheduled";
-    }
-
-    // ------------------------------------------------------------------------
-    // new_connection
-    // ------------------------------------------------------------------------
-
-    @Override
-    public String eventNewConnection() {
-        return "roscpp:new_connection";
     }
 
     // ------------------------------------------------------------------------
@@ -250,6 +268,11 @@ public class Ros021EventLayout implements IRosEventLayout {
     @Override
     public String fieldReceiptTimeNsec() {
         return "receipt_time_nsec";
+    }
+
+    @Override
+    public String fieldIsLatchedMsg() {
+        return "is_latched_msg";
     }
 
     @Override

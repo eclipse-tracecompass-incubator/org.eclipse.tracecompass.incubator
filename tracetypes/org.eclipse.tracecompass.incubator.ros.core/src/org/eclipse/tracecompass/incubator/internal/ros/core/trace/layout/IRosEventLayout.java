@@ -80,10 +80,55 @@ public interface IRosEventLayout {
     String eventShutdownNode();
 
     /**
+     * <code>new_connection</code>,
+     * when a "unique" connection between publisher/subscriber or service
+     * client/server has been created (one for each end of the connection)
+     */
+    String eventNewConnection();
+
+    /**
      * <code>subscriber_callback_added</code>,
      * when a subscriber callback is added
      */
     String eventSubCallbackAdded();
+
+    /**
+     * <code>publisher_message_queued</code>,
+     * when a message is queued on the publisher's side, before transmission
+     */
+    String eventPubMsgQueued();
+
+    /**
+     * <code>subscriber_link_message_write</code>,
+     * when a publisher sends a message via a subscriber link
+     */
+    String eventSubLinkMsgWrite();
+
+    /**
+     * <code>subscriber_link_message_dropped</code>,
+     * when a message (oldest one) in the publisher's queue is dropped
+     */
+    String eventSubLinkMsgDropped();
+
+    /**
+     * <code>publisher_link_handle_message</code>,
+     * when the subscriber's publisher link receives a message, before queuing
+     * in a subscription queue
+     */
+    String eventPubLinkHandleMsg();
+
+    /**
+     * <code>subscription_message_queued</code>,
+     * when a message is queued on the subscriber's side, after reception
+     */
+    String eventSubMsgQueued();
+
+    /**
+     * <code>subscription_message_dropped</code>,
+     * when a message is dropped on the subscriber's side, usually right after a
+     * queued message makes the queue go over its allowed size
+     */
+    String eventSubMsgDropped();
 
     /**
      * <code>callback_start</code>,
@@ -110,31 +155,6 @@ public interface IRosEventLayout {
     String eventCallbackEnd();
 
     /**
-     * <code>subscription_message_queued</code>,
-     * when a message is queued on the subscriber's side, after reception
-     */
-    String eventSubMsgQueued();
-
-    /**
-     * <code>subscription_message_dropped</code>,
-     * when a message is dropped on the subscriber's side, usually right after a
-     * queued message makes the queue go over its allowed size
-     */
-    String eventSubMsgDropped();
-
-    /**
-     * <code>publisher_message_queued</code>,
-     * when a message is queued on the publisher's side, before transmission
-     */
-    String eventPubMsgQueued();
-
-    /**
-     * <code>publisher_link_handle_message</code>,
-     * when ?
-     */
-    String eventPubLinkHandleMsg();
-
-    /**
      * <code>task_start</code>,
      * when a one-time task or setup has started
      */
@@ -151,12 +171,6 @@ public interface IRosEventLayout {
      * when a timer is scheduled to
      */
     String eventTimerScheduled();
-
-    /**
-     * <code>new_connection</code>,
-     * when ?
-     */
-    String eventNewConnection();
 
     // ------------------------------------------------------------------------
     // Fields
@@ -177,6 +191,7 @@ public interface IRosEventLayout {
     String fieldMsgRef();
     String fieldReceiptTimeSec();
     String fieldReceiptTimeNsec();
+    String fieldIsLatchedMsg();
     String fieldTaskName();
     String fieldFunctionName();
     String fieldPeriodSec();

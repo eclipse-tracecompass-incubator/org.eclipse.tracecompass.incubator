@@ -45,8 +45,11 @@ public class RosQueuesPresentationProvider extends AbstractRosPresentationProvid
 
     @Override
     public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event) {
-        ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<>();
         String label = event.getLabel();
+        if (label == null) {
+            return null;
+        }
+        ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<>();
         String entryName = event.getEntry().getName();
         String nodeName = Messages.AbstractRosPresentationProvider_Unknown;
         String topicName = Messages.AbstractRosPresentationProvider_Unknown;
@@ -67,6 +70,7 @@ public class RosQueuesPresentationProvider extends AbstractRosPresentationProvid
             nodeName = event.getEntry().getParent().getParent().getParent().getName();
             builder.put(Messages.AbstractRosPresentationProvider_QueueReference, label);
         } else if (entryName.equals(AbstractRosStateProvider.CALLBACKS)) {
+            // FIXME get topic name by finding "message processing" entry with matching label
             nodeName = event.getEntry().getParent().getParent().getName();
             builder.put(Messages.AbstractRosPresentationProvider_QueueReference, label);
         }
