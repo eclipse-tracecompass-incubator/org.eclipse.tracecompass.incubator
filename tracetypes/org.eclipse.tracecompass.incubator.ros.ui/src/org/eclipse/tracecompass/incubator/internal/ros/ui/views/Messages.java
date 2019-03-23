@@ -19,6 +19,11 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.ros.ui.views.messages"; //$NON-NLS-1$
 
+    /** Name text for HideRosoutAction */
+    public static String HideRosoutAction_NameText;
+    /** Tooltip text for HideRosoutAction */
+    public static String HideRosoutAction_ToolTipText;
+
     /** Connection channel type */
     public static String AbstractRosPresentationProvider_ConnectionChannelType;
     /** Connections local host */

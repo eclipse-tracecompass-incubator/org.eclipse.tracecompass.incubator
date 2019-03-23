@@ -9,38 +9,38 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.ui.views.nodes;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tracecompass.incubator.internal.ros.core.analysis.nodes.RosNodesDataProvider;
-import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
+import org.eclipse.tracecompass.incubator.internal.ros.ui.views.AbstractRosView;
 
 /**
  * View for ROS Nodes
  *
  * @author Christophe Bedard
  */
-public class RosNodesView extends BaseDataProviderTimeGraphView {
+public class RosNodesView extends AbstractRosView {
 
-    /** View ID */
-    public static final String ID = "org.eclipse.tracecompass.incubator.ros.ui.views.nodes"; //$NON-NLS-1$
+    /** View ID suffix */
+    public static final String ID_SUFFIX = "nodes"; //$NON-NLS-1$
 
     /**
      * Constructor
      */
     public RosNodesView() {
-        super(ID, new RosNodesPresentationProvider(), RosNodesDataProvider.getFullDataProviderId());
+        super(ID_SUFFIX, new RosNodesPresentationProvider(), RosNodesDataProvider.getFullDataProviderId());
+        // Enable view filter dialog
+        setFilterColumns(new String[] { StringUtils.EMPTY });
+        setFilterLabelProvider(new RosNodesViewFilterLabelProvider());
+    }
+
+    private static class RosNodesViewFilterLabelProvider extends TreeLabelProvider {
+        // Empty; only used to enable view filter dialog/action
     }
 
     /**
-     * Extendable constructor
-     *
-     * @param id
-     *            the view ID
-     * @param pres
-     *            the presentation provider
-     * @param dpId
-     *            the dataprovider ID
+     * @return the full view ID for this view
      */
-    public RosNodesView(String id, TimeGraphPresentationProvider pres, String dpId) {
-        super(id, pres, dpId);
+    public static String getFullViewId() {
+        return AbstractRosView.ID_PREFIX + ID_SUFFIX;
     }
 }
