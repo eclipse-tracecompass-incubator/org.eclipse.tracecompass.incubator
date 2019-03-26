@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -57,7 +58,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
-import org.eclipse.tracecompass.common.core.StreamUtils;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
@@ -245,7 +245,7 @@ public class FlameGraphView extends TmfView {
         }
         String analysisId = NonNullUtils.nullToEmptyString(getViewSite().getSecondaryId());
         Iterable<ICallGraphProvider> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, ICallGraphProvider.class);
-        return StreamUtils.getStream(modules)
+        return StreamSupport.stream(modules.spliterator(), false)
                 .filter(m -> {
                     if (m instanceof IAnalysisModule) {
                         return ((IAnalysisModule) m).getId().equals(analysisId);
