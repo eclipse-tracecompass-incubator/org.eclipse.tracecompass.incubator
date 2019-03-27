@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,7 +36,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.SubSecondTimeWithUnitFormat;
-import org.eclipse.tracecompass.common.core.StreamUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
@@ -344,7 +344,7 @@ public class CallingContextTreeViewer extends AbstractTmfTreeViewer {
         if (trace != null) {
             Iterable<ICallGraphProvider> callgraphModules = TmfTraceUtils.getAnalysisModulesOfClass(trace, ICallGraphProvider.class);
 
-            return StreamUtils.getStream(callgraphModules)
+            return StreamSupport.stream(callgraphModules.spliterator(), false)
             .filter(m -> {
                 if (m instanceof IAnalysisModule) {
                     return ((IAnalysisModule) m).getId().equals(fAnalysisId);

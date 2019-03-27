@@ -10,37 +10,29 @@
 package org.eclipse.tracecompass.incubator.internal.ros.ui.views.timers;
 
 import org.eclipse.tracecompass.incubator.internal.ros.core.analysis.timers.RosTimersDataProvider;
-import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
+import org.eclipse.tracecompass.incubator.internal.ros.ui.views.AbstractRosView;
 
 /**
  * View for ROS Timers
  *
  * @author Christophe Bedard
  */
-public class RosTimersView extends BaseDataProviderTimeGraphView {
+public class RosTimersView extends AbstractRosView {
 
-    /** View ID */
-    public static final String ID = "org.eclipse.tracecompass.incubator.ros.ui.views.timers"; //$NON-NLS-1$
+    /** View ID suffix */
+    public static final String ID_SUFFIX = "timers"; //$NON-NLS-1$
 
     /**
      * Constructor
      */
     public RosTimersView() {
-        super(ID, new RosTimersPresentationProvider(), RosTimersDataProvider.getFullDataProviderId());
+        super(ID_SUFFIX, new RosTimersPresentationProvider(), RosTimersDataProvider.getFullDataProviderId());
     }
 
     /**
-     * Extendable constructor
-     *
-     * @param id
-     *            the view ID
-     * @param pres
-     *            the presentation provider
-     * @param dpId
-     *            the dataprovider ID
+     * @return the full view ID for this view
      */
-    public RosTimersView(String id, TimeGraphPresentationProvider pres, String dpId) {
-        super(id, pres, dpId);
+    public static String getFullViewId() {
+        return AbstractRosView.ID_PREFIX + ID_SUFFIX;
     }
 }

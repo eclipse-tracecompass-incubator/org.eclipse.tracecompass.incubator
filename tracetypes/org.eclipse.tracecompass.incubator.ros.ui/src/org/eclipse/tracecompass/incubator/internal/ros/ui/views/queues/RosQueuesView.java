@@ -9,38 +9,38 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.ui.views.queues;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tracecompass.incubator.internal.ros.core.analysis.queues.RosQueuesDataProvider;
-import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
+import org.eclipse.tracecompass.incubator.internal.ros.ui.views.AbstractRosView;
 
 /**
  * View for ROS Queues
  *
  * @author Christophe Bedard
  */
-public class RosQueuesView extends BaseDataProviderTimeGraphView {
+public class RosQueuesView extends AbstractRosView {
 
-    /** View ID */
-    public static final String ID = "org.eclipse.tracecompass.incubator.ros.ui.views.queues"; //$NON-NLS-1$
+    /** View ID suffix */
+    public static final String ID_SUFFIX = "queues"; //$NON-NLS-1$
 
     /**
      * Constructor
      */
     public RosQueuesView() {
-        super(ID, new RosQueuesPresentationProvider(), RosQueuesDataProvider.getFullDataProviderId());
+        super(ID_SUFFIX, new RosQueuesPresentationProvider(), RosQueuesDataProvider.getFullDataProviderId());
+        // Enable view filter dialog
+        setFilterColumns(new String[] { StringUtils.EMPTY });
+        setFilterLabelProvider(new RosViewFilterLabelProvider());
+    }
+
+    private static class RosViewFilterLabelProvider extends TreeLabelProvider {
+        // Empty; only used to enable view filter dialog
     }
 
     /**
-     * Extendable constructor
-     *
-     * @param id
-     *            the view ID
-     * @param pres
-     *            the presentation provider
-     * @param dpId
-     *            the dataprovider ID
+     * @return the full view ID for this view
      */
-    public RosQueuesView(String id, TimeGraphPresentationProvider pres, String dpId) {
-        super(id, pres, dpId);
+    public static String getFullViewId() {
+        return AbstractRosView.ID_PREFIX + ID_SUFFIX;
     }
 }

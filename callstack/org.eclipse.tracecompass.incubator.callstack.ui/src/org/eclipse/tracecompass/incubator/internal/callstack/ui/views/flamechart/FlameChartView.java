@@ -82,7 +82,6 @@ import com.google.common.collect.Maps;
  * @author Patrick Tasse
  * @author Geneviève Bastien
  */
-@SuppressWarnings("deprecation")
 public class FlameChartView extends BaseDataProviderTimeGraphView {
 
     // ------------------------------------------------------------------------

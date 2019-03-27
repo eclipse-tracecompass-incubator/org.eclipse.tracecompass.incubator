@@ -27,8 +27,8 @@ public class RosPerspectiveFactory implements IPerspectiveFactory {
     private static final String ID = "org.eclipse.tracecompass.incubator.ros.ui.perspective"; //$NON-NLS-1$
 
     // ROS views
-    private static final String NODES_VIEW_ID = RosNodesView.ID;
-    private static final String QUEUES_VIEW_ID = RosQueuesView.ID;
+    private static final String NODES_VIEW_ID = RosNodesView.getFullViewId();
+    private static final String QUEUES_VIEW_ID = RosQueuesView.getFullViewId();
 
     // Standard Eclipse views
     private static final String PROJECT_VIEW_ID = IPageLayout.ID_PROJECT_EXPLORER;

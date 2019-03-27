@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.analysis.queues;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -85,6 +86,113 @@ public class RosQueuesStateProvider extends AbstractRosStateProvider {
                 return;
             }
 
+            // publisher_message_queued
+            if (isEvent(event, fLayout.eventPubMsgQueued())) {
+                String nodeName = getNodeName(event);
+                String topicName = (String) getField(event, fLayout.fieldTopic());
+                Long buffRef = (Long) getField(event, fLayout.fieldBufferRef());
+
+                // If it's a latched message (no subscribers and latching is
+                // enabled), replace last message if there is one
+                Long isLatchedMsgInt = (Long) getField(event, fLayout.fieldIsLatchedMsg());
+                boolean isLatchedMsg = (isLatchedMsgInt == 1);
+                if (isLatchedMsg) {
+                    // Pop from publisher queue
+                    int pubQueueQuark = ss.getQuarkAbsoluteAndAdd(nodeName, PUBLISHERS_LIST, topicName, QUEUE);
+                    StateSystemUtils.queuePollAttribute(ss, timestamp, pubQueueQuark);
+                }
+
+                // Push to publisher queue
+                int pubQueueQuark = ss.getQuarkAbsoluteAndAdd(nodeName, PUBLISHERS_LIST, topicName, QUEUE);
+                StateSystemUtils.queueOfferAttribute(ss, timestamp, Objects.requireNonNull(buffRef), pubQueueQuark);
+
+                return;
+            }
+
+            // subscriber_link_message_dropped
+            // subscriber_link_message_write
+            boolean isSubLinkDrop = false;
+            if ((isSubLinkDrop = isEvent(event, fLayout.eventSubLinkMsgDropped())) || isEvent(event, fLayout.eventSubLinkMsgWrite())) {
+                String nodeName = getNodeName(event);
+                Long msgRef = (Long) getField(event, fLayout.fieldMsgRef());
+
+                // Find topicName by looking at publisher node's queues and finding matching bufferRef
+                String topicName = null;
+                int nodePubsQuark = ss.getQuarkAbsolute(nodeName, PUBLISHERS_LIST);
+                List<@NonNull Integer> pubTopics = ss.getSubAttributes(nodePubsQuark, false);
+                for (@NonNull Integer topicQuark : pubTopics) {
+                    @NonNull String topicQuarkName = ss.getAttributeName(topicQuark);
+                    List<@NonNull Integer> queueQuarks = ss.getSubAttributes(topicQuark, false);
+                    if (!queueQuarks.isEmpty()) {
+                        Integer queueQuark = queueQuarks.get(0);
+                        Object bufferRef = StateSystemUtils.queuePeekAttribute(ss, timestamp, queueQuark);
+                        if (bufferRef != null && msgRef.equals(bufferRef)) {
+                            topicName = topicQuarkName;
+                            break;
+                        }
+                    }
+                }
+
+                // If a topic was not found, there may be lost events
+                if (topicName == null) {
+                    Activator.getInstance()
+                            .logError("[" + nodeName + "] Could not find matching topic for subscriber_link_message_" + (isSubLinkDrop ? "dropped" : "write") + " with msgRef=" + formatLongDecToHex(msgRef) + "; there may be lost events"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+                    return;
+                }
+
+                // Pop from publisher queue
+                int pubQueueQuark = ss.getQuarkAbsoluteAndAdd(nodeName, PUBLISHERS_LIST, topicName, QUEUE);
+                StateSystemUtils.queuePollAttribute(ss, timestamp, pubQueueQuark);
+
+                if (isSubLinkDrop) {
+                    // Add drop to the publisher's drops
+                    int pubDropsQuark = ss.getQuarkAbsoluteAndAdd(nodeName, PUBLISHERS_LIST, topicName, DROPS);
+                    ss.modifyAttribute(timestamp - 1, msgRef, pubDropsQuark);
+                    ss.modifyAttribute(timestamp, (Object) null, pubDropsQuark);
+                }
+
+                return;
+            }
+
+            // publisher_link_handle_message
+            // TODO figure out what to do here
+            // if (isEvent(event, fLayout.eventPubLinkHandleMsg())) {
+            // return;
+            // }
+
+            // subscription_message_queued
+            if (isEvent(event, fLayout.eventSubMsgQueued())) {
+                String nodeName = getNodeName(event);
+                String topicName = (String) getField(event, fLayout.fieldTopic());
+                Long msgRef = (Long) getField(event, fLayout.fieldMsgRef());
+
+                // Push to subscriber queue
+                int subQueueQuark = ss.getQuarkAbsolute(nodeName, SUBSCRIBERS_LIST, topicName, QUEUE);
+                StateSystemUtils.queueOfferAttribute(ss, timestamp, Objects.requireNonNull(msgRef), subQueueQuark);
+
+                return;
+            }
+
+            // subscription_message_dropped
+            if (isEvent(event, fLayout.eventSubMsgDropped())) {
+                String nodeName = getNodeName(event);
+                String topicName = (String) getField(event, fLayout.fieldTopic());
+                Long msgRef = (Long) getField(event, fLayout.fieldMsgRef());
+
+                int subsListQuark = ss.getQuarkAbsolute(nodeName, SUBSCRIBERS_LIST);
+
+                // Add drop to the subscriber's drops
+                int subDropsQuark = ss.getQuarkRelative(subsListQuark, topicName, DROPS);
+                ss.modifyAttribute(timestamp - 1, msgRef, subDropsQuark);
+                ss.modifyAttribute(timestamp, (Object) null, subDropsQuark);
+
+                // Pop from subscriber queue
+                int subQueueQuark = ss.getQuarkRelative(subsListQuark, topicName, QUEUE);
+                StateSystemUtils.queuePollAttribute(ss, timestamp, subQueueQuark);
+
+                return;
+            }
+
             // callback_start
             if (isEvent(event, fLayout.eventCallbackStart())) {
                 String nodeName = getNodeName(event);
@@ -150,70 +258,6 @@ public class RosQueuesStateProvider extends AbstractRosStateProvider {
 
                 return;
             }
-
-            // subscription_message_queued
-            if (isEvent(event, fLayout.eventSubMsgQueued())) {
-                String nodeName = getNodeName(event);
-                String topicName = (String) getField(event, fLayout.fieldTopic());
-                Long msgRef = (Long) getField(event, fLayout.fieldMsgRef());
-
-                // Push to subscriber queue
-                int subQueueQuark = ss.getQuarkAbsolute(nodeName, SUBSCRIBERS_LIST, topicName, QUEUE);
-                StateSystemUtils.queueOfferAttribute(ss, timestamp, Objects.requireNonNull(msgRef), subQueueQuark);
-
-                return;
-            }
-
-            // subscription_message_dropped
-            if (isEvent(event, fLayout.eventSubMsgDropped())) {
-                String nodeName = getNodeName(event);
-                String topicName = (String) getField(event, fLayout.fieldTopic());
-                Long msgRef = (Long) getField(event, fLayout.fieldMsgRef());
-
-                int subsListQuark = ss.getQuarkAbsolute(nodeName, SUBSCRIBERS_LIST);
-
-                // Add drop to the subscriber's drops
-                int subDropsQuark = ss.getQuarkRelative(subsListQuark, topicName, DROPS);
-                ss.modifyAttribute(timestamp - 1, msgRef, subDropsQuark);
-                ss.modifyAttribute(timestamp, (Object) null, subDropsQuark);
-
-                // Pop from subscriber queue
-                int subQueueQuark = ss.getQuarkRelative(subsListQuark, topicName, QUEUE);
-                StateSystemUtils.queuePollAttribute(ss, timestamp, subQueueQuark);
-
-                return;
-            }
-
-            // TODO
-
-            // publisher_message_queued
-            if (isEvent(event, fLayout.eventPubMsgQueued())) {
-                String nodeName = getNodeName(event);
-                String topicName = (String) getField(event, fLayout.fieldTopic());
-                Long buffRef = (Long) getField(event, fLayout.fieldBufferRef());
-
-                // Push to publisher queue
-                int pubQueueQuark = ss.getQuarkAbsoluteAndAdd(nodeName, PUBLISHERS_LIST, topicName, QUEUE);
-                StateSystemUtils.queueOfferAttribute(ss, timestamp, Objects.requireNonNull(buffRef), pubQueueQuark);
-
-                return;
-            }
-
-            // publisher_link_handle_message
-            // TODO assuming this is when a msg from the pub queue gets "sent"
-            // if (isEvent(event, fLayout.eventPubLinkHandleMsg())) {
-            // long timestamp = event.getTimestamp().toNanos();
-            // String nodeName = getNodeName(event);
-            // String topicName = (String) getField(event, fLayout.fieldTopic());
-            // // Long msgRef = (Long) getField(event, fLayout.fieldMsgRef());
-            //
-            // // Pop from publisher queue
-            // int pubQueueQuark = ss.getQuarkAbsoluteAndAdd(NODES_LIST, nodeName,
-            // PUBLISHERS_LIST, topicName, QUEUE);
-            // popQueue(ss, timestamp, pubQueueQuark);
-            //
-            // return;
-            // }
         } catch (AttributeNotFoundException e) {
             Activator.getInstance().logError("Could not get queue quark; there may be missing events: ", e); //$NON-NLS-1$
         }

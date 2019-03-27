@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.internal.ros.ui;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -51,5 +52,14 @@ public class Activator extends AbstractUIPlugin {
         return plugin;
     }
 
+    /**
+     * Get the ImageDescriptor from a given path
+     *
+     * @param path
+     *            The path to the image file
+     * @return The ImageDescriptor object
+     */
+    public ImageDescriptor getImageDescripterFromPath(String path) {
+        return AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID, path);
+    }
 }
-
