@@ -23,7 +23,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.jsontrace.core,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.internal.traceevent.core;x-friends:="org.eclipse.tracecompass.incubator.traceevent.core.tests",
- org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack;x-internal:=true,
+ org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack;x-friends:="org.eclipse.tracecompass.incubator.traceevent.core.tests",
  org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context;x-friends:="org.eclipse.tracecompass.incubator.traceevent.ui",
  org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.counter;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.objectlife;x-friends:="org.eclipse.tracecompass.incubator.traceevent.ui,org.eclipse.tracecompass.incubator.traceevent.core.tests",

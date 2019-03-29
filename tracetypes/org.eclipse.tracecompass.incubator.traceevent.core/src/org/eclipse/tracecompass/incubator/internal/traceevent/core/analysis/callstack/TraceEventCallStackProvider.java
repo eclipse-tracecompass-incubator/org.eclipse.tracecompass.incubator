@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.cal
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxPidAspect;
@@ -51,7 +53,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  */
 public class TraceEventCallStackProvider extends CallStackStateProvider {
 
-    private static final int VERSION_NUMBER = 4;
+    private static final int VERSION_NUMBER = 5;
     private static final int UNSET_ID = -1;
     static final String EDGES = "EDGES"; //$NON-NLS-1$
 
@@ -339,13 +341,20 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
             int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.CALL_STACK);
             ss.pushAttribute(timestamp, functionBeginName, callStackQuark);
+            prepareNextSlice(ss, callStackQuark, timestamp);
         }
+    }
+
+    private static void prepareNextSlice(ITmfStateSystemBuilder ss, int quark, long timestamp) {
+        // Since the beginning can mark the beginning of more than one slice, make sure the next level in the stack is ready to be updated and has the same start time as the current one
+        ss.pushAttribute(timestamp, StringUtils.EMPTY, quark);
+        ss.popAttribute(timestamp, quark);
     }
 
     private void handleEnd(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp, String processName) {
         /* Check if the event is a function exit */
-        Object functionExitState = functionExit(event);
-        if (functionExitState != null) {
+        Object functionExitName = functionExit(event);
+        if (functionExitName != null) {
             String pName = processName;
 
             if (pName == null) {
@@ -357,8 +366,41 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
                 threadName = Long.toString(getThreadId(event));
             }
             int quark = ss.getQuarkAbsoluteAndAdd(PROCESSES, pName, threadName, InstrumentedCallStackAnalysis.CALL_STACK);
-            ss.popAttribute(timestamp - 1, quark);
+            // The function to end is not necessarily the tip of the stack. Unstack up to function name
+            List<Object> callStack = getCallStack(ss, quark);
+            int indexOf = callStack.indexOf(functionExitName);
+            // Function not found, just unstack the last one?
+            if (indexOf < 0) {
+                // Update the last element of the callstack
+                int stackQuark = ss.optQuarkRelative(quark, String.valueOf(callStack.size() + 1));
+                if (stackQuark >= 0) {
+                    ss.updateOngoingState(functionExitName, stackQuark);
+                    ss.pushAttribute(timestamp, (Object) null, quark);
+                }
+                // Pop the last element
+                indexOf = callStack.size() - 1;
+            }
+            // Pop all the attributes up to the exiting function
+            for (int i = indexOf; i < callStack.size(); i++) {
+                ss.popAttribute(timestamp, quark);
+            }
         }
+    }
+
+    private static List<Object> getCallStack(ITmfStateSystemBuilder ss, int quark) {
+        List<Object> callstackObjects = new ArrayList<>();
+        Integer currentDepth = (Integer) ss.queryOngoing(quark);
+        if (currentDepth == null) {
+            return callstackObjects;
+        }
+        for (int i = 0; i < currentDepth; i++) {
+            int stackQuark = ss.optQuarkRelative(quark, String.valueOf(i + 1));
+            if (stackQuark < 0) {
+                return callstackObjects;
+            }
+            callstackObjects.add(ss.queryOngoing(stackQuark));
+        }
+        return callstackObjects;
     }
 
     /**
