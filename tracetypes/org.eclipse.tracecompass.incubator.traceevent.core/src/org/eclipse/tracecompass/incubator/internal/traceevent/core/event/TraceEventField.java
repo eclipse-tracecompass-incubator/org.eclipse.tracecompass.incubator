@@ -101,6 +101,7 @@ public class TraceEventField {
         }
         String category = optString(root, ITraceEventConstants.CATEGORY);
         String id = optString(root, ITraceEventConstants.ID);
+        String scope = optString(root, ITraceEventConstants.SCOPE);
         JsonObject args = optJSONObject(root, ITraceEventConstants.ARGS);
         if (args != null) {
             for (Entry<String, JsonElement> entry : args.entrySet()) {
@@ -127,6 +128,9 @@ public class TraceEventField {
         }
         if (id != null) {
             argsMap.put(ITraceEventConstants.ID, id);
+        }
+        if (scope != null) {
+            argsMap.put(ITraceEventConstants.SCOPE, scope);
         }
         return new TraceEventField(name, ts, phase, pid, tid, category, id, duration, argsMap);
     }

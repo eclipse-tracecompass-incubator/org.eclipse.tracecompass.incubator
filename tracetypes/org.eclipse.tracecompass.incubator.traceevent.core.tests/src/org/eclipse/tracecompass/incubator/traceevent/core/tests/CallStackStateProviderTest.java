@@ -12,11 +12,14 @@ package org.eclipse.tracecompass.incubator.traceevent.core.tests;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
+import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack.TraceEventCallstackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
@@ -28,6 +31,7 @@ import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.tests.shared.TmfTestHelper;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.junit.After;
 import org.junit.Test;
 
@@ -42,6 +46,14 @@ public class CallStackStateProviderTest {
 
     private ITmfTrace fTrace;
 
+    private static void deleteSuppFiles(@NonNull ITmfTrace trace) {
+        /* Remove supplementary files */
+        File suppDir = new File(TmfTraceManager.getSupplementaryFileDir(trace));
+        for (File file : suppDir.listFiles()) {
+            file.delete();
+        }
+    }
+
     /**
      * Dispose the trace used in this test
      */
@@ -49,6 +61,7 @@ public class CallStackStateProviderTest {
     public void disposeTrace() {
         ITmfTrace trace = fTrace;
         if (trace != null) {
+            deleteSuppFiles(trace);
             trace.dispose();
         }
     }
@@ -105,6 +118,50 @@ public class CallStackStateProviderTest {
                     new StateIntervalStub(160000, 179999, (Object) null),
                     new StateIntervalStub(180000, 200000, (Object) null)),
                     "Processes", "26037", "26066", "CallStack", "3"));
+            StateSystemTestUtils.testIntervals(ss, intervalInfos);
+        } finally {
+            csModule.dispose();
+        }
+    }
+
+    /**
+     * Test the 's', 'f' and 'X' events
+     *
+     * @throws Exception
+     *             Exception thrown by initialization
+     */
+    @Test
+    public void testEventsXsf() throws Exception {
+        TraceEventCallstackAnalysis csModule = getTraceEventModule("traces/flow_simple.json");
+        try {
+            ITmfStateSystem ss = csModule.getStateSystem();
+            assertNotNull(ss);
+            Set<@NonNull IntervalInfo> intervalInfos = new HashSet<>();
+            // First process, request bar
+            intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(0, 9999, "SenderB"),
+                    new StateIntervalStub(10000, 3331000, (Object) null)),
+                    "Processes", "15903", "15904", "CallStack", "1"));
+            intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(0, 1000999, (Object) null),
+                    new StateIntervalStub(1001000, 1100999, "Blergh"),
+                    new StateIntervalStub(1101000, 3331000, (Object) null)),
+                    "Processes", "15875", "15895", "CallStack", "1"));
+            intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(0, 3001999, (Object) null),
+                    new StateIntervalStub(3002000, 3011999, "SenderA"),
+                    new StateIntervalStub(3012000, 3331000, (Object) null)),
+                    "Processes", "15902", "15903", "CallStack", "1"));
+            intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(0, 3199999, (Object) null),
+                    new StateIntervalStub(3200000, 3331000, "OtherSlice")),
+                    "Processes", "15774", "15794", "CallStack", "1"));
+            intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(0, 3330999, (Object) null),
+                    new StateIntervalStub(3331000, 3331000, "SomeSlice")),
+                    "Processes", "15874", "15894", "CallStack", "1"));
+            intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(0, 999, (Object) null),
+                    new StateIntervalStub(1000, 1000999, new EdgeStateValue(-1, new HostThread(fTrace.getHostId(), 15904), new HostThread(fTrace.getHostId(), 15895))),
+                    new StateIntervalStub(1001000, 3001999, (Object) null),
+                    new StateIntervalStub(3002000, 3219999, new EdgeStateValue(-1, new HostThread(fTrace.getHostId(), 15903), new HostThread(fTrace.getHostId(), 15794))),
+                    new StateIntervalStub(3220000, 3329999, new EdgeStateValue(-1, new HostThread(fTrace.getHostId(), 15794), new HostThread(fTrace.getHostId(), 15894))),
+                    new StateIntervalStub(3330000, 3331000, (Object) null)),
+                    "EDGES", "0"));
             StateSystemTestUtils.testIntervals(ss, intervalInfos);
         } finally {
             csModule.dispose();

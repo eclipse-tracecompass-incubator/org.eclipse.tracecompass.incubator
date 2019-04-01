@@ -11,8 +11,10 @@ package org.eclipse.tracecompass.incubator.callstack.core.base;
 
 import java.nio.charset.Charset;
 import java.util.Comparator;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferReader;
 import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferWriter;
@@ -141,6 +143,20 @@ public class EdgeStateValue extends CustomStateValue {
     @Override
     public String toString() {
         return "Edge: id=" + fId + ", src=" + fSrc + ", dst=" + fDst; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fId, fSrc, fDst);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (!(obj instanceof EdgeStateValue)) {
+            return false;
+        }
+        EdgeStateValue other = (EdgeStateValue) obj;
+        return fId == other.fId && Objects.equals(fSrc, other.fSrc) && Objects.equals(fDst, other.fDst);
     }
 
 }

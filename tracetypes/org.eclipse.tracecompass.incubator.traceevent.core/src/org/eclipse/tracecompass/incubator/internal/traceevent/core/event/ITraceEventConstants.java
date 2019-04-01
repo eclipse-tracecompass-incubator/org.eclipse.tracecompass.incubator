@@ -55,5 +55,13 @@ public interface ITraceEventConstants {
      * Arguments field name
      */
     String ARGS = "args"; //$NON-NLS-1$
+    /**
+     * Binding point field for flow events
+     */
+    String BINDING_POINT = "bp"; //$NON-NLS-1$
+    /**
+     * An optional scope for some event types, to differentiate same ids
+     */
+    String SCOPE = "scope"; //$NON-NLS-1$
 
 }

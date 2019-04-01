@@ -40,7 +40,12 @@ public class TraceEventAspects {
     public static final ITmfEventAspect<String> ID_ASPECT = new TraceCompassScopeLogIdAspect();
 
     /**
-     * Apects of a trace
+     * A category aspect, can be used to identify flows.
+     */
+    public static final ITmfEventAspect<String> CATEGORY_ASPECT = new TraceCompassScopeLogCategoryAspect();
+
+    /**
+     * Aspects of a trace
      */
     private static Iterable<@NonNull ITmfEventAspect<?>> aspects;
 
@@ -60,7 +65,7 @@ public class TraceEventAspects {
                     new TraceCompassScopeLogLevel(),
                     new TraceCompassScopeLogTidAspect(),
                     new TraceCompassScopeLogPidAspect(),
-                    new TraceCompassScopeLogCategoryAspect(),
+                    CATEGORY_ASPECT,
                     new TraceCompassScopeLogDurationAspect(),
                     ID_ASPECT,
                     ARGS_ASPECT,
