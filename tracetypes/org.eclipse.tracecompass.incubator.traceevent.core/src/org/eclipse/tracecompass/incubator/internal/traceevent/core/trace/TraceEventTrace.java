@@ -36,6 +36,7 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -183,6 +184,18 @@ public class TraceEventTrace extends JsonTrace {
         try {
             fFileInput = new BufferedRandomAccessFile(fFile, "r"); //$NON-NLS-1$
             goToCorrectStart(fFileInput);
+            /* Set the start and (current) end times for this trace */
+            ITmfContext ctx = seekEvent(0L);
+            if (ctx == null) {
+                return;
+            }
+            ITmfEvent event = getNext(ctx);
+            if (event != null) {
+                final ITmfTimestamp curTime = event.getTimestamp();
+                setStartTime(curTime);
+                setEndTime(curTime);
+            }
+            ctx.dispose();
         } catch (IOException e) {
             throw new TmfTraceException(e.getMessage(), e);
         }
