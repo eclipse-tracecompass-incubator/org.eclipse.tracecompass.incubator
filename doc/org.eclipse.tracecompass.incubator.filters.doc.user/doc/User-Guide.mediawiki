@@ -1,0 +1,5 @@
+= Language Server Protocol Implementation for Filters =
+== User documentation ==
+LSP (Language Server Protocol) with the GlobalFilter box is able to validate the user input. It also proposes completions to the user input (operator, TID, PID) and basic syntax highlighting is there is an error in the user input. The LSP4J eclipse plug-in is required, but it is downloaded automatically with the incubator plug-in. The LSP client and server automatically launch with the TraceCompass application.
+== For Developers ==
+To use this plugin elsewhere in Tracecompass, you need to replace a typical text input by the class LspFilterTextbox which acts as a wrapper around a text field. If we need to implement another kind of filter, for example the xml analysis, the Lsp server will need to be implemented for this specific use since the rules will mostly changed. But if you want to reuse the existing rules you just need to use the LspFilterTextBox class anywhere in the code, inside any view widget. The LspFilterTextbox class will emit two events: "validFilter" when the text is valid according to the server and "invalidFilter" when the text is invalid.
