@@ -11,6 +11,11 @@
             name="%tracetype.type.ros"
             trace_type="org.eclipse.tracecompass.incubator.internal.ros.core.trace.RosTrace">
       </type>
+      <experiment
+            experiment_type="org.eclipse.tracecompass.incubator.internal.ros.core.trace.RosExperiment"
+            id="org.eclipse.tracecompass.incubator.internal.ros.core.trace.RosExperiment"
+            name="%tracetype.experiment.ros">
+      </experiment>
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
@@ -69,6 +74,36 @@
                class="org.eclipse.tracecompass.incubator.internal.ros.core.trace.RosTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.ros.core.analysis.model.connections.RosConnectionsModelAnalysis"
+            automatic="false"
+            icon="icons/ros.png"
+            id="org.eclipse.tracecompass.incubator.ros.core.analysis.model.connections"
+            name="%analysis.ros.model.connections">
+         <tracetype
+               class="org.eclipse.tracecompass.incubator.internal.ros.core.trace.RosExperiment">
+         </tracetype>
+      </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.ros.core.analysis.model.messagestransport.RosMessagesTransportModelAnalysis"
+            icon="icons/ros.png"
+            id="org.eclipse.tracecompass.incubator.ros.core.analysis.model.messagestransport"
+            name="%analysis.ros.model.messagestransport">
+         <tracetype
+               class="org.eclipse.tracecompass.incubator.internal.ros.core.trace.RosExperiment">
+         </tracetype>
+      </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.ros.core.analysis.messageflow.RosMessageFlowAnalysis"
+            applies_experiment="true"
+            automatic="false"
+            icon="icons/ros.png"
+            id="org.eclipse.tracecompass.incubator.ros.core.analysis.messageflow"
+            name="%analysis.ros.messageflow">
+         <tracetype
+               class="org.eclipse.tracecompass.incubator.internal.ros.core.trace.RosExperiment">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
@@ -91,6 +126,10 @@
       <dataProviderFactory
             class="org.eclipse.tracecompass.incubator.internal.ros.core.analysis.timers.RosTimersDataProviderFactory"
             id="org.eclipse.tracecompass.incubator.ros.core.analysis.timers.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.ros.core.analysis.messageflow.RosMessageFlowDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.ros.core.analysis.messageflow.dataprovider">
       </dataProviderFactory>
    </extension>
 

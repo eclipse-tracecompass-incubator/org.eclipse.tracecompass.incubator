@@ -48,6 +48,14 @@
             name="%ros.view.timers"
             restorable="true">
       </view>
+      <view
+            category="org.eclipse.tracecompass.incubator.internal.ros.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.ros.ui.views.messageflow.RosMessageFlowView"
+            icon="icons/obj16/ros_queues.png"
+            id="org.eclipse.tracecompass.incubator.ros.ui.views.messageflow"
+            name="%ros.view.messageflow"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
@@ -79,6 +87,19 @@
                class="org.eclipse.tracecompass.incubator.internal.ros.core.analysis.timers.RosTimersAnalysis">
          </analysisModuleClass>
       </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.ros.ui.views.messageflow">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.ros.core.analysis.messageflow.RosMessageFlowAnalysis">
+         </analysisModuleClass>
+      </output>
+      <parameterProvider
+            class="org.eclipse.tracecompass.incubator.internal.ros.ui.messageflow.RosMessageFlowParameterProvider">
+         <analysisId
+               id="org.eclipse.tracecompass.incubator.ros.core.analysis.messageflow">
+         </analysisId>
+      </parameterProvider>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">

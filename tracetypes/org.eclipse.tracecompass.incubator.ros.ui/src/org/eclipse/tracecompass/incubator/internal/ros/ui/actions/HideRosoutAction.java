@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  **********************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.ros.ui.views;
+package org.eclipse.tracecompass.incubator.internal.ros.ui.actions;
 
 import java.util.Objects;
 

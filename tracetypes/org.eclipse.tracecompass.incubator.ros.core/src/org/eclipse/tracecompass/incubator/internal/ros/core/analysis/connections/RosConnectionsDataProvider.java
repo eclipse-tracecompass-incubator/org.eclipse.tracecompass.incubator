@@ -33,7 +33,6 @@ import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
@@ -42,7 +41,6 @@ import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.TreeMultimap;
@@ -58,7 +56,8 @@ public class RosConnectionsDataProvider extends AbstractTimeGraphDataProvider<@N
     /** Data provider suffix ID */
     public static final String SUFFIX = ".dataprovider"; //$NON-NLS-1$
 
-    private @NonNull RosConnectionsAnalysis fModule;
+    // TODO use for arrows
+    // private @NonNull RosConnectionsAnalysis fModule;
 
     /**
      * Constructor
@@ -70,20 +69,12 @@ public class RosConnectionsDataProvider extends AbstractTimeGraphDataProvider<@N
      */
     public RosConnectionsDataProvider(@NonNull ITmfTrace trace, @NonNull RosConnectionsAnalysis analysisModule) {
         super(trace, analysisModule);
-        fModule = analysisModule;
+        // fModule = analysisModule;
     }
 
     @Override
     public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        ITmfStateSystem ss = fModule.getStateSystem();
-        if (ss == null) {
-            return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.ANALYSIS_INITIALIZATION_FAILED);
-        }
-
-        List<@NonNull ITimeGraphArrow> arrows = Lists.newArrayList();
-        filter.getTimesRequested();
-        arrows.add(new TimeGraphArrow(0, 0, 0, 0));
-        return new TmfModelResponse<>(arrows, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
     @Override

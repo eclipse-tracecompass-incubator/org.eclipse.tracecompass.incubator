@@ -22,13 +22,20 @@ Require-Bundle: org.eclipse.core.runtime,
 Export-Package: org.eclipse.tracecompass.incubator.internal.ros.core;x-friends:="org.eclipse.tracecompass.incubator.ros.core.tests,org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.connections;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
+ org.eclipse.tracecompass.incubator.internal.ros.core.analysis.messageflow;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
+ org.eclipse.tracecompass.incubator.internal.ros.core.analysis.model.messageflow;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.nodes;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.queues;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.tasks;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.analysis.timers;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
+ org.eclipse.tracecompass.incubator.internal.ros.core.signals;x-friends:="org.eclipse.tracecompass.incubator.ros.ui",
  org.eclipse.tracecompass.incubator.internal.ros.core.trace;x-friends:="org.eclipse.tracecompass.incubator.ros.ui,org.eclipse.tracecompass.incubator.ros.core.tests",
  org.eclipse.tracecompass.incubator.internal.ros.core.trace.layout
 Import-Package: com.google.common.base,
  com.google.common.collect,
- org.apache.commons.lang3
+ com.google.common.hash,
+ org.apache.commons.lang3,
+ org.eclipse.tracecompass.internal.lttng2.kernel.core,
+ org.eclipse.tracecompass.internal.lttng2.kernel.core.event.matching,
+ org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.ros.core
