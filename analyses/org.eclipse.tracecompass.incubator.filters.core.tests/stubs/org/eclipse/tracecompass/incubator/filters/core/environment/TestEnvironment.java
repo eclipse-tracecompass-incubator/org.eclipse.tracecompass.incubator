@@ -33,8 +33,38 @@ import org.eclipse.tracecompass.incubator.internal.filters.core.server.FilterSer
  * 2.Use stubs to check if value passed between real implementations are
  * correct.
  *
- * @author Maxime Thibault
+ * Here's a class diagram of the TestEnvironment
  *
+ * <pre>
+ *  TestEnvironment ⟵ TestConnector ⟵ [LanguageFilterClient, LanguageFilterServer, [LSPServerStub,LSPClientStub] ⟵ [Mockup]] ⟵ Stream
+ *
+ *  X ⟵ Y means X is composed of Y
+ * </pre>
+ *
+ *
+ *
+ * Here's how communicates the stubs and the real implementation inside the
+ * TestEnvironment. The left part is the real implementations and the right part
+ * the stubs
+ *
+ * <pre>
+ *  LanguageFilterClient ⟵⟶ LSPServerStub
+ *  LanguageFilterServer ⟵⟶ LSPClientStub
+ *
+ *  X ⟵⟶ Y means X and Y communicates both way
+ * </pre>
+ *
+ * Note that the real implementations communicates with the stubs using Stream.
+ * When a stub receives a message, it can invoke any methods on the real
+ * implementations. For example, LSPServerStub can invoke methods on
+ * LanguageFilterServer. See {@link TestConnector}. Also, the streams has to be
+ * carefully connected between the stubs and the real implementations to allow 2
+ * way communication. It is necessary because the LanguageServer and
+ * LanguageClient sometimes return value from a CompletableFuture. So the stubs
+ * needs to be able to wait for responses and also send it back to the real
+ * implementation through CompletableFuture.
+ *
+ * @author Maxime Thibault
  */
 public class TestEnvironment {
 
@@ -131,7 +161,8 @@ public class TestEnvironment {
     /**
      * Wait for the transactions to be done
      *
-     * @throws InterruptedException Exception thrown by lock
+     * @throws InterruptedException
+     *             Exception thrown by lock
      */
     public void waitForTransactionToTerminate() throws InterruptedException {
         // @see TestConnector.count()
