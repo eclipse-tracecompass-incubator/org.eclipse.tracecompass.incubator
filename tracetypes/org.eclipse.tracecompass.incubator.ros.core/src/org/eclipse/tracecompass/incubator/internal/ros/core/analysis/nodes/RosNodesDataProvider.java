@@ -42,6 +42,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
 /**
@@ -97,7 +98,7 @@ public class RosNodesDataProvider extends AbstractTimeGraphDataProvider<@NonNull
             intervals.put(interval.getAttribute(), interval);
         }
 
-        Map<@NonNull Integer, @NonNull Predicate<@NonNull Map<@NonNull String, @NonNull String>>> predicates = new HashMap<>();
+        Map<@NonNull Integer, @NonNull Predicate<@NonNull Multimap<@NonNull String, @NonNull String>>> predicates = new HashMap<>();
         if (filter instanceof TimeGraphStateQueryFilter) {
             TimeGraphStateQueryFilter timeEventFilter = (TimeGraphStateQueryFilter) filter;
             predicates.putAll(computeRegexPredicate(timeEventFilter));
@@ -117,7 +118,7 @@ public class RosNodesDataProvider extends AbstractTimeGraphDataProvider<@NonNull
                 if (valObject instanceof Long) {
                     Long pid = (Long) valObject;
                     TimeGraphState value = new TimeGraphState(startTime, duration, 0, Objects.requireNonNull(pid.toString()));
-                    addToStateList(eventList, value, entry.getKey(), predicates, monitor);
+                    applyFilterAndAddState(eventList, value, entry.getKey(), predicates, monitor);
                 }
             }
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));

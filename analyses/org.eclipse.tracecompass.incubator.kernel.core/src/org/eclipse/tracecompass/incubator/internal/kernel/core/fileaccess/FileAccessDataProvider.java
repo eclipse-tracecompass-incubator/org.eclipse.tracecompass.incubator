@@ -20,7 +20,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -55,6 +57,8 @@ import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeMultimap;
 
@@ -116,7 +120,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
             }
             intervals.put(interval.getAttribute(), interval);
         }
-        Map<@NonNull Integer, @NonNull Predicate<@NonNull Map<@NonNull String, @NonNull String>>> predicates = new HashMap<>();
+        Map<@NonNull Integer, @NonNull Predicate<@NonNull Multimap<@NonNull String, @NonNull String>>> predicates = new HashMap<>();
         if (filter instanceof TimeGraphStateQueryFilter) {
             TimeGraphStateQueryFilter timeEventFilter = (TimeGraphStateQueryFilter) filter;
             predicates.putAll(computeRegexPredicate(timeEventFilter));
@@ -153,7 +157,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
                 if (value == null) {
                     value = new TimeGraphState(startTime, duration, Integer.MIN_VALUE);
                 }
-                addToStateList(eventList, value, entry.getKey(), predicates, monitor);
+                applyFilterAndAddState(eventList, value, entry.getKey(), predicates, monitor);
             }
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));
 
@@ -364,14 +368,19 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
     }
 
     @Override
-    public @NonNull Map<@NonNull String, @NonNull String> getFilterInput(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<@NonNull String, @NonNull String> inputs = super.getFilterInput(filter, monitor);
+    public @NonNull Multimap<@NonNull String, @NonNull String> getFilterData(long entryId, long time, @Nullable IProgressMonitor monitor) {
+        Multimap<@NonNull String, @NonNull String> data = HashMultimap.create();
+        data.putAll(super.getFilterData(entryId, time, monitor));
+
+        SelectionTimeQueryFilter filter = new SelectionTimeQueryFilter(Collections.singletonList(time), Collections.singleton(Objects.requireNonNull(entryId)));
         TmfModelResponse<Map<String, String>> response = fetchTooltip(filter, monitor);
         Map<@NonNull String, @NonNull String> model = response.getModel();
         if (model != null) {
-            inputs.putAll(model);
+            for (Entry<String, String> entry : model.entrySet()) {
+                data.put(entry.getKey(), entry.getValue());
+            }
         }
-        return inputs;
+        return data;
     }
 
 }

@@ -43,6 +43,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
 /**
@@ -98,7 +99,7 @@ public class RosQueuesDataProvider extends AbstractTimeGraphDataProvider<@NonNul
             intervals.put(interval.getAttribute(), interval);
         }
 
-        Map<@NonNull Integer, @NonNull Predicate<@NonNull Map<@NonNull String, @NonNull String>>> predicates = new HashMap<>();
+        Map<@NonNull Integer, @NonNull Predicate<@NonNull Multimap<@NonNull String, @NonNull String>>> predicates = new HashMap<>();
         if (filter instanceof TimeGraphStateQueryFilter) {
             TimeGraphStateQueryFilter timeEventFilter = (TimeGraphStateQueryFilter) filter;
             predicates.putAll(computeRegexPredicate(timeEventFilter));
@@ -119,12 +120,12 @@ public class RosQueuesDataProvider extends AbstractTimeGraphDataProvider<@NonNul
                     // Queue reference
                     long ref = (Long) valObject;
                     ElementReferenceState state = new ElementReferenceState(startTime, duration, ref);
-                    addToStateList(eventList, state, entry.getKey(), predicates, monitor);
+                    applyFilterAndAddState(eventList, state, entry.getKey(), predicates, monitor);
                 } else if (valObject instanceof Integer) {
                     // Queue count
                     int count = (Integer) valObject;
                     TimeGraphState state = new TimeGraphState(startTime, duration, 0, Integer.toString(count));
-                    addToStateList(eventList, state, entry.getKey(), predicates, monitor);
+                    applyFilterAndAddState(eventList, state, entry.getKey(), predicates, monitor);
                 }
             }
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));

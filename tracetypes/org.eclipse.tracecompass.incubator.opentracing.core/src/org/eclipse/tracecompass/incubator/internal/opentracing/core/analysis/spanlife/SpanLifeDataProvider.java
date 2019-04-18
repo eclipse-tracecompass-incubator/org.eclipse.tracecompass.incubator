@@ -45,6 +45,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
 /**
@@ -154,7 +155,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
             }
             intervals.put(interval.getAttribute(), interval);
         }
-        Map<@NonNull Integer, @NonNull Predicate<@NonNull Map<@NonNull String, @NonNull String>>> predicates = new HashMap<>();
+        Map<@NonNull Integer, @NonNull Predicate<@NonNull Multimap<@NonNull String, @NonNull String>>> predicates = new HashMap<>();
         if (filter instanceof TimeGraphStateQueryFilter) {
             TimeGraphStateQueryFilter timeEventFilter = (TimeGraphStateQueryFilter) filter;
             predicates.putAll(computeRegexPredicate(timeEventFilter));
@@ -171,7 +172,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
                 long duration = interval.getEndTime() - startTime + 1;
                 Object state = interval.getValue();
                 TimeGraphState value = new TimeGraphState(startTime, duration, state == null ? Integer.MIN_VALUE : 0);
-                addToStateList(eventList, value, entry.getKey(), predicates, monitor);
+                applyFilterAndAddState(eventList, value, entry.getKey(), predicates, monitor);
             }
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));
 
