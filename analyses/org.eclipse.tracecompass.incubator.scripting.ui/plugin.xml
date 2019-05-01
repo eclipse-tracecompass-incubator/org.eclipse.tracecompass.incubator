@@ -11,11 +11,6 @@
             visible="true">
       </module>
    </extension>
-   <extension point="org.eclipse.ui.activities">
-      <activity name="%activity.name.debugPerspective"     id="org.eclipse.tracecompass.scriptDebug"    description="%activity.description.debugPerspective" />
-      <activityPatternBinding activityId="org.eclipse.tracecompass.scriptDebug"    pattern="org\.eclipse\.debug.*" />
-      <defaultEnablement id="org.eclipse.tracecompass.scriptDebug" />
-   </extension>
    <extension
             point="org.eclipse.ui.views">
       <view
@@ -26,5 +21,105 @@
             name="%view.scripted"
             restorable="true">
       </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+            <command
+            categoryId="org.eclipse.ui.category.file"
+            defaultHandler="org.eclipse.tracecompass.incubator.scripting.ui.project.handlers.LaunchAsEaseScriptHandler"
+            description="%command.run_as_ease_script.description"
+            id="org.eclipse.tracecompass.incubator.scripting.ui.command.launch_as_ease_script"
+            name="%command.run_as_ease_script">
+         <commandParameter
+               id="org.eclipse.tracecompass.incubator.scripting.ui.commandparameter.launch_as_ease_script.type"
+               name="%command.launch_as_ease_script.type"
+               optional="false">
+         </commandParameter>
+         <commandParameter
+               id="org.eclipse.tracecompass.incubator.scripting.ui.commandparameter.launch_as_ease_script.mode"
+               name="%command.launch_as_ease_script.mode"
+               optional="false">
+         </commandParameter>
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+         <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+            <menu
+                  icon="icons/etool16/run_exc.png"
+                  label="%command.run_as_ease_script"
+                  tooltip="%command.run_as_ease_script.description">
+            <dynamic
+                  class="org.eclipse.tracecompass.incubator.scripting.ui.project.handlers.RunAsElementTypeContributionItem"
+                  id="org.eclipse.tracecompass.incubator.scripting.ui.command.run_as_ease_script.dynamic">
+            </dynamic>
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <and>
+                        <iterate
+                              ifEmpty="false"
+                              operator="and">
+                           <or>
+                              <instanceof
+                                    value="org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceElement">
+                              </instanceof>
+                           </or>
+                        </iterate>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.eclipse.tracecompass.incubator.scripting.ui.hasEngine">
+                     </test>
+                  </and>
+               </with>
+            </visibleWhen>
+         </menu>
+         </menuContribution>
+         <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+            <menu
+                  icon="icons/etool16/debug_exc.png"
+                  label="%command.debug_as_ease_script"
+                  tooltip="%command.debug_as_ease_script.description">
+            <dynamic
+                  class="org.eclipse.tracecompass.incubator.scripting.ui.project.handlers.DebugAsElementTypeContributionItem"
+                  id="org.eclipse.tracecompass.incubator.scripting.ui.command.debug_as_ease_script.dynamic">
+            </dynamic>
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <and>
+                        <iterate
+                              ifEmpty="false"
+                              operator="and">
+                           <or>
+                              <instanceof
+                                    value="org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceElement">
+                              </instanceof>
+                           </or>
+                        </iterate>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.eclipse.tracecompass.incubator.scripting.ui.hasDebugEngine">
+                     </test>
+                  </and>
+               </with>
+            </visibleWhen>
+
+         </menu>
+         </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="org.eclipse.tracecompass.incubator.scripting.ui.project.handlers.ScriptEngineTester"
+            id="org.eclipse.tracecompass.incubator.scripting.ui.engine"
+            namespace="org.eclipse.tracecompass.incubator.scripting.ui"
+            properties="hasEngine,hasDebugEngine"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
 </plugin>

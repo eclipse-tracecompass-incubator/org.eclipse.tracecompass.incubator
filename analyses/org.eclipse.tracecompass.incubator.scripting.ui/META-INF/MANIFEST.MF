@@ -19,8 +19,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.tracecompass.tmf.analysis.xml.core,
  org.eclipse.tracecompass.tmf.ui,
  org.eclipse.debug.core,
- org.eclipse.debug.ui
+ org.eclipse.debug.ui,
+ org.eclipse.ui.views,
+ org.eclipse.ease.ui,
+ org.eclipse.core.expressions
 Export-Package: org.eclipse.tracecompass.incubator.internal.provisional.scripting.ui.views;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.scripting.ui;x-internal:=true,
- org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph;x-internal:=true
+ org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph;x-internal:=true,
+ org.eclipse.tracecompass.incubator.scripting.ui.project.handlers
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.scripting.ui
