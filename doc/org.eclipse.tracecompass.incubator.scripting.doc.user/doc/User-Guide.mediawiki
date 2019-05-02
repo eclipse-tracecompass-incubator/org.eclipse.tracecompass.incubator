@@ -1,0 +1,127 @@
+
+= Scripting =
+
+This plugin adds support for scripting in Trace Compass. It uses the [https://www.eclipse.org/ease/ Eclipse EASE project] as the scripting framework. It supports python, javascript, ruby, groovy, among others.
+
+== Make it work ==
+
+To have EASE scripting working, one needs to get the full source code of Trace Compass and the Incubator. Work is in progress to make it easier to use.
+
+Follow the [https://wiki.eclipse.org/Trace_Compass/Development_Environment_Setup instructions to set up a Trace Compass environment] in Eclipse.
+
+You should use the incubator's target, in the ''org.eclipse.tracecompass.incubator.target'' plugin.
+
+[[Image:images/incubator_target.png | Incubator Target]]
+
+''Tip: The target is very sensitive. If you have thousands of errors after setting the incubator target, you can to set any of the Trace Compass target, wait for it to be loaded and set, then come back to the incubator target, if often fixes the problem''
+
+Then run Trace Compass as per the instructions. If Ease scripting does not seem to be available, make sure ''all workspace and enabled target plugin-ins'' is selected in the Plug-in of the Run configuration ('''Run''' -> '''Run Configurations...''').
+
+== Create and execute a script ==
+
+Trace Compass scripts are not associated with a trace or trace type, do not integrate well with the analysis framework, so you will not see any scripted views under a trace. A script needs to be run manually for each trace and it will run on the currently active trace.
+
+For now, '''only Javascript''' is known to work. Other languages require to install additional packages ang engines.
+
+Anywhere in Trace Compass workspace, you can create a script file. For example, right-click on a project, the select '''New''' -> '''File''' and name it <some-file-name>.js.
+
+The file should now open in a javascript editor in Trace Compass. You can write your script in that file. The next sections describes the API to Trace Compass and show an example script.
+
+[[Image:images/javascript_editor.png | Javascript editor]]
+
+To run the script, make sure the trace you want to run it on is active, then, right-click on the script and select '''Run As''' -> '''EASE Script'''.
+
+[[Image:images/run_script.png | Run EASE Script]]
+
+=== Debug script and results ===
+
+You can also run the script in debug mode ('''Debug As''' -> '''EASE Script'''). Also, any print statement in the script will be displayed in the Console that opens when the script is run.
+
+The Trace Compass branch downloaded above changed the ''State System Explorer'' so that it can open state system files directly, without requiring them to be linked to an analysis. The state system created by the script can thus be explored using that view.
+
+== Trace Compass Scripting API and examples ==
+
+Here's an example javascript script for Trace Compass. It is the equivalent of ''Active Thread'' analysis in Trace Compass, ie saves the currently running process on each CPU.
+
+<pre>
+// load Trace Compass modules
+loadModule('/TraceCompass/Analysis');
+loadModule('/TraceCompass/DataProvider');
+loadModule('/TraceCompass/View');
+
+// Create an analysis named activetid.js.
+var analysis = getAnalysis("activetid.js");
+
+if (analysis == null) {
+	print("Trace is null");
+	exit();
+}
+
+// Get the analysis's state system so we can fill it, false indicates to create a new state system even if one already exists, true would re-use an existing state system
+var ss = analysis.getStateSystem(false);
+
+// The analysis itself is in this function
+function runAnalysis() {
+	// Get the event iterator for the trace
+	var iter = analysis.getEventIterator();
+
+	var event = null;
+	// Parse all events
+	while (iter.hasNext()) {
+
+		event = iter.next();
+
+		// Do something when the event is a sched_switch
+		if (event.getName() == "sched_switch") {
+			// This function is a wrapper to get the value of field CPU in the event, or return null if the field is not present
+			cpu = getFieldValue(event, "CPU");
+			tid = getFieldValue(event, "next_tid");
+			if ((cpu != null) && (tid != null)) {
+				// Write the tid to the state system, for the attribute corresponding to the cpu
+				quark = ss.getQuarkAbsoluteAndAdd(cpu);
+				// modify the value, tid is a long, so "" + tid make sure it's a string for display purposes
+				ss.modifyAttribute(event.getTimestamp().toNanos(), "" + tid, quark);
+			}
+		}
+
+	}
+	// Done parsing the events, close the state system at the time of the last event, it needs to be done manually otherwise the state system will still be waiting for values and will not be considered finished building
+	if (event != null) {
+		ss.closeHistory(event.getTimestamp().toNanos());
+	}
+}
+
+// This condition verifies if the state system is completed. For instance, if it had been built in a previous run of the script, it wouldn't run again.
+if (!ss.waitUntilBuilt(0)) {
+	// State system not built, run the analysis
+	runAnalysis();
+}
+
+function getEntries(filter) {
+	quarks = ss.getQuarks("*");
+	// Prepare the CPU names and sort them
+	var cpus = [];
+	for (i = 0; i < quarks.size(); i++) {
+		quark = quarks.get(i);
+		cpus.push(ss.getAttributeName(quark));
+	}
+	cpus.sort(function(a,b){return Number(a) - Number(b)});
+	var entries = [];
+	for (i = 0; i < cpus.length; i++) {
+		cpu = cpus[i];
+		quark = ss.getQuarkAbsolute(cpu);
+		entries.push(createEntry({'quark' : quark, 'name' : "CPU " + cpu}));
+	}
+	return entries;
+}
+
+// Get a time graph provider from this analysis, displaying all attributes (which are the cpus here)
+provider = createTimeGraphProvider(analysis, {'path' : '*'});
+if (provider != null) {
+	// Open a time graph view displaying this provider
+	openTimeGraphView(provider);
+}
+
+print("Done");
+
+</pre>

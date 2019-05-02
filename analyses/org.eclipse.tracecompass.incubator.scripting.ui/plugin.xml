@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ease.modules">
+      <module
+            category="org.eclipse.tracecompass.incubator.scripting.core.category"
+            class="org.eclipse.tracecompass.incubator.internal.provisional.scripting.ui.views.ViewModule"
+            id="org.eclipse.tracecompass.incubator.scripting.ui.views"
+            name="View"
+            visible="true">
+      </module>
+   </extension>
+   <extension point="org.eclipse.ui.activities">
+      <activity name="%activity.name.debugPerspective"     id="org.eclipse.tracecompass.scriptDebug"    description="%activity.description.debugPerspective" />
+      <activityPatternBinding activityId="org.eclipse.tracecompass.scriptDebug"    pattern="org\.eclipse\.debug.*" />
+      <defaultEnablement id="org.eclipse.tracecompass.scriptDebug" />
+   </extension>
+   <extension
+            point="org.eclipse.ui.views">
+      <view
+            allowMultiple="true"
+            category="org.eclipse.linuxtools.lttng2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph.ScriptedTimeGraphView"
+            id="org.eclipse.tracecompass.incubator.scripting.ui.view.timegraph"
+            name="%view.scripted"
+            restorable="true">
+      </view>
+   </extension>
+</plugin>

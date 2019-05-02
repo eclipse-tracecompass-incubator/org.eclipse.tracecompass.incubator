@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.tracecompass.incubator.scripting"
+      label="%featureName"
+      version="0.0.1.qualifier"
+      provider-name="%featureProvider"
+      license-feature="org.eclipse.license"
+      license-feature-version="0.0.0">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <url>
+      <discovery label="EASE" url="http://download.eclipse.org/ease/update/release"/>
+   </url>
+
+   <requires>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.tracecompass.common.core"/>
+      <import plugin="org.eclipse.tracecompass.tmf.core"/>
+      <import plugin="org.eclipse.core.commands"/>
+      <import plugin="org.eclipse.ui.workbench"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.tracecompass.statesystem.core"/>
+      <import plugin="org.eclipse.tracecompass.tmf.analysis.xml.core"/>
+      <import plugin="org.eclipse.help"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.tracecompass.tmf.analysis.xml.ui"/>
+      <import plugin="org.eclipse.ease"/>
+   </requires>
+
+   <plugin
+         id="org.eclipse.tracecompass.incubator.scripting.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.tracecompass.incubator.scripting.doc.user"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.tracecompass.incubator.scripting.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
