@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
@@ -89,7 +90,7 @@ public class LaunchAsEaseScriptHandler extends AbstractHandler {
             Iterator<Object> iterator = fSelection.iterator();
             while (iterator.hasNext()) {
                 Object element = iterator.next();
-                if (!(element instanceof TmfCommonProjectElement)) {
+                if (!(element instanceof TmfCommonProjectElement) && !(element instanceof IFile)) {
                     return false;
                 }
             }
@@ -118,11 +119,17 @@ public class LaunchAsEaseScriptHandler extends AbstractHandler {
             return null;
         }
         for (Object element : selection.toList()) {
-            TmfCommonProjectElement trace = (TmfCommonProjectElement) element;
-            if (trace instanceof TmfTraceElement) {
-                trace = ((TmfTraceElement) trace).getElementUnderTraceFolder();
+            // Get the file to execute
+            IResource resource = null;
+            if (element instanceof IFile) {
+                resource = (IFile) element;
+            } else if (element instanceof TmfCommonProjectElement) {
+                TmfCommonProjectElement trace = (TmfCommonProjectElement) element;
+                if (trace instanceof TmfTraceElement) {
+                    trace = ((TmfTraceElement) trace).getElementUnderTraceFolder();
+                }
+                resource = trace.getResource();
             }
-            IResource resource = trace.getResource();
             String type = event.getParameter(TYPE_PARAMETER);
             String mode = event.getParameter(MODE_PARAMETER);
             if (resource != null) {

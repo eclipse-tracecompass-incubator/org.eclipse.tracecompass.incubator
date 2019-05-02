@@ -41,6 +41,8 @@ public class ScriptEngineTester extends PropertyTester {
                     if (resource instanceof IFile) {
                         return fDelegateTester.test(resource, property, args, expectedValue);
                     }
+                } else if (element instanceof IFile) {
+                    return fDelegateTester.test(element, property, args, expectedValue);
                 }
                 break;
             }

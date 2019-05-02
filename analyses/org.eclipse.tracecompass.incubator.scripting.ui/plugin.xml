@@ -66,6 +66,10 @@
                               <instanceof
                                     value="org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceElement">
                               </instanceof>
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.eclipse.tracecompass.incubator.scripting.ui.inTracingProject">
+                              </test>
                            </or>
                         </iterate>
                      <test
@@ -99,6 +103,10 @@
                               <instanceof
                                     value="org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceElement">
                               </instanceof>
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.eclipse.tracecompass.incubator.scripting.ui.inTracingProject">
+                              </test>
                            </or>
                         </iterate>
                      <test
@@ -119,6 +127,13 @@
             id="org.eclipse.tracecompass.incubator.scripting.ui.engine"
             namespace="org.eclipse.tracecompass.incubator.scripting.ui"
             properties="hasEngine,hasDebugEngine"
+            type="java.lang.Object">
+      </propertyTester>
+      <propertyTester
+            class="org.eclipse.tracecompass.incubator.scripting.ui.project.handlers.InTracingProjectTester"
+            id="org.eclipse.tracecompass.incubator.scripting.ui.intracing.project"
+            namespace="org.eclipse.tracecompass.incubator.scripting.ui"
+            properties="inTracingProject"
             type="java.lang.Object">
       </propertyTester>
    </extension>
