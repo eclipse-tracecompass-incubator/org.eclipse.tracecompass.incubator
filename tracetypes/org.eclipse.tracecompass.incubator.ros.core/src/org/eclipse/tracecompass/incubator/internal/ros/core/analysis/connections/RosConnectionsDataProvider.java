@@ -23,18 +23,17 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
-import org.eclipse.tracecompass.internal.tmf.core.model.filters.TimeGraphStateQueryFilter;
 import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
@@ -45,7 +44,7 @@ import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
 /**
@@ -59,7 +58,8 @@ public class RosConnectionsDataProvider extends AbstractTimeGraphDataProvider<@N
     /** Data provider suffix ID */
     public static final String SUFFIX = ".dataprovider"; //$NON-NLS-1$
 
-    private @NonNull RosConnectionsAnalysis fModule;
+    // TODO use for arrows
+    // private @NonNull RosConnectionsAnalysis fModule;
 
     /**
      * Constructor
@@ -71,7 +71,7 @@ public class RosConnectionsDataProvider extends AbstractTimeGraphDataProvider<@N
      */
     public RosConnectionsDataProvider(@NonNull ITmfTrace trace, @NonNull RosConnectionsAnalysis analysisModule) {
         super(trace, analysisModule);
-        fModule = analysisModule;
+        // fModule = analysisModule;
     }
 
     @Deprecated
@@ -83,14 +83,7 @@ public class RosConnectionsDataProvider extends AbstractTimeGraphDataProvider<@N
 
     @Override
     public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull Map<@NonNull String, @NonNull Object> fetchParameters, @Nullable IProgressMonitor monitor) {
-        ITmfStateSystem ss = fModule.getStateSystem();
-        if (ss == null) {
-            return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.ANALYSIS_INITIALIZATION_FAILED);
-        }
-
-        List<@NonNull ITimeGraphArrow> arrows = Lists.newArrayList();
-        arrows.add(new TimeGraphArrow(0, 0, 0, 0));
-        return new TmfModelResponse<>(arrows, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
     @Deprecated
@@ -129,11 +122,10 @@ public class RosConnectionsDataProvider extends AbstractTimeGraphDataProvider<@N
             intervals.put(interval.getAttribute(), interval);
         }
 
-        Map<@NonNull Integer, @NonNull Predicate<@NonNull Map<@NonNull String, @NonNull String>>> predicates = new HashMap<>();
-        // TODO Fix with parameters map
-        if (filter instanceof TimeGraphStateQueryFilter) {
-            TimeGraphStateQueryFilter timeEventFilter = (TimeGraphStateQueryFilter) filter;
-            predicates.putAll(computeRegexPredicate(timeEventFilter));
+        Map<@NonNull Integer, @NonNull Predicate<@NonNull Multimap<@NonNull String, @NonNull String>>> predicates = new HashMap<>();
+        Multimap<@NonNull Integer, @NonNull String> regexesMap = DataProviderParameterUtils.extractRegexFilter(parameters);
+        if (regexesMap != null) {
+            predicates.putAll(computeRegexPredicate(regexesMap));
         }
 
         List<@NonNull ITimeGraphRowModel> rows = new ArrayList<>();
@@ -150,7 +142,7 @@ public class RosConnectionsDataProvider extends AbstractTimeGraphDataProvider<@N
                 if (valObject instanceof String) {
                     String name = (String) valObject;
                     TimeGraphState value = new TimeGraphState(startTime, duration, 0, name);
-                    addToStateList(eventList, value, entry.getKey(), predicates, monitor);
+                    applyFilterAndAddState(eventList, value, entry.getKey(), predicates, monitor);
                 }
             }
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));

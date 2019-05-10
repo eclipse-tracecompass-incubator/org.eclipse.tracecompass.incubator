@@ -36,11 +36,13 @@
     <module>org.eclipse.tracecompass.incubator.kernel.core</module>
     <module>org.eclipse.tracecompass.incubator.kernel.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.kernel.ui</module>
-    <module>org.eclipse.tracecompass.incubator.global.filters</module>
-    <module>org.eclipse.tracecompass.incubator.global.filters.ui</module>
     <module>org.eclipse.tracecompass.incubator.eventfieldcount</module>
     <module>org.eclipse.tracecompass.incubator.eventfieldcount.core</module>
     <module>org.eclipse.tracecompass.incubator.eventfieldcount.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.filters</module>
+    <module>org.eclipse.tracecompass.incubator.filters.core</module>
+    <module>org.eclipse.tracecompass.incubator.filters.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.filters.ui</module>
     <!-- insert modules here -->
   </modules>
 

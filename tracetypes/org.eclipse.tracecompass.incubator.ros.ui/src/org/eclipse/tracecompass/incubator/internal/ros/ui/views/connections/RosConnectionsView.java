@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.ui.views.connections;
 
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.tracecompass.incubator.internal.ros.core.analysis.connections.RosConnectionsDataProvider;
 import org.eclipse.tracecompass.incubator.internal.ros.ui.views.AbstractRosView;
 
@@ -27,6 +28,11 @@ public class RosConnectionsView extends AbstractRosView {
      */
     public RosConnectionsView() {
         super(ID_SUFFIX, new RosConnectionsPresentationProvider(), RosConnectionsDataProvider.getFullDataProviderId());
+    }
+
+    @Override
+    protected void fillLocalToolBar(IToolBarManager manager) {
+        super.fillLocalToolBar(manager);
     }
 
     /**

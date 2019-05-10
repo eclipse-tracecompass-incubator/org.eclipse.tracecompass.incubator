@@ -19,6 +19,7 @@ import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.StateSystemBuilderUtils;
 import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
+import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -141,14 +142,13 @@ public class RosQueuesStateProvider extends AbstractRosStateProvider {
                 }
 
                 // Pop from publisher queue
-                int pubQueueQuark = ss.getQuarkAbsoluteAndAdd(nodeName, PUBLISHERS_LIST, topicName, QUEUE);
+                int topicQuark = ss.getQuarkAbsolute(nodeName, PUBLISHERS_LIST, topicName);
+                int pubQueueQuark = ss.getQuarkRelativeAndAdd(topicQuark, QUEUE);
                 StateSystemUtils.queuePollAttribute(ss, timestamp, pubQueueQuark);
 
                 if (isSubLinkDrop) {
                     // Add drop to the publisher's drops
-                    int pubDropsQuark = ss.getQuarkAbsoluteAndAdd(nodeName, PUBLISHERS_LIST, topicName, DROPS);
-                    ss.modifyAttribute(timestamp - 1, msgRef, pubDropsQuark);
-                    ss.modifyAttribute(timestamp, (Object) null, pubDropsQuark);
+                    markDroppedMsg(ss, timestamp, topicQuark, msgRef);
                 }
 
                 return;
@@ -179,15 +179,13 @@ public class RosQueuesStateProvider extends AbstractRosStateProvider {
                 String topicName = (String) getField(event, fLayout.fieldTopic());
                 Long msgRef = (Long) getField(event, fLayout.fieldMsgRef());
 
-                int subsListQuark = ss.getQuarkAbsolute(nodeName, SUBSCRIBERS_LIST);
+                int topicQuark = ss.getQuarkAbsolute(nodeName, SUBSCRIBERS_LIST, topicName);
 
                 // Add drop to the subscriber's drops
-                int subDropsQuark = ss.getQuarkRelative(subsListQuark, topicName, DROPS);
-                ss.modifyAttribute(timestamp - 1, msgRef, subDropsQuark);
-                ss.modifyAttribute(timestamp, (Object) null, subDropsQuark);
+                markDroppedMsg(ss, timestamp, topicQuark, msgRef);
 
                 // Pop from subscriber queue
-                int subQueueQuark = ss.getQuarkRelative(subsListQuark, topicName, QUEUE);
+                int subQueueQuark = ss.getQuarkRelative(topicQuark, QUEUE);
                 StateSystemUtils.queuePollAttribute(ss, timestamp, subQueueQuark);
 
                 return;
@@ -260,6 +258,21 @@ public class RosQueuesStateProvider extends AbstractRosStateProvider {
             }
         } catch (AttributeNotFoundException e) {
             Activator.getInstance().logError("Could not get queue quark; there may be missing events: ", e); //$NON-NLS-1$
+        } catch (StateSystemDisposedException e) {
+            Activator.getInstance().logError("Error querying statesystem: ", e); //$NON-NLS-1$
         }
+    }
+
+    /**
+     * Mark a message as dropped. To make it clearly visible, the dropped state
+     * duration will match that of the dropped message in the queue.
+     */
+    private static void markDroppedMsg(ITmfStateSystemBuilder ss, long timestamp, int topicQuark, Long msgRef) throws StateSystemDisposedException {
+        // Get start time of the last state before getting dropped
+        int queueQuark = ss.getQuarkRelativeAndAdd(topicQuark, QUEUE, "1"); //$NON-NLS-1$
+        long droppedMsgStartTime = ss.querySingleState(timestamp - 1, queueQuark).getStartTime();
+        int dropsQuark = ss.getQuarkRelativeAndAdd(topicQuark, DROPS);
+        ss.modifyAttribute(droppedMsgStartTime, msgRef, dropsQuark);
+        ss.modifyAttribute(timestamp, (Object) null, dropsQuark);
     }
 }

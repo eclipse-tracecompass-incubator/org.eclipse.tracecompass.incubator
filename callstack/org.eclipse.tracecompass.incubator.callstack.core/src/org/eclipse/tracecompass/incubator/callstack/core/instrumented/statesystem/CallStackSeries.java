@@ -164,7 +164,7 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
                     break;
                 case STRING:
                     try {
-                        Integer.valueOf(interval.getStateValue().unboxStr());
+                        tid = Integer.valueOf(interval.getStateValue().unboxStr());
                     } catch (NumberFormatException e) {
                         tid = IHostModel.UNKNOWN_TID;
                     }

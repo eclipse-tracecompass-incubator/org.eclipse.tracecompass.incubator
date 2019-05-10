@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.ui.views.connections;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,11 +38,15 @@ public class RosConnectionsPresentationProvider extends AbstractRosPresentationP
 
     @Override
     public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event) {
+        String label = event.getLabel();
+        if (label == null) {
+            return Collections.emptyMap();
+        }
         ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<>();
         String channelType = event.getEntry().getParent().getParent().getName();
         String connectionName = event.getEntry().getParent().getName();
         String nodeName = event.getEntry().getParent().getParent().getParent().getName();
-        Pair<String, String> localRemoteHost = getLocalAndRemoteHosts(event.getLabel());
+        Pair<String, String> localRemoteHost = getLocalAndRemoteHosts(label);
         builder.put(Messages.AbstractRosPresentationProvider_ConnectionChannelType, channelType);
         builder.put(Messages.AbstractRosPresentationProvider_ConnectionName, connectionName);
         builder.put(Messages.AbstractRosPresentationProvider_NodeName, nodeName);

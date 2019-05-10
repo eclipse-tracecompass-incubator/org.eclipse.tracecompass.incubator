@@ -45,16 +45,28 @@
    <feature url="features/org.eclipse.tracecompass.incubator.eventfieldcount_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.eventfieldcount" version="0.0.1.qualifier">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.filters_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.filters" version="0.0.1.qualifier">
+      <category name="utilities"/>
+   </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.1.qualifier">
       <category name="analyses"/>
    </bundle>
-   <bundle id="javax.ws.rs"/>
+   <bundle id="javax.ws.rs" />
+   <bundle id="org.eclipse.lsp4j" />
+   <bundle id="org.eclipse.lsp4j.jsonrpc" />
+   <bundle id="org.eclipse.xtext.xbase.lib" />
+   <bundle id="org.apache.commons.lang" />
    <category-def name="trace-types" label="Trace Types"/>
    <category-def name="virtualization" label="Virtualization"/>
    <category-def name="analyses" label="Analyses"/>
    <category-def name="callstack" label="Call Stack analyses">
       <description>
          Contains feature related to call stack data, stack traces, sampling, etc.
+      </description>
+   </category-def>
+   <category-def name="utilities" label="Utilities">
+      <description>
+         Additional functionalities for Trace Compass
       </description>
    </category-def>
 </site>

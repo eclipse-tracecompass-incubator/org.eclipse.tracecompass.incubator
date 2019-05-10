@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.ui.views.queues;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +48,7 @@ public class RosQueuesPresentationProvider extends AbstractRosPresentationProvid
     public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event) {
         String label = event.getLabel();
         if (label == null) {
-            return null;
+            return Collections.emptyMap();
         }
         ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<>();
         String entryName = event.getEntry().getName();

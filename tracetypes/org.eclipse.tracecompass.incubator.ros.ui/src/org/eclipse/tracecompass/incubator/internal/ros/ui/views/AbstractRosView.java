@@ -16,6 +16,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.tracecompass.incubator.internal.ros.ui.Activator;
+import org.eclipse.tracecompass.incubator.internal.ros.ui.actions.HideRosoutAction;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.ui.IWorkbenchActionConstants;

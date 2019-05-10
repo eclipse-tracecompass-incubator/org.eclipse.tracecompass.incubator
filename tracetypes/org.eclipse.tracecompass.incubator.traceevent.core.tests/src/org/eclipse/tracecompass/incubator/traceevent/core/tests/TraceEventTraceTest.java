@@ -200,6 +200,10 @@ public class TraceEventTraceTest {
             IStatus validate = trace.validate(null, path);
             assertTrue(validate.getMessage(), validate.isOK());
             trace.initTrace(null, path, ITmfEvent.class);
+            // Make sure start and end time have been set at this point to timestamp of first event
+            assertEquals(startTime, trace.getStartTime());
+            assertEquals(startTime, trace.getEndTime());
+
             ITmfContext context = trace.seekEvent(0.0);
             ITmfEvent event = trace.getNext(context);
             long count = 0;

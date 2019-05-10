@@ -30,7 +30,7 @@ public class TraceEventCallstackAnalysis extends InstrumentedCallStackAnalysis {
     /**
      * ID
      */
-    public static final String ID = "org.eclipse.tracecompass.incubator.traceevent.analysis.callstack"; //$NON-NLS-1$
+    public static final @NonNull String ID = "org.eclipse.tracecompass.incubator.traceevent.analysis.callstack"; //$NON-NLS-1$
 
 //    private @Nullable Set<@NonNull TmfAbstractAnalysisRequirement> fAnalysisRequirements = null;
 
