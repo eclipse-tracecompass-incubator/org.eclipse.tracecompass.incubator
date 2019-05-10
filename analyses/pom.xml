@@ -44,6 +44,7 @@
     <module>org.eclipse.tracecompass.incubator.filters.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.filters.ui</module>
     <module>org.eclipse.tracecompass.incubator.scripting</module>
+    <module>org.eclipse.tracecompass.incubator.scripting.javascript</module>
     <module>org.eclipse.tracecompass.incubator.scripting.core</module>
     <module>org.eclipse.tracecompass.incubator.scripting.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.scripting.ui</module>

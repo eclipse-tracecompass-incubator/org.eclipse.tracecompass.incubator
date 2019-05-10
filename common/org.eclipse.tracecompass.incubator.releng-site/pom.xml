@@ -40,6 +40,11 @@
       <configuration>
         <removeDefaultCategory>true</removeDefaultCategory>
         <skipWebContentGeneration>true</skipWebContentGeneration>
+        <associateSites>
+           <site>https://download.eclipse.org/webtools/downloads/drops/R3.13.0/I-latest/repository/</site>
+           <site>http://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository/</site>
+           <site>http://download.eclipse.org/ease/update/release</site>
+        </associateSites>
         <skipBuildInfo>true</skipBuildInfo>
       </configuration>
     </plugin>

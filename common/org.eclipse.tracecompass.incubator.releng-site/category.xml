@@ -3,59 +3,65 @@
    <description>
       Nightly builds of Trace Compass project.
    </description>
-   <feature url="features/org.eclipse.tracecompass.incubator.traceevent_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.traceevent" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.traceevent_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.traceevent" version="0.0.0">
       <category name="trace-types"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.virtual.machine.analysis_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.virtual.machine.analysis" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.virtual.machine.analysis_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.virtual.machine.analysis" version="0.0.0">
       <category name="virtualization"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.callstack_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.callstack" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.callstack_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.callstack" version="0.0.0">
       <category name="callstack"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.perf.profiling_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.perf.profiling" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.perf.profiling_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.perf.profiling" version="0.0.0">
       <category name="trace-types"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.uftrace_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.uftrace" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.uftrace_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.uftrace" version="0.0.0">
       <category name="trace-types"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.contextswitch_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.contextswitch" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.contextswitch_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.contextswitch" version="0.0.0">
       <category name="analyses"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.lttng2.ust.extras_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.lttng2.ust.extras" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.lttng2.ust.extras_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.lttng2.ust.extras" version="0.0.0">
       <category name="analyses"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.tracecompass_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.tracecompass" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.tracecompass_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.tracecompass" version="0.0.0">
       <category name="trace-types"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.atrace_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.atrace" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.atrace_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.atrace" version="0.0.0">
       <category name="trace-types"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.ftrace_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.ftrace" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.ftrace_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.ftrace" version="0.0.0">
       <category name="trace-types"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.hudson.maven_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.hudson.maven" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.hudson.maven_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.hudson.maven" version="0.0.0">
       <category name="trace-types"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.opentracing_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.opentracing" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.opentracing_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.opentracing" version="0.0.0">
       <category name="trace-types"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.kernel_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.kernel" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.kernel_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.kernel" version="0.0.0">
       <category name="analyses"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.eventfieldcount_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.eventfieldcount" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.eventfieldcount_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.eventfieldcount" version="0.0.0">
       <category name="analyses"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.filters_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.filters" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.filters_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.filters" version="0.0.0">
       <category name="utilities"/>
    </feature>
-   <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.scripting_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.scripting" version="0.0.0">
+      <category name="analyses"/>
+   </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.scripting.javascript_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.scripting.javascript" version="0.0.0">
+      <category name="analyses"/>
+   </feature>
+   <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.0">
       <category name="analyses"/>
    </bundle>
-   <bundle id="javax.ws.rs" />
-   <bundle id="org.eclipse.lsp4j" />
-   <bundle id="org.eclipse.lsp4j.jsonrpc" />
-   <bundle id="org.eclipse.xtext.xbase.lib" />
-   <bundle id="org.apache.commons.lang" />
+   <bundle id="javax.ws.rs"/>
+   <bundle id="org.eclipse.lsp4j"/>
+   <bundle id="org.eclipse.lsp4j.jsonrpc"/>
+   <bundle id="org.eclipse.xtext.xbase.lib"/>
+   <bundle id="org.apache.commons.lang"/>
    <category-def name="trace-types" label="Trace Types"/>
    <category-def name="virtualization" label="Virtualization"/>
    <category-def name="analyses" label="Analyses"/>
