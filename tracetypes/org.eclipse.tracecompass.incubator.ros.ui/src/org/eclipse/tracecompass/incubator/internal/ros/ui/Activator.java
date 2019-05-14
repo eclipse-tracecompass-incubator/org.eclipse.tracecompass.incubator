@@ -59,7 +59,7 @@ public class Activator extends AbstractUIPlugin {
      *            The path to the image file
      * @return The ImageDescriptor object
      */
-    public ImageDescriptor getImageDescripterFromPath(String path) {
+    public @Nullable ImageDescriptor getImageDescripterFromPath(String path) {
         return AbstractUIPlugin.imageDescriptorFromPlugin(PLUGIN_ID, path);
     }
 }

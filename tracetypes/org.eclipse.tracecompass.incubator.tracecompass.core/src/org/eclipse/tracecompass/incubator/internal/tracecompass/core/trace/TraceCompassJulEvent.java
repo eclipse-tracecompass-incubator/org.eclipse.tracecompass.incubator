@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.internal.tracecompass.core.trace;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -87,7 +88,7 @@ public class TraceCompassJulEvent extends CtfTmfEvent {
 
             String msg = (String) field.getValue();
             List<ITmfEventField> fields = new ArrayList<>();
-            baseContent.getFields().stream().forEach(t -> fields.add(t));
+            baseContent.getFields().stream().forEach(t -> fields.add(Objects.requireNonNull(t)));
             try {
                 JSONObject root = new JSONObject(msg);
                 char phase = root.optString("ph", "i").charAt(0); //$NON-NLS-1$ //$NON-NLS-2$
