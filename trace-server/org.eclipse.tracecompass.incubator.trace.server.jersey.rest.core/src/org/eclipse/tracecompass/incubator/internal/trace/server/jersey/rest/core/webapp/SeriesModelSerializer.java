@@ -42,8 +42,8 @@ public class SeriesModelSerializer extends StdSerializer<@NonNull ISeriesModel> 
         gen.writeStartObject();
         gen.writeNumberField("id", value.getId()); //$NON-NLS-1$
         gen.writeStringField("name", value.getName()); //$NON-NLS-1$
-        gen.writeObjectField("xValues", value.getXValues()); //$NON-NLS-1$
-        gen.writeObjectField("yValues", value.getYValues()); //$NON-NLS-1$
+        gen.writeObjectField("xValues", value.getXAxis()); //$NON-NLS-1$
+        gen.writeObjectField("yValues", value.getData()); //$NON-NLS-1$
         gen.writeEndObject();
     }
 

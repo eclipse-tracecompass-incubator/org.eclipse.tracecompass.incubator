@@ -26,6 +26,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.junit.Test;
 
@@ -71,7 +72,7 @@ public class DataProviderServiceTest extends RestServerTest {
         assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
 
         parameters = new HashMap<>();
-        parameters.put("timeRequested", Collections.emptyList());
+        parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, Collections.emptyList());
         Response defaults = callstackTree.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())));
         assertEquals("Default values should return OK code", 200, defaults.getStatus());
     }

@@ -33,6 +33,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
@@ -82,7 +83,7 @@ public class XmlManagerServiceTest extends RestServerTest {
 
         WebTarget xmlProviderPath = getXYTreeEndpoint(CONTEXT_SWITCHES_KERNEL_UUID.toString(), "org.eclipse.linuxtools.tmf.analysis.xml.core.tests.xy");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("timeRequested", Collections.emptyList());
+        parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, Collections.emptyList());
         Response xmlTree = xmlProviderPath.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())));
         assertEquals("The end point for the XML data provider should be available.", 200, xmlTree.getStatus());
 
