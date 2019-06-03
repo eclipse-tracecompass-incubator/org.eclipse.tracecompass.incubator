@@ -3,25 +3,55 @@
 
 This plugin adds support for scripting in Trace Compass. It uses the [https://www.eclipse.org/ease/ Eclipse EASE project] as the scripting framework. It supports python, javascript, ruby, groovy, among others.
 
-== Make it work ==
+The following image shows the Trace Compass EASE environment, with some comments on the various available scripting languages
 
-To have EASE scripting working, one needs to get the full source code of Trace Compass and the Incubator. Work is in progress to make it easier to use.
+[[Image:images/engines_and_modules.png | Engines and modules]]
 
-Follow the [https://wiki.eclipse.org/Trace_Compass/Development_Environment_Setup instructions to set up a Trace Compass environment] in Eclipse.
+== Install Trace Compass with EASE support ==
 
-You should use the incubator's target, in the ''org.eclipse.tracecompass.incubator.target'' plugin.
+To use Trace Compass Scripting modules, one needs to have the latest development snapshot of Trace Compass, or at least the stable 5.0 release.
 
-[[Image:images/incubator_target.png | Incubator Target]]
+The full installation procedure depends on the language one wishes to use for scripting. Here follows the details.
 
-''Tip: The target is very sensitive. If you have thousands of errors after setting the incubator target, you can to set any of the Trace Compass target, wait for it to be loaded and set, then come back to the incubator target, if often fixes the problem''
+=== Javascript ===
 
-Then run Trace Compass as per the instructions. If Ease scripting does not seem to be available, make sure ''all workspace and enabled target plugin-ins'' is selected in the Plug-in of the Run configuration ('''Run''' -> '''Run Configurations...''').
+For Javascript, the feature is available through the '''Tools''' -> '''Add-ons...''' under the ''Analyses'' category. You can search for the '''Trace Compass Scripting Javascript (Incubation)''' feature and click ``Finish``.
+
+[[Image:images/javascript_feature.png | Javascript feature]]
+
+It will automatically install the required '''Trace Compass Scripting (Incubation)''' feature and all related features to edit and execute javascript with EASE.
+
+After Trace Compass restart, the feature will be available.
+
+=== Others ===
+
+For any other language, there is some additional steps to install the full support.
+
+First, you need to install the '''Trace Compass Scripting (Incubation)''' feature of Trace Compass through the '''Tools''' -> '''Add-ons'''.
+
+[[Image:images/scripting_feature.png | Scripting feature]]
+
+Then, for each language, one needs to install 2 components:
+
+* The EASE language support for the desired language
+
+* Optionally, an editor to edit the scripts.
+
+Here is the EASE page describing [https://wiki.eclipse.org/EASE/Engines the supported engines/editors]
+
+To install the EASE language support, go to the '''Help''' -> '''Install New Software...''' menu. From the list of available update site, select the ''ease'' update site. It should be already available after installing the Trace Compass feature. In case it is not, you can add it using the following link [http://download.eclipse.org/ease/update/release].
+
+[[Image:images/install_new_software.png | Install New Software]]
+
+Then under the '''EASE Language Support''' category, select the appropriate feature. There are some duplicates, you should look at the Version of the feature, it should be the latest one (0.6.0.x). For instance, to add ''python'' support, you need to select the '''EASE Py4J Support (Incubation)'''. Then complete the installation.
+
+[[Image:images/py4j_feature.png | Py4J Feature Installation]]
+
+If an editor is not installed, the script files will be opened in an external text editor instead of in Trace Compass. That may be sufficient for small scripts, but having code completion, etc can be handy too. Follow the links in the [https://wiki.eclipse.org/EASE/Engines the supported engines/editors page] for the appropriate engine and follow the instructions to install its editor in Eclipse. They are external tools and sometimes, IDEs of their own, so they might add a lot of content and dependencies to Trace Compass.
 
 == Create and execute a script ==
 
 Trace Compass scripts are not associated with a trace or trace type, do not integrate well with the analysis framework, so you will not see any scripted views under a trace. A script needs to be run manually for each trace and it will run on the currently active trace.
-
-For now, '''only Javascript''' is known to work. Other languages require to install additional packages ang engines.
 
 Anywhere in Trace Compass workspace, you can create a script file. For example, right-click on a project, the select '''New''' -> '''File''' and name it <some-file-name>.js.
 
@@ -125,3 +155,5 @@ if (provider != null) {
 print("Done");
 
 </pre>
+
+Other script examples can be found in the git tree of the Trace Compass Incubator here [https://git.eclipse.org/c/tracecompass.incubator/org.eclipse.tracecompass.incubator.git/tree/analyses/org.eclipse.tracecompass.incubator.scripting.core.tests/testfiles/scripts]
