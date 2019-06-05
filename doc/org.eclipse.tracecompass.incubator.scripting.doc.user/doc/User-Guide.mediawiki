@@ -27,6 +27,18 @@ It will automatically install the required '''Trace Compass Scripting (Incubatio
 
 After Trace Compass restart, the feature will be available.
 
+=== Python ===
+
+For Python, the feature is also available through the '''Tools''' -> '''Add-ons...''' under the ''Analyses'' category. You can search for the '''Trace Compass Scripting Python (Incubation)''' feature and click ``Finish``.
+
+[[Image:images/python_feature.png | Python feature]]
+
+It will automatically install the required '''Trace Compass Scripting (Incubation)''' feature and all related features to execute python with EASE.
+
+After Trace Compass restart, the feature will be available.
+
+This feature does not come with any python code editors, so the python code file won't have code completion or syntax highlighting directly in Trace Compass. But an editor can be installed separately. One such editor is [http://www.pydev.org PyDev], which can be [http://www.pydev.org/manual_101_install.html installed as an Eclipse plugin].
+
 === Others ===
 
 For any other language, there is some additional steps to install the full support.
@@ -47,9 +59,9 @@ To install the EASE language support, go to the '''Help''' -> '''Install New Sof
 
 [[Image:images/install_new_software.png | Install New Software]]
 
-Then under the '''EASE Language Support''' category, select the appropriate feature. There are some duplicates, you should look at the Version of the feature, it should be the latest one (0.6.0.x). For instance, to add ''python'' support, you need to select the '''EASE Py4J Support (Incubation)'''. Then complete the installation.
+Then under the '''EASE Language Support''' category, select the appropriate feature. There are some duplicates, you should look at the Version of the feature, it should be the latest one (0.6.0.x). For instance, to add ''groovy'' support, you need to select the '''EASE Groovy Support (Incubation)'''. Then complete the installation.
 
-[[Image:images/py4j_feature.png | Py4J Feature Installation]]
+[[Image:images/other_ease_feature.png | Groovy Feature Installation]]
 
 If an editor is not installed, the script files will be opened in an external text editor instead of in Trace Compass. That may be sufficient for small scripts, but having code completion, etc can be handy too. Follow the links in the [https://wiki.eclipse.org/EASE/Engines the supported engines/editors page] for the appropriate engine and follow the instructions to install its editor in Eclipse. They are external tools and sometimes, IDEs of their own, so they might add a lot of content and dependencies to Trace Compass.
 
