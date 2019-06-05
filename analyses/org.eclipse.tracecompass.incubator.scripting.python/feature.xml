@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.tracecompass.incubator.scripting.python"
+      label="%featureName"
+      version="0.0.1.qualifier"
+      provider-name="%featureProvider"
+      license-feature="org.eclipse.license"
+      license-feature-version="0.0.0">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <includes
+         id="org.eclipse.tracecompass.incubator.scripting"
+         version="0.0.0"/>
+
+   <requires>
+      <import feature="org.eclipse.ease.lang.python.py4j.feature" version="0.6.0.I201801120620"/>
+   </requires>
+
+</feature>
