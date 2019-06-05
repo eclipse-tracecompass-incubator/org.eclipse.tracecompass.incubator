@@ -28,7 +28,7 @@
     <module>org.eclipse.tracecompass.incubator.trace.server.jersey.rest</module>
     <module>org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core</module>
     <module>org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests</module>
-    <!--module>org.eclipse.tracecompass.incubator.trace.server.product</module-->    
+    <module>org.eclipse.tracecompass.incubator.trace.server.product</module>
     <!-- insert modules here -->
   </modules>
 

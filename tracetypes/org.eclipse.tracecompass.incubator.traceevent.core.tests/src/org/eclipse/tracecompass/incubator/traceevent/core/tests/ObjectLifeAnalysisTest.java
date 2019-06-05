@@ -21,12 +21,15 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.objectlife.ObjectLifeAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.objectlife.ObjectLifeDataProvider;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
+import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse.Status;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
@@ -102,15 +105,15 @@ public class ObjectLifeAnalysisTest {
     @Test
     @SuppressWarnings("restriction")
     public void test() {
-        TmfModelResponse<@NonNull List<@NonNull TimeGraphEntryModel>> tree = fDataProvider.fetchTree(new TimeQueryFilter(fStart, fEnd, 1000), new NullProgressMonitor());
+        TmfModelResponse<@NonNull TmfTreeModel<@NonNull TimeGraphEntryModel>> tree = fDataProvider.fetchTree(FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(fStart, fEnd, 1000)), new NullProgressMonitor());
         assertEquals(Status.COMPLETED, tree.getStatus());
-        List<@NonNull TimeGraphEntryModel> treeModel = tree.getModel();
+        TmfTreeModel<@NonNull TimeGraphEntryModel> treeModel = tree.getModel();
         assertNotNull(treeModel);
 
-        TimeGraphEntryModel mufasaEntry = getValueEntry(treeModel, "Mufasa");
-        TimeGraphEntryModel sarabiEntry = getValueEntry(treeModel, "Sarabi");
-        TimeGraphEntryModel scarEntry = getValueEntry(treeModel, "Scar");
-        TimeGraphEntryModel simbaEntry = getValueEntry(treeModel, "Simba");
+        TimeGraphEntryModel mufasaEntry = getValueEntry(treeModel.getEntries(), "Mufasa");
+        TimeGraphEntryModel sarabiEntry = getValueEntry(treeModel.getEntries(), "Sarabi");
+        TimeGraphEntryModel scarEntry = getValueEntry(treeModel.getEntries(), "Scar");
+        TimeGraphEntryModel simbaEntry = getValueEntry(treeModel.getEntries(), "Simba");
         assertNotNull(mufasaEntry);
         assertNotNull(sarabiEntry);
         assertNotNull(scarEntry);
@@ -120,25 +123,26 @@ public class ObjectLifeAnalysisTest {
          * Remember, state system is in nanos, time range is known since we know the
          * trace
          */
-        TmfModelResponse<@NonNull List<@NonNull ITimeGraphRowModel>> resp = fDataProvider.fetchRowModel(new SelectionTimeQueryFilter(100000L, 300000L, 200, items), new NullProgressMonitor());
+        TmfModelResponse<@NonNull TimeGraphModel> resp = fDataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(100000L, 300000L, 200, items)), new NullProgressMonitor());
         assertEquals(Status.COMPLETED, resp.getStatus());
-        List<@NonNull ITimeGraphRowModel> models = resp.getModel();
-        assertNotNull(models);
-        ImmutableMap<Long, @NonNull ITimeGraphRowModel> groupRowsById = Maps.uniqueIndex(models, ITimeGraphRowModel::getEntryID);
+        TimeGraphModel model = resp.getModel();
+        assertNotNull(model);
+        List<@NonNull ITimeGraphRowModel> modelRows = model.getRows();
+        ImmutableMap<Long, @NonNull ITimeGraphRowModel> groupRowsById = Maps.uniqueIndex(modelRows, ITimeGraphRowModel::getEntryID);
         ITimeGraphRowModel mufasaRow = groupRowsById.get(mufasaEntry.getId());
         assertNotNull(mufasaRow);
         assertEquals("", mufasaRow.getStates().get(0).getLabel());
         assertEquals(null, mufasaRow.getStates().get(1).getLabel());
-        ITimeGraphRowModel sarabiRow = models.get(1);
+        ITimeGraphRowModel sarabiRow = modelRows.get(1);
         assertNotNull(sarabiRow);
         assertEquals(null, sarabiRow.getStates().get(0).getLabel());
         assertEquals("", sarabiRow.getStates().get(1).getLabel());
         assertEquals(null, sarabiRow.getStates().get(2).getLabel());
-        ITimeGraphRowModel scarRow = models.get(2);
+        ITimeGraphRowModel scarRow = modelRows.get(2);
         assertNotNull(scarRow); // The bad guy
         assertEquals(null, scarRow.getStates().get(0).getLabel());
         assertEquals("", scarRow.getStates().get(1).getLabel());
-        ITimeGraphRowModel simbaRow = models.get(3);
+        ITimeGraphRowModel simbaRow = modelRows.get(3);
         assertNotNull(simbaRow);
         assertEquals(null, simbaRow.getStates().get(0).getLabel());
         assertEquals("", simbaRow.getStates().get(1).getLabel());

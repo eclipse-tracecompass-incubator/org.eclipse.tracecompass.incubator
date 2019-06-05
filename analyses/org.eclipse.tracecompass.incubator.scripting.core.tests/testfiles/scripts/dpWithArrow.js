@@ -177,13 +177,13 @@ function prepareTimeGraph() {
 prepareTimeGraph();
 
 // A function used to return the entries to the data provider. It receives the filter in parameter, which contains the requested time range and any additional information
-function getEntries(filter) {
+function getEntries(parameters) {
 	// The list is static once built, return all entries
 	return tgEntries.getList();
 }
 
 // A function used to return the arrows to the data provider. It receives the filter in parameter, which contains the requested time range and any additional information
-function getArrows(filter) {
+function getArrows(parameters) {
 	// Just return all the arrows, the view will take those in the range
 	return tgArrows.getList();
 }

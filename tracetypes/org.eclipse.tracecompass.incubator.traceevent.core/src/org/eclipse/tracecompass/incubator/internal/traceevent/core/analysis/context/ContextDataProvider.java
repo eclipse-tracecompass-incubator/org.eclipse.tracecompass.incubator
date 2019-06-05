@@ -21,6 +21,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
@@ -28,11 +29,12 @@ import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse.Status;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -119,24 +121,39 @@ public class ContextDataProvider extends AbstractTimeGraphDataProvider<@NonNull 
         return true;
     }
 
+    @Deprecated
     @Override
     public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
+        return fetchArrows(parameters, monitor);
+    }
+
+    @Override
+    public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         return new TmfModelResponse<>(null, Status.COMPLETED, "Not supported"); //$NON-NLS-1$
     }
 
+    @Deprecated
     @Override
     public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
+        return fetchTooltip(parameters, monitor);
+    }
+
+    @Override
+    public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         return new TmfModelResponse<>(null, Status.COMPLETED, "Not supported"); //$NON-NLS-1$
     }
 
     @Override
-    protected @Nullable List<@NonNull ITimeGraphRowModel> getRowModel(@NonNull ITmfStateSystem ss, @NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
+    protected @Nullable TimeGraphModel getRowModel(@NonNull ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
         /*
          * Order is not important here
          */
         Map<Integer, String[]> paths = new HashMap<>();
         List<ITimeGraphState> markerList = new ArrayList<>();
 
+        SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(parameters);
         Collection<Long> times = getTimes(filter, ss.getStartTime(), ss.getCurrentEndTime());
         Set<Integer> quarks = new HashSet<>();
         Map<@NonNull Long, @NonNull Integer> selectedEntries = getSelectedEntries(filter);
@@ -150,7 +167,7 @@ public class ContextDataProvider extends AbstractTimeGraphDataProvider<@NonNull 
         /* Do the actual query */
         for (ITmfStateInterval interval : ss.query2D(quarks, times)) {
             if (monitor != null && monitor.isCanceled()) {
-                return Collections.emptyList();
+                return new TimeGraphModel(Collections.emptyList());
             }
             if (interval.getValue() instanceof Integer) {
                 long startTime = interval.getStartTime();
@@ -161,21 +178,21 @@ public class ContextDataProvider extends AbstractTimeGraphDataProvider<@NonNull 
         }
 
         if (monitor != null && monitor.isCanceled()) {
-            return Collections.emptyList();
+            return new TimeGraphModel(Collections.emptyList());
         }
-        return Collections.singletonList(new TimeGraphRowModel(getId(ITmfStateSystem.ROOT_ATTRIBUTE), markerList));
+        return new TimeGraphModel(Collections.singletonList(new TimeGraphRowModel(getId(ITmfStateSystem.ROOT_ATTRIBUTE), markerList)));
     }
 
     @Override
-    protected @NonNull List<@NonNull TimeGraphEntryModel> getTree(@NonNull ITmfStateSystem ss, @NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
+    protected TmfTreeModel<@NonNull TimeGraphEntryModel> getTree(@NonNull ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
         long rootId = getId(ITmfStateSystem.ROOT_ATTRIBUTE);
         List<@NonNull Integer> attribs = ss.getSubAttributes(ITmfStateSystem.ROOT_ATTRIBUTE, false);
         List<@NonNull TimeGraphEntryModel> retVal = new ArrayList<>();
         for (Integer attrib : attribs) {
             String[] strings = ss.getFullAttributePathArray(attrib);
-            retVal.add(new TimeGraphEntryModel(getId(attrib), rootId, strings[0], ss.getStartTime(), ss.getCurrentEndTime()));
+            retVal.add(new TimeGraphEntryModel(getId(attrib), rootId, Collections.singletonList(strings[0]), ss.getStartTime(), ss.getCurrentEndTime()));
         }
-        return retVal;
+        return new TmfTreeModel<>(Collections.emptyList(), retVal);
     }
 
 }

@@ -53,8 +53,9 @@ public class ExperimentModelStub extends AbstractModelStub {
             @JsonProperty("nbEvents") long nbEvents,
             @JsonProperty("start") long start,
             @JsonProperty("end") long end,
+            @JsonProperty("indexingStatus") String indexingStatus,
             @JsonProperty("traces") Set<TraceModelStub> traces) {
-        super(name, uuid, nbEvents, start, end);
+        super(name, uuid, nbEvents, start, end, indexingStatus);
         fTraces = traces;
     }
 

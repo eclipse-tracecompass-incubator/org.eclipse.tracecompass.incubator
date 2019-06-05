@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -63,7 +64,7 @@ public class FlameChartEntryModel extends TimeGraphEntryModel {
      * @param entryType
      *            The type of this entry
      */
-    public FlameChartEntryModel(long id, long parentId, String name, long startTime, long endTime, EntryType entryType) {
+    public FlameChartEntryModel(long id, long parentId, List<String> name, long startTime, long endTime, EntryType entryType) {
         super(id, parentId, name, startTime, endTime);
         fEntryType = entryType;
         fDepth = -1;
@@ -87,7 +88,7 @@ public class FlameChartEntryModel extends TimeGraphEntryModel {
      * @param depth
      *            entry's PID or TID if is a thread
      */
-    public FlameChartEntryModel(long elementId, long parentId, String name, long startTime, long endTime, EntryType entryType, int depth) {
+    public FlameChartEntryModel(long elementId, long parentId, List<String> name, long startTime, long endTime, EntryType entryType, int depth) {
         super(elementId, parentId, name, startTime, endTime);
         fEntryType = entryType;
         fDepth = depth;

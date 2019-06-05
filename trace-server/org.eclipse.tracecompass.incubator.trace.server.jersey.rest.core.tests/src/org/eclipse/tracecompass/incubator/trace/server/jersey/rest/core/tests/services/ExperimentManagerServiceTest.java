@@ -38,7 +38,7 @@ public class ExperimentManagerServiceTest extends RestServerTest {
     private static final @NonNull String EXPERIMENT_UUID = "bb12687f-9866-3a9f-bf55-b4d9da0137ed";
     private static final @NonNull ImmutableSet<TraceModelStub> CONTEXT_SWITCH_SET = ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_STUB, CONTEXT_SWITCHES_UST_STUB);
     private static final ExperimentModelStub EXPECTED = new ExperimentModelStub(TEST,
-            UUID.fromString(EXPERIMENT_UUID), 0L, 0L, 0L, CONTEXT_SWITCH_SET);
+            UUID.fromString(EXPERIMENT_UUID), 0L, 0L, 0L, "RUNNING", CONTEXT_SWITCH_SET);
 
     /**
      * Basic test for the {@link ExperimentManagerService}

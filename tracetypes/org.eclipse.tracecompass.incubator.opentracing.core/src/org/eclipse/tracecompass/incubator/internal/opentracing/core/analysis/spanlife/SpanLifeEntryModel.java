@@ -86,7 +86,7 @@ public class SpanLifeEntryModel extends TimeGraphEntryModel {
      * @param processName
      *            process name
      */
-    public SpanLifeEntryModel(long id, long parentId, String name, long startTime, long endTime, List<LogEvent> logs, boolean errorTag, String processName) {
+    public SpanLifeEntryModel(long id, long parentId, List<String> name, long startTime, long endTime, List<LogEvent> logs, boolean errorTag, String processName) {
         super(id, parentId, name, startTime, endTime);
         fLogs = logs;
         fErrorTag = errorTag;

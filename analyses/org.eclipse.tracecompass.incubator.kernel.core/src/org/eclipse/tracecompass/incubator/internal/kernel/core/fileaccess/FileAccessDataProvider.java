@@ -20,9 +20,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -37,12 +37,13 @@ import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileEn
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.FileDescriptorStateProvider;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.ThreadEntryModel;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.TidTimeQueryFilter;
-import org.eclipse.tracecompass.internal.tmf.core.model.filters.TimeGraphStateQueryFilter;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
@@ -50,14 +51,16 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
-import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeMultimap;
@@ -97,8 +100,15 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         super(trace, analysisModule);
     }
 
+    @Deprecated
     @Override
     public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
+        return fetchArrows(parameters, monitor);
+    }
+
+    @Override
+    public TmfModelResponse<List<ITimeGraphArrow>> fetchArrows(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
@@ -108,7 +118,11 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
     }
 
     @Override
-    protected @Nullable List<ITimeGraphRowModel> getRowModel(ITmfStateSystem ss, SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
+    protected @Nullable TimeGraphModel getRowModel(ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
+        SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(parameters);
+        if (filter == null) {
+            return null;
+        }
         TreeMultimap<Integer, ITmfStateInterval> intervals = TreeMultimap.create(Comparator.naturalOrder(),
                 Comparator.comparing(ITmfStateInterval::getStartTime));
         Map<@NonNull Long, @NonNull Integer> entries = getSelectedEntries(filter);
@@ -116,19 +130,19 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         /* Do the actual query */
         for (ITmfStateInterval interval : ss.query2D(entries.values(), times)) {
             if (monitor != null && monitor.isCanceled()) {
-                return Collections.emptyList();
+                return new TimeGraphModel(Collections.emptyList());
             }
             intervals.put(interval.getAttribute(), interval);
         }
-        Map<@NonNull Integer, @NonNull Predicate<@NonNull Multimap<@NonNull String, @NonNull String>>> predicates = new HashMap<>();
-        if (filter instanceof TimeGraphStateQueryFilter) {
-            TimeGraphStateQueryFilter timeEventFilter = (TimeGraphStateQueryFilter) filter;
-            predicates.putAll(computeRegexPredicate(timeEventFilter));
+        Map<@NonNull Integer, @NonNull Predicate<@NonNull Multimap<@NonNull String, @NonNull Object>>> predicates = new HashMap<>();
+        Multimap<@NonNull Integer, @NonNull String> regexesMap = DataProviderParameterUtils.extractRegexFilter(parameters);
+        if (regexesMap != null) {
+            predicates.putAll(computeRegexPredicate(regexesMap));
         }
         List<@NonNull ITimeGraphRowModel> rows = new ArrayList<>();
         for (Map.Entry<@NonNull Long, @NonNull Integer> entry : entries.entrySet()) {
             if (monitor != null && monitor.isCanceled()) {
-                return Collections.emptyList();
+                return new TimeGraphModel(Collections.emptyList());
             }
 
             List<ITimeGraphState> eventList = new ArrayList<>();
@@ -162,7 +176,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));
 
         }
-        return rows;
+        return new TimeGraphModel(rows);
     }
 
     @Override
@@ -170,9 +184,20 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         return false;
     }
 
+    @Deprecated
     @Override
     public TmfModelResponse<Map<String, String>> fetchTooltip(SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
+        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
+        return fetchTooltip(parameters, monitor);
+    }
+
+    @Override
+    public TmfModelResponse<Map<String, String>> fetchTooltip(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         ITmfStateSystem ss = getAnalysisModule().getStateSystem();
+        SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(fetchParameters);
+        if (filter == null) {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.INCORRECT_QUERY_PARAMETERS);
+        }
         Collection<@NonNull Integer> quarks = getSelectedEntries(filter).values();
         Map<String, String> retMap = new LinkedHashMap<>();
 
@@ -183,8 +208,8 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         long start = filter.getStart();
         if (ss == null || quarks.size() != 1 || !getAnalysisModule().isQueryable(start)) {
             /*
-             * We need the ss to query, we should only be querying one attribute and the
-             * query times should be valid.
+             * We need the ss to query, we should only be querying one attribute
+             * and the query times should be valid.
              */
             return new TmfModelResponse<>(retMap, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
         }
@@ -198,7 +223,8 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
             }
             int parentQuark = ss.getParentAttributeQuark(quark);
             if (parentQuark == resQuark) {
-                // This is a file name, add the number of opened fd and full file name
+                // This is a file name, add the number of opened fd and full
+                // file name
                 String fileName = ss.getAttributeName(quark);
                 retMap.put("File Name", fileName); //$NON-NLS-1$
                 Object value = current.getValue();
@@ -230,8 +256,10 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
 
 
     @Override
-    protected List<TimeGraphEntryModel> getTree(ITmfStateSystem ss, TimeQueryFilter filter, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
+    protected TmfTreeModel<TimeGraphEntryModel> getTree(ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
         Collection<Integer> selectedTids = Collections.emptySet();
+        // TODO Why not SelectionTimeQueryFilter ?
+        TimeQueryFilter filter = FetchParametersUtils.createTimeQuery(parameters);
         if (filter instanceof TidTimeQueryFilter) {
             selectedTids = ((TidTimeQueryFilter) filter).getTids();
         }
@@ -245,7 +273,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
             Activator.getInstance().logError(e.getMessage(), e);
         }
 
-        return builder.build();
+        return new TmfTreeModel<>(Collections.emptyList(), builder.build());
     }
 
     private void addResources(ITmfStateSystem ss, Builder<@NonNull TimeGraphEntryModel> builder, int quark, long parentId, Collection<Integer> filter) {
@@ -368,8 +396,8 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
     }
 
     @Override
-    public @NonNull Multimap<@NonNull String, @NonNull String> getFilterData(long entryId, long time, @Nullable IProgressMonitor monitor) {
-        Multimap<@NonNull String, @NonNull String> data = HashMultimap.create();
+    public @NonNull Multimap<@NonNull String, @NonNull Object> getFilterData(long entryId, long time, @Nullable IProgressMonitor monitor) {
+        Multimap<@NonNull String, @NonNull Object> data = HashMultimap.create();
         data.putAll(super.getFilterData(entryId, time, monitor));
 
         SelectionTimeQueryFilter filter = new SelectionTimeQueryFilter(Collections.singletonList(time), Collections.singleton(Objects.requireNonNull(entryId)));

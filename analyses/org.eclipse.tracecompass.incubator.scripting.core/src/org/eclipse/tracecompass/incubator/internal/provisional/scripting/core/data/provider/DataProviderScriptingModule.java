@@ -28,7 +28,6 @@ import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output.DataDriven
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
-import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
@@ -192,9 +191,9 @@ public class DataProviderScriptingModule {
      */
     @WrapToScript
     public ITimeGraphDataProvider<ITimeGraphEntryModel> createScriptedTimeGraphProvider(ScriptedAnalysis analysis,
-            Function<TimeQueryFilter, @Nullable List<ITimeGraphEntryModel>> entryMethod,
-            @Nullable Function<TimeQueryFilter, @Nullable List<ITimeGraphRowModel>> rowModelMethod,
-            @Nullable Function<TimeQueryFilter, @Nullable List<ITimeGraphArrow>> arrowMethod) {
+            Function<Map<String, Object> , @Nullable List<ITimeGraphEntryModel>> entryMethod,
+            @Nullable Function<Map<String, Object>,  @Nullable List<ITimeGraphRowModel>> rowModelMethod,
+            @Nullable Function<Map<String, Object>, @Nullable List<ITimeGraphArrow>> arrowMethod) {
         ITimeGraphDataProvider<ITimeGraphEntryModel> provider = new ScriptedTimeGraphDataProvider(analysis, entryMethod, rowModelMethod, arrowMethod);
         ScriptingDataProviderManager.getInstance().registerDataProvider(analysis.getTrace(), provider);
         return provider;

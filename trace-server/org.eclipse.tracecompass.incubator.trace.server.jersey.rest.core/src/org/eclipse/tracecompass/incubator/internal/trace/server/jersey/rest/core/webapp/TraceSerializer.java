@@ -48,6 +48,9 @@ public class TraceSerializer extends StdSerializer<@NonNull ITmfTrace> {
         gen.writeNumberField("nbEvents", value.getNbEvents()); //$NON-NLS-1$
         gen.writeNumberField("start", value.getStartTime().toNanos()); //$NON-NLS-1$
         gen.writeNumberField("end", value.getEndTime().toNanos()); //$NON-NLS-1$
+        // TODO Find a better way, no support for cancel
+        String indexingStatus = value.isIndexing() ? "RUNNING" : "COMPLETED"; //$NON-NLS-1$ //$NON-NLS-2$
+        gen.writeStringField("indexingStatus", indexingStatus); //$NON-NLS-1$
         gen.writeEndObject();
     }
 
