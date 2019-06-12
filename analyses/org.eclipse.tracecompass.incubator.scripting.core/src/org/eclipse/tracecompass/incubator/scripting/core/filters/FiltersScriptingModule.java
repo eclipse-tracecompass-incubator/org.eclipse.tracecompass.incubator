@@ -10,17 +10,30 @@
 package org.eclipse.tracecompass.incubator.scripting.core.filters;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.antlr.runtime.RecognitionException;
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
+import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInformationProvider;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.OsStrings;
 import org.eclipse.tracecompass.incubator.internal.filters.core.server.FilterValidation;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filter.parser.IFilterStrings;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TmfFilterAppliedSignal;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TraceCompassFilter;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * Scripting modules that adds filtering capabilities to Trace Compass
@@ -67,6 +80,79 @@ public class FiltersScriptingModule {
         } catch (IOException | RecognitionException e) {
             // Nothing to do, simply don't filter
         }
+    }
+
+    /**
+     * Apply a global filter to all Trace Compass views on the threads whose
+     * name contains the name in parameter.
+     *
+     * @param name
+     *            The name of the thread, as can be seen in the Control Flow
+     *            View.
+     */
+    @WrapToScript
+    public void filterByThreadName(String name) {
+        // iterate over names looking for a match. make a list with those match
+        ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
+        if (trace == null) {
+            return;
+        }
+        List<Integer> tids = findMatchName(name, trace);
+        if (tids.size() == 0) {
+            return;
+        }
+        // create the regex for tids
+        String prefix = OsStrings.tid() + IFilterStrings.EQUAL;
+        String separator = ' ' + IFilterStrings.OR + ' ' + prefix;
+        StringJoiner regexJoiner = new StringJoiner(separator, prefix, ""); //$NON-NLS-1$
+        for (Integer tid : tids) {
+            regexJoiner.add(tid.toString());
+        }
+        // applyGlobalFilter
+        String regexExpression = regexJoiner.toString();
+        if (regexExpression != null) {
+            applyGlobalFilter(regexExpression);
+        }
+    }
+
+    private static List<Integer> findMatchName(String name, ITmfTrace trace) {
+        Map<Integer, String> executableNames = getExecutableNames(trace);
+        List<Integer> tids = new ArrayList<>();
+        Pattern checkRegex = Pattern.compile(name); // regex expression
+        for (Entry<Integer, String> entry : executableNames.entrySet()) {
+            Matcher regexMatcher = checkRegex.matcher(entry.getValue());
+            if (regexMatcher.find()) {
+                tids.add(entry.getKey());
+            }
+        }
+        return tids;
+    }
+
+    /*
+     * FIXME TIDs can be reused for different traces, but HostId is not a field
+     * that is well supported right now.
+     *
+     * FIXME if a tid is reused then it would need a filter that depends on
+     * time, but time fields are not well supported right now.
+     */
+    private static Map<Integer, String> getExecutableNames(ITmfTrace trace) {
+        Map<Integer, String> executableNames = new HashMap<>();
+        KernelAnalysisModule kernelAnlysis = TmfTraceUtils.getAnalysisModuleOfClass(trace, KernelAnalysisModule.class, KernelAnalysisModule.ID);
+        if (kernelAnlysis == null) {
+            return Collections.emptyMap();
+        }
+        Collection<Integer> threadIds = KernelThreadInformationProvider.getThreadIds(kernelAnlysis);
+        if (threadIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        for (Integer tid : threadIds) {
+            String execName = KernelThreadInformationProvider.getExecutableName(kernelAnlysis, tid);
+            if (execName != null) {
+                executableNames.put(tid, execName);
+            }
+        }
+
+        return executableNames;
     }
 
     /**
