@@ -29,6 +29,7 @@ import org.eclipse.swt.dnd.DropTargetListener;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.tracecompass.incubator.internal.filters.ui.lspFilterTextbox.LspFilterTextbox;
@@ -346,6 +347,6 @@ public class GlobalFilterViewer extends Composite {
         // Remove the regex from disabled filters in case it is there
         fDisabledFilters.removeAll(regexes);
         // redraw
-        redraw();
+        Display.getDefault().asyncExec(() -> redraw());
     }
 }
