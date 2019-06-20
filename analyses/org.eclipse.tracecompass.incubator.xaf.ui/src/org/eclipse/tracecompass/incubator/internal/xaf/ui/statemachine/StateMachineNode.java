@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.variable.StateMachineVariable;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.StateMachineVariable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 
 /**

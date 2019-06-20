@@ -26,7 +26,7 @@
          point="org.eclipse.ui.commands">
             <command
             categoryId="org.eclipse.ui.category.file"
-            defaultHandler="org.eclipse.tracecompass.incubator.scripting.ui.project.handlers.LaunchAsEaseScriptHandler"
+            defaultHandler="org.eclipse.tracecompass.incubator.internal.scripting.ui.project.handlers.LaunchAsEaseScriptHandler"
             description="%command.run_as_ease_script.description"
             id="org.eclipse.tracecompass.incubator.scripting.ui.command.launch_as_ease_script"
             name="%command.run_as_ease_script">
@@ -51,7 +51,7 @@
                   label="%command.run_as_ease_script"
                   tooltip="%command.run_as_ease_script.description">
             <dynamic
-                  class="org.eclipse.tracecompass.incubator.scripting.ui.project.handlers.RunAsElementTypeContributionItem"
+                  class="org.eclipse.tracecompass.incubator.internal.scripting.ui.project.handlers.RunAsElementTypeContributionItem"
                   id="org.eclipse.tracecompass.incubator.scripting.ui.command.run_as_ease_script.dynamic">
             </dynamic>
             <visibleWhen
@@ -88,7 +88,7 @@
                   label="%command.debug_as_ease_script"
                   tooltip="%command.debug_as_ease_script.description">
             <dynamic
-                  class="org.eclipse.tracecompass.incubator.scripting.ui.project.handlers.DebugAsElementTypeContributionItem"
+                  class="org.eclipse.tracecompass.incubator.internal.scripting.ui.project.handlers.DebugAsElementTypeContributionItem"
                   id="org.eclipse.tracecompass.incubator.scripting.ui.command.debug_as_ease_script.dynamic">
             </dynamic>
             <visibleWhen
@@ -123,14 +123,14 @@
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
-            class="org.eclipse.tracecompass.incubator.scripting.ui.project.handlers.ScriptEngineTester"
+            class="org.eclipse.tracecompass.incubator.internal.scripting.ui.project.handlers.ScriptEngineTester"
             id="org.eclipse.tracecompass.incubator.scripting.ui.engine"
             namespace="org.eclipse.tracecompass.incubator.scripting.ui"
             properties="hasEngine,hasDebugEngine"
             type="java.lang.Object">
       </propertyTester>
       <propertyTester
-            class="org.eclipse.tracecompass.incubator.scripting.ui.project.handlers.InTracingProjectTester"
+            class="org.eclipse.tracecompass.incubator.internal.scripting.ui.project.handlers.InTracingProjectTester"
             id="org.eclipse.tracecompass.incubator.scripting.ui.intracing.project"
             namespace="org.eclipse.tracecompass.incubator.scripting.ui"
             properties="inTracingProject"

@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.variable.StateMachineVariableAnalysis;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.StateMachineVariableAnalysis;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.google.common.base.Strings;

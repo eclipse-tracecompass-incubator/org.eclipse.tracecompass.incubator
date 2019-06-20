@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend.StateMachineBackendAnalysis;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraint;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.Status;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StatusValue;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.StateMachineVariable;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineUtils.TimestampInterval;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.backend.StateMachineBackendAnalysis;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.constraint.StateMachineConstraint;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.constraint.Status;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.constraint.StatusValue;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.variable.StateMachineVariable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;

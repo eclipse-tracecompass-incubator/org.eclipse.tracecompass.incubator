@@ -48,11 +48,11 @@ import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsExecuti
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.AbstractSegmentStoreAnalysisModule;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend.StateMachineBackendAnalysis;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.builder.BuilderInstanceGroup;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.Activator;
+import org.eclipse.tracecompass.incubator.internal.xaf.ui.handlers.XaFParameterProvider;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineUtils.TimestampInterval;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.backend.StateMachineBackendAnalysis;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.builder.BuilderInstanceGroup;
-import org.eclipse.tracecompass.incubator.xaf.ui.handlers.XaFParameterProvider;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;

@@ -32,11 +32,11 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.constraint.Operator;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.constraint.StateMachineConstraint;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.constraint.StateMachineConstraintAdaptive;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.constraint.ValueType;
-import org.eclipse.tracecompass.incubator.xaf.core.statemachine.variable.StateMachineVariable;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.Operator;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraint;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraintAdaptive;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.ValueType;
+import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.StateMachineVariable;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;

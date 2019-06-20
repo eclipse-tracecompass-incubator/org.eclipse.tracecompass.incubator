@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
-            analysis_module="org.eclipse.tracecompass.incubator.xaf.core.statemachine.backend.StateMachineBackendAnalysis"
+            analysis_module="org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend.StateMachineBackendAnalysis"
             applies_experiment="false"
             automatic="false"
             icon="icons/xaf.png"
@@ -37,7 +37,7 @@
          </analysisModuleClass>
       </output>
       <parameterProvider
-            class="org.eclipse.tracecompass.incubator.xaf.ui.handlers.XaFParameterProvider">
+            class="org.eclipse.tracecompass.incubator.internal.xaf.ui.handlers.XaFParameterProvider">
          <analysisId
                id="org.eclipse.tracecompass.xaf.core.statemachine">
          </analysisId>
@@ -56,7 +56,7 @@
          point="org.eclipse.ui.views">
       <view
             category="org.eclipse.linuxtools.lttng2.ui.views.category"
-            class="org.eclipse.tracecompass.incubator.xaf.ui.views.StateMachineInstancesConstraintsView"
+            class="org.eclipse.tracecompass.incubator.internal.xaf.ui.views.StateMachineInstancesConstraintsView"
             icon="icons/xaf.png"
             id="org.eclipse.tracecompass.xaf.core.ui.views.stateMachineInstancesConstraints"
             name="%view.smconstraints"

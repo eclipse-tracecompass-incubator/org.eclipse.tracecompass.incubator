@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 import org.eclipse.lsp4j.Color;
 import org.eclipse.lsp4j.ColorInformation;
 import org.eclipse.lsp4j.CompletionItem;
-import org.eclipse.tracecompass.incubator.filters.core.environment.TestEnvironment;
+import org.eclipse.tracecompass.incubator.filters.core.tests.environment.TestEnvironment;
 import org.eclipse.tracecompass.incubator.internal.filters.core.server.SyntaxHighlighting;
 import org.junit.Test;
 

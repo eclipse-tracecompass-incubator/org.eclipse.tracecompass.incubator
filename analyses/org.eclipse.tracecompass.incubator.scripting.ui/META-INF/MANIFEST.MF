@@ -25,6 +25,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.expressions
 Export-Package: org.eclipse.tracecompass.incubator.internal.provisional.scripting.ui.views;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.scripting.ui;x-internal:=true,
- org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph;x-internal:=true,
- org.eclipse.tracecompass.incubator.scripting.ui.project.handlers
+ org.eclipse.tracecompass.incubator.internal.scripting.ui.project.handlers;x-internal:=true,
+ org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph;x-internal:=true
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.scripting.ui

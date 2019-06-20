@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.tracecompass.incubator.filters.core.environment.TestEnvironment;
+import org.eclipse.tracecompass.incubator.filters.core.tests.environment.TestEnvironment;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
