@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.provisional.scripting.core.filters;
+package org.eclipse.tracecompass.incubator.scripting.core.filters;
 
 import java.io.IOException;
 import java.util.Collections;

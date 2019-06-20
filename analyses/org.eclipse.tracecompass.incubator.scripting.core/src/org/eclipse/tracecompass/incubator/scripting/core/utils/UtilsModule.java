@@ -7,5 +7,25 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-@org.eclipse.jdt.annotation.NonNullByDefault
-package org.eclipse.tracecompass.incubator.internal.provisional.scripting.ui.views;
+package org.eclipse.tracecompass.incubator.scripting.core.utils;
+
+import org.eclipse.ease.modules.WrapToScript;
+
+/**
+ * A utility scripting module
+ *
+ * @author Geneviève Bastien
+ */
+public class UtilsModule {
+
+    /**
+     * Create a new list wrapper
+     *
+     * @return The list wrapper with an empty list
+     */
+    @WrapToScript
+    public <T> ListWrapper<T> createListWrapper() {
+        return new ListWrapper<>();
+    }
+
+}

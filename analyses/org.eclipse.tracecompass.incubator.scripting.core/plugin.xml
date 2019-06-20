@@ -5,28 +5,28 @@
          point="org.eclipse.ease.modules">
       <module
             category="org.eclipse.tracecompass.incubator.scripting.core.category"
-            class="org.eclipse.tracecompass.incubator.internal.provisional.scripting.core.analysis.AnalysisScriptingModule"
+            class="org.eclipse.tracecompass.incubator.scripting.core.analysis.AnalysisScriptingModule"
             id="org.eclipse.tracecompass.incubator.scripting.core.analysis"
             name="Analysis"
             visible="true">
       </module>
       <module
             category="org.eclipse.tracecompass.incubator.scripting.core.category"
-            class="org.eclipse.tracecompass.incubator.internal.provisional.scripting.core.data.provider.DataProviderScriptingModule"
+            class="org.eclipse.tracecompass.incubator.scripting.core.data.provider.DataProviderScriptingModule"
             id="org.eclipse.tracecompass.incubator.scripting.core.dataprovider"
             name="DataProvider"
             visible="true">
       </module>
       <module
             category="org.eclipse.tracecompass.incubator.scripting.core.category"
-            class="org.eclipse.tracecompass.incubator.internal.provisional.scripting.core.utils.UtilsModule"
+            class="org.eclipse.tracecompass.incubator.scripting.core.utils.UtilsModule"
             id="org.eclipse.tracecompass.incubator.scripting.core.utils"
             name="Utils"
             visible="true">
       </module>
       <module
             category="org.eclipse.tracecompass.incubator.scripting.core.category"
-            class="org.eclipse.tracecompass.incubator.internal.provisional.scripting.core.filters.FiltersScriptingModule"
+            class="org.eclipse.tracecompass.incubator.scripting.core.filters.FiltersScriptingModule"
             id="org.eclipse.tracecompass.incubator.scripting.core.filters"
             name="Filters"
             visible="true">

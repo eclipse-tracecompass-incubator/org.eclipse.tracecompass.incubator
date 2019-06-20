@@ -5,7 +5,7 @@
          point="org.eclipse.ease.modules">
       <module
             category="org.eclipse.tracecompass.incubator.scripting.core.category"
-            class="org.eclipse.tracecompass.incubator.internal.provisional.scripting.ui.views.ViewModule"
+            class="org.eclipse.tracecompass.incubator.scripting.ui.views.ViewModule"
             id="org.eclipse.tracecompass.incubator.scripting.ui.views"
             name="View"
             visible="true">

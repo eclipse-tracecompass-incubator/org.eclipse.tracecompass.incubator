@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.provisional.scripting.core.utils;
+package org.eclipse.tracecompass.incubator.scripting.core.utils;
 
 import java.util.ArrayList;
 import java.util.List;
