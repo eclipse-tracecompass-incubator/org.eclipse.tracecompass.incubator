@@ -33,9 +33,10 @@ public class ListWrapper<T> {
     }
 
     /**
-     * Get the list being wrapped
+     * Get the list being wrapped. This object can be used directly, like a Java
+     * list.
      *
-     * @return The list
+     * @return The list object, that can be used like a Java list.
      */
     public List<T> getList() {
         return fList;

@@ -54,3 +54,8 @@ the build system. You can set them by using `-P[profile name]` and
   Mainly for use on build servers. Copies the standard update site (for the
   Eclipse plugin installation) to the destination specified by
  `-DsiteDestination=/absolute/path/to/destination`.
+
+* `mvn javadoc:aggregate`
+
+  Mainly for use on build servers. Generates the javadoc of API classes as a
+  HTML website to the destination specified by `-Djavadoc-site=/absolute/path/to/destination`.

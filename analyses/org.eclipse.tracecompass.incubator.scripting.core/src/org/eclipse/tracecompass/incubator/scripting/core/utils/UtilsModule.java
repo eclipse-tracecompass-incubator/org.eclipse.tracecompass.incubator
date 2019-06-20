@@ -9,19 +9,29 @@
 
 package org.eclipse.tracecompass.incubator.scripting.core.utils;
 
+import java.util.List;
+import java.util.function.Function;
+
 import org.eclipse.ease.modules.WrapToScript;
 
 /**
- * A utility scripting module
+ * A utility scripting module that wraps certain classes in more convenient
+ * objects. Script developers should try to use the wrapped class directly first
+ * as it may not be problematic in some cases and if there are execution
+ * problems when running the script, use the wrapper instead.
  *
  * @author Geneviève Bastien
  */
 public class UtilsModule {
 
     /**
-     * Create a new list wrapper
+     * Create a new list wrapper. Useful when passing {@link Function} classes
+     * to module methods where the function return value is a {@link List}. Some
+     * scripting engines do not handle very well those objects.
      *
-     * @return The list wrapper with an empty list
+     * @param <T>
+     *            The type of elements that will be in the list
+     * @return The {@link ListWrapper} object with an empty list
      */
     @WrapToScript
     public <T> ListWrapper<T> createListWrapper() {

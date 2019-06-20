@@ -29,9 +29,9 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
- * Provide a class for scripted analysis. It provides an event iterator, as well
- * as backends to store data. Scripts can thus parse events and fill the backend
- * appropriately.
+ * Analysis class that can be used with the scripts. It provides an event
+ * iterator, as well as backends to store data. Scripts can thus parse events
+ * and fill the backend appropriately.
  *
  * @author Geneviève Bastien
  */
@@ -57,12 +57,15 @@ public class ScriptedAnalysis {
     /**
      * Constructor
      *
+     * package-private because it is only expected to be constructed by the
+     * module.
+     *
      * @param activeTrace
      *            The trace to associate with this analysis
      * @param name
      *            The name of the analysis
      */
-    public ScriptedAnalysis(ITmfTrace activeTrace, String name) {
+    ScriptedAnalysis(ITmfTrace activeTrace, String name) {
         fTrace = activeTrace;
         fName = name;
     }
@@ -73,7 +76,8 @@ public class ScriptedAnalysis {
      *
      * @param useExisting
      *            if <code>true</code>, any state system with the same name for
-     *            the trace will be reused.
+     *            the trace will be reused, otherwise, a new state system will
+     *            be created
      * @return A state system builder
      */
     @WrapToScript
@@ -181,7 +185,7 @@ public class ScriptedAnalysis {
     }
 
     /**
-     * Get the trace
+     * Get the trace, not to be used by scripts.
      *
      * @return The trace
      */
@@ -190,7 +194,7 @@ public class ScriptedAnalysis {
     }
 
     /**
-     * Get the name of this analysis
+     * Get the name of this analysis, not to be used by scripts
      *
      * @return The name of the analysis
      */

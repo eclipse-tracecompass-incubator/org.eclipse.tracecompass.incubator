@@ -45,6 +45,7 @@ public interface ICallStackElement {
      * Add a child element to this one
      *
      * @param node
+     *            The child element
      */
     void addChild(ICallStackElement node);
 

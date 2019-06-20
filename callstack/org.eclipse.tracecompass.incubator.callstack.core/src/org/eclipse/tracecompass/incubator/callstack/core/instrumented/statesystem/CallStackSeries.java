@@ -66,15 +66,15 @@ import com.google.common.collect.Multimap;
  *    [pid]
  *        [tid]
  *            callstack
- *               1  -> function name
- *               2  -> function name
- *               3  -> function name
+ *               1  {@literal ->} function name
+ *               2  {@literal ->} function name
+ *               3  {@literal ->} function name
  *  Per component
  *    [application component]
  *       [tid]
  *           callstack
- *               1 -> some string
- *               2 -> some string
+ *               1 {@literal ->} some string
+ *               2 {@literal ->} some string
  * </pre>
  *
  * There are 2 {@link CallStackSeries} in this example, one starting by "Per

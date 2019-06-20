@@ -23,7 +23,11 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 
 /**
- * Scripting modules that adds filtering capabilities to Trace Compass scripting
+ * Scripting modules that adds filtering capabilities to Trace Compass
+ * scripting.
+ *
+ * This requires the <code>Trace Compass Filters (Incubation)</code> feature to
+ * be installed.
  *
  * @author Geneviève Bastien
  */
@@ -33,7 +37,8 @@ public class FiltersScriptingModule {
     /**
      * Apply a global filter to the currently active trace
      *
-     * @param regex The filter to apply
+     * @param regex
+     *            The filter to apply
      */
     @WrapToScript
     public void applyGlobalFilter(String regex) {

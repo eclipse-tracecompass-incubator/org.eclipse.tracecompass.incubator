@@ -15,7 +15,6 @@ import java.util.Set;
 
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -86,9 +85,7 @@ public class CallGraph {
     }
 
     /**
-     * Get the root elements containing the call graph data. If a group by
-     * descriptor was set using {@link #setGroupBy(ICallStackGroupDescriptor)}, the
-     * elements are the root element of the hierarchy grouped per this descriptor.
+     * Get the root elements containing the call graph data.
      *
      * @return The root elements of the call graph
      */

@@ -59,26 +59,11 @@ if (!ss.waitUntilBuilt(0)) {
 	runAnalysis();
 }
 
-function getEntries(filter) {
-	quarks = ss.getQuarks("*");
-	// Prepare the CPU names and sort them
-	var cpus = [];
-	for (i = 0; i < quarks.size(); i++) {
-		quark = quarks.get(i);
-		cpus.push(ss.getAttributeName(quark));
-	}
-	cpus.sort(function(a,b){return Number(a) - Number(b)});
-	var entries = [];
-	for (i = 0; i < cpus.length; i++) {
-		cpu = cpus[i];
-		quark = ss.getQuarkAbsolute(cpu);
-		entries.push(createEntry({'quark' : quark, 'name' : "CPU " + cpu}));
-	}
-	return entries;
-}
-
 // Get a time graph provider from this analysis, displaying all attributes (which are the cpus here)
-provider = createTimeGraphProvider(analysis, {'path' : '*'});
+// Create a map and fill it, because javascript map cannot use the EASE constants as keys
+var map = new java.util.HashMap();
+map.put(ENTRY_PATH, '*');
+provider = createTimeGraphProvider(analysis, map);
 if (provider != null) {
 	// Open a time graph view displaying this provider
 	openTimeGraphView(provider);
