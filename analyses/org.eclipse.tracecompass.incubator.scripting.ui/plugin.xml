@@ -10,6 +10,13 @@
             name="View"
             visible="true">
       </module>
+      <module
+            category="org.eclipse.tracecompass.incubator.scripting.core.category"
+            class="org.eclipse.tracecompass.incubator.scripting.ui.trace.TraceScriptingUI"
+            id="org.eclipse.tracecompass.incubator.scripting.ui.trace"
+            name="TraceUI"
+            visible="true">
+      </module>
    </extension>
    <extension
             point="org.eclipse.ui.views">

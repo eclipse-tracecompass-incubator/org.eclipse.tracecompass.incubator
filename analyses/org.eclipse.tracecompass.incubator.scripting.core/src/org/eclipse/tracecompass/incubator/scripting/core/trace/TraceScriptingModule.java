@@ -9,8 +9,24 @@
 
 package org.eclipse.tracecompass.incubator.scripting.core.trace;
 
+import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.Objects;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.ease.modules.ScriptParameter;
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.scripting.core.trace.Messages;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
+import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
+import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 
@@ -20,6 +36,99 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
  * @author Benjamin Saint-Cyr
  */
 public class TraceScriptingModule {
+
+    /**
+     * Fully open a trace in the Trace Compass application, ie it will open as
+     * if the user had opened it in the UI, running all automatic analyses, etc.
+     * If the trace is successfully opened, it becomes the currently active
+     * trace.
+     *
+     * @param projectName
+     *            The name of the project
+     * @param traceName
+     *            the trace to open
+     * @param isExperiment
+     *            is the trace an experiment
+     * @return The trace
+     * @throws FileNotFoundException
+     *             Exception thrown if the file or the trace doesn't exist
+     */
+    @WrapToScript
+    public ITmfTrace openTrace(String projectName, String traceName, @ScriptParameter(defaultValue = "false") boolean isExperiment) throws FileNotFoundException {
+        // TODO may need to be implemented for Theia.
+        // Can not do anything without the UI
+        throw new UnsupportedOperationException("Load the /TraceCompass/TraceUI module instead"); //$NON-NLS-1$
+    }
+
+    /**
+     * The trace will be opened, its events can be queried, but the analyses
+     * will not have been run on it, they will not be available. The trace
+     * content will not be opened in the UI and it won't be able to populate any
+     * view. Typical use is for stand-alone scripts who want to run and export
+     * content without interacting with the UI. The trace must have been
+     * previously imported in trace compass as it needs to be in a project.
+     *
+     * @param projectName
+     *            The name of the project
+     * @param traceName
+     *            the trace to open
+     * @param isExperiment
+     *            is the trace an experiment
+     * @return The trace
+     * @throws FileNotFoundException
+     *             if the file or the trace doesn't exist
+     */
+    @WrapToScript
+    public @Nullable ITmfTrace openMinimalTrace(String projectName, String traceName, @ScriptParameter(defaultValue = "false") boolean isExperiment) throws FileNotFoundException {
+        // See if project exists
+        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+        if (!project.exists()) {
+            throw new FileNotFoundException(Messages.projectDoesNotExist);
+        }
+
+        String folderName = isExperiment ? "Experiments" : "Traces"; //$NON-NLS-1$ //$NON-NLS-2$
+        IFolder subFolder = project.getFolder(folderName);
+        if (!subFolder.exists()) {
+            throw new FileNotFoundException(Messages.folderDoesNotExist);
+        }
+        String[] split = traceName.split("/"); //$NON-NLS-1$
+        for (int i = 0; i <= split.length - 2; i++) {
+            subFolder = subFolder.getFolder(split[i]);
+            if (!subFolder.exists()) {
+                throw new FileNotFoundException(Messages.folderDoesNotExist);
+            }
+        }
+        String traceFile = split[split.length - 1];
+        IFile file = subFolder.getFile(traceFile);
+
+
+        IPath location = file.getLocation();
+        if (location == null) {
+            return null;
+        }
+        try {
+            // open the trace
+            String traceFileName = location.toFile().getName();
+            return openAndInitializeTrace(file, Objects.requireNonNull(location.toOSString()), traceFileName, ""); //$NON-NLS-1$
+        } catch (InstantiationException | IllegalAccessException | TmfTraceException | TmfTraceImportException e) {
+            // We cannot differentiate in this method between a file that does
+            // not exist in an existing resource or if the resource does not
+            // exist. The message contains both possibilities
+            throw new FileNotFoundException(Messages.traceDoesNotExist);
+        }
+    }
+
+    private static ITmfTrace openAndInitializeTrace(IFile file, String location, String name, String typeID) throws TmfTraceException, InstantiationException, IllegalAccessException, FileNotFoundException, TmfTraceImportException {
+        List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(location, typeID);
+        if (traceTypes.isEmpty()) {
+            throw new FileNotFoundException(Messages.noTraceType);
+        }
+
+        TraceTypeHelper helper = traceTypes.get(0);
+        ITmfTrace trace = helper.getTraceClass().newInstance();
+        trace.initTrace(file, location, ITmfEvent.class, name, typeID);
+        return trace;
+    }
 
     /**
      * Get the currently active trace, ie the last trace opened in the UI
