@@ -45,8 +45,8 @@ public class ViewModule {
             public void run() {
                 try {
                     IViewPart view = openView(dataProvider.getId());
-                    if (view == null) {
-                        return;
+                    if (view instanceof ScriptedTimeGraphView) {
+                        ((ScriptedTimeGraphView) view).refreshIfNeeded();
                     }
                 } catch (final PartInitException e) {
                     // Do nothing

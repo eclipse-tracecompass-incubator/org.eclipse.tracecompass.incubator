@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.internal.scripting.core.data.provider
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
@@ -103,6 +104,19 @@ public class ScriptingDataProviderManager {
      *            The data provider
      */
     public void registerDataProvider(ITmfTrace trace, ITmfTreeDataProvider<? extends ITmfTreeDataModel> provider) {
+        // Remove previous data providers of the same name
+        Collection<ITmfTreeDataProvider<? extends ITmfTreeDataModel>> dataProviders = fInstances.get(trace);
+        ITmfTreeDataProvider<? extends ITmfTreeDataModel> previous = null;
+        for (ITmfTreeDataProvider<? extends ITmfTreeDataModel> dataProvider: dataProviders) {
+            if (provider.getId().equals(dataProvider.getId())) {
+                previous = dataProvider;
+                break;
+            }
+        }
+        if (previous != null) {
+            fInstances.remove(trace, previous);
+            DataProviderManager.getInstance().removeDataProvider(trace, previous);
+        }
         fInstances.put(trace, provider);
     }
 

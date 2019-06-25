@@ -11,9 +11,13 @@ package org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph
 
 import java.util.Collections;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.data.provider.ScriptedTimeGraphDataProvider;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
 
@@ -39,6 +43,8 @@ public class ScriptedTimeGraphView extends BaseDataProviderTimeGraphView {
     /** View ID */
     public static final String ID = "org.eclipse.tracecompass.incubator.scripting.ui.view.timegraph"; //$NON-NLS-1$
 
+    private @Nullable ITimeGraphDataProvider<@NonNull TimeGraphEntryModel> fProvider = null;
+
     /**
      * Constructor
      */
@@ -58,6 +64,26 @@ public class ScriptedTimeGraphView extends BaseDataProviderTimeGraphView {
     @Override
     protected @NonNull Iterable<ITmfTrace> getTracesToBuild(@Nullable ITmfTrace trace) {
         return Collections.singleton(trace);
+    }
+
+    /**
+     * Request of refresh of the view if the data provider has changed.
+     */
+    public void refreshIfNeeded() {
+        ITmfTrace trace = getTrace();
+        ITimeGraphDataProvider<@NonNull TimeGraphEntryModel> dataProvider = DataProviderManager
+                .getInstance().getDataProvider(trace, getProviderId(), ITimeGraphDataProvider.class);
+        if (dataProvider != fProvider) {
+            rebuild();
+        }
+    }
+
+    @Override
+    protected void buildEntryList(@NonNull ITmfTrace trace, @NonNull ITmfTrace parentTrace, @NonNull IProgressMonitor monitor) {
+        ITimeGraphDataProvider<@NonNull TimeGraphEntryModel> dataProvider = DataProviderManager
+                .getInstance().getDataProvider(trace, getProviderId(), ITimeGraphDataProvider.class);
+        fProvider = dataProvider;
+        super.buildEntryList(trace, parentTrace, monitor);
     }
 
 }
