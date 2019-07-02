@@ -13,14 +13,20 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.OsStrings;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.IElementResolver;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * {@link TimeGraphEntryModel} for the Flame chart data
  *
  * @author Geneviève Bastien
  */
-public class FlameChartEntryModel extends TimeGraphEntryModel {
+public class FlameChartEntryModel extends TimeGraphEntryModel implements IElementResolver {
 
     /**
      * An enumeration for the type of flame chart entries
@@ -47,6 +53,7 @@ public class FlameChartEntryModel extends TimeGraphEntryModel {
 
     private final EntryType fEntryType;
     private final int fDepth;
+    private @Nullable HostThread fHostThread;
 
     /**
      * Constructor
@@ -86,12 +93,16 @@ public class FlameChartEntryModel extends TimeGraphEntryModel {
      * @param entryType
      *            The type of this entry
      * @param depth
-     *            entry's PID or TID if is a thread
+     *            The depth this entry represents
+     * @param hostThread
+     *            The entry's unique hostThread or <code>null</code> if host
+     *            thread not available or variable
      */
-    public FlameChartEntryModel(long elementId, long parentId, List<String> name, long startTime, long endTime, EntryType entryType, int depth) {
+    public FlameChartEntryModel(long elementId, long parentId, List<String> name, long startTime, long endTime, EntryType entryType, int depth, @Nullable HostThread hostThread) {
         super(elementId, parentId, name, startTime, endTime);
         fEntryType = entryType;
         fDepth = depth;
+        fHostThread = hostThread;
     }
 
     /**
@@ -133,6 +144,17 @@ public class FlameChartEntryModel extends TimeGraphEntryModel {
     @Override
     public String toString() {
         return super.toString() + ' ' + fEntryType.toString();
+    }
+
+    @Override
+    public Multimap<String, Object> getMetadata() {
+        Multimap<String, Object> map = HashMultimap.create();
+        HostThread hostThread = fHostThread;
+        if (hostThread != null) {
+            map.put(OsStrings.tid(), hostThread.getTid());
+            map.put("hostId", hostThread.getHost()); //$NON-NLS-1$
+        }
+        return map;
     }
 
 }

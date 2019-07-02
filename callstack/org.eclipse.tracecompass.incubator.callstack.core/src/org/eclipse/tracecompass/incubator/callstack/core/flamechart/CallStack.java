@@ -363,9 +363,11 @@ public class CallStack {
     }
 
     /**
-     * Get the unique {@link HostThread} for this callstack. This returns a value only if the TID is not variable in time _and_ it is defined
+     * Get the unique {@link HostThread} for this callstack. This returns a
+     * value only if the TID is not variable in time _and_ it is defined
      *
-     * @return The {@link HostThread} that spans this callstack or <code>null</code> if TID is variable or it is not defined.
+     * @return The {@link HostThread} that spans this callstack or
+     *         <code>null</code> if TID is variable or it is not defined.
      */
     public @Nullable HostThread getHostThread() {
         if (!isTidVariable()) {
