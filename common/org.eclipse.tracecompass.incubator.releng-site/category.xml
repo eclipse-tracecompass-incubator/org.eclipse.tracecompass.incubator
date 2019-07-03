@@ -65,6 +65,14 @@
    <bundle id="org.eclipse.lsp4j.jsonrpc"/>
    <bundle id="org.eclipse.xtext.xbase.lib"/>
    <bundle id="org.apache.commons.lang"/>
+   <bundle id="org.mozilla.javascript"/>
+   <bundle id="org.eclipse.wst.jsdt.ui"/>
+   <bundle id="org.eclipse.wst.jsdt.core"/>
+   <bundle id="org.eclipse.wst.jsdt.debug.core"/>
+   <bundle id="org.eclipse.wst.jsdt.debug.ui"/>
+   <bundle id="com.google.javascript"/>
+   <bundle id="com.google.protobuf"/>
+   <bundle id="org.eclipse.wst.jsdt.manipulation"/>
    <category-def name="trace-types" label="Trace Types"/>
    <category-def name="virtualization" label="Virtualization"/>
    <category-def name="analyses" label="Analyses"/>
