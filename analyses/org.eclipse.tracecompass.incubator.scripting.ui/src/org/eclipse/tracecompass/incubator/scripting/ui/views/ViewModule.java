@@ -14,8 +14,11 @@ import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph.ScriptedTimeGraphView;
+import org.eclipse.tracecompass.incubator.internal.scripting.ui.views.xychart.ScriptedXYView;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
+import org.eclipse.tracecompass.tmf.core.model.xy.ITmfTreeXYDataProvider;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -113,5 +116,35 @@ public class ViewModule {
                 // Do nothing
             }
         });
+    }
+
+    /**
+     * Open a XY chart for a scripted data provider
+     *
+     * @param dataProvider
+     *            The data provider used to populate the view
+     */
+    @WrapToScript
+    public void openXYChartView(ITmfTreeXYDataProvider<ITmfTreeDataModel> dataProvider) {
+        Display.getDefault().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    IViewPart view = openXYView(dataProvider.getId());
+                    if (view == null) {
+                        return;
+                    }
+                } catch (final PartInitException e) {
+                    // Do nothing
+                }
+            }
+        });
+    }
+
+    private static @Nullable IViewPart openXYView(String name) throws PartInitException {
+        final IWorkbench wb = PlatformUI.getWorkbench();
+        final IWorkbenchPage activePage = wb.getActiveWorkbenchWindow().getActivePage();
+
+        return activePage.showView(ScriptedXYView.ID, name.replace(":", ScriptedXYView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
     }
 }

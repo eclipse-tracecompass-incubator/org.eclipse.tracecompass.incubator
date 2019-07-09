@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.scripting.core.data.provider;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +26,12 @@ import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.fsm.model.values.
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output.DataDrivenOutputEntry;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output.DataDrivenTimeGraphProviderFactory;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output.DataDrivenXYDataProvider.DisplayType;
+import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output.DataDrivenXYProviderFactory;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
+import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
@@ -35,6 +39,9 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
+import org.eclipse.tracecompass.tmf.core.model.xy.ITmfTreeXYDataProvider;
+import org.eclipse.tracecompass.tmf.core.statesystem.ITmfAnalysisModuleWithStateSystems;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
  * Scripting module to create data providers from scripted analyzes. Data
@@ -43,10 +50,13 @@ import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
  * <p>
  * Example scripts with data providers can be found here:
  * <ul>
- * <li><a href="../../doc-files/scriptedDataProvider.js">A scripted
- * time graph data provider</a> with script-defined entries and arrows</li>
- * <li><a href="../../doc-files/basicAnalysis.js">A basic analysis</a>
- * building an state system and showing its data in a time graph</li>
+ * <li><a href="../../doc-files/scriptedDataProvider.js">A scripted time graph
+ * data provider</a> with script-defined entries and arrows</li>
+ * <li><a href="../../doc-files/basicAnalysis.js">A basic analysis</a> building
+ * an state system and showing its data in a time graph</li>
+ * <li><a href="../../doc-files/statisticsDensityXY.js">A script that uses the
+ * "Statistics" analysis module</a> of Trace Compass to display an XY chart
+ * showing the density of certain events in the trace.</li>
  * </ul>
  *
  * @author Geneviève Bastien
@@ -69,6 +79,12 @@ public class DataProviderScriptingModule {
     /** Id key to create data providers */
     @WrapToScript
     public static final String ENTRY_ID = "id"; //$NON-NLS-1$
+    /**
+     * Key for whether or not to display a value as a differential with previous
+     * value or use its absolute value.
+     */
+    @WrapToScript
+    public static final String ENTRY_DELTA = "delta"; //$NON-NLS-1$
 
     /** Quark key to create entries */
     @WrapToScript
@@ -139,6 +155,87 @@ public class DataProviderScriptingModule {
         }
         ITimeGraphDataProvider<TimeGraphEntryModel> provider = DataDrivenTimeGraphProviderFactory.create(analysis.getTrace(), Collections.singletonList(stateSystem), Collections.singletonList(entry), Collections.emptyList(), ScriptingDataProviderManager.PROVIDER_ID + ':' + analysis.getName());
         ScriptingDataProviderManager.getInstance().registerDataProvider(analysis.getTrace(), provider);
+        return provider;
+    }
+
+    /**
+     * Create a data driven xy data provider. This will use the specified data
+     * to get the entries from the state system.
+     *
+     * {@link #ENTRY_PATH}: MANDATORY, specifies the path in the state system
+     * (including wildcards) that is the root of the entries. For all root
+     * attributes, use '*'
+     *
+     * {@link #ENTRY_DISPLAY}: The path from the entry's root of the attribute
+     * to display. If not specified, the root attribute itself will be used
+     *
+     * {@link #ENTRY_NAME}: The path from the entry's root of the attribute that
+     * contains the name. If not specified, the name will be the attribute's
+     * name.
+     *
+     * {@link #ENTRY_ID}: The path from the entry's root of the attribute that
+     * contains an identifier for this entry. The identifier can be used to
+     * build hierarchies of entries using the {@link #ENTRY_PARENT}.
+     *
+     * {@link #ENTRY_PARENT}: The path from the entry's root of the attribute
+     * that contains the parent's ID. This data will be used along with the
+     * {@link #ENTRY_ID} to create a hierarchy between the entries.
+     *
+     * {@link #ENTRY_DELTA}: Specify the entry type. If it’s true, it will
+     * display the delta value of the entry otherwise it will show the absolute
+     * value of the entry.
+     *
+     * @param analysis
+     *            The analysis for which to create a time graph provider
+     * @param data
+     *            The XY chart data
+     * @return The XY data provider
+     */
+    @WrapToScript
+    public @Nullable ITmfTreeXYDataProvider<ITmfTreeDataModel> createXYProvider(IAnalysisModule analysis, Map<String, Object> data) {
+        Object pathObj = data.get(ENTRY_PATH);
+        if (pathObj == null) {
+            return null;
+        }
+        String path = String.valueOf(pathObj);
+        Object displayObj = data.get(ENTRY_DISPLAY);
+        DataDrivenStateSystemPath display = new DataDrivenStateSystemPath(displayObj == null ? Collections.emptyList() : Collections.singletonList(new DataDrivenValueConstant(null, ITmfStateValue.Type.NULL, String.valueOf(displayObj))));
+
+        Object nameObj = data.get(ENTRY_NAME);
+        DataDrivenStateSystemPath name = (nameObj == null) ? null : new DataDrivenStateSystemPath(Collections.singletonList(new DataDrivenValueConstant(null, ITmfStateValue.Type.NULL, String.valueOf(nameObj))));
+
+        Object parentObj = data.get(ENTRY_PARENT);
+        DataDrivenStateSystemPath parent = (parentObj == null) ? null : new DataDrivenStateSystemPath(Collections.singletonList(new DataDrivenValueConstant(null, ITmfStateValue.Type.NULL, String.valueOf(parentObj))));
+
+        Object idObj = data.get(ENTRY_ID);
+        DataDrivenStateSystemPath id = new DataDrivenStateSystemPath(Collections.singletonList(new DataDrivenValueConstant(null, ITmfStateValue.Type.NULL, String.valueOf(idObj))));
+
+        Object isDeltaObj = data.get(ENTRY_DELTA);
+        DisplayType displayType = DisplayType.ABSOLUTE;
+        if (isDeltaObj != null && (Boolean) isDeltaObj) {
+            displayType = DisplayType.DELTA;
+        }
+
+        DataDrivenOutputEntry entry = new DataDrivenOutputEntry(Collections.emptyList(), path, null, true,
+                display, id, parent, name, displayType);
+
+        ITmfTrace trace = null;
+        if (analysis instanceof TmfAbstractAnalysisModule) {
+            TmfAbstractAnalysisModule newAnalysis = (TmfAbstractAnalysisModule) analysis;
+            trace = newAnalysis.getTrace();
+        }
+        List<ITmfStateSystem> stateSystems = new ArrayList<>();
+        if (analysis instanceof ITmfAnalysisModuleWithStateSystems) {
+            ITmfAnalysisModuleWithStateSystems module = (ITmfAnalysisModuleWithStateSystems) analysis;
+            if (module.schedule().isOK() && module.waitForInitialization()) {
+                module.getStateSystems().forEach(stateSystems::add);
+            }
+        }
+        if (stateSystems.isEmpty() || trace == null) {
+            return null;
+        }
+        ITmfTreeXYDataProvider<ITmfTreeDataModel> provider = DataDrivenXYProviderFactory.create(trace, stateSystems, Collections.singletonList(entry), ScriptingDataProviderManager.PROVIDER_ID + ':' + analysis.getName());
+        ScriptingDataProviderManager.getInstance().registerDataProvider(trace, provider);
         return provider;
     }
 

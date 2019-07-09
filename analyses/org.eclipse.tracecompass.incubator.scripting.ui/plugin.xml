@@ -25,7 +25,18 @@
             category="org.eclipse.linuxtools.lttng2.ui.views.category"
             class="org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph.ScriptedTimeGraphView"
             id="org.eclipse.tracecompass.incubator.scripting.ui.view.timegraph"
-            name="%view.scripted"
+            name="%view.scriptedTimeGraph"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+            point="org.eclipse.ui.views">
+      <view
+            allowMultiple="true"
+            category="org.eclipse.linuxtools.lttng2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.scripting.ui.views.xychart.ScriptedXYView"
+            id="org.eclipse.tracecompass.incubator.internal.scripting.ui.views.xychart"
+            name="%view.scriptedXYChart"
             restorable="true">
       </view>
    </extension>
