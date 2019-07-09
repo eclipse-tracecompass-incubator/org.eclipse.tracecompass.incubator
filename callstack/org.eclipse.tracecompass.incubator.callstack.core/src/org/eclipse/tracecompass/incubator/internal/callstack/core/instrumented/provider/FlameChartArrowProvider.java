@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -47,9 +48,8 @@ public class FlameChartArrowProvider {
 
     /**
      * Fetch arrows with query
-     *
-     * @param filter
-     *            the query filter
+     * @param fetchParameters
+     *            the parameters
      * @param monitor
      *            the monitor
      * @return the corresponding state intervals
@@ -64,15 +64,14 @@ public class FlameChartArrowProvider {
 
         InstrumentedCallStackAnalysis csModule = null;
         Iterable<InstrumentedCallStackAnalysis> modules = TmfTraceUtils.getAnalysisModulesOfClass(fTrace, InstrumentedCallStackAnalysis.class);
-        // TODO Support many analysis modules, here we take only the first one
         Iterator<InstrumentedCallStackAnalysis> iterator = modules.iterator();
-        if (!iterator.hasNext()) {
-            return Collections.emptyList();
-        }
-        csModule = iterator.next();
-        csModule.schedule();
-        List<@NonNull ITmfStateInterval> edges = csModule.getLinks(start, end, monitor == null ? new NullProgressMonitor() : monitor);
 
-        return edges;
+        List<@NonNull ITmfStateInterval> allEdges = new ArrayList<>();
+        while (iterator.hasNext()) {
+            csModule = iterator.next();
+            List<@NonNull ITmfStateInterval> moduleEdges = csModule.getLinks(start, end, monitor == null ? new NullProgressMonitor() : monitor);
+            allEdges.addAll(moduleEdges);
+        }
+        return allEdges;
     }
 }
