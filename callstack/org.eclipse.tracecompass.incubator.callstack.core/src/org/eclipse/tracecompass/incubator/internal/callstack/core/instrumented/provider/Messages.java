@@ -28,6 +28,9 @@ public class Messages extends NLS {
     /** Title of the dataprovider */
     public static @Nullable String FlameChartDataProvider_Title;
 
+    /** Messages.FlameChartDataProvider_Title */
+    public static @Nullable String FlameChartDataProvider_Description;
+
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -33,6 +33,7 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.p
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel.EntryType;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
@@ -66,6 +67,35 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
         assertNotNull(dataProvider);
         return dataProvider;
     }
+
+    /**
+     * Test getting the descriptors built in the flame chart data provider factory
+     */
+    @Test
+    public void testGetDescriptors() {
+        FlameChartDataProviderFactory dataProviderFactory = new FlameChartDataProviderFactory();
+        Collection<IDataProviderDescriptor> descriptors = dataProviderFactory.getDescriptors(getTrace());
+        assertEquals(descriptors.size(), 2);
+
+        for (IDataProviderDescriptor descriptor : descriptors) {
+            switch(descriptor.getId()) {
+            case "org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.flamechart:org.eclipse.tracecompass.incubator.callstack.analysis.test":
+                assertEquals("FlameChart Test Callstack", descriptor.getName());
+                assertEquals(IDataProviderDescriptor.ProviderType.TIME_GRAPH, descriptor.getType());
+                assertEquals("Show FlameChart provided by Analysis module: Test Callstack", descriptor.getDescription());
+                break;
+            case "org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.flamechart:callstack.analysis":
+                assertEquals("FlameChart Test XML callstack", descriptor.getName());
+                assertEquals(IDataProviderDescriptor.ProviderType.TIME_GRAPH, descriptor.getType());
+                assertEquals("Show FlameChart provided by Analysis module: Test XML callstack", descriptor.getDescription());
+                break;
+            default:
+                fail("Unknown Entry" + descriptor.getId());
+                break;
+            }
+        }
+    }
+
 
     /**
      * Test getting the tree from the flame chart data provider

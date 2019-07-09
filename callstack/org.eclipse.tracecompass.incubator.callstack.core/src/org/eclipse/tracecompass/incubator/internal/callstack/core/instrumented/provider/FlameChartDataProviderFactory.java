@@ -9,15 +9,24 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
+import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.internal.tmf.core.model.xy.TmfTreeXYCompositeDataProvider;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -75,6 +84,27 @@ public class FlameChartDataProviderFactory implements IDataProviderFactory {
             return new FlameChartDataProvider(trace, module, secondaryId);
         }
         return null;
+    }
+
+    @Override
+    public Collection<IDataProviderDescriptor> getDescriptors(ITmfTrace trace) {
+        Iterable<IFlameChartProvider> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, IFlameChartProvider.class);
+        List<IDataProviderDescriptor> descriptors = new ArrayList<>();
+        Set<String> existingModules = new HashSet<>();
+        for (IFlameChartProvider module : modules) {
+            IAnalysisModule analysis = module;
+            // Only add analysis once per trace (which could be an experiment)
+            if (!existingModules.contains(analysis.getId())) {
+                DataProviderDescriptor.Builder builder = new DataProviderDescriptor.Builder();
+                builder.setId(FlameChartDataProvider.ID + DataProviderConstants.ID_SEPARATOR + analysis.getId())
+                    .setName(Objects.requireNonNull(Messages.FlameChartDataProvider_Title + " " + analysis.getName())) //$NON-NLS-1$
+                    .setDescription(Objects.requireNonNull(NLS.bind(Messages.FlameChartDataProvider_Description, analysis.getHelpText())))
+                    .setProviderType(ProviderType.TIME_GRAPH);
+                descriptors.add(builder.build());
+                existingModules.add(analysis.getId());
+            }
+        }
+        return descriptors;
     }
 
 }
