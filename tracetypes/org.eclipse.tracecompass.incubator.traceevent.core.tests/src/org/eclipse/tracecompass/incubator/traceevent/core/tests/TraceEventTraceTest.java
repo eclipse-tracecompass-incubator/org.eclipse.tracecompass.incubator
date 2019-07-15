@@ -13,6 +13,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,9 +23,11 @@ import java.util.Map;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
+import org.eclipse.tracecompass.internal.provisional.jsontrace.core.trace.JsonTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.core.project.model.ITmfPropertiesProvider;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
@@ -247,5 +251,53 @@ public class TraceEventTraceTest {
         } finally {
             trace.dispose();
         }
+    }
+
+    private static class TraceEventTraceStub extends TraceEventTrace {
+
+        public static void findStart(RandomAccessFile file) throws IOException {
+            TraceEventTrace.goToCorrectStart(file);
+        }
+
+    }
+
+    /**
+     * Test the methods inside the TraceEventTrace class, for eg. some data used
+     * in validation
+     *
+     * @throws IOException
+     *             should not happen
+     */
+    @SuppressWarnings({ "restriction", "resource" })
+    @Test
+    public void testTraceEventInsides() throws IOException {
+        // Test a trace that starts with {"traceEvents"
+        String path = "traces/flow_simple.json";
+
+        BufferedRandomAccessFile rafile = new BufferedRandomAccessFile(path, "r");
+
+        TraceEventTraceStub.findStart(rafile);
+        assertTrue(rafile.getFilePointer() >= 14);
+
+        // There should be one event string read per event
+        int eventCount = 0;
+        while (JsonTrace.readNextEventString(() -> rafile.read()) != null) {
+            eventCount++;
+        }
+        assertEquals(10, eventCount);
+
+        // Test a trace that starts directly with events
+        path = "traces/simple-in-order.json";
+
+        BufferedRandomAccessFile rafile2 = new BufferedRandomAccessFile(path, "r");
+
+        TraceEventTraceStub.findStart(rafile2);
+        assertEquals(0, rafile2.getFilePointer());
+
+        eventCount = 0;
+        while (JsonTrace.readNextEventString(() -> rafile2.read()) != null) {
+            eventCount++;
+        }
+        assertEquals(8, eventCount);
     }
 }
