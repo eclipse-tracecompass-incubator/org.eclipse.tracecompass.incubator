@@ -201,7 +201,16 @@ public class TraceEventTrace extends JsonTrace {
         }
     }
 
-    private static void goToCorrectStart(RandomAccessFile rafile) throws IOException {
+    /**
+     * Update the file position to be at the actual start of events, after the
+     * trace event header
+     *
+     * @param rafile
+     *            The random access file
+     * @throws IOException
+     *             Exceptions reading the file
+     */
+    protected static void goToCorrectStart(RandomAccessFile rafile) throws IOException {
         // skip start if it's {"traceEvents":
         String traceEventsKey = "\"traceEvents\""; //$NON-NLS-1$
         StringBuilder sb = new StringBuilder();
@@ -219,13 +228,13 @@ public class TraceEventTrace extends JsonTrace {
         skipList.add((int) '\f');
         while (val != -1 && val != ':' && sb.length() < 14) {
             if (!skipList.contains(val)) {
-                sb.append(val);
+                sb.append((char) val);
             }
             val = rafile.read();
         }
-        if (sb.toString().startsWith('{' + traceEventsKey) && rafile.length() > 14) {
-            rafile.seek(14);
-        } else {
+        if (!(sb.toString().startsWith('{' + traceEventsKey) && rafile.length() > 14)) {
+            // Trace does not start with {"TraceEvents", maybe it's the events
+            // directly, go back to start of trace
             rafile.seek(0);
         }
     }
