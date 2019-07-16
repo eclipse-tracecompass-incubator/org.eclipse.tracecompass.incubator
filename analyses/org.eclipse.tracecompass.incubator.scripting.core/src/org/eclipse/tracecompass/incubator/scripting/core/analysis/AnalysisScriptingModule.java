@@ -21,9 +21,20 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  * Provide an API to create an analysis. Using an analysis links the outputs of
  * the analysis with the trace. For example, the backends (state systems,
  * segment store) filled by the script will be available under the trace.
- *
+ * <p>
  * Typical use of this module is for scripts who wish to parse the events of a
  * trace or experiment and save data in a backend to be displayed later.
+ * </p>
+ * <p>
+ * Example scripts with data providers can be found here:
+ * <ul>
+ * <li><a href="../doc-files/scriptedDataProvider.js">A scripted time graph data
+ * provider</a> with script-defined entries and arrows (javascript)</li>
+ * <li><a href="../doc-files/basicAnalysis.js">A basic analysis</a> building an
+ * state system and showing its data in a time graph (javascript)</li>
+ * <li><a href="../doc-files/basicAnalysis.py">Same basic analysis as before,</a>
+ * building an state system and showing its data in a time graph, in python</li>
+ * </ul>
  *
  * @author Geneviève Bastien
  */

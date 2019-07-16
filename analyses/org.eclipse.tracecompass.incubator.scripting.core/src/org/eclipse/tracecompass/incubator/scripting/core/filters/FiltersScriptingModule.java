@@ -25,9 +25,20 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 /**
  * Scripting modules that adds filtering capabilities to Trace Compass
  * scripting.
- *
+ * <p>
+ * With this module, a script can create a complex query from the trace data and
+ * then call the {@link #applyGlobalFilter(String)} method to apply the filter
+ * on all views of Trace Compass.
+ * </p>
+ * <p>
+ * This module also contains helper methods that transform a simple query, but
+ * that may not be easily understandable by Trace Compass, into a complex one
+ * that will return a maximum of results.
+ * </p>
+ * <p>
  * This requires the <code>Trace Compass Filters (Incubation)</code> feature to
  * be installed.
+ * </p>
  *
  * @author Geneviève Bastien
  */
