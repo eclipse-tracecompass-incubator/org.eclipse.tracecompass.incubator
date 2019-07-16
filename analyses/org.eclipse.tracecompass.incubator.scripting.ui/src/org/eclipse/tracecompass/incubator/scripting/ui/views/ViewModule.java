@@ -22,7 +22,18 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * A scripting module to interact with views using EASE
+ * Scripting module that allow to interact with views using EASE in the Trace
+ * Compass UI.
+ * <p>
+ * Example scripts using views can be found here:
+ * <ul>
+ * <li><a href="../../core/analysis/doc-files/scriptedDataProvider.js">A
+ * scripted time graph data provider</a> with script-defined entries and arrows,
+ * in javascript</li>
+ * <li><a href="../../core/analysis/doc-files/basicAnalysis.py">A basic
+ * analysis,</a> building an state system and showing its data in a time graph,
+ * in python</li>
+ * </ul>
  *
  * @author Geneviève Bastien
  */
@@ -32,7 +43,7 @@ public class ViewModule {
     public static final String MODULE_ID = "/TraceCompass/Views"; //$NON-NLS-1$
 
     /**
-     * Open a time graph view for a scripted data provider
+     * Open a time graph view with a data provider
      *
      * @param dataProvider
      *            The data provider used to populate the view

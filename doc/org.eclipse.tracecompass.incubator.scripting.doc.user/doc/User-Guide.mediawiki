@@ -7,6 +7,10 @@ The following image shows the Trace Compass EASE environment, with some comments
 
 [[Image:images/engines_and_modules.png | Engines and modules]]
 
+== Table of Contents ==
+
+__TOC__
+
 == Install Trace Compass with EASE support ==
 
 To use Trace Compass Scripting modules, one needs to have the latest development snapshot of Trace Compass, or at least the stable 5.0 release.
@@ -70,6 +74,8 @@ You can also run the script in debug mode ('''Debug As''' -> '''EASE Script''').
 The Trace Compass branch downloaded above changed the ''State System Explorer'' so that it can open state system files directly, without requiring them to be linked to an analysis. The state system created by the script can thus be explored using that view.
 
 == Trace Compass Scripting API and examples ==
+
+The scripting modules and API are documented in the '''Scripting''' section of the  [https://archive.eclipse.org/tracecompass.incubator/doc/javadoc/stable-5.0/apidocs/ Trace Compass Incubator API documentation]. [https://archive.eclipse.org/tracecompass.incubator/doc/javadoc/stable-5.0/apidocs/org/eclipse/tracecompass/incubator/scripting/core/doc-files/examples.html Many examples] are also available in the documentation.
 
 Here's an example javascript script for Trace Compass. It is the equivalent of ''Active Thread'' analysis in Trace Compass, ie saves the currently running process on each CPU.
 
@@ -153,7 +159,4 @@ if (provider != null) {
 }
 
 print("Done");
-
 </pre>
-
-Other script examples can be found in the git tree of the Trace Compass Incubator here [https://git.eclipse.org/c/tracecompass.incubator/org.eclipse.tracecompass.incubator.git/tree/analyses/org.eclipse.tracecompass.incubator.scripting.core.tests/testfiles/scripts]

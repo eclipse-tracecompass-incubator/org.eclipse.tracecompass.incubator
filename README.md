@@ -42,6 +42,13 @@ take some time, to skip them you can append `-Dmaven.test.skip=true` to the
 
     mvn clean install -Dmaven.test.skip=true
 
+To generate the javadoc from the Trace Compass source code, run the following
+command from the top-level directory:
+
+    mvn clean package javadoc:aggregate
+
+The javadoc html files will be under `target/site/apidocs`.
+
 Maven profiles and properties
 -----------------------------
 

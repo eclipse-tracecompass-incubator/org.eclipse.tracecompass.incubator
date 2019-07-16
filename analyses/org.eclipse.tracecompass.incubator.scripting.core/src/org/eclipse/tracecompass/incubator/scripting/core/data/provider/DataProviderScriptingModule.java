@@ -40,6 +40,14 @@ import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
  * Scripting module to create data providers from scripted analyzes. Data
  * providers are used to define what and how data will be exported, either as
  * views or other means of exportation.
+ * <p>
+ * Example scripts with data providers can be found here:
+ * <ul>
+ * <li><a href="../../doc-files/scriptedDataProvider.js">A scripted
+ * time graph data provider</a> with script-defined entries and arrows</li>
+ * <li><a href="../../doc-files/basicAnalysis.js">A basic analysis</a>
+ * building an state system and showing its data in a time graph</li>
+ * </ul>
  *
  * @author Geneviève Bastien
  */
@@ -76,27 +84,27 @@ public class DataProviderScriptingModule {
      * manner from the state system, the
      * {@link #createScriptedTimeGraphProvider(ScriptedAnalysis, Function, Function, Function)}
      * method can be used instead.
-     *
+     * <p>
      * The possible keys for the data are:
-     *
-     * {@link #ENTRY_PATH}: MANDATORY, specifies the path in the state system
-     * (including wildcards) that is the root of the entries. For all root
-     * attributes, use '*'
-     *
-     * {@link #ENTRY_DISPLAY}: The path from the entry's root of the attribute
-     * to display. If not specified, the root attribute itself will be used
-     *
-     * {@link #ENTRY_NAME}: The path from the entry's root of the attribute that
-     * contains the name. If not specified, the name will be the attribute's
-     * name.
-     *
-     * {@link #ENTRY_ID}: The path from the entry's root of the attribute that
-     * contains an identifier for this entry. The identifier can be used to
-     * build hierarchies of entries using the {@link #ENTRY_PARENT}.
-     *
-     * {@link #ENTRY_PARENT}: The path from the entry's root of the attribute
-     * that contains the parent's ID. This data will be used along with the
-     * {@link #ENTRY_ID} to create a hierarchy between the entries.
+     * </p>
+     * <ul>
+     * <li>{@link #ENTRY_PATH}: MANDATORY, specifies the path in the state
+     * system (including wildcards) that is the root of the entries. For all
+     * root attributes, use '*'</li>
+     * <li>{@link #ENTRY_DISPLAY}: The path from the entry's root of the
+     * attribute to display. If not specified, the root attribute itself will be
+     * used</li>
+     * <li>{@link #ENTRY_NAME}: The path from the entry's root of the attribute
+     * that contains the name. If not specified, the name will be the
+     * attribute's name.</li>
+     * <li>{@link #ENTRY_ID}: The path from the entry's root of the attribute
+     * that contains an identifier for this entry. The identifier can be used to
+     * build hierarchies of entries using the {@link #ENTRY_PARENT}.</li>
+     * <li>{@link #ENTRY_PARENT}: The path from the entry's root of the
+     * attribute that contains the parent's ID. This data will be used along
+     * with the {@link #ENTRY_ID} to create a hierarchy between the entries.
+     * </li>
+     * </ul>
      *
      * @param analysis
      *            The analysis for which to create a time graph provider

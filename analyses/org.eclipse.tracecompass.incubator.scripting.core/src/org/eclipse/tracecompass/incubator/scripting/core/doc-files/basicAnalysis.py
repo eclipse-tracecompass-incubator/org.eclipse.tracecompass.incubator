@@ -4,6 +4,8 @@
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
+#
+# basicAnalysis.py
 ################################################################################
 
 # load proper Trace Compass modules
@@ -62,8 +64,8 @@ if not(ss.waitUntilBuilt(0)):
     runAnalysis()
 
 # Get a time graph provider from this analysis, displaying all attributes (which are the cpus here)
-provider = createTimeGraphProvider(analysis, {'path' : '*'});
-if not(provider is None):
+provider = createTimeGraphProvider(analysis, {ENTRY_PATH : '*'});
+if not (provider is None):
     # Open a time graph view displaying this provider
     openTimeGraphView(provider)
 

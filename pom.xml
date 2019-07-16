@@ -568,13 +568,21 @@
           <configuration>
             <groups>
               <group>
-                <title>Scripting</title>
+                <title>Trace Compass EASE Scripting</title>
                 <packages>org.eclipse.tracecompass.incubator.scripting.*</packages>
               </group>
             </groups>
             <excludePackageNames>org.eclipse.tracecompass.incubator.internal.*:*.test*</excludePackageNames>
+            <overview>overview.html</overview>
+            <noindex>true</noindex>
+            <nodeprecated>true</nodeprecated>
+            <nodeprecatedlist>true</nodeprecatedlist>
+            <nohelp>true</nohelp>
+            <notree>true</notree>
+            <doctitle>Trace Compass Incubator API</doctitle>
+            <show>public</show>
             <links>
-                  <link>https://download.eclipse.org/tracecompass/javadoc/master/apidocs/</link>
+               <link>https://archive.eclipse.org/tracecompass/doc/javadoc/apidocs/</link>
             </links>
             <verbose>true</verbose>
           </configuration>
