@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.SubSecondTimeWithUnitFormat;
+import org.eclipse.tracecompass.common.core.format.SubSecondTimeWithUnitFormat;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
 
@@ -92,7 +92,7 @@ public class OpenTracingAspects {
     }
 
     private static class OpenTracingDurationAspect implements IOpenTracingAspect<@Nullable String> {
-        private static final Format FORMATTER = new SubSecondTimeWithUnitFormat();
+        private static final Format FORMATTER = SubSecondTimeWithUnitFormat.getInstance();
 
         @Override
         public @NonNull String getName() {
