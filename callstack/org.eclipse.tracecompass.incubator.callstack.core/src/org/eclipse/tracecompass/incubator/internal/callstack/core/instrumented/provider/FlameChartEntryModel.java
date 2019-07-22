@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,7 +32,7 @@ public class FlameChartEntryModel extends TimeGraphEntryModel implements IElemen
     /**
      * An enumeration for the type of flame chart entries
      */
-    public enum EntryType {
+    public static enum EntryType {
         /**
          * A descriptive entry, for example the one for the trace
          */
@@ -45,10 +46,127 @@ public class FlameChartEntryModel extends TimeGraphEntryModel implements IElemen
          */
         FUNCTION,
         /**
-         * This entry will show the kernel statuses for the TID running the callstack.
-         * Will not always be present
+         * This entry will show the kernel statuses for the TID running the
+         * callstack. Will not always be present
          */
         KERNEL
+    }
+
+    /**
+     * A builder class for this entry model
+     */
+    public static class Builder {
+        private final long fId;
+        private final long fParentId;
+        private final long fStartTime;
+        private final String fName;
+        private final EntryType fEntryType;
+        private final int fDepth;
+        private long fEndTime;
+        private @Nullable HostThread fHostThread;
+
+        /**
+         * Constructor
+         *
+         * @param id
+         *            The unique ID for this Entry model for its trace
+         * @param parentId
+         *            The unique ID of the parent entry model
+         * @param name
+         *            The name of this entry
+         * @param start
+         *            the thread's start time
+         * @param entryType
+         *            The type of this entry
+         * @param depth
+         *            The depth if the entry is a function entry, can be
+         *            <code>-1</code> if no depth
+         */
+        public Builder(long id, long parentId, String name, long start, EntryType entryType, int depth) {
+            fId = id;
+            fParentId = parentId;
+            fName = name;
+            fStartTime = start;
+            fEntryType = entryType;
+            fDepth = depth;
+            fEndTime = start;
+            fHostThread = null;
+        }
+
+        /**
+         * Get the unique ID for this entry / builder
+         *
+         * @return this entry's unique ID
+         */
+        public long getId() {
+            return fId;
+        }
+
+        /**
+         * Get this entry / builder's start time
+         *
+         * @return the start time
+         */
+        public long getStartTime() {
+            return fStartTime;
+        }
+
+        /**
+         * Get this entry/builder's end time
+         *
+         * @return the end time
+         */
+        public long getEndTime() {
+            return fEndTime;
+        }
+
+        /**
+         * Update this entry / builder's end time
+         *
+         * @param endTime
+         *            the new end time
+         */
+        public void setEndTime(long endTime) {
+            fEndTime = Long.max(fEndTime, endTime);
+        }
+
+        /**
+         * Update this entry / builder's HostThread
+         *
+         * @param hostThread
+         *            the new HostThread
+         */
+        public void setHostThread(@Nullable HostThread hostThread) {
+            fHostThread = hostThread;
+        }
+
+        /**
+         * Build the {@link FlameChartEntryModel} from the builder, specify the
+         * parent id here to avoid race conditions
+         *
+         * @return the relevant {@link FlameChartEntryModel}
+         */
+        public FlameChartEntryModel build() {
+            return new FlameChartEntryModel(fId, fParentId, Collections.singletonList(fName), fStartTime, fEndTime, fEntryType, fDepth, fHostThread);
+        }
+
+        /**
+         * Get the parent ID of this entry
+         *
+         * @return The parent ID
+         */
+        public long getParentId() {
+            return fParentId;
+        }
+
+        /**
+         * Get the depth of this entry
+         *
+         * @return The depth
+         */
+        public int getDepth() {
+            return fDepth;
+        }
     }
 
     private final EntryType fEntryType;

@@ -21,13 +21,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallStackAnalysisStub;
+import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.FlameDataProviderTestUtils;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartDataProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartDataProviderFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
@@ -46,13 +46,13 @@ import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 
 /**
  * Test the {@link FlameChartDataProvider} class
  *
  * @author Geneviève Bastien
  */
+@SuppressWarnings("restriction")
 public class FlameChartDataProviderTest extends CallStackTestBase {
 
     private static final @Nullable IProgressMonitor MONITOR = new NullProgressMonitor();
@@ -117,7 +117,7 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
 
         // Test the hierarchy of the tree
         for (FlameChartEntryModel entry : modelEntries) {
-            FlameChartEntryModel parent = findEntryById(modelEntries, entry.getParentId());
+            FlameChartEntryModel parent = FlameDataProviderTestUtils.findEntryById(modelEntries, entry.getParentId());
             switch (entry.getEntryType()) {
             case FUNCTION:
                 assertNotNull(parent);
@@ -164,30 +164,6 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
         }
     }
 
-    private static @Nullable FlameChartEntryModel findEntryById(Collection<FlameChartEntryModel> list, long id) {
-        return list.stream()
-                .filter(entry -> entry.getId() == id)
-                .findFirst().orElse(null);
-    }
-
-    private static @Nullable FlameChartEntryModel findEntryByNameAndType(Collection<FlameChartEntryModel> list, String name, EntryType type) {
-        return list.stream()
-                .filter(entry -> entry.getEntryType().equals(type) && entry.getName().equals(name))
-                .findFirst().orElse(null);
-    }
-
-    private static @Nullable FlameChartEntryModel findEntryByDepthAndType(Collection<FlameChartEntryModel> list, int depth, EntryType type) {
-        return list.stream()
-                .filter(entry -> entry.getEntryType().equals(type) && entry.getDepth() == depth)
-                .findFirst().orElse(null);
-    }
-
-    private static List<FlameChartEntryModel> findEntriesByParent(Collection<FlameChartEntryModel> list, long parentId) {
-        return list.stream()
-                .filter(entry -> entry.getParentId() == parentId)
-                .collect(Collectors.toList());
-    }
-
     /**
      * Test getting the model from the flame chart data provider
      */
@@ -203,21 +179,21 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
         // Find the entries corresponding to threads 3 and 6 (along with pid 5)
         Set<@NonNull Long> selectedIds = new HashSet<>();
         // Thread 3
-        FlameChartEntryModel tid3 = findEntryByNameAndType(modelEntries, "3", EntryType.LEVEL);
+        FlameChartEntryModel tid3 = FlameDataProviderTestUtils.findEntryByNameAndType(modelEntries, "3", EntryType.LEVEL);
         assertNotNull(tid3);
         selectedIds.add(tid3.getId());
-        List<FlameChartEntryModel> tid3Children = findEntriesByParent(modelEntries, tid3.getId());
+        List<FlameChartEntryModel> tid3Children = FlameDataProviderTestUtils.findEntriesByParent(modelEntries, tid3.getId());
         assertEquals(2, tid3Children.size());
         tid3Children.forEach(child -> selectedIds.add(child.getId()));
         // Pid 5
-        FlameChartEntryModel pid5 = findEntryByNameAndType(modelEntries, "5", EntryType.LEVEL);
+        FlameChartEntryModel pid5 = FlameDataProviderTestUtils.findEntryByNameAndType(modelEntries, "5", EntryType.LEVEL);
         assertNotNull(pid5);
         selectedIds.add(pid5.getId());
         // Thread 6
-        FlameChartEntryModel tid6 = findEntryByNameAndType(modelEntries, "6", EntryType.LEVEL);
+        FlameChartEntryModel tid6 = FlameDataProviderTestUtils.findEntryByNameAndType(modelEntries, "6", EntryType.LEVEL);
         assertNotNull(tid6);
         selectedIds.add(tid6.getId());
-        List<FlameChartEntryModel> tid6Children = findEntriesByParent(modelEntries, tid6.getId());
+        List<FlameChartEntryModel> tid6Children = FlameDataProviderTestUtils.findEntriesByParent(modelEntries, tid6.getId());
         assertEquals(3, tid6Children.size());
         tid6Children.forEach(child -> selectedIds.add(child.getId()));
 
@@ -235,25 +211,25 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
         verifyStates(rows, pid5, Collections.emptyList());
         verifyStates(rows, tid6, Collections.emptyList());
         // Verify function level 1 of tid 3
-        verifyStates(rows, findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Integer.MIN_VALUE, "op2")));
+        verifyStates(rows, FlameDataProviderTestUtils.findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Integer.MIN_VALUE, "op2")));
         // Verify function level 2 of tid 3
-        verifyStates(rows, findEntryByDepthAndType(tid3Children, 2, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, FlameDataProviderTestUtils.findEntryByDepthAndType(tid3Children, 2, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(1, 4, Integer.MIN_VALUE),
                 new TimeGraphState(5, 1, Integer.MIN_VALUE, "op3"),
                 new TimeGraphState(6, 1, Integer.MIN_VALUE),
                 new TimeGraphState(7, 6, Integer.MIN_VALUE, "op2"),
                 new TimeGraphState(13, 8, Integer.MIN_VALUE)));
         // Verify function level 1 of tid 6
-        verifyStates(rows, findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Integer.MIN_VALUE, "op1")));
+        verifyStates(rows, FlameDataProviderTestUtils.findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Integer.MIN_VALUE, "op1")));
         // Verify function level 2 of tid 6
-        verifyStates(rows, findEntryByDepthAndType(tid6Children, 2, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, FlameDataProviderTestUtils.findEntryByDepthAndType(tid6Children, 2, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(2, 5, Integer.MIN_VALUE, "op3"),
                 new TimeGraphState(7, 1, Integer.MIN_VALUE),
                 new TimeGraphState(8, 3, Integer.MIN_VALUE, "op2"),
                 new TimeGraphState(11, 1, Integer.MIN_VALUE),
                 new TimeGraphState(12, 8, Integer.MIN_VALUE, "op4")));
         // Verify function level 3 of tid 6
-        verifyStates(rows, findEntryByDepthAndType(tid6Children, 3, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, FlameDataProviderTestUtils.findEntryByDepthAndType(tid6Children, 3, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(1, 3, Integer.MIN_VALUE),
                 new TimeGraphState(4, 2, Integer.MIN_VALUE, "op1"),
                 new TimeGraphState(6, 3, Integer.MIN_VALUE),
@@ -274,19 +250,19 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
         verifyStates(rows, pid5, Collections.emptyList());
         verifyStates(rows, tid6, Collections.emptyList());
         // Verify function level 1 of tid 3
-        verifyStates(rows, findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Integer.MIN_VALUE, "op2")));
+        verifyStates(rows, FlameDataProviderTestUtils.findEntryByDepthAndType(tid3Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(3, 17, Integer.MIN_VALUE, "op2")));
         // Verify function level 2 of tid 3
-        verifyStates(rows, findEntryByDepthAndType(tid3Children, 2, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, FlameDataProviderTestUtils.findEntryByDepthAndType(tid3Children, 2, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(1, 4, Integer.MIN_VALUE),
                 new TimeGraphState(13, 8, Integer.MIN_VALUE)));
         // Verify function level 1 of tid 6
-        verifyStates(rows, findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Integer.MIN_VALUE, "op1")));
+        verifyStates(rows, FlameDataProviderTestUtils.findEntryByDepthAndType(tid6Children, 1, EntryType.FUNCTION), ImmutableList.of(new TimeGraphState(1, 19, Integer.MIN_VALUE, "op1")));
         // Verify function level 2 of tid 6
-        verifyStates(rows, findEntryByDepthAndType(tid6Children, 2, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, FlameDataProviderTestUtils.findEntryByDepthAndType(tid6Children, 2, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(2, 5, Integer.MIN_VALUE, "op3"),
                 new TimeGraphState(12, 8, Integer.MIN_VALUE, "op4")));
         // Verify function level 3 of tid 6
-        verifyStates(rows, findEntryByDepthAndType(tid6Children, 3, EntryType.FUNCTION), ImmutableList.of(
+        verifyStates(rows, FlameDataProviderTestUtils.findEntryByDepthAndType(tid6Children, 3, EntryType.FUNCTION), ImmutableList.of(
                 new TimeGraphState(1, 3, Integer.MIN_VALUE),
                 new TimeGraphState(10, 11, Integer.MIN_VALUE)));
     }
@@ -305,9 +281,9 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
         List<@NonNull FlameChartEntryModel> modelEntries = model.getEntries();
 
         // Thread 2
-        FlameChartEntryModel tid2 = findEntryByNameAndType(modelEntries, "2", EntryType.LEVEL);
+        FlameChartEntryModel tid2 = FlameDataProviderTestUtils.findEntryByNameAndType(modelEntries, "2", EntryType.LEVEL);
         assertNotNull(tid2);
-        List<FlameChartEntryModel> tid2Children = findEntriesByParent(modelEntries, tid2.getId());
+        List<FlameChartEntryModel> tid2Children = FlameDataProviderTestUtils.findEntriesByParent(modelEntries, tid2.getId());
         assertEquals(3, tid2Children.size());
 
         // For each child, make sure the response is always the same
@@ -331,23 +307,23 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
         verifyFollowResponse(rowModel, -1, -1);
 
         // Go backward from the back
-        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 20L), selectedEntry)), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(ImmutableList.of(Long.MIN_VALUE, 20L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 1, 12);
 
         // Go backward from time 7 till the beginning
-        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 7L), selectedEntry)), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(ImmutableList.of(Long.MIN_VALUE, 7L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 2, 5);
 
-        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 5L), selectedEntry)), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(ImmutableList.of(Long.MIN_VALUE, 5L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 3, 4);
 
-        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 4L), selectedEntry)), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(ImmutableList.of(Long.MIN_VALUE, 4L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 2, 3);
 
-        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 3L), selectedEntry)), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(ImmutableList.of(Long.MIN_VALUE, 3L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, 1, 1);
 
-        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, 1L), selectedEntry)), new NullProgressMonitor());
+        rowModel = dataProvider.fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(ImmutableList.of(Long.MIN_VALUE, 1L), selectedEntry)), new NullProgressMonitor());
         verifyFollowResponse(rowModel, -1, -1);
     }
 
