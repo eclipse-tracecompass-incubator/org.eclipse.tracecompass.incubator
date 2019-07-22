@@ -12,16 +12,21 @@ package org.eclipse.tracecompass.incubator.callstack.core.tests.callgraph.instru
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.tests.Activator;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallGraphAnalysisStub;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedCalledFunction;
@@ -30,7 +35,15 @@ import org.eclipse.tracecompass.statesystem.core.StateSystemFactory;
 import org.eclipse.tracecompass.statesystem.core.backend.IStateHistoryBackend;
 import org.eclipse.tracecompass.statesystem.core.backend.StateHistoryBackendFactory;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
+import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.TmfXmlTraceStub;
+import org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.TmfXmlTraceStubNs;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -43,6 +56,10 @@ import com.google.common.collect.ImmutableList;
  *
  */
 public class AggregationTreeTest {
+
+    private static final String CALLSTACK_FILE = "testfiles/traces/callstack.xml";
+
+    private ITmfTrace fTrace;
 
     private static final String QUARK_0 = "0";
     private static final String QUARK_1 = "1";
@@ -79,6 +96,28 @@ public class AggregationTreeTest {
     }
 
     /**
+     * Open a flamegraph
+     */
+    @Before
+    public void before() {
+        TmfXmlTraceStub trace = new TmfXmlTraceStubNs();
+        IPath filePath = Activator.getAbsoluteFilePath(CALLSTACK_FILE);
+        IStatus status = trace.validate(null, filePath.toOSString());
+        if (!status.isOK()) {
+            fail(status.getException().getMessage());
+        }
+        try {
+            trace.initTrace(null, filePath.toOSString(), TmfEvent.class);
+        } catch (TmfTraceException e) {
+            fail(e.getMessage());
+        }
+        fTrace = trace;
+        TmfTraceOpenedSignal signal = new TmfTraceOpenedSignal(this, trace, null);
+        trace.traceOpened(signal);
+        TmfTraceManager.getInstance().traceOpened(signal);
+    }
+
+    /**
      * Dispose the callgraph analysis that has been set
      */
     @After
@@ -86,6 +125,10 @@ public class AggregationTreeTest {
         CallGraphAnalysisStub cga = fCga;
         if (cga != null) {
             cga.dispose();
+        }
+        ITmfTrace trace = fTrace;
+        if (trace != null) {
+            trace.dispose();
         }
     }
 
@@ -630,5 +673,14 @@ public class AggregationTreeTest {
 
     private void setCga(CallGraphAnalysisStub cga) {
         fCga = cga;
+    }
+
+    /**
+     * Get a trace for when a trace is needed
+     *
+     * @return A trace, that has no relation with the callgraphs of these tests
+     */
+    protected @NonNull ITmfTrace getTrace() {
+        return Objects.requireNonNull(fTrace);
     }
 }

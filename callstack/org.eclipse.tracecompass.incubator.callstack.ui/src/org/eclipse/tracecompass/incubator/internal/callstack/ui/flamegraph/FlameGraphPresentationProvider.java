@@ -8,31 +8,29 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph;
 
-import java.text.Format;
-import java.text.NumberFormat;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.SubSecondTimeWithUnitFormat;
-import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.FlameViewPalette;
-import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
+import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
+import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils;
-
-import com.google.common.collect.ImmutableMap;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 
 /**
  * Presentation provider for the flame graph view, based on the generic TMF
@@ -44,11 +42,7 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
     /** Number of colors used for flameGraph events */
     public static final int NUM_COLORS = 360;
 
-    private static final Format FORMATTER = new SubSecondTimeWithUnitFormat();
-
     private @Nullable FlameGraphView fView;
-
-    private @Nullable Integer fAverageCharWidth;
 
     private FlameViewPalette fFlameViewPalette;
 
@@ -77,70 +71,56 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
     @NonNullByDefault({})
     @Override
     public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event, long hoverTime) {
-        if (!(event instanceof FlamegraphEvent)) {
-            return Collections.emptyMap();
+        Map<String, String> retMap = super.getEventHoverToolTipInfo(event, hoverTime);
+        if (retMap == null) {
+            retMap = new LinkedHashMap<>(1);
         }
-        ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<>();
-        ITmfTrace activeTrace = TmfTraceManager.getInstance().getActiveTrace();
-        String funcSymbol = null;
-        FlamegraphEvent fgEvent = (FlamegraphEvent) event;
-        Object symbol = fgEvent.getSymbol();
-        if (activeTrace != null && (symbol instanceof ICallStackSymbol)) {
-            funcSymbol = ((ICallStackSymbol) symbol).resolve(SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
+        if (!(event instanceof TimeEvent) || !((TimeEvent) event).hasValue() ||
+                !(event.getEntry() instanceof TimeGraphEntry)) {
+            return retMap;
         }
-        builder.put(Messages.FlameGraph_Symbol, funcSymbol == null ? String.valueOf(fgEvent.getSymbol()) : funcSymbol + " (" + fgEvent.getSymbol() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-        long nb = (fgEvent.getNumberOfCalls());
-        builder.put(Messages.FlameGraph_NbCalls, NumberFormat.getIntegerInstance().format(nb)); // $NON-NLS-1$
-        Map<String, String> tooltip = ((FlamegraphEvent) event).getTooltip(FORMATTER);
-        builder.putAll(tooltip);
-        return builder.build();
+
+        TimeGraphEntry entry = (TimeGraphEntry) event.getEntry();
+        ITimeGraphDataProvider<? extends TimeGraphEntryModel> dataProvider = FlameGraphView.getProvider(entry);
+        TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = dataProvider.fetchTooltip(
+        FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(hoverTime, hoverTime, 1, Collections.singletonList(entry.getEntryModel().getId()))), null);
+        Map<@NonNull String, @NonNull String> tooltipModel = response.getModel();
+        if (tooltipModel != null) {
+            retMap.putAll(tooltipModel);
+        }
+
+        return retMap;
     }
 
     @Override
     public int getStateTableIndex(@Nullable ITimeEvent event) {
-        if (event instanceof FlamegraphEvent) {
-            FlamegraphEvent flameGraphEvent = (FlamegraphEvent) event;
-            return FlameViewPalette.getIndexForValue(flameGraphEvent.getValue());
-        } else if (event instanceof NullTimeEvent) {
+        if (event == null || event instanceof NullTimeEvent) {
             return INVISIBLE;
-        } else if (event instanceof TimeEvent) {
-            int cfIndex = fFlameViewPalette.getControlFlowIndex(event);
-            if (cfIndex >= 0) {
-                return cfIndex;
+        }
+        ITimeGraphEntry entry = event.getEntry();
+        if (event instanceof TimeEvent && entry instanceof TimeGraphEntry) {
+            TimeGraphEntry tgEntry = (TimeGraphEntry) entry;
+            ITmfTreeDataModel entryModel = tgEntry.getEntryModel();
+            if (entryModel instanceof FlameChartEntryModel) {
+                switch(((FlameChartEntryModel) entryModel).getEntryType()) {
+                case FUNCTION:
+                    return FlameViewPalette.getIndexForValue(((TimeEvent) event).getValue());
+                case KERNEL:
+                    int cfIndex = fFlameViewPalette.getControlFlowIndex(event);
+                    if (cfIndex >= 0) {
+                        return cfIndex;
+                    }
+                    break;
+                case LEVEL: // Fallthrough
+                case TRACE: // Fallthrough
+                default:
+                    break;
+                }
             }
         }
-        return FlameViewPalette.MULTIPLE_STATE_INDEX;
-    }
 
-    @Override
-    public void postDrawEvent(@Nullable ITimeEvent event, @Nullable Rectangle bounds, @Nullable GC gc) {
-        if (bounds == null || gc == null) {
-            return;
-        }
-        Integer averageCharWidth = fAverageCharWidth;
-        if (averageCharWidth == null) {
-            averageCharWidth = gc.getFontMetrics().getAverageCharWidth();
-            fAverageCharWidth = averageCharWidth;
-        }
-        if (bounds.width <= averageCharWidth) {
-            return;
-        }
-        if (!(event instanceof FlamegraphEvent)) {
-            return;
-        }
-        String funcSymbol = ""; //$NON-NLS-1$
-        ITmfTrace activeTrace = TmfTraceManager.getInstance().getActiveTrace();
-        if (activeTrace != null) {
-            FlamegraphEvent fgEvent = (FlamegraphEvent) event;
-            Object symbol = fgEvent.getSymbol();
-            if (symbol instanceof ICallStackSymbol) {
-                funcSymbol = ((ICallStackSymbol) symbol).resolve(SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
-            } else {
-                funcSymbol = String.valueOf(symbol);
-            }
-        }
-        gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
-        Utils.drawText(gc, funcSymbol, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
+
+        return FlameViewPalette.MULTIPLE_STATE_INDEX;
     }
 
     /**

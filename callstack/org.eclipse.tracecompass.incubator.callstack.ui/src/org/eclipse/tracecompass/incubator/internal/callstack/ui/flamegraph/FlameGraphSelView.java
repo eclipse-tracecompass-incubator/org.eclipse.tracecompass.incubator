@@ -16,6 +16,7 @@ import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.Flame
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
  * View to display the flame graph. This uses the flameGraphNode tree generated
@@ -48,13 +49,17 @@ public class FlameGraphSelView extends FlameGraphView {
      */
     @TmfSignalHandler
     public void handleSelectionChange(TmfSelectionRangeUpdatedSignal signal) {
+        ITmfTrace trace = getTrace();
+        if (trace == null) {
+            return;
+        }
         ITmfTimestamp beginTime = signal.getBeginTime();
         ITmfTimestamp endTime = signal.getEndTime();
 
         if (beginTime != endTime) {
-            buildFlameGraph(getCallgraphModules(), beginTime, endTime);
+            buildFlameGraph(trace, beginTime, endTime);
         } else {
-            buildFlameGraph(getCallgraphModules(), null, null);
+            buildFlameGraph(trace, null, null);
         }
 
     }

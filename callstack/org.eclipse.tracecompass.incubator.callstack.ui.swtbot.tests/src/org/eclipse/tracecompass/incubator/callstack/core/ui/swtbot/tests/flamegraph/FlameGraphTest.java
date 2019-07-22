@@ -14,8 +14,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -28,12 +28,20 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
+import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.callgraph.instrumented.AggregationTreeTest;
+import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallGraphAnalysisStub;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.FlameGraphDataProvider;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.FlameGraphDataProviderFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphPresentationProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphView;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.ConditionHelpers;
 import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.ConditionHelpers.SWTBotTestCondition;
+import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.SWTBotTimeGraph;
 import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.SWTBotUtils;
 import org.eclipse.tracecompass.tmf.ui.tests.shared.WaitUtils;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
@@ -42,24 +50,29 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.ui.IViewPart;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.junit.runner.RunWith;
 
 /**
  * Unit tests for the flame graph view
  *
  * @author Matthew Khouzam
  */
+@RunWith(SWTBotJunit4ClassRunner.class)
 public class FlameGraphTest extends AggregationTreeTest {
 
+    private static final @NonNull String SECONDARY_ID = "org.eclipse.tracecompass.incubator.callstack.ui.swtbot.test";
     private static final String FLAMEGRAPH_ID = FlameGraphView.ID;
     private SWTWorkbenchBot fBot;
-    private SWTBotView fView;
+    private SWTBotView fViewBot;
     private FlameGraphView fFg;
     /** The Log4j logger instance. */
     private static final Logger fLogger = Logger.getRootLogger();
     private TimeGraphViewer fTimeGraphViewer;
+    private SWTBotTimeGraph fTimeGraph;
 
     /**
      * Initialization
@@ -86,14 +99,14 @@ public class FlameGraphTest extends AggregationTreeTest {
      * Open a flamegraph
      */
     @Before
-    public void before() {
+    public void openView() {
         fBot = new SWTWorkbenchBot();
-        SWTBotUtils.openView(FLAMEGRAPH_ID);
+        SWTBotUtils.openView(FLAMEGRAPH_ID, SECONDARY_ID);
         SWTBotView view = fBot.viewById(FLAMEGRAPH_ID);
         assertNotNull(view);
-        fView = view;
+        fViewBot = view;
         FlameGraphView flamegraph = UIThreadRunnable.syncExec((Result<FlameGraphView>) () -> {
-            IViewPart viewRef = fView.getViewReference().getView(true);
+            IViewPart viewRef = fViewBot.getViewReference().getView(true);
             return (viewRef instanceof FlameGraphView) ? (FlameGraphView) viewRef : null;
         });
         assertNotNull(flamegraph);
@@ -101,14 +114,54 @@ public class FlameGraphTest extends AggregationTreeTest {
         assertNotNull(fTimeGraphViewer);
         SWTBotUtils.maximize(flamegraph);
         fFg = flamegraph;
+        fTimeGraph = new SWTBotTimeGraph(view.bot());
     }
 
-    private void loadFlameGraph() {
-        UIThreadRunnable.syncExec(() -> fFg.buildFlameGraph(Collections.singleton(getCga()), null, null));
+    /**
+     * Clean up after a test, reset the views and reset the states of the
+     * timegraph by pressing reset on all the resets of the legend
+     */
+    @After
+    public void after() {
+        // Calling maximize again will minimize
+        FlameGraphView fg = fFg;
+        if (fg != null) {
+            SWTBotUtils.maximize(fg);
+        }
+        // Setting the input to null so the view can be emptied, to avoid race conditions with subsequent tests
+        TimeGraphViewer tg = fTimeGraphViewer;
+        if (tg != null) {
+            UIThreadRunnable.syncExec(() -> {
+                tg.setInput(null);
+                tg.refresh();
+            });
+        }
         fBot.waitUntil(new SWTBotTestCondition() {
             @Override
             public boolean test() throws Exception {
-                return !fFg.isDirty();
+                return fTimeGraph.getEntries().length == 0;
+            }
+
+            @Override
+            public String getFailureMessage() {
+                return "Flame graph not emptied";
+            }
+        });
+        fViewBot.close();
+        fBot.waitUntil(ConditionHelpers.viewIsClosed(fViewBot));
+    }
+
+    private void loadFlameGraph() {
+        CallGraphAnalysisStub cga = Objects.requireNonNull(getCga());
+        ITmfTrace trace = getTrace();
+        fFg.traceSelected(new TmfTraceSelectedSignal(this, trace));
+        FlameGraphDataProvider<?, ?, ?> dp = new FlameGraphDataProvider<>(trace, cga, FlameGraphDataProvider.ID + ':' + SECONDARY_ID);
+        FlameGraphDataProviderFactory.registerDataProviderWithId(SECONDARY_ID, dp);
+        UIThreadRunnable.syncExec(() -> fFg.buildFlameGraph(trace, null, null));
+        fBot.waitUntil(new SWTBotTestCondition() {
+            @Override
+            public boolean test() throws Exception {
+                return fTimeGraph.getEntries().length > 0;
             }
 
             @Override
@@ -120,8 +173,8 @@ public class FlameGraphTest extends AggregationTreeTest {
     }
 
     private ITimeGraphEntry selectRoot() {
-        // FIXME: there should be only 2 selectNextItem, not 3
         UIThreadRunnable.syncExec(() -> {
+            fTimeGraphViewer.selectNextItem();
             fTimeGraphViewer.selectNextItem();
             fTimeGraphViewer.selectNextItem();
         });

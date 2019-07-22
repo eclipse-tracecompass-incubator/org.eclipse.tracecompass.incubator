@@ -11,7 +11,6 @@ package org.eclipse.tracecompass.incubator.analysis.core.concepts;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -91,16 +90,6 @@ public class AggregatedCallSite extends WeightedTree<ICallStackSymbol> {
     @Override
     public String toString() {
         return "CallSite: " + getObject(); //$NON-NLS-1$
-    }
-
-    /**
-     * Get extra children sites that come with this callsite. For instance, an
-     * instrumented callsite could return the kernel processes
-     *
-     * @return The extra children sites
-     */
-    public Collection<AggregatedCallSite> getExtraChildrenSites() {
-        return Collections.emptyList();
     }
 
 }

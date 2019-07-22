@@ -10,7 +10,9 @@
 package org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -24,14 +26,17 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 
 /**
- * Factory for the flame chart data provider
+ * Factory for the flame graph data provider
  *
  * @author Geneviève Bastien
  */
 public class FlameGraphDataProviderFactory implements IDataProviderFactory {
+
+    private static Map<String, FlameGraphDataProvider<?, ?, ?>> INSTANCES = new HashMap<>();
 
     @Override
     public @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> createProvider(ITmfTrace trace) {
@@ -59,6 +64,10 @@ public class FlameGraphDataProviderFactory implements IDataProviderFactory {
     }
 
     private static @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> create(ITmfTrace trace, String secondaryId) {
+        FlameGraphDataProvider<?, ?, ?> dataProvider = INSTANCES.get(secondaryId);
+        if (dataProvider != null) {
+            return dataProvider;
+        }
         // The trace can be an experiment, so we need to know if there are
         // multiple analysis modules with the same ID
         Iterable<IWeightedTreeProvider> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, IWeightedTreeProvider.class);
@@ -76,6 +85,21 @@ public class FlameGraphDataProviderFactory implements IDataProviderFactory {
             return new FlameGraphDataProvider<>(trace, module, FlameGraphDataProvider.ID + ':' + secondaryId);
         }
         return null;
+    }
+
+    /**
+     * Adds a reference to a data provider identified by the id, but not
+     * associated with a trace. Useful for data provider unit testing where
+     * fixtures of data are used without a trace
+     *
+     * @param id
+     *            ID of the data provider
+     * @param dataProvider
+     *            The data provider
+     */
+    @VisibleForTesting
+    public static void registerDataProviderWithId(String id, FlameGraphDataProvider<?, ?, ?> dataProvider) {
+        INSTANCES.put(id, dataProvider);
     }
 
 }
