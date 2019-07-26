@@ -133,12 +133,11 @@ public class DataProviderScriptingModule {
 
         DataDrivenOutputEntry entry = new DataDrivenOutputEntry(Collections.emptyList(), path, null, true,
                 display, id, parent, name, DisplayType.ABSOLUTE);
-        DataDrivenTimeGraphProviderFactory factory = new DataDrivenTimeGraphProviderFactory(Collections.singletonList(entry), Collections.singleton(analysis.getName()), Collections.emptyList());
         ITmfStateSystemBuilder stateSystem = analysis.getStateSystem(true);
         if (stateSystem == null) {
             return null;
         }
-        ITimeGraphDataProvider<TimeGraphEntryModel> provider = factory.create(analysis.getTrace(), Collections.singletonList(stateSystem), ScriptingDataProviderManager.PROVIDER_ID + ':' + analysis.getName());
+        ITimeGraphDataProvider<TimeGraphEntryModel> provider = DataDrivenTimeGraphProviderFactory.create(analysis.getTrace(), Collections.singletonList(stateSystem), Collections.singletonList(entry), Collections.emptyList(), ScriptingDataProviderManager.PROVIDER_ID + ':' + analysis.getName());
         ScriptingDataProviderManager.getInstance().registerDataProvider(analysis.getTrace(), provider);
         return provider;
     }
