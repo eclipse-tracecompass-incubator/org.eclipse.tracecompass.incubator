@@ -31,6 +31,13 @@
             name="Filters"
             visible="true">
       </module>
+      <module
+            category="org.eclipse.tracecompass.incubator.scripting.core.category"
+            class="org.eclipse.tracecompass.incubator.scripting.core.trace.TraceScriptingModule"
+            id="org.eclipse.tracecompass.incubator.scripting.core.trace"
+            name="Trace"
+            visible="true">
+      </module>
       <category
             id="org.eclipse.tracecompass.incubator.scripting.core.category"
             name="TraceCompass">

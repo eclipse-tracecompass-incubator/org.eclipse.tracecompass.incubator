@@ -15,7 +15,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ease,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.core.commands,
- org.eclipse.ui.workbench,
  org.eclipse.jface,
  org.eclipse.tracecompass.statesystem.core,
  org.eclipse.tracecompass.analysis.os.linux.core,
@@ -27,6 +26,7 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.scripting.core;x-fri
  org.eclipse.tracecompass.incubator.scripting.core.analysis,
  org.eclipse.tracecompass.incubator.scripting.core.data.provider,
  org.eclipse.tracecompass.incubator.scripting.core.filters,
+ org.eclipse.tracecompass.incubator.scripting.core.trace,
  org.eclipse.tracecompass.incubator.scripting.core.utils
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.scripting.core
 Import-Package: com.google.common.collect,

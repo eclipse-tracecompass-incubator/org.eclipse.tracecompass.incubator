@@ -11,6 +11,7 @@ package org.eclipse.tracecompass.incubator.scripting.core.analysis;
 
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -83,6 +84,33 @@ public class AnalysisScriptingModule {
         }
         return field.getValue();
 
+    }
+
+    /**
+     * A wrapper method to get a specified analysis of a trace. It returns an
+     * existing analysis, whether builtin or data-driven, for the trace. These
+     * analyses cannot create state systems or anything else, but their results
+     * can be queried and visualized in a script.
+     * <p>
+     * The analyses can be queried by ID, or by name, ie the text that is
+     * displayed in the Trace Compass UI.
+     *
+     * @param trace
+     *            The trace being analyzed.
+     * @param analysisName
+     *            The analysis module name or ID to get.
+     * @return The module
+     */
+    @WrapToScript
+    public @Nullable IAnalysisModule getTraceAnalysis(ITmfTrace trace, String analysisName) {
+        for (ITmfTrace childTrace : TmfTraceManager.getTraceSetWithExperiment(trace)) {
+            for (IAnalysisModule module : childTrace.getAnalysisModules()) {
+                if (module.getName().equals(analysisName) || module.getId().equals(analysisName)) {
+                    return module;
+                }
+            }
+        }
+        return null;
     }
 
 }
