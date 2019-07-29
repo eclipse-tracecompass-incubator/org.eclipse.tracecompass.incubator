@@ -17,6 +17,7 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
+import org.eclipse.tracecompass.incubator.callstack.core.callgraph.SymbolAspect;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.SegmentComparators;
@@ -91,7 +92,7 @@ abstract class AbstractCalledFunction implements ICalledFunction {
 
     @Override
     public String getName() {
-        return NonNullUtils.nullToEmptyString(getSymbol().toString());
+        return NonNullUtils.nullToEmptyString(SymbolAspect.SYMBOL_ASPECT.resolve(this));
     }
 
     /**

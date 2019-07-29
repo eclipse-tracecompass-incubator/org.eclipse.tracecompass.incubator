@@ -649,7 +649,8 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
     @Override
     public Iterable<ISegment> getIntersectingElements(long start, long end) {
         ITmfStateSystem stateSystem = fRootGroup.getStateSystem();
-        long startTime = Math.max(start - 1, stateSystem.getStartTime());
+        // Start can be Long.MIN_VALUE, we need to avoid underflow
+        long startTime = Math.max(Math.max(1, start) - 1, stateSystem.getStartTime());
         long endTime = Math.min(end, stateSystem.getCurrentEndTime());
         if (startTime > endTime) {
             return Collections.emptyList();
@@ -664,10 +665,14 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
                     throw new NullPointerException("The quark was in that map in the first place, there must be a callstack to go with it!"); //$NON-NLS-1$
                 }
                 HostThread hostThread = callstack.getHostThread(interval.getStartTime());
+
+                int pid = -1 ;
                 if (hostThread == null) {
                     hostThread = new HostThread(StringUtils.EMPTY, IHostModel.UNKNOWN_TID);
+                } else {
+                    pid = ModelManager.getModelFor(hostThread.getHost()).getProcessId(hostThread.getTid(), interval.getStartTime());
                 }
-                return CalledFunctionFactory.create(interval.getStartTime(), interval.getEndTime() + 1, interval.getValue(), -1, hostThread.getTid(),
+                return CalledFunctionFactory.create(interval.getStartTime(), interval.getEndTime() + 1, interval.getValue(), pid, hostThread.getTid(),
                         null, ModelManager.getModelFor(hostThread.getHost()));
             };
             return Iterables.transform(query2d, fct);
