@@ -9,6 +9,7 @@
 
 package org.eclipse.tracecompass.incubator.scripting.ui.views;
 
+import org.eclipse.ease.modules.ScriptParameter;
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Display;
@@ -51,17 +52,14 @@ public class ViewModule {
     @WrapToScript
     public void openTimeGraphView(ITimeGraphDataProvider<TimeGraphEntryModel> dataProvider) {
 
-        Display.getDefault().asyncExec(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    IViewPart view = openView(dataProvider.getId());
-                    if (view instanceof ScriptedTimeGraphView) {
-                        ((ScriptedTimeGraphView) view).refreshIfNeeded();
-                    }
-                } catch (final PartInitException e) {
-                    // Do nothing
+        Display.getDefault().asyncExec(() -> {
+            try {
+                IViewPart view = openView(dataProvider.getId());
+                if (view instanceof ScriptedTimeGraphView) {
+                    ((ScriptedTimeGraphView) view).refreshIfNeeded();
                 }
+            } catch (final PartInitException e) {
+                // Do nothing
             }
         });
     }
@@ -71,5 +69,49 @@ public class ViewModule {
         final IWorkbenchPage activePage = wb.getActiveWorkbenchWindow().getActivePage();
 
         return activePage.showView(ScriptedTimeGraphView.ID, name.replace(":", ScriptedTimeGraphView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
+    }
+
+    /**
+     * Open any view in Trace Compass, using its view ID, with an optional
+     * secondary ID.
+     * <p>
+     * For many views that are common for many analyses, for example, the table
+     * views, scatter views, statistics, flame chart/graph, the secondary ID is
+     * the ID of the analysis. This value can be found by selecting the analysis
+     * that will be the source of the view and looking in the 'Properties' view
+     * for the ID property.
+     * <p>
+     * For example, to open a table view for the LTTng-UST CallStack (Incubator) analysis, the follow call can be make
+     * <p>
+     * <pre>
+     * showView(org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.table.SegmentStoreTableView.ID, "org.eclipse.tracecompass.incubator.callstack.core.lttng.ust");
+     * </pre>
+     *
+     * @param viewId
+     *            The ID of the view to display
+     * @param secondaryId
+     *            The secondary ID, if required.
+     */
+    @WrapToScript
+    public void showView(String viewId, @ScriptParameter(defaultValue = "") String secondaryId) {
+
+        Display.getDefault().asyncExec(() -> {
+            try {
+                final IWorkbench wb = PlatformUI.getWorkbench();
+                final IWorkbenchPage activePage = wb.getActiveWorkbenchWindow().getActivePage();
+
+                IViewPart view;
+                if (secondaryId.isEmpty()) {
+                    view = activePage.showView(viewId);
+                } else {
+                    view = activePage.showView(viewId, secondaryId, IWorkbenchPage.VIEW_ACTIVATE);
+                }
+                if (view instanceof ScriptedTimeGraphView) {
+                    ((ScriptedTimeGraphView) view).refreshIfNeeded();
+                }
+            } catch (final PartInitException e) {
+                // Do nothing
+            }
+        });
     }
 }
