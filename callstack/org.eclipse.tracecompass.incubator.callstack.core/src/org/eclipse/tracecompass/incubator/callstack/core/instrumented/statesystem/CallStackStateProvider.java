@@ -21,7 +21,6 @@ import org.eclipse.tracecompass.incubator.analysis.core.aspects.ThreadNameAspect
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.Messages;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
@@ -109,6 +108,8 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
     /** CallStack state system ID */
     private static final String ID = "org.eclipse.linuxtools.tmf.callstack"; //$NON-NLS-1$
 
+    private boolean fHasErrors = false;
+
     /**
      * Default constructor
      *
@@ -175,17 +176,18 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
                 threadName = Long.toString(getThreadId(event));
             }
             int quark = ss.getQuarkAbsoluteAndAdd(PROCESSES, processName, threadName, InstrumentedCallStackAnalysis.CALL_STACK);
-            ITmfStateValue poppedValue = ss.popAttribute(timestamp, quark);
+            Object poppedValue = ss.popAttributeObject(timestamp, quark);
             /*
              * Verify that the value we are popping matches the one in the
              * event field, unless the latter is undefined.
              */
-            if (!functionExitState.equals(poppedValue)) {
+            if (!fHasErrors && !functionExitState.equals(poppedValue)) {
                 Activator.getInstance().logWarning(NLS.bind(Messages.CallStackStateProvider_EventDescription, event.getName(),
-                        event.getTimestamp().getValue()) + ": " + NLS.bind( //$NON-NLS-1$
-                        Messages.CallStackStateProvider_UnmatchedPoppedValue,
-                        functionExitState,
-                        poppedValue));
+                        event.getTimestamp().getValue()) + ": " //$NON-NLS-1$
+                        + NLS.bind( Messages.CallStackStateProvider_UnmatchedPoppedValue,
+                                functionExitState,
+                                poppedValue));
+                    fHasErrors = true;
             }
         }
     }
