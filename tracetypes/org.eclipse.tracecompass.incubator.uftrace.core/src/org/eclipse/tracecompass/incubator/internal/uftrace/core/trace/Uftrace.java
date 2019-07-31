@@ -152,6 +152,11 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
                 String extension = FilenameUtils.getExtension(file.getName());
                 if (extension.equals("dat")) { //$NON-NLS-1$
                     try {
+                        // TODO: Also support the perf-cpu data. For now, it
+                        // does not contain uftrace data
+                        if (file.getName().startsWith("perf-cpu")) { //$NON-NLS-1$
+                            continue;
+                        }
                         DatParser dp = new DatParser(file);
                         // read first event (really check magic number header)
                         dp.iterator().next();
@@ -197,6 +202,11 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
             String name = child.getName();
             try {
                 if (name.endsWith(".dat")) { //$NON-NLS-1$
+                    // TODO: Also support the perf-cpu data. For now, it does
+                    // not contain uftrace data
+                    if (name.startsWith("perf-cpu")) { //$NON-NLS-1$
+                        continue;
+                    }
                     fSize += child.length();
                     fDats.add(new DatParser(child));
                 } else if (name.endsWith(".map")) { //$NON-NLS-1$
