@@ -11,6 +11,7 @@ package org.eclipse.tracecompass.incubator.internal.uftrace.core.trace;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -89,6 +90,7 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
     private final @NonNull TidAspect fTidAspect = new TidAspect();
     private final @NonNull PidAspect fPidAspect = new PidAspect();
     private final @NonNull ExecAspect fExecAspect = new ExecAspect();
+    private @Nullable String fHostId = null;
 
     @Override
     public Iterable<ITmfEventAspect<?>> getEventAspects() {
@@ -107,8 +109,11 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
 
                     @Override
                     public @Nullable Integer resolve(ITmfEvent event) {
-                        DatEvent fieldValue = (DatEvent) event.getContent().getValue();
-                        return fieldValue.getDepth();
+                        Object fieldValue = event.getContent().getValue();
+                        if (fieldValue instanceof DatEvent) {
+                            return ((DatEvent) fieldValue).getDepth();
+                        }
+                        return null;
                     }
                 }, new ITmfEventAspect<String>() {
 
@@ -220,6 +225,16 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
                     fTasks = new TaskParser(child);
                 } else if (name.equals("info")) { //$NON-NLS-1$
                     fInfo = InfoParser.parse(child);
+                } else if (name.equals("hostid")) { //$NON-NLS-1$
+                    /*
+                     * A 'hostid' file can be added which contains only one line
+                     * with the host ID in it. This can be used to correlate
+                     * with some other traces' data like an lttng kernel trace
+                     */
+                    List<String> fileLines = Files.readAllLines(child.toPath());
+                    if (!fileLines.isEmpty()) {
+                        fHostId = fileLines.get(0);
+                    }
                 }
             } catch (IOException e) {
                 throw new TmfTraceException(e.getMessage(), e);
@@ -299,6 +314,14 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
     @Override
     public int progress() {
         return (int) (fCurrentLoc.getLocationInfo() / 1024);
+    }
+
+    @Override
+    public @NonNull String getHostId() {
+        if (fHostId != null) {
+            return fHostId;
+        }
+        return super.getHostId();
     }
 
     /**
@@ -398,6 +421,10 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
         properties.put("endianness", String.valueOf(fInfo.getByteOrder())); //$NON-NLS-1$
         properties.put("maximum depth", String.valueOf(fInfo.getMaxDepth())); //$NON-NLS-1$
         properties.put("feature bit mask", Long.toBinaryString(fInfo.getFeatures())); //$NON-NLS-1$
+        String hostId = fHostId;
+        if (hostId != null) {
+            properties.put("host ID", hostId); //$NON-NLS-1$
+        }
         properties.putAll(fInfo.getData());
         return properties;
     }

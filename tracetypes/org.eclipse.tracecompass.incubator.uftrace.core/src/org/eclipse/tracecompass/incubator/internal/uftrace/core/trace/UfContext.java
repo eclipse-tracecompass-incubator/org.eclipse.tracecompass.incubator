@@ -16,7 +16,6 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
@@ -67,7 +66,7 @@ public class UfContext extends TmfContext {
             if (eventSource.hasNext()) {
                 fQueue.add(eventSource);
             }
-            TmfEvent tmfEvent = new TmfEvent(fTrace, getRank(), TmfTimestamp.fromNanos(event.getTime()),
+            TmfEvent tmfEvent = new TmfEvent(fTrace, getRank(), fTrace.createTimestamp(event.getTime()),
                     UfEventType.lookup(event.getType()),
                     new TmfEventField(ITmfEventField.ROOT_FIELD_ID, event, null));
             TmfLongLocation location = getLocation();

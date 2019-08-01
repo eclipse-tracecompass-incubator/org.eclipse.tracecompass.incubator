@@ -11,3 +11,15 @@ of the views of the generic callstack analysis.
 
 The parser handles native uftrace traces. In order to open one, select any file within a uftrace
 directory.
+
+== Correlate with other traces ==
+
+Uftrace data can be correlated with the data from other traces, such as kernel traces. To correlate
+traces, their host ID need to match, which means they were taken from the same machine. A file named
+'hostid' can be added to the uftrace.data directory containing the uftrace data. This file has only one
+line which is the host ID.
+
+When correlating with traces that come from [LTTng](http://lttng.org) for instance, the [time offset may
+also need to be adjusted](https://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/Time-offsetting.html#Time_offsetting),
+since the time reference is not the same. The offset to put can be found, along with the LTTng's host ID
+in the ``Properties`` view, when selecting the trace.
