@@ -342,6 +342,8 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
             if (threadId > 0) {
                 tooltips.put(String.valueOf(Messages.FlameChartDataProvider_ThreadId), String.valueOf(threadId));
             }
+            Object symbol = currentFct.getSymbol();
+            tooltips.put(String.valueOf(Messages.FlameChartDataProvider_Symbol), symbol instanceof Long ? "0x" + Long.toHexString((Long) symbol) : String.valueOf(symbol)); //$NON-NLS-1$
             // TODO: Add symbol origin (library, language, etc) when better supported
             return tooltips;
         }

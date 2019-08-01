@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
+import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
@@ -142,6 +143,8 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
         public AttributeValueThreadProvider(ITmfStateSystem ss, int quark) {
             fSs = ss;
             fQuark = quark;
+            // Try to get the tid at the start and set the fVariesInTime value
+            getThreadId(fSs.getStartTime());
         }
 
         @Override
@@ -666,12 +669,15 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
                 }
                 HostThread hostThread = callstack.getHostThread(interval.getStartTime());
 
-                int pid = -1 ;
-                if (hostThread == null) {
-                    hostThread = new HostThread(StringUtils.EMPTY, IHostModel.UNKNOWN_TID);
-                } else {
+                int pid = callstack.getSymbolKeyAt(interval.getStartTime());
+                if (pid == CallStackElement.DEFAULT_SYMBOL_KEY && hostThread != null) {
+                    // Try to find the pid from the tid
                     pid = ModelManager.getModelFor(hostThread.getHost()).getProcessId(hostThread.getTid(), interval.getStartTime());
                 }
+                if (hostThread == null) {
+                    hostThread = new HostThread(StringUtils.EMPTY, IHostModel.UNKNOWN_TID);
+                }
+
                 return CalledFunctionFactory.create(interval.getStartTime(), interval.getEndTime() + 1, interval.getValue(), pid, hostThread.getTid(),
                         null, ModelManager.getModelFor(hostThread.getHost()));
             };

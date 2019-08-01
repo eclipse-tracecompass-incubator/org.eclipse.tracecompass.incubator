@@ -21,29 +21,36 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
+import org.eclipse.tracecompass.analysis.os.linux.core.model.OsStrings;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartDataProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel.EntryType;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.Activator;
+import org.eclipse.tracecompass.internal.analysis.os.linux.ui.actions.FollowThreadAction;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.IElementResolver;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
+import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
@@ -75,6 +82,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 /**
  * Main implementation for the Flame Chart view
@@ -601,6 +609,29 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
         }
 
         return fPrevEventAction;
+    }
+
+    /**
+     * @since 2.0
+     */
+    @Override
+    protected void fillTimeGraphEntryContextMenu(@NonNull IMenuManager menuManager) {
+        ISelection selection = getSite().getSelectionProvider().getSelection();
+        if (selection instanceof StructuredSelection) {
+            StructuredSelection sSel = (StructuredSelection) selection;
+            if (sSel.getFirstElement() instanceof TimeGraphEntry) {
+                TimeGraphEntry entry = (TimeGraphEntry) sSel.getFirstElement();
+                ITmfTreeDataModel entryModel = entry.getEntryModel();
+                if (entryModel instanceof IElementResolver) {
+                    Multimap<@NonNull String, @NonNull Object> metadata = ((IElementResolver) entryModel).getMetadata();
+                    Collection<@NonNull Object> tids = metadata.get(OsStrings.tid());
+                    if (tids.size() == 1) {
+                        HostThread hostThread = new HostThread(getTrace(entry).getHostId(), (Integer) tids.iterator().next());
+                        menuManager.add(new FollowThreadAction(FlameChartView.this, String.valueOf(hostThread.getTid()), hostThread));
+                    }
+                }
+            }
+        }
     }
 
     // ------------------------------------------------------------------------

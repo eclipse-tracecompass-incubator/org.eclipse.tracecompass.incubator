@@ -103,7 +103,7 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     }
 
     @Override
-    public @Nullable CallStackSeries getCallStackSeries() {
+    public synchronized @Nullable CallStackSeries getCallStackSeries() {
         CallStackSeries callstacks = fCallStacks;
         if (callstacks == null) {
             ITmfStateSystem ss = getStateSystem();

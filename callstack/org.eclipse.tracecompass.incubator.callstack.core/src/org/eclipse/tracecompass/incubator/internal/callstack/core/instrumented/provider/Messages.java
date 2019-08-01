@@ -19,6 +19,9 @@ public class Messages extends NLS {
 
     private static final String BUNDLE_NAME = Messages.class.getPackage().getName() + ".messages"; //$NON-NLS-1$
 
+    /** Title of the symbol tooltip key */
+    public static @Nullable String FlameChartDataProvider_Symbol = null;
+
     /** Title of the thread ID tooltip key */
     public static @Nullable String FlameChartDataProvider_ThreadId = null;
 
