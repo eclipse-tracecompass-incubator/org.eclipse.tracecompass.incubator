@@ -475,8 +475,6 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
     private boolean processCallStackElement(ICallStackElement element, Builder<FlameChartEntryModel> builder, FlameChartEntryModel parentEntry) {
 
         long elementId = getEntryId(element);
-        FlameChartEntryModel entry = new FlameChartEntryModel(elementId, parentEntry.getId(), Collections.singletonList(element.getName()), parentEntry.getStartTime(), parentEntry.getEndTime(), FlameChartEntryModel.EntryType.LEVEL);
-        builder.add(entry);
 
         boolean needsKernel = false;
 
@@ -487,6 +485,9 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
             CallStack callStack = finalElement.getCallStack();
             // Set the fixed hostThread to the entry if it is available
             HostThread hostThread = callStack.getHostThread();
+            // Create the entry for this level
+            FlameChartEntryModel entry = new FlameChartEntryModel(elementId, parentEntry.getId(), Collections.singletonList(element.getName()), parentEntry.getStartTime(), parentEntry.getEndTime(), FlameChartEntryModel.EntryType.LEVEL, -1, hostThread);
+            builder.add(entry);
             for (int depth = 0; depth < callStack.getMaxDepth(); depth++) {
                 FlameChartEntryModel flameChartEntry = new FlameChartEntryModel(getEntryId(new CallStackDepth(callStack, depth + 1)), entry.getId(), Collections.singletonList(element.getName()), parentEntry.getStartTime(), parentEntry.getEndTime(),
                         FlameChartEntryModel.EntryType.FUNCTION, depth + 1, hostThread);
@@ -499,7 +500,10 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
             }
             return needsKernel;
         }
-        // Intermediate element, process children
+
+        // Intermediate element, create entry and process children
+        FlameChartEntryModel entry = new FlameChartEntryModel(elementId, parentEntry.getId(), Collections.singletonList(element.getName()), parentEntry.getStartTime(), parentEntry.getEndTime(), FlameChartEntryModel.EntryType.LEVEL);
+        builder.add(entry);
         for (ICallStackElement child : element.getChildren()) {
             needsKernel |= processCallStackElement(child, builder, entry);
         }
