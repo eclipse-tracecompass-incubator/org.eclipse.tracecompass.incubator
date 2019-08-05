@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.internal.filters.ui.views.global;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.Action;
@@ -17,9 +18,12 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TmfFilterAppliedSignal;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TraceCompassFilter;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.ITmfImageConstants;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 
 /**
@@ -91,6 +95,23 @@ public class GlobalFilterView extends TmfView {
             return;
         }
         applySearchOrFilter(signal.getFilter().getRegexes());
+    }
+
+    /**
+     * Remove current filters and apply the trace's current filters
+     *
+     * @param signal
+     *            The trace selection signal
+     */
+    @TmfSignalHandler
+    public void traceSelected(TmfTraceSelectedSignal signal) {
+        ITmfTrace trace = signal.getTrace();
+        if (trace == null) {
+            applySearchOrFilter(Collections.emptyList());
+            return;
+        }
+        TraceCompassFilter filter = TraceCompassFilter.getFilterForTrace(trace);
+        applySearchOrFilter(filter == null ? Collections.emptyList() : filter.getRegexes());
     }
 
     private void applySearchOrFilter(Collection<String> regexes) {

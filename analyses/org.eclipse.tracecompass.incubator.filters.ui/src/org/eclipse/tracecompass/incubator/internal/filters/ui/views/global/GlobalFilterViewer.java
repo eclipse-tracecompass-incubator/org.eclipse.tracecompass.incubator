@@ -27,6 +27,8 @@ import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.DropTargetListener;
 import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -111,9 +113,14 @@ public class GlobalFilterViewer extends Composite {
             @Override
             public void validFilter() {
                 String text = Objects.requireNonNull(fLspFilterTextbox.getText());
+                text = Objects.requireNonNull(text.trim());
                 fLspFilterTextbox.setText(""); //$NON-NLS-1$
-                if (fEnabledFilters.contains(text) || fDisabledFilters.contains(text)) {
+                if (text.isEmpty() || fEnabledFilters.contains(text)) {
                     return;
+                }
+                if (fDisabledFilters.contains(text)) {
+                    // Bring the filter back to enabled
+                    fDisabledFilters.remove(text);
                 }
                 fEnabledFilters.add(text);
                 fSavedArea.removeAll();
@@ -145,6 +152,65 @@ public class GlobalFilterViewer extends Composite {
         fSaved.setControl(fSavedArea);
         fActive.setExpanded(true);
         fSaved.setExpanded(true);
+
+        // Edit filters on double-clicks
+        fActiveArea.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseDoubleClick(@Nullable MouseEvent e) {
+                String[] selection = fActiveArea.getSelection();
+                if (selection.length <= 0) {
+                    return;
+                }
+                // Edit the first element of the selection
+                String toEdit = selection[0];
+                if (toEdit == null) {
+                    return;
+                }
+                fLspFilterTextbox.setText(toEdit);
+                fEnabledFilters.remove(toEdit);
+                fDisabledFilters.add(toEdit);
+                filtersUpdated();
+            }
+
+            @Override
+            public void mouseDown(@Nullable MouseEvent e) {
+                // Nothing to do
+            }
+
+            @Override
+            public void mouseUp(@Nullable MouseEvent e) {
+             // Nothing to do
+            }
+
+        });
+
+        fSavedArea.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseDoubleClick(@Nullable MouseEvent e) {
+                String[] selection = fSavedArea.getSelection();
+                if (selection.length <= 0) {
+                    return;
+                }
+                // Edit the first element of the selection
+                String toEdit = selection[0];
+                fLspFilterTextbox.setText(toEdit);
+                filtersUpdated();
+            }
+
+            @Override
+            public void mouseDown(@Nullable MouseEvent e) {
+                // Nothing to do
+            }
+
+            @Override
+            public void mouseUp(@Nullable MouseEvent e) {
+             // Nothing to do
+            }
+
+        });
+
 
         DragSource activeSource = new DragSource(fActiveArea, DND.DROP_MOVE);
         activeSource.setTransfer(TextTransfer.getInstance());
@@ -333,7 +399,7 @@ public class GlobalFilterViewer extends Composite {
     }
 
     void eventFilterApplied(Collection<String> regexes) {
-        if (fEnabledFilters.containsAll(regexes)) {
+        if (!regexes.isEmpty() && fEnabledFilters.containsAll(regexes)) {
             // regex already present, ignore
             return;
         }
