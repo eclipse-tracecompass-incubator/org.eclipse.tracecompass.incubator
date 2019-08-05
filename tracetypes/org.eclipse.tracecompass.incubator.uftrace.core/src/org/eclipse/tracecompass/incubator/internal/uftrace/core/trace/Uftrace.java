@@ -34,6 +34,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxPidAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
+import org.eclipse.tracecompass.incubator.analysis.core.aspects.ThreadNameAspect;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.SymParser.Symbol;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -371,16 +372,7 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
      *
      * @author Matthew Khouzam
      */
-    public final class ExecAspect implements ITmfEventAspect<String> {
-        @Override
-        public @NonNull String getName() {
-            return "Executable"; //$NON-NLS-1$
-        }
-
-        @Override
-        public @NonNull String getHelpText() {
-            return ""; //$NON-NLS-1$
-        }
+    public final class ExecAspect extends ThreadNameAspect {
 
         @Override
         public @Nullable String resolve(@NonNull ITmfEvent event) {
