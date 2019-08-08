@@ -27,11 +27,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
+import org.eclipse.tracecompass.common.core.xml.XmlUtils;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.Operator;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraint;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraintAdaptive;
@@ -153,7 +153,7 @@ public final class StateMachineUtils {
     public static List<StateMachineTransition> getModelFromXML(String xmlPath) throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
         Document xml = null;
         try (FileInputStream fis = new FileInputStream(xmlPath)) {
-            xml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(fis);
+            xml = XmlUtils.newSafeDocumentBuilderFactory().newDocumentBuilder().parse(fis);
         }
 
         NodeList scxmlList = xml.getElementsByTagName("scxml"); //$NON-NLS-1$
