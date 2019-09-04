@@ -94,10 +94,65 @@ public class DataProviderScriptingModule {
     public static final String ENTRY_FIELD_PARENT_ID = "parentId"; //$NON-NLS-1$
 
     /**
-     * Create a data driven time graph provider from an analysis's state system.
-     * This will use the specified data to get the entries and row data from the
-     * state system. When the data cannot be obtained in a straight-forward
-     * manner from the state system, the
+     * Create a data driven time graph provider from one of the built-in
+     * analysis's state system. This will use the specified data to get the
+     * entries and row data from the state system. When the data cannot be
+     * obtained in a straight-forward manner from the state system, the
+     * {@link #createScriptedTimeGraphProvider(ScriptedAnalysis, Function, Function, Function)}
+     * method can be used instead.
+     * <p>
+     * The possible keys for the data are:
+     * </p>
+     * <ul>
+     * <li>{@link #ENTRY_PATH}: MANDATORY, specifies the path in the state
+     * system (including wildcards) that is the root of the entries. For all
+     * root attributes, use '*'</li>
+     * <li>{@link #ENTRY_DISPLAY}: The path from the entry's root of the
+     * attribute to display. If not specified, the root attribute itself will be
+     * used</li>
+     * <li>{@link #ENTRY_NAME}: The path from the entry's root of the attribute
+     * that contains the name. If not specified, the name will be the
+     * attribute's name.</li>
+     * <li>{@link #ENTRY_ID}: The path from the entry's root of the attribute
+     * that contains an identifier for this entry. The identifier can be used to
+     * build hierarchies of entries using the {@link #ENTRY_PARENT}.</li>
+     * <li>{@link #ENTRY_PARENT}: The path from the entry's root of the
+     * attribute that contains the parent's ID. This data will be used along
+     * with the {@link #ENTRY_ID} to create a hierarchy between the entries.
+     * </li>
+     * </ul>
+     *
+     * @param analysis
+     *            The analysis for which to create a time graph provider
+     * @param data
+     *            The time graph provider data
+     * @return The time graph data provider
+     */
+    @WrapToScript
+    public @Nullable ITimeGraphDataProvider<TimeGraphEntryModel> createTimeGraphProvider(IAnalysisModule analysis, Map<String, Object> data) {
+        ITmfTrace trace = null;
+        if (analysis instanceof TmfAbstractAnalysisModule) {
+            TmfAbstractAnalysisModule newAnalysis = (TmfAbstractAnalysisModule) analysis;
+            trace = newAnalysis.getTrace();
+        }
+        List<ITmfStateSystem> stateSystems = new ArrayList<>();
+        if (analysis instanceof ITmfAnalysisModuleWithStateSystems) {
+            ITmfAnalysisModuleWithStateSystems module = (ITmfAnalysisModuleWithStateSystems) analysis;
+            if (module.schedule().isOK() && module.waitForInitialization()) {
+                module.getStateSystems().forEach(stateSystems::add);
+            }
+        }
+        if (stateSystems.isEmpty() || trace == null) {
+            return null;
+        }
+        return createTimeGraphProvider(trace, stateSystems, String.valueOf(analysis.getName()), data);
+    }
+
+    /**
+     * Create a data driven time graph provider from a scripted analysis's state
+     * system. This will use the specified data to get the entries and row data
+     * from the state system. When the data cannot be obtained in a
+     * straight-forward manner from the state system, the
      * {@link #createScriptedTimeGraphProvider(ScriptedAnalysis, Function, Function, Function)}
      * method can be used instead.
      * <p>
@@ -130,6 +185,15 @@ public class DataProviderScriptingModule {
      */
     @WrapToScript
     public @Nullable ITimeGraphDataProvider<TimeGraphEntryModel> createTimeGraphProvider(ScriptedAnalysis analysis, Map<String, Object> data) {
+        ITmfStateSystemBuilder stateSystem = analysis.getStateSystem(true);
+        if (stateSystem == null) {
+            return null;
+        }
+        return createTimeGraphProvider(analysis.getTrace(), Collections.singletonList(stateSystem), analysis.getName(), data);
+    }
+
+    private static @Nullable ITimeGraphDataProvider<TimeGraphEntryModel> createTimeGraphProvider(ITmfTrace trace,
+            List<ITmfStateSystem> stateSystems, String analysisName, Map<String, Object> data) {
         Object pathObj = data.get(ENTRY_PATH);
         if (pathObj == null) {
             return null;
@@ -149,18 +213,16 @@ public class DataProviderScriptingModule {
 
         DataDrivenOutputEntry entry = new DataDrivenOutputEntry(Collections.emptyList(), path, null, true,
                 display, id, parent, name, DisplayType.ABSOLUTE);
-        ITmfStateSystemBuilder stateSystem = analysis.getStateSystem(true);
-        if (stateSystem == null) {
-            return null;
-        }
-        ITimeGraphDataProvider<TimeGraphEntryModel> provider = DataDrivenTimeGraphProviderFactory.create(analysis.getTrace(), Collections.singletonList(stateSystem), Collections.singletonList(entry), Collections.emptyList(), ScriptingDataProviderManager.PROVIDER_ID + ':' + analysis.getName());
-        ScriptingDataProviderManager.getInstance().registerDataProvider(analysis.getTrace(), provider);
+
+        ITimeGraphDataProvider<TimeGraphEntryModel> provider = DataDrivenTimeGraphProviderFactory.create(trace, stateSystems, Collections.singletonList(entry), Collections.emptyList(), ScriptingDataProviderManager.PROVIDER_ID + ':' + analysisName);
+        ScriptingDataProviderManager.getInstance().registerDataProvider(trace, provider);
         return provider;
     }
 
     /**
-     * Create a data driven xy data provider. This will use the specified data
-     * to get the entries from the state system.
+     * Create a data driven xy data provider from one of the built-in analyses.
+     * This will use the specified data to get the entries from the state
+     * system.
      *
      * {@link #ENTRY_PATH}: MANDATORY, specifies the path in the state system
      * (including wildcards) that is the root of the entries. For all root
@@ -193,6 +255,69 @@ public class DataProviderScriptingModule {
      */
     @WrapToScript
     public @Nullable ITmfTreeXYDataProvider<ITmfTreeDataModel> createXYProvider(IAnalysisModule analysis, Map<String, Object> data) {
+        ITmfTrace trace = null;
+        if (analysis instanceof TmfAbstractAnalysisModule) {
+            TmfAbstractAnalysisModule newAnalysis = (TmfAbstractAnalysisModule) analysis;
+            trace = newAnalysis.getTrace();
+        }
+        List<ITmfStateSystem> stateSystems = new ArrayList<>();
+        if (analysis instanceof ITmfAnalysisModuleWithStateSystems) {
+            ITmfAnalysisModuleWithStateSystems module = (ITmfAnalysisModuleWithStateSystems) analysis;
+            if (module.schedule().isOK() && module.waitForInitialization()) {
+                module.getStateSystems().forEach(stateSystems::add);
+            }
+        }
+        if (stateSystems.isEmpty() || trace == null) {
+            return null;
+        }
+        return createXYProvider(trace, stateSystems, String.valueOf(analysis.getName()), data);
+    }
+
+    /**
+     * Create a data driven xy data provider from a scripted analysis. This will
+     * use the specified data to get the entries from the state system.
+     *
+     * {@link #ENTRY_PATH}: MANDATORY, specifies the path in the state system
+     * (including wildcards) that is the root of the entries. For all root
+     * attributes, use '*'
+     *
+     * {@link #ENTRY_DISPLAY}: The path from the entry's root of the attribute
+     * to display. If not specified, the root attribute itself will be used
+     *
+     * {@link #ENTRY_NAME}: The path from the entry's root of the attribute that
+     * contains the name. If not specified, the name will be the attribute's
+     * name.
+     *
+     * {@link #ENTRY_ID}: The path from the entry's root of the attribute that
+     * contains an identifier for this entry. The identifier can be used to
+     * build hierarchies of entries using the {@link #ENTRY_PARENT}.
+     *
+     * {@link #ENTRY_PARENT}: The path from the entry's root of the attribute
+     * that contains the parent's ID. This data will be used along with the
+     * {@link #ENTRY_ID} to create a hierarchy between the entries.
+     *
+     * {@link #ENTRY_DELTA}: Specify the entry type. If it’s true, it will
+     * display the delta value of the entry otherwise it will show the absolute
+     * value of the entry.
+     *
+     * @param analysis
+     *            The scripted analysis for which to create a time graph
+     *            provider
+     * @param data
+     *            The XY chart data
+     * @return The XY data provider
+     */
+    @WrapToScript
+    public @Nullable ITmfTreeXYDataProvider<ITmfTreeDataModel> createXYProvider(ScriptedAnalysis analysis, Map<String, Object> data) {
+        ITmfStateSystemBuilder stateSystem = analysis.getStateSystem(true);
+        if (stateSystem == null) {
+            return null;
+        }
+        return createXYProvider(analysis.getTrace(), Collections.singletonList(stateSystem), String.valueOf(analysis.getName()), data);
+    }
+
+    private static @Nullable ITmfTreeXYDataProvider<ITmfTreeDataModel> createXYProvider(ITmfTrace trace,
+            List<ITmfStateSystem> stateSystems, String analysisName, Map<String, Object> data) {
         Object pathObj = data.get(ENTRY_PATH);
         if (pathObj == null) {
             return null;
@@ -219,23 +344,10 @@ public class DataProviderScriptingModule {
         DataDrivenOutputEntry entry = new DataDrivenOutputEntry(Collections.emptyList(), path, null, true,
                 display, id, parent, name, displayType);
 
-        ITmfTrace trace = null;
-        if (analysis instanceof TmfAbstractAnalysisModule) {
-            TmfAbstractAnalysisModule newAnalysis = (TmfAbstractAnalysisModule) analysis;
-            trace = newAnalysis.getTrace();
+        ITmfTreeXYDataProvider<ITmfTreeDataModel> provider = DataDrivenXYProviderFactory.create(trace, stateSystems, Collections.singletonList(entry), ScriptingDataProviderManager.PROVIDER_ID + ':' + analysisName);
+        if (provider != null) {
+            ScriptingDataProviderManager.getInstance().registerDataProvider(trace, provider);
         }
-        List<ITmfStateSystem> stateSystems = new ArrayList<>();
-        if (analysis instanceof ITmfAnalysisModuleWithStateSystems) {
-            ITmfAnalysisModuleWithStateSystems module = (ITmfAnalysisModuleWithStateSystems) analysis;
-            if (module.schedule().isOK() && module.waitForInitialization()) {
-                module.getStateSystems().forEach(stateSystems::add);
-            }
-        }
-        if (stateSystems.isEmpty() || trace == null) {
-            return null;
-        }
-        ITmfTreeXYDataProvider<ITmfTreeDataModel> provider = DataDrivenXYProviderFactory.create(trace, stateSystems, Collections.singletonList(entry), ScriptingDataProviderManager.PROVIDER_ID + ':' + analysis.getName());
-        ScriptingDataProviderManager.getInstance().registerDataProvider(trace, provider);
         return provider;
     }
 
