@@ -85,6 +85,16 @@ You can also run the script in debug mode ('''Debug As''' -> '''EASE Script''').
 
 The Trace Compass branch downloaded above changed the ''State System Explorer'' so that it can open state system files directly, without requiring them to be linked to an analysis. The state system created by the script can thus be explored using that view.
 
+== Command Line Scripting ==
+
+Apart from executing a script file, it is also possible to access a script shell in Trace Compass, and script commands from it.
+
+To do so, open the '''Script Shell''' view, using '''Window''' -> '''Show View''' and selecting '''Script Shell''' under the '''Scripting''' category. It will open a shell for the given scripting language, as shown in the screenshot below, where the view is called '''Rhino Script Shell'''.
+
+From this shell, commands can load modules, then execute methods from this modules, in the screenshot, the '''/TraceCompass/TraceUI''' module was loaded and a trace opened directly from command line.
+
+[[Image:images/script_shell.png | Script shell]]
+
 == Trace Compass Scripting API and examples ==
 
 The scripting modules and API are documented in the '''Scripting''' section of the  [https://archive.eclipse.org/tracecompass.incubator/doc/javadoc/apidocs/ Trace Compass Incubator API documentation]. [https://archive.eclipse.org/tracecompass.incubator/doc/javadoc/apidocs/org/eclipse/tracecompass/incubator/scripting/core/doc-files/examples.html Many examples] are also available in the documentation.
@@ -172,3 +182,23 @@ if (provider != null) {
 
 print("Done");
 </pre>
+
+== References and Getting Help ==
+
+* Need help or have comments?
+
+Chat with the Trace Compass community on [irc://irc.oftc.net/tracecompass the IRC channel] (the `#tracecompass` channel on the [http://www.oftc.net OFTC network]) or contact the [https://accounts.eclipse.org/mailing-list/tracecompass-dev Trace Compass mailing list].
+
+* Think of something that should be available through a helper method?
+
+[https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Tracecompass.Incubator Request a feature for it] or [https://wiki.eclipse.org/Trace_Compass/Development_Environment_Setup develop it in the Trace Compass Incubator project] (org.eclipse.tracecompass.incubator.scripting.*) and contribute it [https://wiki.eclipse.org/Trace_Compass/Incubator_Guidelines through gerrit].
+
+* Find bugs?
+
+[https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Tracecompass.Incubator Report it], attaching the script and trace that caused it.
+
+=== References ===
+
+* [https://archive.eclipse.org/tracecompass.incubator/doc/javadoc/apidocs/org/eclipse/tracecompass/incubator/scripting/core/doc-files/examples.html Example EASE scripts]
+* [https://archive.eclipse.org/tracecompass.incubator/doc/javadoc/apidocs/ Trace Compass Incubator and Scripting API]
+* [https://archive.eclipse.org/tracecompass/doc/javadoc/apidocs/ Trace Compass API]

@@ -28,7 +28,8 @@ import org.eclipse.tracecompass.tmf.ui.project.model.TmfProjectElement;
 import org.eclipse.tracecompass.tmf.ui.project.model.TmfProjectRegistry;
 
 /**
- * Let the TraceScriptingModule interact with the UI
+ * Extension of the {@link TraceScriptingModule} class that allows to interact
+ * with the Trace Compass UI to open an import traces.
  *
  * @author Benjamin Saint-Cyr
  */

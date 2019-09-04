@@ -6,14 +6,16 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
+
 /**
- * <code>/TraceCompass/Trace</code>: EASE scripting module and classes to open
- * or import traces
+ * <code>/TraceCompass/TraceUI</code>: An extension of the
+ * <code>/TraceCompass/Trace</code> scripting module that allows to interact
+ * with the Trace Compass Project Explorer and UI in general.
  *
  * <pre>
- * Load: <code>/TraceCompass/Trace</code>
- * Type: core
+ * Load: <code>/TraceCompass/TraceUI</code>
+ * Type: UI
  * </pre>
  */
 @org.eclipse.jdt.annotation.NonNullByDefault
-package org.eclipse.tracecompass.incubator.scripting.core.trace;
+package org.eclipse.tracecompass.incubator.scripting.ui.trace;
