@@ -345,9 +345,7 @@ public class DataProviderScriptingModule {
                 display, id, parent, name, displayType);
 
         ITmfTreeXYDataProvider<ITmfTreeDataModel> provider = DataDrivenXYProviderFactory.create(trace, stateSystems, Collections.singletonList(entry), ScriptingDataProviderManager.PROVIDER_ID + ':' + analysisName);
-        if (provider != null) {
-            ScriptingDataProviderManager.getInstance().registerDataProvider(trace, provider);
-        }
+        ScriptingDataProviderManager.getInstance().registerDataProvider(trace, provider);
         return provider;
     }
 
