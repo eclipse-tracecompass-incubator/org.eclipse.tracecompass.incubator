@@ -41,8 +41,8 @@
         <removeDefaultCategory>true</removeDefaultCategory>
         <skipWebContentGeneration>true</skipWebContentGeneration>
         <associateSites>
-           <site>http://download.eclipse.org/ease/update/release</site>
-           <site>https://dl.bintray.com/py4j/py4j-eclipse/0.10.4</site>
+           <site>https://download.eclipse.org/ease/release/0.7.0</site>
+           <site>https://dl.bintray.com/py4j/py4j-eclipse/0.10.8.1</site>
         </associateSites>
         <skipBuildInfo>true</skipBuildInfo>
       </configuration>

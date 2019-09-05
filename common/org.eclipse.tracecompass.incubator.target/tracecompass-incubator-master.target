@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="tracecompass-incubator-master" sequenceNumber="31">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="tracecompass-incubator-master" sequenceNumber="32">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.cdt.gnu.dsf.feature.group" version="0.0.0"/>
@@ -89,7 +89,7 @@
 <unit id="org.glassfish.jersey.ext.entityfiltering.source" version="0.0.0"/>
 <unit id="org.glassfish.jersey.bundles.repackaged.jersey-guava" version="0.0.0"/>
 <unit id="org.glassfish.jersey.bundles.repackaged.jersey-guava.source" version="0.0.0"/>
-<unit id="org.mozilla.javascript" version="1.7.5.v201504281450"/>
+<unit id="org.mozilla.javascript" version="0.0.0"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20190602212107/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
@@ -154,11 +154,11 @@
 <unit id="org.eclipse.ease.lang.javascript.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.ease.lang.python.py4j.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.ease.ui.feature.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/ease/update/release"/>
+<repository location="https://download.eclipse.org/ease/release/0.7.0"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.py4j.feature.feature.group" version="0.0.0"/>
-<repository location="https://dl.bintray.com/py4j/py4j-eclipse/0.10.4"/>
+<repository location="https://dl.bintray.com/py4j/py4j-eclipse/0.10.8.1"/>
 </location>
 </locations>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
