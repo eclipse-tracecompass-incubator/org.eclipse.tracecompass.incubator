@@ -21,6 +21,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallGraphAnalysisStub;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedCalledFunction;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedCalledFunctionStatistics;
@@ -60,7 +61,7 @@ public class AggregatedCalledFunctionStatisticsTest {
             return Collections.singletonList(group);
         }
         List<ICallStackElement> leafGroups = new ArrayList<>();
-        group.getChildren().forEach(g -> leafGroups.addAll(getLeafElements(g)));
+        group.getChildrenElements().forEach(g -> leafGroups.addAll(getLeafElements(g)));
         return leafGroups;
     }
 
@@ -218,10 +219,10 @@ public class AggregatedCalledFunctionStatisticsTest {
         Object[] firstFunctionChildren = firstFunction.getCallees().toArray();
         AggregatedCalledFunction secondFunction = (AggregatedCalledFunction) firstFunctionChildren[0];
         AggregatedCalledFunction leaf1 = (AggregatedCalledFunction) secondFunction.getCallees().stream()
-                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x2"))
+                .filter(acs -> CallStackTestBase.getCallSiteSymbol(acs).resolve(Collections.emptySet()).equals("0x2"))
                 .findAny().get();
         AggregatedCalledFunction leaf2 = (AggregatedCalledFunction) secondFunction.getCallees().stream()
-                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x3"))
+                .filter(acs -> CallStackTestBase.getCallSiteSymbol(acs).resolve(Collections.emptySet()).equals("0x3"))
                 .findAny().get();
         // Test the first function statistics
         @NonNull
@@ -437,10 +438,10 @@ public class AggregatedCalledFunctionStatisticsTest {
         Object[] mainChildren = main.getCallees().toArray();
         AggregatedCalledFunction function1 = (AggregatedCalledFunction) mainChildren[0];
         AggregatedCalledFunction function2 = (AggregatedCalledFunction) function1.getCallees().stream()
-                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x2"))
+                .filter(acs -> CallStackTestBase.getCallSiteSymbol(acs).resolve(Collections.emptySet()).equals("0x2"))
                 .findAny().get();
         AggregatedCalledFunction function3 = (AggregatedCalledFunction) function1.getCallees().stream()
-                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x3"))
+                .filter(acs -> CallStackTestBase.getCallSiteSymbol(acs).resolve(Collections.emptySet()).equals("0x3"))
                 .findAny().get();
         Object[] firstChildCallee = function2.getCallees().toArray();
         AggregatedCalledFunction function4 = (AggregatedCalledFunction) firstChildCallee[0];

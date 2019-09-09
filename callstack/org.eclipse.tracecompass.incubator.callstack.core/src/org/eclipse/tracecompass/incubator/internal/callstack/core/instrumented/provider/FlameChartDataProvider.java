@@ -504,7 +504,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
         // Intermediate element, create entry and process children
         FlameChartEntryModel entry = new FlameChartEntryModel(elementId, parentEntry.getId(), Collections.singletonList(element.getName()), parentEntry.getStartTime(), parentEntry.getEndTime(), FlameChartEntryModel.EntryType.LEVEL);
         builder.add(entry);
-        for (ICallStackElement child : element.getChildren()) {
+        for (ICallStackElement child : element.getChildrenElements()) {
             needsKernel |= processCallStackElement(child, builder, entry);
         }
         return needsKernel;

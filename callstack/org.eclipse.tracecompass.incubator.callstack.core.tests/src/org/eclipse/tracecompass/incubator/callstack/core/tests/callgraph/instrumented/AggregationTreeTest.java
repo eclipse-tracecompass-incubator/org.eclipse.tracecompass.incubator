@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallGraphAnalysisStub;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedCalledFunction;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
@@ -64,7 +65,7 @@ public class AggregationTreeTest {
             return Collections.singletonList(group);
         }
         List<ICallStackElement> leafGroups = new ArrayList<>();
-        group.getChildren().forEach(g -> leafGroups.addAll(getLeafElements(g)));
+        group.getChildrenElements().forEach(g -> leafGroups.addAll(getLeafElements(g)));
         return leafGroups;
     }
 
@@ -298,10 +299,10 @@ public class AggregationTreeTest {
         AggregatedCalledFunction secondFunction = (AggregatedCalledFunction) firstFunctionChildren[0];
         assertEquals("Children number: Second function", 2, secondFunction.getCallees().size());
         AggregatedCalledFunction leaf1 = (AggregatedCalledFunction) secondFunction.getCallees().stream()
-                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x2"))
+                .filter(acs -> CallStackTestBase.getCallSiteSymbol(acs).resolve(Collections.emptySet()).equals("0x2"))
                 .findAny().get();
         AggregatedCalledFunction leaf2 = (AggregatedCalledFunction) secondFunction.getCallees().stream()
-                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x3"))
+                .filter(acs -> CallStackTestBase.getCallSiteSymbol(acs).resolve(Collections.emptySet()).equals("0x3"))
                 .findAny().get();
         assertEquals("Children number: First leaf function", 0, leaf1.getCallees().size());
         assertEquals("Children number: Second leaf function", 0, leaf2.getCallees().size());
@@ -404,10 +405,10 @@ public class AggregationTreeTest {
         AggregatedCalledFunction function1 = (AggregatedCalledFunction) mainChildren[0];
         assertEquals("Children number: first function", 2, function1.getCallees().size());
         AggregatedCalledFunction function2 = (AggregatedCalledFunction) function1.getCallees().stream()
-                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x2"))
+                .filter(acs -> CallStackTestBase.getCallSiteSymbol(acs).resolve(Collections.emptySet()).equals("0x2"))
                 .findAny().get();
         AggregatedCalledFunction function3 = (AggregatedCalledFunction) function1.getCallees().stream()
-                .filter(acs -> acs.getSymbol().resolve(Collections.emptySet()).equals("0x3"))
+                .filter(acs -> CallStackTestBase.getCallSiteSymbol(acs).resolve(Collections.emptySet()).equals("0x3"))
                 .findAny().get();
         assertEquals("Children number: First child", 1, function2.getCallees().size());
         assertEquals("Children number: Second child", 0, function3.getCallees().size());

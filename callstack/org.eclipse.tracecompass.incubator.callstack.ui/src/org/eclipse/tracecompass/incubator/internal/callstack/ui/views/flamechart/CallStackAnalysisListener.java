@@ -14,9 +14,9 @@ import org.eclipse.tracecompass.incubator.callstack.core.flamechart.IEventCallSt
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphSelView;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphView;
-import org.eclipse.tracecompass.incubator.internal.callstack.ui.views.cct.CallingContextTreeView;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.views.functiondensity.FunctionDensityView;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.views.stacktable.CallStackTableView;
+import org.eclipse.tracecompass.incubator.internal.callstack.ui.views.weightedtree.WeightedTreeView;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.ITmfNewAnalysisModuleListener;
 import org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput;
@@ -39,7 +39,7 @@ public class CallStackAnalysisListener implements ITmfNewAnalysisModuleListener 
         if (module instanceof ICallGraphProvider) {
             module.registerOutput(new TmfAnalysisViewOutput(FlameGraphView.ID, module.getId()));
             module.registerOutput(new TmfAnalysisViewOutput(FlameGraphSelView.SEL_ID, module.getId()));
-            module.registerOutput(new TmfAnalysisViewOutput(CallingContextTreeView.ID, module.getId()));
+            module.registerOutput(new TmfAnalysisViewOutput(WeightedTreeView.ID, module.getId()));
         }
         if (module instanceof IEventCallStackProvider) {
             module.registerOutput(new TmfAnalysisViewOutput(CallStackTableView.ID, module.getId()));

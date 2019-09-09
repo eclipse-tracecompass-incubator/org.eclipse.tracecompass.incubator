@@ -83,7 +83,7 @@ public class CallStackTest extends CallStackTestBase {
     }
 
     private void verifyProcess1(ICallStackElement element) {
-        Collection<ICallStackElement> children = element.getChildren();
+        Collection<ICallStackElement> children = element.getChildrenElements();
         IHostModel model = ModelManager.getModelFor("");
         ITmfTrace trace = getTrace();
         assertNotNull(trace);
@@ -155,7 +155,7 @@ public class CallStackTest extends CallStackTestBase {
     }
 
     private void verifyProcess5(ICallStackElement element) {
-        Collection<ICallStackElement> children = element.getChildren();
+        Collection<ICallStackElement> children = element.getChildrenElements();
         IHostModel model = ModelManager.getModelFor("");
         ITmfTrace trace = getTrace();
         assertNotNull(trace);
@@ -249,7 +249,7 @@ public class CallStackTest extends CallStackTestBase {
         processIt.next();
         ICallStackElement process = processIt.next();
         assertEquals("5", process.getName());
-        Collection<ICallStackElement> threads = process.getChildren();
+        Collection<ICallStackElement> threads = process.getChildrenElements();
         assertEquals(2, threads.size());
 
         Iterator<ICallStackElement> iterator = threads.iterator();

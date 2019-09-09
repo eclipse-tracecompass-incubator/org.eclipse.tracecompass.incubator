@@ -19,6 +19,9 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = Messages.class.getPackage().getName() + ".messages"; //$NON-NLS-1$
 
+    /** Title of the callgraph */
+    public static @Nullable String CallGraphAnalysis_Title;
+
     /**
      * Name of the group by "All" descriptors
      */
@@ -49,6 +52,8 @@ public class Messages extends NLS {
     public static @Nullable String CallGraphStats_SelfTime;
     /** Cpu time statistics title */
     public static @Nullable String CallGraphStats_CpuTime;
+    /** Number of calls statistics title */
+    public static @Nullable String CallGraphStats_NbCalls;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

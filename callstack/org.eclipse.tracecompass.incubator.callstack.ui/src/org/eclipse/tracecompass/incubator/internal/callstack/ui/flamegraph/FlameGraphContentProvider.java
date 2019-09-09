@@ -62,10 +62,10 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         long lastEnd = timestampStack.peek();
         for (int i = 0; i <= firstNode.getMaxDepth() - 1; i++) {
             if (i >= childrenEntries.size()) {
-                FlamegraphDepthEntry entry = new FlamegraphDepthEntry(String.valueOf(i), 0, firstNode.getLength(), i, String.valueOf(i));
+                FlamegraphDepthEntry entry = new FlamegraphDepthEntry(String.valueOf(i), 0, firstNode.getWeight(), i, String.valueOf(i));
                 childrenEntries.add(entry);
             }
-            childrenEntries.get(i).updateEndTime(lastEnd + firstNode.getLength());
+            childrenEntries.get(i).updateEndTime(lastEnd + firstNode.getWeight());
         }
         FlamegraphDepthEntry firstEntry = checkNotNull(childrenEntries.get(0));
         firstEntry.addEvent(new FlamegraphEvent(firstEntry, lastEnd, firstNode));
@@ -92,11 +92,11 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         while (extraChildrenSites.hasNext()) {
             AggregatedCallSite next = extraChildrenSites.next();
             if (next instanceof AggregatedThreadStatus) {
-               entry.addEvent(new TimeEvent(entry, lastEnd, next.getLength(), ((AggregatedThreadStatus) next).getProcessStatus().getStateValue().unboxInt()));
+               entry.addEvent(new TimeEvent(entry, lastEnd, next.getWeight(), ((AggregatedThreadStatus) next).getProcessStatus().getStateValue().unboxInt()));
             } else {
                 entry.addEvent(new FlamegraphEvent(entry, lastEnd, next));
             }
-            lastEnd += next.getLength();
+            lastEnd += next.getWeight();
             entry.updateEndTime(lastEnd);
         }
     }
@@ -117,7 +117,7 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
      */
     private void addEvent(AggregatedCallSite node, List<FlamegraphDepthEntry> childrenEntries, Deque<Long> timestampStack, int depth) {
         node.getCallees().stream()
-                .sorted(Comparator.comparingLong(AggregatedCallSite::getLength))
+                .sorted(Comparator.comparingLong(AggregatedCallSite::getWeight))
                 .forEach(child -> {
                     addEvent(child, childrenEntries, timestampStack, depth + 1);
                 });
@@ -129,7 +129,7 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         // Create the event corresponding to the function using the caller's
         // timestamp
         entry.addEvent(new FlamegraphEvent(entry, timestampStack.peek(), node));
-        timestampStack.push(timestampStack.peek() + node.getLength());
+        timestampStack.push(timestampStack.peek() + node.getWeight());
     }
 
     @Override
@@ -181,7 +181,7 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
         }
 
         // Create the children entries
-        for (ICallStackElement child : element.getChildren()) {
+        for (ICallStackElement child : element.getChildrenElements()) {
             buildChildrenEntries(child, object, currentEntry);
         }
 
@@ -197,11 +197,11 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
 
         // Sort children by duration
         object.getCallingContextTree(element).stream()
-                .sorted(Comparator.comparingLong(AggregatedCallSite::getLength))
+                .sorted(Comparator.comparingLong(AggregatedCallSite::getWeight))
                 .forEach(rootFunction -> {
                     setData(rootFunction, childrenEntries, timestampStack);
                     setExtraData(rootFunction, extraEntries, timestampStack);
-                    long currentThreadDuration = timestampStack.pop() + rootFunction.getLength();
+                    long currentThreadDuration = timestampStack.pop() + rootFunction.getWeight();
                     timestampStack.push(currentThreadDuration);
                 });
         childrenEntries.forEach(child -> {

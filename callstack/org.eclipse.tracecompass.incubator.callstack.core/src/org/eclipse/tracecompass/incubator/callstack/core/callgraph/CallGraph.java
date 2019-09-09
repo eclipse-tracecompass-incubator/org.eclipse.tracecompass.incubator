@@ -76,7 +76,7 @@ public class CallGraph {
         // Add the callsite to the appropriate group
         Collection<AggregatedCallSite> callsites = fCcts.get(dstGroup);
         for (AggregatedCallSite site : callsites) {
-            if (site.getSymbol().equals(callsite.getSymbol())) {
+            if (site.getObject().equals(callsite.getObject())) {
                 site.merge(callsite);
                 return;
             }

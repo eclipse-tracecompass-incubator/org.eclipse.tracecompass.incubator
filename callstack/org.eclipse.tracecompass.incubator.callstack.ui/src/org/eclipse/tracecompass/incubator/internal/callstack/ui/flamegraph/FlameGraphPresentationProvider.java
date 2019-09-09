@@ -20,6 +20,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.SubSecondTimeWithUnitFormat;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.FlameViewPalette;
 import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -83,8 +84,9 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
         ITmfTrace activeTrace = TmfTraceManager.getInstance().getActiveTrace();
         String funcSymbol = null;
         FlamegraphEvent fgEvent = (FlamegraphEvent) event;
-        if (activeTrace != null) {
-            funcSymbol = fgEvent.getSymbol().resolve(SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
+        Object symbol = fgEvent.getSymbol();
+        if (activeTrace != null && (symbol instanceof ICallStackSymbol)) {
+            funcSymbol = ((ICallStackSymbol) symbol).resolve(SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
         }
         builder.put(Messages.FlameGraph_Symbol, funcSymbol == null ? String.valueOf(fgEvent.getSymbol()) : funcSymbol + " (" + fgEvent.getSymbol() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
         long nb = (fgEvent.getNumberOfCalls());
@@ -130,7 +132,12 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
         ITmfTrace activeTrace = TmfTraceManager.getInstance().getActiveTrace();
         if (activeTrace != null) {
             FlamegraphEvent fgEvent = (FlamegraphEvent) event;
-            funcSymbol = fgEvent.getSymbol().resolve(SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
+            Object symbol = fgEvent.getSymbol();
+            if (symbol instanceof ICallStackSymbol) {
+                funcSymbol = ((ICallStackSymbol) symbol).resolve(SymbolProviderManager.getInstance().getSymbolProviders(activeTrace));
+            } else {
+                funcSymbol = String.valueOf(symbol);
+            }
         }
         gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
         Utils.drawText(gc, funcSymbol, bounds.x, bounds.y, bounds.width, bounds.height, true, true);

@@ -120,7 +120,7 @@ public class ContextCallStackAnalysis extends ProfilingCallGraphAnalysisModule {
             ICallStackElement eventEl = events.get();
 
             // Process exists, find a thread element under it or create it
-            Optional<ICallStackElement> process = eventEl.getChildren().stream()
+            Optional<ICallStackElement> process = eventEl.getChildrenElements().stream()
                     .filter(e -> e.getName().equals(String.valueOf(pid)))
                     .findFirst();
 
@@ -141,7 +141,7 @@ public class ContextCallStackAnalysis extends ProfilingCallGraphAnalysisModule {
             }
 
             // Process exists, find a thread element under it or create it
-            Optional<ICallStackElement> thread = processEl.getChildren().stream()
+            Optional<ICallStackElement> thread = processEl.getChildrenElements().stream()
                     .filter(e -> e.getName().equals(String.valueOf(tid)))
                     .findFirst();
 

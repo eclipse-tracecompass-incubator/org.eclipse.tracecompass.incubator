@@ -11,8 +11,11 @@ package org.eclipse.tracecompass.incubator.callstack.core.callgraph;
 
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
+import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 
@@ -22,7 +25,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
  *
  * @author Geneviève Bastien
  */
-public interface ICallGraphProvider {
+public interface ICallGraphProvider extends IWeightedTreeProvider<@NonNull ICallStackSymbol, ICallStackElement, AggregatedCallSite> {
 
     /**
      * Get the group descriptors that describe how the elements are grouped in this
@@ -59,13 +62,33 @@ public interface ICallGraphProvider {
      */
     CallGraph getCallGraph();
 
+    @Override
+    default Collection<AggregatedCallSite> getTreesFor(ICallStackElement element) {
+        CallGraph callGraph = getCallGraph();
+        return callGraph.getCallingContextTree(element);
+    }
+
+    @Override
+    default Collection<AggregatedCallSite> getTrees(ICallStackElement element, ITmfTimestamp start, ITmfTimestamp end) {
+       CallGraph callGraph = getCallGraph(start, end);
+       return callGraph.getCallingContextTree(element);
+    }
+
+
+
+    @Override
+    default Collection<ICallStackElement> getElements() {
+        CallGraph callGraph = getCallGraph();
+        return callGraph.getElements();
+    }
+
     /**
      * Factory method to create an aggregated callsite for a symbol
      *
-     * @param symbol
+     * @param object
      *            The symbol
      * @return A new aggregated callsite
      */
-    AggregatedCallSite createCallSite(ICallStackSymbol symbol);
+    AggregatedCallSite createCallSite(Object object);
 
 }

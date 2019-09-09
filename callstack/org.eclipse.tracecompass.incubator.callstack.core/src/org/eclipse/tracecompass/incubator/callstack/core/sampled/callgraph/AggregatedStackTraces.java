@@ -9,7 +9,6 @@
 
 package org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 
@@ -22,8 +21,6 @@ import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbo
  */
 public class AggregatedStackTraces extends AggregatedCallSite {
 
-    private int fCount = 1;
-
     /**
      * Constructor
      *
@@ -31,22 +28,11 @@ public class AggregatedStackTraces extends AggregatedCallSite {
      *            The symbol for this frame pointer
      */
     public AggregatedStackTraces(ICallStackSymbol symbol) {
-        super(symbol);
+        super(symbol, 1);
     }
 
     private AggregatedStackTraces(AggregatedStackTraces toCopy) {
         super(toCopy);
-        fCount = toCopy.fCount;
-    }
-
-    @Override
-    public long getLength() {
-        return fCount;
-    }
-
-    @Override
-    protected void mergeData(@NonNull AggregatedCallSite child) {
-        fCount += child.getLength();
     }
 
     @Override

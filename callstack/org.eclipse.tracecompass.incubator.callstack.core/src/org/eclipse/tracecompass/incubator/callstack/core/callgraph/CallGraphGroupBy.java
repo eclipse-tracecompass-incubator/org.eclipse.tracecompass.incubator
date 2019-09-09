@@ -53,7 +53,7 @@ public final class CallGraphGroupBy {
             AggregatedCallSite acsCopy = acs.copyOf();
             callGraph.addAggregatedCallSite(dstGroup, acsCopy);
         });
-        srcGroup.getChildren().forEach(group -> {
+        srcGroup.getChildrenElements().forEach(group -> {
             addGroupData(group, srcCg, dstGroup, callGraph);
         });
     }
@@ -82,7 +82,7 @@ public final class CallGraphGroupBy {
         if (parentElement != null) {
             parentElement.addChild(groupedElement);
         }
-        element.getChildren().forEach(g -> {
+        element.getChildrenElements().forEach(g -> {
             searchForGroups(g, groupBy, callGraph, groupedElement, newCg);
         });
     }

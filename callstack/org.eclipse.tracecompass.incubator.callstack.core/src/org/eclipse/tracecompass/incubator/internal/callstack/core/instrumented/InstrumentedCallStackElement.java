@@ -85,7 +85,7 @@ public class InstrumentedCallStackElement extends CallStackElement {
     }
 
     @Override
-    public Collection<ICallStackElement> getChildren() {
+    public Collection<ICallStackElement> getChildrenElements() {
         // Get the elements from the next group in the hierarchy
         @Nullable ICallStackGroupDescriptor nextGroup = getNextGroup();
         if (!(nextGroup instanceof InstrumentedGroupDescriptor)) {
@@ -139,6 +139,9 @@ public class InstrumentedCallStackElement extends CallStackElement {
                         nextGroup, nextLevel, threadIdProvider, parent);
                 if (nextGroup.isSymbolKeyGroup()) {
                     element.setSymbolKeyElement(element);
+                }
+                if (parent != null) {
+                    parent.addChild(element);
                 }
                 cache.put(quark, element);
             }
@@ -195,11 +198,6 @@ public class InstrumentedCallStackElement extends CallStackElement {
             }
         }
         return processId;
-    }
-
-    @Override
-    public String toString() {
-        return this.getClass().getName() + ": [" + fQuark + ']'; //$NON-NLS-1$
     }
 
     /**

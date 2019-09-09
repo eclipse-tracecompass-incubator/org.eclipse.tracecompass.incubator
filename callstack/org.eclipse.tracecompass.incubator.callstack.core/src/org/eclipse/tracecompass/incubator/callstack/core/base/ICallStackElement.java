@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.callstack.core.base;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
 
 /**
  * Interface that classes representing a single element in the callstack
@@ -24,7 +25,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Geneviève Bastien
  */
-public interface ICallStackElement {
+public interface ICallStackElement extends ITree<String> {
 
     /**
      * Get the name of this element
@@ -39,7 +40,7 @@ public interface ICallStackElement {
      *
      * @return The list of children elements in the hierarchy
      */
-    Collection<ICallStackElement> getChildren();
+    Collection<ICallStackElement> getChildrenElements();
 
     /**
      * Add a child element to this one

@@ -22,7 +22,6 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.symbol.StringS
 public class AggregatedThreadStatus extends AggregatedCallSite {
 
     private final ProcessStatus fStatus;
-    private long fLength = 0;
 
     /**
      * Constructor
@@ -31,7 +30,7 @@ public class AggregatedThreadStatus extends AggregatedCallSite {
      *            the process status
      */
     public AggregatedThreadStatus(ProcessStatus status) {
-        super(new StringSymbol(status));
+        super(new StringSymbol(status), 0);
         fStatus = status;
     }
 
@@ -42,9 +41,8 @@ public class AggregatedThreadStatus extends AggregatedCallSite {
      *            the aggregated thread status
      */
     public AggregatedThreadStatus(AggregatedThreadStatus status) {
-        super(status.getSymbol());
+        super(status);
         fStatus = status.fStatus;
-        fLength = status.fLength;
     }
 
     /**
@@ -54,7 +52,7 @@ public class AggregatedThreadStatus extends AggregatedCallSite {
      *            the interval
      */
     public void update(ProcessStatusInterval interval) {
-        fLength += interval.getLength();
+        addToWeight(interval.getLength());
     }
 
     /**
@@ -68,24 +66,12 @@ public class AggregatedThreadStatus extends AggregatedCallSite {
 
     @Override
     public String toString() {
-        return "Aggregated Thread status for " + fStatus + ": " + fLength; //$NON-NLS-1$ //$NON-NLS-2$
-    }
-
-    @Override
-    public long getLength() {
-        return fLength;
+        return "Aggregated Thread status for " + fStatus + ": " + getWeight(); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
     public AggregatedCallSite copyOf() {
         return new AggregatedThreadStatus(this);
-    }
-
-    @Override
-    protected void mergeData(AggregatedCallSite other) {
-        if (other instanceof AggregatedThreadStatus) {
-            fLength += ((AggregatedThreadStatus) other).getLength();
-        }
     }
 
 }

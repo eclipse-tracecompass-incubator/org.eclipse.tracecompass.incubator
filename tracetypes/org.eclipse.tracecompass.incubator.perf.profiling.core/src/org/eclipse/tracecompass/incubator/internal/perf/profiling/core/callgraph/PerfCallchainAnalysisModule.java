@@ -126,7 +126,7 @@ public class PerfCallchainAnalysisModule extends ProfilingCallGraphAnalysisModul
         ICallStackElement processEl = process.get();
 
         // Process exists, find a thread element under it or create it
-        Optional<ICallStackElement> thread = processEl.getChildren().stream()
+        Optional<ICallStackElement> thread = processEl.getChildrenElements().stream()
                 .filter(e -> e.getName().equals(String.valueOf(tid)))
                 .findFirst();
 
@@ -251,7 +251,7 @@ public class PerfCallchainAnalysisModule extends ProfilingCallGraphAnalysisModul
             }
             AggregatedCallSite perfCallSite = stackTrace.getSecond();
             for (AggregatedCallSite site : fSites) {
-                if (site.getSymbol().equals(perfCallSite.getSymbol())) {
+                if (site.getObject().equals(perfCallSite.getObject())) {
                     site.merge(perfCallSite);
                     return;
                 }

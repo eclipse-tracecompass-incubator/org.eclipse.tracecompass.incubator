@@ -164,14 +164,14 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
         for (ICallStackElement element : elements) {
             switch (element.getName()) {
             case "1": {
-                Collection<ICallStackElement> children = element.getChildren();
+                Collection<ICallStackElement> children = element.getChildrenElements();
                 assertEquals(0, children.size());
                 Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(element);
                 compareCcts("", getExpectedProcess1(), callingContextTree);
             }
                 break;
             case "5": {
-                Collection<ICallStackElement> children = element.getChildren();
+                Collection<ICallStackElement> children = element.getChildrenElements();
                 assertEquals(0, children.size());
                 Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(element);
                 compareCcts("", getExpectedProcess5(), callingContextTree);
@@ -208,7 +208,7 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
         for (ICallStackElement element : elements) {
             switch (element.getName()) {
             case "1": {
-                Collection<ICallStackElement> children = element.getChildren();
+                Collection<ICallStackElement> children = element.getChildrenElements();
                 assertEquals(2, children.size());
                 for (ICallStackElement thread : children) {
                     switch (thread.getName()) {
@@ -229,7 +229,7 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
             }
                 break;
             case "5": {
-                Collection<ICallStackElement> children = element.getChildren();
+                Collection<ICallStackElement> children = element.getChildrenElements();
                 assertEquals(2, children.size());
                 for (ICallStackElement thread : children) {
                     switch (thread.getName()) {
@@ -286,11 +286,11 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
         for (AggregatedCallSite callsite : callingContextTree) {
             assertTrue(callsite instanceof AggregatedCalledFunction);
             AggregatedCalledFunction function = (AggregatedCalledFunction) callsite;
-            CallGraphExpected cgExpected = expected.get(callsite.getSymbol().resolve(Collections.emptySet()));
+            CallGraphExpected cgExpected = expected.get(getCallSiteSymbol(callsite).resolve(Collections.emptySet()));
             assertNotNull(cgExpected);
-            assertEquals("Callsite " + callsite.getSymbol(), cgExpected.duration, function.getDuration());
-            assertEquals("Callsite " + callsite.getSymbol(), cgExpected.selfTime, function.getSelfTime());
-            compareCcts(prefix + callsite.getSymbol() + ", ", cgExpected.children, function.getCallees());
+            assertEquals("Callsite " + getCallSiteSymbol(callsite), cgExpected.duration, function.getDuration());
+            assertEquals("Callsite " + getCallSiteSymbol(callsite), cgExpected.selfTime, function.getSelfTime());
+            compareCcts(prefix + getCallSiteSymbol(callsite) + ", ", cgExpected.children, function.getCallees());
         }
     }
 

@@ -25,6 +25,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDes
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph.ProfilingCallGraphAnalysisModule;
+import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
 import org.junit.Test;
@@ -77,7 +78,6 @@ public class SampledCallGraphTest {
 
         @Override
         protected @Nullable Pair<@NonNull ICallStackElement, @NonNull AggregatedCallSite> getProfiledStackTrace(@NonNull ITmfEvent event) {
-            // TODO Auto-generated method stub
             return null;
         }
 
@@ -110,36 +110,36 @@ public class SampledCallGraphTest {
             assertEquals(2, aggregatedData.size());
 
             for (AggregatedCallSite callsite : aggregatedData) {
-                switch (callsite.getSymbol().resolve(Collections.emptySet())) {
+                switch (CallStackTestBase.getCallSiteSymbol(callsite).resolve(Collections.emptySet())) {
                 case "0x1": {
-                    assertEquals(8, callsite.getLength());
+                    assertEquals(8, callsite.getWeight());
                     assertEquals(2, callsite.getCallees().size());
                     for (AggregatedCallSite childCallsite : callsite.getCallees()) {
-                        switch (childCallsite.getSymbol().resolve(Collections.emptySet())) {
+                        switch (CallStackTestBase.getCallSiteSymbol(childCallsite).resolve(Collections.emptySet())) {
                         case "0x2":
-                            assertEquals(7, childCallsite.getLength());
+                            assertEquals(7, childCallsite.getWeight());
                             assertEquals(3, childCallsite.getCallees().size());
                             break;
                         case "0x3":
-                            assertEquals(1, childCallsite.getLength());
+                            assertEquals(1, childCallsite.getWeight());
                             assertEquals(1, childCallsite.getCallees().size());
                             break;
                         default:
-                            throw new IllegalStateException("Unknown callsite: " + childCallsite.getSymbol());
+                            throw new IllegalStateException("Unknown callsite: " + CallStackTestBase.getCallSiteSymbol(childCallsite));
                         }
                     }
                 }
                     break;
                 case "0xa": {
-                    assertEquals(2, callsite.getLength());
+                    assertEquals(2, callsite.getWeight());
                     assertEquals(1, callsite.getCallees().size());
                     AggregatedCallSite childCallsite = callsite.getCallees().iterator().next();
-                    assertEquals(2, childCallsite.getLength());
+                    assertEquals(2, childCallsite.getWeight());
                     assertEquals(1, callsite.getCallees().size());
                 }
                     break;
                 default:
-                    throw new IllegalStateException("Unknown callsite: " + callsite.getSymbol());
+                    throw new IllegalStateException("Unknown callsite: " + CallStackTestBase.getCallSiteSymbol(callsite));
                 }
             }
         } finally {

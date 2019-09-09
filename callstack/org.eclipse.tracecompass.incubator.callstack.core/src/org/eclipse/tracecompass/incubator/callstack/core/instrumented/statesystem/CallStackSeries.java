@@ -538,7 +538,7 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
             return Collections.singleton(element);
         }
         List<ICallStackElement> list = new ArrayList<>();
-        element.getChildren().forEach(e -> list.addAll(getLeafElements(e)));
+        element.getChildrenElements().forEach(e -> list.addAll(getLeafElements(e)));
         return list;
     }
 

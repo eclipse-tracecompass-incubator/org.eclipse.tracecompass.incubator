@@ -16,7 +16,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.jsontrace.core,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional,
  org.eclipse.tracecompass.statesystem.core.tests,
- org.eclipse.tracecompass.tmf.core.tests
+ org.eclipse.tracecompass.tmf.core.tests,
+ org.eclipse.tracecompass.incubator.analysis.core
 Export-Package: org.eclipse.tracecompass.incubator.traceevent.core.tests
 Import-Package: com.google.common.base,
  com.google.common.collect,

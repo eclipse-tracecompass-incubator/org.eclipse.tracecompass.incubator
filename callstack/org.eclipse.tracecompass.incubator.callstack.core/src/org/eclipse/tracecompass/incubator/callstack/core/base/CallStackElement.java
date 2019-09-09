@@ -11,8 +11,10 @@ package org.eclipse.tracecompass.incubator.callstack.core.base;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
 
 /**
  * A basic callstack element implementing the methods of the interface.
@@ -68,7 +70,7 @@ public class CallStackElement implements ICallStackElement {
     }
 
     @Override
-    public Collection<ICallStackElement> getChildren() {
+    public Collection<ICallStackElement> getChildrenElements() {
         return fChildren;
     }
 
@@ -143,7 +145,24 @@ public class CallStackElement implements ICallStackElement {
 
     @Override
     public String toString() {
-        return "Element: " + getName() + '[' + fDescriptor + ']'; //$NON-NLS-1$
+        return getName();
+    }
+
+    @Override
+    public String getObject() {
+        return getName();
+    }
+
+    @Override
+    public @Nullable ITree<String> getParent() {
+        return fParent;
+    }
+
+    @Override
+    public Collection<ITree<String>> getChildren() {
+        List<ITree<String>> list = new ArrayList<>();
+        list.addAll(fChildren);
+        return list;
     }
 
 }

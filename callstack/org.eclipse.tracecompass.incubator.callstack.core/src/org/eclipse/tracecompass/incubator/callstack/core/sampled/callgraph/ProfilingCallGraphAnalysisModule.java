@@ -11,6 +11,7 @@ package org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,12 +25,15 @@ import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphPro
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.IEventCallStackProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.symbol.CallStackSymbolFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.Messages;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
+import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
+import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -43,10 +47,13 @@ import org.eclipse.tracecompass.tmf.core.util.Pair;
  */
 public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalysisModule implements ICallGraphProvider, IEventCallStackProvider {
 
+    private static final MetricType WEIGHT_METRIC = new MetricType(Objects.requireNonNull(Messages.CallGraphStats_NbCalls), DataType.NUMBER, null);
+
     private @Nullable ITmfEventRequest fRequest;
     private final Set<ICallStackElement> fRootElements = new HashSet<>();
 
     private @Nullable CallGraph fFullRangeCallGraph;
+    private @Nullable Collection<ISymbolProvider> fSymbolProviders = null;
 
     /**
      * Get the root elements from this call graph hierarchy
@@ -86,8 +93,32 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
     }
 
     @Override
-    public AggregatedCallSite createCallSite(ICallStackSymbol symbol) {
-        return new AggregatedStackTraces(symbol);
+    public @NonNull MetricType getWeightType() {
+        return WEIGHT_METRIC;
+    }
+
+    @Override
+    public String getTitle() {
+        return "Call Graph"; //$NON-NLS-1$
+    }
+
+    @Override
+    public @NonNull String toDisplayString(@NonNull AggregatedCallSite callsite) {
+        Collection<ISymbolProvider> symbolProviders = fSymbolProviders;
+        if (symbolProviders == null) {
+            ITmfTrace trace = getTrace();
+            if (trace == null) {
+                return String.valueOf(callsite.getObject());
+            }
+            symbolProviders = SymbolProviderManager.getInstance().getSymbolProviders(trace);
+            fSymbolProviders  = symbolProviders;
+        }
+        return callsite.getObject().resolve(symbolProviders);
+    }
+
+    @Override
+    public AggregatedCallSite createCallSite(Object symbol) {
+        return new AggregatedStackTraces((ICallStackSymbol) symbol);
     }
 
     /**
@@ -112,7 +143,7 @@ public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalys
         AggregatedCallSite prevCallsite = createCallSite(CallStackSymbolFactory.createSymbol(stackTrace[stackTrace.length - 1], dstGroup, ts));
         for (int i = stackTrace.length - 2; i >= 0; i--) {
             AggregatedCallSite callsite = createCallSite(CallStackSymbolFactory.createSymbol(stackTrace[i], dstGroup, ts));
-            callsite.addCallee(prevCallsite);
+            callsite.addChild(prevCallsite);
             prevCallsite = callsite;
         }
         return prevCallsite;

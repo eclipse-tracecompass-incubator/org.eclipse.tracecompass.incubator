@@ -16,6 +16,8 @@ import static org.junit.Assert.fail;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.Activator;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallStackAnalysisStub;
@@ -123,6 +125,24 @@ public class CallStackTestBase {
             throw new NullPointerException();
         }
         return trace;
+    }
+
+    /**
+     * Get the callstack symbol from a callsite
+     *
+     * @param callsite
+     *            The callsite to get the symbol for
+     * @return The callstack symbol
+     * @throws NullPointerException
+     *             if the object associate with the callsite is not a callstack
+     *             symbol
+     */
+    public static ICallStackSymbol getCallSiteSymbol(AggregatedCallSite callsite) {
+        Object object = callsite.getObject();
+        if (object instanceof ICallStackSymbol) {
+            return (ICallStackSymbol) object;
+        }
+        throw new NullPointerException("The object is not of the right type");
     }
 
 }

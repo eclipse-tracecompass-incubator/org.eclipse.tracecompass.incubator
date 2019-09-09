@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
@@ -33,14 +35,18 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFun
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
 import org.eclipse.tracecompass.incubator.callstack.core.symbol.CallStackSymbolFactory;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
+import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Call stack analysis used to create a segment for each call function from an
@@ -67,12 +73,23 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
      */
     public static final String ID = "org.eclipse.tracecompass.incubator.callstack.callgraph"; //$NON-NLS-1$
 
+    private static final String SELF_TIME_TITLE = Objects.requireNonNull(Messages.CallGraphStats_SelfTime);
+    private static final String CPU_TIME_TITLE = Objects.requireNonNull(Messages.CallGraphStats_CpuTime);
+    private static final String NB_CALLS_TITLE = Objects.requireNonNull(Messages.CallGraphStats_NbCalls);
+    private static final MetricType DURATION_METRIC = new MetricType(Objects.requireNonNull(Messages.CallGraphStats_Duration), DataType.NANOSECONDS, null);
+    private static final List<MetricType> METRICS = ImmutableList.of(
+            new MetricType(SELF_TIME_TITLE, DataType.NANOSECONDS, null),
+            new MetricType(CPU_TIME_TITLE, DataType.NANOSECONDS, null),
+            new MetricType(NB_CALLS_TITLE, DataType.NUMBER, null));
+
     // ------------------------------------------------------------------------
     // Attributes
     // ------------------------------------------------------------------------
 
     private final IFlameChartProvider fCsProvider;
     private final CallGraph fCallGraph = new CallGraph();
+
+    private @Nullable Collection<ISymbolProvider> fSymbolProviders = null;
 
     /**
      * Constructor
@@ -189,7 +206,7 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
             iterateOverLeafElement(element, model, callgraph, start, end, monitor);
             return;
         }
-        for (ICallStackElement child : element.getChildren()) {
+        for (ICallStackElement child : element.getChildrenElements()) {
             iterateOverElement(child, model, callgraph, start, end, monitor);
         }
     }
@@ -234,7 +251,7 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
             // level
             if (threadId > 0) {
                 Collection<AggregatedCallSite> samplingData = model.getSamplingData(threadId, lastSampleEnd, nextFunction.getStart());
-                samplingData.forEach(aggregatedCall::addCallee);
+                samplingData.forEach(aggregatedCall::addChild);
                 lastSampleEnd = nextFunction.getEnd();
             }
             AggregatedCalledFunction aggregatedChild = createCallSite(CallStackSymbolFactory.createSymbol(nextFunction.getSymbol(), element, nextFunction.getStart()));
@@ -245,7 +262,7 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
         // Get the sampling to the end of the function
         if (threadId > 0) {
             Collection<AggregatedCallSite> samplingData = model.getSamplingData(threadId, lastSampleEnd, function.getEnd() - lastSampleEnd);
-            samplingData.forEach(aggregatedCall::addCallee);
+            samplingData.forEach(aggregatedCall::addChild);
         }
     }
 
@@ -298,8 +315,57 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     }
 
     @Override
-    public AggregatedCalledFunction createCallSite(ICallStackSymbol symbol) {
-        return new AggregatedCalledFunction(symbol);
+    public AggregatedCalledFunction createCallSite(Object symbol) {
+        return new AggregatedCalledFunction((ICallStackSymbol) symbol);
+    }
+
+    @Override
+    public MetricType getWeightType() {
+        return DURATION_METRIC;
+    }
+
+    @Override
+    public List<MetricType> getAdditionalMetrics() {
+        return METRICS;
+    }
+
+    @Override
+    public String toDisplayString(AggregatedCallSite callsite) {
+        Collection<ISymbolProvider> symbolProviders = fSymbolProviders;
+        if (symbolProviders == null) {
+            ITmfTrace trace = getTrace();
+            if (trace == null) {
+                return String.valueOf(callsite.getObject());
+            }
+            symbolProviders = SymbolProviderManager.getInstance().getSymbolProviders(trace);
+            fSymbolProviders  = symbolProviders;
+        }
+        return callsite.getObject().resolve(symbolProviders);
+    }
+
+    @Override
+    public Object getAdditionalMetric(AggregatedCallSite object, int metricIndex) {
+        if (object instanceof AggregatedCalledFunction) {
+            switch (metricIndex) {
+            case 0:
+                return ((AggregatedCalledFunction) object).getSelfTime();
+            case 1:
+                long cpuTime = ((AggregatedCalledFunction) object).getCpuTime();
+                return cpuTime >= 0 ? cpuTime : StringUtils.EMPTY;
+            case 2:
+                return ((AggregatedCalledFunction) object).getNbCalls();
+            default:
+                Activator.getInstance().logError("Unknown metric at position " + metricIndex); //$NON-NLS-1$
+                // Unknown metric, shoud not happen
+                break;
+            }
+        }
+        return StringUtils.EMPTY;
+    }
+
+    @Override
+    public String getTitle() {
+        return Objects.requireNonNull(Messages.CallGraphAnalysis_Title);
     }
 
 }

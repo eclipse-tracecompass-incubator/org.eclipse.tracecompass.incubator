@@ -20,7 +20,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.IAnalysisProgressListener;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
@@ -237,13 +236,18 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     }
 
     @Override
+    public String getTitle() {
+        return fCallGraph.getTitle();
+    }
+
+    @Override
     public void dispose() {
         super.dispose();
         fCallGraph.dispose();
     }
 
     @Override
-    public AggregatedCallSite createCallSite(ICallStackSymbol symbol) {
+    public AggregatedCallSite createCallSite(Object symbol) {
         return fCallGraph.createCallSite(symbol);
     }
 
@@ -339,6 +343,26 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
             throw new IllegalStateException("The initialiation is complete, so the state system must not be null"); //$NON-NLS-1$
         }
         return stateSystem.waitUntilBuilt(0);
+    }
+
+    @Override
+    public MetricType getWeightType() {
+        return fCallGraph.getWeightType();
+    }
+
+    @Override
+    public List<MetricType> getAdditionalMetrics() {
+        return fCallGraph.getAdditionalMetrics();
+    }
+
+    @Override
+    public String toDisplayString(AggregatedCallSite object) {
+        return fCallGraph.toDisplayString(object);
+    }
+
+    @Override
+    public Object getAdditionalMetric(AggregatedCallSite object, int metricIndex) {
+        return fCallGraph.getAdditionalMetric(object, metricIndex);
     }
 
 }

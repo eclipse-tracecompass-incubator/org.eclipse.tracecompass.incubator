@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.IAnalysisProgressListener;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
@@ -309,8 +308,13 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
     }
 
     @Override
-    public AggregatedCallSite createCallSite(ICallStackSymbol symbol) {
+    public AggregatedCallSite createCallSite(Object symbol) {
         return fCallGraph.createCallSite(symbol);
+    }
+
+    @Override
+    public String getTitle() {
+        return fCallGraph.getTitle();
     }
 
     @Override

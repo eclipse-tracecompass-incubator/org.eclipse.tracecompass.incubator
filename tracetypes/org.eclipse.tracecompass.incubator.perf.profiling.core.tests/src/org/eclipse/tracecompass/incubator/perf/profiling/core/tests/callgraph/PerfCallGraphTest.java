@@ -108,7 +108,7 @@ public class PerfCallGraphTest {
         assertEquals(1, samplingData.size());
 
         AggregatedCallSite callsite = samplingData.iterator().next();
-        assertEquals("0x1", callsite.getSymbol().resolve(Collections.emptySet()));
+        assertEquals("0x1", callsite.getObject().resolve(Collections.emptySet()));
 
         // Validate sampling data towards the end
         samplingData = module.getSamplingData(2, 12, 20);
@@ -116,7 +116,7 @@ public class PerfCallGraphTest {
         assertEquals(1, samplingData.size());
 
         callsite = samplingData.iterator().next();
-        assertEquals("0x4", callsite.getSymbol().resolve(Collections.emptySet()));
+        assertEquals("0x4", callsite.getObject().resolve(Collections.emptySet()));
     }
 
 }
