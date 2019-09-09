@@ -61,4 +61,11 @@
             id="org.eclipse.tracecompass.incubator.scripting.dataprovider">
       </dataProviderFactory>
    </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.cli.parser.extension">
+      <parser
+            class="org.eclipse.tracecompass.incubator.internal.scripting.core.cli.ScriptCliParser"
+            priority="8">
+      </parser>
+   </extension>
 </plugin>

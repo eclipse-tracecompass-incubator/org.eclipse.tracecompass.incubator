@@ -19,9 +19,11 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.statesystem.core,
  org.eclipse.tracecompass.analysis.os.linux.core,
  org.eclipse.tracecompass.tmf.analysis.xml.core,
- org.eclipse.tracecompass.incubator.filters.core;resolution:=optional
+ org.eclipse.tracecompass.incubator.filters.core;resolution:=optional,
+ org.eclipse.tracecompass.tmf.cli.core
 Export-Package: org.eclipse.tracecompass.incubator.internal.scripting.core;x-friends:="org.eclipse.tracecompass.incubator.scripting.core.tests,org.eclipse.tracecompass.incubator.scripting.ui.tests",
  org.eclipse.tracecompass.incubator.internal.scripting.core.analysis;x-friends:="org.eclipse.tracecompass.incubator.scripting.core.tests,org.eclipse.tracecompass.incubator.scripting.ui",
+ org.eclipse.tracecompass.incubator.internal.scripting.core.cli;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.scripting.core.data.provider;x-friends:="org.eclipse.tracecompass.incubator.scripting.core.tests,org.eclipse.tracecompass.incubator.scripting.ui",
  org.eclipse.tracecompass.incubator.internal.scripting.core.trace;x-friends:="org.eclipse.tracecompass.incubator.scripting.core.tests,org.eclipse.tracecompass.incubator.scripting.ui",
  org.eclipse.tracecompass.incubator.scripting.core,
