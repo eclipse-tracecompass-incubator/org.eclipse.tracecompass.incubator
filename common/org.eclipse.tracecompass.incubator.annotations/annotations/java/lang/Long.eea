@@ -1,7 +1,7 @@
 class java/lang/Long
-toHexString
- (J)Ljava/lang/String;
- (J)L1java/lang/String;
+decode
+ (Ljava/lang/String;)Ljava/lang/Long;
+ (Ljava/lang/String;)L1java/lang/Long;
 valueOf
  (J)Ljava/lang/Long;
  (J)L1java/lang/Long;

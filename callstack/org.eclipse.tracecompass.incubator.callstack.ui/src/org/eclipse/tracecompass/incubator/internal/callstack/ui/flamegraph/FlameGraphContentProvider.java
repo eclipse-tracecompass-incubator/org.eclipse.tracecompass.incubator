@@ -59,7 +59,10 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
      *            A stack used to save the functions timeStamps
      */
     private void setData(AggregatedCallSite firstNode, List<FlamegraphDepthEntry> childrenEntries, Deque<Long> timestampStack) {
-        long lastEnd = timestampStack.peek();
+        Long lastEnd = timestampStack.peek();
+        if (lastEnd == null) {
+            return;
+        }
         for (int i = 0; i <= firstNode.getMaxDepth() - 1; i++) {
             if (i >= childrenEntries.size()) {
                 FlamegraphDepthEntry entry = new FlamegraphDepthEntry(String.valueOf(i), 0, firstNode.getWeight(), i, String.valueOf(i));
@@ -75,7 +78,10 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
     }
 
     private static void setExtraData(AggregatedCallSite firstNode, List<TimeGraphEntry> extraEntries, Deque<Long> timestampStack) {
-        long lastEnd = timestampStack.peek();
+        Long lastEnd = timestampStack.peek();
+        if (lastEnd == null) {
+            return;
+        }
         Iterator<AggregatedCallSite> extraChildrenSites = firstNode.getExtraChildrenSites().iterator();
 
         if (!extraChildrenSites.hasNext()) {
@@ -125,11 +131,15 @@ public class FlameGraphContentProvider implements ITimeGraphContentProvider {
             timestampStack.pop();
         });
 
+        Long lastEnd = timestampStack.peek();
+        if (lastEnd == null) {
+            return;
+        }
         FlamegraphDepthEntry entry = checkNotNull(childrenEntries.get(depth - 1));
         // Create the event corresponding to the function using the caller's
         // timestamp
-        entry.addEvent(new FlamegraphEvent(entry, timestampStack.peek(), node));
-        timestampStack.push(timestampStack.peek() + node.getWeight());
+        entry.addEvent(new FlamegraphEvent(entry, lastEnd, node));
+        timestampStack.push(lastEnd + node.getWeight());
     }
 
     @Override
