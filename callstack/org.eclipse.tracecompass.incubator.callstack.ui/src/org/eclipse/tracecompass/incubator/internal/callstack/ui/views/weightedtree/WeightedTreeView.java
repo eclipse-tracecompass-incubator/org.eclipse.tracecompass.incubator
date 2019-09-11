@@ -8,8 +8,6 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.weightedtree;
 
-import java.text.DecimalFormat;
-import java.text.Format;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,8 +34,6 @@ import org.eclipse.tracecompass.tmf.ui.views.TmfView;
  * @author Geneviève Bastien
  */
 public class WeightedTreeView extends TmfView {
-
-    static final Format DECIMAL_FORMATTER = new DecimalFormat("###,###.##"); //$NON-NLS-1$
 
     /**
      * The ID of this view
