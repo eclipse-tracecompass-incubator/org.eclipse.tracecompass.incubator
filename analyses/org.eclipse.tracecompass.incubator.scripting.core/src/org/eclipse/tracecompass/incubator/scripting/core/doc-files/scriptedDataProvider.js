@@ -70,7 +70,7 @@ function runAnalysis() {
 				if (resourceId != null) {
 					// Close the receiving state of the resource
 					quark = ss.getQuarkAbsoluteAndAdd(resourceId);
-					ss.modifyAttribute(event.getTimestamp().toNanos(), null, quark);
+					ss.removeAttribute(event.getTimestamp().toNanos(), quark);
 				}
 				// We received a message, see if we can close a pending arrow
 				source = getFieldValue(event, "source");
@@ -108,7 +108,7 @@ function runAnalysis() {
 				if (resourceId != null) {
 					// Close the sending state of this resource
 					quark = ss.getQuarkAbsoluteAndAdd(resourceId);
-					ss.modifyAttribute(event.getTimestamp().toNanos(), null, quark);
+					ss.removeAttribute(event.getTimestamp().toNanos(), quark);
 				}
 			}
 		}

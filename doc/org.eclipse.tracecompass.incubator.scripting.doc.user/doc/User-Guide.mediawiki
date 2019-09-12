@@ -85,6 +85,34 @@ You can also run the script in debug mode ('''Debug As''' -> '''EASE Script''').
 
 The Trace Compass branch downloaded above changed the ''State System Explorer'' so that it can open state system files directly, without requiring them to be linked to an analysis. The state system created by the script can thus be explored using that view.
 
+=== Language Specific Troubleshooting ===
+
+==== Javascript ====
+
+* Errors saying "Cannot convert <some value> to <some java type>" when calling a Java method
+
+Change the Javascript engine to '''Nashorn''' in the Run configuration..., as in the screenshot below.
+
+[[Image:images/change_javascript_engine.png | Change the Javascript Engine]]
+
+''Explanation'': This will typically happen when calling a method with multiple signatures. There are 2 javascript engines in EASE:
+
+1. '''Rhino''' which has the advantage of having a debug engine, but does not handle well methods with multiple signature.
+
+2. '''Nashorn''' which lacks a debugger but has better support of jave methods with multiple signatures.
+
+So when problems that should not be arise with '''Rhino''', a switch to '''Nashorn''' may fix the problem.
+
+==== Python ====
+
+* The script lags and eventually causes an OutOfMemoryException
+
+To avoid OutOfMemoryException, objects should be explicitly detached from the py4j gateway when not needed anymore by calling <code>gateway.detach(myUnneededObject)</code>.
+
+''Explanation'': The python java gateway keeps a reference to the Java objects it sends to the python side. In theory, those objects should be released when the python garbage collector runs. But in practice, it does not seem to work very well, and for scripts that creates a lot of objects (like an event request on a large trace), an OOME happens.
+
+See the [https://www.py4j.org/advanced_topics.html#py4j-memory-model py4j memory model documentation] for more information.
+
 == Command Line Scripting ==
 
 Apart from executing a script file, it is also possible to access a script shell in Trace Compass, and script commands from it.

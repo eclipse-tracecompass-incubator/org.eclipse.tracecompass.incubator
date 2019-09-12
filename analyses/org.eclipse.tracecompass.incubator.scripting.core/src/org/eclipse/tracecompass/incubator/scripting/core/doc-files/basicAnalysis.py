@@ -40,9 +40,12 @@ def runAnalysis():
     # Parse all events
     event = None
     while iter.hasNext():
-       
+        # The python java gateway keeps a reference to the Java objects it sends to python. To avoid OutOfMemoryException, they need to be explicitly detached from the gateway when not needed anymore
+        if not(event is None):
+            gateway.detach(event)
+        
         event = iter.next();
-       
+        
         # Do something when the event is a sched_switch
         if event.getName() == "sched_switch":
             # This function is a wrapper to get the value of field CPU in the event, or return null if the field is not present
@@ -65,7 +68,6 @@ if not(ss.waitUntilBuilt(0)):
 
 # Get a time graph provider from this analysis, displaying all attributes (which are the cpus here)
 provider = createTimeGraphProvider(analysis, {ENTRY_PATH : '*'});
-if not (provider is None):
+if not(provider is None):
     # Open a time graph view displaying this provider
     openTimeGraphView(provider)
-
