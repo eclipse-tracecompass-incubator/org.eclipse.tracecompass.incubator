@@ -384,4 +384,9 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
         return iterator.next().waitUntilBuilt(0);
     }
 
+    @Override
+    public List<String> getExtraDataSets() {
+        return fCallGraph.getExtraDataSets();
+    }
+
 }

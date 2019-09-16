@@ -346,6 +346,11 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     }
 
     @Override
+    public @NonNull List<@NonNull String> getExtraDataSets() {
+        return fCallGraph.getExtraDataSets();
+    }
+
+    @Override
     public MetricType getWeightType() {
         return fCallGraph.getWeightType();
     }

@@ -13,7 +13,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 
 import com.google.common.collect.HashMultimap;
@@ -27,7 +30,7 @@ import com.google.common.collect.Multimap;
  *
  * @author Geneviève Bastien
  */
-public class CallGraph {
+public class CallGraph implements IWeightedTreeSet<@NonNull ICallStackSymbol, ICallStackElement, AggregatedCallSite> {
 
     /**
      * An empty graph that can be returned when there is no other call graph
@@ -89,8 +92,14 @@ public class CallGraph {
      *
      * @return The root elements of the call graph
      */
+    @Override
     public Collection<ICallStackElement> getElements() {
         return ImmutableSet.copyOf(fRootElements);
+    }
+
+    @Override
+    public Collection<AggregatedCallSite> getTreesFor(ICallStackElement element) {
+        return getCallingContextTree(element);
     }
 
 }

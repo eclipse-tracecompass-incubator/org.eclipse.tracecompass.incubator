@@ -12,17 +12,16 @@ package org.eclipse.tracecompass.incubator.analysis.core.weighted.tree;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.common.core.format.DecimalUnitFormat;
-import org.eclipse.tracecompass.common.core.format.SubSecondTimeWithUnitFormat;
 import org.eclipse.tracecompass.common.core.format.DataSizeWithUnitFormat;
 import org.eclipse.tracecompass.common.core.format.DataSpeedWithUnitFormat;
+import org.eclipse.tracecompass.common.core.format.DecimalUnitFormat;
+import org.eclipse.tracecompass.common.core.format.SubSecondTimeWithUnitFormat;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 
 /**
@@ -34,14 +33,14 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
  * elements can implement the {@link ITree} class if there is a hierarchy in the
  * groupings.
  *
- * @author Geneviève Bastien
- *
  * @param <N>
  *            The type of objects represented by each node in the tree
  * @param <E>
  *            The type of elements used to group the trees
  * @param <T>
  *            The type of the tree provided
+ *
+ * @author Geneviève Bastien
  */
 public interface IWeightedTreeProvider<@NonNull N, E, @NonNull T extends WeightedTree<N>> {
 
@@ -177,38 +176,29 @@ public interface IWeightedTreeProvider<@NonNull N, E, @NonNull T extends Weighte
     MetricType WEIGHT_TYPE = new MetricType("Weight", DataType.NUMBER, null); //$NON-NLS-1$
 
     /**
-     * Get the trees provided by this analysis. This should return all the trees
-     * for the whole trace
+     * Get a weighted tree set for a time selection. It should be a subset of
+     * the complete tree, ie the elements, and weights of the weighted trees
+     * should be included in full tree, but its range should cover only the
+     * requested time range. If this provider does not support selection range,
+     * <code>null</code> should be returned.
      *
-     * @param element
-     *            The element for which to get the trees
-     * @return A collection of trees provided by this class
-     */
-    Collection<T> getTreesFor(E element);
-
-    /**
-     * Get the trees for a certain time range. If a provider does not support
-     * ranged trees, this method can just return an empty collection
-     *
-     * @param element
-     *            The element for which to get the trees
      * @param start
      *            The timestamp of the start of the range
      * @param end
      *            The timestamp of the end of the range
-     * @return A collection of trees whose values span from start to end
+     * @return A weighted tree set that spans the selected range, or
+     *         <code>null</code> if range is not supported.
      */
-    default Collection<T> getTrees(E element, ITmfTimestamp start, ITmfTimestamp end) {
-        return Collections.emptySet();
+    default @Nullable IWeightedTreeSet<N, E, T> getSelection(ITmfTimestamp start, ITmfTimestamp end) {
+        return null;
     }
 
     /**
-     * Get the elements under which are the trees. It can be a single constant
-     * element if this provider does not have the concept of grouping the trees.
+     * Get the complete tree set provided by this object.
      *
-     * @return The elements used to group the trees
+     * @return The complete weighted tree set
      */
-    Collection<E> getElements();
+    IWeightedTreeSet<N, E, T> getTreeSet();
 
     /**
      * Get the metric type for the weight value. The default metric is called

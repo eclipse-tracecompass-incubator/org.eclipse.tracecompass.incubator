@@ -93,6 +93,7 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     private final CallGraph fCallGraph = new CallGraph();
 
     private @Nullable Collection<ISymbolProvider> fSymbolProviders = null;
+    private boolean fHasKernelStatuses = false;
 
     // Keep a very small cache of selection callgraphs, to avoid having to
     // compute again
@@ -238,6 +239,7 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
         if (callStack.getMaxDepth() == 0) {
             return;
         }
+        fHasKernelStatuses |= callStack.hasKernelStatuses();
         // Start with the first function
         AbstractCalledFunction nextFunction = (AbstractCalledFunction) callStack.getNextFunction(callStack.getStartTime(), 1, null, model, start, end);
         while (nextFunction != null) {
@@ -331,6 +333,14 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     @Override
     public AggregatedCalledFunction createCallSite(Object symbol) {
         return new AggregatedCalledFunction((ICallStackSymbol) symbol);
+    }
+
+    @Override
+    public List<String> getExtraDataSets() {
+        if (fHasKernelStatuses) {
+            return Collections.singletonList(String.valueOf(org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.Messages.FlameChartDataProvider_KernelStatusTitle));
+        }
+        return ICallGraphProvider.super.getExtraDataSets();
     }
 
     @Override

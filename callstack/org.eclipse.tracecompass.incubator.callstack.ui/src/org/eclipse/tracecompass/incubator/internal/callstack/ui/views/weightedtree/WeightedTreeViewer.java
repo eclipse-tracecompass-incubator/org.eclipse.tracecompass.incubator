@@ -462,7 +462,7 @@ public class WeightedTreeViewer extends AbstractTmfTreeViewer {
 
         private List<ITmfTreeViewerEntry> getChildrenTreeNodes() {
             List<ITmfTreeViewerEntry> list = new ArrayList<>();
-            for (WeightedTree<?> callsite : fTreeProvider.getTreesFor(fThisElement)) {
+            for (WeightedTree<?> callsite : fTreeProvider.getTreeSet().getTreesFor(fThisElement)) {
                 list.add(new TreeNodeEntry(callsite, this, fTreeProvider));
             }
             return list;
@@ -576,7 +576,7 @@ public class WeightedTreeViewer extends AbstractTmfTreeViewer {
 
     private <@NonNull E> void setGlobalData(List<ITmfTreeViewerEntry> entryList, IWeightedTreeProvider<?, E, WeightedTree<?>> module) {
 
-        Collection<E> elements = module.getElements();
+        Collection<E> elements = module.getTreeSet().getElements();
 
         for (E element : elements) {
             ElementEntry<E> entry = new ElementEntry<>(element, module);
