@@ -206,7 +206,7 @@ public class CallStack {
         if (depth > getMaxDepth()) {
             throw new ArrayIndexOutOfBoundsException("CallStack depth " + depth + " is too large"); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        long endTime = (parent == null ? fStateSystem.getCurrentEndTime() : parent.getEnd() - 1);
+        long endTime = (parent == null ? fStateSystem.getCurrentEndTime() : parent.getEnd());
         if (time > endTime || time >= end) {
             return null;
         }

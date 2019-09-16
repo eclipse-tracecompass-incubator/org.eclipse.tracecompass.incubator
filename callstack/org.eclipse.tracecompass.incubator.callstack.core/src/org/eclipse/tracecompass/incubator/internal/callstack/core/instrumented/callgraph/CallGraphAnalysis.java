@@ -46,6 +46,9 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -90,6 +93,19 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     private final CallGraph fCallGraph = new CallGraph();
 
     private @Nullable Collection<ISymbolProvider> fSymbolProviders = null;
+
+    // Keep a very small cache of selection callgraphs, to avoid having to
+    // compute again
+    private final LoadingCache<TmfTimeRange, CallGraph> fRangeCallgraphs = Objects.requireNonNull(CacheBuilder.newBuilder()
+            .maximumSize(10)
+            .build(new CacheLoader<TmfTimeRange, CallGraph>() {
+                @Override
+                public CallGraph load(TmfTimeRange range) {
+                    CallGraph cg = new CallGraph();
+                    executeForRange(cg, range, new NullProgressMonitor());
+                    return cg;
+                }
+            }));
 
     /**
      * Constructor
@@ -290,9 +306,7 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
 
     @Override
     public CallGraph getCallGraph(ITmfTimestamp start, ITmfTimestamp end) {
-        CallGraph cg = new CallGraph();
-        executeForRange(cg, new TmfTimeRange(start, end), new NullProgressMonitor());
-        return cg;
+        return fRangeCallgraphs.getUnchecked(new TmfTimeRange(start, end));
     }
 
     @Override
