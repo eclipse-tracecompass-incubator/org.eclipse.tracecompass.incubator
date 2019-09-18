@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
 import org.eclipse.tracecompass.common.core.format.DataSizeWithUnitFormat;
 import org.eclipse.tracecompass.common.core.format.DataSpeedWithUnitFormat;
 import org.eclipse.tracecompass.common.core.format.DecimalUnitFormat;
@@ -41,6 +42,12 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
  *            The type of the tree provided
  *
  * @author Geneviève Bastien
+ * @param <N>
+ *            The type of objects represented by each node in the tree
+ * @param <E>
+ *            The type of elements used to group the trees
+ * @param <T>
+ *            The type of the tree provided
  */
 public interface IWeightedTreeProvider<@NonNull N, E, @NonNull T extends WeightedTree<N>> {
 
@@ -106,7 +113,7 @@ public interface IWeightedTreeProvider<@NonNull N, E, @NonNull T extends Weighte
          * @return The formatted string
          */
         public String format(Object object) {
-            return fFormatter.format(object);
+            return String.valueOf(fFormatter.format(object));
         }
     }
 
@@ -117,6 +124,7 @@ public interface IWeightedTreeProvider<@NonNull N, E, @NonNull T extends Weighte
         private final String fTitle;
         private final DataType fDataType;
         private final @Nullable Format fFormatter;
+        private final boolean fHasStatistics;
 
         /**
          * Constructor
@@ -131,9 +139,28 @@ public interface IWeightedTreeProvider<@NonNull N, E, @NonNull T extends Weighte
          *            formatter
          */
         public MetricType(String title, DataType dataType, @Nullable Format format) {
+            this(title, dataType, format, false);
+        }
+
+        /**
+         * Constructor
+         *
+         * @param title
+         *            The title of this metric (a string meant for end users)
+         * @param dataType
+         *            The type of data this metric represent
+         * @param format
+         *            The formatter for this metric. If <code>null</code>,
+         *            formatting will use the {@link DataType}'s default
+         *            formatter
+         * @param hasStatistics
+         *            Whether this metric has statistics provided with it
+         */
+        public MetricType(String title, DataType dataType, @Nullable Format format, boolean hasStatistics) {
             fTitle = title;
             fDataType = dataType;
             fFormatter = format;
+            fHasStatistics = hasStatistics;
         }
 
         /**
@@ -166,6 +193,18 @@ public interface IWeightedTreeProvider<@NonNull N, E, @NonNull T extends Weighte
                 return Objects.requireNonNull(fFormatter.format(obj));
             }
             return fDataType.format(obj);
+        }
+
+        /**
+         * Return whether this metric has statistics computed with it. If so,
+         * then calling
+         * {@link IWeightedTreeProvider#getStatistics(WeightedTree, int)} on
+         * this metric's index should return a statistics object for a tree.
+         *
+         * @return Whether this metric has statistics computed for it
+         */
+        public boolean hasStatistics() {
+            return fHasStatistics;
         }
 
     }
@@ -237,10 +276,42 @@ public interface IWeightedTreeProvider<@NonNull N, E, @NonNull T extends Weighte
     }
 
     /**
-     * Return a list of additional data sets' titles. These sets will be available
-     * by calling {@link WeightedTree#getExtraDataTrees(int)} on the trees,
-     * where the index in the list is the parameter that the children set should
-     * match
+     * Get the statistics for a metric. The metric index corresponds to the
+     * position of the desired metric in the list of metric returned by the
+     * {@link #getAdditionalMetrics()} method. If the index < 0, then the metric
+     * is the main weight.
+     *
+     * @param object
+     *            The weighted tree object for which to get the metric
+     * @param metricIndex
+     *            The index in the list of the metric metric to get. If < 0,
+     *            then the metric is the main weight
+     * @return The statistics for the metric of <code>null</code> if there are
+     *         no statistics for this metric.
+     */
+    default @Nullable IStatistics<?> getStatistics(T object, int metricIndex) {
+        if (metricIndex < 0) {
+            if (getWeightType().hasStatistics()) {
+                return object.getStatistics(metricIndex);
+            }
+            return null;
+        }
+        List<MetricType> metrics = getAdditionalMetrics();
+        if (metricIndex >= metrics.size()) {
+            return null;
+        }
+        MetricType metricType = metrics.get(metricIndex);
+        if (!metricType.hasStatistics()) {
+            return null;
+        }
+        return object.getStatistics(metricIndex);
+    }
+
+    /**
+     * Return a list of additional data sets' titles. These sets will be
+     * available by calling {@link WeightedTree#getExtraDataTrees(int)} on the
+     * trees, where the index in the list is the parameter that the children set
+     * should match
      *
      * @return The title of each child set
      */

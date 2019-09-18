@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.ProcessStatus;
 import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
@@ -305,6 +306,20 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
     @Override
     public Collection<AggregatedCallSite> getExtraChildrenSites() {
         return ImmutableList.copyOf(fProcessStatuses.values());
+    }
+
+    @Override
+    public @Nullable IStatistics<?> getStatistics(int metricIndex) {
+        if (metricIndex < 0) {
+            return getFunctionStatistics().getDurationStatistics();
+        }
+        if (metricIndex == CallGraphAnalysis.SELF_TIME_METRIC_INDEX) {
+            return getFunctionStatistics().getSelfTimeStatistics();
+        }
+        if (metricIndex == CallGraphAnalysis.CPU_TIME_METRIC_INDEX) {
+            return getFunctionStatistics().getCpuTimesStatistics();
+        }
+        return null;
     }
 
     /**

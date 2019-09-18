@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
 
 /**
  * A Weighted Tree class to describe hierarchical data with a weight. This class
@@ -201,6 +202,20 @@ public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
      */
     protected void mergeData(WeightedTree<T> other) {
         // Nothing to do in main class
+    }
+
+    /**
+     * Get the statistics for a metric at index. If the index < 0, then the
+     * metric is the main weight.
+     *
+     * @param metricIndex
+     *            The index in the list of the metric metric to get. If < 0,
+     *            then the metric is the weight.
+     * @return The statistics for the metric or <code>null</code> if not
+     *         available
+     */
+    public @Nullable IStatistics<?> getStatistics(int metricIndex) {
+        return null;
     }
 
     /**

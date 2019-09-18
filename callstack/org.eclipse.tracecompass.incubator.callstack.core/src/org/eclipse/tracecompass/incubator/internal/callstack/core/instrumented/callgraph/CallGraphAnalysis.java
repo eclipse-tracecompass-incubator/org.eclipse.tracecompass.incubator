@@ -76,14 +76,20 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
      */
     public static final String ID = "org.eclipse.tracecompass.incubator.callstack.callgraph"; //$NON-NLS-1$
 
+    /**
+     * Index of some metrics, to get its statistics. package-private so
+     * aggregated called function can access it
+     */
+    static final int SELF_TIME_METRIC_INDEX = 0;
+    static final int CPU_TIME_METRIC_INDEX = 1;
     private static final String SELF_TIME_TITLE = Objects.requireNonNull(Messages.CallGraphStats_SelfTime);
     private static final String CPU_TIME_TITLE = Objects.requireNonNull(Messages.CallGraphStats_CpuTime);
     private static final String NB_CALLS_TITLE = Objects.requireNonNull(Messages.CallGraphStats_NbCalls);
-    private static final MetricType DURATION_METRIC = new MetricType(Objects.requireNonNull(Messages.CallGraphStats_Duration), DataType.NANOSECONDS, null);
+    private static final MetricType DURATION_METRIC = new MetricType(Objects.requireNonNull(Messages.CallGraphStats_Duration), DataType.NANOSECONDS, null, true);
     private static final List<MetricType> METRICS = ImmutableList.of(
-            new MetricType(SELF_TIME_TITLE, DataType.NANOSECONDS, null),
-            new MetricType(CPU_TIME_TITLE, DataType.NANOSECONDS, null),
-            new MetricType(NB_CALLS_TITLE, DataType.NUMBER, null));
+            new MetricType(SELF_TIME_TITLE, DataType.NANOSECONDS, null, true),
+            new MetricType(CPU_TIME_TITLE, DataType.NANOSECONDS, null, true),
+            new MetricType(NB_CALLS_TITLE, DataType.NUMBER, null, false));
 
     // ------------------------------------------------------------------------
     // Attributes
