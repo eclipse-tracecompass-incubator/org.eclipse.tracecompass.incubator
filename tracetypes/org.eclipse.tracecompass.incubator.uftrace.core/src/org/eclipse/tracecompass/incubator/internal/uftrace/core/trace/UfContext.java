@@ -45,7 +45,10 @@ public class UfContext extends TmfContext {
     public UfContext(Iterable<DatParser> dats, ITmfTrace trace) {
         fTrace = trace;
         for (DatParser dp : dats) {
-            fQueue.add(dp.iterator());
+            PeekingIterator<DatEvent> iterator = dp.iterator();
+            if (iterator.hasNext()) {
+                fQueue.add(iterator);
+            }
         }
     }
 

@@ -165,9 +165,11 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
                         }
                         DatParser dp = new DatParser(file);
                         // read first event (really check magic number header)
-                        dp.iterator().next();
-                        confidence += 4;
-                        hasDat = true;
+                        if (dp.iterator().hasNext()) {
+                            dp.iterator().next();
+                            confidence += 4;
+                            hasDat = true;
+                        }
                     } catch (IllegalArgumentException e) {
                         // we don't want a failing trace
                         return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "dat parsing error", e); //$NON-NLS-1$
