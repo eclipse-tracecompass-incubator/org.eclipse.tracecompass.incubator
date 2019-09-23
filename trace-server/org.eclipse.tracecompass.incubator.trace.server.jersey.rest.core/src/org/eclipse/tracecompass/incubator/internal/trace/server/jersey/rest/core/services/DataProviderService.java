@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +37,14 @@ import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtu
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlOutputElement;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils.OutputType;
+import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output.XmlDataProviderManager;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
-import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output.XmlDataProviderManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
+import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
+import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
+import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
@@ -51,6 +55,7 @@ import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.xy.ITmfTreeXYDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.xy.ITmfXyModel;
+import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.w3c.dom.Element;
@@ -446,5 +451,47 @@ public class DataProviderService {
 
         TmfModelResponse<?> treeResponse = provider.fetchTree(queryParameters.getParameters(), null);
         return Response.ok(treeResponse).build();
+    }
+
+    /**
+     * Query the provider for styles
+     *
+     * @param uuid
+     *            desired trace UUID
+     * @param outputId
+     *            Eclipse extension point ID for the data provider to query
+     * @param queryParameters
+     *            Parameters to fetch styles as described by
+     *            {@link QueryParameters}
+     * @return {@link GenericView} with the results
+     */
+    @POST
+    @Path("/{outputId}/style")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getStyles(@PathParam("uuid") UUID uuid,
+            @PathParam("outputId") String outputId,
+            QueryParameters queryParameters) {
+        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+        if (trace == null) {
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        }
+
+        ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+                outputId, ITmfTreeDataProvider.class);
+
+        if (provider == null) {
+            // The analysis cannot be run on this trace
+            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+        }
+
+        if (provider instanceof IOutputStyleProvider) {
+            TmfModelResponse<@NonNull OutputStyleModel> styleModelResponse = ((IOutputStyleProvider) provider).fetchStyle(queryParameters.getParameters(), null);
+            return Response.ok(styleModelResponse).build();
+        }
+
+        // Return an empty model if the provider is not an IOutputStyleProvider
+        // and let the client decide the style
+        return Response.ok(new TmfModelResponse<>(new OutputStyleModel(Collections.emptyMap()), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
     }
 }

@@ -28,7 +28,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
@@ -112,7 +111,6 @@ public class WebApplication {
 
     private static JacksonJaxbJsonProvider registerCustomMappers() {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
         // create JsonProvider to provide custom ObjectMapper
         JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
