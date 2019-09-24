@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
 import org.eclipse.tracecompass.internal.provisional.jsontrace.core.trace.JsonTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
@@ -299,5 +300,37 @@ public class TraceEventTraceTest {
             eventCount++;
         }
         assertEquals(8, eventCount);
+    }
+
+    /**
+     * Test a trace with an empty event
+     *
+     * @throws TmfTraceException
+     *             should not happen
+     */
+    @Test
+    public void testEmptyEvent() throws TmfTraceException {
+        String path = "traces/empty_event.json";
+        int nbEvents = 2;
+        ITmfTimestamp startTime = TmfTimestamp.fromMicros(456123453L);
+        ITmfTimestamp endTime = TmfTimestamp.fromMicros(456123455L);
+        testTrace(path, nbEvents, startTime, endTime);
+
+        // Test the values of the first event.
+        ITmfTrace trace = new TraceEventTrace();
+        try {
+            trace.initTrace(null, path, ITmfEvent.class);
+            ITmfContext context = trace.seekEvent(0.0);
+            ITmfEvent event = trace.getNext(context);
+            ITmfEventField eventField = event.getContent();
+            assertEquals(1000000.0, eventField.getField("dur").getValue());
+            assertEquals("X", eventField.getField("ph").getValue());
+            assertEquals("event1", eventField.getField("name").getValue());
+            assertEquals("12", eventField.getField("pid").getValue());
+            assertEquals(12, eventField.getField("tid").getValue());
+            assertEquals(456123453000L, eventField.getField("ts").getValue());
+        } finally {
+            trace.dispose();
+        }
     }
 }

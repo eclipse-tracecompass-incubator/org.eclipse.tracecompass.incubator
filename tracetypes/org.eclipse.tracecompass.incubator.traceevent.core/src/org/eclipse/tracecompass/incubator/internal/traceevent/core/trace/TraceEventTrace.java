@@ -263,7 +263,8 @@ public class TraceEventTrace extends JsonTrace {
                     while (nextJson != null) {
                         TraceEventField field = TraceEventField.parseJson(nextJson);
                         if (field == null) {
-                            return null;
+                            nextJson = readNextEventString(() -> fFileInput.read());
+                            continue;
                         }
                         if (field.getPhase() != 'M') {
                             return new TraceEventEvent(this, context.getRank(), field);
@@ -334,7 +335,9 @@ public class TraceEventTrace extends JsonTrace {
         public @Nullable String resolve(@NonNull ITmfEvent event) {
             if (event instanceof TraceEventEvent) {
                 TraceEventField field = ((TraceEventEvent) event).getField();
-                return fPidNames.get(field.getPid());
+                if (field.getPid() != null) {
+                    return fPidNames.get(field.getPid());
+                }
             }
             return null;
         }
@@ -349,7 +352,9 @@ public class TraceEventTrace extends JsonTrace {
         public @Nullable String resolve(@NonNull ITmfEvent event) {
             if (event instanceof TraceEventEvent) {
                 TraceEventField field = ((TraceEventEvent) event).getField();
-                return fTidNames.get(field.getTid());
+                if (field.getTid() != null) {
+                    return fTidNames.get(field.getTid());
+                }
             }
             return null;
         }

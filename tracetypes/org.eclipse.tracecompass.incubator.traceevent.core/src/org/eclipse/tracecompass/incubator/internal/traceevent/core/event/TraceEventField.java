@@ -62,7 +62,9 @@ public class TraceEventField {
         Map<@NonNull String, @NonNull Object> argsMap = new HashMap<>();
         root = G_SON.fromJson(fieldsString, JsonObject.class);
         long ts = 0;
-
+        if (root.size() == 0) {
+            return null;
+        }
         Double tso = optDouble(root, ITraceEventConstants.TIMESTAMP);
         if (tso == Double.NaN) {
             return null;
