@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+   Copyright (c) 2019 École Polytechnique de Montréal
+
+   All rights reserved. This program and the accompanying materials
+   are made available under the terms of the Eclipse Public License v1.0
+   which accompanies this distribution, and is available at
+   http://www.eclipse.org/legal/epl-v10.html
+-->
+
+<project name="Get Scripts" default="main" >
+<target name="main">
+  <exec executable = "git" failifexecutionfails="false" timeout="20000">
+    <arg value = "clone"/>
+    <arg value = "https://github.com/tahini/tracecompass-ease-scripting.git"/>
+  </exec>
+  <condition property="testSuiteExists">
+    <and>
+      <available file="tracecompass-ease-scripting" type="dir"/>
+    </and>
+  </condition>
+  <antcall target="pullTestSuite"/>
+</target>
+
+<target name="pullTestSuite" if="testSuiteExists">
+  <!-- Update the local 'master' branch -->
+  <exec executable = "git" failifexecutionfails="false" dir="tracecompass-ease-scripting" timeout="20000">
+    <arg value = "checkout"/>
+    <arg value = "master"/>
+  </exec>
+  <exec executable = "git" failifexecutionfails="false" dir="tracecompass-ease-scripting" timeout="20000">
+    <arg value = "pull"/>
+  </exec>
+</target>
+
+</project>

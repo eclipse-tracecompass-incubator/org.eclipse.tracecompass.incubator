@@ -9,12 +9,12 @@
 
 package org.eclipse.tracecompass.incubator.scripting.ui.tests;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -34,7 +34,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ease.IExecutionListener;
@@ -45,8 +44,6 @@ import org.eclipse.ease.service.IScriptService;
 import org.eclipse.ease.service.ScriptService;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.common.core.TraceCompassActivator;
-import org.eclipse.tracecompass.incubator.internal.scripting.core.Activator;
 import org.eclipse.tracecompass.incubator.scripting.core.tests.stubs.ScriptingTestUtils;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -83,7 +80,7 @@ public class ScriptTest {
     private static final @NonNull String SOME_PROJECT_NAME = "myProject";
     private static final @NonNull IProgressMonitor PROGRESS_MONITOR = new NullProgressMonitor();
 
-    private static final String DOC_FOLDER = "src/org/eclipse/tracecompass/incubator/scripting/core/doc-files";
+    private static final String SCRIPT_FOLDER = "scripts/tracecompass-ease-scripting/";
 
     // Final fields for the test
     private final IScriptEngine fScriptEngine;
@@ -118,6 +115,7 @@ public class ScriptTest {
             }
 
             List<Path> filesForEngine = getFilesForEngine(engineDescription);
+            assertFalse(filesForEngine.isEmpty());
             for (Path file : filesForEngine) {
                 /*
                  * A separate engine needs to be created for each script,
@@ -202,9 +200,7 @@ public class ScriptTest {
         List<Path> files = new ArrayList<>();
 
         // Get the files from the scripting core plugin's documentation folder
-        TraceCompassActivator corePlugin = Activator.getInstance();
-        URL location = FileLocator.find(corePlugin.getBundle(), new org.eclipse.core.runtime.Path(DOC_FOLDER), null);
-        org.eclipse.core.runtime.Path path = new org.eclipse.core.runtime.Path(FileLocator.toFileURL(location).getPath());
+        org.eclipse.core.runtime.IPath path = ActivatorTest.getAbsoluteFilePath(SCRIPT_FOLDER);
         Files.walkFileTree(Paths.get(path.toOSString()), new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
