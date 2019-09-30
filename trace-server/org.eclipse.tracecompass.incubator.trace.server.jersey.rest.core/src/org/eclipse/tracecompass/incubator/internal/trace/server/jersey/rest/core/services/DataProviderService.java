@@ -15,6 +15,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -29,6 +31,9 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.log.TraceCompassLog;
+import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
+import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.VirtualTableQueryFilter;
@@ -73,6 +78,8 @@ public class DataProviderService {
     private static final String WRONG_PARAMETERS = "Wrong query parameters"; //$NON-NLS-1$
     private static final String NO_PROVIDER = "Analysis cannot run"; //$NON-NLS-1$
     private static final String NO_SUCH_TRACE = "No Such Trace"; //$NON-NLS-1$
+    private static final String MISSING_OUTPUTID = "Missing parameter outputId"; //$NON-NLS-1$
+    private static final @NonNull Logger LOGGER = TraceCompassLog.getLogger(DataProviderService.class);
 
     private final DataProviderManager manager = DataProviderManager.getInstance();
 
@@ -133,31 +140,37 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getXY(@PathParam("uuid") UUID uuid,
             @PathParam("outputId") String outputId, QueryParameters queryParameters) {
-        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-        if (trace == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        if (outputId == null) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
         }
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getXY") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+            if (trace == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
 
-        ITmfTreeXYDataProvider<@NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
-                outputId, ITmfTreeXYDataProvider.class);
+            ITmfTreeXYDataProvider<@NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+                    outputId, ITmfTreeXYDataProvider.class);
 
-        if (provider == null && outputId != null) {
-            // try and find the XML provider for the ID.
-            provider = getXmlProvider(trace, outputId, EnumSet.of(OutputType.XY));
+            if (provider == null) {
+                // try and find the XML provider for the ID.
+                provider = getXmlProvider(trace, outputId, EnumSet.of(OutputType.XY));
+            }
+
+            if (provider == null) {
+                // The analysis cannot be run on this trace
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            SelectionTimeQueryFilter selectionTimeQueryFilter = FetchParametersUtils.createSelectionTimeQuery(queryParameters.getParameters());
+            if (selectionTimeQueryFilter == null) {
+                return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
+            }
+
+            TmfModelResponse<@NonNull ITmfXyModel> response = provider.fetchXY(queryParameters.getParameters(), null);
+            return Response.ok(response).build();
         }
-
-        if (provider == null) {
-            // The analysis cannot be run on this trace
-            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
-        }
-
-        SelectionTimeQueryFilter selectionTimeQueryFilter = FetchParametersUtils.createSelectionTimeQuery(queryParameters.getParameters());
-        if (selectionTimeQueryFilter == null) {
-            return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
-        }
-
-        TmfModelResponse<@NonNull ITmfXyModel> response = provider.fetchXY(queryParameters.getParameters(), null);
-        return Response.ok(response).build();
     }
 
     /**
@@ -228,25 +241,31 @@ public class DataProviderService {
     public Response getStates(@PathParam("uuid") UUID uuid,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-        if (trace == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        if (outputId == null) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
         }
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStates") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+            if (trace == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
 
-        ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, outputId);
+            ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, outputId);
 
-        if (provider == null) {
-            // The analysis cannot be run on this trace
-            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            if (provider == null) {
+                // The analysis cannot be run on this trace
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            SelectionTimeQueryFilter selectionTimeQueryFilter = FetchParametersUtils.createSelectionTimeQuery(queryParameters.getParameters());
+            if (selectionTimeQueryFilter == null) {
+                return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
+            }
+
+            TmfModelResponse<TimeGraphModel> response = provider.fetchRowModel(queryParameters.getParameters(), null);
+            return Response.ok(response).build();
         }
-
-        SelectionTimeQueryFilter selectionTimeQueryFilter = FetchParametersUtils.createSelectionTimeQuery(queryParameters.getParameters());
-        if (selectionTimeQueryFilter == null) {
-            return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
-        }
-
-        TmfModelResponse<TimeGraphModel> response = provider.fetchRowModel(queryParameters.getParameters(), null);
-        return Response.ok(response).build();
     }
 
     /**
@@ -268,25 +287,31 @@ public class DataProviderService {
     public Response getArrows(@PathParam("uuid") UUID uuid,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-        if (trace == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        if (outputId == null) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
         }
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getArrows") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+            if (trace == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
 
-        ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, outputId);
+            ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, outputId);
 
-        if (provider == null) {
-            // The analysis cannot be run on this trace
-            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            if (provider == null) {
+                // The analysis cannot be run on this trace
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            TimeQueryFilter timeQueryFilter = FetchParametersUtils.createTimeQuery(queryParameters.getParameters());
+            if (timeQueryFilter == null) {
+                return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
+            }
+
+            TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(queryParameters.getParameters(), null);
+            return Response.ok(response).build();
         }
-
-        TimeQueryFilter timeQueryFilter = FetchParametersUtils.createTimeQuery(queryParameters.getParameters());
-        if (timeQueryFilter == null) {
-            return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
-        }
-
-        TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(queryParameters.getParameters(), null);
-        return Response.ok(response).build();
     }
 
     /**
@@ -312,19 +337,26 @@ public class DataProviderService {
             @QueryParam("time") long time,
             @QueryParam("entryId") long entryId,
             @QueryParam("targetId") long targetId) {
-        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-        if (trace == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        if (outputId == null) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
         }
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTimeGraphTooltip") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+            if (trace == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
 
-        ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, outputId);
+            ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, outputId);
 
-        if (provider == null) {
-            // The analysis cannot be run on this trace
-            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            if (provider == null) {
+                // The analysis cannot be run on this trace
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = provider.fetchTooltip(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(time, time, 1, Arrays.asList(entryId, targetId))), null);
+            return Response.ok(response).build();
         }
-        TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = provider.fetchTooltip(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(time, time, 1, Arrays.asList(entryId, targetId))), null);
-        return Response.ok(response).build();
     }
 
     private ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> getTimeGraphProvider(@NonNull ITmfTrace trace, String outputId) {
@@ -379,22 +411,29 @@ public class DataProviderService {
     public Response getLines(@PathParam("uuid") UUID uuid,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-        if (trace == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        if (outputId == null) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
         }
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getLines") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+            if (trace == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
 
-        ITmfVirtualTableDataProvider<? extends IVirtualTableLine, ? extends ITmfTreeDataModel> provider = manager.getDataProvider(trace, outputId, ITmfVirtualTableDataProvider.class);
-        if (provider == null) {
-            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
-        }
+            ITmfVirtualTableDataProvider<? extends IVirtualTableLine, ? extends ITmfTreeDataModel> provider = manager.getDataProvider(trace, outputId, ITmfVirtualTableDataProvider.class);
+            if (provider == null) {
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
 
-        VirtualTableQueryFilter tableQueryFilter = FetchParametersUtils.createVirtualTableQueryFilter(queryParameters.getParameters());
-        if (tableQueryFilter == null) {
-            return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
+            VirtualTableQueryFilter tableQueryFilter = FetchParametersUtils.createVirtualTableQueryFilter(queryParameters.getParameters());
+            if (tableQueryFilter == null) {
+                return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
+            }
+
+            TmfModelResponse<?> response = provider.fetchLines(queryParameters.getParameters(), null);
+            return Response.ok(response).build();
         }
-        TmfModelResponse<?> response = provider.fetchLines(queryParameters.getParameters(), null);
-        return Response.ok(response).build();
     }
 
     /**
@@ -426,31 +465,37 @@ public class DataProviderService {
     }
 
     private Response getTree(UUID uuid, String outputId, QueryParameters queryParameters) {
-        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-        if (trace == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        if (outputId == null) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
         }
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTree") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+            if (trace == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
 
-        ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
-                outputId, ITmfTreeDataProvider.class);
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+                    outputId, ITmfTreeDataProvider.class);
 
-        if (provider == null && outputId != null) {
-            // try and find the XML provider for the ID.
-            provider = getXmlProvider(trace, outputId, EnumSet.allOf(OutputType.class));
+            if (provider == null) {
+                // try and find the XML provider for the ID.
+                provider = getXmlProvider(trace, outputId, EnumSet.allOf(OutputType.class));
+            }
+
+            if (provider == null) {
+                // The analysis cannot be run on this trace
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            TimeQueryFilter timeQueryFilter = FetchParametersUtils.createTimeQuery(queryParameters.getParameters());
+            if (timeQueryFilter == null) {
+                return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
+            }
+
+            TmfModelResponse<?> treeResponse = provider.fetchTree(queryParameters.getParameters(), null);
+            return Response.ok(treeResponse).build();
         }
-
-        if (provider == null) {
-            // The analysis cannot be run on this trace
-            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
-        }
-
-        TimeQueryFilter timeQueryFilter = FetchParametersUtils.createTimeQuery(queryParameters.getParameters());
-        if (timeQueryFilter == null) {
-            return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
-        }
-
-        TmfModelResponse<?> treeResponse = provider.fetchTree(queryParameters.getParameters(), null);
-        return Response.ok(treeResponse).build();
     }
 
     /**
@@ -472,26 +517,32 @@ public class DataProviderService {
     public Response getStyles(@PathParam("uuid") UUID uuid,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-        if (trace == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        if (outputId == null) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
         }
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStyles") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+            if (trace == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
 
-        ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
-                outputId, ITmfTreeDataProvider.class);
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+                    outputId, ITmfTreeDataProvider.class);
 
-        if (provider == null) {
-            // The analysis cannot be run on this trace
-            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            if (provider == null) {
+                // The analysis cannot be run on this trace
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            if (provider instanceof IOutputStyleProvider) {
+                TmfModelResponse<@NonNull OutputStyleModel> styleModelResponse = ((IOutputStyleProvider) provider).fetchStyle(queryParameters.getParameters(), null);
+                return Response.ok(styleModelResponse).build();
+            }
+
+            // Return an empty model if the provider is not an
+            // IOutputStyleProvider and let the client decide the style
+            return Response.ok(new TmfModelResponse<>(new OutputStyleModel(Collections.emptyMap()), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
         }
-
-        if (provider instanceof IOutputStyleProvider) {
-            TmfModelResponse<@NonNull OutputStyleModel> styleModelResponse = ((IOutputStyleProvider) provider).fetchStyle(queryParameters.getParameters(), null);
-            return Response.ok(styleModelResponse).build();
-        }
-
-        // Return an empty model if the provider is not an IOutputStyleProvider
-        // and let the client decide the style
-        return Response.ok(new TmfModelResponse<>(new OutputStyleModel(Collections.emptyMap()), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
     }
 }
