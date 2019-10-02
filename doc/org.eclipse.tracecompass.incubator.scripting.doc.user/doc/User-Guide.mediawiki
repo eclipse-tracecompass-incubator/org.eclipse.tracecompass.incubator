@@ -113,7 +113,11 @@ To avoid OutOfMemoryException, objects should be explicitly detached from the py
 
 See the [https://www.py4j.org/advanced_topics.html#py4j-memory-model py4j memory model documentation] for more information.
 
-== Command Line Scripting ==
+== EASE Provided views ==
+
+Some views that come with the EASE framework can be helpful for Trace Compass scripting users. Here's a short description of those views.
+
+=== Script Shell: Command Line Scripting ===
 
 Apart from executing a script file, it is also possible to access a script shell in Trace Compass, and script commands from it.
 
@@ -123,9 +127,27 @@ From this shell, commands can load modules, then execute methods from this modul
 
 [[Image:images/script_shell.png | Script shell]]
 
+=== Module Explorer: See What's Available ===
+
+The '''Module Explorer''' view can be accessed via '''Window''' -> '''Show View''' and selecting '''Module Explorer''' under the '''Scripting''' category. It will open a window where the available scripting modules are listed.
+
+Under each scripting module is the list of constants and methods available to the scripts. Some help text is also available when hovering over the elements.
+
+The modules are grouped by category and to use the methods under them, one simply needs to load the module first, using <code>loadModule("/<category name>/<module name>")</code>. Then the fields and methods can be used directly in the script
+
+[[Image:images/module_explorer.png | Module Explorer]]
+
+=== Script Explorer: Explore the scripts ===
+
+The '''Script Explorer''' view is available only with the Javascript language installed, but allows to see all scripts. It is not as useful as the others, it is very similar to the main '''Project Explorer''' view, but more focused on scripts. Menu items on script files may be different from those of a Tracing project, for example, opening the file in an editor works through that view.
+
+The view can be accessed via '''Window''' -> '''Show View''' and selecting '''Script Explorer''' under the '''Javascript''' category.
+
+[[Image:images/script_explorer.png | Script Explorer]]
+
 == Trace Compass Scripting API and examples ==
 
-The scripting modules and API are documented in the '''Scripting''' section of the  [https://archive.eclipse.org/tracecompass.incubator/doc/javadoc/apidocs/ Trace Compass Incubator API documentation]. [https://archive.eclipse.org/tracecompass.incubator/doc/javadoc/apidocs/org/eclipse/tracecompass/incubator/scripting/core/doc-files/examples.html Many examples] are also available in the documentation.
+The scripting modules and API are documented in the '''Scripting''' section of the  [https://archive.eclipse.org/tracecompass.incubator/doc/javadoc/apidocs/ Trace Compass Incubator API documentation]. [https://github.com/tahini/tracecompass-ease-scripting Many examples] are also available in this github repository. You can contribute your own examples there.
 
 Here's an example javascript script for Trace Compass. It is the equivalent of ''Active Thread'' analysis in Trace Compass, ie saves the currently running process on each CPU.
 
@@ -211,6 +233,80 @@ if (provider != null) {
 print("Done");
 </pre>
 
+== Advanced Scripting ==
+
+=== Call Scripts from Scripts ===
+
+It is possible to call other scripts files from a running script. The script to call can be referred to either by its full path in the file system, or by its path in the workspace, using teh following URI: <code>workspace://<Project name>/<path to file in project></code>.
+
+There are 2 different approaches:
+
+* Including the file in the script
+
+This approach will include the file in the currently running context, so the file has to be in the same language as the running script. The file's content will be executed upon inclusion, so make sure it is OK. It is ideal for function libraries, etc.
+
+For example, let's say I have the following javascript file ''library.js'':
+
+<pre>
+function sum(a, b){
+   return a+b;
+}
+</pre>
+
+I can call it from another script ''caller.js'':
+
+<pre>
+include("workspace:/MyProject/library.js")
+print(sum(2,3));
+</pre>
+
+* Forking a script
+
+It is also possible to fork a script. The new script will be executed in its own context, will not be available to the running script, but it can be of any language, not just the one of the running script.
+
+Forking a script requires additional EASE Modules that do not come with the Trace Compass EASE Scripting feature.
+
+First, the user needs to install the '''JDT Plugin-in Developer Resources''' from the [https://wiki.eclipse.org/Eclipse_Project_Update_Sites Eclipse Project Update Site] that corresponds to your release of Trace Compass. Enter the update site's URL in the '''Help''' -> '''Install New Software....''' wizard, in the '''Work with''' box. The feature is under the '''Eclipse Java Development Tools''' category. Restart Trace Compass after installation.
+
+Then install the '''EASE Modules''' feature from the [https://download.eclipse.org/ease/release/latest/ EASE update site]. It is under the '''EASE Modules''' category. Complete the wizard then restart Trace Compass.
+
+This adds some '''System''' modules to Trace Compass. We can then call other scripts from a script. For instance the following snippet is a Javascript script called ''caller.js'', that runs a python script with 3 arguments and wait for its completion before continuing:
+
+<pre>
+loadModule("/System/Scripting");
+
+res = fork("workspace://MyProject/callee.py", "a,b,c");
+res.waitForResult();
+</pre>
+
+The following python script ''callee.py'' simply prints the arguments received:
+
+<pre>
+print('Number of arguments: {} arguments.'.format(len(argv)))
+
+for myArg in argv:
+	print("Argument {}".format(myArg))
+</pre>
+
+
+=== Call Scripts With Arguments ===
+
+It is possible to pass <code>String</code> arguments to scripts. These arguments are stored in the '''argv''' variable of the script, that is directly available (no <code>sys.argv</code> in python scripts for instance, it's directly <code>argv</code>).
+
+For example, in javascript, here's the code that will print the arguments received in parameter:
+
+<pre>
+for (i = 0; i< argv.length; i++) {
+	print(argv[i])
+}
+</pre>
+
+Arguments can be passed directly in the launch configuration of the script, by right-clicking the script, '''Run As...''' -> '''Run Configuration...'''. In the '''Script arguments''' box, the arguments are comma-separated strings. The below image shows passing 2 arguments ''arg1'' and ''arg2''' to the library.js script.
+
+[[Image:images/arguments_launch_configuration.png | Arguments through launch configuration]]
+
+If calling a script from another script as explained in [[#Call Scripts from Scripts | the section above]], the arguments can be passed through the <code>fork</code>, like this: <code>fork("workspace:/Tracing/library.js", "a,b,c");</code>, that would pass 3 arguments ''a'', ''b'' and ''c'' to the ''library.js'' script.
+
 == References and Getting Help ==
 
 * Need help or have comments?
@@ -227,6 +323,6 @@ Chat with the Trace Compass community on [irc://irc.oftc.net/tracecompass the IR
 
 === References ===
 
-* [https://archive.eclipse.org/tracecompass.incubator/doc/javadoc/apidocs/org/eclipse/tracecompass/incubator/scripting/core/doc-files/examples.html Example EASE scripts]
+* [https://github.com/tahini/tracecompass-ease-scripting Example EASE scripts]
 * [https://archive.eclipse.org/tracecompass.incubator/doc/javadoc/apidocs/ Trace Compass Incubator and Scripting API]
 * [https://archive.eclipse.org/tracecompass/doc/javadoc/apidocs/ Trace Compass API]
