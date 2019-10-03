@@ -215,10 +215,13 @@ public class TraceManagerService {
         TmfTraceManager.deleteSupplementaryFolder(trace);
         trace.dispose();
         try {
-            trace.getResource().delete(IResource.FORCE, null);
+            IResource resource = trace.getResource();
+            if (resource != null) {
+                resource.delete(IResource.FORCE, null);
+            }
             ResourcesPlugin.getWorkspace().getRoot()
-                    .getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME)
-                    .refreshLocal(Integer.MAX_VALUE, null);
+                .getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME)
+                .refreshLocal(Integer.MAX_VALUE, null);
         } catch (CoreException e) {
             Activator.getInstance().logError("Failed to delete trace", e); //$NON-NLS-1$
         }
