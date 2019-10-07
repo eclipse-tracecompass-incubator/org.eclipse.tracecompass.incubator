@@ -16,7 +16,6 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.OsStrings;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.IElementResolver;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 
 import com.google.common.collect.HashMultimap;
@@ -27,7 +26,7 @@ import com.google.common.collect.Multimap;
  *
  * @author Geneviève Bastien
  */
-public class FlameChartEntryModel extends TimeGraphEntryModel implements IElementResolver {
+public class FlameChartEntryModel extends TimeGraphEntryModel {
 
     /**
      * An enumeration for the type of flame chart entries

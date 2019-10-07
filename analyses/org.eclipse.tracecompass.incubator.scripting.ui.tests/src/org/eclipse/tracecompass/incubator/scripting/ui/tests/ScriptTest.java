@@ -50,6 +50,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -242,6 +243,7 @@ public class ScriptTest {
      * @throws IOException
      *             Exception thrown by executing the script
      */
+    @Ignore
     @Test
     public void testScriptExecution() throws CoreException, IOException {
 
