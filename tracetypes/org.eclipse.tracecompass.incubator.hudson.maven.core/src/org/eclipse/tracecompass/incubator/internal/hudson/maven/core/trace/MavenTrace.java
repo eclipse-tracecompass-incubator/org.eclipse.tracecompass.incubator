@@ -77,7 +77,6 @@ public class MavenTrace extends TextTrace<MavenEvent> {
     @Override
     protected MavenEvent parseFirstLine(Matcher matcher, String line) {
         try {
-            System.out.println("group(1): " + matcher.group(1));
             String group = matcher.group(1);
             if (group != null) {
                 Date parse = DATE_FORMAT.parse(group);
@@ -85,7 +84,6 @@ public class MavenTrace extends TextTrace<MavenEvent> {
                 return event;
             }
             group = matcher.group(6);
-            System.out.println("group(6): " + matcher.group(6));
             if (group != null) {
                 Date parse = DATE_FORMAT.parse(group);
                 MavenEvent event = MavenEvent.createSummary(this, TmfTimestamp.fromMillis(parse.getTime()), matcher.group(12), matcher.group(12), parseDouble(matcher.group(11)));
