@@ -36,6 +36,7 @@
       <import plugin="org.eclipse.help"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.tracecompass.tmf.analysis.xml.ui"/>
+      <import plugin="org.eclipse.ease.ui.scripts"/>
       <import plugin="org.eclipse.ease"/>
    </requires>
 
