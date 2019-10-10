@@ -101,6 +101,7 @@
       <plugin id="org.eclipse.tracecompass.analysis.graph.core"/>
       <plugin id="org.eclipse.tracecompass.analysis.lami.core"/>
       <plugin id="org.eclipse.tracecompass.analysis.os.linux.core"/>
+      <plugin id="org.eclipse.tracecompass.analysis.profiling.core"/>
       <plugin id="org.eclipse.tracecompass.analysis.timing.core"/>
       <plugin id="org.eclipse.tracecompass.common.core"/>
       <plugin id="org.eclipse.tracecompass.ctf.core"/>
@@ -110,6 +111,7 @@
       <plugin id="org.eclipse.tracecompass.lttng2.common.core"/>
       <plugin id="org.eclipse.tracecompass.lttng2.control.core"/>
       <plugin id="org.eclipse.tracecompass.lttng2.kernel.core"/>
+      <plugin id="org.eclipse.tracecompass.lttng2.ust.core"/>
       <plugin id="org.eclipse.tracecompass.segmentstore.core"/>
       <plugin id="org.eclipse.tracecompass.statesystem.core"/>
       <plugin id="org.eclipse.tracecompass.tmf.analysis.xml.core"/>
