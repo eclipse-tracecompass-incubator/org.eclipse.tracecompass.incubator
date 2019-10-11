@@ -50,6 +50,7 @@ import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
@@ -130,6 +131,11 @@ public class TraceManagerService {
         ITmfTrace trace = helper.getTraceClass().newInstance();
         trace.initTrace(resource, path, ITmfEvent.class, name, typeID);
         trace.indexTrace(false);
+        // read first event to make sure start time is initialized
+        ITmfContext ctx = trace.seekEvent(0);
+        trace.getNext(ctx);
+        ctx.dispose();
+
         TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(this, trace, null));
         return trace;
     }
@@ -212,7 +218,6 @@ public class TraceManagerService {
             return Response.status(Status.NOT_FOUND).build();
         }
         TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, trace));
-        TmfTraceManager.deleteSupplementaryFolder(trace);
         trace.dispose();
         try {
             IResource resource = trace.getResource();
