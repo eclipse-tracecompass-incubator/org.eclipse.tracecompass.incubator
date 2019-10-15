@@ -219,6 +219,7 @@ public class TraceManagerService {
         }
         TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, trace));
         trace.dispose();
+        TmfTraceManager.deleteSupplementaryFolder(trace);
         try {
             IResource resource = trace.getResource();
             if (resource != null) {
