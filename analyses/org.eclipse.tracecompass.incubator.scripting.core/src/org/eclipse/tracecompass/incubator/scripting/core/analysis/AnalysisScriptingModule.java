@@ -9,6 +9,8 @@
 
 package org.eclipse.tracecompass.incubator.scripting.core.analysis;
 
+import java.util.Objects;
+
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
@@ -50,8 +52,11 @@ public class AnalysisScriptingModule {
      *            The name of the analysis
      * @return The new analysis, for the active trace, or <code>null</code> if
      *         there is no active trace.
+     * @deprecated Use {@module #createScriptedAnalysis(ITmfTrace, String)}
+     *             instead
      */
     @WrapToScript
+    @Deprecated
     public @Nullable ScriptedAnalysis getAnalysis(String name) {
         ITmfTrace activeTrace = TmfTraceManager.getInstance().getActiveTrace();
         if (activeTrace == null) {
@@ -111,6 +116,23 @@ public class AnalysisScriptingModule {
             }
         }
         return null;
+    }
+
+    /**
+     * Create a scripted analysis with the given name for a trace. If the trace
+     * is <code>null</code>, it will throw a {@link NullPointerException}.
+     *
+     * @param trace
+     *            The trace being analyzed.
+     * @param analysisName
+     *            The name of the analysis to create. If backends like state
+     *            systems are saved by this analysis, this name will be used to
+     *            retrieve the previous data.
+     * @return The module
+     */
+    @WrapToScript
+    public ScriptedAnalysis createScriptedAnalysis(@Nullable ITmfTrace trace, String analysisName) {
+        return new ScriptedAnalysis(Objects.requireNonNull(trace, "Trace should not be null"), analysisName); //$NON-NLS-1$
     }
 
 }

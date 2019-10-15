@@ -56,7 +56,7 @@ public class AnalysisModuleTest {
 
         ITmfTrace trace = ScriptingTestUtils.getTrace();
         try {
-            ScriptedAnalysis analysis = scriptModule.getAnalysis(ANALYSIS_NAME);
+            ScriptedAnalysis analysis = scriptModule.createScriptedAnalysis(trace, ANALYSIS_NAME);
             assertNotNull(analysis);
 
             Iterator<ITmfEvent> eventIterator = analysis.getEventIterator();

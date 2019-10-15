@@ -81,7 +81,7 @@ public class ScriptingTestUtils {
     public static ScriptedAnalysis getAnalysis(ITmfTrace trace, String analysisName) {
         AnalysisScriptingModule scriptModule = new AnalysisScriptingModule();
 
-        ScriptedAnalysis analysis = scriptModule.getAnalysis(analysisName);
+        ScriptedAnalysis analysis = scriptModule.createScriptedAnalysis(trace, analysisName);
         assertNotNull(analysis);
 
         return analysis;
