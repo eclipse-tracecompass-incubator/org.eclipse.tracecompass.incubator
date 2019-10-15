@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.scripting.core.trace.TraceScriptingModule;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
@@ -35,8 +36,9 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  * provider</a> with script-defined entries and arrows (javascript)</li>
  * <li><a href="../doc-files/basicAnalysis.js">A basic analysis</a> building an
  * state system and showing its data in a time graph (javascript)</li>
- * <li><a href="../doc-files/basicAnalysis.py">Same basic analysis as before,</a>
- * building an state system and showing its data in a time graph, in python</li>
+ * <li><a href="../doc-files/basicAnalysis.py">Same basic analysis as
+ * before</a>, building a state system and showing its data in a time graph, in
+ * python</li>
  * </ul>
  *
  * @author Geneviève Bastien
@@ -76,7 +78,11 @@ public class AnalysisScriptingModule {
      *            The name of the field to fetch
      * @return The field value object, or <code>null</code> if the field is not
      *         found
+     * @deprecated This method has been moved to the
+     *             {@link TraceScriptingModule#getEventFieldValue(ITmfEvent,
+     *             String)} class.
      */
+    @Deprecated
     @WrapToScript
     public @Nullable Object getFieldValue(ITmfEvent event, String fieldName) {
 

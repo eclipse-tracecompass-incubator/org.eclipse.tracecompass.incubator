@@ -25,12 +25,14 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.trace.Messages;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.trace.ScriptEventRequest;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * Scripting modules to open and manipulate traces
@@ -175,5 +177,31 @@ public class TraceScriptingModule {
         ScriptEventRequest scriptEventRequest = new ScriptEventRequest();
         trace.sendRequest(scriptEventRequest);
         return scriptEventRequest.getEventIterator();
+    }
+
+    /**
+     * A wrapper method to get the value of an event field. If the field itself
+     * does not exist, it will try to resolve an aspect from the trace the event
+     * is from.
+     *
+     * @param event
+     *            The event for which to get the field
+     * @param fieldName
+     *            The name of the field to fetch
+     * @return The field value object, or <code>null</code> if the field is not
+     *         found
+     */
+    @WrapToScript
+    public @Nullable Object getEventFieldValue(ITmfEvent event, String fieldName) {
+
+        final ITmfEventField field = event.getContent().getField(fieldName);
+
+        /* If the field does not exist, see if it's a special case */
+        if (field == null) {
+            // This will allow to use any column as input
+            return TmfTraceUtils.resolveAspectOfNameForEvent(event.getTrace(), fieldName, event);
+        }
+        return field.getValue();
+
     }
 }
