@@ -16,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -31,8 +32,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.trace.Messages;
 import org.eclipse.tracecompass.incubator.scripting.core.tests.ActivatorTest;
+import org.eclipse.tracecompass.incubator.scripting.core.tests.stubs.ScriptingTestUtils;
 import org.eclipse.tracecompass.incubator.scripting.core.trace.TraceScriptingModule;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.io.ResourceUtil;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.TmfXmlTraceStub;
@@ -254,4 +257,31 @@ public class TraceModuleTest {
         }
         assertTrue(!fileExist);
     }
+
+    /**
+     * Test the event iterator
+     */
+    @Test
+    public void testEventIterator() {
+        TraceScriptingModule traceScriptingModule = new TraceScriptingModule();
+
+        ITmfTrace trace = ScriptingTestUtils.getTrace();
+        try {
+
+            Iterator<ITmfEvent> eventIterator = traceScriptingModule.getEventIterator(trace);
+            assertNotNull(eventIterator);
+
+            int count = 0;
+            while (eventIterator.hasNext()) {
+                eventIterator.next();
+                count++;
+            }
+            // Make sure it parsed the whole trace
+            assertEquals(36, count);
+
+        } finally {
+            trace.dispose();
+        }
+    }
+
 }
