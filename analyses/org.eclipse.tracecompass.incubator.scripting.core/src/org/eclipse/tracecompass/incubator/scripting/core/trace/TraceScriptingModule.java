@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.scripting.core.trace;
 
 import java.io.FileNotFoundException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,6 +23,7 @@ import org.eclipse.ease.modules.ScriptParameter;
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.trace.Messages;
+import org.eclipse.tracecompass.incubator.internal.scripting.core.trace.ScriptEventRequest;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
@@ -138,5 +140,40 @@ public class TraceScriptingModule {
     @WrapToScript
     public @Nullable ITmfTrace getActiveTrace() {
         return TmfTraceManager.getInstance().getActiveTrace();
+    }
+
+    /**
+     * Get an iterator to iterate chronologically through the events of the
+     * trace.
+     *
+     * Thus, to iterate through the events of a trace in a scripted analysis,
+     * one can just do the following snippet (javascript)
+     *
+     * <pre>
+     * var trace = getActiveTrace();
+     * var iter = getEventIterator(trace);
+     *
+     * var event = null;
+     * while (iter.hasNext()) {
+     *
+     *     event = iter.next();
+     *
+     *     // Do something with the event
+     * }
+     * </pre>
+     *
+     * @param trace
+     *            The trace for which to get the event iterator
+     *
+     * @return The event iterator, starting from the first event
+     */
+    @WrapToScript
+    public Iterator<ITmfEvent> getEventIterator(@Nullable ITmfTrace trace) {
+        if (trace == null) {
+            throw new NullPointerException("Trace should not be null"); //$NON-NLS-1$
+        }
+        ScriptEventRequest scriptEventRequest = new ScriptEventRequest();
+        trace.sendRequest(scriptEventRequest);
+        return scriptEventRequest.getEventIterator();
     }
 }
