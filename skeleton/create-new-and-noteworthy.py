@@ -8,6 +8,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 ###############################################################################
 
+import io
 import subprocess
 import sys
 import argparse
@@ -40,11 +41,9 @@ if __name__=='__main__':
     cmd = ['git', '--no-pager','log', '--after', after, '--until', before]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     commit =""
-    for line in iter(proc.stdout.readline, ''):
-        if proc.poll() != None:
-             break;
+    for line in io.TextIOWrapper(proc.stdout, encoding="utf-8"):
         try:
-            line = line.strip().decode('UTF-8')
+            line = line.strip()
             if (line.startswith("commit")):
                 commit = line[len("commit "):].strip()
             update_report(line)
