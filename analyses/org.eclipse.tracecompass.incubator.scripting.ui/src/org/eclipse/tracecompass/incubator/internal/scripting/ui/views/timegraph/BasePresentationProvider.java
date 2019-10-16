@@ -132,7 +132,7 @@ public class BasePresentationProvider extends TimeGraphPresentationProvider {
         } else if (label != null) {
             return label;
         }
-        return "multiple state"; //$NON-NLS-1$
+        return null;
     }
 
     @Override
