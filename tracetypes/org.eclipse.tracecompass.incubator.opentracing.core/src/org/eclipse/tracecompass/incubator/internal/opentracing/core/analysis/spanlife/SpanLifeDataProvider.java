@@ -60,6 +60,9 @@ import com.google.common.collect.TreeMultimap;
 @SuppressWarnings("restriction")
 public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull SpanLifeAnalysis, @NonNull TimeGraphEntryModel> {
 
+    /** The data provider ID */
+    public static String ID = "org.eclipse.tracecompass.incubator.opentracing.analysis.spanlife.dataprovider"; //$NON-NLS-1$
+
     private static final int MARKER_SIZE = 500;
 
     private static final String ERROR = "error"; //$NON-NLS-1$
@@ -100,7 +103,10 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
         Map<@NonNull Long, @NonNull Integer> entries = getSelectedEntries(filter);
         Collection<@NonNull Integer> quarks = entries.values();
         long startTime = filter.getStart();
-        long hoverTime = filter.getTimesRequested()[1];
+        long hoverTime = startTime;
+        if (filter.getTimesRequested().length > 1) {
+            hoverTime = filter.getTimesRequested()[1];
+        }
         long endTime = filter.getEnd();
         if (ss == null || quarks.size() != 1 || !getAnalysisModule().isQueryable(hoverTime)) {
             return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
