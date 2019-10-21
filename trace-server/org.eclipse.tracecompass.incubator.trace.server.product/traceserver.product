@@ -107,7 +107,9 @@
       <plugin id="org.eclipse.tracecompass.ctf.core"/>
       <plugin id="org.eclipse.tracecompass.ctf.parser"/>
       <plugin id="org.eclipse.tracecompass.datastore.core"/>
+      <plugin id="org.eclipse.tracecompass.incubator.opentracing.core"/>
       <plugin id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core"/>
+      <plugin id="org.eclipse.tracecompass.jsontrace.core"/>
       <plugin id="org.eclipse.tracecompass.lttng2.common.core"/>
       <plugin id="org.eclipse.tracecompass.lttng2.control.core"/>
       <plugin id="org.eclipse.tracecompass.lttng2.kernel.core"/>
