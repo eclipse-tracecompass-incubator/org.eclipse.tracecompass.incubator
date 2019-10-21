@@ -16,7 +16,6 @@ Require-Bundle: org.eclipse.core.runtime,
  com.google.guava,
  org.apache.commons.lang3,
  org.eclipse.tracecompass.ctf.core,
- org.eclipse.tracecompass.analysis.timing.ui,
  org.eclipse.tracecompass.jsontrace.core,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.internal.opentracing.core;x-friends:="org.eclipse.tracecompass.incubator.opentracing.core.tests",
