@@ -28,13 +28,13 @@
       <import plugin="com.google.guava"/>
       <import plugin="org.apache.commons.lang3"/>
       <import plugin="org.eclipse.tracecompass.ctf.core"/>
-      <import plugin="org.eclipse.tracecompass.analysis.timing.ui"/>
+      <import plugin="org.eclipse.tracecompass.jsontrace.core"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.tracecompass.tmf.ui"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.apache.commons.compress"/>
       <import plugin="javax.ws.rs"/>
-      <import plugin="org.eclipse.tracecompass.jsontrace.core"/>
+      <import plugin="org.eclipse.help"/>
    </requires>
 
    <plugin

@@ -5,21 +5,21 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <artifactId>org.eclipse.tracecompass.incubator.trace.server-parent</artifactId>
+      <artifactId>org.eclipse.tracecompass.incubator.rcp-parent</artifactId>
       <groupId>org.eclipse.tracecompass.incubator</groupId>
       <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.eclipse.tracecompass.incubator.trace.server.product</artifactId>
+    <artifactId>org.eclipse.tracecompass.incubator.rcp.product</artifactId>
     <packaging>eclipse-repository</packaging>
 
-    <name>Trace Compass Server Product</name>
+    <name>Trace Compass Incubator RCP Product</name>
 
     <properties>
-        <productId>traceserver</productId>
+        <productId>org.eclipse.tracecompass.incubator.rcp</productId>
         <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
-        <archiveFileName>trace-compass-server${unqualifiedVersion}-${build.timestamp}</archiveFileName>
-        <rootFolder>trace-compass-server</rootFolder>
+        <archiveFileName>trace-compass-${unqualifiedVersion}-${build.timestamp}</archiveFileName>
+        <rootFolder>trace-compass</rootFolder>
         <!-- for MacOSX, make sure you use a folder ending with .app , see bug 463670 -->
         <rootFolderMac>${rootFolder}.app</rootFolderMac>
     </properties>
@@ -141,8 +141,8 @@
     <profile>
       <id>deploy-rcp</id>
       <properties>
-        <serverDestination>/home/data/httpd/download.eclipse.org/tracecompass.incubator/trace-server/rcp/</serverDestination>
-        <serverSiteDestination>/home/data/httpd/download.eclipse.org/tracecompass.incubator/trace-server/rcp-repository</serverSiteDestination>
+        <rcpDestination>/home/data/httpd/download.eclipse.org/tracecompass.incubator/master/rcp/</rcpDestination>
+        <rcpSiteDestination>/home/data/httpd/download.eclipse.org/tracecompass.incubator/master/rcp-repository/</rcpSiteDestination>
       </properties>
       <build>
         <plugins>
@@ -159,12 +159,12 @@
                   <target>
                     <!-- Cleanup the "rcp" destination, and copy over the new archives -->
                     <delete includeemptydirs="false">
-                      <fileset dir="${serverDestination}">
+                      <fileset dir="${rcpDestination}">
                         <include name="*.tar.gz" />
                         <include name="*.zip" />
                       </fileset>
                     </delete>
-                    <copy includeemptydirs="false" todir="${serverDestination}">
+                    <copy includeemptydirs="false" todir="${rcpDestination}">
                       <fileset dir="target/products">
                         <include name="trace-compass-*" />
                       </fileset>
@@ -173,11 +173,11 @@
                     <!-- Cleanup the "rcp-repository" update site, and copy over the new one -->
                     <delete includeemptydirs="false">
                       <fileset
-                        dir="${serverSiteDestination}">
+                        dir="${rcpSiteDestination}">
                         <include name="**" />
                       </fileset>
                     </delete>
-                    <copy includeemptydirs="false" todir="${serverSiteDestination}">
+                    <copy includeemptydirs="false" todir="${rcpSiteDestination}">
                       <fileset dir="target/repository">
                         <include name="**" />
                       </fileset>
@@ -211,4 +211,5 @@
         </build>
       </profile>
     </profiles>
+  <groupId>org.eclipse.tracecompass.incubator</groupId>
 </project>

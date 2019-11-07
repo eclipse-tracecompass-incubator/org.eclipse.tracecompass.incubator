@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.tracecompass.incubator.rcp"
+      label="%featureName"
+      version="0.0.1.qualifier"
+      provider-name="%featureProvider"
+      plugin="org.eclipse.tracecompass.incubator.rcp.branding"
+      license-feature="org.eclipse.license"
+      license-feature-version="0.0.0">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <requires>
+      <import feature="org.eclipse.e4.rcp" version="0.0.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.equinox.p2.core.feature" version="0.0.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.equinox.p2.extras.feature" version="0.0.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.help" version="0.0.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.tracecompass.tmf" version="0.0.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.platform" version="0.0.0" match="greaterOrEqual"/>
+   </requires>
+
+      <plugin
+         id="javax.ws.rs"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
