@@ -145,7 +145,7 @@ public class FlameGraphDataProviderTest extends CallStackTestBase {
         assertRows(provider, idsToNames, builder.build(), filePrefix, "All");
 
         // Test getting only the first and last states
-        assertRows(provider, idsToNames, ImmutableList.of(0L, maxDuration), filePrefix, "2Times");
+        assertRows(provider, idsToNames, ImmutableList.of(0L, maxDuration - 1), filePrefix, "2Times");
 
         // Test getting the states for the last half of the flamegraph
         builder = ImmutableList.builder();
@@ -250,7 +250,7 @@ public class FlameGraphDataProviderTest extends CallStackTestBase {
             assertEquals(descriptor + ": value at position " + i, strValue.equals("-") ? Integer.MIN_VALUE : Objects.hash(strValue), state.getValue());
             assertEquals(descriptor + ": label at position " + i, stringStates[i * 4 + 3], String.valueOf(state.getLabel()));
         }
-        assertTrue(descriptor + " no extra state", states.size() == stringStates.length / 4);
+        assertEquals(descriptor + " no extra state", stringStates.length / 4, states.size());
     }
 
 }
