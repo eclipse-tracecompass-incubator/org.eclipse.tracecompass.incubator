@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.contextswitch.ui.view;
+package org.eclipse.tracecompass.incubator.internal.kernel.ui.views.contextswitch;
 
 import org.eclipse.osgi.util.NLS;
 
@@ -17,7 +17,7 @@ import org.eclipse.osgi.util.NLS;
  * @author Matthew Khouzam
  */
 public class Messages extends NLS {
-    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.contextswitch.ui.view.messages"; //$NON-NLS-1$
+    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.kernel.ui.views.contextswitch.messages"; //$NON-NLS-1$
     /**
      * Entry Title
      */

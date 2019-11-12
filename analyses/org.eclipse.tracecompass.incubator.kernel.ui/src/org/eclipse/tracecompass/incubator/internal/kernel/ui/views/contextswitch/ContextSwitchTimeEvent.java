@@ -10,7 +10,7 @@
  *   Alexis Cabana-Loriaux - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.contextswitch.ui.view;
+package org.eclipse.tracecompass.incubator.internal.kernel.ui.views.contextswitch;
 
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;

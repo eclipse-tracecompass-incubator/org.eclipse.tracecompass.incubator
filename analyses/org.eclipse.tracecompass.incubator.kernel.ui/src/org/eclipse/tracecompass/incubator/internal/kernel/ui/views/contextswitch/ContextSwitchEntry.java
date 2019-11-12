@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.contextswitch.ui.view;
+package org.eclipse.tracecompass.incubator.internal.kernel.ui.views.contextswitch;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;

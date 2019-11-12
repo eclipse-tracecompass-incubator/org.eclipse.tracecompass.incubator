@@ -10,7 +10,7 @@
  *   Alexis Cabana-Loriaux - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.contextswitch.ui.view;
+package org.eclipse.tracecompass.incubator.internal.kernel.ui.views.contextswitch;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

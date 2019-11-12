@@ -10,7 +10,7 @@
  *   Alexis Cabana-Loriaux - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.contextswitch.ui.view;
+package org.eclipse.tracecompass.incubator.internal.kernel.ui.views.contextswitch;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +22,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.contextswitch.KernelContextSwitchAnalysis;
-import org.eclipse.tracecompass.incubator.internal.contextswitch.ui.view.ContextSwitchTimeEvent.ContextSwitchRate;
+import org.eclipse.tracecompass.incubator.internal.kernel.ui.views.contextswitch.ContextSwitchTimeEvent.ContextSwitchRate;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;

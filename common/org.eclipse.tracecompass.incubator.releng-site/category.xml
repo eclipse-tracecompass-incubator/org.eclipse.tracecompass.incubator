@@ -18,9 +18,6 @@
    <feature url="features/org.eclipse.tracecompass.incubator.uftrace_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.uftrace" version="0.0.0">
       <category name="trace-types"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.contextswitch_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.contextswitch" version="0.0.0">
-      <category name="analyses"/>
-   </feature>
    <feature url="features/org.eclipse.tracecompass.incubator.lttng2.ust.extras_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.lttng2.ust.extras" version="0.0.0">
       <category name="analyses"/>
    </feature>

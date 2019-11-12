@@ -7,7 +7,16 @@
             category="org.eclipse.linuxtools.lttng2.ui.views.category"
             class="org.eclipse.tracecompass.incubator.internal.kernel.ui.views.fileaccess.FileAccessByFileView"
             id="org.eclipse.tracecompass.incubator.kernel.ui.filebyfile"
-            name="File Access (File)"
+            name="%view.fileaccess"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            category="org.eclipse.linuxtools.lttng2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.kernel.ui.views.contextswitch.ContextSwitchView"
+            icon="icons/obj16/contextswitch.png"
+            id="org.eclipse.tracecompass.incubator.kernel.ui.contextswitch"
+            name="%view.contextswitch"
             restorable="true">
       </view>
    </extension>
@@ -18,6 +27,13 @@
             id="org.eclipse.tracecompass.incubator.kernel.ui.filebyfile">
          <analysisModuleClass
                class="org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessAnalysis">
+         </analysisModuleClass>
+      </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.kernel.ui.contextswitch">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.analysis.os.linux.core.contextswitch.KernelContextSwitchAnalysis">
          </analysisModuleClass>
       </output>
    </extension>
