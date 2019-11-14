@@ -67,9 +67,6 @@ public abstract class AbstractRosPresentationProvider extends TimeGraphPresentat
         }
     }
 
-    /** The minimum width */
-    protected Integer fMinimumDisplayedTextWidth;
-
     /** The event cache */
     protected final LoadingCache<NamedTimeEvent, Optional<String>> fTimeEventNames = CacheBuilder.newBuilder()
             .maximumSize(1000)
@@ -122,30 +119,15 @@ public abstract class AbstractRosPresentationProvider extends TimeGraphPresentat
             return;
         }
 
-        if (fMinimumDisplayedTextWidth == null) {
-            fMinimumDisplayedTextWidth = getAverageCharacterWidth(gc) + gc.stringExtent(Utils.ELLIPSIS).x;
-        }
-        if (bounds.width <= fMinimumDisplayedTextWidth) {
-            // Don't print anything if we cannot at least show one character and ellipses
-            return;
-        }
-
         String name = fTimeEventNames.getUnchecked((NamedTimeEvent) event).orElse(StringUtils.EMPTY);
         if (name.isEmpty()) {
             // No text to print
             return;
         }
 
-        gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
-        Utils.drawText(gc, name, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
-    }
-
-    /**
-     * @param gc
-     *            the graphics content
-     * @return the average character width
-     */
-    protected static int getAverageCharacterWidth(GC gc) {
-        return (int) gc.getFontMetrics().getAverageCharacterWidth();
+        if (bounds.width > bounds.height) {
+            gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
+            Utils.drawText(gc, name, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
+        }
     }
 }
