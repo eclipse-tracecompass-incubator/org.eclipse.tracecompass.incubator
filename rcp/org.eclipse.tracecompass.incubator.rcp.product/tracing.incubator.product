@@ -204,6 +204,7 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <feature id="org.eclipse.equinox.p2.extras.feature"/>
       <feature id="org.eclipse.tracecompass.ctf"/>
       <feature id="org.eclipse.tracecompass.tmf.ctf"/>
+      <feature id="org.eclipse.tracecompass.tmf.cli"/>
       <feature id="org.eclipse.tracecompass.tmf.pcap"/>
       <feature id="org.eclipse.ecf.core.ssl.feature"/>
       <feature id="org.eclipse.ecf.filetransfer.ssl.feature"/>
@@ -230,6 +231,10 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <feature id="org.eclipse.tracecompass.rcp" installMode="root"/>
       <feature id="org.eclipse.tracecompass.incubator.rcp" installMode="root"/>
       <feature id="org.eclipse.tracecompass.tmf.cli" installMode="root"/>
+      <feature id="org.eclipse.tracecompass.incubator.filters" installMode="root"/>
+      <feature id="org.eclipse.tracecompass.incubator.scripting" installMode="root"/>
+      <feature id="org.eclipse.tracecompass.incubator.scripting.javascript" installMode="root"/>
+      <feature id="org.eclipse.tracecompass.incubator.scripting.python" installMode="root"/>
    </features>
 
    <configurations>

@@ -42,6 +42,12 @@ take some time, to skip them you can append `-Dmaven.test.skip=true` to the
 
     mvn clean install -Dmaven.test.skip=true
 
+The resulting executables will be in the
+`rcp/org.eclipse.tracecompass.incubator.rcp.product/target/products`. There are
+the archives for linux, macos and Windows. The sub-directories
+`org.eclipse.tracecompass.incubator.rcp/<os>/...` contain the executable for each
+OS.
+
 To generate the javadoc from the Trace Compass source code, run the following
 command from the top-level directory:
 
