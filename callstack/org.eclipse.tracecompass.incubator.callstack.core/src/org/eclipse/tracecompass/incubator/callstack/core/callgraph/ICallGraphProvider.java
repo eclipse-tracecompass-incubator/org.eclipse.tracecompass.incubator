@@ -15,6 +15,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
@@ -38,6 +39,16 @@ public interface ICallGraphProvider extends IWeightedTreeProvider<@NonNull ICall
      * @return The collection of group descriptors for this call graph
      */
     Collection<ICallStackGroupDescriptor> getGroupDescriptors();
+
+    @Override
+    default @Nullable IWeightedTreeGroupDescriptor getGroupDescriptor() {
+        // Return the first group descriptor
+        Collection<ICallStackGroupDescriptor> groupDescriptors = getGroupDescriptors();
+        if (groupDescriptors.isEmpty()) {
+            return null;
+        }
+        return groupDescriptors.iterator().next();
+    }
 
     /**
      * Get the call graph for a given time range. This callgraph is for all the

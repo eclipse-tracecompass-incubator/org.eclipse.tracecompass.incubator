@@ -28,7 +28,9 @@ import org.eclipse.jdt.annotation.NonNull;
  * @param <N>
  *            The type of objects represented by each node in the tree
  * @param <E>
- *            The type of elements used to group the trees
+ *            The type of elements used to group the trees. If this type extends
+ *            {@link ITree}, then the elements and their associated weighted
+ *            trees will be grouped in a hierarchical style
  * @param <T>
  *            The type of the tree provided
  */

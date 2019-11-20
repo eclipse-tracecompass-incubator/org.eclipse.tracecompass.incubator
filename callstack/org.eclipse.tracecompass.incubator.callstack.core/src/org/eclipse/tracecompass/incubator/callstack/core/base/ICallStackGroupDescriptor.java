@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.callstack.core.base;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 
 /**
  * This interface describes a group in the callstack. A group can either be a
@@ -56,28 +57,10 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Geneviève Bastien
  */
-public interface ICallStackGroupDescriptor {
+public interface ICallStackGroupDescriptor extends IWeightedTreeGroupDescriptor {
 
-    /**
-     * Get the group descriptor at the next level.
-     *
-     * @return The next group or <code>null</code> if this is a leaf level
-     */
+    @Override
     @Nullable ICallStackGroupDescriptor getNextGroup();
-
-//    /**
-//     * Get the elements corresponding to this group in the call stack hierarchy
-//     *
-//     * @param factory
-//     *            The factory to create the elements
-//     * @param parent
-//     *            The element of the previous group, that will be parent to this
-//     *            group's elements
-//     * @param symbolKeyElement
-//     *            The symbol key element, or <code>null</code> if unavailable
-//     * @return The list of elements corresponding to this group descriptor
-//     */
-//    List<ICallStackElement> getElements(@Nullable ICallStackElement parent, @Nullable ICallStackElement symbolKeyElement);
 
     /**
      * Get whether the value of this group should be used as the key for the
@@ -88,12 +71,5 @@ public interface ICallStackGroupDescriptor {
      *         symbol mapping key.
      */
     boolean isSymbolKeyGroup();
-
-    /**
-     * Get the human-readable name for this group descriptor
-     *
-     * @return The name of this group descriptor
-     */
-    String getName();
 
 }

@@ -36,14 +36,6 @@ public interface ICallStackElement extends ITree {
     Collection<ICallStackElement> getChildrenElements();
 
     /**
-     * Add a child element to this one
-     *
-     * @param node
-     *            The child element
-     */
-    void addChild(ICallStackElement node);
-
-    /**
      * Get the corresponding group descriptor
      *
      * @return The group descriptor of this element

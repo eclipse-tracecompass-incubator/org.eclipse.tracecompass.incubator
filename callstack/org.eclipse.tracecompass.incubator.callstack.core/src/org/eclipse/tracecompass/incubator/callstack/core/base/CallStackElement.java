@@ -32,7 +32,7 @@ public class CallStackElement implements ICallStackElement {
     private final ICallStackGroupDescriptor fDescriptor;
     private final @Nullable ICallStackGroupDescriptor fNextDescriptor;
     private final Collection<ICallStackElement> fChildren = new ArrayList<>();
-    private final @Nullable ICallStackElement fParent;
+    private @Nullable ICallStackElement fParent;
     private @Nullable ICallStackElement fSymbolKeyElement = null;
 
     /**
@@ -75,8 +75,20 @@ public class CallStackElement implements ICallStackElement {
     }
 
     @Override
-    public void addChild(ICallStackElement node) {
-        fChildren.add(node);
+    public void addChild(ITree child) {
+        if (!(child instanceof ICallStackElement)) {
+            throw new IllegalArgumentException("The CallStackElement hierarchy does not support children of type " + child.getClass().getName()); //$NON-NLS-1$
+        }
+        fChildren.add((ICallStackElement) child);
+        child.setParent(this);
+    }
+
+    @Override
+    public void setParent(@Nullable ITree parent) {
+        if (parent != null && !(parent instanceof ICallStackElement)) {
+            throw new IllegalArgumentException("The CallStackElement hierarchy does not support parent of type " + parent.getClass().getName()); //$NON-NLS-1$
+        }
+        fParent = (ICallStackElement) parent;
     }
 
     @Override
@@ -158,6 +170,11 @@ public class CallStackElement implements ICallStackElement {
         List<ITree> list = new ArrayList<>();
         list.addAll(fChildren);
         return list;
+    }
+
+    @Override
+    public CallStackElement copyElement() {
+        return new CallStackElement(fName, fDescriptor, fNextDescriptor, null);
     }
 
 }

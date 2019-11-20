@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.analysis.core.weighted.tree;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +46,9 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
  * @param <N>
  *            The type of objects represented by each node in the tree
  * @param <E>
- *            The type of elements used to group the trees
+ *            The type of elements used to group the trees. If this type extends
+ *            {@link ITree}, then the elements and their associated weighted
+ *            trees will be grouped in a hierarchical style
  * @param <T>
  *            The type of the tree provided
  */
@@ -338,5 +341,38 @@ public interface IWeightedTreeProvider<@NonNull N, E, @NonNull T extends Weighte
      * @return The title of this provider
      */
     String getTitle();
+
+    /**
+     * Get the group descriptors that describe the hierarchical groups of
+     * elements.
+     *
+     * This method returns <code>null</code> if the elements are not
+     * {@link ITree} instances. If the elements implement the {@link ITree}
+     * interface, the implementations may override this method and return a
+     * group descriptor that gives names to each level of the hierarchy of
+     * elements. Otherwise, it returns a group for the root element, whose next
+     * groups will match the depth of the {@link ITree} structure.
+     *
+     * @return The collection of group descriptors for this call graph, or
+     *         <code>null</code> if there is no hierarchy of elements
+     */
+    default @Nullable IWeightedTreeGroupDescriptor getGroupDescriptor() {
+        IWeightedTreeSet<@NonNull N, E, @NonNull T> treeSet = getTreeSet();
+
+        Collection<E> elements = treeSet.getElements();
+        int lvl = 0;
+        for (E element : elements) {
+            if (element instanceof ITree) {
+                lvl = Math.max(lvl, ITree.getDepth((ITree) element));
+            }
+        }
+
+        // No tree level, default value is null
+        if (lvl == 0) {
+            return null;
+        }
+
+        return DepthGroupDescriptor.createChainForDepth(lvl - 1);
+    }
 
 }
