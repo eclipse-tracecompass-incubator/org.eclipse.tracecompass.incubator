@@ -44,25 +44,23 @@ public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
     /**
      * Constructor
      *
-     * @param symbol
-     *            The symbol of the call site. It can eventually be resolved to
-     *            a string using the symbol providers
+     * @param object
+     *            The object that goes with this tree.
      */
-    public WeightedTree(T symbol) {
-        this(symbol, 0);
+    public WeightedTree(T object) {
+        this(object, 0);
     }
 
     /**
      * Constructor
      *
-     * @param symbol
-     *            The symbol of the call site. It can eventually be resolved to
-     *            a string using the symbol providers
+     * @param object
+     *            The object that goes with this tree.
      * @param initialWeight
      *            The initial length of this object
      */
-    public WeightedTree(T symbol, long initialWeight) {
-        fObject = symbol;
+    public WeightedTree(T object, long initialWeight) {
+        fObject = object;
         fParent = null;
         fWeight = initialWeight;
     }
@@ -71,7 +69,7 @@ public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
      * Copy constructor
      *
      * @param copy
-     *            The call site to copy
+     *            The tree to copy
      */
     protected WeightedTree(WeightedTree<T> copy) {
         fObject = copy.fObject;
@@ -83,41 +81,41 @@ public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
     }
 
     /**
-     * Get the aggregated value of this callsite. The units of this length will
-     * depend on the time of callstack. Typically, for sampled, it will be the
-     * number of times this symbol was hit, while for instrumented, it can be
-     * the total time spent in this callstack element
+     * Get the weight of this tree. The unit of this weight will depend on the
+     * metric it represents.
      *
-     * @return The aggregated value of this callsite
+     * @return The weight of this tree
      */
     public long getWeight() {
         return fWeight;
     }
 
     /**
-     * Make a copy of this callsite, with its statistics. Implementing classes
-     * should make sure they copy all fields of the callsite, including the
+     * Make a copy of this tree, with its statistics. Implementing classes
+     * should make sure they copy all fields of the tree, including the
      * statistics.
      *
-     * @return A copy of this aggregated call site
+     * This constructor recursively copies all the children.
+     *
+     * @return A copy of this weighted tree
      */
     public WeightedTree<T> copyOf() {
         return new WeightedTree<>(this);
     }
 
     /**
-     * Get the symbol associated with this callsite
+     * Get the object associated with this tree
      *
-     * @return The symbol for this callsite
+     * @return The object for this tree
      */
     public T getObject() {
         return fObject;
     }
 
     /**
-     * Get the caller of this callsite (parent)
+     * Get the parent of this tree
      *
-     * @return The caller of this callsite
+     * @return The parent of this tree
      */
     protected @Nullable WeightedTree<T> getParent() {
         return fParent;
@@ -134,16 +132,16 @@ public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
     }
 
     /**
-     * Get the callees of this callsite, ie the functions called by this one
+     * Get the children of this tree
      *
-     * @return A collection of callees' callsites
+     * @return A collection of children trees
      */
     public Collection<WeightedTree<T>> getChildren() {
         return fChildren.values();
     }
 
     /**
-     * Add value to the length of this callsite
+     * Add value to the weight of this tree
      *
      * @param weight
      *            the amount to add to the length
@@ -153,35 +151,35 @@ public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
     }
 
     /**
-     * Add a callee to this callsite. If a callee for the same object already
-     * exists, the data for both callees will be merged.
+     * Add a child to this tree. If a child for the same object already
+     * exists, the data for both children will be merged.
      *
-     * @param callee
-     *            the call site of the callee
+     * @param child
+     *            the child tree to add
      */
-    public void addChild(WeightedTree<T> callee) {
-        WeightedTree<T> callsite = fChildren.get(callee.getObject());
-        if (callsite == null) {
-            callee.setParent(this);
-            fChildren.put(callee.getObject(), callee);
+    public void addChild(WeightedTree<T> child) {
+        WeightedTree<T> childTree = fChildren.get(child.getObject());
+        if (childTree == null) {
+            child.setParent(this);
+            fChildren.put(child.getObject(), child);
             return;
         }
-        callsite.merge(callee);
+        childTree.merge(child);
     }
 
     /**
-     * Merge a callsite's data with this one. This method will modify the
-     * current callsite.
+     * Merge a tree's data with this one. This method will modify the current
+     * tree.
      *
      * It will first call {@link #mergeData(WeightedTree)} that needs to be
      * implemented for each implementation of this class.
      *
-     * It will then merge the callees of both callsites by adding the other's
-     * callees to this one.
+     * It will then merge the children of both trees by adding the other's
+     * children to this one.
      *
      * @param other
-     *            The call site to merge. It has to have the same symbol as the
-     *            current callsite otherwise it will throw an
+     *            The tree to merge. It has to have the same object as the
+     *            current tree otherwise it will throw an
      *            {@link IllegalArgumentException}
      */
     public final void merge(WeightedTree<T> other) {
@@ -194,29 +192,29 @@ public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
     }
 
     /**
-     * Merge the data of two callsites. This should modify the current
-     * callsite's specific data. It is called by {@link #merge(WeightedTree)}
-     * and this method MUST NOT touch the callees of the callsites.
+     * Merge the data of two trees. This should modify the current
+     * tree's specific data. It is called by {@link #merge(WeightedTree)}
+     * and this method MUST NOT touch the children of the tree.
      *
      * @param other
-     *            The call site to merge to this one
+     *            The tree to merge to this one
      */
     protected void mergeData(WeightedTree<T> other) {
         // Nothing to do in main class
     }
 
     /**
-     * Merge the children callsites
+     * Merge the children trees
      *
      * @param other
-     *            The call site to merge to this one
+     *            The tree to merge to this one
      */
     private void mergeChildren(WeightedTree<T> other) {
         for (WeightedTree<T> otherChildSite : other.fChildren.values()) {
-            T childSymbol = otherChildSite.getObject();
-            WeightedTree<T> childSite = fChildren.get(childSymbol);
+            T childObject = otherChildSite.getObject();
+            WeightedTree<T> childSite = fChildren.get(childObject);
             if (childSite == null) {
-                fChildren.put(childSymbol, otherChildSite.copyOf());
+                fChildren.put(childObject, otherChildSite.copyOf());
             } else {
                 // combine children
                 childSite.merge(otherChildSite);
@@ -225,11 +223,11 @@ public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
     }
 
     /**
-     * Get the maximum depth under and including this aggregated callsite. A
-     * depth of 1 means there is one element under and including this element.
+     * Get the maximum depth under and including this tree. A depth of 1 means
+     * there is one element under and including this element.
      *
-     * @return The maximum depth under and including this aggregated call site.
-     *         The minimal value for the depth is 1.
+     * @return The maximum depth under and including this tree. The minimal
+     *         value for the depth is 1.
      */
     public int getMaxDepth() {
         int maxDepth = 0;
@@ -243,17 +241,17 @@ public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
      * Get other children of this tree that are not its direct descendants. It
      * can be used for instance to represent extra data, for example kernel
      * statuses for a callstack.
-     * <p>
-     * A weighted tree provider will advertise those potential children data
-     * that come with this tree, and consumers can then call this method with
-     * the index of this extra type, if the tree has more than one extra data
-     * set
+     *
+     * A {@link IWeightedTreeProvider} will advertise those potential children
+     * data that come with this tree, and consumers can then call this method
+     * with the index of this extra type, if the tree has more than one extra
+     * data set
      *
      * @param index
      *            The index of this extra children set, as provided by the
      *            {@link IWeightedTreeProvider#getExtraDataSets()} method.
      *
-     * @return The extra children sites
+     * @return The extra children trees
      */
     public Collection<WeightedTree<@NonNull T>> getExtraDataTrees(int index) {
         return Collections.emptyList();
@@ -261,7 +259,7 @@ public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
 
     @Override
     public String toString() {
-        return "WeightedTreeNode: " + fObject; //$NON-NLS-1$
+        return "[" + fObject + "]: " + fWeight; //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
