@@ -436,8 +436,8 @@ public class WeightedTreeViewer extends AbstractTmfTreeViewer {
                 children = new ArrayList<>();
                 Object thisNode = fThisElement;
                 // Does this element have children?
-                if (thisNode instanceof ITree<?>) {
-                    children.addAll(getChildrenElements((ITree<?>) thisNode));
+                if (thisNode instanceof ITree) {
+                    children.addAll(getChildrenElements((ITree) thisNode));
                 }
                 children.addAll(getChildrenTreeNodes());
                 fChildren = children;
@@ -468,9 +468,9 @@ public class WeightedTreeViewer extends AbstractTmfTreeViewer {
             return list;
         }
 
-        private List<ITmfTreeViewerEntry> getChildrenElements(ITree<?> thisNode) {
+        private List<ITmfTreeViewerEntry> getChildrenElements(ITree thisNode) {
             List<ITmfTreeViewerEntry> list = new ArrayList<>();
-            for (ITree<@NonNull ?> elChild : ((ITree<?>) thisNode).getChildren()) {
+            for (ITree elChild : thisNode.getChildren()) {
                 list.add(new ElementEntry<>((E) elChild, fTreeProvider));
             }
             return list;

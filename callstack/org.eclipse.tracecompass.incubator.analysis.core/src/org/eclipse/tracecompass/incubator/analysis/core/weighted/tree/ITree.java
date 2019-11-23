@@ -11,7 +11,6 @@ package org.eclipse.tracecompass.incubator.analysis.core.weighted.tree;
 
 import java.util.Collection;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -22,31 +21,30 @@ import org.eclipse.jdt.annotation.Nullable;
  * implementations can add their own tree building methods.
  *
  * @author Geneviève Bastien
- *
- * @param <T>
- *            The type of objects contained in this tree
  */
-public interface ITree<@NonNull T> {
+public interface ITree {
 
     /**
-     * Get the symbol associated with this callsite
+     * Get the name of this tree element, it should be human-readable as it will
+     * be displayed to the user
      *
-     * @return The symbol for this callsite
+     * @return The name of this tree element
      */
-    T getObject();
+    String getName();
 
     /**
-     * Get the caller of this callsite (parent)
+     * Get the parent of this tree element
      *
-     * @return The caller of this callsite
+     * @return The parent of this object
      */
-    @Nullable ITree<T> getParent();
+    @Nullable
+    ITree getParent();
 
     /**
-     * Get the callees of this callsite, ie the functions called by this one
+     * Get the children of this object
      *
-     * @return A collection of callees' callsites
+     * @return A collection of children elements
      */
-    Collection<ITree<T>> getChildren();
+    Collection<ITree> getChildren();
 
 }

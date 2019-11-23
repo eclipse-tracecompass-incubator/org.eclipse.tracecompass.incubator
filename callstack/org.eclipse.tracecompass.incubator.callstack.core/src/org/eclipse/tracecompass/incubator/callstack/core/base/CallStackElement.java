@@ -149,18 +149,13 @@ public class CallStackElement implements ICallStackElement {
     }
 
     @Override
-    public String getObject() {
-        return getName();
-    }
-
-    @Override
-    public @Nullable ITree<String> getParent() {
+    public @Nullable ITree getParent() {
         return fParent;
     }
 
     @Override
-    public Collection<ITree<String>> getChildren() {
-        List<ITree<String>> list = new ArrayList<>();
+    public Collection<ITree> getChildren() {
+        List<ITree> list = new ArrayList<>();
         list.addAll(fChildren);
         return list;
     }

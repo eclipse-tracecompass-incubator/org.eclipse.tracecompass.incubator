@@ -25,14 +25,7 @@ import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
  *
  * @author Geneviève Bastien
  */
-public interface ICallStackElement extends ITree<String> {
-
-    /**
-     * Get the name of this element
-     *
-     * @return The name of the element
-     */
-    String getName();
+public interface ICallStackElement extends ITree {
 
     /**
      * Get the elements at the next level of the callstack hierarchy from this
