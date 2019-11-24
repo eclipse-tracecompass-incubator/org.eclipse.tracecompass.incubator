@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.AllGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallStackAnalysisStub;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.FlameDataProviderTestUtils;
@@ -68,7 +68,7 @@ public class FlameGraphDataProviderTest extends CallStackTestBase {
     public void testFlameGraphDataProviderAllItems() throws IOException {
         CallStackAnalysisStub cga = getModule();
 
-        FlameGraphDataProvider provider = new FlameGraphDataProvider(getTrace(), cga, cga.getId());
+        FlameGraphDataProvider<?, ?, ?> provider = new FlameGraphDataProvider<>(getTrace(), cga, cga.getId());
 
         Map<Long, FlameChartEntryModel> idsToNames = assertAndGetTree(provider, "expectedFgTreeFull", Collections.emptyMap());
 
@@ -87,7 +87,7 @@ public class FlameGraphDataProviderTest extends CallStackTestBase {
     public void testFlameGraphDataProviderGroupByProcess() throws IOException {
         CallStackAnalysisStub cga = getModule();
 
-        FlameGraphDataProvider provider = new FlameGraphDataProvider(getTrace(), cga, cga.getId());
+        FlameGraphDataProvider<?, ?, ?> provider = new FlameGraphDataProvider<>(getTrace(), cga, cga.getId());
 
         Map<Long, FlameChartEntryModel> idsToNames = assertAndGetTree(provider, "expectedFgTreeProcess", ImmutableMap.of(FlameGraphDataProvider.GROUP_BY_KEY, "Processes/*"));
 
@@ -107,7 +107,7 @@ public class FlameGraphDataProviderTest extends CallStackTestBase {
     public void testFlameGraphDataProviderGrouped() throws IOException {
         CallStackAnalysisStub cga = getModule();
 
-        FlameGraphDataProvider provider = new FlameGraphDataProvider(getTrace(), cga, cga.getId());
+        FlameGraphDataProvider<?, ?, ?> provider = new FlameGraphDataProvider<>(getTrace(), cga, cga.getId());
 
         Map<Long, FlameChartEntryModel> idsToNames = assertAndGetTree(provider, "expectedFgTreeOne", ImmutableMap.of(FlameGraphDataProvider.GROUP_BY_KEY, AllGroupDescriptor.getInstance().getName()));
 
@@ -127,7 +127,7 @@ public class FlameGraphDataProviderTest extends CallStackTestBase {
     public void testFlameGraphDataProviderSelection() throws IOException {
         CallStackAnalysisStub cga = getModule();
 
-        FlameGraphDataProvider provider = new FlameGraphDataProvider(getTrace(), cga, cga.getId());
+        FlameGraphDataProvider<?, ?, ?> provider = new FlameGraphDataProvider<>(getTrace(), cga, cga.getId());
 
         Map<Long, FlameChartEntryModel> idsToNames = assertAndGetTree(provider, "expectedFgTreeSelection", ImmutableMap.of(FlameGraphDataProvider.SELECTION_RANGE_KEY, ImmutableList.of(5, 15)));
 
@@ -135,7 +135,7 @@ public class FlameGraphDataProviderTest extends CallStackTestBase {
 
     }
 
-    private static void assertRowsRequests(FlameGraphDataProvider provider, Map<Long, FlameChartEntryModel> idsToNames, String resultFileSuffix, long maxDuration) throws IOException {
+    private static void assertRowsRequests(FlameGraphDataProvider<?, ?, ?> provider, Map<Long, FlameChartEntryModel> idsToNames, String resultFileSuffix, long maxDuration) throws IOException {
         String filePrefix = "expectedFgRow" + resultFileSuffix;
         // Test getting all the states
         Builder<Long> builder = ImmutableList.builder();
@@ -155,7 +155,7 @@ public class FlameGraphDataProviderTest extends CallStackTestBase {
         assertRows(provider, idsToNames, builder.build(), filePrefix, "Zoom");
     }
 
-    private static Map<Long, FlameChartEntryModel> assertAndGetTree(FlameGraphDataProvider provider, String filePath, @NonNull Map<@NonNull String, @NonNull Object> additionalParameters) throws IOException {
+    private static Map<Long, FlameChartEntryModel> assertAndGetTree(FlameGraphDataProvider<?, ?, ?> provider, String filePath, @NonNull Map<@NonNull String, @NonNull Object> additionalParameters) throws IOException {
         Map<@NonNull String, @NonNull Object> parameters = new HashMap<>(TREE_PARAMETERS);
         parameters.putAll(additionalParameters);
         TmfModelResponse<TmfTreeModel<@NonNull FlameChartEntryModel>> treeResponse = provider.fetchTree(parameters, null);
@@ -198,7 +198,7 @@ public class FlameGraphDataProviderTest extends CallStackTestBase {
         return FlameChartEntryModel.EntryType.valueOf(string.toUpperCase());
     }
 
-    private static void assertRows(FlameGraphDataProvider provider, Map<Long, FlameChartEntryModel> idsToNames, @NonNull List<Long> requestedTimes, String filePath, String descriptor) throws IOException {
+    private static void assertRows(FlameGraphDataProvider<?, ?, ?> provider, Map<Long, FlameChartEntryModel> idsToNames, @NonNull List<Long> requestedTimes, String filePath, String descriptor) throws IOException {
         TmfModelResponse<TimeGraphModel> rowResponse = provider.fetchRowModel(prepareRowParameters(idsToNames.keySet(), requestedTimes), null);
         assertNotNull(rowResponse);
         assertEquals(ITmfResponse.Status.COMPLETED, rowResponse.getStatus());

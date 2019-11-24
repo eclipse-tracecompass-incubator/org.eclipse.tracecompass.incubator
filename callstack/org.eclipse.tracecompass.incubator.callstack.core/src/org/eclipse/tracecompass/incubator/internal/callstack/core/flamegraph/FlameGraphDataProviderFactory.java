@@ -14,7 +14,7 @@ import java.util.Iterator;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.internal.tmf.core.model.xy.TmfTreeXYCompositeDataProvider;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
@@ -59,20 +59,21 @@ public class FlameGraphDataProviderFactory implements IDataProviderFactory {
     }
 
     private static @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> create(ITmfTrace trace, String secondaryId) {
-        // The trace can be an experiment, so we need to know if there are multiple
-        // analysis modules with the same ID
-        Iterable<ICallGraphProvider> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, ICallGraphProvider.class);
-        Iterable<ICallGraphProvider> filteredModules = Iterables.filter(modules, m -> ((IAnalysisModule) m).getId().equals(secondaryId));
-        Iterator<ICallGraphProvider> iterator = filteredModules.iterator();
+        // The trace can be an experiment, so we need to know if there are
+        // multiple analysis modules with the same ID
+        Iterable<IWeightedTreeProvider> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, IWeightedTreeProvider.class);
+        Iterable<IWeightedTreeProvider> filteredModules = Iterables.filter(modules, m -> ((IAnalysisModule) m).getId().equals(secondaryId));
+        Iterator<IWeightedTreeProvider> iterator = filteredModules.iterator();
         if (iterator.hasNext()) {
-            ICallGraphProvider module = iterator.next();
+            IWeightedTreeProvider<?, ?, ?> module = iterator.next();
             if (iterator.hasNext()) {
-                // More than one module, must be an experiment, return null so the factory can
+                // More than one module, must be an experiment, return null so
+                // the factory can
                 // try with individual traces
                 return null;
             }
             ((IAnalysisModule) module).schedule();
-            return new FlameGraphDataProvider(trace, module, secondaryId);
+            return new FlameGraphDataProvider<>(trace, module, FlameGraphDataProvider.ID + ':' + secondaryId);
         }
         return null;
     }

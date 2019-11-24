@@ -20,8 +20,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.IAnalysisProgressListener;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.SymbolAspect;
@@ -229,7 +229,7 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
     }
 
     @Override
-    public Collection<ICallStackGroupDescriptor> getGroupDescriptors() {
+    public Collection<IWeightedTreeGroupDescriptor> getGroupDescriptors() {
         fCallGraph.schedule();
         fCallGraph.waitForCompletion();
         return fCallGraph.getGroupDescriptors();

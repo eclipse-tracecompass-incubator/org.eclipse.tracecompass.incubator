@@ -38,12 +38,12 @@ public interface ICallGraphProvider extends IWeightedTreeProvider<@NonNull ICall
      *
      * @return The collection of group descriptors for this call graph
      */
-    Collection<ICallStackGroupDescriptor> getGroupDescriptors();
+    Collection<IWeightedTreeGroupDescriptor> getGroupDescriptors();
 
     @Override
     default @Nullable IWeightedTreeGroupDescriptor getGroupDescriptor() {
         // Return the first group descriptor
-        Collection<ICallStackGroupDescriptor> groupDescriptors = getGroupDescriptors();
+        Collection<IWeightedTreeGroupDescriptor> groupDescriptors = getGroupDescriptors();
         if (groupDescriptors.isEmpty()) {
             return null;
         }

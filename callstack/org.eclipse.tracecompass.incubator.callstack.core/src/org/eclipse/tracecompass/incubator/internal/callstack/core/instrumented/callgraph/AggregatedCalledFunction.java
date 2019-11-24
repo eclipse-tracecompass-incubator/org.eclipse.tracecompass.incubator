@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -304,8 +305,11 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
     }
 
     @Override
-    public Collection<AggregatedCallSite> getExtraChildrenSites() {
-        return ImmutableList.copyOf(fProcessStatuses.values());
+    public @NonNull Collection<@NonNull WeightedTree<@NonNull ICallStackSymbol>> getExtraDataTrees(int index) {
+        if (index == 0) {
+            return ImmutableList.copyOf(fProcessStatuses.values());
+        }
+        return Collections.emptyList();
     }
 
     @Override

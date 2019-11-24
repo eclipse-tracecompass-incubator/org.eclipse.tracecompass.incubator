@@ -20,10 +20,10 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ISamplingDataProvider;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph.ProfilingCallGraphAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
@@ -140,7 +140,7 @@ public class PerfCallchainAnalysisModule extends ProfilingCallGraphAnalysisModul
     }
 
     @Override
-    public Collection<ICallStackGroupDescriptor> getGroupDescriptors() {
+    public Collection<IWeightedTreeGroupDescriptor> getGroupDescriptors() {
         return ImmutableList.of(fProcessDescriptor);
     }
 

@@ -9,7 +9,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph;
 
-import java.text.Format;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,10 +16,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
@@ -29,28 +27,25 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
-import org.eclipse.tracecompass.common.core.format.SubSecondTimeWithUnitFormat;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferWriter;
-import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.AllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider.MetricType;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescriptor;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraphGroupBy;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeGroupBy;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedThreadStatus;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel.EntryType;
@@ -80,8 +75,6 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
-import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
-import org.eclipse.tracecompass.tmf.core.symbols.SymbolProviderManager;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
@@ -103,9 +96,15 @@ import com.google.common.collect.TreeMultimap;
  * TODO: Use weighted tree instead of callgraph provider
  *
  * @author Geneviève Bastien
+ * @param <N>
+ *            The type of objects represented by each node in the tree
+ * @param <E>
+ *            The type of elements used to group the trees
+ * @param <T>
+ *            The type of the tree provided
  */
 @SuppressWarnings("restriction")
-public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider implements ITimeGraphDataProvider<FlameChartEntryModel> {
+public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTree<@NonNull N>> extends AbstractTmfTraceDataProvider implements ITimeGraphDataProvider<FlameChartEntryModel> {
 
     /**
      * Provider ID.
@@ -121,55 +120,50 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
      */
     public static final String SELECTION_RANGE_KEY = "selection_range"; //$NON-NLS-1$
     private static final AtomicLong ENTRY_ID = new AtomicLong();
-    private static final Comparator<AggregatedCallSite> CCT_COMPARATOR = Comparator.comparingLong(AggregatedCallSite::getWeight).thenComparing(s -> String.valueOf(s.getObject()));
-    private final Comparator<WeightedTree<ICallStackSymbol>> CCT_COMPARATOR2 = Comparator.comparing(WeightedTree<ICallStackSymbol>::getWeight).thenComparing(s -> String.valueOf(s.getObject()));
+    private final Comparator<WeightedTree<N>> CCT_COMPARATOR2 = Comparator.comparing(WeightedTree<N>::getWeight).thenComparing(s -> String.valueOf(s.getObject()));
     /**
      * Logger for Abstract Tree Data Providers.
      */
     private static final Logger LOGGER = TraceCompassLog.getLogger(FlameGraphDataProvider.class);
-    private static final Format FORMATTER = SubSecondTimeWithUnitFormat.getInstance();
 
     /* State System attributes for the root levels */
-    private static final String FUNCTION_LEVEL = "Function"; //$NON-NLS-1$
-    private static final String EXTRA_LEVEL = "Extra"; //$NON-NLS-1$
+    private static final String FUNCTION_LEVEL = "::Function"; //$NON-NLS-1$
 
-    private final ICallGraphProvider fCgProvider;
+    private final IWeightedTreeProvider<N, E, T> fWtProvider;
+
     private final String fAnalysisId;
     private final long fTraceId = ENTRY_ID.getAndIncrement();
 
     private final ReentrantReadWriteLock fLock = new ReentrantReadWriteLock(false);
     private @Nullable Pair<Map<String, Object>, TmfModelResponse<TmfTreeModel<FlameChartEntryModel>>> fCached;
     private final Map<Long, FlameChartEntryModel> fEntries = new HashMap<>();
-    private final Map<Long, CallGraphEntry> fCgEntries = new HashMap<>();
-    private final Collection<ISymbolProvider> fSymbolProviders;
+    private final Map<Long, WeightedTreeEntry> fCgEntries = new HashMap<>();
     private final Map<Long, Long> fEndTimes = new HashMap<>();
 
     /** An internal class to describe the data for an entry */
-    private static class CallGraphEntry {
-        private final ICallStackElement fElement;
+    private class WeightedTreeEntry {
         private ITmfStateSystem fSs;
         private Integer fQuark;
 
-        public CallGraphEntry(ICallStackElement element, ITmfStateSystem ss, Integer quark) {
-            fElement = element;
+        public WeightedTreeEntry(ITmfStateSystem ss, Integer quark) {
             fSs = ss;
             fQuark = quark;
         }
     }
 
-    private static class CallSiteCustomValue extends CustomStateValue {
-        private WeightedTree<ICallStackSymbol> fCallSite;
+    private static class CalleeCustomValue<@NonNull N> extends CustomStateValue {
+        private WeightedTree<N> fCallSite;
 
-        public CallSiteCustomValue(WeightedTree<ICallStackSymbol> rootFunction) {
+        public CalleeCustomValue(WeightedTree<N> rootFunction) {
             fCallSite = rootFunction;
         }
 
         @Override
         public int compareTo(ITmfStateValue o) {
-            if (!(o instanceof CallSiteCustomValue)) {
+            if (!(o instanceof CalleeCustomValue)) {
                 return -1;
             }
-            return fCallSite.compareTo(((CallSiteCustomValue) o).fCallSite);
+            return fCallSite.compareTo(((CalleeCustomValue) o).fCallSite);
         }
 
         @Override
@@ -199,36 +193,34 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
      * @param secondaryId
      *            The ID of the weighted tree provider
      */
-    public FlameGraphDataProvider(ITmfTrace trace, ICallGraphProvider module, String secondaryId) {
+    public FlameGraphDataProvider(ITmfTrace trace, IWeightedTreeProvider<N, E, T> module, String secondaryId) {
         super(trace);
-        fCgProvider = module;
+        fWtProvider = module;
         fAnalysisId = secondaryId;
-        Collection<ISymbolProvider> symbolProviders = SymbolProviderManager.getInstance().getSymbolProviders(trace);
-        symbolProviders.forEach(provider -> provider.loadConfiguration(new NullProgressMonitor()));
-        fSymbolProviders = symbolProviders;
     }
 
     @Override
     public String getId() {
-        return ID + ':' + fAnalysisId;
+        return fAnalysisId;
     }
 
     @Override
     public @NonNull TmfModelResponse<@NonNull TmfTreeModel<@NonNull FlameChartEntryModel>> fetchTree(@NonNull Map<@NonNull String, @NonNull Object> fetchParameters, @Nullable IProgressMonitor monitor) {
-        // Did we cache this tree with those parameters
-        Pair<Map<String, Object>, TmfModelResponse<TmfTreeModel<FlameChartEntryModel>>> cached = fCached;
-        if (cached != null && cached.getFirst().equals(fetchParameters)) {
-            return cached.getSecond();
-        }
+
         fLock.writeLock().lock();
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphDataProvider#fetchTree") //$NON-NLS-1$
                 .setCategory(getClass().getSimpleName()).build()) {
+            // Did we cache this tree with those parameters
+            Pair<Map<String, Object>, TmfModelResponse<TmfTreeModel<FlameChartEntryModel>>> cached = fCached;
+            if (cached != null && cached.getFirst().equals(fetchParameters)) {
+                return cached.getSecond();
+            }
 
             fEntries.clear();
             fCgEntries.clear();
             SubMonitor subMonitor = Objects.requireNonNull(SubMonitor.convert(monitor, "FlameGraphDataProvider#fetchRowModel", 2)); //$NON-NLS-1$
 
-            CallGraph callGraph = getCallGraph(fetchParameters, subMonitor);
+            IWeightedTreeSet<N, Object, WeightedTree<N>> callGraph = getCallGraph(fetchParameters, subMonitor);
             if (subMonitor.isCanceled()) {
                 return new TmfModelResponse<>(null, ITmfResponse.Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
             }
@@ -242,7 +234,7 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
             List<FlameChartEntryModel.Builder> builder = new ArrayList<>();
             FlameChartEntryModel.Builder traceEntry = new FlameChartEntryModel.Builder(fTraceId, -1, getTrace().getName(), start, FlameChartEntryModel.EntryType.TRACE, -1);
 
-            buildCallGraphEntries(callGraph, builder, traceEntry);
+            buildWeightedTreeEntries(callGraph, builder, traceEntry);
 
             ImmutableList.Builder<FlameChartEntryModel> treeBuilder = ImmutableList.builder();
             long end = traceEntry.getEndTime();
@@ -269,11 +261,14 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
         }
     }
 
-    private @Nullable CallGraph getCallGraph(Map<String, Object> fetchParameters, SubMonitor subMonitor) {
+    /**
+     * @param fetchParameters
+     */
+    private @Nullable IWeightedTreeSet<N, Object, WeightedTree<N>> getCallGraph(Map<String, Object> fetchParameters, SubMonitor subMonitor) {
         // Get the provider and wait for the analysis completion
-        ICallGraphProvider fcProvider = fCgProvider;
-        if (fcProvider instanceof IAnalysisModule) {
-            ((IAnalysisModule) fcProvider).waitForCompletion(subMonitor);
+        IWeightedTreeProvider<N, E, T> wtProvider = fWtProvider;
+        if (wtProvider instanceof IAnalysisModule) {
+            ((IAnalysisModule) wtProvider).waitForCompletion(subMonitor);
         }
         if (subMonitor.isCanceled()) {
             return null;
@@ -281,25 +276,28 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
 
         // Get the full or selection callgraph
         List<Long> selectionRange = DataProviderParameterUtils.extractLongList(fetchParameters, SELECTION_RANGE_KEY);
-        CallGraph callGraph;
+        IWeightedTreeSet<@NonNull N, E, @NonNull T> callGraph;
         if (selectionRange == null || selectionRange.size() != 2) {
-            callGraph = fcProvider.getCallGraph();
+            callGraph = wtProvider.getTreeSet();
         } else {
             long time0 = selectionRange.get(0);
             long time1 = selectionRange.get(1);
-            callGraph = fcProvider.getCallGraph(TmfTimestamp.fromNanos(Math.min(time0, time1)), TmfTimestamp.fromNanos(Math.max(time0, time1)));
+            callGraph = wtProvider.getSelection(TmfTimestamp.fromNanos(Math.min(time0, time1)), TmfTimestamp.fromNanos(Math.max(time0, time1)));
+        }
+        if (callGraph == null) {
+            return null;
         }
 
         // Look if we need to group the callgraph
-        ICallStackGroupDescriptor groupDescriptor = extractGroupDescriptor(fetchParameters, fcProvider);
+        IWeightedTreeGroupDescriptor groupDescriptor = extractGroupDescriptor(fetchParameters, wtProvider);
         if (groupDescriptor != null) {
-            callGraph = CallGraphGroupBy.groupCallGraphBy(groupDescriptor, callGraph);
+            return WeightedTreeGroupBy.groupWeightedTreeBy(groupDescriptor, callGraph, wtProvider);
         }
 
-        return callGraph;
+        return (IWeightedTreeSet<@NonNull N, Object, WeightedTree<@NonNull N>>) callGraph;
     }
 
-    private static @Nullable ICallStackGroupDescriptor extractGroupDescriptor(Map<String, Object> fetchParameters, ICallGraphProvider fcProvider) {
+    private static @Nullable IWeightedTreeGroupDescriptor extractGroupDescriptor(Map<String, Object> fetchParameters, IWeightedTreeProvider<?, ?, ?> fcProvider) {
         Object groupBy = fetchParameters.get(GROUP_BY_KEY);
         if (groupBy == null) {
             return null;
@@ -310,35 +308,38 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
             return AllGroupDescriptor.getInstance();
         }
         // Try to find the right group descriptor
-        for (ICallStackGroupDescriptor groupDescriptor : fcProvider.getGroupDescriptors()) {
+        IWeightedTreeGroupDescriptor groupDescriptor = fcProvider.getGroupDescriptor();
+        while (groupDescriptor != null) {
             if (groupDescriptor.getName().equals(groupName)) {
                 return groupDescriptor;
             }
+            groupDescriptor = groupDescriptor.getNextGroup();
         }
         return null;
     }
 
-    private void buildCallGraphEntries(CallGraph callgraph, List<FlameChartEntryModel.Builder> builder, FlameChartEntryModel.Builder traceEntry) {
-        Collection<ICallStackElement> elements = callgraph.getElements();
-        for (ICallStackElement element : elements) {
-            buildChildrenEntries(element, callgraph, builder, traceEntry);
+    private void buildWeightedTreeEntries(IWeightedTreeSet<N, Object, WeightedTree<N>> callGraph, List<FlameChartEntryModel.Builder> builder, FlameChartEntryModel.Builder traceEntry) {
+        IWeightedTreeProvider<N, E, T> wtProvider = fWtProvider;
+        Collection<@NonNull ?> elements = callGraph.getElements();
+        for (Object element : elements) {
+            buildChildrenEntries(element, wtProvider, callGraph, builder, traceEntry);
         }
 
     }
 
-    private ITmfStateSystem elementToStateSystem(CallGraph callgraph, ICallStackElement element) {
+    private ITmfStateSystem elementToStateSystem(IWeightedTreeProvider<N, E, T> wtProvider, IWeightedTreeSet<N, Object, WeightedTree<N>> callGraph, Object element) {
         // Create an in-memory state system for this element
         IStateHistoryBackend backend = StateHistoryBackendFactory.createInMemoryBackend("org.eclipse.tracecompass.incubator.callgraph.ss", 0L); //$NON-NLS-1$
         ITmfStateSystemBuilder ssb = StateSystemFactory.newStateSystem(backend);
 
         // Add the functions
-        List<AggregatedCallSite> rootFunctions = new ArrayList<>(callgraph.getCallingContextTree(element));
-        rootFunctions.sort(CCT_COMPARATOR);
+        List<WeightedTree<N>> rootFunctions = new ArrayList<>(callGraph.getTreesFor(element));
+        rootFunctions.sort(CCT_COMPARATOR2);
         int quarkFct = ssb.getQuarkAbsoluteAndAdd(FUNCTION_LEVEL);
         Deque<Long> timestampStack = new ArrayDeque<>();
         timestampStack.push(0L);
-        for (AggregatedCallSite rootFunction : rootFunctions) {
-            recursivelyAddChildren(ssb, quarkFct, rootFunction, timestampStack);
+        for (WeightedTree<N> rootFunction : rootFunctions) {
+            recursivelyAddChildren(wtProvider, ssb, quarkFct, rootFunction, timestampStack);
         }
         Long endTime = timestampStack.pop();
         ssb.closeHistory(endTime);
@@ -346,35 +347,37 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
         return ssb;
     }
 
-    private void recursivelyAddChildren(ITmfStateSystemBuilder ssb, int quarkFct, WeightedTree<ICallStackSymbol> callSite, Deque<Long> timestampStack) {
+    private void recursivelyAddChildren(IWeightedTreeProvider<N, E, T> wtProvider, ITmfStateSystemBuilder ssb, int quarkFct, WeightedTree<N> callSite, Deque<Long> timestampStack) {
         Long lastEnd = timestampStack.peek();
         if (lastEnd == null) {
             return;
         }
-        ssb.pushAttribute(lastEnd, (Object) new CallSiteCustomValue(callSite), quarkFct);
+        ssb.pushAttribute(lastEnd, (Object) new CalleeCustomValue(callSite), quarkFct);
 
         // Push the children to the state system
         timestampStack.push(lastEnd);
-        List<WeightedTree<ICallStackSymbol>> children = new ArrayList<>(callSite.getChildren());
+        List<WeightedTree<N>> children = new ArrayList<>(callSite.getChildren());
         children.sort(CCT_COMPARATOR2);
-        for (WeightedTree<ICallStackSymbol> callsite : children) {
-            recursivelyAddChildren(ssb, quarkFct, callsite, timestampStack);
+        for (WeightedTree<N> callsite : children) {
+            recursivelyAddChildren(wtProvider, ssb, quarkFct, callsite, timestampStack);
         }
         timestampStack.pop();
 
         // Add the extra sites
-        // TODO Support extra sites from weighted tree
-        if (callSite instanceof AggregatedCallSite) {
-            Iterator<AggregatedCallSite> extraChildrenSites = ((AggregatedCallSite) callSite).getExtraChildrenSites().iterator();
-            if (extraChildrenSites.hasNext()) {
-                int quarkExtra = ssb.getQuarkAbsoluteAndAdd(EXTRA_LEVEL);
-                long extraStartTime = lastEnd;
-                while (extraChildrenSites.hasNext()) {
-                    AggregatedCallSite next = extraChildrenSites.next();
-                    ssb.modifyAttribute(extraStartTime, (Object) new CallSiteCustomValue(next), quarkExtra);
-                    extraStartTime += next.getWeight();
-                }
+        List<String> extraDataSets = wtProvider.getExtraDataSets();
+        for (int i = 0; i < extraDataSets.size(); i++) {
+            Collection<WeightedTree<@NonNull N>> extraDataTrees = callSite.getExtraDataTrees(i);
+            if (extraDataTrees.isEmpty()) {
+                continue;
             }
+            String dataSetName = extraDataSets.get(i);
+            int quarkExtra = ssb.getQuarkAbsoluteAndAdd(dataSetName);
+            long extraStartTime = lastEnd;
+            for (WeightedTree<@NonNull N> extraTree : extraDataTrees) {
+                ssb.modifyAttribute(extraStartTime, (Object) new CalleeCustomValue(extraTree), quarkExtra);
+                extraStartTime += extraTree.getWeight();
+            }
+
         }
 
         long currentEnd = timestampStack.pop() + callSite.getWeight();
@@ -384,18 +387,18 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
 
     /**
      * Build the entry list for one thread
-     *
-     * @param element
-     *            The node of the aggregation tree
      */
-    private void buildChildrenEntries(ICallStackElement element, CallGraph callgraph, List<FlameChartEntryModel.Builder> builder, FlameChartEntryModel.Builder parent) {
+    private void buildChildrenEntries(Object element, IWeightedTreeProvider<N, E, T> wtProvider, IWeightedTreeSet<N, Object, WeightedTree<N>> callGraph, List<FlameChartEntryModel.Builder> builder, FlameChartEntryModel.Builder parent) {
         // Add the entry
-        FlameChartEntryModel.Builder entry = new FlameChartEntryModel.Builder(ENTRY_ID.getAndIncrement(), parent.getId(), element.getName(), 0, FlameChartEntryModel.EntryType.LEVEL, -1);
+        FlameChartEntryModel.Builder entry = new FlameChartEntryModel.Builder(ENTRY_ID.getAndIncrement(),
+                parent.getId(), (element instanceof ITree) ? String.valueOf(((ITree) element).getName()) : String.valueOf(element), 0, FlameChartEntryModel.EntryType.LEVEL, -1);
         builder.add(entry);
 
-        // Create the children entries
-        for (ICallStackElement child : element.getChildrenElements()) {
-            buildChildrenEntries(child, callgraph, builder, entry);
+        // Create the hierarchy of children entries if available
+        if (element instanceof ITree) {
+            for (ITree child : ((ITree) element).getChildren()) {
+                buildChildrenEntries(child, wtProvider, callGraph, builder, entry);
+            }
         }
 
         // Update endtime with the children and add them to builder
@@ -407,8 +410,9 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
         }
         entry.setEndTime(endTime);
 
+        List<WeightedTree<N>> rootTrees = new ArrayList<>(callGraph.getTreesFor(element));
         // Create the function callsite entries
-        if (!(element.isLeaf())) {
+        if (rootTrees.isEmpty()) {
             return;
         }
 
@@ -416,10 +420,10 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
         timestampStack.push(0L);
 
         // Get the state system to represent this callgraph
-        ITmfStateSystem ss = elementToStateSystem(callgraph, element);
+        ITmfStateSystem ss = elementToStateSystem(wtProvider, callGraph, element);
         entry.setEndTime(ss.getCurrentEndTime());
 
-        // Add items for the function entries
+        // Add entry items for the main weighted tree levels
         int quark = ss.optQuarkAbsolute(FUNCTION_LEVEL);
         if (quark == ITmfStateSystem.INVALID_ATTRIBUTE) {
             return;
@@ -430,18 +434,22 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
             child.setEndTime(ss.getCurrentEndTime());
             builder.add(child);
             i++;
-            fCgEntries.put(child.getId(), new CallGraphEntry(element, ss, subQuark));
+            fCgEntries.put(child.getId(), new WeightedTreeEntry(ss, subQuark));
         }
 
         // Add items for the extra entries
-        quark = ss.optQuarkAbsolute(EXTRA_LEVEL);
-        if (quark == ITmfStateSystem.INVALID_ATTRIBUTE) {
-            return;
+        List<String> extraDataSets = wtProvider.getExtraDataSets();
+        for (int set = 0; set < extraDataSets.size(); set++) {
+            String dataSetName = extraDataSets.get(set);
+            quark = ss.optQuarkAbsolute(dataSetName);
+            if (quark == ITmfStateSystem.INVALID_ATTRIBUTE) {
+                continue;
+            }
+            FlameChartEntryModel.Builder child = new FlameChartEntryModel.Builder(ENTRY_ID.getAndIncrement(), entry.getId(), dataSetName, 0, EntryType.KERNEL, -1);
+            child.setEndTime(ss.getCurrentEndTime());
+            builder.add(child);
+            fCgEntries.put(child.getId(), new WeightedTreeEntry(ss, quark));
         }
-        FlameChartEntryModel.Builder child = new FlameChartEntryModel.Builder(ENTRY_ID.getAndIncrement(), entry.getId(), Objects.requireNonNull(Messages.FlameGraph_KernelStatusTitle), 0, EntryType.KERNEL, -1);
-        child.setEndTime(ss.getCurrentEndTime());
-        builder.add(child);
-        fCgEntries.put(child.getId(), new CallGraphEntry(element, ss, quark));
 
         return;
     }
@@ -462,13 +470,14 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
             // No entry selected, assume all
             selected = fEntries.keySet();
         }
-        List<CallGraphEntry> selectedEntries = new ArrayList<>();
-        Multimap<Pair<ITmfStateSystem, ICallStackElement>, Pair<Integer, Long>> requested = HashMultimap.create();
+        List<WeightedTreeEntry> selectedEntries = new ArrayList<>();
+        Multimap<WeightedTreeEntry, Pair<Integer, Long>> requested = HashMultimap.create();
+
         for (Long id : selected) {
-            CallGraphEntry entry = fCgEntries.get(id);
+            WeightedTreeEntry entry = fCgEntries.get(id);
             if (entry != null) {
                 selectedEntries.add(entry);
-                requested.put(new Pair<>(entry.fSs, entry.fElement), new Pair<>(entry.fQuark, id));
+                requested.put(entry, new Pair<>(entry.fQuark, id));
             }
         }
 
@@ -485,12 +494,12 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
 
         // For each element and callgraph, get the states
         try {
-            for (Pair<ITmfStateSystem, ICallStackElement> element : requested.keySet()) {
+            for (WeightedTreeEntry element : requested.keySet()) {
                 if (subMonitor.isCanceled()) {
                     return new TmfModelResponse<>(null, ITmfResponse.Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
                 }
-                Collection<Pair<Integer, Long>> depths = requested.get(element);
-                rowModels.addAll(getStatesForElement(times, predicates, subMonitor, element.getFirst(), depths));
+                Collection<Pair<Integer, Long>> depths = Objects.requireNonNull(requested.get(element));
+                rowModels.addAll(getStatesForElement(times, predicates, subMonitor, element.fSs, depths));
             }
         } catch (StateSystemDisposedException e) {
             // Nothing to do
@@ -543,19 +552,20 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
     }
 
     private ITimeGraphState createTimeGraphState(ITmfStateInterval interval, long ssEndTime) {
+        IWeightedTreeProvider<N, E, T> wtProvider = fWtProvider;
         long startTime = interval.getStartTime();
         long duration = interval.getEndTime() - startTime + (ssEndTime == interval.getEndTime() ? 0 : 1);
         Object valueObject = interval.getValue();
-        if (valueObject instanceof CallSiteCustomValue) {
+        if (valueObject instanceof CalleeCustomValue) {
 
-            WeightedTree<ICallStackSymbol> callsite = ((CallSiteCustomValue) valueObject).fCallSite;
-            ICallStackSymbol value = callsite.getObject();
-            String resolved = value.resolve(fSymbolProviders);
-            // FIXME there shouldn't be any direct reference to AggregatedThreadStatus. Passing from CallGraph to WeightedTree should fix this
+            WeightedTree<N> callsite = ((CalleeCustomValue) valueObject).fCallSite;
+            String displayString = wtProvider.toDisplayString((T) callsite);
+            // FIXME there shouldn't be any direct reference to
+            // AggregatedThreadStatus. Moving styling to core should fix this
             if (callsite instanceof AggregatedThreadStatus) {
-                return new TimeGraphState(startTime, duration, ((AggregatedThreadStatus) callsite).getProcessStatus().getStateValue().unboxInt(), resolved);
+                return new TimeGraphState(startTime, duration, ((AggregatedThreadStatus) callsite).getProcessStatus().getStateValue().unboxInt(), displayString);
             }
-            return new TimeGraphState(startTime, duration, value.hashCode(), resolved);
+            return new TimeGraphState(startTime, duration, callsite.getObject().hashCode(), displayString);
         }
         return new TimeGraphState(startTime, duration, Integer.MIN_VALUE);
     }
@@ -577,11 +587,11 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
         }
         Long time = times.get(0);
         Long item = items.get(0);
-        CallGraphEntry callGraphEntry = fCgEntries.get(item);
+        WeightedTreeEntry callGraphEntry = fCgEntries.get(item);
         if (callGraphEntry == null) {
             return new TmfModelResponse<>(Collections.emptyMap(), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
         }
-        WeightedTree<ICallStackSymbol> callSite = findCallSite(callGraphEntry, time);
+        WeightedTree<@NonNull N> callSite = findCallSite(callGraphEntry, time);
         if (callSite != null) {
             return new TmfModelResponse<>(getTooltip(callSite), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
         }
@@ -589,38 +599,67 @@ public class FlameGraphDataProvider extends AbstractTmfTraceDataProvider impleme
         return new TmfModelResponse<>(Collections.emptyMap(), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
-    private Map<String, String> getTooltip(WeightedTree<ICallStackSymbol> tree) {
-        if (!(tree instanceof AggregatedCallSite)) {
-            return Collections.emptyMap();
-        }
-        AggregatedCallSite callSite = (AggregatedCallSite) tree;
+    private Map<String, String> getTooltip(WeightedTree<@NonNull N> callSite) {
         ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<>();
-        builder.put(Messages.FlameGraph_Symbol, callSite.getObject().resolve(fSymbolProviders));
-        for (Entry<String, IStatistics<?>> entry : callSite.getStatistics().entrySet()) {
-            String statType = String.valueOf(entry.getKey());
-            IStatistics<?> stats = entry.getValue();
-            if (stats.getMax() != IHostModel.TIME_UNKNOWN) {
-                builder.put(statType, ""); //$NON-NLS-1$
-                String lowerType = statType.toLowerCase();
-                builder.put("\t" + Messages.FlameGraph_Total + ' ' + lowerType, FORMATTER.format(stats.getTotal())); //$NON-NLS-1$
-                builder.put("\t" + Messages.FlameGraph_Average + ' ' + lowerType, FORMATTER.format(stats.getMean())); //$NON-NLS-1$
-                builder.put("\t" + Messages.FlameGraph_Max + ' ' + lowerType, FORMATTER.format(stats.getMax())); //$NON-NLS-1$
-                builder.put("\t" + Messages.FlameGraph_Min + ' ' + lowerType, FORMATTER.format(stats.getMin())); //$NON-NLS-1$
-                builder.put("\t" + Messages.FlameGraph_Deviation + ' ' + lowerType, FORMATTER.format(stats.getStdDev())); //$NON-NLS-1$
+        // Display the object name first
+        String string = callSite.getObject().toString();
+        String displayString = fWtProvider.toDisplayString((T) callSite);
+        builder.put(Objects.requireNonNull(Messages.FlameGraph_Object), string.equals(displayString) ? displayString : displayString + ' ' + '(' + string + ')');
+        List<MetricType> additionalMetrics = fWtProvider.getAdditionalMetrics();
 
+        // First, display the metrics that do not have statistics to not loose
+        // them in the middle of stats
+        MetricType metric = fWtProvider.getWeightType();
+        if (!metric.hasStatistics()) {
+            builder.put(metric.getTitle(), metric.format(callSite.getWeight()));
+        }
+        for (int i = 0; i < additionalMetrics.size(); i++) {
+            MetricType otherMetric = additionalMetrics.get(i);
+            if (!otherMetric.hasStatistics()) {
+                builder.put(otherMetric.getTitle(), otherMetric.format(fWtProvider.getAdditionalMetric((T) callSite, i)));
             }
         }
+
+        // Then, display the metrics with statistics
+        if (metric.hasStatistics()) {
+            builder.putAll(getMetricWithStatTooltip(metric, callSite, -1));
+        }
+        for (int i = 0; i < additionalMetrics.size(); i++) {
+            MetricType otherMetric = additionalMetrics.get(i);
+            if (otherMetric.hasStatistics()) {
+                builder.putAll(getMetricWithStatTooltip(otherMetric, callSite, i));
+            }
+        }
+
         return builder.build();
     }
 
-    /** Find the callsite at the time requested */
-    private static @Nullable WeightedTree<ICallStackSymbol> findCallSite(CallGraphEntry cgEntry, Long time) {
+    private Map<String, String> getMetricWithStatTooltip(MetricType metric, WeightedTree<@NonNull N> callSite, int metricIndex) {
+        Object metricValue = metricIndex < 0 ? callSite.getWeight() : fWtProvider.getAdditionalMetric((T) callSite, metricIndex);
+        IStatistics<?> statistics = fWtProvider.getStatistics((T) callSite, metricIndex);
+        Map<String, String> map = new LinkedHashMap<>();
+        if (statistics == null || statistics.getMax() == IHostModel.TIME_UNKNOWN) {
+            map.put(metric.getTitle(), metric.format(metricValue));
+        } else {
+            map.put(metric.getTitle(), StringUtils.EMPTY);
+            String lowerTitle = metric.getTitle().toLowerCase();
+            map.put("\t" + Messages.FlameGraph_Total + ' ' + lowerTitle, metric.format(statistics.getTotal())); //$NON-NLS-1$
+            map.put("\t" + Messages.FlameGraph_Average + ' ' + lowerTitle, metric.format(statistics.getMean())); //$NON-NLS-1$
+            map.put("\t" + Messages.FlameGraph_Max + ' ' + lowerTitle, metric.format(statistics.getMax())); //$NON-NLS-1$
+            map.put("\t" + Messages.FlameGraph_Min + ' ' + lowerTitle, metric.format(statistics.getMin())); //$NON-NLS-1$
+            map.put("\t" + Messages.FlameGraph_Deviation + ' ' + lowerTitle, metric.format(statistics.getStdDev())); //$NON-NLS-1$
+        }
+        return map;
+    }
+
+    /** Find the callsite at the time and depth requested */
+    private @Nullable WeightedTree<@NonNull N> findCallSite(WeightedTreeEntry cgEntry, Long time) {
         try {
             ITmfStateInterval interval = cgEntry.fSs.querySingleState(time, cgEntry.fQuark);
 
             Object valueObject = interval.getValue();
-            if (valueObject instanceof CallSiteCustomValue) {
-                return ((CallSiteCustomValue) valueObject).fCallSite;
+            if (valueObject instanceof CalleeCustomValue) {
+                return ((CalleeCustomValue) valueObject).fCallSite;
             }
         } catch (StateSystemDisposedException e) {
             // Nothing to do

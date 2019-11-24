@@ -19,10 +19,10 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.AllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.sampled.callgraph.ProfilingCallGraphAnalysisModule;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
@@ -67,7 +67,7 @@ public class SampledCallGraphTest {
         }
 
         @Override
-        public Collection<ICallStackGroupDescriptor> getGroupDescriptors() {
+        public Collection<IWeightedTreeGroupDescriptor> getGroupDescriptors() {
             return Collections.singleton(AllGroupDescriptor.getInstance());
         }
 

@@ -21,9 +21,9 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdResolver;
@@ -73,8 +73,8 @@ public class InstrumentedCallStackElement extends CallStackElement {
      *            element
      */
     public InstrumentedCallStackElement(IHostIdResolver hostResolver, ITmfStateSystem stateSystem, Integer quark,
-            InstrumentedGroupDescriptor group,
-            @Nullable InstrumentedGroupDescriptor nextGroup,
+            IWeightedTreeGroupDescriptor group,
+            @Nullable IWeightedTreeGroupDescriptor nextGroup,
             @Nullable IThreadIdResolver threadIdResolver,
             @Nullable InstrumentedCallStackElement parent) {
         super(INSTRUMENTED, group, nextGroup, parent);
@@ -87,7 +87,7 @@ public class InstrumentedCallStackElement extends CallStackElement {
     @Override
     public Collection<ICallStackElement> getChildrenElements() {
         // Get the elements from the next group in the hierarchy
-        @Nullable ICallStackGroupDescriptor nextGroup = getNextGroup();
+        @Nullable IWeightedTreeGroupDescriptor nextGroup = getNextGroup();
         if (!(nextGroup instanceof InstrumentedGroupDescriptor)) {
             return Collections.emptyList();
         }
@@ -264,6 +264,11 @@ public class InstrumentedCallStackElement extends CallStackElement {
         }
         List<Integer> subAttributes = getStateSystem().getSubAttributes(stackQuark, false);
         return subAttributes;
+    }
+
+    @Override
+    public InstrumentedCallStackElement copyElement() {
+        return new InstrumentedCallStackElement(fHostResolver, fStateSystem, fQuark, super.getGroup(), null, fThreadIdResolver, null);
     }
 
 }

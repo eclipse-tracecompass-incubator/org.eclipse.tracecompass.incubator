@@ -23,7 +23,7 @@ public class Messages extends NLS {
     /** Title of the data provider */
     public static String FlameGraphDataProvider_Title;
     /** Label for the symbol */
-    public static String FlameGraph_Symbol;
+    public static String FlameGraph_Object;
     /** Label for the CPU times */
     public static String FlameGraph_Total;
     /** Label for total CPU time */

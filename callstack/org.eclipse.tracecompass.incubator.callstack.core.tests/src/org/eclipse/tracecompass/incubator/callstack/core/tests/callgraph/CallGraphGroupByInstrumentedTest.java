@@ -18,12 +18,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.AllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeGroupBy;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeSet;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraphGroupBy;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallStackAnalysisStub;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedCalledFunction;
@@ -33,7 +37,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
 /**
- * Test the {@link CallGraphGroupBy} class
+ * Test the {@link WeightedTreeGroupBy} class with a callgraph
  *
  * @author Geneviève Bastien
  */
@@ -132,14 +136,14 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
         CallStackAnalysisStub cga = getModule();
         CallGraph baseCallGraph = cga.getCallGraph();
 
-        CallGraph callGraph = CallGraphGroupBy.groupCallGraphBy(AllGroupDescriptor.getInstance(), baseCallGraph);
-        Collection<ICallStackElement> elements = callGraph.getElements();
+        WeightedTreeSet<@NonNull ICallStackSymbol, @NonNull Object> callGraph = WeightedTreeGroupBy.groupWeightedTreeBy(AllGroupDescriptor.getInstance(), baseCallGraph, cga);
+        Collection<Object> elements = callGraph.getElements();
         assertEquals(1, elements.size());
 
-        ICallStackElement element = Iterables.getFirst(elements, null);
+        Object element = Iterables.getFirst(elements, null);
         assertNotNull(element);
 
-        Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(element);
+        Collection<@NonNull WeightedTree<@NonNull ICallStackSymbol>> callingContextTree = callGraph.getTreesFor(element);
         compareCcts("", getExpectedAll(), callingContextTree);
 
     }
@@ -153,27 +157,35 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
         CallGraph baseCallGraph = cga.getCallGraph();
 
         // The first group descriptor is the process
-        Collection<ICallStackGroupDescriptor> groupDescriptors = cga.getGroupDescriptors();
-        ICallStackGroupDescriptor processGroup = Iterables.getFirst(groupDescriptors, null);
+        Collection<IWeightedTreeGroupDescriptor> groupDescriptors = cga.getGroupDescriptors();
+        IWeightedTreeGroupDescriptor processGroup = Iterables.getFirst(groupDescriptors, null);
         assertNotNull(processGroup);
 
-        CallGraph callGraph = CallGraphGroupBy.groupCallGraphBy(processGroup, baseCallGraph);
-        Collection<ICallStackElement> elements = callGraph.getElements();
+        WeightedTreeSet<@NonNull ICallStackSymbol, @NonNull Object> callGraph = WeightedTreeGroupBy.groupWeightedTreeBy(processGroup, baseCallGraph, cga);
+        Collection<Object> elements = callGraph.getElements();
         assertEquals(2, elements.size());
 
-        for (ICallStackElement element : elements) {
-            switch (element.getName()) {
+        for (Object element : elements) {
+            assertTrue(element instanceof ICallStackElement);
+            switch (String.valueOf(element)) {
             case "1": {
-                Collection<ICallStackElement> children = element.getChildrenElements();
+                Collection<@NonNull ITree> children = ((ICallStackElement) element).getChildren();
                 assertEquals(0, children.size());
-                Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(element);
+                // Make sure the children have no tree with them
+                for (ITree child : children) {
+                    assertTrue(callGraph.getTreesFor(child).isEmpty());
+                }
+                Collection<@NonNull WeightedTree<@NonNull ICallStackSymbol>> callingContextTree = callGraph.getTreesFor(element);
                 compareCcts("", getExpectedProcess1(), callingContextTree);
             }
                 break;
             case "5": {
-                Collection<ICallStackElement> children = element.getChildrenElements();
+                Collection<@NonNull ITree> children = ((ICallStackElement) element).getChildren();
                 assertEquals(0, children.size());
-                Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(element);
+                for (ITree child : children) {
+                    assertTrue(callGraph.getTreesFor(child).isEmpty());
+                }
+                Collection<@NonNull WeightedTree<@NonNull ICallStackSymbol>> callingContextTree = callGraph.getTreesFor(element);
                 compareCcts("", getExpectedProcess5(), callingContextTree);
             }
                 break;
@@ -192,8 +204,8 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
         CallGraph baseCallGraph = cga.getCallGraph();
 
         // The first group descriptor is the process
-        Collection<ICallStackGroupDescriptor> groupDescriptors = cga.getGroupDescriptors();
-        ICallStackGroupDescriptor group = Iterables.getFirst(groupDescriptors, null);
+        Collection<IWeightedTreeGroupDescriptor> groupDescriptors = cga.getGroupDescriptors();
+        IWeightedTreeGroupDescriptor group = Iterables.getFirst(groupDescriptors, null);
         assertNotNull(group);
         while (group.getNextGroup() != null) {
             group = group.getNextGroup();
@@ -201,24 +213,25 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
         }
 
         // Group by thread
-        CallGraph callGraph = CallGraphGroupBy.groupCallGraphBy(group, baseCallGraph);
-        Collection<ICallStackElement> elements = callGraph.getElements();
+        WeightedTreeSet<@NonNull ICallStackSymbol, @NonNull Object> callGraph = WeightedTreeGroupBy.groupWeightedTreeBy(group, baseCallGraph, cga);
+        Collection<Object> elements = callGraph.getElements();
         assertEquals(2, elements.size());
 
-        for (ICallStackElement element : elements) {
-            switch (element.getName()) {
+        for (Object element : elements) {
+            assertTrue(element instanceof ICallStackElement);
+            switch (String.valueOf(element)) {
             case "1": {
-                Collection<ICallStackElement> children = element.getChildrenElements();
+                Collection<@NonNull ITree> children = ((ICallStackElement) element).getChildren();
                 assertEquals(2, children.size());
-                for (ICallStackElement thread : children) {
-                    switch (thread.getName()) {
+                for (ITree thread : children) {
+                    switch (String.valueOf(thread)) {
                     case "2": {
-                        Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(thread);
+                        Collection<@NonNull WeightedTree<@NonNull ICallStackSymbol>> callingContextTree = callGraph.getTreesFor(thread);
                         compareCcts("", getExpectedThread2(), callingContextTree);
                     }
                         break;
                     case "3": {
-                        Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(thread);
+                        Collection<@NonNull WeightedTree<@NonNull ICallStackSymbol>> callingContextTree = callGraph.getTreesFor(thread);
                         compareCcts("", getExpectedThread3(), callingContextTree);
                     }
                         break;
@@ -229,17 +242,17 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
             }
                 break;
             case "5": {
-                Collection<ICallStackElement> children = element.getChildrenElements();
+                Collection<@NonNull ITree> children = ((ICallStackElement) element).getChildren();
                 assertEquals(2, children.size());
-                for (ICallStackElement thread : children) {
-                    switch (thread.getName()) {
+                for (ITree thread : children) {
+                    switch (String.valueOf(thread)) {
                     case "6": {
-                        Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(thread);
+                        Collection<@NonNull WeightedTree<@NonNull ICallStackSymbol>> callingContextTree = callGraph.getTreesFor(thread);
                         compareCcts("", getExpectedThread6(), callingContextTree);
                     }
                         break;
                     case "7": {
-                        Collection<AggregatedCallSite> callingContextTree = callGraph.getCallingContextTree(thread);
+                        Collection<@NonNull WeightedTree<@NonNull ICallStackSymbol>> callingContextTree = callGraph.getTreesFor(thread);
                         compareCcts("", getExpectedThread7(), callingContextTree);
                     }
                         break;
@@ -281,16 +294,17 @@ public class CallGraphGroupByInstrumentedTest extends CallStackTestBase {
 
     }
 
-    private void compareCcts(String prefix, Map<String, CallGraphExpected> expected, Collection<AggregatedCallSite> callingContextTree) {
+    private void compareCcts(String prefix, Map<String, CallGraphExpected> expected, Collection<@NonNull WeightedTree<@NonNull ICallStackSymbol>> callingContextTree) {
         assertEquals(expected.size(), callingContextTree.size());
-        for (AggregatedCallSite callsite : callingContextTree) {
+        for (WeightedTree<@NonNull ICallStackSymbol> callsite : callingContextTree) {
             assertTrue(callsite instanceof AggregatedCalledFunction);
             AggregatedCalledFunction function = (AggregatedCalledFunction) callsite;
-            CallGraphExpected cgExpected = expected.get(getCallSiteSymbol(callsite).resolve(Collections.emptySet()));
+            ICallStackSymbol callSiteSymbol = getCallSiteSymbol(function);
+            CallGraphExpected cgExpected = expected.get(callSiteSymbol.resolve(Collections.emptySet()));
             assertNotNull(cgExpected);
-            assertEquals("Callsite " + getCallSiteSymbol(callsite), cgExpected.duration, function.getDuration());
-            assertEquals("Callsite " + getCallSiteSymbol(callsite), cgExpected.selfTime, function.getSelfTime());
-            compareCcts(prefix + getCallSiteSymbol(callsite) + ", ", cgExpected.children, function.getCallees());
+            assertEquals("Callsite " + callSiteSymbol, cgExpected.duration, function.getDuration());
+            assertEquals("Callsite " + callSiteSymbol, cgExpected.selfTime, function.getSelfTime());
+            compareCcts(prefix + callSiteSymbol + ", ", cgExpected.children, callsite.getChildren());
         }
     }
 

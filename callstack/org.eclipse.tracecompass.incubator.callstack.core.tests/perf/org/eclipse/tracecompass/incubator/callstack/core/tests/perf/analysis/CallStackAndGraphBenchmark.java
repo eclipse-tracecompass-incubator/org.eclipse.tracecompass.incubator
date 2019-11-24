@@ -23,10 +23,10 @@ import java.util.Random;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.AllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.AllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeGroupBy;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
-import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraphGroupBy;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
@@ -141,15 +141,15 @@ public abstract class CallStackAndGraphBenchmark {
                 callgraphQueryPm.stop();
 
                 // Benchmark the group by. Do a few iterations in different orders
-                List<ICallStackGroupDescriptor> descriptors = new ArrayList<>();
+                List<IWeightedTreeGroupDescriptor> descriptors = new ArrayList<>();
                 descriptors.add(AllGroupDescriptor.getInstance());
                 descriptors.addAll(callGraphModule.getGroupDescriptors());
                 CallGraph callGraphToGroup = callGraphModule.getCallGraph();
                 callgraphGroupByPm.start();
                 for (int j = 0; j < 10; j++) {
-                    descriptors.forEach(group -> CallGraphGroupBy.groupCallGraphBy(group, callGraphToGroup));
+                    descriptors.forEach(group -> WeightedTreeGroupBy.groupWeightedTreeBy(group, callGraphToGroup, callGraphModule));
                     Collections.reverse(descriptors);
-                    descriptors.forEach(group -> CallGraphGroupBy.groupCallGraphBy(group, callGraphToGroup));
+                    descriptors.forEach(group -> WeightedTreeGroupBy.groupWeightedTreeBy(group, callGraphToGroup, callGraphModule));
                 }
                 callgraphGroupByPm.stop();
 

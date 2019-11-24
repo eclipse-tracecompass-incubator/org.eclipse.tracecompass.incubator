@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 
 /**
  * A basic callstack element implementing the methods of the interface.
@@ -29,8 +30,8 @@ public class CallStackElement implements ICallStackElement {
     public static final int DEFAULT_SYMBOL_KEY = -1;
 
     private final String fName;
-    private final ICallStackGroupDescriptor fDescriptor;
-    private final @Nullable ICallStackGroupDescriptor fNextDescriptor;
+    private final IWeightedTreeGroupDescriptor fDescriptor;
+    private final @Nullable IWeightedTreeGroupDescriptor fNextDescriptor;
     private final Collection<ICallStackElement> fChildren = new ArrayList<>();
     private @Nullable ICallStackElement fParent;
     private @Nullable ICallStackElement fSymbolKeyElement = null;
@@ -43,7 +44,7 @@ public class CallStackElement implements ICallStackElement {
      * @param descriptor
      *            The corresponding group descriptor
      */
-    public CallStackElement(String name, ICallStackGroupDescriptor descriptor) {
+    public CallStackElement(String name, IWeightedTreeGroupDescriptor descriptor) {
         this(name, descriptor, null, null);
     }
 
@@ -59,7 +60,7 @@ public class CallStackElement implements ICallStackElement {
      * @param parent
      *            The parent element
      */
-    public CallStackElement(String name, ICallStackGroupDescriptor descriptor, @Nullable ICallStackGroupDescriptor nextGroup, @Nullable ICallStackElement parent) {
+    public CallStackElement(String name, IWeightedTreeGroupDescriptor descriptor, @Nullable IWeightedTreeGroupDescriptor nextGroup, @Nullable ICallStackElement parent) {
         fName = name;
         fDescriptor = descriptor;
         fParent = parent;
@@ -92,7 +93,7 @@ public class CallStackElement implements ICallStackElement {
     }
 
     @Override
-    public ICallStackGroupDescriptor getGroup() {
+    public IWeightedTreeGroupDescriptor getGroup() {
         return fDescriptor;
     }
 
@@ -107,7 +108,7 @@ public class CallStackElement implements ICallStackElement {
     }
 
     @Override
-    public @Nullable ICallStackGroupDescriptor getNextGroup() {
+    public @Nullable IWeightedTreeGroupDescriptor getNextGroup() {
         return fNextDescriptor;
     }
 

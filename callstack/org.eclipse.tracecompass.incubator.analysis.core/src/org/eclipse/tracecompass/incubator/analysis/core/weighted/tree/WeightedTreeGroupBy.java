@@ -54,13 +54,10 @@ public final class WeightedTreeGroupBy {
             return groupWeightedTreeByAll(weightedTreeSet);
         }
 
-        WeightedTreeSet<N, Object> wts = new WeightedTreeSet<>();
-        searchForGroups(groupBy, weightedTreeSet, provider, wts);
-        return wts;
+        return searchForGroups(groupBy, weightedTreeSet, provider);
     }
 
-    private static <@NonNull N, E, T extends WeightedTree<N>> void searchForGroups(IWeightedTreeGroupDescriptor groupBy, IWeightedTreeSet<N, E, T> callGraph, IWeightedTreeProvider<N, E, T> provider,
-            WeightedTreeSet<N, Object> newCg) {
+    private static <@NonNull N, E, T extends WeightedTree<N>> WeightedTreeSet<N, Object> searchForGroups(IWeightedTreeGroupDescriptor groupBy, IWeightedTreeSet<N, E, T> callGraph, IWeightedTreeProvider<N, E, T> provider) {
         IWeightedTreeGroupDescriptor groupDescriptor = provider.getGroupDescriptor();
         int level = 0;
         while (groupDescriptor != null && !groupDescriptor.equals(groupBy)) {
@@ -68,11 +65,14 @@ public final class WeightedTreeGroupBy {
             level++;
         }
 
+        WeightedTreeSet<N, Object> newCg = new WeightedTreeSet<>();
+
         Collection<E> elements = callGraph.getElements();
         for (E element : elements) {
             Object groupElement = (element instanceof ITree) ? ((ITree) element).copyElement() : Objects.requireNonNull(element);
             recurseAddElementData(element, groupElement, callGraph, newCg, 0, level);
         }
+        return newCg;
     }
 
     /**

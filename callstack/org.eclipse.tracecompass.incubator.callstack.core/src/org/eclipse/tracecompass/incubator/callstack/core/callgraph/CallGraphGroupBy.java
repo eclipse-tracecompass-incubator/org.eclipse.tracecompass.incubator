@@ -11,9 +11,10 @@ package org.eclipse.tracecompass.incubator.callstack.core.callgraph;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.AllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.base.CallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 
 /**
  * A class containing helper methods to group aggregated callgraph data by the
@@ -37,7 +38,7 @@ public final class CallGraphGroupBy {
      * @return A collection of data that is the result of the grouping by the
      *         descriptor
      */
-    public static CallGraph groupCallGraphBy(ICallStackGroupDescriptor groupBy, CallGraph callGraph) {
+    public static CallGraph groupCallGraphBy(IWeightedTreeGroupDescriptor groupBy, CallGraph callGraph) {
         // Fast return: just aggregated all groups together
         if (groupBy.equals(AllGroupDescriptor.getInstance())) {
             return groupCallGraphByAll(callGraph);
@@ -68,7 +69,7 @@ public final class CallGraphGroupBy {
         return cg;
     }
 
-    private static void searchForGroups(ICallStackElement element, ICallStackGroupDescriptor groupBy, CallGraph callGraph, @Nullable ICallStackElement parentElement, CallGraph newCg) {
+    private static void searchForGroups(ICallStackElement element, IWeightedTreeGroupDescriptor groupBy, CallGraph callGraph, @Nullable ICallStackElement parentElement, CallGraph newCg) {
         if (element.getGroup().equals(groupBy)) {
             ICallStackElement groupedElement = new CallStackElement(element.getName(), groupBy, null, parentElement);
             if (parentElement != null) {

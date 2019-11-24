@@ -13,6 +13,7 @@ import java.util.Collection;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 
 /**
  * Interface that classes representing a single element in the callstack
@@ -31,6 +32,8 @@ public interface ICallStackElement extends ITree {
      * Get the elements at the next level of the callstack hierarchy from this
      * element
      *
+     * FIXME: Can this method be completely replace by {@link ITree#getChildren()}?
+     *
      * @return The list of children elements in the hierarchy
      */
     Collection<ICallStackElement> getChildrenElements();
@@ -38,17 +41,21 @@ public interface ICallStackElement extends ITree {
     /**
      * Get the corresponding group descriptor
      *
+     * FIXME: Remove this method?
+     *
      * @return The group descriptor of this element
      */
-    ICallStackGroupDescriptor getGroup();
+    IWeightedTreeGroupDescriptor getGroup();
 
     /**
      * Get the next group descriptor
      *
+     * FIXME: Remove this method?
+     *
      * @return The next group descriptor, or <code>null</code> if this is a leaf
      *         element
      */
-    @Nullable ICallStackGroupDescriptor getNextGroup();
+    @Nullable IWeightedTreeGroupDescriptor getNextGroup();
 
     /**
      * Get the key for symbol resolution at a given time
@@ -77,6 +84,8 @@ public interface ICallStackElement extends ITree {
     /**
      * Get the parent element, or <code>null</code> if this element corresponds
      * to the first group of the hierarchy
+     *
+     * FIXME: Can this method be completely replace by {@link ITree#getParent()}?
      *
      * @return The parent element
      */

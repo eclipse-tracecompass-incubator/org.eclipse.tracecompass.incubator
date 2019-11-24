@@ -26,8 +26,8 @@ import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbo
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.flamechart.CallStack;
@@ -323,8 +323,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     }
 
     @Override
-    public Collection<ICallStackGroupDescriptor> getGroupDescriptors() {
-        List<ICallStackGroupDescriptor> descriptors = new ArrayList<>();
+    public Collection<IWeightedTreeGroupDescriptor> getGroupDescriptors() {
+        List<IWeightedTreeGroupDescriptor> descriptors = new ArrayList<>();
         for (IAnalysisModule module : getDependentAnalyses()) {
             if (module instanceof IFlameChartProvider) {
                 CallStackSeries serie = ((IFlameChartProvider) module).getCallStackSeries();
