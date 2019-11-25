@@ -11,7 +11,9 @@ package org.eclipse.tracecompass.incubator.callstack.core.tests.callgraph;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -32,6 +33,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.FlameDataPr
 import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.FlameGraphDataProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
+import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
@@ -55,6 +57,9 @@ public class FlameGraphDataProviderTest extends CallStackTestBase {
 
     private static final @NonNull Map<@NonNull String, @NonNull Object> TREE_PARAMETERS = ImmutableMap.of(
             DataProviderParameterUtils.REQUESTED_TIME_KEY, ImmutableList.of(0, Long.MAX_VALUE));
+
+    // Keep the map of values to style, to make sure a same value always has the same style
+    private static final Map<String, String> VALUE_TO_STYLE = new HashMap<>();
 
     /**
      * Test the {@link FlameGraphDataProvider} for the test callstack, with all
@@ -247,7 +252,23 @@ public class FlameGraphDataProviderTest extends CallStackTestBase {
             assertEquals(descriptor + ": start time at position " + i, Long.parseLong(stringStates[i * 4]), state.getStartTime());
             assertEquals(descriptor + ": duration at position " + i, Long.parseLong(stringStates[i * 4 + 1]), state.getDuration());
             String strValue = stringStates[i * 4 + 2];
-            assertEquals(descriptor + ": value at position " + i, strValue.equals("-") ? Integer.MIN_VALUE : Objects.hash(strValue), state.getValue());
+            OutputElementStyle style = state.getStyle();
+            if (strValue.equals("-")) {
+                assertNull(descriptor + ": style at position " + i, style);
+            } else {
+                assertNotNull(descriptor + ": existing style at position " + i, style);
+                String parentKey = style.getParentKey();
+                // The style should be a string that represents a number, so
+                // make sure it can be parsed as integer
+                try {
+                    Integer.parseInt(parentKey);
+                    String expectedStyle = VALUE_TO_STYLE.computeIfAbsent(strValue, str -> parentKey);
+                    assertEquals(descriptor + ": style at position " + i, expectedStyle, parentKey);
+                } catch (NumberFormatException e) {
+                    fail("Unexpected style: " + parentKey);
+                }
+            }
+            assertEquals(descriptor + ": no value at position " + i, Integer.MIN_VALUE, state.getValue());
             assertEquals(descriptor + ": label at position " + i, stringStates[i * 4 + 3], String.valueOf(state.getLabel()));
         }
         assertEquals(descriptor + " no extra state", stringStates.length / 4, states.size());

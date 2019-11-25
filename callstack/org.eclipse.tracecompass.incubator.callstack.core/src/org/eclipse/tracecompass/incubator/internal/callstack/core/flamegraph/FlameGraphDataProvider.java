@@ -39,6 +39,7 @@ import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLo
 import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferWriter;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.AllGroupDescriptor;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IDataPalette;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
@@ -46,7 +47,6 @@ import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedT
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeGroupBy;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedThreadStatus;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel.EntryType;
 import org.eclipse.tracecompass.internal.provisional.statesystem.core.statevalue.CustomStateValue;
@@ -63,6 +63,8 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
+import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
+import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
@@ -104,7 +106,7 @@ import com.google.common.collect.TreeMultimap;
  *            The type of the tree provided
  */
 @SuppressWarnings("restriction")
-public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTree<@NonNull N>> extends AbstractTmfTraceDataProvider implements ITimeGraphDataProvider<FlameChartEntryModel> {
+public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTree<@NonNull N>> extends AbstractTmfTraceDataProvider implements ITimeGraphDataProvider<FlameChartEntryModel>, IOutputStyleProvider {
 
     /**
      * Provider ID.
@@ -560,12 +562,7 @@ public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTr
 
             WeightedTree<N> callsite = ((CalleeCustomValue) valueObject).fCallSite;
             String displayString = wtProvider.toDisplayString((T) callsite);
-            // FIXME there shouldn't be any direct reference to
-            // AggregatedThreadStatus. Moving styling to core should fix this
-            if (callsite instanceof AggregatedThreadStatus) {
-                return new TimeGraphState(startTime, duration, ((AggregatedThreadStatus) callsite).getProcessStatus().getStateValue().unboxInt(), displayString);
-            }
-            return new TimeGraphState(startTime, duration, callsite.getObject().hashCode(), displayString);
+            return new TimeGraphState(startTime, duration, displayString, fWtProvider.getPalette().getStyleFor(callsite));
         }
         return new TimeGraphState(startTime, duration, Integer.MIN_VALUE);
     }
@@ -706,6 +703,12 @@ public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTr
     public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
         Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
         return fetchTooltip(parameters, monitor);
+    }
+
+    @Override
+    public TmfModelResponse<OutputStyleModel> fetchStyle(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
+        IDataPalette palette = fWtProvider.getPalette();
+        return new TmfModelResponse<>(new OutputStyleModel(palette.getStyles()), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
 }

@@ -26,6 +26,7 @@ import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbo
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ProcessStatusInterval;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IDataPalette;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
@@ -37,6 +38,8 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.callstack.core.symbol.CallStackSymbolFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.palette.FlameDefaultPalette;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.palette.FlameWithKernelPalette;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
@@ -396,6 +399,11 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
     @Override
     public String getTitle() {
         return Objects.requireNonNull(Messages.CallGraphAnalysis_Title);
+    }
+
+    @Override
+    public @NonNull IDataPalette getPalette() {
+        return (fHasKernelStatuses ? FlameWithKernelPalette.getInstance() : FlameDefaultPalette.getInstance());
     }
 
 }

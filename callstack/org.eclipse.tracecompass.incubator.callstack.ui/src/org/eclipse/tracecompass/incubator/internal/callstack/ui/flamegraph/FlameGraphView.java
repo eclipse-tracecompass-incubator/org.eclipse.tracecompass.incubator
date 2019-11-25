@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -75,11 +76,13 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.Fla
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.Activator;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TmfFilterAppliedSignal;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TraceCompassFilter;
+import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
+import org.eclipse.tracecompass.tmf.core.model.IOutputElement;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.IFilterProperty;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
@@ -108,7 +111,6 @@ import org.eclipse.tracecompass.tmf.ui.symbols.SymbolProviderConfigDialog;
 import org.eclipse.tracecompass.tmf.ui.symbols.TmfSymbolProviderUpdatedSignal;
 import org.eclipse.tracecompass.tmf.ui.views.SaveImageUtil;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
@@ -162,7 +164,7 @@ public class FlameGraphView extends TmfView {
 
     private SortOption fSortOption = SortOption.BY_NAME;
 
-    private TimeGraphPresentationProvider fPresentationProvider;
+    private BaseDataProviderTimeGraphPresentationProvider fPresentationProvider;
 
     private ITmfTrace fTrace;
     private static final @NonNull Logger LOGGER = Logger.getLogger(FlameGraphView.class.getName());
@@ -225,7 +227,7 @@ public class FlameGraphView extends TmfView {
         super.createPartControl(parent);
         fDisplayWidth = Display.getDefault().getBounds().width;
         fTimeGraphViewer = new TimeGraphViewer(parent, SWT.NONE);
-        fPresentationProvider = new FlameGraphPresentationProvider();
+        fPresentationProvider = new BaseDataProviderTimeGraphPresentationProvider();
         fTimeGraphViewer.setTimeGraphProvider(fPresentationProvider);
         fTimeGraphViewer.setTimeFormat(TimeFormat.NUMBER);
         IEditorPart editor = getSite().getPage().getActiveEditor();
@@ -398,6 +400,10 @@ public class FlameGraphView extends TmfView {
         if (dataProvider == null) {
             return;
         }
+        BaseDataProviderTimeGraphPresentationProvider presentationProvider = fPresentationProvider;
+        if (presentationProvider != null) {
+            presentationProvider.addProvider(dataProvider, getTooltipResolver(dataProvider));
+        }
         boolean complete = false;
         while (!complete && !monitor.isCanceled()) {
             Map<String, Object> parameters = new HashMap<>(additionalParams);
@@ -490,6 +496,46 @@ public class FlameGraphView extends TmfView {
                 }
             }
         }
+    }
+
+    /**
+     * Get the presentation provider
+     *
+     * @return the presentation provider
+     */
+    @VisibleForTesting
+    public BaseDataProviderTimeGraphPresentationProvider getPresentationProvider() {
+        return fPresentationProvider;
+    }
+
+    private static BiFunction<ITimeEvent, Long, Map<String, String>> getTooltipResolver(ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider) {
+        return (event, time) -> {
+            ITimeGraphEntry entry = event.getEntry();
+
+            if (!(entry instanceof TimeGraphEntry)) {
+                return Collections.emptyMap();
+            }
+            long entryId = ((TimeGraphEntry) entry).getEntryModel().getId();
+            IOutputElement element = null;
+            if (event instanceof TimeEvent) {
+                element = ((TimeEvent) event).getModel();
+            }
+            Map<@NonNull String, @NonNull Object> parameters = getFetchTooltipParameters(time, entryId, element);
+            TmfModelResponse<Map<String, String>> response = provider.fetchTooltip(parameters, new NullProgressMonitor());
+            Map<String, String> tooltip = response.getModel();
+            return (tooltip == null) ? Collections.emptyMap() : tooltip;
+        };
+
+    }
+
+    private static Map<String, Object> getFetchTooltipParameters(long time, long item, @Nullable IOutputElement element) {
+        @NonNull Map<String, Object> parameters = new HashMap<>();
+        parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, Collections.singletonList(time));
+        parameters.put(DataProviderParameterUtils.REQUESTED_ITEMS_KEY, Collections.singletonList(item));
+        if (element != null) {
+            parameters.put(DataProviderParameterUtils.REQUESTED_ELEMENT_KEY, element);
+        }
+        return parameters;
     }
 
     /**
@@ -678,7 +724,6 @@ public class FlameGraphView extends TmfView {
             }
         }
         return visible;
-
     }
 
     private void zoomEntries(@NonNull Iterable<@NonNull TimeGraphEntry> entries, long zoomStartTime, long zoomEndTime, long resolution, @NonNull IProgressMonitor monitor) {
@@ -800,18 +845,16 @@ public class FlameGraphView extends TmfView {
      * @param state
      *            {@link ITimeGraphState} from the data provider
      * @return a new {@link TimeEvent} for these arguments
-     *
-     * @since 3.3
      */
     protected TimeEvent createTimeEvent(TimeGraphEntry entry, ITimeGraphState state) {
         String label = state.getLabel();
-        if (state.getValue() == Integer.MIN_VALUE && label == null) {
+        if (state.getValue() == Integer.MIN_VALUE && label == null && state.getStyle() == null) {
             return new NullTimeEvent(entry, state.getStartTime(), state.getDuration());
         }
         if (label != null) {
-            return new NamedTimeEvent(entry, state.getStartTime(), state.getDuration(), state.getValue(), label, state.getActiveProperties());
+            return new NamedTimeEvent(entry, label, state);
         }
-        return new TimeEvent(entry, state.getStartTime(), state.getDuration(), state.getValue(), state.getActiveProperties());
+        return new TimeEvent(entry, state);
     }
 
     /**

@@ -35,7 +35,6 @@ import org.eclipse.tracecompass.incubator.callstack.core.tests.callgraph.instrum
 import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallGraphAnalysisStub;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.FlameGraphDataProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.FlameGraphDataProviderFactory;
-import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphPresentationProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphView;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -274,9 +273,11 @@ public class FlameGraphTest extends AggregationTreeTest {
         ITimeEvent actualEvent = getFirstEvent(actualEntry);
         assertNotNull(actualEvent);
         assertEquals(80, actualEvent.getDuration());
-        Map<String, String> tooltip = new FlameGraphPresentationProvider().getEventHoverToolTipInfo(actualEvent);
-        assertNull(tooltip);
-        tooltip = new FlameGraphPresentationProvider().getEventHoverToolTipInfo(actualEvent, 5);
+        FlameGraphView fg = fFg;
+        Map<String, String> tooltip = fg.getPresentationProvider().getEventHoverToolTipInfo(actualEvent);
+        assertTrue(tooltip.toString().contains("duration=80 ns"));
+        assertTrue(tooltip.toString().contains("duration=40 ns"));
+        tooltip = fg.getPresentationProvider().getEventHoverToolTipInfo(actualEvent, 5);
         assertTrue(tooltip.toString().contains("duration=80 ns"));
         assertTrue(tooltip.toString().contains("duration=40 ns"));
     }

@@ -40,6 +40,7 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.p
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel.EntryType;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.Activator;
 import org.eclipse.tracecompass.internal.analysis.os.linux.ui.actions.FollowThreadAction;
+import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
@@ -71,8 +72,6 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationPr
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NamedTimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils;
@@ -241,7 +240,7 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
      * Default constructor
      */
     public FlameChartView() {
-        this(ID, new FlameChartPresentationProvider(), FlameChartDataProvider.ID);
+        this(ID, new BaseDataProviderTimeGraphPresentationProvider(), FlameChartDataProvider.ID);
     }
 
     /**
@@ -357,19 +356,6 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
     // ------------------------------------------------------------------------
 
     /**
-     * @since 2.1
-     * @deprecated no need to link back and forth between the
-     *             {@link FlameChartPresentationProvider} and {@link FlameChartView}
-     *             anymore
-     */
-    @Deprecated
-    @Override
-    protected FlameChartPresentationProvider getPresentationProvider() {
-        /* Set to this type by the constructor */
-        return (FlameChartPresentationProvider) super.getPresentationProvider();
-    }
-
-    /**
      * @since 2.0
      */
     @Override
@@ -409,19 +395,6 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
         if (parentTrace == getTrace()) {
             refresh();
         }
-    }
-
-    @Override
-    protected TimeEvent createTimeEvent(TimeGraphEntry entry, ITimeGraphState state) {
-        if (state.getValue() == Integer.MIN_VALUE) {
-            return new NullTimeEvent(entry, state.getStartTime(), state.getDuration());
-        }
-        String label = state.getLabel();
-        int value = state.getValue();
-        if (label != null) {
-            return new NamedTimeEvent(entry, state.getStartTime(), state.getDuration(), value, label, state.getActiveProperties());
-        }
-        return new TimeEvent(entry, state.getStartTime(), state.getDuration(), value, state.getActiveProperties());
     }
 
     /**

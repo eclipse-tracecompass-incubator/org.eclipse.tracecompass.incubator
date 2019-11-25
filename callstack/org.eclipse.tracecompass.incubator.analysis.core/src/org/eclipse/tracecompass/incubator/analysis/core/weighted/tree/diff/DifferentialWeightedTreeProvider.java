@@ -19,9 +19,11 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IDataPalette;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
+import org.eclipse.tracecompass.incubator.internal.analysis.core.weighted.tree.DifferentialPalette;
 
 /**
  * Weighted tree provider that provides a differential weighted tree. Since any
@@ -138,6 +140,11 @@ public class DifferentialWeightedTreeProvider implements IWeightedTreeProvider<O
     @Override
     public IWeightedTreeSet<Object, String, DifferentialWeightedTree<Object>> getTreeSet() {
         return fTreeSet;
+    }
+
+    @Override
+    public IDataPalette getPalette() {
+        return DifferentialPalette.getInstance();
     }
 
 }
