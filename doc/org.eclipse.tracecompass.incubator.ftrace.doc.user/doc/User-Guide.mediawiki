@@ -13,7 +13,9 @@ ftrace traces with kernel events are kernel traces and all analyses available wi
 
 === function graph ===
 
-The function graph plugin of trace allows to record the function entry and exits of various kernel functions. With this kind of trace, we can obtain a callstack / flame chart / flame graph for the various threads on the machine.
+The function graph plugin of ftrace allows to record the function entry and exits of various kernel functions. With this kind of trace, we can obtain a callstack / flame chart / flame graph for the various threads on the machine. To get these views, you need to install the '''Generic Callstack''' add-ons from the Incubator (using '''Tools''' -> '''Add-ons''').
+
+To resolve the symbols correctly in the trace, you'll need the symbols from the kernel, that you can get with the '''sudo cat /proc/kallsyms > kallsyms.txt''' command. The symbols can be configured for the trace, either by clicking the [[Image:images/binaries_obj.gif]] icon in the view's toolbars, or right-clicking on the trace and selecting '''Configure symbols'''. The Trace Compass documentation has more information on [https://archive.eclipse.org/tracecompass/doc/stable/org.eclipse.tracecompass.doc.user/LTTng-UST-Analyses.html#Importing_a_binary_or_function_name_mapping_file_.28for_LTTng-UST_.3C2.8_traces.29 configuring symbols].
 
 [[Image:images/FuncGraph.png]]
 
