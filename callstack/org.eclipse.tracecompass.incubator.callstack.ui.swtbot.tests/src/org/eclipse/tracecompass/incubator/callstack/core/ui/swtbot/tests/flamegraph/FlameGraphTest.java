@@ -25,6 +25,7 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
@@ -97,8 +98,10 @@ public class FlameGraphTest extends AggregationTreeTest {
     /**
      * Open a flamegraph
      */
+    @Override
     @Before
-    public void openView() {
+    public void before() {
+        // Open the flame graph first
         fBot = new SWTWorkbenchBot();
         SWTBotUtils.openView(FLAMEGRAPH_ID, SECONDARY_ID);
         SWTBotView view = fBot.viewById(FLAMEGRAPH_ID);
@@ -114,6 +117,8 @@ public class FlameGraphTest extends AggregationTreeTest {
         SWTBotUtils.maximize(flamegraph);
         fFg = flamegraph;
         fTimeGraph = new SWTBotTimeGraph(view.bot());
+        // Now open the trace
+        super.before();
     }
 
     /**
@@ -153,7 +158,7 @@ public class FlameGraphTest extends AggregationTreeTest {
     private void loadFlameGraph() {
         CallGraphAnalysisStub cga = Objects.requireNonNull(getCga());
         ITmfTrace trace = getTrace();
-        fFg.traceSelected(new TmfTraceSelectedSignal(this, trace));
+        Display.getDefault().syncExec(() -> fFg.traceSelected(new TmfTraceSelectedSignal(this, trace)));
         FlameGraphDataProvider<?, ?, ?> dp = new FlameGraphDataProvider<>(trace, cga, FlameGraphDataProvider.ID + ':' + SECONDARY_ID);
         FlameGraphDataProviderFactory.registerDataProviderWithId(SECONDARY_ID, dp);
         UIThreadRunnable.syncExec(() -> fFg.buildFlameGraph(trace, null, null));

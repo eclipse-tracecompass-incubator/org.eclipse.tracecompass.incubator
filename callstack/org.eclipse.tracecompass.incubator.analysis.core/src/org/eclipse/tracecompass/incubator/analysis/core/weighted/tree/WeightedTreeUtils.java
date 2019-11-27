@@ -95,6 +95,8 @@ public final class WeightedTreeUtils {
      * <code>null</code>
      * </p>
      *
+     * @param <N>
+     *            The type of element in the tree
      * @param provider
      *            The base provider of one of the trees, it will be used by the
      *            differential weighted tree provider to display the metrics and

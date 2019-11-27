@@ -38,6 +38,13 @@
             name="Trace"
             visible="true">
       </module>
+      <module
+            category="org.eclipse.tracecompass.incubator.scripting.core.category"
+            class="org.eclipse.tracecompass.incubator.scripting.core.callstack.CallStackScriptingModule"
+            id="org.eclipse.tracecompass.incubator.scripting.core.callstack"
+            name="Callstack"
+            visible="true">
+      </module>
       <category
             id="org.eclipse.tracecompass.incubator.scripting.core.category"
             name="TraceCompass">

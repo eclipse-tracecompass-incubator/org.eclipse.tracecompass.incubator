@@ -232,11 +232,15 @@ public class FlameGraphView extends TmfView {
         fTimeGraphViewer.setTimeGraphProvider(fPresentationProvider);
         fTimeGraphViewer.setTimeFormat(TimeFormat.NUMBER);
         IEditorPart editor = getSite().getPage().getActiveEditor();
+        ITmfTrace trace = null;
         if (editor instanceof ITmfTraceEditor) {
-            ITmfTrace trace = ((ITmfTraceEditor) editor).getTrace();
-            if (trace != null) {
-                traceSelected(new TmfTraceSelectedSignal(this, trace));
-            }
+            trace = ((ITmfTraceEditor) editor).getTrace();
+        } else {
+            // Get the active trace, the editor might be opened on a script
+            trace = TmfTraceManager.getInstance().getActiveTrace();
+        }
+        if (trace != null) {
+            traceSelected(new TmfTraceSelectedSignal(this, trace));
         }
         contributeToActionBars();
         loadSortOption();
@@ -296,6 +300,7 @@ public class FlameGraphView extends TmfView {
                 });
             }
         });
+
     }
 
     /**
@@ -365,7 +370,11 @@ public class FlameGraphView extends TmfView {
 
     private String getProviderId() {
         String secondaryId = this.getViewSite().getSecondaryId();
-        return (secondaryId == null) ? FlameGraphDataProvider.ID : FlameGraphDataProvider.ID + ':' + secondaryId;
+        // The secondary ID may contain the '[COLON]' text, in which case, it
+        // should be replace with a real ':' and this is the complete
+        // providerId. This kind of secondary ID may come from external sources
+        // of data provider, such as scripting
+        return (secondaryId == null) ? FlameGraphDataProvider.ID : (secondaryId.contains("[COLON]")) ? secondaryId.replace("[COLON]", ":") : FlameGraphDataProvider.ID + ':' + secondaryId;
     }
 
     private class BuildRunnable {
