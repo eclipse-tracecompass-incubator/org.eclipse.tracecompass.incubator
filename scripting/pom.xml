@@ -35,4 +35,77 @@
     <!-- insert modules here -->
   </modules>
 
+<profiles>
+   <profile>
+        <!-- build help pages for modules using javadoc. Needs variable doclet.path 
+             to be set to the location of the ModuleDoclet jar. The jar can be built with: 
+             mvn clean package -f org.eclipse.ease.core/developers/org.eclipse.ease.helpgenerator/pom.xml 
+             in which case the doclet.path would be: org.eclipse.ease.core/developers/org.eclipse.ease.helpgenerator/target/ease.module.doclet.jar 
+             or the pre-built jar can downloaded from: https://ci.eclipse.org/ease/job/ease.build.module.doclet/lastSuccessfulBuild/artifact/developers/org.eclipse.ease.helpgenerator/target/ease.module.doclet.jar -->
+        <id>module-docs</id>
+        <properties>
+            <platform.api>org.eclipse.platform.doc.isv/reference/api</platform.api>
+            <doclet.path>${user.dir}/ease.module.doclet.jar</doclet.path>
+        </properties>
+        <build>
+            <plugins>
+
+                <!-- enable module documentation builder -->
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <version>2.9.1</version>
+                    <configuration>
+                        <outputDirectory>${project.build.directory}/../mydocs </outputDirectory>
+                        <doclet>org.eclipse.ease.helpgenerator.V8ModuleDoclet</doclet>
+                        <docletPath>${doclet.path}</docletPath>
+			<additionalparam>-root ${basedir} -failOnHTMLError true
+                                           -failOnMissingDocs true</additionalparam>
+
+                        <useStandardDocletOptions>true</useStandardDocletOptions>
+                        <excludePackageNames>org.eclipse.tracecompass.incubator.internal.*:*.test*</excludePackageNames>
+                        <links>
+                            <link>https://osgi.org/javadoc/r6/cmpn</link>
+                            <link>http://docs.oracle.com/javase/8/docs/api/</link>
+                            <link>https://archive.eclipse.org/tracecompass/doc/javadoc/apidocs/</link>
+                        </links>
+                        <verbose>true</verbose>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>build-docs</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>javadoc</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <version>1.9.1</version>
+                    <executions>
+                        <execution>
+                            <id>add_help</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>add-resource</goal>
+                            </goals>
+                            <configuration>
+                                <resources>
+                                    <resource>
+                                        <directory>${basedir}/help</directory>
+                                        <targetPath>help</targetPath>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+</profiles>
 </project>

@@ -270,6 +270,41 @@
         <sonar.skip>true</sonar.skip>
       </properties>
     </profile>
+
+     <profile>
+        <id>build-api-docs</id>
+        <build>
+            <plugins>
+               <plugin>
+                   <groupId>org.apache.maven.plugins</groupId>
+                   <artifactId>maven-javadoc-plugin</artifactId>
+                   <version>3.1.0</version>
+                   <configuration>
+                      <groups>
+                         <group>
+                            <title>Trace Compass EASE Scripting</title>
+                            <packages>org.eclipse.tracecompass.incubator.scripting.*</packages>
+                         </group>
+                      </groups>
+                      <excludePackageNames>org.eclipse.tracecompass.incubator.internal.*:*.test*</excludePackageNames>
+                      <overview>overview.html</overview>
+                      <noindex>true</noindex>
+                      <nodeprecated>false</nodeprecated>
+                      <nodeprecatedlist>false</nodeprecatedlist>
+                      <nohelp>true</nohelp>
+                      <notree>true</notree>
+                      <doctitle>Trace Compass Incubator API</doctitle>
+                      <show>public</show>
+                      <links>
+                         <link>https://archive.eclipse.org/tracecompass/doc/javadoc/apidocs/</link>
+                      </links>
+                      <verbose>true</verbose>
+                   </configuration>
+                </plugin>
+            </plugins>
+        </build>
+     </profile>
+
   </profiles>
 
   <modules>
@@ -561,33 +596,6 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>2.9</version>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.1.0</version>
-          <configuration>
-            <groups>
-              <group>
-                <title>Trace Compass EASE Scripting</title>
-                <packages>org.eclipse.tracecompass.incubator.scripting.*</packages>
-              </group>
-            </groups>
-            <excludePackageNames>org.eclipse.tracecompass.incubator.internal.*:*.test*</excludePackageNames>
-            <overview>overview.html</overview>
-            <noindex>true</noindex>
-            <nodeprecated>true</nodeprecated>
-            <nodeprecatedlist>true</nodeprecatedlist>
-            <nohelp>true</nohelp>
-            <notree>true</notree>
-            <doctitle>Trace Compass Incubator API</doctitle>
-            <show>public</show>
-            <links>
-               <link>https://archive.eclipse.org/tracecompass/doc/javadoc/apidocs/</link>
-            </links>
-            <verbose>true</verbose>
-          </configuration>
         </plugin>
 
         <plugin>

@@ -31,8 +31,8 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  * </p>
  * <p>
  * Example scripts with data providers can be found here:
- * <ul>
  * </p>
+ * <ul>
  * <li><a href="../doc-files/scriptedDataProvider.js">A scripted time graph data
  * provider</a> with script-defined entries and arrows (javascript)</li>
  * <li><a href="../doc-files/basicAnalysis.js">A basic analysis</a> building an

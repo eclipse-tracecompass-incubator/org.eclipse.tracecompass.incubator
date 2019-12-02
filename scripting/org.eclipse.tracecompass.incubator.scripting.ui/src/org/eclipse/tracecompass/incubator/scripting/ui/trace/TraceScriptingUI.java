@@ -19,7 +19,6 @@ import org.eclipse.ease.modules.ScriptParameter;
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.trace.Messages;
-import org.eclipse.tracecompass.incubator.scripting.core.trace.TraceScriptingModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.project.model.ITmfProjectModelElement;
 import org.eclipse.tracecompass.tmf.ui.project.model.TmfCommonProjectElement;
@@ -28,14 +27,29 @@ import org.eclipse.tracecompass.tmf.ui.project.model.TmfProjectElement;
 import org.eclipse.tracecompass.tmf.ui.project.model.TmfProjectRegistry;
 
 /**
- * Extension of the {@link TraceScriptingModule} class that allows to interact
- * with the Trace Compass UI to open an import traces.
+ * Trace scripting module that allows to interact with the Trace Compass UI to
+ * open an import traces.
  *
  * @author Benjamin Saint-Cyr
  */
-public class TraceScriptingUI extends TraceScriptingModule {
+public class TraceScriptingUI {
 
-    @Override
+    /**
+     * Fully open a trace in the Trace Compass application, ie it will open as
+     * if the user had opened it in the UI, running all automatic analyses, etc.
+     * If the trace is successfully opened, it becomes the currently active
+     * trace.
+     *
+     * @param projectName
+     *            The name of the project
+     * @param traceName
+     *            the trace to open
+     * @param isExperiment
+     *            is the trace an experiment
+     * @return The trace
+     * @throws FileNotFoundException
+     *             Exception thrown if the file or the trace doesn't exist
+     */
     @WrapToScript
     public ITmfTrace openTrace(String projectName, String traceName, @ScriptParameter(defaultValue = "false") boolean isExperiment) throws FileNotFoundException {
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
@@ -62,7 +76,7 @@ public class TraceScriptingUI extends TraceScriptingModule {
         Display.getDefault().syncExec(new Runnable() {
             @Override
             public void run() {
-                TmfOpenTraceHelper.openTraceFromElement((TmfCommonProjectElement) traceChild);
+                TmfOpenTraceHelper.openFromElement((TmfCommonProjectElement) traceChild);
             }
         });
         // Return the trace

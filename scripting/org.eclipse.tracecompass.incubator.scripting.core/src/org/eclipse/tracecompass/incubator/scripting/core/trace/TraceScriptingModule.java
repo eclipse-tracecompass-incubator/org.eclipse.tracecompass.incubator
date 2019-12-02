@@ -54,11 +54,13 @@ public class TraceScriptingModule {
      * @param isExperiment
      *            is the trace an experiment
      * @return The trace
-     * @throws FileNotFoundException
-     *             Exception thrown if the file or the trace doesn't exist
+     * @deprecated This method was never supported, to open a trace in Trace
+     *             Compass, use the <code>openTrace</code> method from the
+     *             <code>'/TraceCompass/TraceUI'</code> module
      */
+    @Deprecated
     @WrapToScript
-    public ITmfTrace openTrace(String projectName, String traceName, @ScriptParameter(defaultValue = "false") boolean isExperiment) throws FileNotFoundException {
+    public ITmfTrace openTrace(String projectName, String traceName, @ScriptParameter(defaultValue = "false") boolean isExperiment) {
         // TODO may need to be implemented for Theia.
         // Can not do anything without the UI
         throw new UnsupportedOperationException("Load the /TraceCompass/TraceUI module instead"); //$NON-NLS-1$

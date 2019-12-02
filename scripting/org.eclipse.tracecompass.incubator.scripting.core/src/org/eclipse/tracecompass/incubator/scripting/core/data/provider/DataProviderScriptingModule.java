@@ -49,6 +49,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  * views or other means of exportation.
  * <p>
  * Example scripts with data providers can be found here:
+ * </p>
  * <ul>
  * <li><a href="../../doc-files/scriptedDataProvider.js">A scripted time graph
  * data provider</a> with script-defined entries and arrows</li>
