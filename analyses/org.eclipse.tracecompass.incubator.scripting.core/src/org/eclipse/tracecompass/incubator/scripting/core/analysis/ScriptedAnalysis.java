@@ -32,6 +32,7 @@ public class ScriptedAnalysis {
 
     private final ITmfTrace fTrace;
     private final String fName;
+    private @Nullable ITmfStateSystemBuilder fStateSystem;
 
     /**
      * Constructor
@@ -62,12 +63,17 @@ public class ScriptedAnalysis {
     @WrapToScript
     public @Nullable ITmfStateSystemBuilder getStateSystem(@ScriptParameter(defaultValue = "false") boolean useExisting) {
 
+        ITmfStateSystemBuilder stateSystem = fStateSystem;
+        if (stateSystem != null) {
+            return stateSystem;
+        }
         TmfScriptAnalysis analysisModule = TmfTraceUtils.getAnalysisModuleOfClass(fTrace, TmfScriptAnalysis.class, TmfScriptAnalysis.ID);
         if (analysisModule == null) {
             return null;
         }
-
-        return (ITmfStateSystemBuilder) analysisModule.getStateSystem(fName, useExisting);
+        stateSystem = (ITmfStateSystemBuilder) analysisModule.getStateSystem(fName, useExisting);
+        fStateSystem = stateSystem;
+        return stateSystem;
 
     }
 
@@ -115,5 +121,36 @@ public class ScriptedAnalysis {
      */
     public String getName() {
         return fName;
+    }
+
+    /**
+     * Make sure the analysis is complete and the state system, if any, is
+     * closed. It will close the state system at the end time of the trace if is
+     * has not been closed previously. If no state system was requested through
+     * the {@link #getStateSystem(boolean)} before hand, nothing will happen.
+     */
+    public void complete() {
+        ITmfStateSystemBuilder stateSystem = fStateSystem;
+        if (stateSystem == null) {
+            return;
+        }
+        if (!stateSystem.waitUntilBuilt(0)) {
+            stateSystem.closeHistory(getTrace().getEndTime().toNanos());
+        }
+    }
+
+    /**
+     * Get whether this analysis is complete, ie, if a state systemw as
+     * requested by the {@link #getStateSystem(boolean)} method, then the state
+     * system has been closed.
+     *
+     * @return Whether the analysis is complete and the state system was closed
+     */
+    public boolean isComplete() {
+        ITmfStateSystemBuilder stateSystem = fStateSystem;
+        if (stateSystem == null) {
+            return true;
+        }
+        return stateSystem.waitUntilBuilt(0);
     }
 }

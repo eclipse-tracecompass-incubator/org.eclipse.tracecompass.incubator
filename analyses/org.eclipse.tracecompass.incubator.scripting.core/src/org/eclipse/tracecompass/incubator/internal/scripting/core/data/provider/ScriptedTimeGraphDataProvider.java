@@ -73,6 +73,7 @@ public class ScriptedTimeGraphDataProvider extends AbstractTmfTraceDataProvider 
     private final Function<Map<String, Object>, @Nullable List<ITimeGraphEntryModel>> fEntryMethod;
     private final @Nullable Function<Map<String, Object>, @Nullable List<ITimeGraphArrow>> fArrowMethod;
     private final @Nullable Function<Map<String, Object>, @Nullable List<ITimeGraphRowModel>> fRowModelMethod;
+    private final ScriptedAnalysis fAnalysis;
 
     /**
      * Constructor
@@ -91,6 +92,7 @@ public class ScriptedTimeGraphDataProvider extends AbstractTmfTraceDataProvider 
             @Nullable Function<Map<String, Object>, @Nullable List<ITimeGraphRowModel>> rowModelMethod,
             @Nullable Function<Map<String, Object>, @Nullable List<ITimeGraphArrow>> arrowMethod) {
         super(analysis.getTrace());
+        fAnalysis = analysis;
         fSs = Objects.requireNonNull(analysis.getStateSystem(true));
         fEntryMethod = entryMethod;
         fRowModelMethod = rowModelMethod;
@@ -100,7 +102,7 @@ public class ScriptedTimeGraphDataProvider extends AbstractTmfTraceDataProvider 
 
     @Override
     public TmfModelResponse<TmfTreeModel<ITimeGraphEntryModel>> fetchTree(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
-        boolean isComplete = fSs.waitUntilBuilt(0);
+        boolean isComplete = fAnalysis.isComplete();
 
         List<ITimeGraphEntryModel> entryList = fEntryMethod.apply(fetchParameters);
         if (entryList == null) {
