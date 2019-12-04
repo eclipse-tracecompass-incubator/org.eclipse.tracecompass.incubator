@@ -34,6 +34,7 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventAspects;
+import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventField;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventPhases;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -53,7 +54,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  */
 public class TraceEventCallStackProvider extends CallStackStateProvider {
 
-    private static final int VERSION_NUMBER = 5;
+    private static final int VERSION_NUMBER = 6;
     private static final int UNSET_ID = -1;
     static final String EDGES = "EDGES"; //$NON-NLS-1$
 
@@ -371,14 +372,19 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             int indexOf = callStack.indexOf(functionExitName);
             // Function not found, just unstack the last one?
             if (indexOf < 0) {
-                // Update the last element of the callstack
-                int stackQuark = ss.optQuarkRelative(quark, String.valueOf(callStack.size() + 1));
-                if (stackQuark >= 0) {
-                    ss.updateOngoingState(functionExitName, stackQuark);
-                    ss.pushAttribute(timestamp, (Object) null, quark);
+                if (functionExitName.equals(TraceEventField.UNKNOWN_EXIT_EVENT) || functionExitName.equals(TraceEventField.UNKNOWN_DURATION_EXIT_EVENT)) {
+                    // The event has no name, assume the last one in the stack
+                    indexOf = callStack.size() - 1;
+                } else {
+                    // The event had a name, maybe the beginning was lost, update it in the stack, then pop it
+                    int stackQuark = ss.optQuarkRelative(quark, String.valueOf(callStack.size() + 1));
+                    if (stackQuark >= 0) {
+                        ss.updateOngoingState(functionExitName, stackQuark);
+                        ss.pushAttribute(timestamp, (Object) null, quark);
+                    }
+                    // Pop the last element
+                    indexOf = callStack.size() - 1;
                 }
-                // Pop the last element
-                indexOf = callStack.size() - 1;
             }
             // Pop all the attributes up to the exiting function
             for (int i = indexOf; i < callStack.size(); i++) {
