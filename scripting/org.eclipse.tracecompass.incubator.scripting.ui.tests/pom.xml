@@ -14,7 +14,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>org.eclipse.tracecompass.incubator.analyses-parent</artifactId>
+    <artifactId>org.eclipse.tracecompass.incubator.scripting-parent</artifactId>
     <groupId>org.eclipse.tracecompass.incubator</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
