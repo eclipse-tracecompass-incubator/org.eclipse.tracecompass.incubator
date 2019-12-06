@@ -52,6 +52,7 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.p
 import org.eclipse.tracecompass.internal.provisional.statesystem.core.statevalue.CustomStateValue;
 import org.eclipse.tracecompass.internal.tmf.core.model.AbstractTmfTraceDataProvider;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
+import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.StateSystemFactory;
@@ -121,6 +122,11 @@ public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTr
      * should be a list of 2 longs
      */
     public static final String SELECTION_RANGE_KEY = "selection_range"; //$NON-NLS-1$
+    /**
+     * The key used to specify whether to return actions as tooltips, actions
+     * keys will start with the '#' characters
+     */
+    public static final String TOOLTIP_ACTION_KEY = "actions"; //$NON-NLS-1$
     private static final AtomicLong ENTRY_ID = new AtomicLong();
     private final Comparator<WeightedTree<N>> CCT_COMPARATOR2 = Comparator.comparing(WeightedTree<N>::getWeight).thenComparing(s -> String.valueOf(s.getObject()));
     /**
@@ -588,12 +594,39 @@ public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTr
         if (callGraphEntry == null) {
             return new TmfModelResponse<>(Collections.emptyMap(), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
         }
+
         WeightedTree<@NonNull N> callSite = findCallSite(callGraphEntry, time);
         if (callSite != null) {
-            return new TmfModelResponse<>(getTooltip(callSite), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+            Object actions = fetchParameters.get(TOOLTIP_ACTION_KEY);
+            if (actions == null) {
+                // Return the normal tooltip
+                return new TmfModelResponse<>(getTooltip(callSite), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+            }
+            // Return the actions for this entry
+            return new TmfModelResponse<>(getTooltipActions(callSite), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
         }
 
         return new TmfModelResponse<>(Collections.emptyMap(), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+    }
+
+    private Map<String, String> getTooltipActions(WeightedTree<@NonNull N> callSite) {
+        ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<>();
+        /* Goto min/max actions */
+        // Try to get the statistics of the main metric
+        IStatistics<?> statistics = fWtProvider.getStatistics((T) callSite, -1);
+        if (statistics != null) {
+            Object minObject = statistics.getMinObject();
+            if (minObject instanceof ISegment) {
+                ISegment minimum = (ISegment) minObject;
+                builder.put(DataProviderUtils.ACTION_PREFIX + Messages.FlameGraph_GoToMin, DataProviderUtils.createGoToTimeAction(minimum.getStart(), minimum.getEnd()));
+            }
+            Object maxObject = statistics.getMaxObject();
+            if (maxObject instanceof ISegment) {
+                ISegment maximum = (ISegment) maxObject;
+                builder.put(DataProviderUtils.ACTION_PREFIX + Messages.FlameGraph_GoToMax, DataProviderUtils.createGoToTimeAction(maximum.getStart(), maximum.getEnd()));
+            }
+        }
+        return builder.build();
     }
 
     private Map<String, String> getTooltip(WeightedTree<@NonNull N> callSite) {

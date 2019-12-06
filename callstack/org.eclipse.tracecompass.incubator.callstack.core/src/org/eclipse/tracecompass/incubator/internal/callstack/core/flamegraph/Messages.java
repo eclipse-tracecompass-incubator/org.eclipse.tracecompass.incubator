@@ -22,18 +22,22 @@ public class Messages extends NLS {
     private static final String BUNDLE_NAME = Messages.class.getPackage().getName() + ".messages"; //$NON-NLS-1$
     /** Title of the data provider */
     public static String FlameGraphDataProvider_Title;
-    /** Label for the symbol */
+    /** Label for the object */
     public static String FlameGraph_Object;
-    /** Label for the CPU times */
+    /** Label for the total time */
     public static String FlameGraph_Total;
-    /** Label for total CPU time */
+    /** Label for average time */
     public static String FlameGraph_Average;
-    /** Label for average CPU time */
+    /** Label for the minimum value */
     public static String FlameGraph_Min;
-    /** Label for minimum CPU time */
+    /** Label for the maximum value */
     public static String FlameGraph_Max;
-    /** Label for maximum CPU time */
+    /** Label for standard deviation */
     public static String FlameGraph_Deviation;
+    /** Label for the goto min action */
+    public static String FlameGraph_GoToMin;
+    /** Label for the goto max action */
+    public static String FlameGraph_GoToMax;
     /**
      * The number of calls of a function
      */

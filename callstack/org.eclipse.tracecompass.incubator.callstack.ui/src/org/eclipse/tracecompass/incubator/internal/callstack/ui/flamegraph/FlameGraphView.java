@@ -72,6 +72,7 @@ import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLo
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.AllGroupDescriptor;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.DataProviderUtils;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.FlameGraphDataProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.Activator;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TmfFilterAppliedSignal;
@@ -510,22 +511,29 @@ public class FlameGraphView extends TmfView {
 
     private static BiFunction<ITimeEvent, Long, Map<String, String>> getTooltipResolver(ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider) {
         return (event, time) -> {
-            ITimeGraphEntry entry = event.getEntry();
-
-            if (!(entry instanceof TimeGraphEntry)) {
-                return Collections.emptyMap();
-            }
-            long entryId = ((TimeGraphEntry) entry).getEntryModel().getId();
-            IOutputElement element = null;
-            if (event instanceof TimeEvent) {
-                element = ((TimeEvent) event).getModel();
-            }
-            Map<@NonNull String, @NonNull Object> parameters = getFetchTooltipParameters(time, entryId, element);
-            TmfModelResponse<Map<String, String>> response = provider.fetchTooltip(parameters, new NullProgressMonitor());
-            Map<String, String> tooltip = response.getModel();
-            return (tooltip == null) ? Collections.emptyMap() : tooltip;
+            return getTooltip(event, time, provider, false);
         };
 
+    }
+
+    private static Map<String, String> getTooltip(ITimeEvent event, Long time, ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider, boolean getActions) {
+        ITimeGraphEntry entry = event.getEntry();
+
+        if (!(entry instanceof TimeGraphEntry)) {
+            return Collections.emptyMap();
+        }
+        long entryId = ((TimeGraphEntry) entry).getEntryModel().getId();
+        IOutputElement element = null;
+        if (event instanceof TimeEvent) {
+            element = ((TimeEvent) event).getModel();
+        }
+        Map<@NonNull String, @NonNull Object> parameters = getFetchTooltipParameters(time, entryId, element);
+        if (getActions) {
+            parameters.put(FlameGraphDataProvider.TOOLTIP_ACTION_KEY, true);
+        }
+        TmfModelResponse<Map<String, String>> response = provider.fetchTooltip(parameters, new NullProgressMonitor());
+        Map<String, String> tooltip = response.getModel();
+        return (tooltip == null) ? Collections.emptyMap() : tooltip;
     }
 
     private static Map<String, Object> getFetchTooltipParameters(long time, long item, @Nullable IOutputElement element) {
@@ -1222,10 +1230,8 @@ public class FlameGraphView extends TmfView {
             @Override
             public void menuDetected(MenuDetectEvent event) {
                 Menu menu = timeEventMenu;
-                if (event.data instanceof TimeEvent) {
-                    if (((TimeEvent) event.data).hasValue()) {
-                        timeGraphControl.setMenu(menu);
-                    }
+                if (event.data instanceof TimeEvent && !(event.data instanceof NullTimeEvent)) {
+                    timeGraphControl.setMenu(menu);
                     return;
                 }
                 timeGraphControl.setMenu(null);
@@ -1250,36 +1256,29 @@ public class FlameGraphView extends TmfView {
      *            a menuManager to fill
      */
     protected void fillTimeEventContextMenu(@NonNull IMenuManager menuManager) {
-        // TODO Bring this functionality back
-//        ISelection selection = getSite().getSelectionProvider().getSelection();
-//        if (selection instanceof IStructuredSelection) {
-//            for (Object object : ((IStructuredSelection) selection).toList()) {
-//                if (object instanceof FlamegraphEvent) {
-//                    final FlamegraphEvent flamegraphEvent = (FlamegraphEvent) object;
-//                    final ICalledFunction maxSeg = flamegraphEvent.getMaxObject();
-//                    if (maxSeg != null) {
-//                        menuManager.add(new Action(Messages.FlameGraphView_GotoMaxDuration) {
-//                            @Override
-//                            public void run() {
-//                                TmfSelectionRangeUpdatedSignal sig = new TmfSelectionRangeUpdatedSignal(this, TmfTimestamp.fromNanos(maxSeg.getStart()), TmfTimestamp.fromNanos(maxSeg.getEnd()), fTrace);
-//                                broadcast(sig);
-//                            }
-//                        });
-//                    }
-//
-//                    final ICalledFunction minSeg = flamegraphEvent.getMinObject();
-//                    if (minSeg != null) {
-//                        menuManager.add(new Action(Messages.FlameGraphView_GotoMinDuration) {
-//                            @Override
-//                            public void run() {
-//                                TmfSelectionRangeUpdatedSignal sig = new TmfSelectionRangeUpdatedSignal(this, TmfTimestamp.fromNanos(minSeg.getStart()), TmfTimestamp.fromNanos(minSeg.getEnd()), fTrace);
-//                                broadcast(sig);
-//                            }
-//                        });
-//                    }
-//                }
-//            }
-//        }
+        ISelection selection = getSite().getSelectionProvider().getSelection();
+        if (selection instanceof IStructuredSelection) {
+            for (Object object : ((IStructuredSelection) selection).toList()) {
+                if (object instanceof ITimeEvent) {
+                    ITimeEvent event = (ITimeEvent) object;
+                    ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider = getProvider(event.getEntry());
+                    Map<String, String> tooltip = getTooltip(event, event.getTime(), provider, true);
+                    for (Entry<String, String> entry : tooltip.entrySet()) {
+                        String tooltipKey = entry.getKey();
+                        if (tooltipKey.startsWith(DataProviderUtils.ACTION_PREFIX)) {
+                            // It's an action, add it to the menu
+                            menuManager.add(new Action(tooltipKey.substring(DataProviderUtils.ACTION_PREFIX.length())) {
+                                @Override
+                                public void run() {
+                                    DataProviderActionUtils.executeAction(entry.getValue());
+
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void contributeToActionBars() {
