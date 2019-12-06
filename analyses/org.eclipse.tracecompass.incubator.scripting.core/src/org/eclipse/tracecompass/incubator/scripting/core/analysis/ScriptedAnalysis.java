@@ -71,10 +71,12 @@ public class ScriptedAnalysis {
         if (analysisModule == null) {
             return null;
         }
+        analysisModule.schedule();
+        analysisModule.waitForCompletion();
+
         stateSystem = (ITmfStateSystemBuilder) analysisModule.getStateSystem(fName, useExisting);
         fStateSystem = stateSystem;
         return stateSystem;
-
     }
 
     /**
