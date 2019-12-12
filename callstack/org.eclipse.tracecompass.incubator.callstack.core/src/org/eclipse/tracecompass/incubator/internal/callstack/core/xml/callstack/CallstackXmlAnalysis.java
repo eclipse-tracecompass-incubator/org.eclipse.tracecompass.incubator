@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.timing.core.segmentstore.IAnalysisProgressListener;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IDataPalette;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
@@ -387,6 +388,33 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
     @Override
     public List<String> getExtraDataSets() {
         return fCallGraph.getExtraDataSets();
+    }
+
+    @Override
+    public MetricType getWeightType() {
+        return fCallGraph.getWeightType();
+    }
+
+    @Override
+    public List<MetricType> getAdditionalMetrics() {
+        return fCallGraph.getAdditionalMetrics();
+    }
+
+    @Override
+    public String toDisplayString(AggregatedCallSite object) {
+        return fCallGraph.toDisplayString(object);
+    }
+
+    @Override
+    public Object getAdditionalMetric(AggregatedCallSite object, int metricIndex) {
+        return fCallGraph.getAdditionalMetric(object, metricIndex);
+    }
+
+    @Override
+    public IDataPalette getPalette() {
+        fCallGraph.schedule();
+        fCallGraph.waitForCompletion();
+        return fCallGraph.getPalette();
     }
 
 }
