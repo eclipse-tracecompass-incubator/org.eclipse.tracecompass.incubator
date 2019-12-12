@@ -13,10 +13,11 @@ import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IDataPalette;
@@ -32,10 +33,11 @@ import org.eclipse.tracecompass.incubator.internal.analysis.core.weighted.tree.D
  * to this class.
  *
  * @author Geneviève Bastien
+ * @param <N>
+ *            The type of objects represented by each node in the tree
  */
-public class DifferentialWeightedTreeProvider implements IWeightedTreeProvider<Object, String, DifferentialWeightedTree<Object>> {
+public class DifferentialWeightedTreeProvider<@NonNull N> implements IWeightedTreeProvider<N, Object, DifferentialWeightedTree<N>> {
 
-    private static final String DEFAULT_ELEMENT = "diff"; //$NON-NLS-1$
     private static final Format FORMAT = new DecimalFormat("#.#"); //$NON-NLS-1$
 
     private static final Format DIFFERENTIAL_FORMAT = new Format() {
@@ -68,33 +70,12 @@ public class DifferentialWeightedTreeProvider implements IWeightedTreeProvider<O
 
     };
 
-    private class DifferentialWeightedTreeSet implements IWeightedTreeSet<Object, String, DifferentialWeightedTree<Object>> {
-
-        private final Collection<DifferentialWeightedTree<Object>> fTrees;
-
-        DifferentialWeightedTreeSet(Collection<DifferentialWeightedTree<Object>> trees) {
-            fTrees = trees;
-        }
-
-        @Override
-        public Collection<DifferentialWeightedTree<Object>> getTreesFor(String element) {
-            if (element.equals(DEFAULT_ELEMENT)) {
-                return fTrees;
-            }
-            return Collections.emptyList();
-        }
-
-        @Override
-        public Collection<String> getElements() {
-            return Collections.singleton(DEFAULT_ELEMENT);
-        }
-    }
-
     private static final List<MetricType> WEIGHT_TYPES = Collections.singletonList(new MetricType("Differential", DataType.OTHER, DIFFERENTIAL_FORMAT)); //$NON-NLS-1$
 
-    private final IWeightedTreeSet<Object, String, DifferentialWeightedTree<Object>> fTreeSet;
+    private final IWeightedTreeSet<N, Object, DifferentialWeightedTree<N>> fTreeSet;
 
-    private final IWeightedTreeProvider<Object, ?, WeightedTree<Object>> fOriginalTree;
+    private final IWeightedTreeProvider<N, ?, WeightedTree<N>> fOriginalTree;
+    private final List<MetricType> fAdditionalMetrics = new ArrayList<>(WEIGHT_TYPES);
 
     /**
      * Constructor
@@ -104,9 +85,22 @@ public class DifferentialWeightedTreeProvider implements IWeightedTreeProvider<O
      * @param trees
      *            The differential tree
      */
-    public DifferentialWeightedTreeProvider(IWeightedTreeProvider<Object, ?, WeightedTree<Object>> originalTree, Collection<DifferentialWeightedTree<Object>> trees) {
-        fTreeSet = new DifferentialWeightedTreeSet(trees);
+    public DifferentialWeightedTreeProvider(IWeightedTreeProvider<N, ?, WeightedTree<N>> originalTree, Collection<DifferentialWeightedTree<N>> trees) {
+        this(originalTree, DifferentialWeightedTreeSet.create(trees));
+    }
+
+    /**
+     * Constructor
+     *
+     * @param originalTree
+     *            The original tree provider, used to get information for texts and metrics.
+     * @param treeSet
+     *            The differential tree set
+     */
+    public DifferentialWeightedTreeProvider(IWeightedTreeProvider<N, ?, WeightedTree<N>> originalTree, DifferentialWeightedTreeSet<N> treeSet) {
         fOriginalTree = originalTree;
+        fTreeSet = treeSet;
+        fAdditionalMetrics.addAll(fOriginalTree.getAdditionalMetrics());
     }
 
     @Override
@@ -120,25 +114,25 @@ public class DifferentialWeightedTreeProvider implements IWeightedTreeProvider<O
     }
 
     @Override
-    public String toDisplayString(DifferentialWeightedTree<Object> tree) {
+    public String toDisplayString(DifferentialWeightedTree<N> tree) {
         return fOriginalTree.toDisplayString(tree.getOriginalTree());
     }
 
     @Override
     public List<MetricType> getAdditionalMetrics() {
-        return WEIGHT_TYPES;
+        return fAdditionalMetrics;
     }
 
     @Override
-    public Object getAdditionalMetric(DifferentialWeightedTree<Object> object, int metricIndex) {
+    public Object getAdditionalMetric(DifferentialWeightedTree<N> object, int metricIndex) {
         if (metricIndex == 0) {
             return object.getDifference();
         }
-        return StringUtils.EMPTY;
+        return fOriginalTree.getAdditionalMetric(object.getOriginalTree(), metricIndex - 1);
     }
 
     @Override
-    public IWeightedTreeSet<Object, String, DifferentialWeightedTree<Object>> getTreeSet() {
+    public IWeightedTreeSet<N, Object, DifferentialWeightedTree<N>> getTreeSet() {
         return fTreeSet;
     }
 

@@ -52,7 +52,7 @@ public interface IWeightedTreeSet<@NonNull N, E, @NonNull T extends WeightedTree
      *            The element for which to get the trees
      * @return A collection of weighted trees for the requested element
      */
-    Collection<T> getTreesFor(E element);
+    Collection<T> getTreesFor(Object element);
 
     /**
      * Return a list of additional data sets' titles. These sets will be
@@ -63,6 +63,38 @@ public interface IWeightedTreeSet<@NonNull N, E, @NonNull T extends WeightedTree
      * @return The title of each child set
      */
     default List<String> getExtraDataSets() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Get the trees for an element with the given string representation. If
+     * many names are entered, then it is assumed the elements should be
+     * {@link ITree}s and the hierarchy is followed
+     *
+     * @param elementNames
+     *            The name(s) of the element to get the trees for. If multiple
+     *            names are given, then the elements are expected to have a
+     *            hierarchical relation
+     * @return The trees for the given element. If no element with that name is
+     *         found, an empty collection will be returned
+     */
+    default Collection<T> getTreesForNamed(String... elementNames) {
+        Collection<?> elements = getElements();
+        for (int i = 0; i < elementNames.length; i++) {
+            String elementName = elementNames[i];
+            for (Object element : elements) {
+                if (String.valueOf(element).equals(elementName)) {
+                    // Found the element at this level. Is this the last?
+                    if (i == elementNames.length - 1) {
+                        return getTreesFor(element);
+                    }
+                    if (element instanceof ITree) {
+                        elements = ((ITree) element).getChildren();
+                        break;
+                    }
+                }
+            }
+        }
         return Collections.emptyList();
     }
 }

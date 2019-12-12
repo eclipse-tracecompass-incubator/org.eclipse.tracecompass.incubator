@@ -10,6 +10,7 @@
 package org.eclipse.tracecompass.incubator.callstack.core.callgraph;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -98,8 +99,11 @@ public class CallGraph implements IWeightedTreeSet<@NonNull ICallStackSymbol, IC
     }
 
     @Override
-    public Collection<AggregatedCallSite> getTreesFor(ICallStackElement element) {
-        return getCallingContextTree(element);
+    public Collection<AggregatedCallSite> getTreesFor(Object element) {
+        if (element instanceof ICallStackElement) {
+            return getCallingContextTree((ICallStackElement) element);
+        }
+        return Collections.emptyList();
     }
 
 }

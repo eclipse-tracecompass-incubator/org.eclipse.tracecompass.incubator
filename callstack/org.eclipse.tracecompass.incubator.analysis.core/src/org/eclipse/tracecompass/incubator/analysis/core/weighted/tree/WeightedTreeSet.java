@@ -33,7 +33,7 @@ import com.google.common.collect.Multimap;
 public class WeightedTreeSet<@NonNull N, E> implements IWeightedTreeSet<N, E, WeightedTree<N>> {
 
     private final Set<E> fRootElements = new HashSet<>();
-    private final Multimap<E, WeightedTree<N>> fTrees = HashMultimap.create();
+    private final Multimap<Object, WeightedTree<N>> fTrees = HashMultimap.create();
 
     @Override
     public Collection<E> getElements() {
@@ -41,7 +41,7 @@ public class WeightedTreeSet<@NonNull N, E> implements IWeightedTreeSet<N, E, We
     }
 
     @Override
-    public Collection<@NonNull WeightedTree<N>> getTreesFor(E element) {
+    public Collection<@NonNull WeightedTree<N>> getTreesFor(Object element) {
         return Objects.requireNonNull(fTrees.get(element));
     }
 
