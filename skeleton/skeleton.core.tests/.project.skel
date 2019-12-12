@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.eclipse.tracecompass.incubator.{%skeleton}.core.tests</name>
+	<name>{%baseId}.{%skeleton}.core.tests</name>
 	<comment></comment>
 	<projects>
 	</projects>

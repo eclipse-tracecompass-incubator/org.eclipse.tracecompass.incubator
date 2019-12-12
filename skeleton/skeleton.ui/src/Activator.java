@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.{%skeleton}.ui;
+package {%baseId}.internal.{%skeleton}.ui;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -21,7 +21,7 @@ import org.osgi.framework.BundleContext;
 public class Activator extends AbstractUIPlugin {
 
     /** The plugin ID */
-    public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.{%skeleton}.ui"; //$NON-NLS-1$
+    public static final String PLUGIN_ID = "{%baseId}.{%skeleton}.ui"; //$NON-NLS-1$
 
     // The shared instance
     private static @Nullable Activator plugin;

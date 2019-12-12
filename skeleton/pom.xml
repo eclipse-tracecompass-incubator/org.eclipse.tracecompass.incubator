@@ -21,7 +21,7 @@
     <version>0.2.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.eclipse.tracecompass.incubator.{%dir}-parent</artifactId>
+  <artifactId>{%baseId}.{%dir}-parent</artifactId>
   <packaging>pom</packaging>
 
   <name>Trace Compass Incubator {%dir} Parent</name>

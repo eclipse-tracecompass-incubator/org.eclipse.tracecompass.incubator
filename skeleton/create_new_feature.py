@@ -22,14 +22,17 @@ parser.add_argument('--no-ui', dest='noUi', action='store_const', const=True, de
 parser.add_argument('--no-help', dest='noHelp', action='store_const', const=True, default=False, help='Whether to add an help plugin for this feature')
 parser.add_argument('--year', default=time.strftime("%Y"), help='The current year (defaults to current year from system time)')
 parser.add_argument('--copyright', default="École Polytechnique de Montréal", help='The organisation that has the copyright on the new files')
+parser.add_argument('--base-id', default='org.eclipse.tracecompass.incubator', help='The base ID for the plugin (e.g. org.eclipse.tracecompass.incubator)')
 
 args = parser.parse_args()
+baseIdPlaceholder = "{%baseId}"
 idPlaceholder = "{%skeleton}"
 namePlaceholder = "{%skeletonName}"
 yearPlaceholder = "{%year}"
 copyrightPlaceholder = "{%copyright}"
 year = args.year
 copyright = args.copyright
+baseId = args.base_id
 
 baseDir = os.path.dirname(os.path.realpath(__file__))
 
@@ -44,8 +47,8 @@ featurePluginStr = """
 """
 
 pomModulePlaceholder = "<!-- insert modules here -->"
-pomModuleStr = """<module>org.eclipse.tracecompass.incubator.{%skeleton}{%suffix}</module>
-    """
+pomModuleStr = """<module>{%baseId}.{%skeleton}{%suffix}</module>
+    """.replace(baseIdPlaceholder, baseId)
 
 def copyAndUpdate(srcDir, destDir, name, id):
     shutil.copytree(srcDir, destDir)
@@ -57,6 +60,7 @@ def copyAndUpdate(srcDir, destDir, name, id):
             try:
                 with open(fpath, encoding = "utf-8") as f:
                     s = f.read()
+                s = s.replace(baseIdPlaceholder, baseId)
                 s = s.replace(idPlaceholder, id)
                 s = s.replace(namePlaceholder, name)
                 s = s.replace(yearPlaceholder, year)
@@ -67,13 +71,13 @@ def copyAndUpdate(srcDir, destDir, name, id):
                 print("Problem opening file. That may be normal if the file is not a text file")
 
 def moveActivator(moveTo, suffix, id):
-    os.makedirs(moveTo + '.' + suffix + '/src/org/eclipse/tracecompass/incubator/internal/' + id.replace('.', '/') + '/' + suffix)
-    shutil.move(moveTo + '.' + suffix + '/src/Activator.java', moveTo + '.' + suffix + '/src/org/eclipse/tracecompass/incubator/internal/' + id.replace('.', '/') + '/' + suffix)
-    shutil.move(moveTo + '.' + suffix + '/src/package-info.java', moveTo + '.' + suffix + '/src/org/eclipse/tracecompass/incubator/internal/' + id.replace('.', '/') + '/' + suffix)
+    os.makedirs(moveTo + '.' + suffix + '/src/' + baseId.replace('.', '/') + '/internal/' + id.replace('.', '/') + '/' + suffix)
+    shutil.move(moveTo + '.' + suffix + '/src/Activator.java', moveTo + '.' + suffix + '/src/' + baseId.replace('.', '/') + '/internal/' + id.replace('.', '/') + '/' + suffix)
+    shutil.move(moveTo + '.' + suffix + '/src/package-info.java', moveTo + '.' + suffix + '/src/' + baseId.replace('.', '/') + '/internal/' + id.replace('.', '/') + '/' + suffix)
 
 def moveActivatorTest(moveTo, suffix, id):
-    os.makedirs(moveTo + '.' + suffix + '/src/org/eclipse/tracecompass/incubator/' + id.replace('.', '/') + '/' + suffix.replace('.', '/'))
-    shutil.move(moveTo + '.' + suffix + '/src/ActivatorTest.java', moveTo + '.' + suffix + '/src/org/eclipse/tracecompass/incubator/' + id.replace('.', '/') + '/' + suffix.replace('.', '/'))
+    os.makedirs(moveTo + '.' + suffix + '/src/' + baseId.replace('.', '/') + '/' + id.replace('.', '/') + '/' + suffix.replace('.', '/'))
+    shutil.move(moveTo + '.' + suffix + '/src/ActivatorTest.java', moveTo + '.' + suffix + '/src/' + baseId.replace('.', '/') + '/' + id.replace('.', '/') + '/' + suffix.replace('.', '/'))
 
 def updatePom(baseDir, destDir, id, moduleStr):
     # Does a pom.xml exists in the destination directory?
@@ -83,6 +87,7 @@ def updatePom(baseDir, destDir, id, moduleStr):
         
     with open(destPom, encoding = "utf-8") as f:
         s = f.read();
+    s = s.replace(baseIdPlaceholder, baseId)
     s = s.replace("{%dir}", destDir)
     s = s.replace(pomModulePlaceholder, moduleStr + pomModulePlaceholder)
     s = s.replace(yearPlaceholder, year)
@@ -97,13 +102,13 @@ def copyDirs(fullname, dir, noUi, noHelp):
 
     id = fullname.lower().replace(' ', '.')
     pomModule = ""
-    moveTo = dir + '/org.eclipse.tracecompass.incubator.' + id
+    moveTo = dir + '/' + baseId + '.' + id
     print('Copying skeleton directories to ' + moveTo + '[.*]')
     copyAndUpdate(baseDir + '/skeleton.feature', moveTo, fullname, id)
     pomModule = pomModuleStr.replace(idPlaceholder, id).replace("{%suffix}", "")
     copyAndUpdate(baseDir + '/skeleton.core', moveTo + '.core', fullname, id)
     moveActivator(moveTo, "core", id)
-    pluginStr = featurePluginStr.replace("{%plugin}", "org.eclipse.tracecompass.incubator." + id + ".core")
+    pluginStr = featurePluginStr.replace("{%plugin}", baseId + '.' + id + ".core")
     pomModule += pomModuleStr.replace(idPlaceholder, id).replace("{%suffix}", ".core")
     
     copyAndUpdate(baseDir + '/skeleton.core.tests', moveTo + '.core.tests', fullname, id)
@@ -113,14 +118,14 @@ def copyDirs(fullname, dir, noUi, noHelp):
     if not(noUi):
         copyAndUpdate(baseDir + '/skeleton.ui', moveTo + '.ui', fullname, id)
         moveActivator(moveTo, "ui", id)
-        pluginStr = pluginStr + featurePluginStr.replace("{%plugin}", "org.eclipse.tracecompass.incubator." + id + ".ui")
+        pluginStr = pluginStr + featurePluginStr.replace("{%plugin}", baseId + '.' + id + ".ui")
         pomModule += pomModuleStr.replace(idPlaceholder, id).replace("{%suffix}", ".ui")
         copyAndUpdate(baseDir + '/skeleton.ui.swtbot.tests', moveTo + '.ui.swtbot.tests', fullname, id)
         os.makedirs(moveTo + '.ui.swtbot.tests/src')
 
     if not(noHelp):
-        copyAndUpdate(baseDir + '/skeleton.doc.user', baseDir + '/../doc/org.eclipse.tracecompass.incubator.' + id + '.doc.user', fullname, id)
-        pluginStr = pluginStr + featurePluginStr.replace("{%plugin}", "org.eclipse.tracecompass.incubator." + id + ".doc.user")
+        copyAndUpdate(baseDir + '/skeleton.doc.user', baseDir + '/../doc/' + baseId + '.' + id + '.doc.user', fullname, id)
+        pluginStr = pluginStr + featurePluginStr.replace("{%plugin}", baseId + '.' + id + ".doc.user")
         # Update the pom.xml
         updatePom(baseDir, baseDir + '/../doc', id, pomModuleStr.replace(idPlaceholder, id).replace("{%suffix}", ".doc.user"))
 

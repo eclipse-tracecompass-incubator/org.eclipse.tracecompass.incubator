@@ -10,4 +10,4 @@
  *******************************************************************************/
 
 @org.eclipse.jdt.annotation.NonNullByDefault
-package org.eclipse.tracecompass.incubator.internal.{%skeleton}.core;
+package {%baseId}.internal.{%skeleton}.core;

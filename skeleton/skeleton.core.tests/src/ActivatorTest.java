@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.{%skeleton}.core.tests;
+package {%baseId}.{%skeleton}.core.tests;
 
 import static org.junit.Assert.assertEquals;
 
@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
-import org.eclipse.tracecompass.incubator.internal.{%skeleton}.core.Activator;
+import {%baseId}.internal.{%skeleton}.core.Activator;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
@@ -39,7 +39,7 @@ public class ActivatorTest extends Plugin {
     /**
      * The plug-in ID
      */
-    public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.{%skeleton}.core.tests"; //$NON-NLS-1$
+    public static final String PLUGIN_ID = "{%baseId}.{%skeleton}.core.tests"; //$NON-NLS-1$
 
     /**
      * The shared instance
@@ -91,7 +91,7 @@ public class ActivatorTest extends Plugin {
     @Test
     public void testActivator() {
         TraceCompassActivator instance = Activator.getInstance();
-        assertEquals("org.eclipse.tracecompass.incubator.{%skeleton}.core", instance.getPluginId());
+        assertEquals("{%baseId}.{%skeleton}.core", instance.getPluginId());
     }
 
     /**

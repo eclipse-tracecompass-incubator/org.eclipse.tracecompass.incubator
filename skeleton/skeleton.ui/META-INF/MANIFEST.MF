@@ -2,16 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
-Bundle-SymbolicName: org.eclipse.tracecompass.incubator.{%skeleton}.ui;singleton:=true
+Bundle-SymbolicName: {%baseId}.{%skeleton}.ui;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Localization: plugin
-Bundle-Activator: org.eclipse.tracecompass.incubator.internal.{%skeleton}.ui.Activator
+Bundle-Activator: {%baseId}.internal.{%skeleton}.ui.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.tracecompass.common.core,
- org.eclipse.tracecompass.incubator.{%skeleton}.core,
+ {%baseId}.{%skeleton}.core,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
-Export-Package: org.eclipse.tracecompass.incubator.internal.{%skeleton}.ui;x-internal:=true
-Automatic-Module-Name: org.eclipse.tracecompass.incubator.{%skeleton}.ui
+Export-Package: {%baseId}.internal.{%skeleton}.ui;x-internal:=true
+Automatic-Module-Name: {%baseId}.{%skeleton}.ui

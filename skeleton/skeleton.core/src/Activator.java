@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.{%skeleton}.core;
+package {%baseId}.internal.{%skeleton}.core;
 
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
 
@@ -19,7 +19,7 @@ import org.eclipse.tracecompass.common.core.TraceCompassActivator;
 public class Activator extends TraceCompassActivator {
 
     /** The plug-in ID */
-    public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.{%skeleton}.core"; //$NON-NLS-1$
+    public static final String PLUGIN_ID = "{%baseId}.{%skeleton}.core"; //$NON-NLS-1$
 
     /**
      * The constructor
