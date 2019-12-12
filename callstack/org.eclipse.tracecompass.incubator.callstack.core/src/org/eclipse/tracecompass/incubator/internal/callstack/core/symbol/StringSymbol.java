@@ -58,6 +58,6 @@ public class StringSymbol implements ICallStackSymbol {
 
     @Override
     public String toString() {
-        return "String Symbol: " + fSymbol; //$NON-NLS-1$
+        return String.valueOf(fSymbol);
     }
 }

@@ -71,7 +71,7 @@ public class ResolvableSymbol implements ICallStackSymbol {
 
     @Override
     public String toString() {
-        return "Resolvable Symbol: 0x" + Long.toHexString(fAddr) + " in " + fPid; //$NON-NLS-1$//$NON-NLS-2$
+        return "0x" + Long.toHexString(fAddr) + " in " + fPid; //$NON-NLS-1$//$NON-NLS-2$
     }
 
 }
