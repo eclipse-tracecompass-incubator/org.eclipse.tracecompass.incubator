@@ -32,6 +32,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  * <p>
  * Example scripts with data providers can be found here:
  * <ul>
+ * </p>
  * <li><a href="../doc-files/scriptedDataProvider.js">A scripted time graph data
  * provider</a> with script-defined entries and arrows (javascript)</li>
  * <li><a href="../doc-files/basicAnalysis.js">A basic analysis</a> building an
@@ -54,7 +55,7 @@ public class AnalysisScriptingModule {
      *            The name of the analysis
      * @return The new analysis, for the active trace, or <code>null</code> if
      *         there is no active trace.
-     * @deprecated Use {@module #createScriptedAnalysis(ITmfTrace, String)}
+     * @deprecated Use {@link #createScriptedAnalysis(ITmfTrace, String)}
      *             instead
      */
     @WrapToScript
@@ -105,7 +106,7 @@ public class AnalysisScriptingModule {
      * <p>
      * The analyses can be queried by ID, or by name, ie the text that is
      * displayed in the Trace Compass UI.
-     *
+     * </p>
      * @param trace
      *            The trace being analyzed.
      * @param analysisName
