@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ***************************************************************************
+* Copyright (c) 2020 École Polytechnique de Montréal
+*
+* All rights reserved. This program and the accompanying materials are
+* made available under the terms of the Eclipse Public License v1.0 which
+* accompanies this distribution, and is available at
+* http://www.eclipse.org/legal/epl-v10.html
+*************************************************************************** -->
+<tmfxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="xmlDefinition.xsd">
+
+	<stateProvider id="tracecompass.script.benchmark" version="1">
+		<head>
+			<traceType id="org.eclipse.linuxtools.lttng2.kernel.tracetype" />
+			<label value="XML TID analysis" />
+		</head>
+
+		<!-- case 1 : exit_syscall : Fields: int64 ret -->
+		<eventHandler eventName="sched_switch">
+			<stateChange>
+				<stateAttribute type="eventField" value="CPU" />
+				<stateValue type="eventField" value="next_tid" />
+			</stateChange>
+		</eventHandler>
+	</stateProvider>
+</tmfxml>

@@ -73,6 +73,10 @@ public class TraceScriptingModule {
      * view. Typical use is for stand-alone scripts who want to run and export
      * content without interacting with the UI. The trace must have been
      * previously imported in trace compass as it needs to be in a project.
+     * <p>
+     * The trace will not be attached to the workspace, so it is important after
+     * using to dispose of it by calling the {@link ITmfTrace#dispose()} method.
+     * </p>
      *
      * @param projectName
      *            The name of the project

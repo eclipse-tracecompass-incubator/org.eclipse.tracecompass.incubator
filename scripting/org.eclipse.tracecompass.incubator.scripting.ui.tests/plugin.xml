@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ease.modules">
+      <module
+            category="org.eclipse.tracecompass.incubator.scripting.ui.tests.category"
+            class="org.eclipse.tracecompass.incubator.scripting.ui.tests.TestModule"
+            id="org.eclipse.tracecompass.incubator.scripting.ui.tests"
+            name="Test"
+            visible="true">
+      </module>
+      <category
+            id="org.eclipse.tracecompass.incubator.scripting.ui.tests.category"
+            name="TraceCompassTest">
+      </category>
+   </extension>
+
+</plugin>

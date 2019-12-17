@@ -84,7 +84,7 @@ public class TraceScriptingUI {
 
         ITmfTrace trace = projectElement.getTrace();
         Integer tryCounter = 0;
-        final Integer numberOfTry = 10;
+        final Integer numberOfTry = 20;
         /*
          * Need to wait until the job inside openTraceFromElement is done and
          * the trace is open. Otherwise there will be a race condition.

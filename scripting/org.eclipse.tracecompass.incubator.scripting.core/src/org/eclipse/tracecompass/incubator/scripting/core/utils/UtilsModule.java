@@ -38,4 +38,19 @@ public class UtilsModule {
         return new ListWrapper<>();
     }
 
+    /**
+     * Convert a string to an array of string, as some scripting languages do
+     * not easily support arrays (like jython)
+     *
+     * @param string
+     *            The element to add to the array
+     * @return An array of string containing the element in parameter
+     */
+    @WrapToScript
+    public String[] strToArray(String string) {
+        String[] array = new String[1];
+        array[0] = string;
+        return array;
+    }
+
 }

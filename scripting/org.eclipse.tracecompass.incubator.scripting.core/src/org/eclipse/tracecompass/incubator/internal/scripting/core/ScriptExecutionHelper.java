@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.incubator.internal.scripting.core;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.eclipse.ease.IScriptEngine;
 import org.eclipse.ease.ScriptResult;
@@ -38,23 +39,32 @@ public class ScriptExecutionHelper {
      *         script did not execute properly
      */
     public static @Nullable Object executeScript(String filePath) {
+        return executeScript(filePath, null, null);
+    }
+
+    /**
+     * Execute the script file pointed to by the path
+     *
+     * @param filePath
+     *            The absolute path of the file containing the script to execute
+     * @param engineID
+     *            The ID of the engine to run this script with. If
+     *            <code>null</code>, the method will try to find the right
+     *            engine.
+     * @param arguments
+     *            The arguments to the script, or <code>null</code> if there are
+     *            no arguments
+     * @return The return value of the script, or <code>null</code> if the
+     *         script did not execute properly
+     */
+    public static @Nullable Object executeScript(String filePath, @Nullable String engineID, @Nullable List<String> arguments) {
         // Does the file exists
         Path path = Paths.get(filePath);
         if (!Files.exists(path)) {
             Activator.getInstance().logWarning(String.format("Script file does not exist %s", filePath)); //$NON-NLS-1$
             return null;
         }
-        EngineDescription engineDescription = null;
-        final IScriptService scriptService = ScriptService.getInstance();
-
-        // locate engine by file extension
-        final ScriptType scriptType = scriptService.getScriptType(filePath);
-        if (scriptType == null) {
-            Activator.getInstance().logWarning(String.format("No script type was found for script %s", filePath)); //$NON-NLS-1$
-            return null;
-        }
-
-        engineDescription = scriptService.getEngine(scriptType.getName());
+        EngineDescription engineDescription = getEngine(filePath, engineID);
         if (engineDescription == null) {
             Activator.getInstance().logWarning(String.format("No engine was found to execute script %s", filePath)); //$NON-NLS-1$
             return null;
@@ -63,9 +73,10 @@ public class ScriptExecutionHelper {
         // create engine
         final IScriptEngine engine = engineDescription.createEngine();
 
-        // TODO Support script arguments
-        // engine.setVariable("argv", ((List)
-        // parameters.get("args")).toArray(new String[0]));
+        // Add the arguments to the script
+        if (arguments != null) {
+            engine.setVariable("argv", arguments.toArray(new String[arguments.size()])); //$NON-NLS-1$
+        }
 
         Object scriptObject = ResourceTools.resolve(filePath);
         if (scriptObject == null) {
@@ -116,6 +127,29 @@ public class ScriptExecutionHelper {
             return null;
         }
         return null;
+
+    }
+
+    private static @Nullable EngineDescription getEngine(@Nullable String filePath, @Nullable String engineID) {
+        final IScriptService scriptService = ScriptService.getInstance();
+
+        if (engineID != null) {
+            EngineDescription engineDescription = scriptService.getEngineByID(engineID);
+            if (engineDescription == null) {
+                throw new NullPointerException("Script engine not found " + engineID); //$NON-NLS-1$
+            }
+            return engineDescription;
+        }
+
+        // locate engine by file extension
+        final ScriptType scriptType = scriptService.getScriptType(filePath);
+        if (scriptType == null) {
+            Activator.getInstance().logWarning(String.format("No script type was found for script %s", filePath)); //$NON-NLS-1$
+            return null;
+        }
+
+        EngineDescription engineDescription = scriptService.getEngine(scriptType.getName());
+        return engineDescription;
 
     }
 
