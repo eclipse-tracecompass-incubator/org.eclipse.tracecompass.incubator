@@ -24,7 +24,8 @@
          version="0.0.0"/>
 
    <requires>
-      <import feature="org.eclipse.ease.lang.python.py4j.feature" version="0.6.0.I201801120620"/>
+      <import feature="org.eclipse.ease.lang.python.py4j.feature"/>
+      <import feature="org.eclipse.ease.python.jython.feature"/>
    </requires>
 
 </feature>

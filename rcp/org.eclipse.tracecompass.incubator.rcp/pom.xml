@@ -59,6 +59,9 @@
                 <plugin id="py4j-java"/>
                 <plugin id="py4j-python"/>
                 <plugin id="py4j-java"/>
+                <feature id="org.eclipse.ease.python.jython.feature"/>
+                <feature id="org.eclipse.ease.engine.jython.feature"/>
+                <plugin id="org.eclipse.ease.modules.platform"/>
               </excludes>
             </configuration>
           </execution>

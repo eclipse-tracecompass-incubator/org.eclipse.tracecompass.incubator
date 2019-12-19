@@ -32,6 +32,14 @@
          id="org.eclipse.ease.lang.python.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.eclipse.ease.python.jython.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.ease.engine.jython.feature"
+         version="0.0.0"/>
+
    <requires>
       <import feature="org.eclipse.e4.rcp" version="0.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.equinox.p2.core.feature" version="0.0.0" match="greaterOrEqual"/>
@@ -172,5 +180,12 @@
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.ease.modules.platform"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
