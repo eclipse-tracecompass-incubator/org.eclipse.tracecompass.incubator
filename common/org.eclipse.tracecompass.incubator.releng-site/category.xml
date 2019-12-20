@@ -51,7 +51,7 @@
    <feature url="features/org.eclipse.tracecompass.incubator.scripting.javascript_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.scripting.javascript" version="0.0.0">
       <category name="analyses"/>
    </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.scripting.python_0.0.1.qualifier.jar" id="org.eclipse.tracecompass.incubator.scripting.python" version="0.0.1.qualifier">
+   <feature url="features/org.eclipse.tracecompass.incubator.scripting.python_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.scripting.python" version="0.0.0">
       <category name="analyses"/>
    </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.0">

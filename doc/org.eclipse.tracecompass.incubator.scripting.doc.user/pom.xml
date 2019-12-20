@@ -19,6 +19,7 @@
 
   <artifactId>org.eclipse.tracecompass.incubator.scripting.doc.user</artifactId>
   <packaging>eclipse-plugin</packaging>
+  <version>0.1.0-SNAPSHOT</version>
 
   <name>Trace Compass Incubator Scripting User Guide</name>
 
