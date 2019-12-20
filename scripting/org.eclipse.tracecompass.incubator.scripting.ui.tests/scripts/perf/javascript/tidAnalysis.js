@@ -28,6 +28,7 @@ var ss = analysis.getStateSystem(false);
 function runAnalysis() {
 	// Get the event iterator for the trace
 	var iter = analysis.getEventIterator();
+	iter.addEvent("sched_switch")
 
 	var event = null;
 	// Parse all events

@@ -10,7 +10,6 @@
 package org.eclipse.tracecompass.incubator.scripting.core.trace;
 
 import java.io.FileNotFoundException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -152,7 +151,10 @@ public class TraceScriptingModule {
 
     /**
      * Get an iterator to iterate chronologically through the events of the
-     * trace.
+     * trace. To reduce overhead of passing all events to/from the script when
+     * only a subset of events is requested, the
+     * {@link ScriptEventsIterator#addEvent(String)} method can be used to set
+     * the events to filter.
      *
      * Thus, to iterate through the events of a trace in a scripted analysis,
      * one can just do the following snippet (javascript)
@@ -176,7 +178,7 @@ public class TraceScriptingModule {
      * @return The event iterator, starting from the first event
      */
     @WrapToScript
-    public Iterator<ITmfEvent> getEventIterator(@Nullable ITmfTrace trace) {
+    public ScriptEventsIterator getEventIterator(@Nullable ITmfTrace trace) {
         if (trace == null) {
             throw new NullPointerException("Trace should not be null"); //$NON-NLS-1$
         }

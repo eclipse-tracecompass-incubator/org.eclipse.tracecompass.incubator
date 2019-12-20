@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,6 +34,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.tracecompass.analysis.os.linux.core.tid.TidAnalysisModule;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfBenchmarkTrace;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.ScriptExecutionHelper;
+import org.eclipse.tracecompass.incubator.scripting.core.trace.ScriptEventsIterator;
 import org.eclipse.tracecompass.incubator.scripting.core.trace.TraceScriptingModule;
 import org.eclipse.tracecompass.incubator.scripting.ui.tests.ActivatorTest;
 import org.eclipse.tracecompass.incubator.scripting.ui.tests.TestModule;
@@ -190,7 +190,8 @@ public class ScriptingBenchmark {
         try {
             trace.initTrace(null, absolutePathToTrace, CtfTmfEvent.class);
             TraceScriptingModule module = new TraceScriptingModule();
-            Iterator<@NonNull ITmfEvent> eventIterator = module.getEventIterator(trace);
+            ScriptEventsIterator eventIterator = module.getEventIterator(trace);
+            eventIterator.addEvent("sched_switch");
             int schedSwitchCnt = 0;
             while (eventIterator.hasNext()) {
                 ITmfEvent event = eventIterator.next();
@@ -456,6 +457,7 @@ public class ScriptingBenchmark {
             pmPython.start();
             ScriptExecutionHelper.executeScript(Objects.requireNonNull(absoluteFilePath.toOSString()), JYTHON_ENGINE, fArguments);
             pmPython.stop();
+            System.out.println("Did iteration " + i);
         }
         pmPython.commit();
     }

@@ -76,34 +76,37 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
 
         // Read the state systems of this analysis
         Path suppFolder = getStateSystemFolder();
-        try {
-            Files.walkFileTree(suppFolder, new SimpleFileVisitor<Path>() {
+        if (Files.exists(suppFolder)) {
+            try {
+                Files.walkFileTree(suppFolder, new SimpleFileVisitor<Path>() {
 
-                @Override
-                public FileVisitResult visitFile(Path file, @Nullable BasicFileAttributes attrs) throws IOException {
-                    try {
+                    @Override
+                    public FileVisitResult visitFile(Path file, @Nullable BasicFileAttributes attrs) throws IOException {
+                        try {
 
-                        String ssid = String.valueOf(file.getFileName());
-                        IStateHistoryBackend backend = StateHistoryBackendFactory.createHistoryTreeBackendExistingFile(
-                                ssid, Objects.requireNonNull(file.toFile()), 1);
-                        ITmfStateSystem stateSystem = StateSystemFactory.newStateSystem(backend, false);
-                        fStateSystems.put(ssid, stateSystem);
-                    } catch (IOException e) {
-                        /*
-                         * This may happen if the file is not a state system. A
-                         * script may save other files in the supplementary
-                         * file, like segment stores or internal files.
-                         *
-                         * TODO: Support a version ID?
-                         */
-                        Activator.getInstance().logWarning("Error opening a file that should contain a state system: " + file.getFileName(), e); //$NON-NLS-1$
+                            String ssid = String.valueOf(file.getFileName());
+                            IStateHistoryBackend backend = StateHistoryBackendFactory.createHistoryTreeBackendExistingFile(
+                                    ssid, Objects.requireNonNull(file.toFile()), 1);
+                            ITmfStateSystem stateSystem = StateSystemFactory.newStateSystem(backend, false);
+                            fStateSystems.put(ssid, stateSystem);
+                        } catch (IOException e) {
+                            /*
+                             * This may happen if the file is not a state
+                             * system. A script may save other files in the
+                             * supplementary file, like segment stores or
+                             * internal files.
+                             *
+                             * TODO: Support a version ID?
+                             */
+                            Activator.getInstance().logWarning("Error opening a file that should contain a state system: " + file.getFileName(), e); //$NON-NLS-1$
+                        }
+                        return FileVisitResult.CONTINUE;
                     }
-                    return FileVisitResult.CONTINUE;
-                }
 
-            });
-        } catch (IOException e) {
-            Activator.getInstance().logWarning("Uncaught error opening state system files", e); //$NON-NLS-1$
+                });
+            } catch (IOException e) {
+                Activator.getInstance().logWarning("Uncaught error opening state system files", e); //$NON-NLS-1$
+            }
         }
 
         return true;

@@ -13,6 +13,7 @@ from py4j.java_gateway import JavaClass
 trace = openMinimalTrace("Tracing", argv[0])
 
 eventIterator = getEventIterator(trace)
+eventIterator.addEvent("sched_switch")
 schedSwitchCnt = 0;
 while eventIterator.hasNext():
     event = eventIterator.next()

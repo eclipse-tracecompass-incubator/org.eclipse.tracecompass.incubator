@@ -30,6 +30,7 @@ ss = analysis.getStateSystem(False)
 def runAnalysis():
     # Get the event iterator for the trace
     iter = analysis.getEventIterator()
+    iter.addEvent("sched_switch")
 
     # Parse all events
     event = None

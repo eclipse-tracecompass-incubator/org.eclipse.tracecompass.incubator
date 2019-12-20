@@ -9,15 +9,13 @@
 
 package org.eclipse.tracecompass.incubator.scripting.core.analysis;
 
-import java.util.Iterator;
-
 import org.eclipse.ease.modules.ScriptParameter;
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.analysis.TmfScriptAnalysis;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.trace.ScriptEventRequest;
+import org.eclipse.tracecompass.incubator.scripting.core.trace.ScriptEventsIterator;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
@@ -81,7 +79,10 @@ public class ScriptedAnalysis {
 
     /**
      * Get an iterator to iterate chronologically through the events of the
-     * trace.
+     * trace. To reduce overhead of passing all events to/from the script when
+     * only a subset of events is requested, the
+     * {@link ScriptEventsIterator#addEvent(String)} method can be used to set
+     * the events to filter.
      *
      * Thus, to iterate through a trace in a scripted analysis, one can just do
      * the following snippet (javascript)
@@ -101,7 +102,7 @@ public class ScriptedAnalysis {
      * @return The event iterator, starting from the first event
      */
     @WrapToScript
-    public Iterator<ITmfEvent> getEventIterator() {
+    public ScriptEventsIterator getEventIterator() {
         ScriptEventRequest scriptEventRequest = new ScriptEventRequest();
         fTrace.sendRequest(scriptEventRequest);
         return scriptEventRequest.getEventIterator();

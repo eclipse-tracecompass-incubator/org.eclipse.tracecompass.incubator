@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.scripting.core.analysis.AnalysisScriptingModule;
 import org.eclipse.tracecompass.incubator.scripting.core.analysis.ScriptedAnalysis;
 import org.eclipse.tracecompass.incubator.scripting.core.tests.stubs.ScriptingTestUtils;
+import org.eclipse.tracecompass.incubator.scripting.core.trace.ScriptEventsIterator;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
@@ -74,6 +75,36 @@ public class AnalysisModuleTest {
             trace.dispose();
         }
     }
+
+    /**
+     * Test the event iterator with an events filter
+     */
+    @Test
+    public void testEventIteratorWithFilter() {
+        AnalysisScriptingModule scriptModule = new AnalysisScriptingModule();
+
+        ITmfTrace trace = ScriptingTestUtils.getTrace();
+        try {
+            ScriptedAnalysis analysis = scriptModule.createScriptedAnalysis(trace, ANALYSIS_NAME);
+            assertNotNull(analysis);
+
+            ScriptEventsIterator eventIterator = analysis.getEventIterator();
+            assertNotNull(eventIterator);
+            eventIterator.addEvent("entry");
+
+            int count = 0;
+            while (eventIterator.hasNext()) {
+                eventIterator.next();
+                count++;
+            }
+            // Make sure it parsed the whole trace
+            assertEquals(18, count);
+
+        } finally {
+            trace.dispose();
+        }
+    }
+
 
     /**
      * Test the
