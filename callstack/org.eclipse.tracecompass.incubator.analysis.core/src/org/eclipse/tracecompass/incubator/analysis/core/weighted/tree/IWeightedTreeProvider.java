@@ -36,13 +36,6 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
  * elements can implement the {@link ITree} class if there is a hierarchy in the
  * groupings.
  *
- * @param <N>
- *            The type of objects represented by each node in the tree
- * @param <E>
- *            The type of elements used to group the trees
- * @param <T>
- *            The type of the tree provided
- *
  * @author Geneviève Bastien
  * @param <N>
  *            The type of objects represented by each node in the tree
@@ -282,14 +275,14 @@ public interface IWeightedTreeProvider<@NonNull N, E, @NonNull T extends Weighte
     /**
      * Get the statistics for a metric. The metric index corresponds to the
      * position of the desired metric in the list of metric returned by the
-     * {@link #getAdditionalMetrics()} method. If the index < 0, then the metric
-     * is the main weight.
+     * {@link #getAdditionalMetrics()} method. If the index {@literal <} 0, then
+     * the metric is the main weight.
      *
      * @param object
      *            The weighted tree object for which to get the metric
      * @param metricIndex
-     *            The index in the list of the metric metric to get. If < 0,
-     *            then the metric is the main weight
+     *            The index in the list of the metric metric to get. If
+     *            {@literal <} 0, then the metric is the main weight
      * @return The statistics for the metric of <code>null</code> if there are
      *         no statistics for this metric.
      */

@@ -19,8 +19,8 @@ import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IDataPalet
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeGroupBy;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackGroupDescriptor;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.palette.FlameDefaultPalette;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 
@@ -55,7 +55,7 @@ public interface ICallGraphProvider extends IWeightedTreeProvider<@NonNull ICall
     /**
      * Get the call graph for a given time range. This callgraph is for all the
      * elements. The caller can then group the result by calling
-     * {@link CallGraphGroupBy#groupCallGraphBy(ICallStackGroupDescriptor, CallGraph)}
+     * {@link WeightedTreeGroupBy#groupWeightedTreeBy(IWeightedTreeGroupDescriptor, IWeightedTreeSet, IWeightedTreeProvider)}
      * method
      *
      * @param start
@@ -70,7 +70,7 @@ public interface ICallGraphProvider extends IWeightedTreeProvider<@NonNull ICall
     /**
      * Get the call graph for the full range of the trace. This callgraph is for all
      * the elements. The caller can then group the result by calling
-     * {@link CallGraphGroupBy#groupCallGraphBy(ICallStackGroupDescriptor, CallGraph)}
+     * {@link WeightedTreeGroupBy#groupWeightedTreeBy(IWeightedTreeGroupDescriptor, IWeightedTreeSet, IWeightedTreeProvider)}
      *
      * @return The call graph object containing the CCTs for each element in the
      *         range.

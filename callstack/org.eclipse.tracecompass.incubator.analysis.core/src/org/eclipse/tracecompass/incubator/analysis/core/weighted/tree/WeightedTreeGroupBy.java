@@ -75,7 +75,7 @@ public final class WeightedTreeGroupBy {
         return newCg;
     }
 
-    /**
+    /*
      * @param originalElement
      *            The element to get the trees for
      * @param groupElement
@@ -125,7 +125,7 @@ public final class WeightedTreeGroupBy {
         return newTreeSet;
     }
 
-    /**
+    /*
      * @param element
      *            The element to get the trees for
      * @param groupElement

@@ -205,12 +205,12 @@ public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
     }
 
     /**
-     * Get the statistics for a metric at index. If the index < 0, then the
-     * metric is the main weight.
+     * Get the statistics for a metric at index. If the index {@literal <} 0,
+     * then the metric is the main weight.
      *
      * @param metricIndex
-     *            The index in the list of the metric metric to get. If < 0,
-     *            then the metric is the weight.
+     *            The index in the list of the metric metric to get. If
+     *            {@literal <} 0, then the metric is the weight.
      * @return The statistics for the metric or <code>null</code> if not
      *         available
      */
