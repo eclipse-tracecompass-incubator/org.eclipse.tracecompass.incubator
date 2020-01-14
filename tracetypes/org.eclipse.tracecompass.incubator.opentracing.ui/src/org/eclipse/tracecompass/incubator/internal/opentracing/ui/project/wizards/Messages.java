@@ -17,6 +17,7 @@ import org.eclipse.osgi.util.NLS;
 @SuppressWarnings("javadoc")
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.wizards.messages"; //$NON-NLS-1$
+    public static String FetchJaegerTracesWizardPage_importNotAvailable;
     public static String FetchJaegerTracesWizardPage_apiBaseUrlLabel;
     public static String FetchJaegerTracesWizardPage_deselectAllButton;
     public static String FetchJaegerTracesWizardPage_fetchJaegerShellTitle;
