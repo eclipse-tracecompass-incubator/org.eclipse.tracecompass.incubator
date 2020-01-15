@@ -20,7 +20,7 @@
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack.TraceEventCallstackAnalysis"
-            automatic="true"
+            automatic="false"
             icon="icons/callstack_view.gif"
             id="org.eclipse.tracecompass.incubator.traceevent.analysis.callstack"
             name="%callstack.name">
@@ -31,7 +31,7 @@
       </module>
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.objectlife.ObjectLifeAnalysis"
-            automatic="true"
+            automatic="false"
             icon="icons/life.png"
             id="org.eclipse.tracecompass.incubator.traceevent.analysis.objectlife"
             name="%objectLife.name">
@@ -42,7 +42,7 @@
       </module>
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.counter.TraceEventCounterAnalysis"
-            automatic="true"
+            automatic="false"
             icon="icons/counter.png"
             id="org.eclipse.tracecompass.incubator.traceevent.core.counter"
             name="%counter.name">
@@ -53,7 +53,7 @@
       </module>
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context.ContextAnalysis"
-            automatic="true"
+            automatic="false"
             icon="icons/context.png"
             id="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.context"
             name="%context.name">
