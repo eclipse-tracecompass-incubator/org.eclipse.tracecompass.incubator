@@ -8,7 +8,7 @@
 	</callstackGroup>
 	<!-- callstack process="Views/*" thread="Threads/*" callstack="callstack" / -->
 	
-    <pattern version="1" id="org.eclipse.tracecompass.incubator.tracecompass.grouped.threads.pattern">
+    <pattern version="2" id="org.eclipse.tracecompass.incubator.tracecompass.grouped.threads.pattern">
         <head>
             <traceType id="org.eclipse.tracecompass.incubator.tracecompass.trace.jul" />
             <label value="Trace Compass Thread by Component" />
@@ -45,7 +45,7 @@
 				    <or>
 				    	<condition>
 					    	<stateValue type="eventField" value="ph"/>
-							<stateValue type="string" value="s"/>
+							<stateValue type="string" value="b"/>
 				    	</condition>
 				    	<condition>
 					    	<stateValue type="eventField" value="ph"/>
@@ -59,7 +59,7 @@
 				    <or>
 				    	<condition>
 					    	<stateValue type="eventField" value="ph"/>
-							<stateValue type="string" value="f"/>
+							<stateValue type="string" value="e"/>
 				    	</condition>
 				    	<condition>
 					    	<stateValue type="eventField" value="ph"/>
