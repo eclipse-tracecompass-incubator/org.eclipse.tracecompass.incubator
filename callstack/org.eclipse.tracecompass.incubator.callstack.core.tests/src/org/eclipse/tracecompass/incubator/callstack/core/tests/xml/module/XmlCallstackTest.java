@@ -26,7 +26,7 @@ import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedT
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider.MetricType;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.Activator;
 import org.eclipse.tracecompass.incubator.callstack.core.tests.flamechart.CallStackTestBase;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.palette.FlameDefaultPalette;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.palette.FlameWithKernelPalette;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.xml.callstack.CallstackXmlAnalysis;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -88,7 +88,7 @@ public class XmlCallstackTest extends CallStackTestBase {
         assertFalse(additionalMetrics.isEmpty());
 
         IDataPalette palette = xmlModule.getPalette();
-        assertEquals(FlameDefaultPalette.getInstance(), palette);
+        assertEquals(FlameWithKernelPalette.getInstance(), palette);
     }
 
 }

@@ -38,7 +38,6 @@ import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesyste
 import org.eclipse.tracecompass.incubator.callstack.core.symbol.CallStackSymbolFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.palette.FlameDefaultPalette;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.palette.FlameWithKernelPalette;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
@@ -403,7 +402,8 @@ public class CallGraphAnalysis extends TmfAbstractAnalysisModule implements ICal
 
     @Override
     public @NonNull IDataPalette getPalette() {
-        return (fHasKernelStatuses ? FlameWithKernelPalette.getInstance() : FlameDefaultPalette.getInstance());
+        // Use the palette with kernel styles, at worst, kernel styles won't be used
+        return FlameWithKernelPalette.getInstance();
     }
 
 }

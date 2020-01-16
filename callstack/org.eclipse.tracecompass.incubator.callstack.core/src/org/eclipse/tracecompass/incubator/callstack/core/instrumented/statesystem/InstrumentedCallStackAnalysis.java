@@ -373,8 +373,9 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
 
     @Override
     public IDataPalette getPalette() {
+        // Schedule the analysis (it will likely be needed) but don't wait for
+        // completion as this should be a fast return.
         fCallGraph.schedule();
-        fCallGraph.waitForCompletion();
         return fCallGraph.getPalette();
     }
 
