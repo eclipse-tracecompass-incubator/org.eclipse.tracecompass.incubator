@@ -386,6 +386,19 @@ public class CallstackXmlAnalysis extends TmfAbstractAnalysisModule implements I
     }
 
     @Override
+    public long getEnd() {
+        // Initialization error, but the analysis is completed
+        if (!waitForInitialization()) {
+            return Integer.MIN_VALUE;
+        }
+        Iterator<ITmfStateSystem> iterator = getStateSystems().iterator();
+        if (!iterator.hasNext()) {
+            throw new IllegalStateException("The initialization is complete, so the state system must not be null"); //$NON-NLS-1$
+        }
+        return iterator.next().getCurrentEndTime();
+    }
+
+    @Override
     public List<String> getExtraDataSets() {
         return fCallGraph.getExtraDataSets();
     }

@@ -416,7 +416,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
                 return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.ANALYSIS_INITIALIZATION_FAILED);
             }
             long start = getTrace().getStartTime().getValue();
-            long end = getTrace().readEnd().getValue();
+            long end = Math.max(start, fcProvider.getEnd());
 
             // Initialize the first element of the tree
             ImmutableList.Builder<FlameChartEntryModel> builder = ImmutableList.builder();

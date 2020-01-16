@@ -55,6 +55,20 @@ public interface IFlameChartProvider extends IAnalysisModule, ISegmentStoreProvi
     boolean isComplete();
 
     /**
+     * Return the current end time of this flame chart. The return value of this
+     * method may change as long as the {@link #isComplete()} method returns
+     * <code>false</code>. When the flame chart is complete, then this value
+     * should stay the same.
+     *
+     * If the value is not known, impossible to compute or not available, the
+     * return value should be {@link Integer#MIN_VALUE}.
+     *
+     * @return The end time of the flame chart, in nanoseconds, or
+     *         {@link Integer#MIN_VALUE} if end time is not available.
+     */
+    long getEnd();
+
+    /**
      * Query the requested callstacks and return the segments for the sampled times.
      * The returned segments will be simply {@link ISegment} when there is no
      * function at a given depth, or {@link ICalledFunction} when there is an actual
