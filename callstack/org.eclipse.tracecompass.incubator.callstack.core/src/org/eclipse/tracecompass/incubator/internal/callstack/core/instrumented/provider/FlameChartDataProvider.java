@@ -242,12 +242,25 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
     @Override
     public TmfModelResponse<List<ITimeGraphArrow>> fetchArrows(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         List<ITmfStateInterval> arrows = fArrowProvider.fetchArrows(fetchParameters, monitor);
+        if (monitor != null && monitor.isCanceled()) {
+            return new TmfModelResponse<>(null, Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
+        }
+        if (arrows.isEmpty()) {
+            return new TmfModelResponse<>(Collections.emptyList(), Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        }
         List<ITimeGraphArrow> tgArrows = new ArrayList<>();
         // First, get the distinct callstacks
-        Set<CallStack> callstacks = fIdToCallstack.values().stream()
-                .map(CallStackDepth::getCallStack)
-                .distinct()
-                .collect(Collectors.toSet());
+        List<CallStackDepth> csList = new ArrayList<>();
+        synchronized (fIdToCallstack) {
+            // Quick copy the values to a list to avoid keeping the lock for too
+            // long, adding to a hashSet takes time to calculate the CallStack's
+            // hash.
+            csList.addAll(fIdToCallstack.values());
+        }
+        Set<CallStack> callstacks = new HashSet<>();
+        for (CallStackDepth csd : csList) {
+            callstacks.add(csd.getCallStack());
+        }
 
         // Find the source and destination entry for each arrow
         for (ITmfStateInterval interval : arrows) {
@@ -283,12 +296,9 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
             }
             // We found the callstack, find the right depth and its entry id
             int currentDepth = callstack.getCurrentDepth(ts);
-            for (Entry<Long, CallStackDepth> csdEntry : fIdToCallstack.entrySet()) {
-                CallStackDepth csd = csdEntry.getValue();
-                // For callstack, compare objects, not content
-                if (csd.getDepth() == currentDepth && csd.getCallStack() == callstack) {
-                    return csdEntry.getKey();
-                }
+            CallStackDepth csd = new CallStackDepth(callstack, currentDepth);
+            synchronized (fIdToCallstack) {
+                return fIdToCallstack.inverse().get(csd);
             }
         }
         return null;
@@ -377,7 +387,9 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
 
     // Get an entry for a quark
     private long getEntryId(CallStackDepth stack) {
-        return fIdToCallstack.inverse().computeIfAbsent(stack, q -> ENTRY_ID.getAndIncrement());
+        synchronized (fIdToCallstack) {
+            return fIdToCallstack.inverse().computeIfAbsent(stack, q -> ENTRY_ID.getAndIncrement());
+        }
     }
 
     private long getEntryId(ICallStackElement instrumentedCallStackElement) {
