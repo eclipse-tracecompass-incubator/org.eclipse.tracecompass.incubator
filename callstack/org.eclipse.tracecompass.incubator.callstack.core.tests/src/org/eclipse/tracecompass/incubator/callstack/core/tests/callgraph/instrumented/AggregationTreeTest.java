@@ -37,6 +37,7 @@ import org.eclipse.tracecompass.statesystem.core.backend.StateHistoryBackendFact
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
@@ -128,6 +129,7 @@ public class AggregationTreeTest {
         }
         ITmfTrace trace = fTrace;
         if (trace != null) {
+            TmfTraceManager.getInstance().traceClosed(new TmfTraceClosedSignal(this, trace));
             trace.dispose();
         }
     }

@@ -1196,6 +1196,19 @@ public class FlameGraphView extends TmfView {
     }
 
     /**
+     * Set the current trace of this view. This should be called only for
+     * testing purposes, otherwise, the normal
+     * {@link #traceSelected(TmfTraceSelectedSignal)} should be used.
+     *
+     * @param trace
+     *            The trace to set
+     */
+    @VisibleForTesting
+    public void setTrace(ITmfTrace trace) {
+        fTrace = trace;
+    }
+
+    /**
      * Trace is closed: clear the data structures and the view
      *
      * @param signal

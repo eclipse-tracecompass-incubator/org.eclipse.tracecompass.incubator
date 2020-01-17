@@ -93,12 +93,17 @@ public class FlameGraphDataProviderFactory implements IDataProviderFactory {
      * fixtures of data are used without a trace
      *
      * @param id
-     *            ID of the data provider
+     *            ID of the data provider. A <code>null</code> value will remove
+     *            the data provider from the instance list
      * @param dataProvider
      *            The data provider
      */
     @VisibleForTesting
-    public static void registerDataProviderWithId(String id, FlameGraphDataProvider<?, ?, ?> dataProvider) {
+    public static void registerDataProviderWithId(String id, @Nullable FlameGraphDataProvider<?, ?, ?> dataProvider) {
+        if (dataProvider == null) {
+            INSTANCES.remove(id);
+            return;
+        }
         INSTANCES.put(id, dataProvider);
     }
 

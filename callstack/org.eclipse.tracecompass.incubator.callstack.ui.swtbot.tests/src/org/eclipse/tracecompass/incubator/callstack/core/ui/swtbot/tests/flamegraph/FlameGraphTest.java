@@ -25,7 +25,6 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
@@ -37,7 +36,6 @@ import org.eclipse.tracecompass.incubator.callstack.core.tests.stubs.CallGraphAn
 import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.FlameGraphDataProvider;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.FlameGraphDataProviderFactory;
 import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphView;
-import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.ConditionHelpers;
 import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.ConditionHelpers.SWTBotTestCondition;
@@ -132,7 +130,10 @@ public class FlameGraphTest extends AggregationTreeTest {
         if (fg != null) {
             SWTBotUtils.maximize(fg);
         }
-        // Setting the input to null so the view can be emptied, to avoid race conditions with subsequent tests
+        // Reset the data provider so old data is not used to build view
+        FlameGraphDataProviderFactory.registerDataProviderWithId(SECONDARY_ID, null);
+        // Setting the input to null so the view can be emptied, to avoid race
+        // conditions with subsequent tests
         TimeGraphViewer tg = fTimeGraphViewer;
         if (tg != null) {
             UIThreadRunnable.syncExec(() -> {
@@ -158,7 +159,8 @@ public class FlameGraphTest extends AggregationTreeTest {
     private void loadFlameGraph() {
         CallGraphAnalysisStub cga = Objects.requireNonNull(getCga());
         ITmfTrace trace = getTrace();
-        Display.getDefault().syncExec(() -> fFg.traceSelected(new TmfTraceSelectedSignal(this, trace)));
+        fFg.setTrace(trace);
+        // Add the new provider and rebuild the view
         FlameGraphDataProvider<?, ?, ?> dp = new FlameGraphDataProvider<>(trace, cga, FlameGraphDataProvider.ID + ':' + SECONDARY_ID);
         FlameGraphDataProviderFactory.registerDataProviderWithId(SECONDARY_ID, dp);
         UIThreadRunnable.syncExec(() -> fFg.buildFlameGraph(trace, null, null));
