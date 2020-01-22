@@ -58,7 +58,6 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
      * The pie chart containing global information about the trace
      */
     private @Nullable PieChart fGlobalPC = null;
-    private @Nullable PieChart fSecondaryPc = null;
 
     /**
      * The listener for the mouse movement event.
@@ -197,57 +196,60 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
      * @param treeProvider
      */
     synchronized void updateGlobalPieChart(Set<WeightedTree<?>> trees, IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider) {
+        long totalWeight = getTotalWeight(trees);
+
         PieChart pie = getGlobalPC();
-        if (pie == null) {
-            pie = new PieChart(getParent(), SWT.NONE);
-            Color backgroundColor = fColorScheme.getColor(TimeGraphColorScheme.TOOL_BACKGROUND);
-            Color foregroundColor = fColorScheme.getColor(TimeGraphColorScheme.TOOL_FOREGROUND);
-            pie.getTitle().setText(treeProvider.getTitle());
-            pie.getTitle().setForeground(foregroundColor);
-            pie.setBackground(backgroundColor);
-            pie.setForeground(foregroundColor);
-            // Hide the title over the legend
-            pie.getAxisSet().getXAxis(0).getTitle().setText(StringUtils.EMPTY);
-            pie.getAxisSet().getXAxis(0).getTitle().setForeground(foregroundColor);
-            pie.getLegend().setVisible(true);
-            pie.getLegend().setPosition(SWT.RIGHT);
-            pie.getLegend().setBackground(backgroundColor);
-            pie.getLegend().setForeground(foregroundColor);
-            pie.addListener(SWT.MouseMove, fMouseMoveListener);
-            pie.addMouseListener(fMouseClickListener);
-            fGlobalPC = pie;
+        if (pie == null || totalWeight == 0) {
+            pie = createPieChart(treeProvider);
+            setGlobalPC(pie);
             fWeightType = treeProvider.getWeightType();
         }
 
-        updatePieChartWithData(pie, trees, treeProvider);
+        if (totalWeight > 0) {
+            updatePieChartWithData(pie, trees, treeProvider, totalWeight);
+        }
         pie.redraw();
     }
 
-    synchronized void updateSecondaryPieChart(Collection<WeightedTree<?>> trees, IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider) {
-        PieChart pie = getSecondaryPc();
-        if (pie == null) {
-            pie = new PieChart(getParent(), SWT.NONE);
-            Color backgroundColor = fColorScheme.getColor(TimeGraphColorScheme.TOOL_BACKGROUND);
-            Color foregroundColor = fColorScheme.getColor(TimeGraphColorScheme.TOOL_FOREGROUND);
-            pie.getTitle().setText(treeProvider.getTitle());
-            pie.getTitle().setForeground(foregroundColor);
-            pie.setBackground(backgroundColor);
-            pie.setForeground(foregroundColor);
-            // Hide the title over the legend
-            pie.getAxisSet().getXAxis(0).getTitle().setText(StringUtils.EMPTY);
-            pie.getAxisSet().getXAxis(0).getTitle().setForeground(foregroundColor);
-            pie.getLegend().setVisible(true);
-            pie.getLegend().setPosition(SWT.RIGHT);
-            pie.getLegend().setBackground(backgroundColor);
-            pie.getLegend().setForeground(foregroundColor);
-            pie.addListener(SWT.MouseMove, fMouseMoveListener);
-            pie.addMouseListener(fMouseClickListener);
-            fGlobalPC = pie;
-            fWeightType = treeProvider.getWeightType();
-        }
+    private PieChart createPieChart(IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider) {
+        PieChart pie = new PieChart(getParent(), SWT.NONE);
+        Color backgroundColor = fColorScheme.getColor(TimeGraphColorScheme.TOOL_BACKGROUND);
+        Color foregroundColor = fColorScheme.getColor(TimeGraphColorScheme.TOOL_FOREGROUND);
+        pie.getTitle().setText(treeProvider.getTitle());
+        pie.getTitle().setForeground(foregroundColor);
+        pie.setBackground(backgroundColor);
+        pie.setForeground(foregroundColor);
+        // Hide the title over the legend
+        pie.getAxisSet().getXAxis(0).getTitle().setText(StringUtils.EMPTY);
+        pie.getAxisSet().getXAxis(0).getTitle().setForeground(foregroundColor);
+        pie.getLegend().setVisible(true);
+        pie.getLegend().setPosition(SWT.RIGHT);
+        pie.getLegend().setBackground(backgroundColor);
+        pie.getLegend().setForeground(foregroundColor);
+        pie.addListener(SWT.MouseMove, fMouseMoveListener);
+        pie.addMouseListener(fMouseClickListener);
+        return pie;
+    }
 
-        updatePieChartWithData(pie, trees, treeProvider);
-        pie.redraw();
+    /**
+     * Calculates the total weight of the trees. If the treeset is empty, or if
+     * they all have a weight of 0, then 0 is returned and it means there is no
+     * data to display in the pie and it should be reset
+     *
+     * @param trees
+     * @return The total weight. If <code>0</code>, then the pie should be
+     *         reset.
+     */
+    private static long getTotalWeight(Collection<WeightedTree<?>> trees) {
+        if (trees.isEmpty()) {
+            return 0;
+        }
+        // Get the total weights
+        long totalWeight = 0;
+        for (WeightedTree<?> tree : trees) {
+            totalWeight += tree.getWeight();
+        }
+        return totalWeight;
     }
 
     /**
@@ -258,30 +260,19 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
     private static void updatePieChartWithData(
             final PieChart chart,
             final Collection<WeightedTree<?>> trees,
-            IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider) {
-
-        if (trees.isEmpty()) {
-            return;
-        }
-        // Get the total weights
-        long totalWeight = 0;
-        for (WeightedTree<?> tree : trees) {
-            totalWeight += tree.getWeight();
-        }
-        if (totalWeight == 0) {
-            // Children have no weight, return
-            return;
-        }
+            IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider, long totalWeight) {
 
         long otherWeight = 0;
         // Add to the list only the trees that would be visible (> threshold),
         // add the rest to an "other" element
+        WeightedTree<?> otherTree = null;
         List<WeightedTree<?>> list = new ArrayList<>();
         for (WeightedTree<?> tree : trees) {
             if ((float) tree.getWeight() / (float) totalWeight > MIN_PRECENTAGE_TO_SHOW_SLICE) {
                 list.add(tree);
             } else {
                 otherWeight += tree.getWeight();
+                otherTree = tree;
             }
         }
         Collections.sort(list, Collections.reverseOrder());
@@ -296,7 +287,13 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
             i++;
         }
         if (otherWeight != 0) {
-            sliceNames[list.size()] = Messages.WeightedTreeViewer_Other;
+            // Compare with the otherTree's weight. If there's only one other,
+            // display it as is
+            if (otherTree != null && otherTree.getWeight() == otherWeight) {
+                sliceNames[list.size()] = treeProvider.toDisplayString(otherTree);
+            } else {
+                sliceNames[list.size()] = Messages.WeightedTreeViewer_Other;
+            }
             sliceValues[list.size()][0] = otherWeight;
         }
 
@@ -341,11 +338,12 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
         return fGlobalPC;
     }
 
-    /**
-     * @return the time-range selection piechart
-     */
-    synchronized @Nullable PieChart getSecondaryPc() {
-        return fSecondaryPc;
+    private synchronized void setGlobalPC(PieChart pie) {
+        PieChart pc = fGlobalPC;
+        if (pc != null) {
+            pc.dispose();
+        }
+        fGlobalPC = pie;
     }
 
     // ------------------------------------------------------------------------
@@ -372,18 +370,6 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
     @Override
     public void refresh() {
 
-    }
-
-    /**
-     * An element has been selected
-     *
-     * @param collection
-     *            The selected elements
-     * @param treeProvider
-     *            The tree provider for the selected trees
-     */
-    public void secondarySelection(Collection<WeightedTree<?>> collection, IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider) {
-        updateSecondaryPieChart(collection, treeProvider);
     }
 
 }

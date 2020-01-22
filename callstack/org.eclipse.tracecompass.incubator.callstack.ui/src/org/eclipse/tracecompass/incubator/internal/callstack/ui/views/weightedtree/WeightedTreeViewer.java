@@ -114,6 +114,9 @@ public class WeightedTreeViewer extends AbstractTmfTreeViewer {
                     if (selection instanceof TmfTreeViewerEntry) {
                         Set<WeightedTree<?>> trees = new HashSet<>();
                         IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider = null;
+                        if (selection instanceof TreeNodeEntry) {
+                            treeProvider = ((TreeNodeEntry) selection).fTreeProvider;
+                        }
                         for (ITmfTreeViewerEntry entry : ((TmfTreeViewerEntry) selection).getChildren()) {
                             // FIXME: Should we aggregate all children trees of all children elements?
                             if (!(entry instanceof TreeNodeEntry)) {
