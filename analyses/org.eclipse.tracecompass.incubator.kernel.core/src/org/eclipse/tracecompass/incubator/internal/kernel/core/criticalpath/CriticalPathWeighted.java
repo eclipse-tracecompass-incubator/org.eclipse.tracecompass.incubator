@@ -102,7 +102,7 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
             // If it's another worker that is running, add a other process
             // running state
             if (worker != fMainWorker && edge.getType().equals(EdgeType.RUNNING)) {
-                WeightedTree<Object> callSite = new WeightedTree<>("Other process"); //$NON-NLS-1$
+                WeightedTree<Object> callSite = new WeightedTree<>(String.valueOf(Messages.CriticalPathWeighted_OtherRunningProcess));
                 callSite.addToWeight(edge.getDuration());
                 fAggregatedTree.addChild(callSite);
                 return;
@@ -123,26 +123,24 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
                 return;
             }
 
-            // If it is the main worker, just add a 1st level call of the edge
-            // type
+            WeightedTree<Object> workerTree;
             if (worker == fMainWorker) {
-                WeightedTree<Object> callSite = new WeightedTree<>(edge.getType());
-                callSite.addToWeight(edge.getDuration());
-                fTree.addChild(callSite);
-                return;
+                // If it is the main worker, first level will be self
+                workerTree = new WeightedTree<>(String.valueOf(Messages.CriticalPathWeighted_SelfWorker));
+                workerTree.addToWeight(edge.getDuration());
+            } else {
+                // If it's another worker, add a worker as 1st level
+                workerTree = new WeightedTree<>(String.valueOf(worker));
+                workerTree.addToWeight(edge.getDuration());
             }
-
-            // Otherwise, add a first level call that corresponds to the worker
-            WeightedTree<Object> callSite = new WeightedTree<>(String.valueOf(worker));
-            callSite.addToWeight(edge.getDuration());
 
             // Then, add a second level for the edge type if it is not running
             if (!edge.getType().equals(EdgeType.RUNNING)) {
                 WeightedTree<Object> childType = new WeightedTree<>(edge.getType());
                 childType.addToWeight(edge.getDuration());
-                callSite.addChild(childType);
+                workerTree.addChild(childType);
             }
-            fTree.addChild(callSite);
+            fTree.addChild(workerTree);
         }
 
         private void addEdgeToProcessElement(TmfEdge edge) {
@@ -153,19 +151,24 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
                 return;
             }
 
-            // If it's another worker that is running, add a other process
-            // running state
-            if (worker != fMainWorker && edge.getType().equals(EdgeType.RUNNING)) {
-                WeightedTree<Object> callSite = new WeightedTree<>(((OsWorker) worker).getName());
-                callSite.addToWeight(edge.getDuration());
-                fProcessTree.addChild(callSite);
-                return;
+            WeightedTree<Object> workerTree;
+            if (worker == fMainWorker) {
+                // If it is the main worker, first level will be self
+                workerTree = new WeightedTree<>(String.valueOf(Messages.CriticalPathWeighted_SelfWorker));
+                workerTree.addToWeight(edge.getDuration());
+            } else {
+                // If it's another worker, first level is the name of the process
+                workerTree = new WeightedTree<>(((OsWorker) worker).getName());
+                workerTree.addToWeight(edge.getDuration());
             }
 
-            // Otherwise, add a first level call that corresponds to the worker
-            WeightedTree<Object> callSite = new WeightedTree<>(edge.getType());
-            callSite.addToWeight(edge.getDuration());
-            fProcessTree.addChild(callSite);
+            // Then add a state for the non-running states
+            if (!edge.getType().equals(EdgeType.RUNNING)) {
+                WeightedTree<Object> typeTree = new WeightedTree<>(edge.getType());
+                typeTree.addToWeight(edge.getDuration());
+                workerTree.addChild(typeTree);
+            }
+            fProcessTree.addChild(workerTree);
         }
 
     }

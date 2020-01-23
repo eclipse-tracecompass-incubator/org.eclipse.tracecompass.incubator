@@ -25,6 +25,10 @@ public class Messages extends NLS {
     public static @Nullable String CriticalPathWeighted_ByStatus;
     /** String for the aggregation by thread */
     public static @Nullable String CriticalPathWeighted_ByThread;
+    /** Label for the other running process element */
+    public static @Nullable String CriticalPathWeighted_OtherRunningProcess;
+    /** String for the self worker */
+    public static @Nullable String CriticalPathWeighted_SelfWorker;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
