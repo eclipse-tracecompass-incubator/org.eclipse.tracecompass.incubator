@@ -12,27 +12,36 @@ package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.weightedt
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.linuxtools.dataviewers.piechart.PieChart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGBA;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IDataPalette;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider.DataType;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider.MetricType;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
+import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
+import org.eclipse.tracecompass.tmf.core.presentation.RGBAColor;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.ui.model.StyleManager;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfTimeViewer;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphColorScheme;
 
@@ -79,6 +88,35 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
     /** The color scheme for the chart */
     private TimeGraphColorScheme fColorScheme = new TimeGraphColorScheme();
     private final WeightedTreeView fView;
+
+    private @Nullable PieChartPalette fPiePalette = null;
+
+    private class PieChartPalette {
+        private final IDataPalette fPalette;
+        private final StyleManager fStyleManager;
+        private final Map<OutputElementStyle, Color> fColors = new HashMap<>();
+
+        private PieChartPalette(IDataPalette palette) {
+            fPalette = palette;
+            fStyleManager = new StyleManager(palette.getStyles());
+        }
+
+        public Color getColor(WeightedTree<?> tree) {
+            @NonNull OutputElementStyle style = fPalette.getStyleFor(tree);
+            return fColors.computeIfAbsent(style, st -> {
+                RGBAColor colorStyle = fStyleManager.getColorStyle(st, StyleProperties.BACKGROUND_COLOR);
+                if (colorStyle == null) {
+                    colorStyle = fStyleManager.getColorStyle(st, StyleProperties.COLOR);
+                }
+                if (colorStyle == null) {
+                    // Return a default color
+                    return fColorScheme.getColor(TimeGraphColorScheme.DARK_BLUE_STATE);
+                }
+                return fColorScheme.getColor(new RGBA(colorStyle.getRed(), colorStyle.getGreen(), colorStyle.getBlue(), colorStyle.getAlpha()));
+
+            });
+        }
+    }
 
     /**
      * Constructor
@@ -203,12 +241,20 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
             pie = createPieChart(treeProvider);
             setGlobalPC(pie);
             fWeightType = treeProvider.getWeightType();
+            setPalette(treeProvider.getPalette());
         }
 
         if (totalWeight > 0) {
             updatePieChartWithData(pie, trees, treeProvider, totalWeight);
         }
         pie.redraw();
+    }
+
+    private synchronized void setPalette(IDataPalette palette) {
+        PieChartPalette currentPalette = fPiePalette;
+        if (currentPalette == null || !palette.equals(currentPalette.fPalette)) {
+            fPiePalette = new PieChartPalette(palette);
+        }
     }
 
     private PieChart createPieChart(IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider) {
@@ -257,7 +303,7 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
      * content of a Map passed in parameter. It also provides a facade to use
      * the PieChart API
      */
-    private static void updatePieChartWithData(
+    private void updatePieChartWithData(
             final PieChart chart,
             final Collection<WeightedTree<?>> trees,
             IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider, long totalWeight) {
@@ -277,13 +323,20 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
         }
         Collections.sort(list, Collections.reverseOrder());
 
+
         int listSize = otherWeight == 0 ? list.size() : list.size() + 1;
         double[][] sliceValues = new double[listSize][1];
         String[] sliceNames = new String[listSize];
         int i = 0;
+        PieChartPalette palette = fPiePalette;
+        Color[] colors = (palette == null) ? null : new Color[listSize];
+
         for (WeightedTree<?> tree : list) {
             sliceNames[i] = treeProvider.toDisplayString(tree);
             sliceValues[i][0] = tree.getWeight();
+            if (colors != null && palette != null) {
+                colors[i] = palette.getColor(tree);
+            }
             i++;
         }
         if (otherWeight != 0) {
@@ -291,12 +344,17 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
             // display it as is
             if (otherTree != null && otherTree.getWeight() == otherWeight) {
                 sliceNames[list.size()] = treeProvider.toDisplayString(otherTree);
+                if (colors != null && palette != null) {
+                    colors[list.size()] = palette.getColor(otherTree);
+                }
             } else {
                 sliceNames[list.size()] = Messages.WeightedTreeViewer_Other;
             }
             sliceValues[list.size()][0] = otherWeight;
         }
-
+        if (colors != null) {
+            chart.setCustomColors(colors);
+        }
         chart.addPieChartSeries(sliceNames, sliceValues);
     }
 
