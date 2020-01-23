@@ -51,8 +51,9 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
      * An empty critical path
      */
     private static final CriticalPathWeighted EMPTY_CRIT_PATH_CG = new CriticalPathWeighted();
-    private static final String ALL_SUFFIX = "_all"; //$NON-NLS-1$
-    private static final String PROCESS_SUFFIX = "_proc"; //$NON-NLS-1$
+    private static final String ALL_SUFFIX = String.valueOf(Messages.CriticalPathWeighted_ByStatus);
+    private static final String PROCESS_SUFFIX = String.valueOf(Messages.CriticalPathWeighted_ByProcessName);
+    private static final String THREAD_SUFFIX = String.valueOf(Messages.CriticalPathWeighted_ByThread);
 
     private final List<String> fElements;
     private WeightedTree<Object> fAggregatedTree;
@@ -215,8 +216,8 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
         if (worker == null) {
             throw new NullPointerException("head vertex has no parent"); //$NON-NLS-1$
         }
-        fElements = ImmutableList.of(String.valueOf(worker), String.valueOf(worker) + ALL_SUFFIX, String.valueOf(worker) + PROCESS_SUFFIX);
-        fTree = new WeightedTree<>(String.valueOf(worker));
+        fElements = ImmutableList.of(String.valueOf(worker) + THREAD_SUFFIX, String.valueOf(worker) + ALL_SUFFIX, String.valueOf(worker) + PROCESS_SUFFIX);
+        fTree = new WeightedTree<>(String.valueOf(worker) + THREAD_SUFFIX);
         fAggregatedTree = new WeightedTree<>(String.valueOf(worker) + ALL_SUFFIX);
         fProcessTree = new WeightedTree<>(String.valueOf(worker) + PROCESS_SUFFIX);
         GraphToCallGraphConverter converter = new GraphToCallGraphConverter(worker, graph);
