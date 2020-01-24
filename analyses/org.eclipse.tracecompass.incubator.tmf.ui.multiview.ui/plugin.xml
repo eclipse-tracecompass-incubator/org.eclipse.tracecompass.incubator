@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.MultiView"
+            id="org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.MultiView"
+            name="MultiView"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.contexts">
+      <context
+            id="org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.context"
+            name="%context.tmf.multiview">
+      </context>
+      <context
+            id="org.eclipse.linuxtools.tmf.ui.view.uml2sd.context"
+            name="%contexts.uml2sd">
+      </context>
+      <context
+            id="org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.timegraph.context"
+            name="%context.multiview.timegraph">
+      </context>
+   </extension>
+
+</plugin>
