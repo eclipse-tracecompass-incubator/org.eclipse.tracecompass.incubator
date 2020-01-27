@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="tracecompass-incubator-master" sequenceNumber="39">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="tracecompass-incubator-master" sequenceNumber="40">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.cdt.gnu.dsf.feature.group" version="0.0.0"/>
@@ -138,7 +138,7 @@
 <unit id="org.eclipse.tracecompass.lttng2.control.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.tracecompass.jsontrace.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.tracecompass.tmf.cli.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tracecompass/master/repository"/>
+<repository location="http://download.eclipse.org/tracecompass/stable/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <repository location="https://download.eclipse.org/tracecompass/master/rcp-repository/"/>
