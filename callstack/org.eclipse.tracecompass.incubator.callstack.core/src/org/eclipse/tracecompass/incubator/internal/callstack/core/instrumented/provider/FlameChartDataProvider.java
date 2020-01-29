@@ -67,6 +67,7 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphStateFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphArrow;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
@@ -160,12 +161,16 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
     private static class ThreadData {
 
         private final ThreadStatusDataProvider fThreadDataProvider;
-        private final List<ThreadEntryModel> fThreadTree;
+        private final List<ThreadEntryModel> fThreadTree = new ArrayList<>();
         private final Status fStatus;
 
-        public ThreadData(ThreadStatusDataProvider dataProvider, List<ThreadEntryModel> threadTree, Status status) {
+        public ThreadData(ThreadStatusDataProvider dataProvider, List<TimeGraphEntryModel> threadTree, Status status) {
             fThreadDataProvider = dataProvider;
-            fThreadTree = threadTree;
+            for (TimeGraphEntryModel model : threadTree) {
+                if (model instanceof ThreadEntryModel) {
+                    fThreadTree.add((ThreadEntryModel) model);
+                }
+            }
             fStatus = status;
         }
 
@@ -466,8 +471,8 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
             ThreadStatusDataProvider dataProvider = DataProviderManager.getInstance().getDataProvider(trace, ThreadStatusDataProvider.ID, ThreadStatusDataProvider.class);
             if (dataProvider != null) {
                 // Get the tree for the trace's current range
-                TmfModelResponse<TmfTreeModel<ThreadEntryModel>> threadTreeResp = dataProvider.fetchTree(FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(start, Long.MAX_VALUE, 2)), monitor);
-                TmfTreeModel<ThreadEntryModel> threadTree = threadTreeResp.getModel();
+                TmfModelResponse<TmfTreeModel<TimeGraphEntryModel>> threadTreeResp = dataProvider.fetchTree(FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(start, Long.MAX_VALUE, 2)), monitor);
+                TmfTreeModel<TimeGraphEntryModel> threadTree = threadTreeResp.getModel();
                 if (threadTree != null) {
                     fThreadData = new ThreadData(dataProvider, threadTree.getEntries(), threadTreeResp.getStatus());
                     break;
