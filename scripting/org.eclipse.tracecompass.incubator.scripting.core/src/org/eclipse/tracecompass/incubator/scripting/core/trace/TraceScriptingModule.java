@@ -18,6 +18,10 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.ease.IExecutionListener;
+import org.eclipse.ease.IScriptEngine;
+import org.eclipse.ease.Script;
+import org.eclipse.ease.modules.AbstractScriptModule;
 import org.eclipse.ease.modules.ScriptParameter;
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.Nullable;
@@ -38,7 +42,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  *
  * @author Benjamin Saint-Cyr
  */
-public class TraceScriptingModule {
+public class TraceScriptingModule extends AbstractScriptModule {
 
     /**
      * Fully open a trace in the Trace Compass application, ie it will open as
@@ -182,9 +186,28 @@ public class TraceScriptingModule {
         if (trace == null) {
             throw new NullPointerException("Trace should not be null"); //$NON-NLS-1$
         }
+
         ScriptEventRequest scriptEventRequest = new ScriptEventRequest();
         trace.sendRequest(scriptEventRequest);
+        setupEventIteratorExecutionListener(scriptEventRequest);
+
         return scriptEventRequest.getEventIterator();
+    }
+
+    private void setupEventIteratorExecutionListener(ScriptEventRequest scriptEventRequest) {
+        IScriptEngine scriptEngine = getScriptEngine();
+        if (scriptEngine == null) {
+            return;
+        }
+
+        scriptEngine.addExecutionListener(new IExecutionListener() {
+            @Override
+            public void notify(@Nullable IScriptEngine engine, @Nullable Script script, int status) {
+                if (status == SCRIPT_END && !scriptEventRequest.isCompleted()) {
+                    scriptEventRequest.cancel();
+                }
+            }
+        });
     }
 
     /**

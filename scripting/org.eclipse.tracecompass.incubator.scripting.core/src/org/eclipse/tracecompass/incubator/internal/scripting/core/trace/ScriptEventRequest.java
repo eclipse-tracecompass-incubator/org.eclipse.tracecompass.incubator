@@ -68,13 +68,18 @@ public class ScriptEventRequest extends TmfEventRequest {
     @Override
     public synchronized void done() {
         super.done();
-        fEventsQueue.put(END_EVENT);
-        fEventsQueue.flushInputBuffer();
+        if (!isCancelled()) {
+            fEventsQueue.put(END_EVENT);
+            fEventsQueue.flushInputBuffer();
+        }
     }
 
     @Override
     public synchronized void cancel() {
         super.cancel();
+        while (!fEventsQueue.isEmpty()) {
+          fEventIterator.next();
+        }
         fEventsQueue.put(END_EVENT);
         fEventsQueue.flushInputBuffer();
     }
