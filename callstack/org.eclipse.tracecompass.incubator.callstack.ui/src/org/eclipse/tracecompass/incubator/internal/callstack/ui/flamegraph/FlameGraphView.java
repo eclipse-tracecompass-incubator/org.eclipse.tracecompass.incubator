@@ -1149,30 +1149,27 @@ public class FlameGraphView extends TmfView {
                 service = site.getService(IWorkbenchSiteProgressService.class);
             }
 
-            for (ITmfTrace trace : TmfTraceManager.getTraceSet(viewTrace)) {
+            // Cancel previous build job for this trace
+            Job buildJob = fBuildJobMap.remove(viewTrace);
+            if (buildJob != null) {
+                buildJob.cancel();
+            }
+            resetEntries(viewTrace);
+            // Build job will decrement
 
-                // Cancel previous build job for this trace
-                Job buildJob = fBuildJobMap.remove(trace);
-                if (buildJob != null) {
-                    buildJob.cancel();
+            buildJob = new Job(getTitle() + Messages.FlameGraphView_RetrievingData) {
+                @Override
+                protected IStatus run(IProgressMonitor monitor) {
+                    new BuildRunnable(viewTrace, viewTrace, selStart, selEnd, log).run(monitor);
+                    monitor.done();
+                    return Status.OK_STATUS;
                 }
-                resetEntries(viewTrace);
-                // Build job will decrement
-
-                buildJob = new Job(getTitle() + Messages.FlameGraphView_RetrievingData) {
-                    @Override
-                    protected IStatus run(IProgressMonitor monitor) {
-                        new BuildRunnable(trace, viewTrace, selStart, selEnd, log).run(monitor);
-                        monitor.done();
-                        return Status.OK_STATUS;
-                    }
-                };
-                fBuildJobMap.put(trace, buildJob);
-                if (service != null) {
-                    service.schedule(buildJob);
-                } else {
-                    buildJob.schedule();
-                }
+            };
+            fBuildJobMap.put(viewTrace, buildJob);
+            if (service != null) {
+                service.schedule(buildJob);
+            } else {
+                buildJob.schedule();
             }
             fLock.release();
         }
