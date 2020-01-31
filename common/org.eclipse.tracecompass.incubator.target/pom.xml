@@ -48,6 +48,11 @@
                     <type>target</type>
                     <classifier>tracecompass-oxygen-master</classifier>
                   </artifact>
+                  <artifact>
+                    <file>tracecompass-incubator-2019-06.target</file>
+                    <type>target</type>
+                    <classifier>tracecompass-incubator-2019-06</classifier>
+                  </artifact>
                   <!-- More targets could be added here -->
                 </artifacts>
               </configuration>
