@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -22,6 +24,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
 import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
+import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
 import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
 import org.eclipse.tracecompass.tmf.core.model.xy.ITmfXyModel;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -102,8 +105,21 @@ public class WebApplication {
                 .getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME);
         if (!project.exists()) {
             project.create(null);
+            if (!project.isOpen()) {
+                project.open(null);
+            }
+            IProjectDescription description = project.getDescription();
+            description.setNatureIds(new String[] { TmfProjectNature.ID });
+            project.setDescription(description, null);
         }
-        project.open(null);
+        if (!project.isOpen()) {
+            project.open(null);
+        }
+
+        IFolder tracesFolder = project.getFolder("Traces");
+        if (!tracesFolder.exists()) {
+            tracesFolder.create(true, true, null);
+        }
 
         fServer.start();
         if (fPort != TEST_PORT) {
