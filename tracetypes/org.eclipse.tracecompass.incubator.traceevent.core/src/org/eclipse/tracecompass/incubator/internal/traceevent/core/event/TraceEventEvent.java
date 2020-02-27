@@ -21,7 +21,6 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfCallsite;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfSourceLookup;
-import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
@@ -59,7 +58,7 @@ public class TraceEventEvent extends TmfEvent implements ITmfSourceLookup {
      *            the event field, contains all the needed data
      */
     public TraceEventEvent(ITmfTrace trace, long rank, TraceEventField field) {
-        super(trace, rank, TmfTimestamp.fromNanos(field.getTs()), TraceEventLookup.get(field.getPhase()), field.getContent());
+        super(trace, rank, trace.createTimestamp(field.getTs()), TraceEventLookup.get(field.getPhase()), field.getContent());
         fField = field;
         fName = field.getName();
         fLogLevel = Level.INFO;
