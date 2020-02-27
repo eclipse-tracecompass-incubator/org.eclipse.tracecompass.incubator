@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -45,10 +46,14 @@ import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlOutputE
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils.OutputType;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output.XmlDataProviderManager;
+import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
+import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
+import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
 import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
 import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
@@ -100,6 +105,8 @@ public class DataProviderService {
             return Response.status(Status.NOT_FOUND).build();
         }
         List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(trace);
+        list.addAll(getXmlDataProviderDescriptors(trace, EnumSet.of(OutputType.TIME_GRAPH)));
+        list.addAll(getXmlDataProviderDescriptors(trace, EnumSet.of(OutputType.XY)));
 
         return Response.ok(list).build();
     }
@@ -464,6 +471,39 @@ public class DataProviderService {
             }
         }
         return null;
+    }
+
+    private static @NonNull List<IDataProviderDescriptor> getXmlDataProviderDescriptors(@NonNull ITmfTrace trace, EnumSet<OutputType> types) {
+        /*
+         *  TODO: find a better way to create the data provider descriptors.
+         *  This should be part of the XmlDataProviderManager.
+         */
+        List<IDataProviderDescriptor> descriptors = new ArrayList<>();
+        Map<String, IAnalysisModuleHelper> modules = TmfAnalysisManager.getAnalysisModules(trace.getClass());
+        for (OutputType viewType : types) {
+            for (XmlOutputElement element : Iterables.filter(XmlUtils.getXmlOutputElements().values(), element -> element.getXmlElem().equals(viewType.getXmlElem()))) {
+                DataProviderDescriptor.Builder builder = new DataProviderDescriptor.Builder();
+                String label = String.valueOf(element.getLabel());
+                String elemId = element.getId();
+                if (elemId == null) {
+                    // Ignore element
+                    continue;
+                }
+                builder.setId(elemId).setName(label).setDescription(label);
+                if (viewType == OutputType.XY) {
+                    builder.setProviderType(ProviderType.TREE_TIME_XY);
+                } else if (viewType == OutputType.TIME_GRAPH) {
+                    builder.setProviderType(ProviderType.TIME_GRAPH);
+                }
+                for (String id : element.getAnalyses()) {
+                    if (modules.containsKey(id)) {
+                        descriptors.add(builder.build());
+                        break;
+                    }
+                }
+            }
+        }
+        return descriptors;
     }
 
     private Response getTree(UUID uuid, String outputId, QueryParameters queryParameters) {
