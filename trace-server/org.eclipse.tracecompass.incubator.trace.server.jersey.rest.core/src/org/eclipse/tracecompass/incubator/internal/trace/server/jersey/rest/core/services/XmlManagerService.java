@@ -91,6 +91,7 @@ public class XmlManagerService {
             return Response.status(Status.NOT_FOUND).build();
         }
         XmlUtils.deleteFiles(ImmutableList.of(Objects.requireNonNull(name)));
+        XmlUtils.saveFilesStatus();
         return Response.ok().build();
     }
 
@@ -106,6 +107,7 @@ public class XmlManagerService {
             }
             if (status.isOK()) {
                 XmlAnalysisModuleSource.notifyModuleChange();
+                XmlUtils.saveFilesStatus();
                 return Response.ok().build();
             }
         }
