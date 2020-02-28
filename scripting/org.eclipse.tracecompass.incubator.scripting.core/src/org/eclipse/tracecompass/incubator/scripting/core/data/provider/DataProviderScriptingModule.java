@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.eclipse.ease.modules.ScriptParameter;
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.data.provider.ScriptedEntryDataModel;
@@ -129,10 +130,14 @@ public class DataProviderScriptingModule {
      *            The analysis for which to create a time graph provider
      * @param data
      *            The time graph provider data
+     * @param dpName
+     *            The unique name of this data provider. If not set, the
+     *            analysis name will be used. Output of this data provider will
+     *            use this name as the title
      * @return The time graph data provider
      */
     @WrapToScript
-    public @Nullable ITimeGraphDataProvider<TimeGraphEntryModel> createTimeGraphProvider(IAnalysisModule analysis, Map<String, Object> data) {
+    public @Nullable ITimeGraphDataProvider<TimeGraphEntryModel> createTimeGraphProvider(IAnalysisModule analysis, Map<String, Object> data, @ScriptParameter(defaultValue = "") String dpName) {
         ITmfTrace trace = null;
         if (analysis instanceof TmfAbstractAnalysisModule) {
             TmfAbstractAnalysisModule newAnalysis = (TmfAbstractAnalysisModule) analysis;
@@ -148,7 +153,8 @@ public class DataProviderScriptingModule {
         if (stateSystems.isEmpty() || trace == null) {
             return null;
         }
-        return createTimeGraphProvider(trace, stateSystems, String.valueOf(analysis.getName()), data);
+        String dataProviderName = dpName.isEmpty() ? String.valueOf(analysis.getName()) : dpName;
+        return createTimeGraphProvider(trace, stateSystems, dataProviderName, data);
     }
 
     /**
@@ -184,15 +190,20 @@ public class DataProviderScriptingModule {
      *            The analysis for which to create a time graph provider
      * @param data
      *            The time graph provider data
+     * @param dpName
+     *            The unique name of this data provider. If not set, the
+     *            analysis name will be used. Output of this data provider will
+     *            use this name as the title
      * @return The time graph data provider
      */
     @WrapToScript
-    public @Nullable ITimeGraphDataProvider<TimeGraphEntryModel> createTimeGraphProvider(ScriptedAnalysis analysis, Map<String, Object> data) {
+    public @Nullable ITimeGraphDataProvider<TimeGraphEntryModel> createTimeGraphProvider(ScriptedAnalysis analysis, Map<String, Object> data, @ScriptParameter(defaultValue = "") String dpName) {
         ITmfStateSystemBuilder stateSystem = analysis.getStateSystem(true);
         if (stateSystem == null) {
             return null;
         }
-        return createTimeGraphProvider(analysis.getTrace(), Collections.singletonList(stateSystem), analysis.getName(), data);
+        String dataProviderName = dpName.isEmpty() ? String.valueOf(analysis.getName()) : dpName;
+        return createTimeGraphProvider(analysis.getTrace(), Collections.singletonList(stateSystem), dataProviderName, data);
     }
 
     private static @Nullable ITimeGraphDataProvider<TimeGraphEntryModel> createTimeGraphProvider(ITmfTrace trace,
@@ -254,10 +265,14 @@ public class DataProviderScriptingModule {
      *            The analysis for which to create a time graph provider
      * @param data
      *            The XY chart data
+     * @param dpName
+     *            The unique name of this data provider. If not set, the
+     *            analysis name will be used. Output of this data provider will
+     *            use this name as the title
      * @return The XY data provider
      */
     @WrapToScript
-    public @Nullable ITmfTreeXYDataProvider<ITmfTreeDataModel> createXYProvider(IAnalysisModule analysis, Map<String, Object> data) {
+    public @Nullable ITmfTreeXYDataProvider<ITmfTreeDataModel> createXYProvider(IAnalysisModule analysis, Map<String, Object> data, @ScriptParameter(defaultValue = "") String dpName) {
         ITmfTrace trace = null;
         if (analysis instanceof TmfAbstractAnalysisModule) {
             TmfAbstractAnalysisModule newAnalysis = (TmfAbstractAnalysisModule) analysis;
@@ -273,7 +288,8 @@ public class DataProviderScriptingModule {
         if (stateSystems.isEmpty() || trace == null) {
             return null;
         }
-        return createXYProvider(trace, stateSystems, String.valueOf(analysis.getName()), data);
+        String dataProviderName = dpName.isEmpty() ? String.valueOf(analysis.getName()) : dpName;
+        return createXYProvider(trace, stateSystems, dataProviderName, data);
     }
 
     /**
@@ -307,16 +323,21 @@ public class DataProviderScriptingModule {
      *            The scripted analysis for which to create a time graph
      *            provider
      * @param data
-     *            The XY chart data
+     *            The XY chart options
+     * @param dpName
+     *            The unique name of this data provider. If not set, the
+     *            analysis name will be used. Output of this data provider will
+     *            use this name as the title
      * @return The XY data provider
      */
     @WrapToScript
-    public @Nullable ITmfTreeXYDataProvider<ITmfTreeDataModel> createXYProvider(ScriptedAnalysis analysis, Map<String, Object> data) {
+    public @Nullable ITmfTreeXYDataProvider<ITmfTreeDataModel> createXYProvider(ScriptedAnalysis analysis, Map<String, Object> data, @ScriptParameter(defaultValue = "") String dpName) {
         ITmfStateSystemBuilder stateSystem = analysis.getStateSystem(true);
         if (stateSystem == null) {
             return null;
         }
-        return createXYProvider(analysis.getTrace(), Collections.singletonList(stateSystem), String.valueOf(analysis.getName()), data);
+        String dataProviderName = dpName.isEmpty() ? String.valueOf(analysis.getName()) : dpName;
+        return createXYProvider(analysis.getTrace(), Collections.singletonList(stateSystem), dataProviderName, data);
     }
 
     private static @Nullable ITmfTreeXYDataProvider<ITmfTreeDataModel> createXYProvider(ITmfTrace trace,
@@ -406,7 +427,7 @@ public class DataProviderScriptingModule {
      * Create a data provider from scripted functions. The script itself is
      * responsible for generating the entries, optionally row data and arrows.
      * For a simple state system, the
-     * {@link #createTimeGraphProvider(ScriptedAnalysis, Map)} may be used
+     * {@link #createTimeGraphProvider(ScriptedAnalysis, Map, String)} may be used
      * instead
      *
      * @param analysis

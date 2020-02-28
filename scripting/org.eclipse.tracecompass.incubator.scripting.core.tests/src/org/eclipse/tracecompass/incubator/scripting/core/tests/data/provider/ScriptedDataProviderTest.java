@@ -120,7 +120,7 @@ public class ScriptedDataProviderTest {
         DataProviderScriptingModule scriptingModule = new DataProviderScriptingModule();
 
         // Create a data provider that returns a flat hierarchy of objects
-        ITimeGraphDataProvider<@NonNull TimeGraphEntryModel> dp = scriptingModule.createTimeGraphProvider(fixture, ImmutableMap.of(DataProviderScriptingModule.ENTRY_PATH, "*/*"));
+        ITimeGraphDataProvider<@NonNull TimeGraphEntryModel> dp = scriptingModule.createTimeGraphProvider(fixture, ImmutableMap.of(DataProviderScriptingModule.ENTRY_PATH, "*/*"), "test");
         assertNotNull(dp);
 
         /*
