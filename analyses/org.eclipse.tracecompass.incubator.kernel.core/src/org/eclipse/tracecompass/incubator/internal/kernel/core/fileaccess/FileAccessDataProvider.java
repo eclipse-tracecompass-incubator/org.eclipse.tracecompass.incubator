@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2020 Ericsson and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,6 @@ import org.eclipse.tracecompass.incubator.internal.kernel.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileEntryModel.Type;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.FileDescriptorStateProvider;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.ThreadEntryModel;
-import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.TidTimeQueryFilter;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
@@ -46,7 +44,12 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundExc
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
+import org.eclipse.tracecompass.tmf.core.dataprovider.X11ColorUtils;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
+import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
+import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
+import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
+import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
@@ -58,13 +61,14 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
+import org.eclipse.tracecompass.tmf.core.response.ITmfResponse.Status;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import com.google.common.collect.TreeMultimap;
 
 /**
@@ -77,14 +81,42 @@ import com.google.common.collect.TreeMultimap;
  *
  * @author Matthew Khouzam
  */
-public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNull FileAccessAnalysis, @NonNull TimeGraphEntryModel> {
+@SuppressWarnings("restriction")
+public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNull FileAccessAnalysis, @NonNull TimeGraphEntryModel>
+        implements IOutputStyleProvider {
 
     /**
      * Suffix for dataprovider ID
      */
     public static final String SUFFIX = ".dataprovider"; //$NON-NLS-1$ ;
+    /**
+     * String for the tid parameter of this view
+     */
+    public static final String TID_PARAM = "tid"; //$NON-NLS-1$
 
     private static final Pattern IS_INTEGER = Pattern.compile("\\d+"); //$NON-NLS-1$
+
+    private static final String META_IO_NAME = "Meta IO"; //$NON-NLS-1$
+    private static final String IO_NAME = "IO"; //$NON-NLS-1$
+
+    /* The map of basic styles */
+    private static final Map<String, OutputElementStyle> STATE_MAP;
+    /*
+     * A map of styles names to a style that has the basic style as parent, to
+     * avoid returning complete styles for each state
+     */
+    private static final Map<String, OutputElementStyle> STYLE_MAP = new HashMap<>();
+
+    static {
+        /* Build three different styles to use as examples */
+        ImmutableMap.Builder<String, OutputElementStyle> builder = new ImmutableMap.Builder<>();
+
+        builder.put(META_IO_NAME, new OutputElementStyle(null, ImmutableMap.of(StyleProperties.STYLE_NAME, META_IO_NAME,
+                StyleProperties.BACKGROUND_COLOR, String.valueOf(X11ColorUtils.toHexColor(174, 123, 131)))));
+        builder.put(IO_NAME, new OutputElementStyle(null, ImmutableMap.of(StyleProperties.STYLE_NAME, IO_NAME,
+                StyleProperties.BACKGROUND_COLOR, String.valueOf(X11ColorUtils.toHexColor(140, 180, 165)))));
+        STATE_MAP = builder.build();
+    }
 
     private static final int OFFSET = 100000;
     private static final AtomicInteger STRING_VALUE = new AtomicInteger(OFFSET);
@@ -162,13 +194,14 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
                         if (sv != null) {
                             int tid = getTid(ss, threadInterval.getAttribute());
                             label = getThreadName(tid, interval.getStartTime(), trace) + " (" + tid + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-                            value = new TimeGraphState(startTime, duration, tid, label);
+                            value = new TimeGraphState(startTime, duration, label,
+                                    STYLE_MAP.computeIfAbsent(META_IO_NAME, n -> new OutputElementStyle(n)));
                             break;
                         }
                     }
                 }
                 if (state != null && value == null) {
-                    value = new TimeGraphState(startTime, duration, 1);
+                    value = new TimeGraphState(startTime, duration, null, STYLE_MAP.computeIfAbsent(IO_NAME, n -> new OutputElementStyle(n)));
                 }
                 if (value == null) {
                     value = new TimeGraphState(startTime, duration, Integer.MIN_VALUE);
@@ -256,15 +289,12 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
-
     @Override
     protected TmfTreeModel<TimeGraphEntryModel> getTree(ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
-        Collection<Integer> selectedTids = Collections.emptySet();
-        // TODO Why not SelectionTimeQueryFilter ?
-        TimeQueryFilter filter = FetchParametersUtils.createTimeQuery(parameters);
-        if (filter instanceof TidTimeQueryFilter) {
-            selectedTids = ((TidTimeQueryFilter) filter).getTids();
-        }
+
+        Object tidParam = parameters.get(TID_PARAM);
+        Integer selectedTids = (tidParam instanceof Integer) ? (Integer) tidParam : -1;
+
         Builder<@NonNull TimeGraphEntryModel> builder = new Builder<>();
         long rootId = getId(ITmfStateSystem.ROOT_ATTRIBUTE);
         ITmfTrace trace = getTrace();
@@ -278,7 +308,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         return new TmfTreeModel<>(Collections.emptyList(), builder.build());
     }
 
-    private void addResources(ITmfStateSystem ss, Builder<@NonNull TimeGraphEntryModel> builder, int quark, long parentId, Collection<Integer> filter) {
+    private void addResources(ITmfStateSystem ss, Builder<@NonNull TimeGraphEntryModel> builder, int quark, long parentId, Integer filter) {
         List<@NonNull Integer> fileQuarks = ss.getSubAttributes(quark, false);
 
         String ramFiles = "in memory"; //$NON-NLS-1$
@@ -296,7 +326,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
                     .filter(FileAccessDataProvider::isInteger)
                     .map(Integer::parseInt)
                     .collect(Collectors.toSet());
-            if (filter.isEmpty() || !Sets.intersection(contributingTids, new HashSet<>(filter)).isEmpty()) {
+            if (filter == -1 || contributingTids.contains(filter)) {
                 if (name.startsWith(File.separator)) {
                     String[] segments = name.split(File.separator);
                     StringBuilder sb = new StringBuilder();
@@ -411,6 +441,11 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
             }
         }
         return data;
+    }
+
+    @Override
+    public TmfModelResponse<OutputStyleModel> fetchStyle(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
+        return new TmfModelResponse<>(new OutputStyleModel(STATE_MAP), Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2020 Ericsson and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -14,12 +14,9 @@ package org.eclipse.tracecompass.incubator.internal.kernel.ui.views.fileaccess;
 import java.io.File;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.Action;
@@ -32,7 +29,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.analysis.os.linux.core.signals.TmfThreadSelectedSignal;
@@ -41,32 +37,18 @@ import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAc
 import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessDataProvider;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileEntryModel;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.ThreadEntryModel;
-import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.TidTimeQueryFilter;
 import org.eclipse.tracecompass.incubator.internal.kernel.ui.Activator;
 import org.eclipse.tracecompass.internal.analysis.os.linux.ui.actions.FollowThreadAction;
-import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
+import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
-import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
-import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
-import org.eclipse.tracecompass.tmf.core.presentation.RGBAColor;
-import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
-import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
+import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEventStyleStrings;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NamedTimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
@@ -78,8 +60,8 @@ import com.google.common.collect.ImmutableMap;
  * File access by file view
  *
  * @author Matthew Khouzam
- *
  */
+@SuppressWarnings("restriction")
 public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
 
     private static final String TITLE = Messages.FileAccessByFileView_title;
@@ -116,7 +98,7 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
         public @Nullable Image getColumnImage(@Nullable Object element, int columnIndex) {
             if (columnIndex == 0 && element instanceof TimeGraphEntry) {
                 TimeGraphEntry entry = (TimeGraphEntry) element;
-                ITimeGraphEntryModel entryModel = entry.getModel();
+                ITmfTreeDataModel entryModel = entry.getEntryModel();
                 if (entryModel instanceof FileEntryModel) {
                     return FILE_IMAGE;
                 } else if (entryModel instanceof ThreadEntryModel) {
@@ -134,7 +116,7 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
             TimeGraphEntry entry = (TimeGraphEntry) element;
 
             if (columnIndex == 1) {
-                ITimeGraphEntryModel model = entry.getModel();
+                ITmfTreeDataModel model = entry.getEntryModel();
                 if (model instanceof ThreadEntryModel) {
                     return String.valueOf(((ThreadEntryModel) model).getTid());
                 }
@@ -183,7 +165,7 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
             }
             if (first instanceof TimeGraphEntry) {
                 TimeGraphEntry entry = (TimeGraphEntry) sSel.getFirstElement();
-                ITimeGraphEntryModel model = entry.getModel();
+                ITmfTreeDataModel model = entry.getEntryModel();
                 if (model instanceof ThreadEntryModel) {
                     menuManager.add(new FollowThreadAction(FileAccessByFileView.this, entry.getName(), ((ThreadEntryModel) model).getTid(), getTrace(entry)));
                 }
@@ -196,68 +178,9 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
      * Constructor
      */
     public FileAccessByFileView() {
-        this(ID, new TimeGraphPresentationProvider() {
-
-            StateItem[] states = {
-                    new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), "Meta IO", //$NON-NLS-1$
-                            ITimeEventStyleStrings.fillStyle(), ITimeEventStyleStrings.solidColorFillStyle(),
-                            ITimeEventStyleStrings.fillColor(), new RGBAColor(174, 123, 131, 255).toInt(),
-                            ITimeEventStyleStrings.heightFactor(), 1.0f)),
-                    new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), "IO", //$NON-NLS-1$
-                            ITimeEventStyleStrings.fillStyle(), ITimeEventStyleStrings.solidColorFillStyle(),
-                            ITimeEventStyleStrings.fillColor(), new RGBAColor(140, 180, 165, 255).toInt(),
-                            ITimeEventStyleStrings.heightFactor(), 1.0f))
-            };
-
-            @Override
-            public StateItem[] getStateTable() {
-                return states;
-            }
-
-            @Override
-            public int getStateTableIndex(ITimeEvent event) {
-                if (event instanceof NullTimeEvent) {
-                    return -1;
-                } else if (event instanceof NamedTimeEvent || (event.getEntry() instanceof TimeGraphEntry && ((TimeGraphEntry)event.getEntry()).getModel() instanceof ThreadEntryModel)) {
-                    return 1;
-                }
-                return 0;
-            }
-
-            @Override
-            public int getItemHeight(ITimeGraphEntry entry) {
-                if (entry instanceof TimeGraphEntry && ((TimeGraphEntry) entry).getModel() instanceof ThreadEntryModel) {
-                    return (int) (super.getItemHeight(entry) * .6);
-                }
-                return super.getItemHeight(entry);
-            }
-
-            @Override
-            public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event, long hoverTime) {
-                Map<String, String> retMap = super.getEventHoverToolTipInfo(event, hoverTime);
-                if (retMap == null) {
-                    retMap = new LinkedHashMap<>(1);
-                }
-
-                if (!(event instanceof TimeEvent) || !((TimeEvent) event).hasValue() ||
-                        !(event.getEntry() instanceof TimeGraphEntry)) {
-                    return retMap;
-                }
-
-                TimeGraphEntry entry = (TimeGraphEntry) event.getEntry();
-                ITimeGraphDataProvider<? extends TimeGraphEntryModel> dataProvider = BaseDataProviderTimeGraphView.getProvider(entry);
-                TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = dataProvider.fetchTooltip(
-                        FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(hoverTime, hoverTime, 1, Collections.singletonList(entry.getModel().getId()))),
-                        null);
-                Map<@NonNull String, @NonNull String> map = response.getModel();
-                if (map != null) {
-                    retMap.putAll(map);
-                }
-
-                return retMap;
-            }
-
-        }, FileAccessAnalysis.ID + FileAccessDataProvider.SUFFIX);
+        super(ID, new BaseDataProviderTimeGraphPresentationProvider(), FileAccessAnalysis.ID + FileAccessDataProvider.SUFFIX);
+        setTreeColumns(COLUMN_NAMES);
+        setTreeLabelProvider(new FileAccessTreeLabelProvider());
     }
 
     @Override
@@ -337,7 +260,7 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
             }
             if (first instanceof TimeGraphEntry) {
                 TimeGraphEntry entry = (TimeGraphEntry) sSel.getFirstElement();
-                ITimeGraphEntryModel model = entry.getModel();
+                ITmfTreeDataModel model = entry.getEntryModel();
                 if (model instanceof ThreadEntryModel) {
                     menuManager.add(new FollowThreadAction(FileAccessByFileView.this, entry.getName(), ((ThreadEntryModel) model).getTid(), getTrace(entry)));
                 }
@@ -374,106 +297,17 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
         rebuild();
     }
 
-    public FileAccessByFileView(String id, TimeGraphPresentationProvider pres, String providerId) {
-        super(id, pres, providerId);
-        setTreeColumns(COLUMN_NAMES);
-        setTreeLabelProvider(new FileAccessTreeLabelProvider());
-    }
-
     @Override
-    protected void buildEntryList(@NonNull ITmfTrace trace, @NonNull ITmfTrace parentTrace, @NonNull IProgressMonitor monitor) {
-        // The trace context would be in the parent trace
-        TmfTraceContext ctx = TmfTraceManager.getInstance().getTraceContext(parentTrace);
+    protected @NonNull Map<@NonNull String, @NonNull Object> getFetchTreeParameters() {
+        TmfTraceContext ctx = TmfTraceManager.getInstance().getTraceContext(getTrace());
         HostThread data = (HostThread) ctx.getData(HostThread.SELECTED_HOST_THREAD_KEY);
         int tid = data != null ? data.getTid() : -1;
         String threadName = tid < 0 ? fAdvancedMode ? ALL : FOLLOW_A_THREAD : Integer.toString(tid);
         setPartName(String.format(TITLE, threadName));
         if (!fAdvancedMode && tid == -1) {
-            return;
+            return Collections.emptyMap();
         }
-        if (data != null && !data.getHost().equals(trace.getHostId())) {
-            return;
-        }
-        ITimeGraphDataProvider<@NonNull TimeGraphEntryModel> dataProvider = DataProviderManager
-                .getInstance().getDataProvider(trace, getProviderId(), ITimeGraphDataProvider.class);
-        if (dataProvider == null) {
-            return;
-        }
-        boolean complete = false;
-        while (!complete && !monitor.isCanceled()) {
-            TimeQueryFilter filter = new TidTimeQueryFilter(0, Long.MAX_VALUE, 2, Collections.emptyList(), getRegexes(), tid == -1 ? Collections.emptyList() : Collections.singleton(tid));
-            TmfModelResponse<List<TimeGraphEntryModel>> response = dataProvider.fetchTree(filter, monitor);
-            // ------------- BEGIN COPY WITH MINIMAL CHANGE ------------
-            if (response.getStatus() == ITmfResponse.Status.FAILED) {
-                Activator.getDefault().logError(getClass().getSimpleName() + " Data Provider failed: " + response.getStatusMessage()); //$NON-NLS-1$
-                return;
-            } else if (response.getStatus() == ITmfResponse.Status.CANCELLED) {
-                return;
-            }
-            complete = response.getStatus() == ITmfResponse.Status.COMPLETED;
-            List<TimeGraphEntryModel> model = response.getModel();
-            if (model != null) {
-                synchronized (fEntries) {
-                    for (TimeGraphEntryModel entry : model) {
-                        TimeGraphEntry uiEntry = fEntries.get(dataProvider, entry.getId());
-                        if (entry.getParentId() != -1) {
-                            if (uiEntry == null) {
-                                uiEntry = new TimeGraphEntry(entry);
-                                TimeGraphEntry parent = fEntries.get(dataProvider, entry.getParentId());
-                                if (parent != null) {
-                                    parent.addChild(uiEntry);
-                                }
-                                fEntries.put(dataProvider, entry.getId(), uiEntry);
-                            } else {
-                                uiEntry.updateModel(entry);
-                            }
-                        } else {
-                            setStartTime(Long.min(getStartTime(), entry.getStartTime()));
-                            setEndTime(Long.max(getEndTime(), entry.getEndTime() + 1));
-
-                            if (uiEntry != null) {
-                                uiEntry.updateModel(entry);
-                            } else {
-                                uiEntry = new TraceEntry(entry, trace, dataProvider);
-                                fEntries.put(dataProvider, entry.getId(), uiEntry);
-                                addToEntryList(parentTrace, Collections.singletonList(uiEntry));
-                            }
-                        }
-                        if (entry instanceof ThreadEntryModel) {
-
-                            TimeGraphEntry toCollapse = uiEntry.getParent();
-                            Display.getDefault().asyncExec(
-                                    () -> {
-                                        getTimeGraphViewer().getTimeGraphControl().setExpandedState(toCollapse, false);
-                                    });
-                        }
-                    }
-                }
-                long start = getStartTime();
-                long end = getEndTime();
-                final long resolution = Long.max(1, (end - start) / getDisplayWidth());
-                zoomEntries(fEntries.values(), start, end, resolution, monitor);
-            }
-
-            if (monitor.isCanceled()) {
-                return;
-            }
-
-            if (parentTrace.equals(getTrace())) {
-                synchingToTime(getTimeGraphViewer().getSelectionBegin());
-                refresh();
-            }
-            monitor.worked(1);
-
-            if (!complete && !monitor.isCanceled()) {
-                try {
-                    Thread.sleep(BUILD_UPDATE_TIMEOUT);
-                } catch (InterruptedException e) {
-                    Activator.getDefault().logError("Failed to wait for data provider", e); //$NON-NLS-1$
-                }
-            }
-        }
-        // -------------- END COPY WITH MINIMAL CHANGE -------------
+        return ImmutableMap.of(FileAccessDataProvider.TID_PARAM, tid);
     }
 
 }
