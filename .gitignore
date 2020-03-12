@@ -2,4 +2,5 @@
 bin/
 target/
 workspace/
+**/.pydevproject
 */.settings/org.sonar.ide.eclipse.core.prefs
