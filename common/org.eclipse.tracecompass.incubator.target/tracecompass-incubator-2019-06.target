@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="tracecompass-incubator-2019-06" sequenceNumber="2">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="tracecompass-incubator-2019-06" sequenceNumber="3">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.cdt.gnu.dsf.feature.group" version="0.0.0"/>
@@ -145,8 +145,9 @@
 <unit id="org.eclipse.tracecompass.rcp.feature.group" version="0.0.0"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.nebula.widgets.opal.notifier.feature.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.nebula.widgets.opal.notifier.feature.feature.group" version="1.0.0.201912241810"/>
 <repository location="http://download.eclipse.org/nebula/releases/latest"/>
+<unit id="org.eclipse.nebula.widgets.opal.duallist.feature.feature.group" version="1.0.0.201912241810"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.lsp4j.sdk.feature.group" version="0.0.0"/>
@@ -161,7 +162,7 @@
 <unit id="org.eclipse.ease.modules.feature.feature.group" version="0.0.0"/>
 <repository location="https://download.eclipse.org/ease/integration/nightly/"/>
 </location>
-<location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.ease.engine.jython.feature.feature.group" version="0.0.0"/>
 <repository id="ease-engines" location="https://bintray.com/artifact/download/pontesegger/ease-engines/"/>
 </location>

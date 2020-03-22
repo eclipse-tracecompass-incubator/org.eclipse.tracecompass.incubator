@@ -22,10 +22,9 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.messages"; //$NON-NLS-1$
 
-    public static String Action_Add;
-    public static String Action_Remove;
+    public static String Action_Set;
 
-    public static String Dialog_AddDataProviderName;
+    public static String Dialog_SetDataProviderName;
     public static String Dialog_ListLabel;
 
     public static String ProviderType_XY;

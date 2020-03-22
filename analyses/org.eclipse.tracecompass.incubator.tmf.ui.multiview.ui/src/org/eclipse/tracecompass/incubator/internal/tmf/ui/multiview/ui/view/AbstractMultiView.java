@@ -314,9 +314,9 @@ public abstract class AbstractMultiView extends TmfView implements ITmfTimeAlign
     /**
      * Add a lane to this view. This method is automatically called if viewers
      * have been created using the default methods
-     * {@link #addChartViewer(String)} and {@link #addTimeGraphViewer(String)}.
-     * Implementations creating their own lanes will call this method to add the
-     * viewer's lane.
+     * {@link #addChartViewer(String, boolean)} and
+     * {@link #addTimeGraphViewer(String, boolean)}. Implementations creating
+     * their own lanes will call this method to add the viewer's lane.
      *
      * @param lane
      *            The lane to add
@@ -546,9 +546,7 @@ public abstract class AbstractMultiView extends TmfView implements ITmfTimeAlign
         Composite composite = new Composite(sashForm, SWT.NONE);
         composite.setLayout(new FillLayout());
         composite.setBackground(fColorScheme.getColor(TimeGraphColorScheme.BACKGROUND));
-        ChartMultiViewer viewer = withActions ?
-                new ActionsChartMultiViewer(composite, providerId, getViewSite()) :
-                new ChartMultiViewer(composite, providerId);
+        ChartMultiViewer viewer = withActions ? new ActionsChartMultiViewer(composite, providerId, getViewSite()) : new ChartMultiViewer(composite, providerId);
         viewer.setStatusLineManager(getViewSite().getActionBars().getStatusLineManager());
         if (!hasLanes()) {
             viewer.getChartViewer().getSwtChart().addPaintListener(e -> redrawTimeScales());
@@ -584,10 +582,9 @@ public abstract class AbstractMultiView extends TmfView implements ITmfTimeAlign
         Composite composite = new Composite(sashForm, SWT.NONE);
         composite.setLayout(new FillLayout());
         composite.setBackground(fColorScheme.getColor(TimeGraphColorScheme.BACKGROUND));
-        BaseDataProviderTimeGraphMultiViewer viewer = withActions ?
-                new ActionsDataProviderTimeGraphMultiViewer(
-                        composite, new BaseDataProviderTimeGraphPresentationProvider(), getViewSite(), providerId) :
-                new BaseDataProviderTimeGraphMultiViewer(
+        BaseDataProviderTimeGraphMultiViewer viewer = withActions ? new ActionsDataProviderTimeGraphMultiViewer(
+                composite, new BaseDataProviderTimeGraphPresentationProvider(), getViewSite(), providerId)
+                : new BaseDataProviderTimeGraphMultiViewer(
                         composite, new BaseDataProviderTimeGraphPresentationProvider(), getViewSite(), providerId);
         viewer.init();
         if (!hasLanes()) {

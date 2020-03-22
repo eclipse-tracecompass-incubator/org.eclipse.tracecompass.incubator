@@ -64,6 +64,8 @@
                 <feature id="org.eclipse.ease.python.jython.feature"/>
                 <feature id="org.eclipse.ease.engine.jython.feature"/>
                 <plugin id="org.eclipse.ease.modules.platform"/>
+                <plugin id="org.eclipse.nebula.widgets.opal.commons"/>
+                <plugin id="org.eclipse.nebula.widgets.opal.duallist"/>
               </excludes>
             </configuration>
           </execution>

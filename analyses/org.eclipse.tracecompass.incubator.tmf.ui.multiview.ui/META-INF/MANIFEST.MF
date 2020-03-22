@@ -22,6 +22,8 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui;
  org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.timegraph,
  org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.xychart;x-internal:=true
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.tmf.ui.multiview.ui
-Import-Package: com.google.common.collect,
- com.google.common.base,
+Import-Package: com.google.common.base,
+ com.google.common.collect,
+ org.eclipse.nebula.widgets.opal.commons,
+ org.eclipse.nebula.widgets.opal.duallist,
  org.swtchart

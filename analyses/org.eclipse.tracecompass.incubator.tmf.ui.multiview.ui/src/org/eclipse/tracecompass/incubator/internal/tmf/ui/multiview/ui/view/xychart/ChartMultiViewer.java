@@ -49,7 +49,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.dialogs.TriStateFiltere
  */
 public class ChartMultiViewer extends TmfTimeViewer implements IMultiViewer {
 
-    private static final int[] DEFAULT_WEIGHTS = {1, 3};
+    private static final int[] DEFAULT_WEIGHTS = { 1, 3 };
 
     private final SashForm fSashForm;
     private final TreeViewer fLeftViewer;
@@ -225,4 +225,5 @@ public class ChartMultiViewer extends TmfTimeViewer implements IMultiViewer {
     private int getTimeAxisOffset() {
         return fSashForm.getChildren()[0].getSize().x + fSashForm.getSashWidth() + fChartViewer.getPointAreaOffset();
     }
+
 }
