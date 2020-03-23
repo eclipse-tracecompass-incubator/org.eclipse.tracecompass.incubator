@@ -23,7 +23,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.data.VcpuStateValues;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vcpuview.VirtualMachineCommon.Type;
-import org.eclipse.tracecompass.tmf.core.presentation.RGBAColor;
+import org.eclipse.tracecompass.tmf.core.dataprovider.X11ColorUtils;
+import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
@@ -85,14 +86,14 @@ public class VirtualMachinePresentationProvider extends TimeGraphPresentationPro
             if (heightFactor > 1.0 || heightFactor < 0) {
                 throw new IllegalArgumentException("Height factor needs to be between 0 and 1.0, given hint : " + heightFactor); //$NON-NLS-1$
             }
-            fMap = ImmutableMap.of(ITimeEventStyleStrings.label(), label,
-                    ITimeEventStyleStrings.fillStyle(), ITimeEventStyleStrings.solidColorFillStyle(),
-                    ITimeEventStyleStrings.fillColor(), new RGBAColor(red, green, blue, alpha).toInt(),
-                    ITimeEventStyleStrings.heightFactor(), heightFactor);
+            fMap = ImmutableMap.of(StyleProperties.STYLE_NAME, label,
+                    StyleProperties.BACKGROUND_COLOR, X11ColorUtils.toHexColor(red, green, blue),
+                    StyleProperties.OPACITY, alpha / 255,
+                    StyleProperties.HEIGHT, heightFactor);
         }
 
         public String getLabel() {
-            return (String) fMap.get(ITimeEventStyleStrings.label());
+            return (String) fMap.get(StyleProperties.STYLE_NAME);
         }
 
         /**

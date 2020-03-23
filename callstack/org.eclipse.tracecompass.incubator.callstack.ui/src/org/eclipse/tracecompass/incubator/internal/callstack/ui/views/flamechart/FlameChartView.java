@@ -48,7 +48,6 @@ import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.IElementResolver;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
@@ -112,8 +111,8 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
         if (o1 instanceof TimeGraphEntry && o2 instanceof TimeGraphEntry) {
             TimeGraphEntry t1 = (TimeGraphEntry) o1;
             TimeGraphEntry t2 = (TimeGraphEntry) o2;
-            ITimeGraphEntryModel model1 = t1.getModel();
-            ITimeGraphEntryModel model2 = t2.getModel();
+            ITmfTreeDataModel model1 = t1.getEntryModel();
+            ITmfTreeDataModel model2 = t2.getEntryModel();
             if (model1 instanceof FlameChartEntryModel && model2 instanceof FlameChartEntryModel) {
                 FlameChartEntryModel m1 = (FlameChartEntryModel) model1;
                 FlameChartEntryModel m2 = (FlameChartEntryModel) model2;
@@ -184,7 +183,7 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
         public Image getColumnImage(Object element, int columnIndex) {
             if (columnIndex == 0 && (element instanceof TimeGraphEntry)) {
                 TimeGraphEntry entry = (TimeGraphEntry) element;
-                ITimeGraphEntryModel entryModel = entry.getModel();
+                ITmfTreeDataModel entryModel = entry.getEntryModel();
                 if (entryModel instanceof FlameChartEntryModel) {
                     FlameChartEntryModel model = (FlameChartEntryModel) entryModel;
                     if (model.getEntryType() == EntryType.LEVEL) {
@@ -207,7 +206,7 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
                 return ((TraceEntry) element).getName();
             } else if (element instanceof TimeGraphEntry) {
                 TimeGraphEntry entry = (TimeGraphEntry) element;
-                ITimeGraphEntryModel model = entry.getModel();
+                ITmfTreeDataModel model = entry.getEntryModel();
                 ITimeGraphState function = fFunctions.get(model.getId());
                 if (columnIndex == 0 && (!(model instanceof FlameChartEntryModel) ||
                         (model instanceof FlameChartEntryModel && ((FlameChartEntryModel) model).getEntryType() != EntryType.FUNCTION))) {
@@ -284,7 +283,7 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
                     // also null checks
                     return;
                 }
-                ITimeGraphState function = fFunctions.get(((TimeGraphEntry) selection).getModel().getId());
+                ITimeGraphState function = fFunctions.get(((TimeGraphEntry) selection).getEntryModel().getId());
                 if (function != null) {
                     long entryTime = function.getStartTime();
                     long exitTime = entryTime + function.getDuration();
@@ -413,13 +412,13 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
                 // Do not query for kernel entries
                 Iterable<TimeGraphEntry> unfiltered = Utils.flatten(traceEntry);
                 Iterable<TimeGraphEntry> filtered = Iterables.filter(unfiltered, e -> {
-                    ITimeGraphEntryModel model = e.getModel();
+                    ITmfTreeDataModel model = e.getEntryModel();
                     if (model instanceof FlameChartEntryModel) {
                         return !((FlameChartEntryModel) model).getEntryType().equals(EntryType.KERNEL);
                     }
                     return true;
                 });
-                Map<Long, TimeGraphEntry> map = Maps.uniqueIndex(filtered, e -> e.getModel().getId());
+                Map<Long, TimeGraphEntry> map = Maps.uniqueIndex(filtered, e -> e.getEntryModel().getId());
                 // use time -1 as a lower bound for the end of Time events to be included.
                 SelectionTimeQueryFilter filter = new SelectionTimeQueryFilter(Math.max(traceEntry.getStartTime(), time - 1), time, 2, map.keySet());
                 TmfModelResponse<@NonNull TimeGraphModel> response = traceEntry.getProvider().fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(filter), null);
@@ -507,7 +506,7 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
                         TimeGraphEntry callStackEntry = (TimeGraphEntry) entry;
                         ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider = getProvider(callStackEntry);
                         long selectionBegin = viewer.getSelectionBegin();
-                        Map<@NonNull String, @NonNull Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(selectionBegin, Long.MAX_VALUE, 2, Collections.singleton(callStackEntry.getModel().getId())));
+                        Map<@NonNull String, @NonNull Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(selectionBegin, Long.MAX_VALUE, 2, Collections.singleton(callStackEntry.getEntryModel().getId())));
                         TmfModelResponse<@NonNull TimeGraphModel> response = provider.fetchRowModel(parameters, null);
                         TimeGraphModel model = response.getModel();
                         if (model == null || model.getRows().size() != 1) {
@@ -557,7 +556,7 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
                         TimeGraphEntry callStackEntry = (TimeGraphEntry) entry;
                         ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider = getProvider(callStackEntry);
                         long selectionBegin = viewer.getSelectionBegin();
-                        Map<@NonNull String, @NonNull Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, selectionBegin), Collections.singleton(callStackEntry.getModel().getId())));
+                        Map<@NonNull String, @NonNull Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, selectionBegin), Collections.singleton(callStackEntry.getEntryModel().getId())));
                         TmfModelResponse<@NonNull TimeGraphModel> response = provider.fetchRowModel(parameters, null);
                         TimeGraphModel model = response.getModel();
                         if (model == null || model.getRows().size() != 1) {
@@ -700,7 +699,7 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
              * remove functions associated to the trace's entries.
              */
             Iterable<TimeGraphEntry> all = Iterables.concat(Iterables.transform(traceEntries, Utils::flatten));
-            all.forEach(entry -> fFunctions.remove(entry.getModel().getId()));
+            all.forEach(entry -> fFunctions.remove(entry.getEntryModel().getId()));
         }
         super.traceClosed(signal);
     }

@@ -19,10 +19,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEventStyleStrings;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 
@@ -125,7 +125,7 @@ public class ContextSwitchPresentationProvider extends TimeGraphPresentationProv
                     int count = csEvent.getCount();
                     float heightFactor = (float) (csEvent.getValue() / mean / count * 0.33);
                     heightFactor = (float) Math.max(0.1f, Math.min(heightFactor, 1.0));
-                    retVal.put(ITimeEventStyleStrings.heightFactor(), heightFactor);
+                    retVal.put(StyleProperties.HEIGHT, heightFactor);
                     return retVal;
                 }
             }

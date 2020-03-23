@@ -41,13 +41,13 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeExcept
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
+import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.views.FormatTimeUtils;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEventStyleStrings;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
@@ -822,7 +822,7 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
         float heightFactor = FULL_HEIGHT;
         Float b = fTimeEventHighlight.get(event);
         if (b != null) {
-            return ImmutableMap.of(ITimeEventStyleStrings.heightFactor(), b);
+            return ImmutableMap.of(StyleProperties.HEIGHT, b);
         }
         try {
             Type typeEntry = ((VirtualResourceEntry) event.getEntry()).getType();
@@ -839,7 +839,7 @@ public class VirtualResourcePresentationProvider extends TimeGraphPresentationPr
             heightFactor = FULL_HEIGHT;
         }
         fTimeEventHighlight.put(event, heightFactor);
-        return ImmutableMap.of(ITimeEventStyleStrings.heightFactor(), heightFactor);
+        return ImmutableMap.of(StyleProperties.HEIGHT, heightFactor);
     }
 
     /**

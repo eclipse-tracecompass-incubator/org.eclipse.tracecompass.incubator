@@ -25,7 +25,7 @@ import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spa
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel.LogEvent;
 import org.eclipse.tracecompass.incubator.internal.opentracing.ui.Activator;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
@@ -56,7 +56,7 @@ public class SpanLifeView extends BaseDataProviderTimeGraphView {
         public @Nullable Image getColumnImage(@Nullable Object element, int columnIndex) {
             if (columnIndex == 0 && element instanceof TimeGraphEntry) {
                 TimeGraphEntry entry = (TimeGraphEntry) element;
-                ITimeGraphEntryModel entryModel = entry.getModel();
+                ITmfTreeDataModel entryModel = entry.getEntryModel();
                 if ((entryModel instanceof SpanLifeEntryModel) && ((SpanLifeEntryModel) entryModel).getErrorTag()) {
                     return ERROR_IMAGE;
                 }
@@ -93,8 +93,9 @@ public class SpanLifeView extends BaseDataProviderTimeGraphView {
         ITimeGraphEntry[] expandedElements = getTimeGraphViewer().getExpandedElements();
         List<IMarkerEvent> markers = new ArrayList<>();
         for (ITimeGraphEntry element : expandedElements) {
-            if (((TimeGraphEntry) element).getModel() instanceof SpanLifeEntryModel) {
-                SpanLifeEntryModel model = (SpanLifeEntryModel) ((TimeGraphEntry) element).getModel();
+            ITmfTreeDataModel entryModel = ((TimeGraphEntry) element).getEntryModel();
+            if (entryModel instanceof SpanLifeEntryModel) {
+                SpanLifeEntryModel model = (SpanLifeEntryModel) entryModel;
                 for (LogEvent log : model.getLogs()) {
                     markers.add(new SpanMarkerEvent(element, log.getTime(), MARKER_COLOR, log.getType()));
                 }

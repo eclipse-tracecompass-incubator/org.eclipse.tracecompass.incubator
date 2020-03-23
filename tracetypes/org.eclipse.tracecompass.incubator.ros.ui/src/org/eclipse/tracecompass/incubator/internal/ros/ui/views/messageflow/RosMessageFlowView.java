@@ -30,7 +30,7 @@ import org.eclipse.tracecompass.incubator.internal.ros.core.analysis.model.messa
 import org.eclipse.tracecompass.incubator.internal.ros.ui.Activator;
 import org.eclipse.tracecompass.incubator.internal.ros.ui.views.AbstractRosView;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfStartAnalysisSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -65,7 +65,7 @@ public class RosMessageFlowView extends AbstractRosView {
         @Override
         public String getColumnText(Object element, int columnIndex) {
             TimeGraphEntry entry = (TimeGraphEntry) element;
-            ITimeGraphEntryModel model = entry.getModel();
+            ITmfTreeDataModel model = entry.getEntryModel();
             if (model instanceof RosMessageFlowSegmentEntryModel) {
                 RosMessageFlowSegmentEntryModel segmentModel = (RosMessageFlowSegmentEntryModel) model;
                 RosMessageFlowSegment segment = segmentModel.getSegment();

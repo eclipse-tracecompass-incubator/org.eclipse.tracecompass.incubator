@@ -22,9 +22,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.graphics.RGBA;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
+import org.eclipse.tracecompass.tmf.core.dataprovider.X11ColorUtils;
+import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
@@ -34,7 +35,6 @@ import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraph
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEventStyleStrings;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
@@ -57,8 +57,8 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
     private static final @NonNull String OTHER = "other"; //$NON-NLS-1$
     private static final @NonNull String FLAG_EMOJI = "🏳️"; //$NON-NLS-1$
 
-    private static final @NonNull RGBA MARKER_COLOR = new RGBA(200, 0, 0, 150);
-    private static final int MARKER_COLOR_INT = MARKER_COLOR.hashCode();
+    private static final @NonNull String MARKER_HEX_COLOR = X11ColorUtils.toHexColor(200, 0, 0);
+    private static double OPACITY = 150/255;
     /**
      * Only states available
      */
@@ -67,15 +67,15 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
             new StateItem(new RGB(0,91,150), "Third Service Class"), //$NON-NLS-1$
             new StateItem(new RGB(3, 57, 108), "Forth Service Class"), //$NON-NLS-1$
             new StateItem(new RGB(1, 31, 75), "Fifth Service Class"), //$NON-NLS-1$
-            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), ERROR, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.CROSS, ITimeEventStyleStrings.heightFactor(),
+            new StateItem(ImmutableMap.of(StyleProperties.STYLE_NAME, ERROR, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.CROSS, StyleProperties.HEIGHT,
                     0.4f)),
             new StateItem(
-                    ImmutableMap.of(ITimeEventStyleStrings.label(), EVENT, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.DIAMOND, ITimeEventStyleStrings.heightFactor(), 0.3f)),
+                    ImmutableMap.of(StyleProperties.STYLE_NAME, EVENT, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.DIAMOND, StyleProperties.HEIGHT, 0.3f)),
             new StateItem(
-                    ImmutableMap.of(ITimeEventStyleStrings.label(), MESSAGE, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.CIRCLE, ITimeEventStyleStrings.heightFactor(), 0.3f)),
-            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), STACK, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), IYAppearance.SymbolStyle.SQUARE,
-                    ITimeEventStyleStrings.heightFactor(), 0.3f)),
-            new StateItem(ImmutableMap.of(ITimeEventStyleStrings.label(), OTHER, ITimeEventStyleStrings.fillColor(), MARKER_COLOR_INT, ITimeEventStyleStrings.symbolStyle(), FLAG_EMOJI, ITimeEventStyleStrings.heightFactor(), 0.3f))
+                    ImmutableMap.of(StyleProperties.STYLE_NAME, MESSAGE, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.CIRCLE, StyleProperties.HEIGHT, 0.3f)),
+            new StateItem(ImmutableMap.of(StyleProperties.STYLE_NAME, STACK, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.SQUARE,
+                    StyleProperties.HEIGHT, 0.3f)),
+            new StateItem(ImmutableMap.of(StyleProperties.STYLE_NAME, OTHER, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, FLAG_EMOJI, StyleProperties.HEIGHT, 0.3f))
     };
 
     /**
@@ -98,7 +98,7 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
         }
         ITimeGraphEntry entry = event.getEntry();
         if (entry instanceof TimeGraphEntry) {
-            long id = ((TimeGraphEntry) entry).getModel().getId();
+            long id = ((TimeGraphEntry) entry).getEntryModel().getId();
             ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider = BaseDataProviderTimeGraphView.getProvider((TimeGraphEntry) entry);
 
             long windowStartTime = Long.MIN_VALUE;
@@ -144,8 +144,8 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
             }
         }
         if ((event instanceof TimeEvent) && ((TimeEvent) event).getValue() != Integer.MIN_VALUE) {
-            if ((event.getEntry() instanceof TimeGraphEntry) && (((TimeGraphEntry) event.getEntry()).getModel() instanceof SpanLifeEntryModel)) {
-                String processName = ((SpanLifeEntryModel) ((TimeGraphEntry) event.getEntry()).getModel()).getProcessName();
+            if ((event.getEntry() instanceof TimeGraphEntry) && (((TimeGraphEntry) event.getEntry()).getEntryModel() instanceof SpanLifeEntryModel)) {
+                String processName = ((SpanLifeEntryModel) ((TimeGraphEntry) event.getEntry()).getEntryModel()).getProcessName();
                 // We want a random color but that is the same for 2 spans of the same service
                 return Math.abs(Objects.hash(processName)) % 5;
             }

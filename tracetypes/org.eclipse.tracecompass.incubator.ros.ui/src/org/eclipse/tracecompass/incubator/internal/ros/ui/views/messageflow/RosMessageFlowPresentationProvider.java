@@ -16,7 +16,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.tracecompass.tmf.core.presentation.RGBAColor;
+import org.eclipse.tracecompass.tmf.core.dataprovider.X11ColorUtils;
+import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
@@ -73,9 +74,8 @@ public class RosMessageFlowPresentationProvider extends TimeGraphPresentationPro
             RGB stateColor = state.rgb;
             String stateType = state.name().toLowerCase().contains(ARROW_STATE) ? ITimeEventStyleStrings.linkType() : ITimeEventStyleStrings.stateType();
             ImmutableMap<String, Object> styleMap = ImmutableMap.of(
-                    ITimeEventStyleStrings.fillStyle(), ITimeEventStyleStrings.solidColorFillStyle(),
-                    ITimeEventStyleStrings.fillColor(), new RGBAColor(stateColor.red, stateColor.green, stateColor.blue).toInt(),
-                    ITimeEventStyleStrings.label(), String.valueOf(state.toString()),
+                    StyleProperties.BACKGROUND_COLOR, X11ColorUtils.toHexColor(stateColor.red, stateColor.green, stateColor.blue),
+                    StyleProperties.STYLE_NAME, String.valueOf(state.toString()),
                     ITimeEventStyleStrings.itemTypeProperty(), stateType);
             STATE_TABLE[i] = new StateItem(styleMap);
         }

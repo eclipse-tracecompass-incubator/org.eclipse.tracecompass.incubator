@@ -128,7 +128,7 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
                 ITmfTrace activeTrace = TmfTraceManager.getInstance().getActiveTrace();
                 if (activeTrace != null && dp != null) {
                     TmfTimeRange tr = activeTrace.getTimeRange();
-                    return NonNullUtils.nullToEmptyString(dp.getBytesRead(tr.getStartTime().toNanos(), tr.getEndTime().toNanos(), entry.getModel().getId()));
+                    return NonNullUtils.nullToEmptyString(dp.getBytesRead(tr.getStartTime().toNanos(), tr.getEndTime().toNanos(), entry.getEntryModel().getId()));
                 }
             }
             if (columnIndex == 3) {
@@ -137,7 +137,7 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
                 ITmfTrace activeTrace = TmfTraceManager.getInstance().getActiveTrace();
                 if (activeTrace != null && dp != null) {
                     TmfTimeRange tr = activeTrace.getTimeRange();
-                    return NonNullUtils.nullToEmptyString(dp.getBytesWrite(tr.getStartTime().toNanos(), tr.getEndTime().toNanos(), entry.getModel().getId()));
+                    return NonNullUtils.nullToEmptyString(dp.getBytesWrite(tr.getStartTime().toNanos(), tr.getEndTime().toNanos(), entry.getEntryModel().getId()));
                 }
             }
             return super.getColumnText(element, columnIndex);
