@@ -23,7 +23,6 @@ import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.Fi
 import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.HandlerParameter;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.StateSystemBuilderUtils;
-import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
@@ -146,7 +145,7 @@ public class FileAccessStateProvider extends FileDescriptorStateProvider {
             int tidFileQuark = ssb.getQuarkAbsoluteAndAdd(TID, String.valueOf(tid), String.valueOf(fd));
             ssb.modifyAttribute(time, fn, tidFileQuark);
             StateSystemBuilderUtils.incrementAttributeInt(ssb, time, fileQuark, 1);
-        } catch (StateValueTypeException | AttributeNotFoundException e) {
+        } catch (StateValueTypeException e) {
             Activator.getInstance().logError(e.getMessage(), e);
         }
     }

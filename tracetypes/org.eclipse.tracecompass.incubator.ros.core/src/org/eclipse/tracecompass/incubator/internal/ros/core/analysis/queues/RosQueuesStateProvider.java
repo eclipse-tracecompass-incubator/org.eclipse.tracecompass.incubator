@@ -73,7 +73,7 @@ public class RosQueuesStateProvider extends AbstractRosStateProvider {
                 int subsListQuark = ss.getQuarkAbsoluteAndAdd(nodeName, SUBSCRIBERS_LIST);
                 try {
                     StateSystemBuilderUtils.incrementAttributeInt(ss, timestamp, subsListQuark, 1);
-                } catch (StateValueTypeException | AttributeNotFoundException e) {
+                } catch (StateValueTypeException e) {
                 }
 
                 // Increment subscribers list counter

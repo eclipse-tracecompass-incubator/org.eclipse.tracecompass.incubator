@@ -35,7 +35,6 @@ import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
-import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
@@ -344,17 +343,4 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
         }
     }
 
-    @Deprecated
-    @Override
-    public TmfModelResponse<List<ITimeGraphArrow>> fetchArrows(TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
-        return fetchArrows(parameters, monitor);
-    }
-
-    @Deprecated
-    @Override
-    public TmfModelResponse<Map<String, String>> fetchTooltip(SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
-        return fetchTooltip(parameters, monitor);
-    }
 }

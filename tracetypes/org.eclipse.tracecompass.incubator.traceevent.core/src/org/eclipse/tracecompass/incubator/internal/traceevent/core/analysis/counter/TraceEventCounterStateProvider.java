@@ -23,7 +23,6 @@ import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEv
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventField;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.StateSystemBuilderUtils;
-import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
@@ -114,7 +113,7 @@ public class TraceEventCounterStateProvider extends AbstractTmfStateProvider {
                         groupQuark = ss.getQuarkRelativeAndAdd(groupQuark, entry.getKey());
                         StateSystemBuilderUtils.incrementAttributeLong(ss, event.getTimestamp().toNanos(), groupQuark, value.longValue());
                     }
-                } catch (StateValueTypeException | AttributeNotFoundException e) {
+                } catch (StateValueTypeException e) {
                     Activator.getInstance().logError("error in counters analysis", e); //$NON-NLS-1$
                 }
             }

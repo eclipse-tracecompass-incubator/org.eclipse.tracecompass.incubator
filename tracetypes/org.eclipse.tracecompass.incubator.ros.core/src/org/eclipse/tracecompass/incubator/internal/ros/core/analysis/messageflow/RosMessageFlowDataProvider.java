@@ -93,18 +93,6 @@ public class RosMessageFlowDataProvider extends AbstractTmfTraceDataProvider imp
         return fSegmentToId.computeIfAbsent(segment, i -> ATOMIC_LONG.getAndIncrement());
     }
 
-    @Deprecated
-    @Override
-    public @NonNull TmfModelResponse<@NonNull List<@NonNull TimeGraphEntryModel>> fetchTree(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        TmfModelResponse<@NonNull TmfTreeModel<@NonNull TimeGraphEntryModel>> response = fetchTree(FetchParametersUtils.timeQueryToMap(filter), monitor);
-        TmfTreeModel<@NonNull TimeGraphEntryModel> model = response.getModel();
-        List<@NonNull TimeGraphEntryModel> treeModel = null;
-        if (model != null) {
-            treeModel = model.getEntries();
-        }
-        return new TmfModelResponse<>(treeModel, response.getStatus(), response.getStatusMessage());
-    }
-
     @Override
     public @NonNull TmfModelResponse<@NonNull TmfTreeModel<@NonNull TimeGraphEntryModel>> fetchTree(@NonNull Map<@NonNull String, @NonNull Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         TimeQueryFilter filter = FetchParametersUtils.createTimeQuery(fetchParameters);
@@ -134,19 +122,6 @@ public class RosMessageFlowDataProvider extends AbstractTmfTraceDataProvider imp
         for (RosMessageFlowSegment n : next) {
             addTreeChildren(entries, n, parentId);
         }
-    }
-
-    @Deprecated
-    @Override
-    public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphRowModel>> fetchRowModel(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        @NonNull Map<@NonNull String, @NonNull Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
-        TmfModelResponse<@NonNull TimeGraphModel> response = fetchRowModel(parameters, monitor);
-        TimeGraphModel model = response.getModel();
-        List<@NonNull ITimeGraphRowModel> rows = null;
-        if (model != null) {
-            rows = model.getRows();
-        }
-        return new TmfModelResponse<>(rows, response.getStatus(), response.getStatusMessage());
     }
 
     @Override
@@ -210,12 +185,6 @@ public class RosMessageFlowDataProvider extends AbstractTmfTraceDataProvider imp
         return 4;
     }
 
-    @Deprecated
-    @Override
-    public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        return fetchArrows(FetchParametersUtils.timeQueryToMap(filter), monitor);
-    }
-
     @Override
     public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull Map<@NonNull String, @NonNull Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         TimeQueryFilter filter = FetchParametersUtils.createTimeQuery(fetchParameters);
@@ -265,12 +234,6 @@ public class RosMessageFlowDataProvider extends AbstractTmfTraceDataProvider imp
             return 6;
         }
         return 7;
-    }
-
-    @Deprecated
-    @Override
-    public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        return fetchTooltip(FetchParametersUtils.selectionTimeQueryToMap(filter), monitor);
     }
 
     @Override

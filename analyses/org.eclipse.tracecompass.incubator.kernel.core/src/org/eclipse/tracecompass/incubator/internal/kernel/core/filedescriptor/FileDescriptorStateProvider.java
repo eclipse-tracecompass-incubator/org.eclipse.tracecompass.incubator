@@ -24,7 +24,6 @@ import org.eclipse.tracecompass.incubator.internal.kernel.core.Activator;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.StateSystemBuilderUtils;
-import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
@@ -225,7 +224,7 @@ public abstract class FileDescriptorStateProvider extends AbstractTmfStateProvid
                     int readFile = ssb.getQuarkAbsoluteAndAdd(RESOURCES, String.valueOf(fileNameObj), String.valueOf(tid), READ);
                     StateSystemBuilderUtils.incrementAttributeLong(ssb, time, readFile, count);
                 }
-            } catch (StateValueTypeException | AttributeNotFoundException e) {
+            } catch (StateValueTypeException e) {
                 Activator.getInstance().logError(e.getMessage(), e);
             }
         }
@@ -261,7 +260,7 @@ public abstract class FileDescriptorStateProvider extends AbstractTmfStateProvid
                     int writeFile = ssb.getQuarkAbsoluteAndAdd(RESOURCES, String.valueOf(fileNameObj), String.valueOf(tid), WRITE);
                     StateSystemBuilderUtils.incrementAttributeLong(ssb, time, writeFile, count);
                 }
-            } catch (StateValueTypeException | AttributeNotFoundException e) {
+            } catch (StateValueTypeException e) {
                 Activator.getInstance().logError(e.getMessage(), e);
             }
         }
@@ -316,7 +315,7 @@ public abstract class FileDescriptorStateProvider extends AbstractTmfStateProvid
                 }
                 ssb.modifyAttribute(time, (Object) null, fileTidQuark);
             }
-        } catch (StateValueTypeException | AttributeNotFoundException e) {
+        } catch (StateValueTypeException e) {
             Activator.getInstance().logError(e.getMessage(), e);
         }
     }

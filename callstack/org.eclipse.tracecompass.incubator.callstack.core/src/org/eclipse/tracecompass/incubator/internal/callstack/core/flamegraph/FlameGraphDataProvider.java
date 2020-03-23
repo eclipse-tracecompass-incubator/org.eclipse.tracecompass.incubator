@@ -53,7 +53,6 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.p
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel.EntryType;
 import org.eclipse.tracecompass.internal.provisional.statesystem.core.statevalue.CustomStateValue;
 import org.eclipse.tracecompass.internal.tmf.core.model.AbstractTmfTraceDataProvider;
-import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
@@ -68,8 +67,6 @@ import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
 import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
 import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
-import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
-import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
@@ -393,7 +390,7 @@ public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTr
         if (lastEnd == null) {
             return;
         }
-        ssb.pushAttribute(lastEnd, (Object) new CalleeCustomValue(callSite), quarkFct);
+        ssb.pushAttribute(lastEnd, new CalleeCustomValue(callSite), quarkFct);
 
         // Push the children to the state system
         timestampStack.push(lastEnd);
@@ -415,7 +412,7 @@ public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTr
             int quarkExtra = ssb.getQuarkAbsoluteAndAdd(dataSetName);
             long extraStartTime = lastEnd;
             for (WeightedTree<@NonNull N> extraTree : extraDataTrees) {
-                ssb.modifyAttribute(extraStartTime, (Object) new CalleeCustomValue(extraTree), quarkExtra);
+                ssb.modifyAttribute(extraStartTime, new CalleeCustomValue(extraTree), quarkExtra);
                 extraStartTime += extraTree.getWeight();
             }
 
@@ -728,47 +725,6 @@ public class FlameGraphDataProvider<@NonNull N, E, @NonNull T extends WeightedTr
             // Nothing to do
         }
         return null;
-    }
-
-    @Deprecated
-    @Override
-    public TmfModelResponse<List<FlameChartEntryModel>> fetchTree(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
-        TmfModelResponse<@NonNull TmfTreeModel<@NonNull FlameChartEntryModel>> response = fetchTree(parameters, monitor);
-        TmfTreeModel<@NonNull FlameChartEntryModel> model = response.getModel();
-        List<FlameChartEntryModel> treeModel = null;
-        if (model != null) {
-            treeModel = model.getEntries();
-        }
-        return new TmfModelResponse<>(treeModel, response.getStatus(),
-                response.getStatusMessage());
-    }
-
-    @Deprecated
-    @Override
-    public TmfModelResponse<List<ITimeGraphRowModel>> fetchRowModel(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
-        TmfModelResponse<TimeGraphModel> response = fetchRowModel(parameters, monitor);
-        TimeGraphModel model = response.getModel();
-        List<ITimeGraphRowModel> rows = null;
-        if (model != null) {
-            rows = model.getRows();
-        }
-        return new TmfModelResponse<>(rows, response.getStatus(), response.getStatusMessage());
-    }
-
-    @Deprecated
-    @Override
-    public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
-        return fetchArrows(parameters, monitor);
-    }
-
-    @Deprecated
-    @Override
-    public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
-        return fetchTooltip(parameters, monitor);
     }
 
     @Override

@@ -29,7 +29,6 @@ import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
-import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
@@ -123,23 +122,9 @@ public class ContextDataProvider extends AbstractTimeGraphDataProvider<@NonNull 
         return true;
     }
 
-    @Deprecated
-    @Override
-    public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
-        return fetchArrows(parameters, monitor);
-    }
-
     @Override
     public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         return new TmfModelResponse<>(null, Status.COMPLETED, "Not supported"); //$NON-NLS-1$
-    }
-
-    @Deprecated
-    @Override
-    public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
-        return fetchTooltip(parameters, monitor);
     }
 
     @Override

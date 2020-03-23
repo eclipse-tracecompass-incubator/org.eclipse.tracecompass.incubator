@@ -869,47 +869,6 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
         return data;
     }
 
-    @Deprecated
-    @Override
-    public TmfModelResponse<List<FlameChartEntryModel>> fetchTree(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
-        TmfModelResponse<@NonNull TmfTreeModel<@NonNull FlameChartEntryModel>> response = fetchTree(parameters, monitor);
-        TmfTreeModel<@NonNull FlameChartEntryModel> model = response.getModel();
-        List<FlameChartEntryModel> treeModel = null;
-        if (model != null) {
-            treeModel = model.getEntries();
-        }
-        return new TmfModelResponse<>(treeModel, response.getStatus(),
-                response.getStatusMessage());
-    }
-
-    @Deprecated
-    @Override
-    public TmfModelResponse<List<ITimeGraphRowModel>> fetchRowModel(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
-        TmfModelResponse<TimeGraphModel> response = fetchRowModel(parameters, monitor);
-        TimeGraphModel model = response.getModel();
-        List<ITimeGraphRowModel> rows = null;
-        if (model != null) {
-            rows = model.getRows();
-        }
-        return new TmfModelResponse<>(rows, response.getStatus(), response.getStatusMessage());
-    }
-
-    @Deprecated
-    @Override
-    public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
-        return fetchArrows(parameters, monitor);
-    }
-
-    @Deprecated
-    @Override
-    public @NonNull TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> fetchTooltip(@NonNull SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
-        return fetchTooltip(parameters, monitor);
-    }
-
     @Override
     public TmfModelResponse<OutputStyleModel> fetchStyle(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         // Use the palette with kernel styles, at worst, kernel styles won't be used

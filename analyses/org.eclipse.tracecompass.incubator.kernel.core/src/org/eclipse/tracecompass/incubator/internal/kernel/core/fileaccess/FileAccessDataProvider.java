@@ -51,7 +51,6 @@ import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
-import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
@@ -134,13 +133,6 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         super(trace, analysisModule);
     }
 
-    @Deprecated
-    @Override
-    public @NonNull TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> fetchArrows(@NonNull TimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(filter);
-        return fetchArrows(parameters, monitor);
-    }
-
     @Override
     public TmfModelResponse<List<ITimeGraphArrow>> fetchArrows(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
@@ -217,13 +209,6 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
     @Override
     protected boolean isCacheable() {
         return false;
-    }
-
-    @Deprecated
-    @Override
-    public TmfModelResponse<Map<String, String>> fetchTooltip(SelectionTimeQueryFilter filter, @Nullable IProgressMonitor monitor) {
-        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
-        return fetchTooltip(parameters, monitor);
     }
 
     @Override
@@ -432,8 +417,9 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         Multimap<@NonNull String, @NonNull Object> data = HashMultimap.create();
         data.putAll(super.getFilterData(entryId, time, monitor));
 
-        SelectionTimeQueryFilter filter = new SelectionTimeQueryFilter(Collections.singletonList(time), Collections.singleton(Objects.requireNonNull(entryId)));
-        TmfModelResponse<Map<String, String>> response = fetchTooltip(filter, monitor);
+        Map<@NonNull String, @NonNull Object> parameters = ImmutableMap.of(DataProviderParameterUtils.REQUESTED_TIME_KEY, Collections.singletonList(time),
+                                DataProviderParameterUtils.REQUESTED_ELEMENT_KEY, Collections.singleton(Objects.requireNonNull(entryId)));
+        TmfModelResponse<Map<String, String>> response = fetchTooltip(parameters, monitor);
         Map<@NonNull String, @NonNull String> model = response.getModel();
         if (model != null) {
             for (Entry<String, String> entry : model.entrySet()) {
