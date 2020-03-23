@@ -1984,7 +1984,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
                     Predicate<Multimap<String, Object>> value = Objects.requireNonNull(mapEntry.getValue());
                     Multimap<String, Object> toTest = HashMultimap.create();
                     getPresentationProvider().getFilterInput(te).forEach((k, e) -> toTest.put(k, e));
-                    te.computeData().forEach((k, e) -> toTest.put(k, e));
+                    te.getMetadata().forEach((k, e) -> toTest.put(k, e));
 
                     boolean status = value.test(toTest);
                     Integer property = mapEntry.getKey();
