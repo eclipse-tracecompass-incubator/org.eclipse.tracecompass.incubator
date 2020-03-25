@@ -16,10 +16,14 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.density.AbstractSegmentStoreDensityView;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.density.AbstractSegmentStoreDensityViewer;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.table.AbstractSegmentStoreTableViewer;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
+import org.eclipse.tracecompass.tmf.core.segment.SegmentDurationAspect;
+import org.eclipse.tracecompass.tmf.core.segment.SegmentEndTimeAspect;
+import org.eclipse.tracecompass.tmf.core.segment.SegmentStartTimeAspect;
 
 /**
  * Call stack Density view displaying the call stack segments tree.
@@ -45,7 +49,29 @@ public class FunctionDensityView extends AbstractSegmentStoreDensityView {
             protected void createProviderColumns() {
                 super.createProviderColumns();
                 Table t = (Table) getControl();
-                t.setColumnOrder(new int[] { 2, 3, 0, 1 });
+
+                moveColumnTo(t, SegmentDurationAspect.SEGMENT_DURATION_ASPECT.getName(), 0);
+                moveColumnTo(t, SegmentStartTimeAspect.SEGMENT_START_TIME_ASPECT.getName(), 1);
+                moveColumnTo(t, SegmentEndTimeAspect.SEGMENT_END_TIME_ASPECT.getName(), 2);
+            }
+
+            private void moveColumnTo(Table t, String aspectName, int desiredIndex) {
+                int[] order = t.getColumnOrder();
+                int foundIndex = -1;
+                for (int i = 0 ; i < t.getColumnCount(); i++) {
+                    TableColumn col = t.getColumn(i);
+                    if (col.getText().equals(aspectName)) {
+                        foundIndex = i;
+                    }
+                }
+                if (foundIndex == -1) {
+                    // At least we tried
+                    return;
+                }
+                int tmp = order[desiredIndex];
+                order[desiredIndex] = order[foundIndex];
+                order[foundIndex] = tmp;
+                t.setColumnOrder(order);
             }
         };
     }
