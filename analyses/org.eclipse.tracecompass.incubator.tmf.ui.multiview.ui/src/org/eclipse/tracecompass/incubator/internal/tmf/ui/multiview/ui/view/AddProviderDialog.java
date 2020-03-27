@@ -50,7 +50,7 @@ public class AddProviderDialog extends Dialog {
     private final ITmfTrace fTrace;
     private java.util.List<String> fIds = new ArrayList<>();
     private List fList;
-    private String fProviderId;
+    private IDataProviderDescriptor fProvider;
     private ProviderType fProviderType;
 
     /**
@@ -67,13 +67,13 @@ public class AddProviderDialog extends Dialog {
     }
 
     /**
-     * Retrieves the ID selected by the user.
+     * Retrieves the descriptor selected by the user.
      *
-     * @return the ID of the selected provider
+     * @return the selected data provider descriptor
      */
     @Nullable
-    public String getProviderId() {
-        return fProviderId;
+    public IDataProviderDescriptor getProvider() {
+        return fProvider;
     }
 
     public ProviderType getProviderType() {
@@ -111,11 +111,18 @@ public class AddProviderDialog extends Dialog {
         if (okButton == null) {
             return;
         }
+        fProvider = null;
+        okButton.setEnabled(false);
         if (fList.getSelectionCount() > 0) {
-            fProviderId = fIds.get(fList.getSelectionIndices()[0]);
-            okButton.setEnabled(true);
-        } else {
-            fProviderId = null;
+            java.util.List<IDataProviderDescriptor> descriptors = DataProviderManager.getInstance().getAvailableProviders(fTrace);
+            for (IDataProviderDescriptor descriptor : descriptors) {
+                if (descriptor.getId().equals(fIds.get(fList.getSelectionIndices()[0]))) {
+                    fProvider = descriptor;
+                    okButton.setEnabled(true);
+                }
+            }
+        }
+        if (fProvider == null) {
             okButton.setEnabled(false);
         }
     }

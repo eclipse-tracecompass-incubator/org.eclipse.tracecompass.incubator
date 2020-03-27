@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.tim
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -377,6 +378,16 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
         timeGraphViewer.setMarkerAxisControlVisible(false);
         timeGraphViewer.setHorizontalScrollBarVisible(false);
         fTimeGraphViewer = timeGraphViewer;
+        setFilterColumns(new String[] { "Name" });
+        setFilterLabelProvider(new TreeLabelProvider() {
+            @Override
+            public String getColumnText(Object element, int columnIndex) {
+                if (columnIndex == 0) {
+                    return this.getText(element);
+                }
+                return "";
+            }
+        });
     }
 
     /**
@@ -845,6 +856,15 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
     }
 
     /**
+     * Gets the trace displayed in the view.
+     *
+     * @return the trace
+     */
+    public ITmfTrace getTrace() {
+        return fTrace;
+    }
+
+    /**
      * Getter for the presentation provider
      *
      * @return The time graph presentation provider
@@ -1111,21 +1131,49 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
     }
 
     /**
+     * Sets the filter column labels.
+     * <p>
+     * This should be called from the constructor.
+     *
+     * @param filterColumns
+     *            The array of filter column labels
+     */
+    protected void setFilterColumns(final String[] filterColumns) {
+        fFilterColumns = Arrays.copyOf(filterColumns, filterColumns.length);
+    }
+
+    /**
+     * Sets the filter content provider.
+     * <p>
+     * This should be called from the constructor.
+     *
+     * @param contentProvider
+     *            The filter content provider
+     * @since 1.2
+     */
+    protected void setFilterContentProvider(final ITreeContentProvider contentProvider) {
+        fFilterContentProvider = contentProvider;
+    }
+
+    /**
+     * Sets the filter label provider.
+     * <p>
+     * This should be called from the constructor.
+     *
+     * @param labelProvider
+     *            The filter label provider
+     */
+    protected void setFilterLabelProvider(final TreeLabelProvider labelProvider) {
+        fFilterLabelProvider = labelProvider;
+    }
+
+    /**
      * Gets the display width
      *
      * @return the display width
      */
     protected int getDisplayWidth() {
         return fDisplayWidth;
-    }
-
-    /**
-     * Gets the trace displayed in the view.
-     *
-     * @return the trace
-     */
-    public ITmfTrace getTrace() {
-        return fTrace;
     }
 
     /**

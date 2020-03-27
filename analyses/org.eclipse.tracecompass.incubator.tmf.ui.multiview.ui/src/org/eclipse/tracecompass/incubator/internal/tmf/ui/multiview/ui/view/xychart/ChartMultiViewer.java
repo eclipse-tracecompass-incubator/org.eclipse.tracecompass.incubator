@@ -63,23 +63,21 @@ public class ChartMultiViewer extends TmfTimeViewer implements IMultiViewer {
      *
      * @param parent
      *            parent for the viewer
-     * @param leftViewerProviderId
-     *            provider ID for the left viewer
-     * @param chartProviderId
-     *            provider ID for the chart
+     * @param providerId
+     *            provider's ID
      */
-    public ChartMultiViewer(Composite parent, String leftViewerProviderId, String chartProviderId) {
+    public ChartMultiViewer(Composite parent, String providerId) {
         super(parent);
         fSashForm = new SashForm(parent, SWT.NONE);
 
-        fLeftViewer = new TreeViewer(fSashForm, leftViewerProviderId);
+        fLeftViewer = new TreeViewer(fSashForm, providerId);
         fXYViewerContainer = new Composite(fSashForm, SWT.NONE);
         GridLayout layout = new GridLayout();
         layout.marginHeight = 0;
         layout.marginWidth = 0;
         fXYViewerContainer.setLayout(layout);
 
-        fChartViewer = new TmfFilteredXYChartViewer(fXYViewerContainer, new TmfXYChartSettings("", "", "", 1), chartProviderId); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        fChartViewer = new TmfFilteredXYChartViewer(fXYViewerContainer, new TmfXYChartSettings("", "", "", 1), providerId); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         fChartViewer.setTimeAxisVisible(false);
         fChartViewer.setSendTimeAlignSignals(true);
         fChartViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

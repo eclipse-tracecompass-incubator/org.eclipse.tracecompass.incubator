@@ -26,7 +26,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.timegraph.ActionsDataProviderTimeGraphMultiViewer;
 import org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.timegraph.BaseDataProviderTimeGraphMultiViewer;
+import org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.xychart.ActionsChartMultiViewer;
 import org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.xychart.ChartMultiViewer;
 import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
@@ -529,19 +531,24 @@ public abstract class AbstractMultiView extends TmfView implements ITmfTimeAlign
     }
 
     /**
-     * Create and add a new chart viewer for the given data provider ID
+     * Create and add a new chart viewer for the given data provider
      *
      * @param providerId
-     *            The data provider ID
+     *            The ID of the data provider to source in the viewer
+     * @param withActions
+     *            Whether to construct a viewer with actions as context menu or
+     *            not
      * @return The newly created chart viewer
      */
-    protected ChartMultiViewer addChartViewer(String providerId) {
+    protected ChartMultiViewer addChartViewer(String providerId, boolean withActions) {
         SashForm sashForm = fSashForm;
         ITmfTrace trace = getTrace();
         Composite composite = new Composite(sashForm, SWT.NONE);
         composite.setLayout(new FillLayout());
         composite.setBackground(fColorScheme.getColor(TimeGraphColorScheme.BACKGROUND));
-        ChartMultiViewer viewer = new ChartMultiViewer(composite, providerId, providerId);
+        ChartMultiViewer viewer = withActions ?
+                new ActionsChartMultiViewer(composite, providerId, getViewSite()) :
+                new ChartMultiViewer(composite, providerId);
         viewer.setStatusLineManager(getViewSite().getActionBars().getStatusLineManager());
         if (!hasLanes()) {
             viewer.getChartViewer().getSwtChart().addPaintListener(e -> redrawTimeScales());
@@ -566,16 +573,22 @@ public abstract class AbstractMultiView extends TmfView implements ITmfTimeAlign
      * Create and add a new time graph viewer for the given data provider
      *
      * @param providerId
-     *            The ID of the data provider
+     *            The ID of the data provider to source in the viewer
+     * @param withActions
+     *            Whether to construct a viewer with actions as context menu or
+     *            not
      * @return The new time graph viewer
      */
-    protected BaseDataProviderTimeGraphMultiViewer addTimeGraphViewer(String providerId) {
+    protected BaseDataProviderTimeGraphMultiViewer addTimeGraphViewer(String providerId, boolean withActions) {
         SashForm sashForm = fSashForm;
         Composite composite = new Composite(sashForm, SWT.NONE);
         composite.setLayout(new FillLayout());
         composite.setBackground(fColorScheme.getColor(TimeGraphColorScheme.BACKGROUND));
-        BaseDataProviderTimeGraphMultiViewer viewer = new BaseDataProviderTimeGraphMultiViewer(
-                composite, new BaseDataProviderTimeGraphPresentationProvider(), getViewSite(), providerId);
+        BaseDataProviderTimeGraphMultiViewer viewer = withActions ?
+                new ActionsDataProviderTimeGraphMultiViewer(
+                        composite, new BaseDataProviderTimeGraphPresentationProvider(), getViewSite(), providerId) :
+                new BaseDataProviderTimeGraphMultiViewer(
+                        composite, new BaseDataProviderTimeGraphPresentationProvider(), getViewSite(), providerId);
         viewer.init();
         if (!hasLanes()) {
             TimeGraphViewer timeGraphViewer = viewer.getTimeGraphViewer();

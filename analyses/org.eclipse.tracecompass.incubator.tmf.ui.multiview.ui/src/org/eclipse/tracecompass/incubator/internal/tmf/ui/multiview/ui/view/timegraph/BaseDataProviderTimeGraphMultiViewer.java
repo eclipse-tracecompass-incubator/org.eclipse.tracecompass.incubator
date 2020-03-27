@@ -148,7 +148,7 @@ public class BaseDataProviderTimeGraphMultiViewer extends AbstractTimeGraphMulti
      * @param site
      *            workbench site
      * @param providerId
-     *            provider ID
+     *            provider's ID
      */
     public BaseDataProviderTimeGraphMultiViewer(Composite parent, ITimeGraphPresentationProvider pres, IWorkbenchPartSite site, String providerId) {
         super(parent, pres, site);

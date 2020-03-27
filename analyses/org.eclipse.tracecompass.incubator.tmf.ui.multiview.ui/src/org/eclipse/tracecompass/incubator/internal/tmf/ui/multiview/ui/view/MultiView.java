@@ -20,6 +20,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
@@ -75,12 +76,15 @@ public class MultiView extends AbstractMultiView {
                 AddProviderDialog dialog = new AddProviderDialog(shell, trace);
                 dialog.setBlockOnOpen(true);
                 if (dialog.open() == Window.OK) {
-                    String providerId = dialog.getProviderId();
+                    IDataProviderDescriptor descriptor = dialog.getProvider();
+                    if (descriptor == null) {
+                        return;
+                    }
                     if (dialog.getProviderType() == ProviderType.TREE_TIME_XY) {
-                        addChartViewer(providerId);
+                        addChartViewer(descriptor.getId(), true);
                     }
                     if (dialog.getProviderType() == ProviderType.TIME_GRAPH) {
-                        addTimeGraphViewer(providerId);
+                        addTimeGraphViewer(descriptor.getId(), true);
                     }
                     alignViewers(true);
                 }
