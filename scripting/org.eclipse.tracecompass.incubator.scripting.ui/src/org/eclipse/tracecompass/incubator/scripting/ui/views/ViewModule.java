@@ -15,6 +15,7 @@ import org.eclipse.ease.modules.ScriptParameter;
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.tracecompass.incubator.internal.scripting.ui.views.histogram.ScriptedHistogramView;
 import org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph.ScriptedTimeGraphView;
 import org.eclipse.tracecompass.incubator.internal.scripting.ui.views.xychart.ScriptedXYView;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
@@ -148,5 +149,35 @@ public class ViewModule {
         final IWorkbenchPage activePage = wb.getActiveWorkbenchWindow().getActivePage();
 
         return activePage.showView(ScriptedXYView.ID, name.replace(":", ScriptedXYView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
+    }
+
+    /**
+     * Open a histogram chart for a scripted XY data provider
+     *
+     * @param dataProvider
+     *            The data provider used to populate the view
+     */
+    @WrapToScript
+    public void openHistogramChartView(ITmfTreeXYDataProvider<ITmfTreeDataModel> dataProvider) {
+        Display.getDefault().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    IViewPart view = openHistogramView(dataProvider.getId());
+                    if (view == null) {
+                        return;
+                    }
+                } catch (final PartInitException e) {
+                    // Do nothing
+                }
+            }
+        });
+    }
+
+    private static @Nullable IViewPart openHistogramView(String name) throws PartInitException {
+        final IWorkbench wb = PlatformUI.getWorkbench();
+        final IWorkbenchPage activePage = wb.getActiveWorkbenchWindow().getActivePage();
+
+        return activePage.showView(ScriptedHistogramView.ID, name.replace(":", ScriptedHistogramView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
     }
 }

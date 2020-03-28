@@ -30,6 +30,17 @@
       <view
             allowMultiple="true"
             category="org.eclipse.linuxtools.lttng2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.scripting.ui.views.histogram.ScriptedHistogramView"
+            id="org.eclipse.tracecompass.incubator.internal.scripting.ui.views.histogram"
+            name="%view.scriptedHistogramChart"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+            point="org.eclipse.ui.views">
+      <view
+            allowMultiple="true"
+            category="org.eclipse.linuxtools.lttng2.ui.views.category"
             class="org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph.ScriptedTimeGraphView"
             id="org.eclipse.tracecompass.incubator.scripting.ui.view.timegraph"
             name="%view.scriptedTimeGraph"
