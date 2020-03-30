@@ -12,11 +12,11 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -30,11 +30,13 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
@@ -115,18 +117,26 @@ public class ExperimentManagerService {
      * Post a new experiment encapsulating the traces from the list of
      * {@link UUID}s.
      *
-     * @param name
-     *            name for the experiment.
-     * @param traceUUIDs
-     *            {@link UUID}s of the traces to add to the experiment
+     *  @param queryParameters
+     *            Parameters to post a experiment as described by
+     *            {@link QueryParameters}
+     *            - name -> name for the experiment.
+     *            - traces -> List of UUID strings of the traces to add to the experiment
+     *
      * @return no content response if one of the trace {@link UUID}s does not map to
      *         any trace.
      */
     @POST
-    @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public Response postExperiment(@FormParam("name") String name,
-            @FormParam("traces") List<UUID> traceUUIDs) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response postExperiment(QueryParameters queryParameters) {
+        Map<String, Object> parameters = queryParameters.getParameters();
+        String name = (String) parameters.get("name"); //$NON-NLS-1$
+        Object traces = parameters.get("traces"); //$NON-NLS-1$
+        if (! (traces instanceof List<?>)) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+        List<?> traceUUIDs = (List<?>) traces;
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
         IPath ipath = root.getLocation().append(EXPERIMENTS).append(name);
         IResource resource = root.findMember(ipath);
@@ -137,7 +147,14 @@ public class ExperimentManagerService {
 
         ITmfTrace[] array = new ITmfTrace[traceUUIDs.size()];
         int i = 0;
-        for (UUID uuid : traceUUIDs) {
+        for (Object uuidObj : traceUUIDs) {
+            String uuidStr;
+            if (uuidObj instanceof String) {
+                uuidStr = (String) uuidObj;
+            } else {
+                return Response.status(Status.BAD_REQUEST).build();
+            }
+            UUID uuid = UUID.fromString(uuidStr);
             ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
             if (trace == null) {
                 return Response.noContent().build();
@@ -151,7 +168,14 @@ public class ExperimentManagerService {
                 return Response.serverError().entity(e.getMessage()).build();
             }
         }
+
         TmfExperiment experiment = new TmfExperiment(ITmfEvent.class, ipath.toOSString(), array, TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, resource);
+        experiment.indexTrace(false);
+        // read first event to make sure start time is initialized
+        ITmfContext ctx = experiment.seekEvent(0);
+        experiment.getNext(ctx);
+        ctx.dispose();
+
         TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(this, experiment, null));
         return Response.ok(experiment).build();
     }

@@ -48,6 +48,8 @@ public class ExperimentSerializer extends StdSerializer<@NonNull TmfExperiment> 
         gen.writeNumberField("nbEvents", value.getNbEvents()); //$NON-NLS-1$
         gen.writeNumberField("start", value.getStartTime().toNanos()); //$NON-NLS-1$
         gen.writeNumberField("end", value.getEndTime().toNanos()); //$NON-NLS-1$
+        String indexingStatus = value.isIndexing() ? "RUNNING" : "COMPLETED"; //$NON-NLS-1$ //$NON-NLS-2$
+        gen.writeStringField("indexingStatus", indexingStatus); //$NON-NLS-1$
         gen.writeObjectField("traces", value.getTraces()); //$NON-NLS-1$
         gen.writeEndObject();
     }

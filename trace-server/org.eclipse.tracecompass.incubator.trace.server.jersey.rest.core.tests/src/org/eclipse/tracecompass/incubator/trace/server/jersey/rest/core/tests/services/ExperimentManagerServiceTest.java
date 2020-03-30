@@ -13,14 +13,19 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.s
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Form;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
@@ -57,11 +62,16 @@ public class ExperimentManagerServiceTest extends RestServerTest {
 
         assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
 
-        Form form = new Form(NAME, TEST);
-        form.param(TRACES, CONTEXT_SWITCHES_KERNEL_UUID.toString());
-        form.param(TRACES, CONTEXT_SWITCHES_UST_UUID.toString());
+        List<String> traceUUIDs = new ArrayList<>();
+        traceUUIDs.add(CONTEXT_SWITCHES_KERNEL_UUID.toString());
+        traceUUIDs.add(CONTEXT_SWITCHES_UST_UUID.toString());
 
-        assertEquals("Failed to POST the experiment", EXPECTED, expTarget.request().post(Entity.form(form)).readEntity(ExperimentModelStub.class));
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(NAME, EXPECTED.getName());
+        parameters.put(TRACES, traceUUIDs);
+
+        Response response = expTarget.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())));
+        assertEquals("Failed to POST the experiment", EXPECTED, response.readEntity(ExperimentModelStub.class));
         assertEquals("Failed to add experiment to set of experiments", Collections.singleton(EXPECTED), getExperiments(expTarget));
         assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_SET, getTraces(traces));
         assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(EXPERIMENT_UUID).request().get(ExperimentModelStub.class));
