@@ -41,6 +41,17 @@
       <view
             allowMultiple="true"
             category="org.eclipse.linuxtools.lttng2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.scripting.ui.views.scatter.ScriptedScatterView"
+            id="org.eclipse.tracecompass.incubator.internal.scripting.ui.views.scatter"
+            name="%view.scriptedScatterChart"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+            point="org.eclipse.ui.views">
+      <view
+            allowMultiple="true"
+            category="org.eclipse.linuxtools.lttng2.ui.views.category"
             class="org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph.ScriptedTimeGraphView"
             id="org.eclipse.tracecompass.incubator.scripting.ui.view.timegraph"
             name="%view.scriptedTimeGraph"

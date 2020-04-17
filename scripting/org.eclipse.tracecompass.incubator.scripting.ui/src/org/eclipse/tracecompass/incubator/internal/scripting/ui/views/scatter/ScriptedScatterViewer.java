@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.scripting.ui.views.histogram;
+package org.eclipse.tracecompass.incubator.internal.scripting.ui.views.scatter;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.swt.widgets.Composite;
@@ -18,21 +18,21 @@ import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.linecharts.TmfFilteredXY
 import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.linecharts.TmfXYChartSettings;
 
 /**
- * Viewer for the {@link ScriptedHistogramView}
+ * Viewer for the {@link ScriptedScatterView}
  *
  * @author Qing Chi
  */
-public class ScriptedHistogramViewer extends TmfFilteredXYChartViewer {
+public class ScriptedScatterViewer extends TmfFilteredXYChartViewer {
 
     private static final int DEFAULT_SERIES_WIDTH = 1;
 
-    public ScriptedHistogramViewer(Composite parent, TmfXYChartSettings settings, String providerId) {
+    public ScriptedScatterViewer(Composite parent, TmfXYChartSettings settings, String providerId) {
         super(parent, settings, providerId);
     }
 
     @Override
     public IYAppearance getSeriesAppearance(@NonNull String seriesName) {
-        return getPresentationProvider().getAppearance(seriesName, IYAppearance.Type.BAR, DEFAULT_SERIES_WIDTH);
+        return getPresentationProvider().getAppearance(seriesName, IYAppearance.Type.SCATTER, DEFAULT_SERIES_WIDTH);
     }
 
 }

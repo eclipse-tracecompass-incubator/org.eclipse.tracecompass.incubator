@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 VMware, Inc.
+ *  Copyright (c) 2020 VMware, Inc.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.scripting.ui.views.histogram;
+package org.eclipse.tracecompass.incubator.internal.scripting.ui.views.scatter;
 
 import java.util.Objects;
 
@@ -29,7 +29,7 @@ import org.eclipse.tracecompass.tmf.ui.views.TmfChartView;
  *
  * @author Qing Chi
  */
-public class ScriptedHistogramView extends TmfChartView {
+public class ScriptedScatterView extends TmfChartView {
 
     /**
      * Because colons are not allowed in secondary IDs, but can be present in
@@ -39,19 +39,19 @@ public class ScriptedHistogramView extends TmfChartView {
     public static final String COLON = "[COLON]"; //$NON-NLS-1$
 
     /** The view ID. */
-    public static final String ID = "org.eclipse.tracecompass.incubator.internal.scripting.ui.views.histogram"; //$NON-NLS-1$
+    public static final String ID = "org.eclipse.tracecompass.incubator.internal.scripting.ui.views.scatter"; //$NON-NLS-1$
 
     /**
      * Default Constructor
      */
-    public ScriptedHistogramView() {
+    public ScriptedScatterView() {
         super(ID);
     }
 
     @Override
     protected TmfXYChartViewer createChartViewer(Composite parent) {
-        TmfXYChartSettings settings = new TmfXYChartSettings(Messages.ScriptedHistogramTreeViewer_DefaultViewerTitle, Messages.ScriptedHistogramTreeViewer_DefaultXAxis, Messages.ScriptedHistogramTreeViewer_DefaultYAxis, 1);
-        return new ScriptedHistogramViewer(parent, settings, getSecondaryIdName());
+        TmfXYChartSettings settings = new TmfXYChartSettings(Messages.ScriptedScatterTreeViewer_DefaultViewerTitle, Messages.ScriptedScatterTreeViewer_DefaultXAxis, Messages.ScriptedScatterTreeViewer_DefaultYAxis, 1);
+        return new ScriptedScatterViewer(parent, settings, getSecondaryIdName());
     }
 
     @Override
@@ -60,6 +60,6 @@ public class ScriptedHistogramView extends TmfChartView {
     }
 
     private String getSecondaryIdName() {
-        return getViewSite().getSecondaryId().replace(ScriptedHistogramView.COLON, ":"); //$NON-NLS-1$
+        return getViewSite().getSecondaryId().replace(ScriptedScatterView.COLON, ":"); //$NON-NLS-1$
     }
 }

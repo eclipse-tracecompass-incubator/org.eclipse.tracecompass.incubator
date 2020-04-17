@@ -9,25 +9,25 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.scripting.ui.views.histogram;
+package org.eclipse.tracecompass.incubator.internal.scripting.ui.views.scatter;
 
 import org.eclipse.osgi.util.NLS;
 
 /**
- * Messages related to the {@link ScriptedHistogramView}
+ * Messages related to the {@link ScriptedScatterView}
  *
  * @author Qing Chi
  */
 public class Messages extends NLS {
 
-    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.scripting.ui.views.histogram.messages"; //$NON-NLS-1$
+    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.scripting.ui.views.scatter.messages"; //$NON-NLS-1$
 
     /** Default Viewer title */
-    public static String ScriptedHistogramTreeViewer_DefaultViewerTitle;
+    public static String ScriptedScatterTreeViewer_DefaultViewerTitle;
     /** default x axis title */
-    public static String ScriptedHistogramTreeViewer_DefaultXAxis;
+    public static String ScriptedScatterTreeViewer_DefaultXAxis;
     /** default y axis title */
-    public static String ScriptedHistogramTreeViewer_DefaultYAxis;
+    public static String ScriptedScatterTreeViewer_DefaultYAxis;
 
     static {
         // initialize resource bundle
