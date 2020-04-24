@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.scripting.ui;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.scripting.ui.tracemarker.ScriptingMarkerSourceFactory;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -36,11 +37,13 @@ public class Activator extends AbstractUIPlugin {
     public void start(@Nullable BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
+        ScriptingMarkerSourceFactory.getInstance().register();
     }
 
     @Override
     public void stop(@Nullable BundleContext context) throws Exception {
         plugin = null;
+        ScriptingMarkerSourceFactory.getInstance().unregister();
         super.stop(context);
     }
 
