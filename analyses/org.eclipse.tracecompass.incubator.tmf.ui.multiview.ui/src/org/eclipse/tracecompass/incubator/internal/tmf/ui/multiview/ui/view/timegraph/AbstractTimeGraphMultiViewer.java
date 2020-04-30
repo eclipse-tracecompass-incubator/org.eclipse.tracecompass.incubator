@@ -1349,6 +1349,16 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
     }
 
     /**
+     * Triggers a rebuild of the entries and rows. The entries are typically
+     * immutable once set and the underlying analysis is complete, but they can
+     * sometimes change, given some user action or other. If this is the case,
+     * this method should be called.
+     */
+    public void triggerRebuild() {
+        rebuild();
+    }
+
+    /**
      * Method called when synching to a given timestamp. Inheriting classes can
      * perform actions here to update the viewer at the given timestamp.
      *

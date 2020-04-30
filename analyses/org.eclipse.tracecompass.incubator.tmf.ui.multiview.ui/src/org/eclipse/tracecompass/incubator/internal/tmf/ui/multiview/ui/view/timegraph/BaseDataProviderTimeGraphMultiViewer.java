@@ -641,7 +641,7 @@ public class BaseDataProviderTimeGraphMultiViewer extends AbstractTimeGraphMulti
      * @return Map of parameters for fetchRowModel
      */
     protected @NonNull Map<@NonNull String, @NonNull Object> getFetchRowModelParameters(long start, long end,
-            long resolution, boolean fullSearch, @NonNull Collection<Long> items) {
+            long resolution, boolean fullSearch, @NonNull Collection<@NonNull Long> items) {
         @NonNull
         Map<@NonNull String, @NonNull Object> parameters = new HashMap<>();
         parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, StateSystemUtils.getTimes(start, end, resolution));
