@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -109,6 +110,36 @@ public class DataProviderService {
         list.addAll(getXmlDataProviderDescriptors(trace, EnumSet.of(OutputType.XY)));
 
         return Response.ok(list).build();
+    }
+
+    /**
+     * Getter for the list of data provider descriptions
+     *
+     * @param uuid
+     *            UUID of the trace to search for
+     * @param outputId
+     *            Eclipse extension point ID for the data provider to query
+     * @return the data provider descriptions with the queried {@link UUID} if it exists.
+     */
+    @GET
+    @Path("/{outputId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getProvider(@PathParam("uuid") UUID uuid, @PathParam("outputId") String outputId) {
+        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+        if (trace == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+        List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(trace);
+        list.addAll(getXmlDataProviderDescriptors(trace, EnumSet.of(OutputType.TIME_GRAPH)));
+        list.addAll(getXmlDataProviderDescriptors(trace, EnumSet.of(OutputType.XY)));
+
+        Optional<IDataProviderDescriptor> provider = list.stream().filter(p -> p.getId().equals(outputId)).findFirst();
+
+        if (provider.isPresent()) {
+            return Response.ok(provider.get()).build();
+        }
+
+        return Response.status(Status.NOT_FOUND).build();
     }
 
     /**
