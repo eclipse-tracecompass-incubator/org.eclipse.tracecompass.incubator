@@ -100,13 +100,16 @@ public class TraceManagerService {
         String path = (String) parameters.get("uri");
         Object typeIDObject = parameters.get("typeID");
         String typeID = typeIDObject != null ? (String) typeIDObject : "";
-        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(TmfTraceManager.getInstance().getOpenedTraces(), t -> t.getPath().equals(path));
-        if (optional.isPresent()) {
-            return Response.status(Status.CONFLICT).entity(optional.get()).build();
-        }
+
         if (!Paths.get(path).toFile().exists()) {
             return Response.status(Status.NOT_FOUND).entity("No trace at " + path).build(); //$NON-NLS-1$
         }
+
+        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(TmfTraceManager.getInstance().getOpenedTraces(), t -> t.getPath().equals(path));
+        if (optional.isPresent()) {
+            return Response.ok(optional.get()).build();
+        }
+
         try {
             ITmfTrace trace = put(path, name, typeID);
             if (trace == null) {

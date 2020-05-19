@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.s
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.Collections;
 
 import javax.ws.rs.client.WebTarget;
@@ -68,5 +69,25 @@ public class TraceManagerServiceTest extends RestServerTest {
         assertPost(traces, CONTEXT_SWITCHES_UST_STUB);
 
         assertEquals(ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_STUB, CONTEXT_SWITCHES_UST_STUB), getTraces(traces));
+    }
+
+    /**
+     * Test conflicting traces
+     * @throws IOException Exception thrown by getting trace path
+     */
+    @Test
+    public void testConflictingTraces() throws IOException {
+        WebTarget traces = getApplicationEndpoint().path(TRACES);
+
+        assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
+
+        // Post the trace a second time
+        assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
+        assertEquals(ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_STUB), getTraces(traces));
+
+        // Post a trace with the same name but another path, the name does not
+        // matter if the path is different, the trace will be added
+        assertPost(traces, ARM_64_KERNEL_STUB);
+        assertEquals(ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_STUB, ARM_64_KERNEL_STUB), getTraces(traces));
     }
 }

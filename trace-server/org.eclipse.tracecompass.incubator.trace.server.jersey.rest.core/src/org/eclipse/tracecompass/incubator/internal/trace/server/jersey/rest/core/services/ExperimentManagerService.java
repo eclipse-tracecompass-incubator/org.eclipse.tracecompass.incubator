@@ -30,7 +30,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
+import org.eclipse.tracecompass.tmf.core.component.ITmfEventProvider;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
@@ -41,6 +43,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 
@@ -84,11 +87,18 @@ public class ExperimentManagerService {
         return Response.status(Status.NOT_FOUND).build();
     }
 
+    /**
+     * Get the outputs for an experiment
+     *
+     * @param uuid
+     *            UUID of the experiment to get the outputs for
+     * @return The outputs for the experiment
+     */
     @GET
     @Path("/{uuid}/outputs")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getOutputs(@PathParam("uuid") UUID uuid) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("Not implemented for " + uuid).build();
+        return Response.status(Status.NOT_IMPLEMENTED).entity("Not implemented for " + uuid).build(); //$NON-NLS-1$
     }
 
 
@@ -141,8 +151,40 @@ public class ExperimentManagerService {
         IPath ipath = root.getLocation().append(EXPERIMENTS).append(name);
         IResource resource = root.findMember(ipath);
 
-        if (Iterables.any(TmfTraceManager.getInstance().getOpenedTraces(), t -> t.getPath().equals(ipath.toOSString()))) {
-            return Response.status(Status.CONFLICT).entity("There is already an experiment named: " + name).build(); //$NON-NLS-1$
+        Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(TmfTraceManager.getInstance().getOpenedTraces(), t -> t.getPath().equals(ipath.toOSString()));
+        if (optional.isPresent()) {
+            ITmfTrace trace = optional.get();
+            if (!(trace instanceof TmfExperiment)) {
+                // Something else than an experiment exists with that name,
+                // return a conflict
+                return Response.status(Status.CONFLICT).entity(optional.get()).build();
+            }
+            TmfExperiment experiment = (TmfExperiment) trace;
+            if (experiment.getChildren().size() != traceUUIDs.size()) {
+                // Not the same number of children, the current and posted
+                // experiments are different
+                return Response.status(Status.CONFLICT).entity(optional.get()).build();
+            }
+            for (Object uuidObj : traceUUIDs) {
+                if (uuidObj instanceof String) {
+                    UUID uuid = UUID.fromString((String) uuidObj);
+                    ITmfTrace childTrace = TraceManagerService.getTraceByUUID(uuid);
+                    if (childTrace == null) {
+                        return Response.noContent().build();
+                    }
+                    ITmfEventProvider child = experiment.getChild(childTrace.getName());
+                    if (child == null || !(child instanceof ITmfTrace) || !uuid.equals(((ITmfTrace) child).getUUID())) {
+                        // The requested child is not a child of the
+                        // experiment, the experiment is different
+                        return Response.status(Status.CONFLICT).entity(optional.get()).build();
+                    }
+                } else {
+                    return Response.status(Status.BAD_REQUEST).build();
+                }
+            }
+            // It's the same experiment, return OK
+            return Response.ok(experiment).build();
+
         }
 
         ITmfTrace[] array = new ITmfTrace[traceUUIDs.size()];

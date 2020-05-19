@@ -120,6 +120,16 @@ public abstract class RestServerTest {
     protected static TraceModelStub CONTEXT_SWITCHES_KERNEL_STUB;
 
     /**
+     * {@link UUID} for {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL}.
+     */
+    protected static final UUID ARM_64_KERNEL_UUID = UUID.fromString("5d079bb9-28f0-6648-8bcf-390bb7f31523");
+    /**
+     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link CtfTestTrace#ARM_64_BIT_HEADER}, with the same name as {@link #CONTEXT_SWITCHES_KERNEL_STUB}
+     */
+    protected static TraceModelStub ARM_64_KERNEL_STUB;
+
+    /**
      * Expected toString() of all data providers for this experiment
      */
     protected static List<DataProviderDescriptorStub> EXPECTED_DATA_PROVIDER_DESCRIPTOR = null;
@@ -137,6 +147,9 @@ public abstract class RestServerTest {
 
         String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath();
         CONTEXT_SWITCHES_KERNEL_STUB = new TraceModelStub("kernel", contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_UUID);
+
+        String arm64Path = FileLocator.toFileURL(CtfTestTrace.ARM_64_BIT_HEADER.getTraceURL()).getPath();
+        ARM_64_KERNEL_STUB = new TraceModelStub("kernel", arm64Path, ARM_64_KERNEL_UUID);
         ImmutableList.Builder<DataProviderDescriptorStub> b = ImmutableList.builder();
         b.add(new DataProviderDescriptorStub("org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack",
                 "LTTng-UST CallStack - Latency vs Time",
