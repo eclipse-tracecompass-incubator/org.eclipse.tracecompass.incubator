@@ -43,7 +43,7 @@ public class XYModelSerializer extends StdSerializer<@NonNull ITmfXyModel> {
     public void serialize(@NonNull ITmfXyModel value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         gen.writeStartObject();
         gen.writeStringField("title", value.getTitle()); //$NON-NLS-1$
-        gen.writeObjectField("series", value.getData()); //$NON-NLS-1$
+        gen.writeObjectField("series", value.getSeriesData()); //$NON-NLS-1$
         gen.writeEndObject();
     }
 
