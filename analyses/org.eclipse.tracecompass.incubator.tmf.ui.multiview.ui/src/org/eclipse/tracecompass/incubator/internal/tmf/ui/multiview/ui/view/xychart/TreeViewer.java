@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Optional;
 
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
@@ -35,9 +37,9 @@ public class TreeViewer extends AbstractSelectTreeViewer {
 
     /**
      * @param parent
-     *            - The parent component.
+     *            the parent component
      * @param id
-     *            - The Provider ID.
+     *            the Provider ID
      */
     public TreeViewer(Composite parent, String id) {
         super(parent, TreeViewer.COL_INDEX_COLOR_LEGEND, id);
@@ -46,8 +48,26 @@ public class TreeViewer extends AbstractSelectTreeViewer {
 
     @Override
     protected ITmfTreeColumnDataProvider getColumnDataProvider() {
+        TmfTreeColumnData legendColumn = new TmfTreeColumnData("Legend");
+        legendColumn.setComparator(new ViewerComparator() {
+            @Override
+            public int compare(Viewer viewer, Object o1, Object o2) {
+                if (isChecked(o1) && !isChecked(o2)) {
+                    return -1;
+                }
+                if (!isChecked(o1) && isChecked(o2)) {
+                    return 1;
+                }
+                if (o1 instanceof ITmfTreeViewerEntry & o2 instanceof ITmfTreeViewerEntry) {
+                    ITmfTreeViewerEntry e1 = (ITmfTreeViewerEntry) o1;
+                    ITmfTreeViewerEntry e2 = (ITmfTreeViewerEntry) o2;
+                    return e1.getName().compareTo(e2.getName());
+                }
+                return 0;
+            }
+        });
         return () -> Arrays.asList(createColumn("Name", Comparator.comparing(ITmfTreeViewerEntry::getName)),
-                new TmfTreeColumnData("Unit"), new TmfTreeColumnData("Legend"));
+                new TmfTreeColumnData("Unit"), legendColumn);
     }
 
     @Override
