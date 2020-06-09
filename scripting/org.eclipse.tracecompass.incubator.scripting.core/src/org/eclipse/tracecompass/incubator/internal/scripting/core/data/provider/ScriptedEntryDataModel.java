@@ -39,7 +39,7 @@ public class ScriptedEntryDataModel extends TimeGraphEntryModel {
      *            The quark in the state system containing the data to display
      */
     public ScriptedEntryDataModel(String name, long parentId, int quark) {
-        super(sfId.getAndIncrement(), parentId, name, 0L, Long.MAX_VALUE);
+        super(sfId.getAndIncrement(), parentId, name, Long.MIN_VALUE, Long.MAX_VALUE);
         fQuark = quark;
     }
 
