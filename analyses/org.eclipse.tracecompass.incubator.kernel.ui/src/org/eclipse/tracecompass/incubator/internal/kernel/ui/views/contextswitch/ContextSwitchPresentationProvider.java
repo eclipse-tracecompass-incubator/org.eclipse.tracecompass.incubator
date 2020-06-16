@@ -23,6 +23,7 @@ import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.MarkerEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 
@@ -84,6 +85,9 @@ public class ContextSwitchPresentationProvider extends TimeGraphPresentationProv
 
     @Override
     public int getStateTableIndex(ITimeEvent event) {
+        if(event instanceof MarkerEvent) {
+            return TRANSPARENT;
+        }
         ContextSwitchEntry entry = (ContextSwitchEntry) event.getEntry();
         if (!entry.hasId()) {
             return TRANSPARENT;
