@@ -24,6 +24,12 @@ public class Messages extends NLS {
 
     /** Run script command description */
     public static @Nullable String CliParser_RunScriptDescription;
+    /** Script engine command description */
+    public static @Nullable String CliParser_ScriptEngineDescription;
+    /** Message when the engine name mapping does not find any engineID **/
+    public static @Nullable String CliParser_ScriptEngineMapError;
+    /** Script argument command description */
+    public static @Nullable String CliParser_ScriptArgumentDescription;
     /** Message when script does not end properly */
     public static @Nullable String CliParser_ScriptExecutionError;
 

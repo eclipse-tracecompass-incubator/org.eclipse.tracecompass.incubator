@@ -1,0 +1,16 @@
+usage: How to use the command line options:
+ -a,--args <argument>        Script arguments. If multiple scripts are
+                             run, they will all be run with these
+                             arguments. If there are multiple script
+                             arguments, they must be space-separated.
+                             Example: -a arg1 arg2 arg3
+ -e,--engine <engine name>   Engine name for the script to use. If
+                             multiple scripts are run, they will all be
+                             run with this engine. The engine needs to be
+                             already installed. Some available engines:
+                             Jython
+                             Py4j
+                             Rhino
+                             Nashorn
+ -h,--help                   Shows the help.
+ -s,--script <script>        Run a script once the workspace is ready

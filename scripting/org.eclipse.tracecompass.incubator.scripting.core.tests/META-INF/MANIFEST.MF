@@ -20,7 +20,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ease,
  org.eclipse.ease.lang.javascript,
  org.eclipse.ease.lang.javascript.nashorn,
- org.eclipse.ease.lang.python.py4j
+ org.eclipse.ease.lang.python.py4j,
+ org.eclipse.tracecompass.tmf.cli.core.tests
 Export-Package: org.eclipse.tracecompass.incubator.scripting.core.tests,
  org.eclipse.tracecompass.incubator.scripting.core.tests.analysis,
  org.eclipse.tracecompass.incubator.scripting.core.tests.data.provider,
