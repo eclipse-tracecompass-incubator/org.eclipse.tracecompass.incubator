@@ -17,6 +17,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.fasterxml.jackson.core.jackson-databind,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.lttng2.ust.core,
+ org.eclipse.tracecompass.lttng2.kernel.core,
  org.eclipse.tracecompass.tmf.analysis.xml.core.tests,
  javax.xml.bind,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
