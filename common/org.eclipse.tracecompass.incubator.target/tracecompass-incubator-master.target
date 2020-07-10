@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="tracecompass-incubator-master" sequenceNumber="42">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="tracecompass-incubator-master" sequenceNumber="43">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.cdt.gnu.dsf.feature.group" version="0.0.0"/>
@@ -147,9 +147,9 @@
 <unit id="org.eclipse.tracecompass.rcp.feature.group" version="0.0.0"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<repository location="http://download.eclipse.org/nebula/releases/latest"/>
 <unit id="org.eclipse.nebula.widgets.opal.notifier.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.nebula.widgets.opal.duallist.feature.feature.group" version="0.0.0"/>
+<repository location="https://download.eclipse.org/nebula/releases/2.4.0/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.lsp4j.sdk.feature.group" version="0.0.0"/>
