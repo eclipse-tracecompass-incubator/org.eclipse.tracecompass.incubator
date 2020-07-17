@@ -14,7 +14,6 @@ package org.eclipse.tracecompass.incubator.analysis.core.aspects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
-import org.eclipse.tracecompass.incubator.analysis.core.aspects.ThreadNameAspect;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;

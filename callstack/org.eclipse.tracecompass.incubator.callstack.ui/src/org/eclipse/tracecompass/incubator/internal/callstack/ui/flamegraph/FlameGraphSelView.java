@@ -14,7 +14,6 @@
 package org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.FlameGraphView;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
