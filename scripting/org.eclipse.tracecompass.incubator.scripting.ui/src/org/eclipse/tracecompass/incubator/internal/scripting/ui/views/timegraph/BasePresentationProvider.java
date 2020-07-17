@@ -18,17 +18,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils;
 
 /**
  * A basic presentation provider for the default DataProviderBaseView.
@@ -47,11 +43,6 @@ public class BasePresentationProvider extends TimeGraphPresentationProvider {
     private static final int COLOR_MASK = 0xffffff;
 
     private List<StateItem> fStateValues = new ArrayList<>();
-    /**
-     * Average width of the characters used for state labels. Is computed in the
-     * first call to postDrawEvent(). Is null before that.
-     */
-    private @Nullable Integer fAverageCharacterWidth = null;
     /*
      * Maps the value of an event with the corresponding index in the
      * stateValues list
@@ -144,43 +135,6 @@ public class BasePresentationProvider extends TimeGraphPresentationProvider {
          * tooltips and implement this
          */
         return Collections.emptyMap();
-    }
-
-    /**
-     * Returns the average character width, measured in pixels, of the font
-     * described by the receiver.
-     *
-     * @param gc
-     *            The graphic context
-     * @return the average character width of the font
-     */
-    @Deprecated
-    private static int getAverageCharWidth(GC gc) {
-        return gc.getFontMetrics().getAverageCharWidth();
-    }
-
-    @Override
-    public void postDrawEvent(@Nullable ITimeEvent event, @Nullable Rectangle bounds, @Nullable GC gc) {
-        if (event == null || bounds == null || gc == null) {
-            return;
-        }
-        // See if the state is too short to show text
-        Integer averageCharacterWidth = fAverageCharacterWidth;
-        if (averageCharacterWidth == null) {
-            averageCharacterWidth = getAverageCharWidth(gc);
-            fAverageCharacterWidth = averageCharacterWidth;
-        }
-        if (bounds.width <= averageCharacterWidth) {
-            return;
-        }
-        String eventName = getEventName(event);
-        if (eventName == null) {
-            return;
-        }
-
-        Color stateColor = gc.getBackground();
-        gc.setForeground(Utils.getDistinctColor(stateColor.getRGB()));
-        Utils.drawText(gc, eventName, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
     }
 
     /**
