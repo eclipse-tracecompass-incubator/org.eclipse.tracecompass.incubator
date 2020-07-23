@@ -513,7 +513,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             int quark = ss.getQuarkAbsoluteAndAdd(PROCESSES, pName, threadName, InstrumentedCallStackAnalysis.CALL_STACK);
             // The function to end is not necessarily the tip of the stack. Unstack up to function name
             List<Object> callStack = getCallStack(ss, quark);
-            int indexOf = callStack.indexOf(functionExitName);
+            int indexOf = callStack.lastIndexOf(functionExitName);
             // Function not found, just unstack the last one?
             if (indexOf < 0) {
                 if (functionExitName.equals(TraceEventField.UNKNOWN_EXIT_EVENT) || functionExitName.equals(TraceEventField.UNKNOWN_DURATION_EXIT_EVENT)) {
