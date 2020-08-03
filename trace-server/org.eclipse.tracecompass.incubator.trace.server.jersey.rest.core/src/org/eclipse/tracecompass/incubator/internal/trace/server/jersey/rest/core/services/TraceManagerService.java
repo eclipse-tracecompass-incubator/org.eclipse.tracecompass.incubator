@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -117,14 +118,14 @@ public class TraceManagerService {
             }
             return Response.ok(trace).build();
         } catch (TmfTraceException | TmfTraceImportException | InstantiationException
-                | IllegalAccessException | CoreException e) {
+                | IllegalAccessException | CoreException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(e.getMessage()).build();
         }
     }
 
     private ITmfTrace put(String path, String name, String typeID)
             throws TmfTraceException, TmfTraceImportException, InstantiationException,
-            IllegalAccessException, CoreException {
+            IllegalAccessException, CoreException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(path, typeID);
         if (traceTypes.isEmpty()) {
             return null;
@@ -136,7 +137,7 @@ public class TraceManagerService {
         TraceTypeHelper helper = traceTypes.get(0);
         resource.setPersistentProperty(TmfCommonConstants.TRACETYPE, helper.getTraceTypeId());
 
-        ITmfTrace trace = helper.getTraceClass().newInstance();
+        ITmfTrace trace = helper.getTraceClass().getDeclaredConstructor().newInstance();
         trace.initTrace(resource, path, ITmfEvent.class, name, typeID);
         trace.indexTrace(false);
         // read first event to make sure start time is initialized

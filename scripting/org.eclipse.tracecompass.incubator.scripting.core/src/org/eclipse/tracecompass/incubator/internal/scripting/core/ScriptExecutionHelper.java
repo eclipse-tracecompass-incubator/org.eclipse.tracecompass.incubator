@@ -107,7 +107,7 @@ public class ScriptExecutionHelper {
                 }
 
                 try {
-                    return new Double(Double.parseDouble(result.toString())).intValue();
+                    return (int)(Double.parseDouble(result.toString()));
                 } catch (final Exception e) {
                     // no double
                 }

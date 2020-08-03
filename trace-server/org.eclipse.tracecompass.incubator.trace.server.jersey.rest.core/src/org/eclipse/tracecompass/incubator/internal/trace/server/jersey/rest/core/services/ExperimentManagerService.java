@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -203,10 +204,10 @@ public class ExperimentManagerService {
             }
             // traces in the experiment need to be cloned.
             try {
-                ITmfTrace clone = trace.getClass().newInstance();
+                ITmfTrace clone = trace.getClass().getDeclaredConstructor().newInstance();
                 clone.initTrace(trace.getResource(), trace.getPath(), ITmfEvent.class, trace.getName(), trace.getTraceTypeId());
                 array[i++] = clone;
-            } catch (InstantiationException | IllegalAccessException | TmfTraceException e) {
+            } catch (InstantiationException | IllegalAccessException | TmfTraceException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                 return Response.serverError().entity(e.getMessage()).build();
             }
         }

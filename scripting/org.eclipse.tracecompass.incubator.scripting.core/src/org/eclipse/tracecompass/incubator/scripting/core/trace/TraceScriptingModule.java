@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.scripting.core.trace;
 
 import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Objects;
 
@@ -125,7 +126,7 @@ public class TraceScriptingModule extends AbstractScriptModule {
             // open the trace
             String traceFileName = location.toFile().getName();
             return openAndInitializeTrace(file, Objects.requireNonNull(location.toOSString()), traceFileName, ""); //$NON-NLS-1$
-        } catch (InstantiationException | IllegalAccessException | TmfTraceException | TmfTraceImportException e) {
+        } catch (InstantiationException | IllegalAccessException | TmfTraceException | TmfTraceImportException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             // We cannot differentiate in this method between a file that does
             // not exist in an existing resource or if the resource does not
             // exist. The message contains both possibilities
@@ -133,14 +134,14 @@ public class TraceScriptingModule extends AbstractScriptModule {
         }
     }
 
-    private static ITmfTrace openAndInitializeTrace(IFile file, String location, String name, String typeID) throws TmfTraceException, InstantiationException, IllegalAccessException, FileNotFoundException, TmfTraceImportException {
+    private static ITmfTrace openAndInitializeTrace(IFile file, String location, String name, String typeID) throws TmfTraceException, InstantiationException, IllegalAccessException, FileNotFoundException, TmfTraceImportException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(location, typeID);
         if (traceTypes.isEmpty()) {
             throw new FileNotFoundException(Messages.noTraceType);
         }
 
         TraceTypeHelper helper = traceTypes.get(0);
-        ITmfTrace trace = helper.getTraceClass().newInstance();
+        ITmfTrace trace = helper.getTraceClass().getDeclaredConstructor().newInstance();
         trace.initTrace(file, location, ITmfEvent.class, name, typeID);
         return trace;
     }
