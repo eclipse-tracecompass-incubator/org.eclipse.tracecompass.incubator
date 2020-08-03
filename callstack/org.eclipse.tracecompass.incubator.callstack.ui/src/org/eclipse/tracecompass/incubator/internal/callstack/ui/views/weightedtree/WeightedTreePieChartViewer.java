@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.linuxtools.dataviewers.piechart.PieChart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -38,6 +37,8 @@ import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedT
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider.DataType;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider.MetricType;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
+import org.eclipse.tracecompass.internal.tmf.ui.widgets.piechart.PieSlice;
+import org.eclipse.tracecompass.internal.tmf.ui.widgets.piechart.TmfPieChart;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
@@ -68,7 +69,7 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
     /**
      * The pie chart containing global information about the trace
      */
-    private @Nullable PieChart fGlobalPC = null;
+    private @Nullable TmfPieChart fGlobalPC = null;
 
     /**
      * The listener for the mouse movement event.
@@ -143,21 +144,21 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
                 if (event == null) {
                     return;
                 }
-                PieChart pc = (PieChart) event.widget;
+                TmfPieChart pc = (TmfPieChart) event.widget;
                 switch (event.type) {
                 /* Get tooltip information on the slice */
                 case SWT.MouseMove:
-                    int sliceIndex = pc.getSliceIndexFromPosition(0, event.x, event.y);
-                    if (sliceIndex < 0) {
+                    PieSlice slice = pc.getSliceFromPosition(event.x, event.y);
+                    if (slice == null) {
                         // mouse is outside the chart
                         pc.setToolTipText(null);
                         break;
                     }
-                    float percOfSlice = (float) pc.getSlicePercent(0, sliceIndex);
+                    long value = (long) slice.getValue();
+                    float percOfSlice = (float) (value / pc.getTotal() * 100.0);
                     String percent = String.format("%.1f", percOfSlice); //$NON-NLS-1$
-                    Long value = Long.valueOf((long) pc.getSeriesSet().getSeries()[sliceIndex].getXSeries()[0]);
 
-                    String text = pc.getSeriesSet().getSeries()[sliceIndex].getId() + "\n"; //$NON-NLS-1$
+                    String text = slice.getLabel() + "\n"; //$NON-NLS-1$
 
                     text += fWeightType.format(value) + " (" + percent + "%)"; //$NON-NLS-1$ //$NON-NLS-2$
                     pc.setToolTipText(text);
@@ -178,14 +179,16 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
                 if (e == null) {
                     return;
                 }
-                PieChart pc = (PieChart) e.widget;
-                int slicenb = pc.getSliceIndexFromPosition(0, e.x, e.y);
-                if (slicenb < 0 || slicenb >= pc.getSeriesSet().getSeries().length) {
+                TmfPieChart pc = (TmfPieChart) e.widget;
+                PieSlice slice = pc.getSliceFromPosition(e.x, e.y);
+                if (slice == null) {
                     // mouse is outside the chart
                     return;
                 }
+                String id = slice.getID();
+                select(id);
                 Event selectionEvent = new Event();
-                selectionEvent.text = pc.getSeriesSet().getSeries()[slicenb].getId();
+                selectionEvent.text = slice.getLabel();
                 notifySelectionListener(selectionEvent);
             }
 
@@ -193,6 +196,23 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
             public void mouseDoubleClick(@Nullable MouseEvent e) {
             }
         };
+    }
+
+    /**
+     * Select a slice of the pie
+     *
+     * @param id
+     *            the id to select
+     */
+    public void select(@Nullable String id) {
+        if (id == null) {
+            return;
+        }
+        TmfPieChart pieChart = fGlobalPC;
+        if (pieChart != null) {
+            pieChart.select(id);
+            pieChart.redraw();
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -238,7 +258,7 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
     synchronized void updateGlobalPieChart(Set<WeightedTree<?>> trees, IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider) {
         long totalWeight = getTotalWeight(trees);
 
-        PieChart pie = getGlobalPC();
+        TmfPieChart pie = getGlobalPC();
         if (pie == null || totalWeight == 0) {
             pie = createPieChart(treeProvider);
             setGlobalPC(pie);
@@ -259,8 +279,8 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
         }
     }
 
-    private PieChart createPieChart(IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider) {
-        PieChart pie = new PieChart(getParent(), SWT.NONE);
+    private TmfPieChart createPieChart(IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider) {
+        TmfPieChart pie = new TmfPieChart(getParent(), SWT.NONE);
         Color backgroundColor = fColorScheme.getColor(TimeGraphColorScheme.TOOL_BACKGROUND);
         Color foregroundColor = fColorScheme.getColor(TimeGraphColorScheme.TOOL_FOREGROUND);
         pie.getTitle().setText(treeProvider.getTitle());
@@ -306,10 +326,11 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
      * the PieChart API
      */
     private void updatePieChartWithData(
-            final PieChart chart,
+            final TmfPieChart chart,
             final Collection<WeightedTree<?>> trees,
             IWeightedTreeProvider<?, ?, WeightedTree<?>> treeProvider, long totalWeight) {
 
+        chart.clear();
         long otherWeight = 0;
         // Add to the list only the trees that would be visible (> threshold),
         // add the rest to an "other" element
@@ -326,38 +347,25 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
         Collections.sort(list, Collections.reverseOrder());
 
 
-        int listSize = otherWeight == 0 ? list.size() : list.size() + 1;
-        double[][] sliceValues = new double[listSize][1];
-        String[] sliceNames = new String[listSize];
-        int i = 0;
         PieChartPalette palette = fPiePalette;
-        Color[] colors = (palette == null) ? null : new Color[listSize];
 
         for (WeightedTree<?> tree : list) {
-            sliceNames[i] = treeProvider.toDisplayString(tree);
-            sliceValues[i][0] = tree.getWeight();
-            if (colors != null && palette != null) {
-                colors[i] = palette.getColor(tree);
+            String sliceName = treeProvider.toDisplayString(tree);
+            if (palette != null) {
+                chart.addColor(sliceName, palette.getColor(tree).getRGB());
             }
-            i++;
+            chart.addPieSlice(sliceName, tree.getWeight(), sliceName);
         }
         if (otherWeight != 0) {
             // Compare with the otherTree's weight. If there's only one other,
             // display it as is
-            if (otherTree != null && otherTree.getWeight() == otherWeight) {
-                sliceNames[list.size()] = treeProvider.toDisplayString(otherTree);
-                if (colors != null && palette != null) {
-                    colors[list.size()] = palette.getColor(otherTree);
-                }
-            } else {
-                sliceNames[list.size()] = Messages.WeightedTreeViewer_Other;
+            String sliceName = (otherTree != null && otherTree.getWeight() == otherWeight) ? treeProvider.toDisplayString(otherTree) : Messages.WeightedTreeViewer_Other;
+            if (otherTree != null && otherTree.getWeight() == otherWeight && palette != null) {
+                chart.addColor(sliceName, palette.getColor(otherTree).getRGB());
             }
-            sliceValues[list.size()][0] = otherWeight;
+            chart.addPieSlice(sliceName, otherWeight, sliceName);
         }
-        if (colors != null) {
-            chart.setCustomColors(colors);
-        }
-        chart.addPieChartSeries(sliceNames, sliceValues);
+
     }
 
     /**
@@ -394,12 +402,12 @@ public class WeightedTreePieChartViewer extends TmfTimeViewer {
     /**
      * @return the global piechart
      */
-    synchronized @Nullable PieChart getGlobalPC() {
+    synchronized @Nullable TmfPieChart getGlobalPC() {
         return fGlobalPC;
     }
 
-    private synchronized void setGlobalPC(PieChart pie) {
-        PieChart pc = fGlobalPC;
+    private synchronized void setGlobalPC(TmfPieChart pie) {
+        TmfPieChart pc = fGlobalPC;
         if (pc != null) {
             pc.dispose();
         }
