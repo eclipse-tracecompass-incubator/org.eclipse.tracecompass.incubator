@@ -85,6 +85,16 @@ public abstract class RestServerTest {
     public static final String XY_PATH = "XY";
 
     /**
+     * xy series path segment
+     */
+    public static final String XY_SERIES_PATH = "xy";
+
+    /**
+     * states path segment
+     */
+    public static final String STATE_PATH = "states";
+
+    /**
      * <b>name</b> constant
      */
     public static final String NAME = "name";
@@ -227,6 +237,24 @@ public abstract class RestServerTest {
     }
 
     /**
+     * Get the {@link WebTarget} for the time graph state endpoint.
+     *
+     * @param UUID
+     *            Trace or experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph state endpoint
+     */
+    public static WebTarget getTimeGraphStatesEndpoint(String UUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(UUID)
+                .path(OUTPUTS_PATH)
+                .path(TIMEGRAPH_PATH)
+                .path(dataProviderId)
+                .path(STATE_PATH);
+    }
+
+    /**
      * Get the {@link WebTarget} for the XY tree endpoint.
      *
      * @param UUID
@@ -242,6 +270,24 @@ public abstract class RestServerTest {
                 .path(XY_PATH)
                 .path(dataProviderId)
                 .path(TREE_PATH);
+    }
+
+    /**
+     * Get the {@link WebTarget} for the XY series endpoint.
+     *
+     * @param UUID
+     *            Trace or experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The XY series endpoint
+     */
+    public static WebTarget getXYSeriesEndpoint(String UUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(UUID)
+                .path(OUTPUTS_PATH)
+                .path(XY_PATH)
+                .path(dataProviderId)
+                .path(XY_SERIES_PATH);
     }
 
     /**

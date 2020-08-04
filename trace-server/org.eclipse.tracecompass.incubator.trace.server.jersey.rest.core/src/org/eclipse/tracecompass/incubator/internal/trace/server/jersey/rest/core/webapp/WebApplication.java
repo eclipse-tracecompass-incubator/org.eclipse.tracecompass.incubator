@@ -31,6 +31,11 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
+import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
 import org.eclipse.tracecompass.tmf.core.model.xy.ITmfXyModel;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -172,6 +177,11 @@ public class WebApplication {
         module.addSerializer(DataProviderDescriptor.class, new DataProviderDescriptorSerializer());
         module.addSerializer(ITmfXyModel.class, new XYModelSerializer());
         module.addSerializer(ISeriesModel.class, new SeriesModelSerializer());
+        module.addSerializer(TimeGraphState.class, new TimeGraphStateSerializer());
+        module.addSerializer(TimeGraphRowModel.class, new TimeGraphRowModelSerializer());
+        module.addSerializer(TimeGraphEntryModel.class, new TimeGraphEntryModelSerializer());
+        module.addSerializer(TmfTreeDataModel.class, new TmfTreeModelSerializer());
+        module.addSerializer(OutputElementStyle.class, new OutputElementStyleSerializer());
         mapper.registerModule(module);
         return provider;
     }

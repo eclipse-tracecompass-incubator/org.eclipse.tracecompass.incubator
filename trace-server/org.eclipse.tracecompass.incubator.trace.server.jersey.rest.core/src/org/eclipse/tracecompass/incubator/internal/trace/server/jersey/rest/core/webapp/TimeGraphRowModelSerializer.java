@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2019 Ericsson
+ * Copyright (c) 2020 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -8,24 +8,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp;
 
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
- * Serializer for XY series model {@link ISeriesModel}
+ * Serializer for time graph row models {@link TimeGraphRowModel}
  *
- * @author Simon Delisle
+ * @author Geneviève Bastien
  */
-public class SeriesModelSerializer extends StdSerializer<@NonNull ISeriesModel> {
+public class TimeGraphRowModelSerializer extends StdSerializer<@NonNull TimeGraphRowModel> {
 
     /**
      * Generated serialVersionUID
@@ -35,17 +34,15 @@ public class SeriesModelSerializer extends StdSerializer<@NonNull ISeriesModel> 
     /**
      * Constructor.
      */
-    protected SeriesModelSerializer() {
-        super(ISeriesModel.class);
+    protected TimeGraphRowModelSerializer() {
+        super(TimeGraphRowModel.class);
     }
 
     @Override
-    public void serialize(ISeriesModel value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(TimeGraphRowModel value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         gen.writeStartObject();
-        gen.writeNumberField("seriesId", value.getId()); //$NON-NLS-1$
-        gen.writeStringField("seriesName", value.getName()); //$NON-NLS-1$
-        gen.writeObjectField("xValues", value.getXAxis()); //$NON-NLS-1$
-        gen.writeObjectField("yValues", value.getData()); //$NON-NLS-1$
+        gen.writeNumberField("entryId", value.getEntryID()); //$NON-NLS-1$
+        gen.writeObjectField("states", value.getStates()); //$NON-NLS-1$
         gen.writeEndObject();
     }
 

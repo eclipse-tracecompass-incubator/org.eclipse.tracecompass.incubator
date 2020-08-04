@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2019 Ericsson
+ * Copyright (c) 2020 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -14,38 +14,35 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
+import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
- * Serializer for XY series model {@link ISeriesModel}
+ * @author Geneviève Bastien
  *
- * @author Simon Delisle
  */
-public class SeriesModelSerializer extends StdSerializer<@NonNull ISeriesModel> {
+public class OutputElementStyleSerializer extends StdSerializer<@NonNull OutputElementStyle> {
 
     /**
-     * Generated serialVersionUID
+     * Generated serial UID
      */
-    private static final long serialVersionUID = -4359431726167157401L;
+    private static final long serialVersionUID = 8663734251280456250L;
 
     /**
-     * Constructor.
+     * Constructor
      */
-    protected SeriesModelSerializer() {
-        super(ISeriesModel.class);
+    public OutputElementStyleSerializer() {
+        super(OutputElementStyle.class);
     }
 
     @Override
-    public void serialize(ISeriesModel value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(@NonNull OutputElementStyle value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
-        gen.writeNumberField("seriesId", value.getId()); //$NON-NLS-1$
-        gen.writeStringField("seriesName", value.getName()); //$NON-NLS-1$
-        gen.writeObjectField("xValues", value.getXAxis()); //$NON-NLS-1$
-        gen.writeObjectField("yValues", value.getData()); //$NON-NLS-1$
+        gen.writeStringField("parentKey", value.getParentKey()); //$NON-NLS-1$
+        gen.writeObjectField("values", value.getStyleValues()); //$NON-NLS-1$
         gen.writeEndObject();
     }
 
