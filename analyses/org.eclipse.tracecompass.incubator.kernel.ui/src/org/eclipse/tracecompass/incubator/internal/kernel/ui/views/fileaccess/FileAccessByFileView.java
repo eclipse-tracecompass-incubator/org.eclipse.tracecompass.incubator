@@ -33,10 +33,9 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.analysis.os.linux.core.signals.TmfThreadSelectedSignal;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
-import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessAnalysis;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessDataProvider;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileEntryModel;
-import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.ThreadEntryModel;
+import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.ThreadEntryModel;
 import org.eclipse.tracecompass.incubator.internal.kernel.ui.Activator;
 import org.eclipse.tracecompass.internal.analysis.os.linux.ui.actions.FollowThreadAction;
 import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
@@ -178,7 +177,7 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
      * Constructor
      */
     public FileAccessByFileView() {
-        super(ID, new BaseDataProviderTimeGraphPresentationProvider(), FileAccessAnalysis.ID + FileAccessDataProvider.SUFFIX);
+        super(ID, new BaseDataProviderTimeGraphPresentationProvider(), FileAccessDataProvider.ID);
         setTreeColumns(COLUMN_NAMES);
         setTreeLabelProvider(new FileAccessTreeLabelProvider());
     }

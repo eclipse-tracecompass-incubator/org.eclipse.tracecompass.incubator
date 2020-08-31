@@ -33,14 +33,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
-import org.eclipse.tracecompass.incubator.internal.kernel.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileEntryModel.Type;
-import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.FileDescriptorStateProvider;
-import org.eclipse.tracecompass.incubator.internal.kernel.core.filedescriptor.ThreadEntryModel;
+import org.eclipse.tracecompass.incubator.internal.kernel.core.io.IoAnalysis;
+import org.eclipse.tracecompass.incubator.internal.kernel.core.io.IoStateProvider;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
-import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
@@ -64,6 +62,8 @@ import org.eclipse.tracecompass.tmf.core.response.ITmfResponse.Status;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
@@ -81,13 +81,13 @@ import com.google.common.collect.TreeMultimap;
  * @author Matthew Khouzam
  */
 @SuppressWarnings("restriction")
-public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNull FileAccessAnalysis, @NonNull TimeGraphEntryModel>
+public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNull IoAnalysis, @NonNull TimeGraphEntryModel>
         implements IOutputStyleProvider {
 
     /**
      * Suffix for dataprovider ID
      */
-    public static final String SUFFIX = ".dataprovider"; //$NON-NLS-1$ ;
+    public static final String ID = "org.eclipse.tracecompass.incubator.kernel.core.file.access.dataprovider"; //$NON-NLS-1$ ;
     /**
      * String for the tid parameter of this view
      */
@@ -119,7 +119,8 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
 
     private static final int OFFSET = 100000;
     private static final AtomicInteger STRING_VALUE = new AtomicInteger(OFFSET);
-    private Map<String, Integer> fileIds = new HashMap<>();
+    private Map<String, Integer> fFileIds = new HashMap<>();
+    private BiMap<Long, Integer> fIdToEntry = HashBiMap.create();
 
     /**
      * Constructor
@@ -129,7 +130,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
      * @param analysisModule
      *            the analysis encapsulated by this provider
      */
-    public FileAccessDataProvider(ITmfTrace trace, FileAccessAnalysis analysisModule) {
+    public FileAccessDataProvider(ITmfTrace trace, IoAnalysis analysisModule) {
         super(trace, analysisModule);
     }
 
@@ -140,7 +141,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
 
     @Override
     public @NonNull String getId() {
-        return getAnalysisModule().getId() + SUFFIX;
+        return ID;
     }
 
     @Override
@@ -201,7 +202,6 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
                 applyFilterAndAddState(eventList, value, entry.getKey(), predicates, monitor);
             }
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));
-
         }
         return new TimeGraphModel(rows);
     }
@@ -237,7 +237,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         try {
             ITmfStateInterval current = ss.querySingleState(start, quark);
 
-            int resQuark = ss.optQuarkAbsolute(FileDescriptorStateProvider.RESOURCES);
+            int resQuark = ss.optQuarkAbsolute(IoStateProvider.ATTRIBUTE_RESOURCES);
             if (resQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
                 return new TmfModelResponse<>(retMap, ITmfResponse.Status.FAILED, "Bizarre quark value for the file resources"); //$NON-NLS-1$
             }
@@ -284,10 +284,9 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         long rootId = getId(ITmfStateSystem.ROOT_ATTRIBUTE);
         ITmfTrace trace = getTrace();
         builder.add(new TimeGraphEntryModel(rootId, -1, String.valueOf(trace.getName()), ss.getStartTime(), ss.getCurrentEndTime()));
-        try {
-            addResources(ss, builder, ss.getQuarkAbsolute(FileDescriptorStateProvider.RESOURCES), rootId, selectedTids);
-        } catch (AttributeNotFoundException e) {
-            Activator.getInstance().logError(e.getMessage(), e);
+        int resourcesQuark = ss.optQuarkAbsolute(IoStateProvider.ATTRIBUTE_RESOURCES);
+        if (resourcesQuark != ITmfStateSystem.INVALID_ATTRIBUTE) {
+            addResources(ss, builder, resourcesQuark, rootId, selectedTids);
         }
 
         return new TmfTreeModel<>(Collections.emptyList(), builder.build());
@@ -298,8 +297,8 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
 
         String ramFiles = "in memory"; //$NON-NLS-1$
         boolean hasMemfile = false;
-        int ramHash = fileIds.computeIfAbsent(ramFiles, a -> STRING_VALUE.incrementAndGet());
-        long ramId = getId(ramHash);
+        int ramHash = fFileIds.computeIfAbsent(ramFiles, a -> STRING_VALUE.incrementAndGet());
+        long ramId = getStringEntryId(ramHash);
         TimeGraphEntryModel ramElement = new TimeGraphEntryModel(ramId, parentId, ramFiles, ss.getStartTime(), ss.getCurrentEndTime());
 
         for (Integer fileQuark : fileQuarks) {
@@ -316,11 +315,11 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
                     String[] segments = name.split(File.separator);
                     StringBuilder sb = new StringBuilder();
                     long parent = parentId;
-                    builder.add(new FileEntryModel(getId(fileIds.computeIfAbsent(File.separator, a -> STRING_VALUE.incrementAndGet())), parentId, File.separator, ss.getStartTime(), ss.getCurrentEndTime(), false, Type.Directory));
+                    builder.add(new FileEntryModel(getStringEntryId(fFileIds.computeIfAbsent(File.separator, a -> STRING_VALUE.incrementAndGet())), parentId, File.separator, ss.getStartTime(), ss.getCurrentEndTime(), false, Type.Directory));
                     for (int i = 0; i < segments.length - 1; i++) {
                         sb.append('/').append(segments[i]);
                         String fileName = sb.toString();
-                        Long fileId = getId(fileIds.computeIfAbsent(fileName, a -> STRING_VALUE.incrementAndGet()));
+                        Long fileId = getId(fFileIds.computeIfAbsent(fileName, a -> STRING_VALUE.incrementAndGet()));
                         builder.add(new FileEntryModel(fileId, parent, segments[i] + File.separator, ss.getStartTime(), ss.getCurrentEndTime(), false, Type.Directory));
                         parent = fileId;
                     }
@@ -348,6 +347,10 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
                 }
             }
         }
+    }
+
+    private long getStringEntryId(int value) {
+        return fIdToEntry.inverse().computeIfAbsent(value, q -> getEntryId());
     }
 
     private static @Nullable String getThreadName(int tid, long time, ITmfTrace trace) {
@@ -380,7 +383,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         if (startingNodeQuark == null || startingNodeQuark >= OFFSET) {
             return null;
         }
-        int readQuark = ss.optQuarkRelative(startingNodeQuark, FileDescriptorStateProvider.READ);
+        int readQuark = ss.optQuarkRelative(startingNodeQuark, IoStateProvider.ATTRIBUTE_READ);
         return getdelta(start, end, ss, readQuark);
     }
 
@@ -395,7 +398,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         if (startingNodeQuark == null || startingNodeQuark >= OFFSET) {
             return null;
         }
-        int readQuark = ss.optQuarkRelative(startingNodeQuark, FileDescriptorStateProvider.WRITE);
+        int readQuark = ss.optQuarkRelative(startingNodeQuark, IoStateProvider.ATTRIBUTE_WRITE);
         return getdelta(start, end, ss, readQuark);
     }
 

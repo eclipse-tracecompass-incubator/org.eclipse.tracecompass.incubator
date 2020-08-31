@@ -7,6 +7,7 @@
             category="org.eclipse.linuxtools.lttng2.ui.views.category"
             class="org.eclipse.tracecompass.incubator.internal.kernel.ui.views.fileaccess.FileAccessByFileView"
             id="org.eclipse.tracecompass.incubator.kernel.ui.filebyfile"
+            icon="icons/obj16/file_obj.gif"
             name="%view.fileaccess"
             restorable="true">
       </view>
@@ -19,6 +20,14 @@
             name="%view.contextswitch"
             restorable="true">
       </view>
+      <view
+            category="org.eclipse.linuxtools.tmf.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.kernel.ui.views.io.perprocess.IoByProcessView"
+            id="org.eclipse.tracecompass.incubator.kernel.ui.io.per.process.multiview"
+            icon="icons/obj16/file_obj.gif"
+            name="%view.ioperprocess"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
@@ -26,7 +35,7 @@
             class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
             id="org.eclipse.tracecompass.incubator.kernel.ui.filebyfile">
          <analysisModuleClass
-               class="org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessAnalysis">
+               class="org.eclipse.tracecompass.incubator.internal.kernel.core.io.IoAnalysis">
          </analysisModuleClass>
       </output>
       <output
@@ -34,6 +43,13 @@
             id="org.eclipse.tracecompass.incubator.kernel.ui.contextswitch">
          <analysisModuleClass
                class="org.eclipse.tracecompass.analysis.os.linux.core.contextswitch.KernelContextSwitchAnalysis">
+         </analysisModuleClass>
+      </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.kernel.ui.io.per.process.multiview">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.kernel.core.io.IoAnalysis">
          </analysisModuleClass>
       </output>
    </extension>

@@ -1,0 +1,4 @@
+50,180,10
+2,/mnt/thisIsMyTest:50,54,Write,null,60,64,Write,null,70,79,null,null,80,84,Read,null,85,200,null,null
+4,/mnt/ImGonnaReadThisFile:1,139,null,null,140,149,null,null,150,154,Read,null,155,200,null,null
+4,/mnt/ImGonnaWriteToThisFile:1,139,null,null,140,149,null,null,150,154,Write,null,155,200,null,null

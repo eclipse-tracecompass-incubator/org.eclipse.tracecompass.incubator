@@ -4,12 +4,12 @@
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
-            analysis_module="org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessAnalysis"
+            analysis_module="org.eclipse.tracecompass.incubator.internal.kernel.core.io.IoAnalysis"
             applies_experiment="true"
             automatic="false"
             icon="icons/fileaccess.png"
-            id="org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess"
-            name="%kernel.fileaccess.name">
+            id="org.eclipse.tracecompass.incubator.internal.kernel.core.io"
+            name="%kernel.io.name">
          <tracetype
                applies="true"
                class="org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace">
@@ -41,7 +41,15 @@
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
       <dataProviderFactory
             class="org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileAccessDataProviderFactory"
-            id="org.eclipse.tracecompass.incubator.internal.kernel.core.fileacess.dataprovider">
+            id="org.eclipse.tracecompass.incubator.kernel.core.file.access.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+         class="org.eclipse.tracecompass.incubator.internal.kernel.core.io.IoPerProcessDataProviderFactory"
+         id="org.eclipse.tracecompass.incubator.kernel.core.io.per.process">
+      </dataProviderFactory>
+      <dataProviderFactory
+         class="org.eclipse.tracecompass.incubator.internal.kernel.core.io.IoAccessDataProviderFactory"
+         id="org.eclipse.tracecompass.incubator.kernel.core.io.access.dataprovider">
       </dataProviderFactory>
    </extension>
 
