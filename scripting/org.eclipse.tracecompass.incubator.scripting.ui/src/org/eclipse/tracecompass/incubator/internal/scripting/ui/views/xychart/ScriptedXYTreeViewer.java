@@ -47,7 +47,7 @@ public class ScriptedXYTreeViewer extends AbstractSelectTreeViewer {
                     // do not show the legend for the trace entries.
                     return null;
                 }
-                return getLegendImage(String.valueOf(model.getName()));
+                return getLegendImage(model.getId());
             }
             return null;
         }
