@@ -28,6 +28,32 @@
             name="%view.ioperprocess"
             restorable="true">
       </view>
+      <view
+            category="org.eclipse.linuxtools.lttng2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.kernel.ui.views.io.diskrequests.DiskRequestsView"
+            icon="icons/obj16/diskQueues.png"
+            id="org.eclipse.tracecompass.analysis.os.linux.views.diskrequests"
+            name="%view.diskrequests"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            category="org.eclipse.linuxtools.lttng2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.kernel.ui.views.io.latencies.stats.WaitQueueLatencyStatisticsView"
+            icon="icons/obj16/statistics_view.gif"
+            id="org.eclipse.tracecompass.kernel.core.inputoutput.waitqueue.view.statistics"
+            name="%view.iowait.stats"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            category="org.eclipse.linuxtools.lttng2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.kernel.ui.views.io.latencies.stats.ExecQueueLatencyStatisticsView"
+            icon="icons/obj16/statistics_view.gif"
+            id="org.eclipse.tracecompass.kernel.core.inputoutput.execqueue.view.statistics"
+            name="%view.ioexec.stats"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
@@ -50,6 +76,27 @@
             id="org.eclipse.tracecompass.incubator.kernel.ui.io.per.process.multiview">
          <analysisModuleClass
                class="org.eclipse.tracecompass.incubator.internal.kernel.core.io.IoAnalysis">
+         </analysisModuleClass>
+      </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.analysis.os.linux.views.diskrequests">
+            <analysisModuleClass
+               class="org.eclipse.tracecompass.internal.analysis.os.linux.core.inputoutput.InputOutputAnalysisModule">
+         </analysisModuleClass>
+      </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.kernel.core.inputoutput.waitqueue.view.statistics">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.internal.analysis.os.linux.core.inputoutput.InputOutputAnalysisModule">
+         </analysisModuleClass>
+      </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.kernel.core.inputoutput.execqueue.view.statistics">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.internal.analysis.os.linux.core.inputoutput.InputOutputAnalysisModule">
          </analysisModuleClass>
       </output>
    </extension>
