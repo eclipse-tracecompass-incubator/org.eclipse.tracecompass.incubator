@@ -27,17 +27,18 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.signal.TmfTimeViewAlignmentInfo;
 import org.eclipse.tracecompass.tmf.ui.signal.TmfTimeViewAlignmentSignal;
-import org.eclipse.tracecompass.tmf.ui.viewers.ILegendImageProvider;
+import org.eclipse.tracecompass.tmf.ui.viewers.ILegendImageProvider2;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfTimeViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.AbstractSelectTreeViewer;
-import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.TmfXYChartViewer;
-import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.XYChartLegendImageProvider;
-import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.linecharts.TmfCommonXAxisChartViewer;
-import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.linecharts.TmfFilteredXYChartViewer;
-import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.linecharts.TmfXYChartSettings;
+import org.eclipse.tracecompass.tmf.ui.viewers.tree.AbstractSelectTreeViewer2;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.TmfXYChartViewer;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.XYChartLegendImageProvider;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.linechart.TmfCommonXAxisChartViewer;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.linechart.TmfFilteredXYChartViewer;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.linechart.TmfXYChartSettings;
 import org.eclipse.tracecompass.tmf.ui.views.ManyEntriesSelectedDialogPreCheckedListener;
-import org.eclipse.tracecompass.tmf.ui.views.TmfChartView;
+import org.eclipse.tracecompass.tmf.ui.views.xychart.TmfChartView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.dialogs.TriStateFilteredCheckboxTree;
 
 /**
@@ -212,9 +213,9 @@ public class ChartMultiViewer extends TmfTimeViewer implements IMultiViewer {
     private void coupleSelectViewer() {
         TmfViewer tree = fLeftViewer;
         TmfXYChartViewer chart = fChartViewer;
-        if (tree instanceof AbstractSelectTreeViewer && chart instanceof TmfFilteredXYChartViewer) {
-            ILegendImageProvider legendImageProvider = new XYChartLegendImageProvider((TmfCommonXAxisChartViewer) chart);
-            AbstractSelectTreeViewer selectTree = (AbstractSelectTreeViewer) tree;
+        if (tree instanceof AbstractSelectTreeViewer2 && chart instanceof TmfFilteredXYChartViewer) {
+            ILegendImageProvider2 legendImageProvider = new XYChartLegendImageProvider((TmfCommonXAxisChartViewer) chart);
+            AbstractSelectTreeViewer2 selectTree = (AbstractSelectTreeViewer2) tree;
             selectTree.addTreeListener((TmfFilteredXYChartViewer) chart);
             selectTree.setLegendImageProvider(legendImageProvider);
             TriStateFilteredCheckboxTree checkboxTree = selectTree.getTriStateFilteredCheckboxTree();

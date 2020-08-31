@@ -33,7 +33,7 @@ import org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.xych
 import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.ITmfImageConstants;
-import org.eclipse.tracecompass.internal.tmf.ui.viewers.xycharts.TmfXYChartTimeAdapter;
+import org.eclipse.tracecompass.internal.tmf.ui.viewers.xychart.TmfXYChartTimeAdapter;
 import org.eclipse.tracecompass.internal.tmf.ui.views.TmfAlignmentSynchronizer;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
@@ -44,7 +44,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.ui.signal.TmfTimeViewAlignmentInfo;
 import org.eclipse.tracecompass.tmf.ui.signal.TmfTimeViewAlignmentSignal;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfViewer;
-import org.eclipse.tracecompass.tmf.ui.viewers.tree.AbstractSelectTreeViewer;
+import org.eclipse.tracecompass.tmf.ui.viewers.tree.AbstractSelectTreeViewer2;
 import org.eclipse.tracecompass.tmf.ui.views.ITimeReset;
 import org.eclipse.tracecompass.tmf.ui.views.ITmfTimeAligned;
 import org.eclipse.tracecompass.tmf.ui.views.ResetUtil;
@@ -560,8 +560,8 @@ public abstract class AbstractMultiView extends TmfView implements ITmfTimeAlign
         }
         // A workaround for XYCharts to realign after a selection
         // changes leading to possible changing of Y axis labels' width.
-        if (viewer.getLeftChildViewer() instanceof AbstractSelectTreeViewer) {
-            AbstractSelectTreeViewer tree = (AbstractSelectTreeViewer) viewer.getLeftChildViewer();
+        if (viewer.getLeftChildViewer() instanceof AbstractSelectTreeViewer2) {
+            AbstractSelectTreeViewer2 tree = (AbstractSelectTreeViewer2) viewer.getLeftChildViewer();
             tree.addSelectionChangeListener(e -> alignViewers(false));
         }
         return viewer;

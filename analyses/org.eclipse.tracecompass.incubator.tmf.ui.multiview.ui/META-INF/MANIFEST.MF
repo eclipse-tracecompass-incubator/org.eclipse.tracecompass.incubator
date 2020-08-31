@@ -26,4 +26,4 @@ Import-Package: com.google.common.base,
  com.google.common.collect,
  org.eclipse.nebula.widgets.opal.commons,
  org.eclipse.nebula.widgets.opal.duallist,
- org.swtchart
+ org.eclipse.swtchart

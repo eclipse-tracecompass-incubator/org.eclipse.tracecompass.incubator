@@ -24,8 +24,9 @@ import org.eclipse.swt.events.MenuDetectEvent;
 import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swtchart.IPlotArea;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
-import org.eclipse.tracecompass.internal.tmf.ui.views.LockRangeDialog;
+import org.eclipse.tracecompass.internal.tmf.ui.views.xychart.LockRangeDialog;
 import org.eclipse.ui.IViewSite;
 
 /**
@@ -107,8 +108,7 @@ public class ActionsChartMultiViewer extends ChartMultiViewer implements ISelect
      * Shows the context menu for the PlotArea.
      */
     public void showMenu() {
-        Composite plotArea = getChartViewer().getSwtChart().getPlotArea();
-        plotArea.getMenu().setVisible(true);
+        getChartViewer().getSwtChart().getMenu().setVisible(true);
     }
 
     /**
@@ -128,10 +128,10 @@ public class ActionsChartMultiViewer extends ChartMultiViewer implements ISelect
 
     private MenuManager createContextMenus() {
         MenuManager menuManager = new MenuManager();
-        Composite plotArea = getChartViewer().getSwtChart().getPlotArea();
-        Menu menu = menuManager.createContextMenu(plotArea);
-        plotArea.setMenu(menu);
-        plotArea.addMenuDetectListener(this);
+        IPlotArea plotArea = getChartViewer().getSwtChart().getPlotArea();
+        Menu menu = menuManager.createContextMenu((Composite) plotArea);
+        getChartViewer().getSwtChart().setMenu(menu);
+        getChartViewer().getSwtChart().addMenuDetectListener(this);
         fViewSite.registerContextMenu(menuManager, this);
         return menuManager;
     }

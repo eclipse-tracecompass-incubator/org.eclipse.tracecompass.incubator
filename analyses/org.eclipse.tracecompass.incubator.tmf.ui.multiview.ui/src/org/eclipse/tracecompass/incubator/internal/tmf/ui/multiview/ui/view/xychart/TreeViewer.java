@@ -20,7 +20,7 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
-import org.eclipse.tracecompass.tmf.ui.viewers.tree.AbstractSelectTreeViewer;
+import org.eclipse.tracecompass.tmf.ui.viewers.tree.AbstractSelectTreeViewer2;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.ITmfTreeColumnDataProvider;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.ITmfTreeViewerEntry;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.TmfGenericTreeEntry;
@@ -31,7 +31,7 @@ import org.eclipse.tracecompass.tmf.ui.viewers.tree.TmfTreeColumnData;
  *
  * @author Ivan Grinenko
  */
-public class TreeViewer extends AbstractSelectTreeViewer {
+public class TreeViewer extends AbstractSelectTreeViewer2 {
 
     private static final int COL_INDEX_COLOR_LEGEND = 2;
 

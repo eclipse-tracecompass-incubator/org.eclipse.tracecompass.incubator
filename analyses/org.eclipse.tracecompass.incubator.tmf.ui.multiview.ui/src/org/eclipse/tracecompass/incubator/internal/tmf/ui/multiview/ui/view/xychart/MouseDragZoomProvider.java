@@ -17,13 +17,13 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.ITmfChartTimeProvider;
-import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.TmfBaseProvider;
-import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.TmfMouseDragZoomProvider;
-import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.TmfXYChartViewer;
-import org.swtchart.IAxis;
-import org.swtchart.ICustomPaintListener;
-import org.swtchart.IPlotArea;
+import org.eclipse.swtchart.ICustomPaintListener;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.IAxis;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.ITmfChartTimeProvider;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.TmfBaseProvider;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.TmfMouseDragZoomProvider;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.TmfXYChartViewer;
+
 
 /**
  * Enables context menu if no dragging was detected. Is a copy of
@@ -60,27 +60,11 @@ public class MouseDragZoomProvider extends TmfBaseProvider
     public MouseDragZoomProvider(ActionsChartMultiViewer tmfChartViewer) {
         super(tmfChartViewer.getChartViewer());
         fChartViewer = tmfChartViewer;
-        register();
     }
 
     // ------------------------------------------------------------------------
     // TmfBaseProvider
     // ------------------------------------------------------------------------
-    @Override
-    public void register() {
-        getChart().getPlotArea().addMouseListener(this);
-        getChart().getPlotArea().addMouseMoveListener(this);
-        ((IPlotArea) getChart().getPlotArea()).addCustomPaintListener(this);
-    }
-
-    @Override
-    public void deregister() {
-        if ((getChartViewer().getControl() != null) && !getChartViewer().getControl().isDisposed()) {
-            getChart().getPlotArea().removeMouseListener(this);
-            getChart().getPlotArea().removeMouseMoveListener(this);
-            ((IPlotArea) getChart().getPlotArea()).removeCustomPaintListener(this);
-        }
-    }
 
     @Override
     public void refresh() {
@@ -98,7 +82,7 @@ public class MouseDragZoomProvider extends TmfBaseProvider
     @Override
     public void mouseDown(MouseEvent e) {
         if ((getChartViewer().getWindowDuration() != 0) && (e.button == 3)) {
-            IAxis xAxis = getChart().getAxisSet().getXAxis(0);
+            IAxis xAxis = getXAxis();
             fStartTime = limitXDataCoordinate(xAxis.getDataCoordinate(e.x));
             fEndTime = fStartTime;
             fIsUpdate = true;
@@ -122,7 +106,7 @@ public class MouseDragZoomProvider extends TmfBaseProvider
         }
 
         if (fIsUpdate) {
-            getChart().redraw();
+            redraw();
         }
         fIsUpdate = false;
     }
@@ -133,16 +117,19 @@ public class MouseDragZoomProvider extends TmfBaseProvider
     @Override
     public void mouseMove(MouseEvent e) {
         if (fIsUpdate) {
-            IAxis xAxis = getChart().getAxisSet().getXAxis(0);
-            fEndTime = limitXDataCoordinate(xAxis.getDataCoordinate(e.x));
-
             ITmfChartTimeProvider viewer = getChartViewer();
+
+            fStartTime = viewer.getWindowStartTime();
+            fEndTime = viewer.getWindowEndTime();
+
             if (viewer instanceof TmfXYChartViewer) {
+                IAxis xAxis = getXAxis();
+                long cursorTime = limitXDataCoordinate(xAxis.getDataCoordinate(e.x));
                 TmfXYChartViewer xyChartViewer = (TmfXYChartViewer) viewer;
-                xyChartViewer.updateStatusLine(fStartTime, fEndTime, limitXDataCoordinate(xAxis.getDataCoordinate(e.x)));
+                xyChartViewer.updateStatusLine(fStartTime, fEndTime, cursorTime);
             }
 
-            getChart().redraw();
+            redraw();
         }
     }
 
@@ -152,7 +139,7 @@ public class MouseDragZoomProvider extends TmfBaseProvider
     @Override
     public void paintControl(PaintEvent e) {
         if (fIsUpdate && (fStartTime != fEndTime)) {
-            IAxis xAxis = getChart().getAxisSet().getXAxis(0);
+            IAxis xAxis = getXAxis();
             int startX = xAxis.getPixelCoordinate(fStartTime);
             int endX = xAxis.getPixelCoordinate(fEndTime);
 
