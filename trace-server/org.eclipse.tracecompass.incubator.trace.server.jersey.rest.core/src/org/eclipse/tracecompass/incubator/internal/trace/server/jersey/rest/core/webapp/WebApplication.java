@@ -14,9 +14,15 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.FilterService;
@@ -47,30 +53,25 @@ public class WebApplication {
 
     private static final String CONTEXT_PATH = "/tsp/api"; //$NON-NLS-1$
     private static final String PATH_SPEC = "/*"; //$NON-NLS-1$
-    /**
-     * Port value which boots the server in testing mode.
-     */
-    public static final int TEST_PORT = 8378;
-
-    private int fPort;
 
     private Server fServer;
+    private final TraceServerConfiguration fConfig;
 
     /**
      * Default Constructor
      */
     public WebApplication() {
-        this(8080);
+        this(TraceServerConfiguration.create());
     }
 
     /**
-     * Constructor to to provide different port for server
+     * Constructor to provide a configuration to the server
      *
-     * @param port
-     *            the port to use
+     * @param config
+     *            Server configuration
      */
-    public WebApplication(int port) {
-        fPort = port;
+    public WebApplication(TraceServerConfiguration config) {
+        fConfig = config;
     }
 
     /**
@@ -97,7 +98,12 @@ public class WebApplication {
         ServletHolder holder = new ServletHolder(sc);
         sch.addServlet(holder, PATH_SPEC);
 
-        fServer = new Server(fPort);
+        fServer = new Server();
+        // https://www.programcreek.com/java-api-examples/?api=org.eclipse.jetty.server.SslConnectionFactory
+
+        @SuppressWarnings("resource")
+        ServerConnector connector = getConnector(fServer, fConfig);
+        fServer.addConnector(connector);
         fServer.setHandler(sch);
 
         // create and open a default eclipse project.
@@ -122,9 +128,35 @@ public class WebApplication {
         }
 
         fServer.start();
-        if (fPort != TEST_PORT) {
+        if (fConfig.getPort() != TraceServerConfiguration.TEST_PORT) {
             fServer.join();
         }
+    }
+
+    private static ServerConnector getConnector(Server server, TraceServerConfiguration config) {
+        ServerConnector serverConnector = null;
+        if (config.useSSL()) {
+
+            SslContextFactory contextFactory = new SslContextFactory.Server();
+            contextFactory.setKeyStorePath(config.getKeystore());
+            contextFactory.setKeyStorePassword(config.getKeystorePass());
+            contextFactory.setTrustAll(true);
+
+            HttpConfiguration httpsConfig = new HttpConfiguration();
+            httpsConfig.setSecureScheme("https"); //$NON-NLS-1$
+            httpsConfig.setOutputBufferSize(32768);
+            httpsConfig.setRequestHeaderSize(8192 * 2);
+            httpsConfig.setResponseHeaderSize(8192 * 2);
+            httpsConfig.setSendServerVersion(true);
+            httpsConfig.setSendDateHeader(false);
+
+            SslConnectionFactory connector = new SslConnectionFactory(contextFactory, HttpVersion.HTTP_1_1.asString());
+            serverConnector = new ServerConnector(server, connector, new HttpConnectionFactory(httpsConfig));
+        } else {
+            serverConnector = new ServerConnector(server);
+        }
+        serverConnector.setPort(config.getPort());
+        return serverConnector;
     }
 
     private static JacksonJaxbJsonProvider registerCustomMappers() {

@@ -31,6 +31,7 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.TraceServerConfiguration;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
@@ -53,7 +54,7 @@ import com.google.common.collect.ImmutableList;
  */
 public abstract class RestServerTest {
     private static final String SERVER = "http://localhost:8378/tsp/api"; //$NON-NLS-1$
-    private static final WebApplication fWebApp = new WebApplication(WebApplication.TEST_PORT);
+    private static final WebApplication fWebApp = new WebApplication(new TraceServerConfiguration(TraceServerConfiguration.TEST_PORT, false, null, null));
     /**
      * Traces endpoint path (relative to application).
      */
