@@ -47,10 +47,6 @@ import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.ResourceUtil;
-import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTrace;
-import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition;
-import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomXmlTrace;
-import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomXmlTraceDefinition;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
@@ -137,8 +133,11 @@ public class TraceManagerService {
 
         IResource resource = getResource(path);
 
+//        TmfTraceTypeUIUtils.setTraceType(resource, traceTypeHelper);
         TraceTypeHelper helper = traceTypes.get(0);
-        ITmfTrace trace = instantiateTrace(helper);
+        resource.setPersistentProperty(TmfCommonConstants.TRACETYPE, helper.getTraceTypeId());
+
+        ITmfTrace trace = helper.getTraceClass().getDeclaredConstructor().newInstance();
         trace.initTrace(resource, path, ITmfEvent.class, name, typeID);
         trace.indexTrace(false);
         // read first event to make sure start time is initialized
@@ -148,27 +147,6 @@ public class TraceManagerService {
 
         TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(this, trace, null));
         return trace;
-    }
-
-     // TODO De-duplicate code in TraceManagerService, ExperimentManagerService and TmfTraceElement
-    private static ITmfTrace instantiateTrace(TraceTypeHelper helper) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        if (CustomTxtTrace.isCustomTraceTypeId(helper.getTraceTypeId())) {
-            for (CustomTxtTraceDefinition def : CustomTxtTraceDefinition.loadAll()) {
-                String id = CustomTxtTrace.buildTraceTypeId(def.categoryName, def.definitionName);
-                if (helper.getTraceTypeId().equals(id)) {
-                    return new CustomTxtTrace(def);
-                }
-            }
-        }
-        if (CustomXmlTrace.isCustomTraceTypeId(helper.getTraceTypeId())) {
-            for (CustomXmlTraceDefinition def : CustomXmlTraceDefinition.loadAll()) {
-                String id = CustomXmlTrace.buildTraceTypeId(def.categoryName, def.definitionName);
-                if (helper.getTraceTypeId().equals(id)) {
-                    return new CustomXmlTrace(def);
-                }
-            }
-        }
-        return  helper.getTraceClass().getDeclaredConstructor().newInstance();
     }
 
     /**
