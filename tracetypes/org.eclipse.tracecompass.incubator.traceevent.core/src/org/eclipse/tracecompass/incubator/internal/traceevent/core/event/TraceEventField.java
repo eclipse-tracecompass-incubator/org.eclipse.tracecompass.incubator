@@ -76,10 +76,11 @@ public class TraceEventField {
         if (root.size() == 0) {
             return null;
         }
-        Double tso = optDouble(root, ITraceEventConstants.TIMESTAMP);
-        if (tso == Double.NaN) {
+        JsonElement timestamp = root.get(ITraceEventConstants.TIMESTAMP);
+        if (timestamp == null) {
             return null;
         }
+        Double tso = timestamp.getAsDouble();
         if (Double.isFinite(tso)) {
             ts = (long) (tso * MICRO_TO_NANO);
         }
@@ -113,7 +114,7 @@ public class TraceEventField {
                 argsMap.put(ITraceEventConstants.ARGS + "/" + key, value); //$NON-NLS-1$
             }
         }
-        argsMap.put(ITraceEventConstants.TIMESTAMP, ts);
+        argsMap.put(ITraceEventConstants.TIMESTAMP, timestamp.getAsString());
         argsMap.put(ITraceEventConstants.PHASE, phase);
         argsMap.put(ITraceEventConstants.NAME, name);
         if (tid != null) {
@@ -193,6 +194,7 @@ public class TraceEventField {
                 .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
                 .toArray(ITmfEventField[]::new);
         fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array);
+        fields.put(ITraceEventConstants.TIMESTAMP, ts / MICRO_TO_NANO);
         fTs = ts;
         fDuration = duration == null ? null : Double.isFinite(duration) ? duration.longValue() : null;
         fPhase = phase.charAt(0);

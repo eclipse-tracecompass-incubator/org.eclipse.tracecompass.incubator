@@ -330,7 +330,7 @@ public class TraceEventTraceTest {
             assertEquals("event1", eventField.getField("name").getValue());
             assertEquals("12", eventField.getField("pid").getValue());
             assertEquals(12, eventField.getField("tid").getValue());
-            assertEquals(456123453000L, eventField.getField("ts").getValue());
+            assertEquals("456123453", eventField.getField("ts").getValue()); // it's in microseconds
         } finally {
             trace.dispose();
         }
