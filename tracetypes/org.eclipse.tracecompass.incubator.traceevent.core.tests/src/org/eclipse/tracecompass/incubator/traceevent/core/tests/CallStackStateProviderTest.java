@@ -84,7 +84,7 @@ public class CallStackStateProviderTest {
             // First process, request bar
             intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(10000, 99999, "REQUEST_BAR"),
                     new StateIntervalStub(100000, 200000, (Object) null)),
-                    "Processes", "26037", "26065", "CallStack", "1"));
+                    "Processes", "26037(async)", "26065", "CallStack", "1"));
             intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(10000, 19999, (Object) null),
                     new StateIntervalStub(20000, 29999, "URL_REQUEST_DELEGATE"),
                     new StateIntervalStub(30000, 39999, (Object) null),
@@ -92,20 +92,20 @@ public class CallStackStateProviderTest {
                     new StateIntervalStub(70000, 79999, (Object) null),
                     new StateIntervalStub(80000, 99999, "URL_REQUEST_DELEGATE_UNMATCHED_BEGIN"),
                     new StateIntervalStub(100000, 200000, (Object) null)),
-                    "Processes", "26037", "26065", "CallStack", "2"));
+                    "Processes", "26037(async)", "26065", "CallStack", "2"));
             intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(10000, 19999, (Object) null),
                     new StateIntervalStub(20000, 39999, (Object) null),
                     new StateIntervalStub(40000, 49999, (Object) null),
                     new StateIntervalStub(50000, 59999, "URL_REQUEST_INNER"),
                     new StateIntervalStub(60000, 79999, (Object) null),
                     new StateIntervalStub(80000, 200000, (Object) null)),
-                    "Processes", "26037", "26065", "CallStack", "3"));
+                    "Processes", "26037(async)", "26065", "CallStack", "3"));
 
             // Second process, request foo
             intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(10000, 109999, (Object) null),
                     new StateIntervalStub(110000, 199999, "REQUEST_FOO"),
                     new StateIntervalStub(200000, 200000, (Object) null)),
-                    "Processes", "26037", "26066", "CallStack", "1"));
+                    "Processes", "26037(async)", "26066", "CallStack", "1"));
             intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(10000, 109999, (Object) null),
                     new StateIntervalStub(110000, 129999, "URL_REQUEST_DELEGATE_UNMATCHED_END"),
                     new StateIntervalStub(130000, 139999, (Object) null),
@@ -113,13 +113,13 @@ public class CallStackStateProviderTest {
                     new StateIntervalStub(170000, 179999, (Object) null),
                     new StateIntervalStub(180000, 189999, "URL_REQUEST_DELEGATE"),
                     new StateIntervalStub(190000, 200000, (Object) null)),
-                    "Processes", "26037", "26066", "CallStack", "2"));
+                    "Processes", "26037(async)", "26066", "CallStack", "2"));
             intervalInfos.add(new IntervalInfo(ImmutableList.of(new StateIntervalStub(10000, 139999, (Object) null),
                     new StateIntervalStub(140000, 149999, (Object) null),
                     new StateIntervalStub(150000, 159999, "URL_REQUEST_INNER"),
                     new StateIntervalStub(160000, 179999, (Object) null),
                     new StateIntervalStub(180000, 200000, (Object) null)),
-                    "Processes", "26037", "26066", "CallStack", "3"));
+                    "Processes", "26037(async)", "26066", "CallStack", "3"));
             StateSystemTestUtils.testIntervals(ss, intervalInfos);
         } finally {
             csModule.dispose();

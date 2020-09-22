@@ -58,7 +58,8 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  */
 public class TraceEventCallStackProvider extends CallStackStateProvider {
 
-    private static final int VERSION_NUMBER = 7;
+    private static final String ASYNC_SUFFIX = "(async)"; //$NON-NLS-1$
+    private static final int VERSION_NUMBER = 8;
     private static final int UNSET_ID = -1;
     static final String EDGES = "EDGES"; //$NON-NLS-1$
 
@@ -156,9 +157,10 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
     @Override
     protected @Nullable String getProcessName(@NonNull ITmfEvent event) {
         String pName = super.getProcessName(event);
-        if (pName == null) {
-            pName = event.getContent().getFieldValue(String.class, ITraceEventConstants.PID);
+        if (pName != null) {
+            return String.format("%s (%s)", pName, getProcessId(event)); //$NON-NLS-1$
         }
+        pName = event.getContent().getFieldValue(String.class, ITraceEventConstants.PID);
 
         if (pName == null) {
             int processId = getProcessId(event);
@@ -171,9 +173,10 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
     @Override
     protected @Nullable String getThreadName(@NonNull ITmfEvent event) {
         String tName = super.getThreadName(event);
-        if (tName == null) {
-            tName = event.getContent().getFieldValue(String.class, "tname"); //$NON-NLS-1$
+        if (tName != null) {
+            return String.format("%s (%s)", tName, getThreadId(event)); //$NON-NLS-1$
         }
+        tName = event.getContent().getFieldValue(String.class, "tname"); //$NON-NLS-1$
 
         if (tName == null) {
             long threadId = getThreadId(event);
@@ -262,6 +265,8 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
         }
         switch (ph) {
         case TraceEventPhases.NESTABLE_START:
+            handleStart(event, ss, timestamp, processName + ASYNC_SUFFIX);
+            break;
         case TraceEventPhases.DURATION_START:
             handleStart(event, ss, timestamp, processName);
             break;
@@ -274,6 +279,8 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             break;
 
         case TraceEventPhases.NESTABLE_END:
+            handleEnd(event, ss, timestamp, processName + ASYNC_SUFFIX);
+            break;
         case TraceEventPhases.DURATION_END:
             handleEnd(event, ss, timestamp, processName);
             break;
