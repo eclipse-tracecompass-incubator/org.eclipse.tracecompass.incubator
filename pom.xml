@@ -35,6 +35,8 @@
        available under the terms of the Eclipse Public License 2.0
        which accompanies this distribution, and is available at
        https://www.eclipse.org/legal/epl-2.0/
+
+       SPDX-License-Identifier: EPL-2.0
       </comments>
     </license>
   </licenses>
@@ -153,7 +155,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.7.9</version>
+            <version>0.8.4</version>
             <executions>
               <execution>
                 <id>pre-test</id>
@@ -162,7 +164,7 @@
                 </goals>
                 <configuration>
                   <!-- Where to put jacoco coverage report -->
-                  <destFile>${sonar.jacoco.reportPath}</destFile>
+                  <destFile>${jacoco.destFile}</destFile>
                   <includes>
                     <include>org.eclipse.tracecompass.incubator.*</include>
                   </includes>
@@ -170,14 +172,12 @@
                 </configuration>
               </execution>
               <execution>
-                <id>post-test</id>
-                <phase>post-integration-test</phase>
+                <id>jacoco-report</id>
+                <phase>verify</phase>
                 <goals>
                   <goal>report</goal>
+                  <goal>report-aggregate</goal>
                 </goals>
-                <configuration>
-                  <dataFile>${sonar.jacoco.reportPath}</dataFile>
-                </configuration>
               </execution>
             </executions>
           </plugin>
