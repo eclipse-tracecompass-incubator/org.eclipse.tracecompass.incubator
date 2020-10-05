@@ -27,9 +27,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
@@ -148,9 +145,9 @@ public class ExperimentManagerService {
             return Response.status(Status.BAD_REQUEST).build();
         }
         List<?> traceUUIDs = (List<?>) traces;
-        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        IPath ipath = root.getLocation().append(EXPERIMENTS).append(name);
-        IResource resource = root.findMember(ipath);
+        IPath ipath = new org.eclipse.core.runtime.Path(EXPERIMENTS)
+                .append(UUID.nameUUIDFromBytes(String.join("", (Iterable) traceUUIDs).getBytes()).toString())
+                .append(name);
 
         Optional<@NonNull ITmfTrace> optional = Iterables.tryFind(TmfTraceManager.getInstance().getOpenedTraces(), t -> t.getPath().equals(ipath.toOSString()));
         if (optional.isPresent()) {
@@ -212,7 +209,7 @@ public class ExperimentManagerService {
             }
         }
 
-        TmfExperiment experiment = new TmfExperiment(ITmfEvent.class, ipath.toOSString(), array, TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, resource);
+        TmfExperiment experiment = new TmfExperiment(ITmfEvent.class, ipath.toOSString(), array, TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, null);
         experiment.indexTrace(false);
         // read first event to make sure start time is initialized
         ITmfContext ctx = experiment.seekEvent(0);
