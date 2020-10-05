@@ -116,6 +116,7 @@ public class ExperimentManagerService {
         if (experiment instanceof TmfExperiment) {
             TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, experiment));
             experiment.dispose();
+            TmfTraceManager.deleteSupplementaryFolder(experiment);
             return Response.ok(experiment).build();
         }
         return Response.status(Status.NOT_FOUND).build();
