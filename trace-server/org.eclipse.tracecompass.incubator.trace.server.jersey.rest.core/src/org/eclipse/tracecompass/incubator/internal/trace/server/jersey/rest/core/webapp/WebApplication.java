@@ -28,6 +28,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.FilterService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
 import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
@@ -182,6 +183,7 @@ public class WebApplication {
         module.addSerializer(TimeGraphEntryModel.class, new TimeGraphEntryModelSerializer());
         module.addSerializer(TmfTreeDataModel.class, new TmfTreeModelSerializer());
         module.addSerializer(OutputElementStyle.class, new OutputElementStyleSerializer());
+        module.addSerializer(IVirtualTableLine.class, new VirtualTableLineSerializer());
         mapper.registerModule(module);
         return provider;
     }

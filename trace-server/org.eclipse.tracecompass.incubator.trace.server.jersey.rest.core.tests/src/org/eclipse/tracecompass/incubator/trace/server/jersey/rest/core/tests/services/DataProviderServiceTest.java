@@ -31,9 +31,14 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ColumnHeaderEntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.LineModelStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TableColumnsOutputResponseStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TableLinesOutputResponseStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TableModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgEntryModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgStatesOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgTreeOutputResponseStub;
@@ -62,6 +67,7 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final int MAX_ITER = 40;
     private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
     private static final String XY_DATAPROVIDER_ID = "org.eclipse.tracecompass.analysis.os.linux.core.cpuusage.CpuUsageDataProvider";
+    private static final String EVENTS_TABLE_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider";
 
     /**
      * Test getting the data provider descriptors
@@ -236,6 +242,81 @@ public class DataProviderServiceTest extends RestServerTest {
             Set<TimeGraphRowStub> rows = tgModel.getRows();
             assertFalse(rows.isEmpty());
             statesResponse.close();
+
+        } catch (ProcessingException e) {
+            // The failure from this exception alone is not helpful. Use the
+            // suppressed exception's message be the failure message for more
+            // help debugging failed tests.
+            fail(e.getCause().getMessage());
+        }
+    }
+
+    /**
+     * Ensure that a table data provider exists and returns correct data. It
+     * does not test the data itself, simply that the serialized fields are the
+     * expected ones.
+     *
+     * @throws InterruptedException
+     *             Exception thrown while waiting to execute again
+     */
+    @Test
+    public void testTableDataProvider() throws InterruptedException {
+        long start = 1412670961211260539L;
+        long end = 1412670967217750839L;
+        try {
+            WebTarget traces = getApplicationEndpoint().path(TRACES);
+            RestServerTest.assertPost(traces, ARM_64_KERNEL_STUB);
+
+            // Test getting the tree endpoint for an XY chart
+            WebTarget tableColumns = getTableColumnsEndpoint(ARM_64_KERNEL_UUID.toString(), EVENTS_TABLE_DATAPROVIDER_ID);
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, ImmutableList.of(start, end));
+            TableColumnsOutputResponseStub responseModel;
+            Response tree = tableColumns.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+            assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
+            responseModel = tree.readEntity(TableColumnsOutputResponseStub.class);
+            assertNotNull(responseModel);
+            tree.close();
+
+            // Make sure the analysis ran enough and we have a model
+            int iteration = 0;
+            while (responseModel.isRunning() && responseModel.getModel() == null && iteration < MAX_ITER) {
+                Thread.sleep(100);
+                Response xyResponse = tableColumns.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+                assertEquals("There should be a positive response for the data provider", 200, xyResponse.getStatus());
+                responseModel = xyResponse.readEntity(TableColumnsOutputResponseStub.class);
+                assertNotNull(responseModel);
+                iteration++;
+                xyResponse.close();
+            }
+
+            List<ColumnHeaderEntryStub> columns = responseModel.getModel();
+            assertNotNull("The model is null, maybe the analysis did not run long enough?" + responseModel, columns);
+            assertFalse(columns.isEmpty());
+
+            // Test getting the XY series endpoint
+            WebTarget tableLinesEnpoint = getTableLinesEndpoint(ARM_64_KERNEL_UUID.toString(), EVENTS_TABLE_DATAPROVIDER_ID);
+            List<Long> requestedColumnsIds = new ArrayList<>();
+            for (int i = 0; i <= columns.size() / 2; i++) {
+                requestedColumnsIds.add(columns.get(i).getId());
+            }
+            parameters.put("columnIds", requestedColumnsIds);
+            Response linesResponse = tableLinesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+            assertEquals("There should be a positive response for the data provider", 200, linesResponse.getStatus());
+            TableLinesOutputResponseStub lineModelResponse = linesResponse.readEntity(TableLinesOutputResponseStub.class);
+            assertNotNull(lineModelResponse);
+
+            TableModelStub tableModel = lineModelResponse.getModel();
+            assertNotNull("Table model", tableModel);
+            List<LineModelStub> lines = tableModel.getLines();
+            // FIXME This assert does not work with current implementation
+            // assertEquals("Sizes match", tableModel.getSize(), lines.size());
+            assertFalse(lines.isEmpty());
+            for (LineModelStub line : lines) {
+                assertEquals("Number of returned cells", requestedColumnsIds.size(), line.getCells().size());
+            }
+            linesResponse.close();
 
         } catch (ProcessingException e) {
             // The failure from this exception alone is not helpful. Use the

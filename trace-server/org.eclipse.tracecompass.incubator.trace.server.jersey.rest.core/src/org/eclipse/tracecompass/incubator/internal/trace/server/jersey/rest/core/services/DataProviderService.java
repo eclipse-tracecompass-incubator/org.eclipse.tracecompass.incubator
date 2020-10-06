@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,9 +41,11 @@ import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLo
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.VirtualTableQueryFilter;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TableColumnHeader;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TreeModelWrapper;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.VirtualTableModelWrapper;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableDataProvider;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlOutputElement;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
@@ -54,6 +57,7 @@ import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
@@ -89,6 +93,7 @@ public class DataProviderService {
     private static final String NO_PROVIDER = "Analysis cannot run"; //$NON-NLS-1$
     private static final String NO_SUCH_TRACE = "No Such Trace"; //$NON-NLS-1$
     private static final String MISSING_OUTPUTID = "Missing parameter outputId"; //$NON-NLS-1$
+    private static final int DEFAULT_MAX_TABLE_LINE_SIZE = 100000;
     private static final @NonNull Logger LOGGER = TraceCompassLog.getLogger(DataProviderService.class);
 
     private final DataProviderManager manager = DataProviderManager.getInstance();
@@ -431,7 +436,21 @@ public class DataProviderService {
     public Response getColumns(@PathParam("uuid") UUID uuid,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        return getTree(uuid, outputId, queryParameters);
+        Response response = getTree(uuid, outputId, queryParameters);
+        Object entity = response.getEntity();
+        if (!(entity instanceof TmfModelResponse<?>)) {
+            return response;
+        }
+        Object model = ((TmfModelResponse<?>) entity).getModel();
+        if (!(model instanceof TreeModelWrapper)) {
+            return response;
+        }
+        List<@NonNull ITmfTreeDataModel> entries = ((TreeModelWrapper) model).getEntries();
+        List<TableColumnHeader> columns = new ArrayList<>();
+        for (ITmfTreeDataModel dataModel : entries) {
+            columns.add(new TableColumnHeader(dataModel));
+        }
+        return Response.ok(new TmfModelResponse<>(columns, ((TmfModelResponse<?>) entity).getStatus(), ((TmfModelResponse<?>) entity).getStatusMessage())).build();
     }
 
     /**
@@ -468,13 +487,18 @@ public class DataProviderService {
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
-            VirtualTableQueryFilter tableQueryFilter = FetchParametersUtils.createVirtualTableQueryFilter(queryParameters.getParameters());
-            if (tableQueryFilter == null) {
-                return Response.status(Status.UNAUTHORIZED).entity(WRONG_PARAMETERS).build();
-            }
+            // Map the incoming parameters to the expected parametere
+            Map<String, Object> parameters = queryParameters.getParameters();
+            Map<String, Object> lineParameters = new HashMap<>();
+            lineParameters.put(DataProviderParameterUtils.REQUESTED_COLUMN_IDS_KEY, parameters.containsKey("columnIds") ? parameters.get("columnIds") : Collections.emptyList()); //$NON-NLS-1$ //$NON-NLS-2$
+            lineParameters.put(DataProviderParameterUtils.REQUESTED_TABLE_INDEX_KEY, parameters.containsKey("lowIndex") ? parameters.get("lowIndex") : 0); //$NON-NLS-1$ //$NON-NLS-2$
+            lineParameters.put(DataProviderParameterUtils.REQUESTED_TABLE_COUNT_KEY, parameters.containsKey("size") ? parameters.get("size") : DEFAULT_MAX_TABLE_LINE_SIZE); //$NON-NLS-1$ //$NON-NLS-2$
 
-            TmfModelResponse<?> response = provider.fetchLines(queryParameters.getParameters(), null);
-            return Response.ok(response).build();
+            TmfModelResponse<?> response = provider.fetchLines(lineParameters, null);
+            if (response.getStatus() == ITmfResponse.Status.FAILED) {
+                return Response.status(Status.UNAUTHORIZED).entity(response.getStatusMessage()).build();
+            }
+            return Response.ok(new TmfModelResponse<>(new VirtualTableModelWrapper((ITmfVirtualTableModel) response.getModel()), response.getStatus(), response.getStatusMessage())).build();
         }
     }
 

@@ -95,6 +95,21 @@ public abstract class RestServerTest {
     public static final String STATE_PATH = "states";
 
     /**
+     * Time Graph path segment
+     */
+    public static final String TABLE_PATH = "table";
+
+    /**
+     * Time Graph path segment
+     */
+    public static final String TABLE_COLUMN_PATH = "columns";
+
+    /**
+     * Time Graph path segment
+     */
+    public static final String TABLE_LINE_PATH = "lines";
+
+    /**
      * <b>name</b> constant
      */
     public static final String NAME = "name";
@@ -216,6 +231,42 @@ public abstract class RestServerTest {
         Client client = ClientBuilder.newClient();
         client.register(JacksonJsonProvider.class);
         return client.target(SERVER);
+    }
+
+    /**
+     * Get the {@link WebTarget} for the table columns endpoint.
+     *
+     * @param UUID
+     *            Trace or experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getTableColumnsEndpoint(String UUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(UUID)
+                .path(OUTPUTS_PATH)
+                .path(TABLE_PATH)
+                .path(dataProviderId)
+                .path(TABLE_COLUMN_PATH);
+    }
+
+    /**
+     * Get the {@link WebTarget} for the table lines endpoint.
+     *
+     * @param UUID
+     *            Trace or experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getTableLinesEndpoint(String UUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(UUID)
+                .path(OUTPUTS_PATH)
+                .path(TABLE_PATH)
+                .path(dataProviderId)
+                .path(TABLE_LINE_PATH);
     }
 
     /**
