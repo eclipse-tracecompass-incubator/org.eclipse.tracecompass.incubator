@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Ericsson
+ * Copyright (c) 2017, 2020 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -80,6 +80,7 @@ import org.eclipse.tracecompass.tmf.core.model.xy.ITmfXyModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.w3c.dom.Element;
 
 import com.google.common.collect.Iterables;
@@ -90,7 +91,7 @@ import com.google.common.collect.Iterables;
  * @author Loic Prieur-Drevon
  */
 @SuppressWarnings("restriction")
-@Path("/experiments/{uuid}/outputs")
+@Path("/experiments/{expUUID}/outputs")
 public class DataProviderService {
     private static final String WRONG_PARAMETERS = "Wrong query parameters"; //$NON-NLS-1$
     private static final String NO_PROVIDER = "Analysis cannot run"; //$NON-NLS-1$
@@ -104,20 +105,20 @@ public class DataProviderService {
     /**
      * Getter for the list of data provider descriptions
      *
-     * @param uuid
-     *            UUID of the trace to search for
+     * @param expUUID
+     *            UUID of the experiment to search for
      * @return the data provider descriptions with the queried {@link UUID} if it exists.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProviders(@PathParam("uuid") UUID uuid) {
-        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-        if (trace == null) {
+    public Response getProviders(@PathParam("expUUID") UUID expUUID) {
+        TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+        if (experiment == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
-        List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(trace);
-        list.addAll(getXmlDataProviderDescriptors(trace, EnumSet.of(OutputType.TIME_GRAPH)));
-        list.addAll(getXmlDataProviderDescriptors(trace, EnumSet.of(OutputType.XY)));
+        List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(experiment);
+        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
+        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.XY)));
 
         return Response.ok(list).build();
     }
@@ -125,8 +126,8 @@ public class DataProviderService {
     /**
      * Getter for the list of data provider descriptions
      *
-     * @param uuid
-     *            UUID of the trace to search for
+     * @param expUUID
+     *            UUID of the experiment to search for
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @return the data provider descriptions with the queried {@link UUID} if it exists.
@@ -134,14 +135,14 @@ public class DataProviderService {
     @GET
     @Path("/{outputId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProvider(@PathParam("uuid") UUID uuid, @PathParam("outputId") String outputId) {
-        ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-        if (trace == null) {
+    public Response getProvider(@PathParam("expUUID") UUID expUUID, @PathParam("outputId") String outputId) {
+        TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+        if (experiment == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
-        List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(trace);
-        list.addAll(getXmlDataProviderDescriptors(trace, EnumSet.of(OutputType.TIME_GRAPH)));
-        list.addAll(getXmlDataProviderDescriptors(trace, EnumSet.of(OutputType.XY)));
+        List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(experiment);
+        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
+        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.XY)));
 
         Optional<IDataProviderDescriptor> provider = list.stream().filter(p -> p.getId().equals(outputId)).findFirst();
 
@@ -155,8 +156,8 @@ public class DataProviderService {
     /**
      * Query the provider for the XY tree
      *
-     * @param uuid
-     *            desired trace UUID
+     * @param expUUID
+     *            desired experiment UUID
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param queryParameters
@@ -168,16 +169,16 @@ public class DataProviderService {
     @Path("/XY/{outputId}/tree")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getXYTree(@PathParam("uuid") UUID uuid,
+    public Response getXYTree(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId, QueryParameters queryParameters) {
-        return getTree(uuid, outputId, queryParameters);
+        return getTree(expUUID, outputId, queryParameters);
     }
 
     /**
      * Query the provider for the XY view
      *
-     * @param uuid
-     *            {@link UUID} of the trace to query
+     * @param expUUID
+     *            {@link UUID} of the experiment to query
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param queryParameters
@@ -188,24 +189,24 @@ public class DataProviderService {
     @Path("/XY/{outputId}/xy")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getXY(@PathParam("uuid") UUID uuid,
+    public Response getXY(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId, QueryParameters queryParameters) {
         if (outputId == null) {
             return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getXY") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
-            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-            if (trace == null) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfTreeXYDataProvider<@NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+            ITmfTreeXYDataProvider<@NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
                     outputId, ITmfTreeXYDataProvider.class);
 
             if (provider == null) {
                 // try and find the XML provider for the ID.
-                provider = getXmlProvider(trace, outputId, EnumSet.of(OutputType.XY));
+                provider = getXmlProvider(experiment, outputId, EnumSet.of(OutputType.XY));
             }
 
             if (provider == null) {
@@ -226,8 +227,8 @@ public class DataProviderService {
     /**
      * Query the provider for XY tooltip, currently not implemented
      *
-     * @param uuid
-     *            {@link UUID} of the trace to query
+     * @param expUUID
+     *            {@link UUID} of the experiment to query
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param xValue
@@ -242,7 +243,7 @@ public class DataProviderService {
     @GET
     @Path("/XY/{outputId}/tooltip")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getXYTooltip(@PathParam("uuid") UUID uuid,
+    public Response getXYTooltip(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             @QueryParam("xValue") long xValue,
             @QueryParam("yValue") long yValue,
@@ -253,8 +254,8 @@ public class DataProviderService {
     /**
      * Query the provider for the time graph tree
      *
-     * @param uuid
-     *            {@link UUID} of the trace to query
+     * @param expUUID
+     *            {@link UUID} of the experiment to query
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param queryParameters
@@ -266,17 +267,17 @@ public class DataProviderService {
     @Path("/timeGraph/{outputId}/tree")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTimeGraphTree(@PathParam("uuid") UUID uuid,
+    public Response getTimeGraphTree(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        return getTree(uuid, outputId, queryParameters);
+        return getTree(expUUID, outputId, queryParameters);
     }
 
     /**
      * Query the provider for the time graph states
      *
-     * @param uuid
-     *            desired trace UUID
+     * @param expUUID
+     *            desired experiment UUID
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param queryParameters
@@ -288,7 +289,7 @@ public class DataProviderService {
     @Path("/timeGraph/{outputId}/states")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getStates(@PathParam("uuid") UUID uuid,
+    public Response getStates(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
         if (outputId == null) {
@@ -296,12 +297,12 @@ public class DataProviderService {
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStates") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
-            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-            if (trace == null) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, outputId);
+            ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(experiment, outputId);
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
@@ -321,8 +322,8 @@ public class DataProviderService {
     /**
      * Query the provider for the time graph arrows
      *
-     * @param uuid
-     *            desired trace UUID
+     * @param expUUID
+     *            desired experiment UUID
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param queryParameters
@@ -334,7 +335,7 @@ public class DataProviderService {
     @Path("/timeGraph/{outputId}/arrows")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getArrows(@PathParam("uuid") UUID uuid,
+    public Response getArrows(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
         if (outputId == null) {
@@ -342,12 +343,12 @@ public class DataProviderService {
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getArrows") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
-            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-            if (trace == null) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, outputId);
+            ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(experiment, outputId);
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
@@ -366,8 +367,8 @@ public class DataProviderService {
 
     /**
      * Query the provider for all annotation categories
-     * @param uuid
-     *            desired trace UUID
+     * @param expUUID
+     *            desired experiment UUID
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @return {@link TmfModelResponse} containing {@link AnnotationCategoriesModel}
@@ -375,7 +376,7 @@ public class DataProviderService {
     @GET
     @Path("/{outputId}/annotations")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAnnotationCategories(@PathParam("uuid") UUID uuid,
+    public Response getAnnotationCategories(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId) {
 
         if (outputId == null) {
@@ -383,12 +384,12 @@ public class DataProviderService {
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getAnnotationCategories") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
-            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-            if (trace == null) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
                     outputId, ITmfTreeDataProvider.class);
 
             if (provider == null) {
@@ -409,8 +410,8 @@ public class DataProviderService {
 
     /**
      * Query the provider for all annotations for the time range defined by Query parameters
-     * @param uuid
-     *            desired trace UUID
+     * @param expUUID
+     *            desired experiment UUID
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param queryParameters
@@ -422,7 +423,7 @@ public class DataProviderService {
     @Path("/{outputId}/annotations")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAnnotations(@PathParam("uuid") UUID uuid,
+    public Response getAnnotations(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
 
@@ -431,12 +432,12 @@ public class DataProviderService {
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getAnnotations") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
-            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-            if (trace == null) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
                     outputId, ITmfTreeDataProvider.class);
 
             if (provider == null) {
@@ -457,8 +458,8 @@ public class DataProviderService {
     /**
      * Query the provider for the time graph tooltips
      *
-     * @param uuid
-     *            desired trace UUID
+     * @param expUUID
+     *            desired experiment UUID
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param time
@@ -472,7 +473,7 @@ public class DataProviderService {
     @GET
     @Path("/timeGraph/{outputId}/tooltip")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTimeGraphTooltip(@PathParam("uuid") UUID uuid,
+    public Response getTimeGraphTooltip(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             @QueryParam("time") long time,
             @QueryParam("entryId") long entryId,
@@ -482,12 +483,12 @@ public class DataProviderService {
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTimeGraphTooltip") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
-            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-            if (trace == null) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(trace, outputId);
+            ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(experiment, outputId);
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
@@ -513,8 +514,8 @@ public class DataProviderService {
     /**
      * Query the provider for table columns
      *
-     * @param uuid
-     *            desired trace UUID
+     * @param expUUID
+     *            desired experiment UUID
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param queryParameters
@@ -526,10 +527,10 @@ public class DataProviderService {
     @Path("/table/{outputId}/columns")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getColumns(@PathParam("uuid") UUID uuid,
+    public Response getColumns(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        Response response = getTree(uuid, outputId, queryParameters);
+        Response response = getTree(expUUID, outputId, queryParameters);
         Object entity = response.getEntity();
         if (!(entity instanceof TmfModelResponse<?>)) {
             return response;
@@ -549,8 +550,8 @@ public class DataProviderService {
     /**
      * Query the provider for table lines
      *
-     * @param uuid
-     *            desired trace UUID
+     * @param expUUID
+     *            desired experiment UUID
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param queryParameters
@@ -562,7 +563,7 @@ public class DataProviderService {
     @Path("/table/{outputId}/lines")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getLines(@PathParam("uuid") UUID uuid,
+    public Response getLines(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
         if (outputId == null) {
@@ -570,12 +571,12 @@ public class DataProviderService {
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getLines") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
-            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-            if (trace == null) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfVirtualTableDataProvider<? extends IVirtualTableLine, ? extends ITmfTreeDataModel> provider = manager.getDataProvider(trace, outputId, ITmfVirtualTableDataProvider.class);
+            ITmfVirtualTableDataProvider<? extends IVirtualTableLine, ? extends ITmfTreeDataModel> provider = manager.getDataProvider(experiment, outputId, ITmfVirtualTableDataProvider.class);
             if (provider == null) {
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
@@ -656,23 +657,23 @@ public class DataProviderService {
         return descriptors;
     }
 
-    private Response getTree(UUID uuid, String outputId, QueryParameters queryParameters) {
+    private Response getTree(UUID expUUID, String outputId, QueryParameters queryParameters) {
         if (outputId == null) {
             return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTree") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
-            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-            if (trace == null) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
                     outputId, ITmfTreeDataProvider.class);
 
             if (provider == null) {
                 // try and find the XML provider for the ID.
-                provider = getXmlProvider(trace, outputId, EnumSet.allOf(OutputType.class));
+                provider = getXmlProvider(experiment, outputId, EnumSet.allOf(OutputType.class));
             }
 
             if (provider == null) {
@@ -694,8 +695,8 @@ public class DataProviderService {
     /**
      * Query the provider for styles
      *
-     * @param uuid
-     *            desired trace UUID
+     * @param expUUID
+     *            desired experiment UUID
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param queryParameters
@@ -707,7 +708,7 @@ public class DataProviderService {
     @Path("/{outputId}/style")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getStyles(@PathParam("uuid") UUID uuid,
+    public Response getStyles(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
         if (outputId == null) {
@@ -715,12 +716,12 @@ public class DataProviderService {
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStyles") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
-            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
-            if (trace == null) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
                     outputId, ITmfTreeDataProvider.class);
 
             if (provider == null) {

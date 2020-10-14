@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2020 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.junit.Test;
@@ -80,10 +81,9 @@ public class XmlManagerServiceTest extends RestServerTest {
         assertEquals("valid XML should have posted successfully",
                 Collections.singleton("test_valid.xml"), map.keySet());
 
-        WebTarget traces = application.path("traces");
-        assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
+        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_KERNEL_STUB.getName(), CONTEXT_SWITCHES_KERNEL_STUB);
 
-        WebTarget xmlProviderPath = getXYTreeEndpoint(CONTEXT_SWITCHES_KERNEL_UUID.toString(), "org.eclipse.linuxtools.tmf.analysis.xml.core.tests.xy");
+        WebTarget xmlProviderPath = getXYTreeEndpoint(exp.getUUID().toString(), "org.eclipse.linuxtools.tmf.analysis.xml.core.tests.xy");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, Collections.emptyList());
         Response xmlTree = xmlProviderPath.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())));

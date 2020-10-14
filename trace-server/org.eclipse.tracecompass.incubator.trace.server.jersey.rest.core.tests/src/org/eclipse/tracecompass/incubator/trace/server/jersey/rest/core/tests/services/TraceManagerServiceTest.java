@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2020 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -43,14 +43,14 @@ public class TraceManagerServiceTest extends RestServerTest {
 
         assertTrue("Expected empty set of traces", getTraces(traces).isEmpty());
 
-        assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
+        TraceModelStub kernelStub = assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
 
-        assertEquals(CONTEXT_SWITCHES_KERNEL_STUB, traces.path(CONTEXT_SWITCHES_KERNEL_UUID.toString()).request().get(TraceModelStub.class));
+        assertEquals(CONTEXT_SWITCHES_KERNEL_STUB, traces.path(kernelStub.getUUID().toString()).request().get(TraceModelStub.class));
 
         assertEquals("Expected set of traces to contain trace2 stub",
                 Collections.singleton(CONTEXT_SWITCHES_KERNEL_STUB), getTraces(traces));
 
-        Response deleteResponse = traces.path(CONTEXT_SWITCHES_KERNEL_UUID.toString()).request().delete();
+        Response deleteResponse = traces.path(kernelStub.getUUID().toString()).request().delete();
         int deleteCode = deleteResponse.getStatus();
         assertEquals("Failed to DELETE trace2, error code=" + deleteCode, 200, deleteCode);
         assertEquals(CONTEXT_SWITCHES_KERNEL_STUB, deleteResponse.readEntity(TraceModelStub.class));
@@ -80,6 +80,7 @@ public class TraceManagerServiceTest extends RestServerTest {
         WebTarget traces = getApplicationEndpoint().path(TRACES);
 
         assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
+        assertEquals(ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_STUB), getTraces(traces));
 
         // Post the trace a second time
         assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);

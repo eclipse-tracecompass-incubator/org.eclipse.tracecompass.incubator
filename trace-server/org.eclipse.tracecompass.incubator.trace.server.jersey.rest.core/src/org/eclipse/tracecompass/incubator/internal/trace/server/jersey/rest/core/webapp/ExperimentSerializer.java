@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2020 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -12,9 +12,9 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Experiment;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  *
  * @author Loic Prieur-Drevon
  */
-public class ExperimentSerializer extends StdSerializer<@NonNull TmfExperiment> {
+public class ExperimentSerializer extends StdSerializer<@NonNull Experiment> {
 
     /**
      * Generated serialVersionUID
@@ -37,19 +37,18 @@ public class ExperimentSerializer extends StdSerializer<@NonNull TmfExperiment> 
      * Public constructor
      */
     public ExperimentSerializer() {
-        super(TmfExperiment.class);
+        super(Experiment.class);
     }
 
     @Override
-    public void serialize(TmfExperiment value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Experiment value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         gen.writeStartObject();
         gen.writeStringField("name", value.getName()); //$NON-NLS-1$
-        gen.writeStringField("UUID", Objects.requireNonNull(value.getUUID()).toString()); //$NON-NLS-1$
+        gen.writeStringField("UUID", value.getUUID().toString()); //$NON-NLS-1$
         gen.writeNumberField("nbEvents", value.getNbEvents()); //$NON-NLS-1$
-        gen.writeNumberField("start", value.getStartTime().toNanos()); //$NON-NLS-1$
-        gen.writeNumberField("end", value.getEndTime().toNanos()); //$NON-NLS-1$
-        String indexingStatus = value.isIndexing() ? "RUNNING" : "COMPLETED"; //$NON-NLS-1$ //$NON-NLS-2$
-        gen.writeStringField("indexingStatus", indexingStatus); //$NON-NLS-1$
+        gen.writeNumberField("start", value.getStart()); //$NON-NLS-1$
+        gen.writeNumberField("end", value.getEnd()); //$NON-NLS-1$
+        gen.writeStringField("indexingStatus", value.getIndexingStatus()); //$NON-NLS-1$
         gen.writeObjectField("traces", value.getTraces()); //$NON-NLS-1$
         gen.writeEndObject();
     }

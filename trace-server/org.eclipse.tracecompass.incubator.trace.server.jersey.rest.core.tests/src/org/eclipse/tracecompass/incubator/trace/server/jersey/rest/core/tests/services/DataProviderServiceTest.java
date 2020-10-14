@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018-2020 Ericsson and others
+ * Copyright (c) 2018, 2020 Ericsson and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -35,6 +35,7 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.LineModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TableColumnsOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TableLinesOutputResponseStub;
@@ -74,12 +75,10 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testProviders() {
-
-        WebTarget traces = getApplicationEndpoint().path(TRACES);
-        RestServerTest.assertPost(traces, CONTEXT_SWITCHES_UST_STUB);
+        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_STUB.getName(), CONTEXT_SWITCHES_UST_STUB);
 
         WebTarget experiments = getApplicationEndpoint().path(EXPERIMENTS);
-        WebTarget providers = experiments.path(CONTEXT_SWITCHES_UST_UUID.toString())
+        WebTarget providers = experiments.path(exp.getUUID().toString())
                 .path(OUTPUTS_PATH);
 
         Set<DataProviderDescriptorStub> descriptors = getDataProviderDescriptors(providers);
@@ -93,10 +92,9 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testCallStackDataProvider() {
-        WebTarget traces = getApplicationEndpoint().path(TRACES);
-        RestServerTest.assertPost(traces, CONTEXT_SWITCHES_UST_STUB);
+        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_STUB.getName(), CONTEXT_SWITCHES_UST_STUB);
 
-        WebTarget callstackTree = getTimeGraphTreeEndpoint(CONTEXT_SWITCHES_UST_UUID.toString(), CALL_STACK_DATAPROVIDER_ID);
+        WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
 
         Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(0L, Long.MAX_VALUE, 2));
         Response tree = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
@@ -121,11 +119,10 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1412670961211260539L;
         long end = 1412670967217750839L;
         try {
-            WebTarget traces = getApplicationEndpoint().path(TRACES);
-            RestServerTest.assertPost(traces, ARM_64_KERNEL_STUB);
+            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_STUB.getName(), ARM_64_KERNEL_STUB);
 
             // Test getting the tree endpoint for an XY chart
-            WebTarget xyTree = getXYTreeEndpoint(ARM_64_KERNEL_UUID.toString(), XY_DATAPROVIDER_ID);
+            WebTarget xyTree = getXYTreeEndpoint(exp.getUUID().toString(), XY_DATAPROVIDER_ID);
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, ImmutableList.of(start, end));
@@ -154,7 +151,7 @@ public class DataProviderServiceTest extends RestServerTest {
             assertFalse(entries.isEmpty());
 
             // Test getting the XY series endpoint
-            WebTarget xySeriesEnpoint = getXYSeriesEndpoint(ARM_64_KERNEL_UUID.toString(), XY_DATAPROVIDER_ID);
+            WebTarget xySeriesEnpoint = getXYSeriesEndpoint(exp.getUUID().toString(), XY_DATAPROVIDER_ID);
             List<Integer> items = new ArrayList<>();
             for (EntryStub entry : entries) {
                 items.add(entry.getId());
@@ -191,11 +188,10 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1450193697034689597L;
         long end = 1450193745774189602L;
         try {
-            WebTarget traces = getApplicationEndpoint().path(TRACES);
-            RestServerTest.assertPost(traces, CONTEXT_SWITCHES_UST_STUB);
+            ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_STUB.getName(), CONTEXT_SWITCHES_UST_STUB);
 
             // Test getting the time graph tree
-            WebTarget callstackTree = getTimeGraphTreeEndpoint(CONTEXT_SWITCHES_UST_UUID.toString(), CALL_STACK_DATAPROVIDER_ID);
+            WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
 
             Map<String, Object> parameters = new HashMap<>();
             TgTreeOutputResponseStub responseModel;
@@ -230,7 +226,7 @@ public class DataProviderServiceTest extends RestServerTest {
             }
 
             // Test getting the time graph row data
-            WebTarget tgStatesEnpoint = getTimeGraphStatesEndpoint(CONTEXT_SWITCHES_UST_UUID.toString(), CALL_STACK_DATAPROVIDER_ID);
+            WebTarget tgStatesEnpoint = getTimeGraphStatesEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
             parameters.put(DataProviderParameterUtils.REQUESTED_ITEMS_KEY, items);
             Response statesResponse = tgStatesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, statesResponse.getStatus());
@@ -264,11 +260,10 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1412670961211260539L;
         long end = 1412670967217750839L;
         try {
-            WebTarget traces = getApplicationEndpoint().path(TRACES);
-            RestServerTest.assertPost(traces, ARM_64_KERNEL_STUB);
+            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_STUB.getName(), ARM_64_KERNEL_STUB);
 
             // Test getting the tree endpoint for an XY chart
-            WebTarget tableColumns = getTableColumnsEndpoint(ARM_64_KERNEL_UUID.toString(), EVENTS_TABLE_DATAPROVIDER_ID);
+            WebTarget tableColumns = getTableColumnsEndpoint(exp.getUUID().toString(), EVENTS_TABLE_DATAPROVIDER_ID);
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, ImmutableList.of(start, end));
@@ -296,7 +291,7 @@ public class DataProviderServiceTest extends RestServerTest {
             assertFalse(columns.isEmpty());
 
             // Test getting the XY series endpoint
-            WebTarget tableLinesEnpoint = getTableLinesEndpoint(ARM_64_KERNEL_UUID.toString(), EVENTS_TABLE_DATAPROVIDER_ID);
+            WebTarget tableLinesEnpoint = getTableLinesEndpoint(exp.getUUID().toString(), EVENTS_TABLE_DATAPROVIDER_ID);
             List<Long> requestedColumnsIds = new ArrayList<>();
             for (int i = 0; i <= columns.size() / 2; i++) {
                 requestedColumnsIds.add(columns.get(i).getId());

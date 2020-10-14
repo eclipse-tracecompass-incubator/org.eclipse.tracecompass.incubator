@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs;
 
+import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -51,7 +52,8 @@ public class TraceModelStub extends AbstractModelStub {
      *            end time
      */
     @JsonCreator
-    public TraceModelStub(@JsonProperty("name") String name,
+    public TraceModelStub(
+            @JsonProperty("name") String name,
             @JsonProperty("path") String path,
             @JsonProperty("UUID") UUID uuid,
             @JsonProperty("nbEvents") long nbEvents,
@@ -69,11 +71,13 @@ public class TraceModelStub extends AbstractModelStub {
      *            trace name
      * @param path
      *            path to trace on server file system
-     * @param uuid
-     *            the stub's UUID
      */
-    public TraceModelStub(String name, String path, UUID uuid) {
-        this(name, path, uuid, 0, 0L, 0L, "RUNNING");
+    public TraceModelStub(String name, String path) {
+        this(name, path, getUUID(path, name), 0, 0L, 0L, "RUNNING");
+    }
+
+    private static UUID getUUID(String path, String name) {
+        return UUID.nameUUIDFromBytes(Objects.requireNonNull((path + name).getBytes(Charset.defaultCharset())));
     }
 
     /**

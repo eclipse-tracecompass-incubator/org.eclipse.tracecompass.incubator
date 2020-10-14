@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2020 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -12,22 +12,20 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Trace;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
- * {@link StdSerializer} for {@link ITmfTrace} to avoid building intermediate
- * representations.
+ * {@link StdSerializer} for {@link Trace}.
  *
  * @author Loic Prieur-Drevon
  */
-public class TraceSerializer extends StdSerializer<@NonNull ITmfTrace> {
+public class TraceSerializer extends StdSerializer<@NonNull Trace> {
 
     /**
      * Generated serialVersionUID
@@ -38,21 +36,19 @@ public class TraceSerializer extends StdSerializer<@NonNull ITmfTrace> {
      * Public constructor
      */
     public TraceSerializer() {
-        super(ITmfTrace.class);
+        super(Trace.class);
     }
 
     @Override
-    public void serialize(ITmfTrace value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Trace value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         gen.writeStartObject();
         gen.writeStringField("name", value.getName()); //$NON-NLS-1$
         gen.writeStringField("path", value.getPath()); //$NON-NLS-1$
-        gen.writeStringField("UUID", Objects.requireNonNull(value.getUUID()).toString()); //$NON-NLS-1$
+        gen.writeStringField("UUID", value.getUUID().toString()); //$NON-NLS-1$
         gen.writeNumberField("nbEvents", value.getNbEvents()); //$NON-NLS-1$
-        gen.writeNumberField("start", value.getStartTime().toNanos()); //$NON-NLS-1$
-        gen.writeNumberField("end", value.getEndTime().toNanos()); //$NON-NLS-1$
-        // TODO Find a better way, no support for cancel
-        String indexingStatus = value.isIndexing() ? "RUNNING" : "COMPLETED"; //$NON-NLS-1$ //$NON-NLS-2$
-        gen.writeStringField("indexingStatus", indexingStatus); //$NON-NLS-1$
+        gen.writeNumberField("start", value.getStart()); //$NON-NLS-1$
+        gen.writeNumberField("end", value.getEnd()); //$NON-NLS-1$
+        gen.writeStringField("indexingStatus", value.getIndexingStatus()); //$NON-NLS-1$
         gen.writeEndObject();
     }
 
