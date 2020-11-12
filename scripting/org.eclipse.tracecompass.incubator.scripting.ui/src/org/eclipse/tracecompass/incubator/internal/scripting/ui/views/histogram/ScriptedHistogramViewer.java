@@ -13,9 +13,10 @@ package org.eclipse.tracecompass.incubator.internal.scripting.ui.views.histogram
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.presentation.IYAppearance;
-import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.linecharts.TmfFilteredXYChartViewer;
-import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.linecharts.TmfXYChartSettings;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.linechart.TmfFilteredXYChartViewer;
+import org.eclipse.tracecompass.tmf.ui.viewers.xychart.linechart.TmfXYChartSettings;
 
 /**
  * Viewer for the {@link ScriptedHistogramView}
@@ -26,13 +27,23 @@ public class ScriptedHistogramViewer extends TmfFilteredXYChartViewer {
 
     private static final int DEFAULT_SERIES_WIDTH = 1;
 
+    /**
+     * Constructor
+     *
+     * @param parent
+     *            Parent composite
+     * @param settings
+     *            Chart settings
+     * @param providerId
+     *            Data provider ID
+     */
     public ScriptedHistogramViewer(Composite parent, TmfXYChartSettings settings, String providerId) {
         super(parent, settings, providerId);
     }
 
     @Override
-    public IYAppearance getSeriesAppearance(@NonNull String seriesName) {
-        return getPresentationProvider().getAppearance(seriesName, IYAppearance.Type.BAR, DEFAULT_SERIES_WIDTH);
+    public @NonNull OutputElementStyle getSeriesStyle(@NonNull Long seriesId) {
+        return getPresentationProvider().getSeriesStyle(seriesId, IYAppearance.Type.BAR, DEFAULT_SERIES_WIDTH);
     }
 
 }
