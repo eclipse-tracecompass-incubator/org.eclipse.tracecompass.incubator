@@ -110,6 +110,13 @@ public class OpenTracingField {
                 fieldsMap.put(IOpenTracingConstants.TAGS + '/' + key, value);
             }
         }
+        if (name.isEmpty() && tags != null) {
+            // See if there is a tag for operation name
+            Object nameTag = fieldsMap.get(IOpenTracingConstants.TAGS + '/' + IOpenTracingConstants.OPERATION_NAME);
+            if (nameTag != null) {
+                name = String.valueOf(nameTag);
+            }
+        }
 
         JsonArray logs = optJSONArray(root, IOpenTracingConstants.LOGS);
         if (logs != null) {
