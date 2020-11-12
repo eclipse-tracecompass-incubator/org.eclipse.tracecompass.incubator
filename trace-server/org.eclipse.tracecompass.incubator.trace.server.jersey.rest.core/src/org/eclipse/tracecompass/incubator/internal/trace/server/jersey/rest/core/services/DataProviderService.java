@@ -44,6 +44,9 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TableColumnHeader;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TreeModelWrapper;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.VirtualTableModelWrapper;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationCategoriesModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.IOutputAnnotationProvider;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableDataProvider;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
@@ -358,6 +361,96 @@ public class DataProviderService {
 
             TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(queryParameters.getParameters(), null);
             return Response.ok(response).build();
+        }
+    }
+
+    /**
+     * Query the provider for all annotation categories
+     * @param uuid
+     *            desired trace UUID
+     * @param outputId
+     *            Eclipse extension point ID for the data provider to query
+     * @return {@link TmfModelResponse} containing {@link AnnotationCategoriesModel}
+     */
+    @GET
+    @Path("/{outputId}/annotations")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAnnotationCategories(@PathParam("uuid") UUID uuid,
+            @PathParam("outputId") String outputId) {
+
+        if (outputId == null) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
+        }
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getAnnotationCategories") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+            if (trace == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
+
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+                    outputId, ITmfTreeDataProvider.class);
+
+            if (provider == null) {
+                // The analysis cannot be run on this trace
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            if (provider instanceof IOutputAnnotationProvider) {
+                @NonNull Map<@NonNull String, @NonNull Object> params = Collections.emptyMap();
+                TmfModelResponse<@NonNull AnnotationCategoriesModel> annotationCategories = ((IOutputAnnotationProvider) provider).fetchAnnotationCategories(params, null);
+                return Response.ok(annotationCategories).build();
+            }
+
+            // Return an empty model if the provider is not an IOutputAnnotationProvider
+            return Response.ok(new TmfModelResponse<>(new AnnotationCategoriesModel(Collections.emptyList()), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
+        }
+    }
+
+    /**
+     * Query the provider for all annotations for the time range defined by Query parameters
+     * @param uuid
+     *            desired trace UUID
+     * @param outputId
+     *            Eclipse extension point ID for the data provider to query
+     * @param queryParameters
+     *            Parameters to fetch table columns as described by
+     *            {@link QueryParameters}
+     * @return {@link TmfModelResponse} containing {@link AnnotationModel}
+     */
+    @POST
+    @Path("/{outputId}/annotations")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAnnotations(@PathParam("uuid") UUID uuid,
+            @PathParam("outputId") String outputId,
+            QueryParameters queryParameters) {
+
+        if (outputId == null) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
+        }
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getAnnotations") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            ITmfTrace trace = TraceManagerService.getTraceByUUID(uuid);
+            if (trace == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
+
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(trace,
+                    outputId, ITmfTreeDataProvider.class);
+
+            if (provider == null) {
+                // The analysis cannot be run on this trace
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            if (provider instanceof IOutputAnnotationProvider) {
+                TmfModelResponse<@NonNull AnnotationModel> annotations = ((IOutputAnnotationProvider) provider).fetchAnnotations(queryParameters.getParameters(), null);
+                return Response.ok(annotations).build();
+            }
+
+            // Return an empty model if the provider is not an IOutputAnnotationProvider
+            return Response.ok(new TmfModelResponse<>(new AnnotationModel(Collections.emptyMap()), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
         }
     }
 
