@@ -109,7 +109,8 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
         } else {
             Integer parentQuark = fSpanMap.get(refId);
             if (parentQuark == null) {
-                return;
+                // We don't have the parent span, just start this span at root
+                parentQuark = openTracingSpansQuark;
             }
             spanQuark = ss.getQuarkRelativeAndAdd(parentQuark, name + '/' + spanId + '/' + errorTag + '/' + processName);
         }
