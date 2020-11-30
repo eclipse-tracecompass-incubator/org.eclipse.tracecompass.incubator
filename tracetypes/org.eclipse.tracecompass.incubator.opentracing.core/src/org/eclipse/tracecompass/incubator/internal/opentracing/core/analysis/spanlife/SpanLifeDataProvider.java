@@ -186,7 +186,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
                 long startTime = interval.getStartTime();
                 long duration = interval.getEndTime() - startTime + 1;
                 Object state = interval.getValue();
-                TimeGraphState value = new TimeGraphState(startTime, duration, state == null ? Integer.MIN_VALUE : 0);
+                TimeGraphState value = state == null ? new TimeGraphState(startTime, duration, Integer.MIN_VALUE) : new TimeGraphState(startTime, duration, 0, String.valueOf(state));
                 applyFilterAndAddState(eventList, value, entry.getKey(), predicates, monitor);
             }
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));
