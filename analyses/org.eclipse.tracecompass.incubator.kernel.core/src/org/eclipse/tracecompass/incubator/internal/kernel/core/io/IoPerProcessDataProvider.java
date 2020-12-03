@@ -429,7 +429,7 @@ public class IoPerProcessDataProvider extends AbstractTreeDataProvider<IoAnalysi
         List<Long> times = getTimes(ss, DataProviderParameterUtils.extractTimeRequested(fetchParameters));
         List<Integer> quarksToQuery = new ArrayList<>();
         long currentEnd = ss.getCurrentEndTime();
-        boolean complete = ss.waitUntilBuilt(0) || times.get(times.size() - 1) <= currentEnd;
+        boolean complete = ss.waitUntilBuilt(0) || (times.size() != 0 && times.get(times.size() - 1) <= currentEnd);
 
         for (Entry<Long, Integer> entry : selectedEntries.entrySet()) {
             // Add only quarks that can be displayed, ie, those in the
