@@ -73,6 +73,8 @@
    <bundle id="com.google.javascript"/>
    <bundle id="com.google.protobuf"/>
    <bundle id="org.eclipse.wst.jsdt.manipulation"/>
+   <bundle id="org.eclipse.nebula.widgets.opal.commons"/>
+   <bundle id="org.eclipse.nebula.widgets.opal.duallist"/>
    <category-def name="trace-types" label="Trace Types"/>
    <category-def name="virtualization" label="Virtualization"/>
    <category-def name="analyses" label="Analyses"/>
