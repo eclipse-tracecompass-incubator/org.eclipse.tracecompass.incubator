@@ -102,6 +102,7 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <plugin id="com.google.gson"/>
       <plugin id="com.google.guava"/>
       <plugin id="com.ibm.icu"/>
+      <plugin id="jakarta.xml.bind"/>
       <plugin id="javassist"/>
       <plugin id="javax.activation"/>
       <plugin id="javax.annotation"/>
@@ -120,6 +121,7 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <plugin id="org.apache.commons.lang3"/>
       <plugin id="org.apache.felix.gogo.command"/>
       <plugin id="org.apache.felix.gogo.runtime"/>
+      <plugin id="org.apache.felix.gogo.shell"/>
       <plugin id="org.apache.felix.scr"/>
       <plugin id="org.eclipse.cdt.core"/>
       <plugin id="org.eclipse.cdt.core.native"/>
@@ -149,6 +151,7 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <plugin id="org.eclipse.jetty.server"/>
       <plugin id="org.eclipse.jetty.servlet"/>
       <plugin id="org.eclipse.jetty.util"/>
+      <plugin id="org.eclipse.jetty.util.ajax"/>
       <plugin id="org.eclipse.ltk.core.refactoring"/>
       <plugin id="org.eclipse.osgi"/>
       <plugin id="org.eclipse.osgi.compatibility.state" fragment="true"/>
