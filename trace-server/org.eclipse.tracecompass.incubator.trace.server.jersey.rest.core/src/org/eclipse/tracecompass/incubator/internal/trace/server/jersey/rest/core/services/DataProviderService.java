@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Ericsson
+ * Copyright (c) 2017, 2021 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,7 +59,6 @@ import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
-import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
@@ -97,7 +95,6 @@ public class DataProviderService {
     private static final String NO_PROVIDER = "Analysis cannot run"; //$NON-NLS-1$
     private static final String NO_SUCH_TRACE = "No Such Trace"; //$NON-NLS-1$
     private static final String MISSING_OUTPUTID = "Missing parameter outputId"; //$NON-NLS-1$
-    private static final int DEFAULT_MAX_TABLE_LINE_SIZE = 100000;
     private static final @NonNull Logger LOGGER = TraceCompassLog.getLogger(DataProviderService.class);
 
     private final DataProviderManager manager = DataProviderManager.getInstance();
@@ -581,14 +578,7 @@ public class DataProviderService {
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
-            // Map the incoming parameters to the expected parametere
-            Map<String, Object> parameters = queryParameters.getParameters();
-            Map<String, Object> lineParameters = new HashMap<>();
-            lineParameters.put(DataProviderParameterUtils.REQUESTED_COLUMN_IDS_KEY, parameters.containsKey("columnIds") ? parameters.get("columnIds") : Collections.emptyList()); //$NON-NLS-1$ //$NON-NLS-2$
-            lineParameters.put(DataProviderParameterUtils.REQUESTED_TABLE_INDEX_KEY, parameters.containsKey("lowIndex") ? parameters.get("lowIndex") : 0); //$NON-NLS-1$ //$NON-NLS-2$
-            lineParameters.put(DataProviderParameterUtils.REQUESTED_TABLE_COUNT_KEY, parameters.containsKey("size") ? parameters.get("size") : DEFAULT_MAX_TABLE_LINE_SIZE); //$NON-NLS-1$ //$NON-NLS-2$
-
-            TmfModelResponse<?> response = provider.fetchLines(lineParameters, null);
+            TmfModelResponse<?> response = provider.fetchLines(queryParameters.getParameters(), null);
             if (response.getStatus() == ITmfResponse.Status.FAILED) {
                 return Response.status(Status.UNAUTHORIZED).entity(response.getStatusMessage()).build();
             }

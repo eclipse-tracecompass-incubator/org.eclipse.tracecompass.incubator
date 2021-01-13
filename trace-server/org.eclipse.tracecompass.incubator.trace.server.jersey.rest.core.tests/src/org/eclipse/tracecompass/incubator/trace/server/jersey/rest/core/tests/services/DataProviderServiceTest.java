@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Ericsson and others
+ * Copyright (c) 2018, 2021 Ericsson and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -52,7 +52,6 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XySeriesStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
-import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.junit.Test;
 
@@ -69,6 +68,13 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
     private static final String XY_DATAPROVIDER_ID = "org.eclipse.tracecompass.analysis.os.linux.core.cpuusage.CpuUsageDataProvider";
     private static final String EVENTS_TABLE_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider";
+    private static final String REQUESTED_TIME_KEY = "requested_times";
+    private static final String REQUESTED_ITEMS_KEY = "requested_items";
+    private static final String REQUESTED_COLUMN_IDS_KEY = "requested_table_column_ids";
+    private static final String REQUESTED_TABLE_INDEX_KEY = "requested_table_index";
+    private static final String REQUESTED_TABLE_COUNT_KEY = "requested_table_count";
+    private static final long TABLE_INDEX = 0L;
+    private static final long TABLE_COUNT = 100L;
 
     /**
      * Test getting the data provider descriptors
@@ -101,7 +107,7 @@ public class DataProviderServiceTest extends RestServerTest {
         assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
 
         parameters = new HashMap<>();
-        parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, Collections.emptyList());
+        parameters.put(REQUESTED_TIME_KEY, Collections.emptyList());
         Response defaults = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
         assertEquals("Default values should return OK code", 200, defaults.getStatus());
     }
@@ -125,7 +131,7 @@ public class DataProviderServiceTest extends RestServerTest {
             WebTarget xyTree = getXYTreeEndpoint(exp.getUUID().toString(), XY_DATAPROVIDER_ID);
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, ImmutableList.of(start, end));
+            parameters.put(REQUESTED_TIME_KEY, ImmutableList.of(start, end));
             TreeOutputResponseStub responseModel;
             Response tree = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
@@ -156,7 +162,7 @@ public class DataProviderServiceTest extends RestServerTest {
             for (EntryStub entry : entries) {
                 items.add(entry.getId());
             }
-            parameters.put(DataProviderParameterUtils.REQUESTED_ITEMS_KEY, items);
+            parameters.put(REQUESTED_ITEMS_KEY, items);
             Response series = xySeriesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, series.getStatus());
             XyOutputResponseStub xyModelResponse = series.readEntity(XyOutputResponseStub.class);
@@ -195,7 +201,7 @@ public class DataProviderServiceTest extends RestServerTest {
 
             Map<String, Object> parameters = new HashMap<>();
             TgTreeOutputResponseStub responseModel;
-            parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, ImmutableList.of(start, end));
+            parameters.put(REQUESTED_TIME_KEY, ImmutableList.of(start, end));
             Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
             responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
@@ -227,7 +233,7 @@ public class DataProviderServiceTest extends RestServerTest {
 
             // Test getting the time graph row data
             WebTarget tgStatesEnpoint = getTimeGraphStatesEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
-            parameters.put(DataProviderParameterUtils.REQUESTED_ITEMS_KEY, items);
+            parameters.put(REQUESTED_ITEMS_KEY, items);
             Response statesResponse = tgStatesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, statesResponse.getStatus());
 
@@ -266,7 +272,7 @@ public class DataProviderServiceTest extends RestServerTest {
             WebTarget tableColumns = getTableColumnsEndpoint(exp.getUUID().toString(), EVENTS_TABLE_DATAPROVIDER_ID);
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, ImmutableList.of(start, end));
+            parameters.put(REQUESTED_TIME_KEY, ImmutableList.of(start, end));
             TableColumnsOutputResponseStub responseModel;
             Response tree = tableColumns.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
@@ -296,7 +302,9 @@ public class DataProviderServiceTest extends RestServerTest {
             for (int i = 0; i <= columns.size() / 2; i++) {
                 requestedColumnsIds.add(columns.get(i).getId());
             }
-            parameters.put("columnIds", requestedColumnsIds);
+            parameters.put(REQUESTED_COLUMN_IDS_KEY, requestedColumnsIds);
+            parameters.put(REQUESTED_TABLE_INDEX_KEY, TABLE_INDEX);
+            parameters.put(REQUESTED_TABLE_COUNT_KEY, TABLE_COUNT);
             Response linesResponse = tableLinesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, linesResponse.getStatus());
             TableLinesOutputResponseStub lineModelResponse = linesResponse.readEntity(TableLinesOutputResponseStub.class);
