@@ -45,6 +45,9 @@
     <module>org.eclipse.tracecompass.incubator.filters.ui</module>
     <module>org.eclipse.tracecompass.incubator.tmf.ui.multiview</module>
     <module>org.eclipse.tracecompass.incubator.tmf.ui.multiview.ui</module>
+    <module>org.eclipse.tracecompass.incubator.rocm</module>
+    <module>org.eclipse.tracecompass.incubator.rocm.core</module>
+    <module>org.eclipse.tracecompass.incubator.rocm.core.tests</module>
     <!-- insert modules here -->
   </modules>
 
