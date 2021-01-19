@@ -7,7 +7,9 @@
    </configIni>
 
    <launcherArgs>
-      <programArgs>-data @noDefault
+      <programArgs>--launcher.suppressErrors 
+-noSplash
+-data @noDefault
       </programArgs>
       <programArgsLin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=1.8
       </programArgsLin>
