@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableModel;
@@ -42,7 +43,7 @@ public class VirtualTableModelWrapper {
      * @return The list of column IDs in order that they are sorted
      */
     public List<Long> getColumnIds() {
-        return fWrapper.getColumnIds();
+        return fWrapper == null ? Collections.emptyList() : fWrapper.getColumnIds();
     }
 
     /**
@@ -53,7 +54,7 @@ public class VirtualTableModelWrapper {
      * @return The list of lines
      */
     public List<IVirtualTableLine> getLines() {
-        return fWrapper.getLines();
+        return fWrapper == null ? Collections.emptyList() : fWrapper.getLines();
     }
 
     /**
@@ -62,7 +63,7 @@ public class VirtualTableModelWrapper {
      * @return The top index
      */
     public long getLowIndex() {
-        return fWrapper.getIndex();
+        return fWrapper == null ? 0 : fWrapper.getIndex();
     }
 
     /**
@@ -73,7 +74,7 @@ public class VirtualTableModelWrapper {
      * @return The total number of table entries that matches a filter
      */
     public long getSize() {
-        return fWrapper.getSize();
+        return fWrapper == null ? 0 : fWrapper.getSize();
     }
 
 }
