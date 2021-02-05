@@ -36,6 +36,17 @@
                class="org.eclipse.tracecompass.tmf.core.trace.TmfTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.kernel.core.swslatency.SWSLatencyAnalysis"
+            applies_experiment="false"
+            automatic="false"
+            icon="icons/wakeup.png"
+            id="org.eclipse.tracecompass.incubator.internal.kernel.core.swslatency.sws"
+            name="%analysis.swsLatency.wakeupswitch">
+         <tracetype
+               class="org.eclipse.tracecompass.tmf.core.trace.TmfTrace">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
