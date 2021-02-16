@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Ericsson
+ * Copyright (c) 2020, 2021 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -14,6 +14,9 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import java.io.Serializable;
 import java.util.UUID;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.tracecompass.tmf.core.io.ResourceUtil;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -68,7 +71,7 @@ public final class Trace implements Serializable {
     }
 
     /**
-     * Constructs a trace model
+     * Constructs a trace model from its instance
      *
      * @param trace
      *            trace
@@ -84,6 +87,30 @@ public final class Trace implements Serializable {
                 trace.getStartTime().toNanos(),
                 trace.getEndTime().toNanos(),
                 trace.isIndexing() ? "RUNNING" : "COMPLETED");
+    }
+
+    /**
+     * Constructs a trace model from its resource
+     *
+     * @param traceResource
+     *            trace resource
+     * @param uuid
+     *            UUID
+     * @return the trace model
+     */
+    public static Trace from(IResource traceResource, UUID uuid) {
+        IPath location = ResourceUtil.getLocation(traceResource);
+        if (location == null) {
+            location = traceResource.getProjectRelativePath();
+        }
+        String path = location.removeTrailingSeparator().toOSString();
+        return new Trace(traceResource.getName(),
+                uuid,
+                path,
+                0L,
+                0L,
+                0L,
+                "CLOSED");
     }
 
     /**

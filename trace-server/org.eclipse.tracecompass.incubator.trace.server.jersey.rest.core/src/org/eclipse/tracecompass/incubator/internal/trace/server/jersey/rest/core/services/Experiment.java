@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Ericsson
+ * Copyright (c) 2020, 2021 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -13,9 +13,12 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -72,7 +75,7 @@ public final class Experiment implements Serializable {
     }
 
     /**
-     * Constructs an experiment model
+     * Constructs an experiment model from its instance
      *
      * @param experiment
      *            experiment
@@ -90,6 +93,27 @@ public final class Experiment implements Serializable {
                 experiment.getStartTime().toNanos(),
                 experiment.getEndTime().toNanos(),
                 experiment.isIndexing() ? "RUNNING" : "COMPLETED",
+                traces);
+    }
+
+    /**
+     * Constructs an experiment model from its resource
+     *
+     * @param experimentResource
+     *            experiment resource
+     * @param expUUID
+     *            experiment UUID
+     * @return the experiment model
+     */
+    public static Experiment from(IResource experimentResource, UUID expUUID) {
+        List<UUID> traceUUIDs = ExperimentManagerService.getTraceUUIDs(expUUID);
+        Set<Trace> traces = new LinkedHashSet<>(Lists.transform(traceUUIDs, uuid -> Trace.from(TraceManagerService.getTraceResource(uuid), uuid)));
+        return new Experiment(experimentResource.getName(),
+                expUUID,
+                0L,
+                0L,
+                0L,
+                "CLOSED",
                 traces);
     }
 

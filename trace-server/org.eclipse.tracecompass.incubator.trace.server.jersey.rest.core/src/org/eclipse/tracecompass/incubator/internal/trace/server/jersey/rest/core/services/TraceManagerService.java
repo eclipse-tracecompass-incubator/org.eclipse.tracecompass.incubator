@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Ericsson
+ * Copyright (c) 2017, 2021 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -69,7 +69,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 @Path("/traces")
 public class TraceManagerService {
 
-    private static final Map<UUID, IResource> TRACES = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<UUID, IResource> TRACES = Collections.synchronizedMap(initTraces());
 
     private static final String TRACES_FOLDER = "Traces"; //$NON-NLS-1$
 
@@ -91,6 +91,25 @@ public class TraceManagerService {
             }
             return Response.ok(traces).build();
         }
+    }
+
+    private static Map<UUID, IResource> initTraces() {
+        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        IProject project = root.getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME);
+        Map<UUID, IResource> traces = new HashMap<>();
+        try {
+            project.refreshLocal(IResource.DEPTH_INFINITE, null);
+            IFolder tracesFolder = project.getFolder(TRACES_FOLDER);
+            tracesFolder.accept(resource -> {
+                if (ResourceUtil.isSymbolicLink(resource)) {
+                    traces.put(getTraceUUID(resource), resource);
+                    return false;
+                }
+                return true;
+            });
+        } catch (CoreException e) {
+        }
+        return traces;
     }
 
     /**
@@ -131,8 +150,6 @@ public class TraceManagerService {
         }
         String traceType = traceTypes.get(0).getTraceTypeId();
 
-        UUID uuid = UUID.nameUUIDFromBytes(Objects.requireNonNull((path + name).getBytes(Charset.defaultCharset())));
-
         IResource resource = getResource(path, name);
         if (!resource.exists()) {
             if (!createResource(path, resource)) {
@@ -154,8 +171,23 @@ public class TraceManagerService {
                 }
             }
         }
+        UUID uuid = getTraceUUID(resource);
         TRACES.put(uuid, resource);
         return Response.ok(createTraceModel(uuid)).build();
+    }
+
+    /**
+     * Get the UUID of a trace by its resource
+     *
+     * @param resource
+     *            the trace resource
+     * @return the trace UUID
+     */
+    public static UUID getTraceUUID(IResource resource) {
+        IPath location = ResourceUtil.getLocation(resource);
+        IPath path = location != null ? location.append(resource.getName()) : resource.getProjectRelativePath();
+        UUID uuid = UUID.nameUUIDFromBytes(Objects.requireNonNull(path.toString().getBytes(Charset.defaultCharset())));
+        return uuid;
     }
 
     /**
@@ -204,13 +236,11 @@ public class TraceManagerService {
     }
 
     private static Trace createTraceModel(UUID uuid) {
-        ITmfTrace traceInstance = createTraceInstance(uuid);
-        if (traceInstance == null) {
+        IResource resource = TRACES.get(uuid);
+        if (resource == null) {
             return null;
         }
-        Trace trace = Trace.from(traceInstance, uuid);
-        traceInstance.dispose();
-        return trace;
+        return Trace.from(resource, uuid);
     }
 
     /**
@@ -257,7 +287,7 @@ public class TraceManagerService {
      * @throws CoreException
      *             if an error occurs
      */
-    private static boolean createResource(String path, IResource resource) throws CoreException {
+    private static synchronized boolean createResource(String path, IResource resource) throws CoreException {
         // create the resource hierarchy.
         IPath targetLocation = org.eclipse.core.runtime.Path.forPosix(path);
         createFolder((IFolder) resource.getParent(), null);
@@ -325,9 +355,7 @@ public class TraceManagerService {
             cleanupFolders(resource.getParent().getLocation().toFile(),
                     resource.getProject().getFolder(TRACES_FOLDER).getLocation().toFile());
             // Refresh the workspace
-            ResourcesPlugin.getWorkspace().getRoot()
-            .getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME)
-            .refreshLocal(Integer.MAX_VALUE, null);
+            resource.getProject().refreshLocal(Integer.MAX_VALUE, null);
         } catch (CoreException | IOException e) {
             Activator.getInstance().logError("Failed to delete trace", e); //$NON-NLS-1$
         }
@@ -345,9 +373,13 @@ public class TraceManagerService {
         }
     }
 
-    private static void cleanupFolders(File folder, File root) {
+    private static synchronized void cleanupFolders(File folder, File root) {
         File current = folder;
-        while (current.isDirectory() && !current.equals(root) && current.listFiles().length == 0) {
+        while (current.isDirectory() && !current.equals(root)) {
+            File[] listFiles = current.listFiles();
+            if (listFiles == null || listFiles.length != 0) {
+                break;
+            }
             current.delete();
             current = current.getParentFile();
         }

@@ -106,7 +106,7 @@ public class ExperimentModelStub extends AbstractModelStub {
 
     @Override
     public String toString() {
-        return getName() + ":<nbEvents=" + ", UUID=" + getUUID() + ", traces=" + fTraces + '>';
+        return getName() + ": <UUID=" + getUUID() + ", traces=" + fTraces + '>';
     }
 
 }

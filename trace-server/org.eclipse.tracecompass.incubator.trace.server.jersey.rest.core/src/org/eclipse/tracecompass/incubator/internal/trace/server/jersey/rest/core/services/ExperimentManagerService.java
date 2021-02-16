@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Ericsson
+ * Copyright (c) 2018, 2021 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -12,6 +12,8 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,19 +35,21 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IResourceProxyVisitor;
-import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -55,7 +59,6 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 import com.google.common.collect.HashMultiset;
@@ -70,8 +73,9 @@ import com.google.common.collect.Multiset;
 @Path("/experiments")
 public class ExperimentManagerService {
 
-    private static final Map<UUID, TmfExperiment> EXPERIMENTS = Collections.synchronizedMap(new HashMap<>());
     private static final Map<UUID, List<UUID>> TRACE_UUIDS = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<UUID, IResource> EXPERIMENT_RESOURCES = Collections.synchronizedMap(initExperimentResources());
+    private static final Map<UUID, TmfExperiment> EXPERIMENTS = Collections.synchronizedMap(new HashMap<>());
 
     private static final String EXPERIMENTS_FOLDER = "Experiments"; //$NON-NLS-1$
     private static final String TRACES_FOLDER = "Traces"; //$NON-NLS-1$
@@ -85,11 +89,58 @@ public class ExperimentManagerService {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getExperiments() {
-        synchronized (EXPERIMENTS) {
-            List<Experiment> experiments = Lists.transform(new ArrayList<>(EXPERIMENTS.entrySet()),
-                    e -> Experiment.from(e.getValue(), e.getKey()));
+        synchronized (EXPERIMENT_RESOURCES) {
+            List<Experiment> experiments = Lists.transform(new ArrayList<>(EXPERIMENT_RESOURCES.entrySet()), e -> {
+                UUID expUUID = e.getKey();
+                TmfExperiment experiment = EXPERIMENTS.get(expUUID);
+                if (experiment != null) {
+                    return Experiment.from(experiment, expUUID);
+                }
+                IResource experimentResource = e.getValue();
+                return Experiment.from(experimentResource, expUUID);
+            });
             return Response.ok(experiments).build();
         }
+    }
+
+    private static Map<UUID, IResource> initExperimentResources() {
+        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        IProject project = root.getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME);
+        Map<UUID, IResource> experimentResources = new HashMap<>();
+        try {
+            project.refreshLocal(IResource.DEPTH_INFINITE, null);
+            IFolder experimentsFolder = project.getFolder(EXPERIMENTS_FOLDER);
+            experimentsFolder.accept((IResourceVisitor) resource -> {
+                if (resource.equals(experimentsFolder)) {
+                    return true;
+                }
+                if (resource instanceof IFolder) {
+                    UUID expUUID = UUID.nameUUIDFromBytes(Objects.requireNonNull(resource.getName().getBytes(Charset.defaultCharset())));
+                    experimentResources.put(expUUID, resource);
+                    List<UUID> traceUUIDs = getTraceUUIDs((IFolder) resource);
+                    TRACE_UUIDS.put(expUUID, traceUUIDs);
+                }
+                return false;
+            }, IResource.DEPTH_ONE, IResource.NONE);
+        } catch (CoreException e) {
+        }
+        return experimentResources;
+    }
+
+    private static List<UUID> getTraceUUIDs(IFolder experimentResource) throws CoreException {
+        List<UUID> traceUUIDs = new ArrayList<>();
+        experimentResource.accept(resource -> {
+            if (resource instanceof IFile) {
+                IPath path = resource.getProjectRelativePath().makeRelativeTo(experimentResource.getProjectRelativePath());
+                IResource traceResource = experimentResource.getProject().getFolder(TRACES_FOLDER).findMember(path);
+                if (traceResource != null) {
+                    traceUUIDs.add(TraceManagerService.getTraceUUID(traceResource));
+                }
+                return false;
+            }
+            return true;
+        });
+        return traceUUIDs;
     }
 
     /**
@@ -104,7 +155,7 @@ public class ExperimentManagerService {
     @Path("/{expUUID}")
     @Produces({ MediaType.APPLICATION_JSON })
     public Response getExperiment(@PathParam("expUUID") UUID expUUID) {
-        TmfExperiment experiment = EXPERIMENTS.get(expUUID);
+        TmfExperiment experiment = getExperimentByUUID(expUUID);
         if (experiment != null) {
             return Response.ok(Experiment.from(experiment, expUUID)).build();        }
         return Response.status(Status.NOT_FOUND).build();
@@ -137,17 +188,17 @@ public class ExperimentManagerService {
     @Path("/{expUUID}")
     @Produces({ MediaType.APPLICATION_JSON })
     public Response deleteExperiment(@PathParam("expUUID") UUID expUUID) {
-        TmfExperiment experiment = EXPERIMENTS.remove(expUUID);
-        if (experiment == null) {
+        IResource resource = EXPERIMENT_RESOURCES.remove(expUUID);
+        if (resource == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
-        Experiment entity = Experiment.from(experiment, expUUID);
+        Experiment experimentModel = Experiment.from(resource, expUUID);
+        TmfExperiment experiment = EXPERIMENTS.remove(expUUID);
+        if (experiment != null) {
+            TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, experiment));
+            experiment.dispose();
+        }
         TRACE_UUIDS.remove(expUUID);
-
-        TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, experiment));
-        experiment.dispose();
-
-        IResource resource = experiment.getResource();
         boolean deleteResources = true;
         synchronized (EXPERIMENTS) {
             for (TmfExperiment e : EXPERIMENTS.values()) {
@@ -159,17 +210,19 @@ public class ExperimentManagerService {
         }
         if (deleteResources) {
             try {
-                ResourcesPlugin.getWorkspace().run(mon -> {
-                    // Delete supplementary files
-                    TmfTraceManager.deleteSupplementaryFolder(experiment);
-                    // Finally, delete the experiment
-                    resource.delete(true, null);
-                }, experiment.getResource().getProject(), IWorkspace.AVOID_UPDATE, null);
-            } catch (CoreException e) {
-                return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+                // Delete supplementary files and folders
+                File supplFolder = new File(resource.getPersistentProperty(TmfCommonConstants.TRACE_SUPPLEMENTARY_FOLDER));
+                FileUtils.cleanDirectory(supplFolder);
+                supplFolder.delete();
+                // Delete experiment resource
+                resource.delete(true, null);
+                // Refresh the workspace
+                resource.getProject().refreshLocal(Integer.MAX_VALUE, null);
+            } catch (CoreException | IOException e) {
+                Activator.getInstance().logError("Failed to delete experiment", e); //$NON-NLS-1$
             }
         }
-        return Response.ok(entity).build();
+        return Response.ok(experimentModel).build();
     }
 
     /**
@@ -239,12 +292,28 @@ public class ExperimentManagerService {
                 // It's a new experiment, create the experiment resources
                 createExperiment(resource, traceResources);
             }
-            // Create and set the supplementary folder
-            createSupplementaryFolder(resource);
         } catch (CoreException e) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
+        TRACE_UUIDS.put(expUUID, traceUUIDs);
+        EXPERIMENT_RESOURCES.put(expUUID, resource);
+        TmfExperiment experiment = createExperimentInstance(expUUID);
+        if (experiment == null) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to instantiate experiment").build();
+        }
+
+        return Response.ok(Experiment.from(experiment, expUUID)).build();
+    }
+
+    private static @Nullable TmfExperiment createExperimentInstance(UUID expUUID) {
+        List<UUID> traceUUIDs = TRACE_UUIDS.get(expUUID);
+        IResource resource = EXPERIMENT_RESOURCES.get(expUUID);
+        if (traceUUIDs == null || resource == null) {
+            return null;
+        }
+        // Create and set the supplementary folder
+        createSupplementaryFolder(resource);
         // Instantiate the experiment and return it
         ITmfTrace[] traces = Lists.transform(traceUUIDs, uuid -> TraceManagerService.createTraceInstance(uuid)).toArray(new ITmfTrace[0]);
         TmfExperiment experiment = new TmfExperiment(ITmfEvent.class, resource.getLocation().toOSString(), traces, TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, resource);
@@ -254,12 +323,10 @@ public class ExperimentManagerService {
         experiment.getNext(ctx);
         ctx.dispose();
 
-        TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(this, experiment, null));
+        TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(ExperimentManagerService.class, experiment, null));
 
-        TRACE_UUIDS.put(expUUID, traceUUIDs);
         EXPERIMENTS.put(expUUID, experiment);
-
-        return Response.ok(Experiment.from(experiment, expUUID)).build();
+        return experiment;
     }
 
     /**
@@ -329,11 +396,14 @@ public class ExperimentManagerService {
         file.setPersistentProperty(TmfCommonConstants.TRACETYPE, TmfTraceType.getTraceTypeId(traceResource));
     }
 
-    private static void createSupplementaryFolder(IFolder folder) throws CoreException {
-        IFolder supplRootFolder = folder.getProject().getFolder(TmfCommonConstants.TRACE_SUPPLEMENTARY_FOLDER_NAME);
-        IFolder supplFolder = supplRootFolder.getFolder(folder.getName() + SUFFIX);
-        createFolder(supplFolder);
-        folder.setPersistentProperty(TmfCommonConstants.TRACE_SUPPLEMENTARY_FOLDER, supplFolder.getLocation().toOSString());
+    private static void createSupplementaryFolder(IResource experimentResource) {
+        try {
+            IFolder supplRootFolder = experimentResource.getProject().getFolder(TmfCommonConstants.TRACE_SUPPLEMENTARY_FOLDER_NAME);
+            IFolder supplFolder = supplRootFolder.getFolder(experimentResource.getName() + SUFFIX);
+            createFolder(supplFolder);
+            experimentResource.setPersistentProperty(TmfCommonConstants.TRACE_SUPPLEMENTARY_FOLDER, supplFolder.getLocation().toOSString());
+        } catch (CoreException e) {
+        }
     }
 
     private static void createFolder(IFolder folder) throws CoreException {
@@ -354,7 +424,11 @@ public class ExperimentManagerService {
      * @return the experiment or null if none match.
      */
     public static @Nullable TmfExperiment getExperimentByUUID(UUID expUUID) {
-        return EXPERIMENTS.get(expUUID);
+        TmfExperiment experiment = EXPERIMENTS.get(expUUID);
+        if (experiment == null) {
+            experiment = createExperimentInstance(expUUID);
+        }
+        return experiment;
     }
 
     /**

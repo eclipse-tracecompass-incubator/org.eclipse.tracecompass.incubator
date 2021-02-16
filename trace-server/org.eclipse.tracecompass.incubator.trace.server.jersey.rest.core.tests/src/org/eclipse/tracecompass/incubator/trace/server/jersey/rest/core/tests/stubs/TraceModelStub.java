@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2021 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -14,6 +14,9 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.s
 import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.UUID;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -50,6 +53,8 @@ public class TraceModelStub extends AbstractModelStub {
      *            start time
      * @param end
      *            end time
+     * @param indexingStatus
+     *            indexing status
      */
     @JsonCreator
     public TraceModelStub(
@@ -77,7 +82,8 @@ public class TraceModelStub extends AbstractModelStub {
     }
 
     private static UUID getUUID(String path, String name) {
-        return UUID.nameUUIDFromBytes(Objects.requireNonNull((path + name).getBytes(Charset.defaultCharset())));
+        IPath tracePath = new Path(path).append(name);
+        return UUID.nameUUIDFromBytes(Objects.requireNonNull(tracePath.toString().getBytes(Charset.defaultCharset())));
     }
 
     /**
@@ -91,7 +97,7 @@ public class TraceModelStub extends AbstractModelStub {
 
     @Override
     public String toString() {
-        return getName() + ":<path=" + fPath + ", UUID=" + getUUID() + '>'; //$NON-NLS-1$ //$NON-NLS-2$
+        return getName() + ": <UUID=" + getUUID() + ", path=" + fPath + '>'; //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
