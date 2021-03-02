@@ -36,6 +36,7 @@ import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
@@ -181,6 +182,7 @@ public class WebApplication {
         module.addSerializer(ITmfXyModel.class, new XYModelSerializer());
         module.addSerializer(ISeriesModel.class, new SeriesModelSerializer());
         module.addSerializer(TimeGraphState.class, new TimeGraphStateSerializer());
+        module.addSerializer(ITimeGraphArrow.class, new TimeGraphArrowSerializer());
         module.addSerializer(TimeGraphRowModel.class, new TimeGraphRowModelSerializer());
         module.addSerializer(TimeGraphEntryModel.class, new TimeGraphEntryModelSerializer());
         module.addSerializer(TmfTreeDataModel.class, new TmfTreeModelSerializer());
