@@ -23,6 +23,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 
 /**
  * Test the {@link ScriptExecutionHelper} class
@@ -79,6 +80,7 @@ public class HeadlessScriptExecutionTest {
      * Test a simple execution of a javascript file
      */
     @Test
+    @Ignore
     public void testJs() {
         IPath path = ActivatorTest.getAbsoluteFilePath(JS_FILE);
         Object result = ScriptExecutionHelper.executeScript(String.valueOf(path.toOSString()));
