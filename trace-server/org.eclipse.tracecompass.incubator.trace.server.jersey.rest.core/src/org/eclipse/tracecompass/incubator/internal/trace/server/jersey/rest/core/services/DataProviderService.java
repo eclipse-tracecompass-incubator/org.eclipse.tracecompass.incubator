@@ -46,6 +46,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationCategoriesModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.IOutputAnnotationProvider;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.TraceAnnotationProvider;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableDataProvider;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
@@ -394,14 +395,33 @@ public class DataProviderService {
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
+            boolean isComplete = true;
+            AnnotationCategoriesModel model = null;
+            // Fetch trace annotation categories
+            TraceAnnotationProvider traceAnnotationProvider = ExperimentManagerService.getTraceAnnotationProvider(expUUID);
+            @NonNull Map<@NonNull String, @NonNull Object> params = Collections.emptyMap();
+            if (traceAnnotationProvider != null) {
+                TmfModelResponse<@NonNull AnnotationCategoriesModel> traceAnnotations = traceAnnotationProvider.fetchAnnotationCategories(params, null);
+                if (traceAnnotations.getStatus() == ITmfResponse.Status.CANCELLED || traceAnnotations.getStatus() == ITmfResponse.Status.FAILED) {
+                    return Response.ok(new TmfModelResponse<>(new AnnotationCategoriesModel(Collections.emptyList()), traceAnnotations.getStatus(), traceAnnotations.getStatusMessage())).build();
+                }
+                isComplete &= traceAnnotations.getStatus() == ITmfResponse.Status.COMPLETED;
+                model = traceAnnotations.getModel();
+            }
+            // Fetch data provider annotation categories
             if (provider instanceof IOutputAnnotationProvider) {
-                @NonNull Map<@NonNull String, @NonNull Object> params = Collections.emptyMap();
-                TmfModelResponse<@NonNull AnnotationCategoriesModel> annotationCategories = ((IOutputAnnotationProvider) provider).fetchAnnotationCategories(params, null);
-                return Response.ok(annotationCategories).build();
+                TmfModelResponse<@NonNull AnnotationCategoriesModel> annotations = ((IOutputAnnotationProvider) provider).fetchAnnotationCategories(params, null);
+                if (annotations.getStatus() == ITmfResponse.Status.CANCELLED || annotations.getStatus() == ITmfResponse.Status.FAILED) {
+                    return Response.ok(new TmfModelResponse<>(new AnnotationCategoriesModel(Collections.emptyList()), annotations.getStatus(), annotations.getStatusMessage())).build();
+                }
+                isComplete &= annotations.getStatus() == ITmfResponse.Status.COMPLETED;
+                model = AnnotationCategoriesModel.of(model, annotations.getModel());
             }
 
-            // Return an empty model if the provider is not an IOutputAnnotationProvider
-            return Response.ok(new TmfModelResponse<>(new AnnotationCategoriesModel(Collections.emptyList()), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
+            if (isComplete) {
+                return Response.ok(new TmfModelResponse<>(model, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
+            }
+            return Response.ok(new TmfModelResponse<>(model, ITmfResponse.Status.RUNNING, CommonStatusMessage.RUNNING)).build();
         }
     }
 
@@ -442,13 +462,33 @@ public class DataProviderService {
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
+            boolean isComplete = true;
+            AnnotationModel model = null;
+
+            // Fetch trace annotations
+            TraceAnnotationProvider traceAnnotationProvider = ExperimentManagerService.getTraceAnnotationProvider(expUUID);
+            if (traceAnnotationProvider != null) {
+                TmfModelResponse<@NonNull AnnotationModel> traceAnnotations = traceAnnotationProvider.fetchAnnotations(queryParameters.getParameters(), null);
+                if (traceAnnotations.getStatus() == ITmfResponse.Status.CANCELLED || traceAnnotations.getStatus() == ITmfResponse.Status.FAILED) {
+                    return Response.ok(new TmfModelResponse<>(new AnnotationModel(Collections.emptyMap()), traceAnnotations.getStatus(), traceAnnotations.getStatusMessage())).build();
+                }
+                isComplete &= traceAnnotations.getStatus() == ITmfResponse.Status.COMPLETED;
+                model = traceAnnotations.getModel();
+            }
+            // Fetch data provider annotations
             if (provider instanceof IOutputAnnotationProvider) {
                 TmfModelResponse<@NonNull AnnotationModel> annotations = ((IOutputAnnotationProvider) provider).fetchAnnotations(queryParameters.getParameters(), null);
-                return Response.ok(annotations).build();
+                if (annotations.getStatus() == ITmfResponse.Status.CANCELLED || annotations.getStatus() == ITmfResponse.Status.FAILED) {
+                    return Response.ok(new TmfModelResponse<>(new AnnotationModel(Collections.emptyMap()), annotations.getStatus(), annotations.getStatusMessage())).build();
+                }
+                isComplete &= annotations.getStatus() == ITmfResponse.Status.COMPLETED;
+                model = AnnotationModel.of(model, annotations.getModel());
             }
 
-            // Return an empty model if the provider is not an IOutputAnnotationProvider
-            return Response.ok(new TmfModelResponse<>(new AnnotationModel(Collections.emptyMap()), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
+            if (isComplete) {
+                return Response.ok(new TmfModelResponse<>(model, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
+            }
+            return Response.ok(new TmfModelResponse<>(model, ITmfResponse.Status.RUNNING, CommonStatusMessage.RUNNING)).build();
         }
     }
 
