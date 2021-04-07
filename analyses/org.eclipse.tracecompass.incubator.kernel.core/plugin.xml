@@ -44,7 +44,8 @@
             id="org.eclipse.tracecompass.incubator.internal.kernel.core.swslatency.sws"
             name="%analysis.swsLatency.wakeupswitch">
          <tracetype
-               class="org.eclipse.tracecompass.tmf.core.trace.TmfTrace">
+               applies="true"
+               class="org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace">
          </tracetype>
       </module>
    </extension>
