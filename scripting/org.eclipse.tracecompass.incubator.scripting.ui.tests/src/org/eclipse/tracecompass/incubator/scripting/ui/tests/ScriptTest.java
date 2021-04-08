@@ -271,7 +271,7 @@ public class ScriptTest {
          * EASE module loading can get bootstrapped and modules are loadable
          */
         IFile file = createFile("testScript." + fScriptEngine.getDescription().getSupportedScriptTypes().get(0).getDefaultExtension(), fScriptFile, fProject);
-        fScriptEngine.executeAsync(file);
+        fScriptEngine.execute(file);
         runUntilTerminated(fScriptEngine);
 
         // Verify the script result

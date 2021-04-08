@@ -87,13 +87,15 @@ public class ScriptExecutionHelper {
         }
 
         try {
-            ScriptResult scriptResult = engine.executeSync(scriptObject);
+            ScriptResult scriptResult = engine.execute(scriptObject);
+            engine.schedule();
+
+            final Object result = scriptResult.get();
 
             if (scriptResult.hasException()) {
                 return null;
             }
 
-            final Object result = scriptResult.getResult();
 
             if (result != null) {
                 if (ScriptResult.VOID.equals(result)) {
@@ -124,7 +126,7 @@ public class ScriptExecutionHelper {
             } else {
                 return 0;
             }
-        } catch (InterruptedException e1) {
+        } catch (Exception e1) {
             Activator.getInstance().logWarning(String.format("Script execution was interrupted for %s", filePath)); //$NON-NLS-1$
             return null;
         }
