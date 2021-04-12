@@ -13,7 +13,7 @@ package org.eclipse.tracecompass.incubator.scripting.ui.tests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -41,6 +42,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ease.IExecutionListener;
 import org.eclipse.ease.IScriptEngine;
 import org.eclipse.ease.Script;
+import org.eclipse.ease.ScriptResult;
 import org.eclipse.ease.service.EngineDescription;
 import org.eclipse.ease.service.IScriptService;
 import org.eclipse.ease.service.ScriptService;
@@ -277,7 +279,13 @@ public class ScriptTest {
         // Verify the script result
         Script script = fScript;
         assertNotNull(fScriptFile.getFileName().toString(), script);
-        assertNull("Result of " + fScriptFile.getFileName(), script.getResult().getException());
+        ScriptResult result = script.getResult();
+        assertNotNull(result);
+        try {
+            result.get();
+        } catch (ExecutionException e) {
+            fail("Unexpected Execption (" + fScriptFile.getFileName() + "): " + e.toString());
+        }
     }
 
     private static void runUntilTerminated(IScriptEngine engine) {

@@ -92,11 +92,6 @@ public class ScriptExecutionHelper {
 
             final Object result = scriptResult.get();
 
-            if (scriptResult.hasException()) {
-                return null;
-            }
-
-
             if (result != null) {
                 if (ScriptResult.VOID.equals(result)) {
                     return 0;
@@ -127,7 +122,7 @@ public class ScriptExecutionHelper {
                 return 0;
             }
         } catch (Exception e1) {
-            Activator.getInstance().logWarning(String.format("Script execution was interrupted for %s", filePath)); //$NON-NLS-1$
+            Activator.getInstance().logWarning(String.format("Script execution was interrupted (%s) by exeception: %s", filePath, e1.toString())); //$NON-NLS-1$
             return null;
         }
         return null;
