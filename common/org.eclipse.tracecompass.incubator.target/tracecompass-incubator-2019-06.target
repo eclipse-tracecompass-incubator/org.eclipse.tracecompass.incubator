@@ -164,11 +164,11 @@
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.ease.engine.jython.feature.feature.group" version="0.0.0"/>
-<repository id="ease-engines" location="https://bintray.com/artifact/download/pontesegger/ease-engines/"/>
+<repository id="ease-engines" location="https://eclipse-ease-addons.github.io/org.eclipse.ease.engines.p2/latest/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.py4j.feature.feature.group" version="0.0.0"/>
-<repository location="https://dl.bintray.com/py4j/py4j-eclipse/0.10.8.1"/>
+<repository location="http://eclipse.py4j.org."/>
 </location>
 </locations>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
