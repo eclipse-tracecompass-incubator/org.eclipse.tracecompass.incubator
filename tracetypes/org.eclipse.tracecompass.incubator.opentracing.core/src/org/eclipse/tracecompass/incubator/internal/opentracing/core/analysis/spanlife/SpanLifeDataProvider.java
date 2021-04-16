@@ -12,28 +12,41 @@
 package org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.opentracing.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel.LogEvent;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.IOpenTracingConstants;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.Annotation;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationCategoriesModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.IOutputAnnotationProvider;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils.QuarkIterator;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
+import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
+import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
+import org.eclipse.tracecompass.tmf.core.model.StyleProperties.SymbolType;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
@@ -44,11 +57,13 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
+import org.eclipse.tracecompass.tmf.core.response.ITmfResponse.Status;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
@@ -59,7 +74,7 @@ import com.google.common.collect.TreeMultimap;
  *
  */
 @SuppressWarnings("restriction")
-public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull SpanLifeAnalysis, @NonNull TimeGraphEntryModel> {
+public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull SpanLifeAnalysis, @NonNull TimeGraphEntryModel> implements IOutputAnnotationProvider {
 
     /** The data provider ID */
     public static String ID = "org.eclipse.tracecompass.incubator.opentracing.analysis.spanlife.dataprovider"; //$NON-NLS-1$
@@ -251,8 +266,9 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
                 int logQuark = getLogQuark(ss, childName, logsQuarks);
                 try {
                     for (ITmfStateInterval interval : ss.query2D(Collections.singletonList(logQuark), ss.getStartTime(), ss.getCurrentEndTime())) {
-                        if (!interval.getStateValue().isNull()) {
-                            logs.add(new LogEvent(interval.getStartTime(), getLogType(String.valueOf(interval.getValue()))));
+                        Object value = interval.getValue();
+                        if (value != null) {
+                            logs.add(new LogEvent(interval.getStartTime(), getLogType(String.valueOf(value))));
                         }
                     }
                 } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
@@ -309,12 +325,12 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
     }
 
     private static String getSpanId(String attributeName) {
-        String[] attributeInfo = attributeName.split("/");  //$NON-NLS-1$
+        String[] attributeInfo = attributeName.split("/"); //$NON-NLS-1$
         return attributeInfo[attributeInfo.length - 3];
     }
 
     private static Boolean getErrorTag(String attributeName) {
-        String[] attributeInfo = attributeName.split("/");  //$NON-NLS-1$
+        String[] attributeInfo = attributeName.split("/"); //$NON-NLS-1$
         return attributeInfo[attributeInfo.length - 2].equals("true"); //$NON-NLS-1$
     }
 
@@ -341,6 +357,87 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
         } else {
             return OTHER;
         }
+    }
+
+    @Override
+    public TmfModelResponse<AnnotationCategoriesModel> fetchAnnotationCategories(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
+        ITmfStateSystem ss = getAnalysisModule().getStateSystem();
+        if (ss == null) {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        }
+        List<Integer> quarks = ss.getQuarks("*", IOpenTracingConstants.LOGS); //$NON-NLS-1$
+        if (quarks.isEmpty()) {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        }
+        return new TmfModelResponse<>(new AnnotationCategoriesModel(Arrays.asList(IOpenTracingConstants.LOGS)), Status.COMPLETED, IOpenTracingConstants.LOGS);
+    }
+
+    @Override
+    public TmfModelResponse<AnnotationModel> fetchAnnotations(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
+        ITmfStateSystem ss = getAnalysisModule().getStateSystem();
+        SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(fetchParameters);
+        if (filter == null) {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.INCORRECT_QUERY_PARAMETERS);
+        }
+        Map<Long, Integer> entries = getSelectedEntries(filter);
+        Collection<@NonNull Integer> quarks = entries.values();
+        if (ss == null || quarks.isEmpty()) {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        }
+        Map<Integer, Long> lookup = new HashMap<>();
+        for (Entry<Long, Integer> entry : entries.entrySet()) {
+            lookup.put(entry.getValue(), entry.getKey());
+        }
+
+        int traceQuark = ITmfStateSystem.INVALID_ATTRIBUTE;
+        int traceLogsQuark = ITmfStateSystem.INVALID_ATTRIBUTE;
+        try {
+            String traceId = ss.getFullAttributePathArray(quarks.iterator().next())[0];
+            traceQuark = ss.getQuarkAbsolute(traceId);
+            traceLogsQuark = ss.getQuarkRelative(traceQuark, IOpenTracingConstants.LOGS);
+        } catch (AttributeNotFoundException e) {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
+        }
+
+        Map<Integer, Long> spanLookup = new HashMap<>();
+        List<Integer> spanLogQuarks = new ArrayList<>();
+        quarks.remove(traceQuark);
+        for (int quark : quarks) {
+            int spanLogQuark = getLogQuark(ss, ss.getAttributeName(quark), ss.getSubAttributes(traceLogsQuark, false));
+            if (spanLogQuark != ITmfStateSystem.INVALID_ATTRIBUTE) {
+                spanLogQuarks.add(spanLogQuark);
+                Long value = lookup.get(quark);
+                spanLookup.put(spanLogQuark, Objects.requireNonNull(value));
+            }
+        }
+        if (spanLogQuarks.isEmpty()) {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        }
+        List<Annotation> annotations = new ArrayList<>();
+        OutputElementStyle style = new OutputElementStyle(null, ImmutableMap.of(
+                StyleProperties.COLOR, "#7f0000", //$NON-NLS-1$
+                StyleProperties.VERTICAL_ALIGN, "top", //$NON-NLS-1$
+                StyleProperties.HEIGHT, 0.5f,
+                StyleProperties.SYMBOL_TYPE, SymbolType.INVERTED_TRIANGLE));
+        try {
+            long[] timesRequested = filter.getTimesRequested();
+            for (int logQuark : spanLogQuarks) {
+                QuarkIterator iter = new StateSystemUtils.QuarkIterator(ss, logQuark, timesRequested[0], timesRequested[timesRequested.length - 1]);
+                while (iter.hasNext()) {
+                    ITmfStateInterval interval = iter.next();
+                    if (interval.getValue() != null) {
+                        Long entryId = spanLookup.get(interval.getAttribute());
+                        if (entryId == null) {
+                            entryId = -1L;
+                        }
+                        annotations.add(new Annotation(interval.getStartTime(), interval.getEndTime() - interval.getStartTime(), entryId, "", style));
+                    }
+                }
+            }
+        } catch (IndexOutOfBoundsException | TimeRangeException e) {
+            Activator.getInstance().logError(e.getMessage());
+        }
+        return new TmfModelResponse<>(new AnnotationModel(Collections.singletonMap(IOpenTracingConstants.LOGS, annotations)), Status.COMPLETED, "");
     }
 
 }

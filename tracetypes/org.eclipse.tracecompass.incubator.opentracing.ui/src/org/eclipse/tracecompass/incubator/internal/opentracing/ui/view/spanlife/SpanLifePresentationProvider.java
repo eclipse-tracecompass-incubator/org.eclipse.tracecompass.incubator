@@ -25,6 +25,8 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.X11ColorUtils;
+import org.eclipse.tracecompass.tmf.core.model.ITimeElement;
+import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
@@ -36,10 +38,9 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.MarkerEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.ITmfTimeGraphDrawingHelper;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -58,21 +59,23 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
     private static final @NonNull String FLAG_EMOJI = "🏳️"; //$NON-NLS-1$
 
     private static final @NonNull String MARKER_HEX_COLOR = X11ColorUtils.toHexColor(200, 0, 0);
-    private static double OPACITY = 150/255;
+    private static double OPACITY = 150. / 255;
     /**
      * Only states available
      */
-    private static final StateItem[] STATE_TABLE = { new StateItem(new RGB(179,205,224), "Fist Service Class"), //$NON-NLS-1$
+    private static final StateItem[] STATE_TABLE = { new StateItem(new RGB(179, 205, 224), "Fist Service Class"), //$NON-NLS-1$
             new StateItem(new RGB(100, 151, 177), "Second Service Class"), //$NON-NLS-1$
-            new StateItem(new RGB(0,91,150), "Third Service Class"), //$NON-NLS-1$
+            new StateItem(new RGB(0, 91, 150), "Third Service Class"), //$NON-NLS-1$
             new StateItem(new RGB(3, 57, 108), "Forth Service Class"), //$NON-NLS-1$
             new StateItem(new RGB(1, 31, 75), "Fifth Service Class"), //$NON-NLS-1$
             new StateItem(ImmutableMap.of(StyleProperties.STYLE_NAME, ERROR, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.CROSS, StyleProperties.HEIGHT,
                     0.4f)),
             new StateItem(
-                    ImmutableMap.of(StyleProperties.STYLE_NAME, EVENT, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.DIAMOND, StyleProperties.HEIGHT, 0.3f)),
+                    ImmutableMap.of(StyleProperties.STYLE_NAME, EVENT, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.DIAMOND, StyleProperties.HEIGHT,
+                            0.3f)),
             new StateItem(
-                    ImmutableMap.of(StyleProperties.STYLE_NAME, MESSAGE, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.CIRCLE, StyleProperties.HEIGHT, 0.3f)),
+                    ImmutableMap.of(StyleProperties.STYLE_NAME, MESSAGE, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.CIRCLE, StyleProperties.HEIGHT,
+                            0.3f)),
             new StateItem(ImmutableMap.of(StyleProperties.STYLE_NAME, STACK, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.SQUARE,
                     StyleProperties.HEIGHT, 0.3f)),
             new StateItem(ImmutableMap.of(StyleProperties.STYLE_NAME, OTHER, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, FLAG_EMOJI, StyleProperties.HEIGHT, 0.3f))
@@ -91,8 +94,8 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
     }
 
     @Override
-    public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event, long hoverTime) {
-        Map<String, String> eventHoverToolTipInfo = super.getEventHoverToolTipInfo(event, hoverTime);
+    public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event) {
+        Map<String, String> eventHoverToolTipInfo = super.getEventHoverToolTipInfo(event);
         if (eventHoverToolTipInfo == null) {
             eventHoverToolTipInfo = new LinkedHashMap<>();
         }
@@ -101,19 +104,8 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
             long id = ((TimeGraphEntry) entry).getEntryModel().getId();
             ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider = BaseDataProviderTimeGraphView.getProvider((TimeGraphEntry) entry);
 
-            long windowStartTime = Long.MIN_VALUE;
-            long windowEndTime = Long.MIN_VALUE;
-            ITmfTimeGraphDrawingHelper drawingHelper = getDrawingHelper();
-            if (drawingHelper instanceof TimeGraphControl) {
-                TimeGraphControl timeGraphControl = (TimeGraphControl) drawingHelper;
-                windowStartTime = timeGraphControl.getTimeDataProvider().getTime0();
-                windowEndTime = timeGraphControl.getTimeDataProvider().getTime1();
-            }
-
             List<@NonNull Long> times = new ArrayList<>();
-            times.add(windowStartTime);
-            times.add(hoverTime);
-            times.add(windowEndTime);
+            times.add(event.getTime());
 
             SelectionTimeQueryFilter filter = new SelectionTimeQueryFilter(times, Collections.singleton(id));
             TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> tooltipResponse = provider.fetchTooltip(FetchParametersUtils.selectionTimeQueryToMap(filter), new NullProgressMonitor());
@@ -146,11 +138,26 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
         if ((event instanceof TimeEvent) && ((TimeEvent) event).getValue() != Integer.MIN_VALUE) {
             if ((event.getEntry() instanceof TimeGraphEntry) && (((TimeGraphEntry) event.getEntry()).getEntryModel() instanceof SpanLifeEntryModel)) {
                 String processName = ((SpanLifeEntryModel) ((TimeGraphEntry) event.getEntry()).getEntryModel()).getProcessName();
-                // We want a random color but that is the same for 2 spans of the same service
+                // We want a random color but that is the same for 2 spans of
+                // the same service
                 return Math.abs(Objects.hash(processName)) % 5;
             }
             return 0;
         }
         return -1;
+    }
+
+    @Override
+    public Map<String, Object> getSpecificEventStyle(ITimeEvent event) {
+        if (event instanceof MarkerEvent) {
+            ITimeElement model = ((MarkerEvent) event).getModel();
+            if (model != null) {
+                OutputElementStyle style = model.getStyle();
+                if (style != null) {
+                    return style.getStyleValues();
+                }
+            }
+        }
+        return super.getSpecificEventStyle(event);
     }
 }
