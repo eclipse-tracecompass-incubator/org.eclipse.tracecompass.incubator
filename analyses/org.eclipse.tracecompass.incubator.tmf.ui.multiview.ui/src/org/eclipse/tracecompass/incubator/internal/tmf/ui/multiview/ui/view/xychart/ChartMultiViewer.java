@@ -30,7 +30,6 @@ import org.eclipse.tracecompass.tmf.ui.signal.TmfTimeViewAlignmentSignal;
 import org.eclipse.tracecompass.tmf.ui.viewers.ILegendImageProvider2;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfTimeViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfViewer;
-import org.eclipse.tracecompass.tmf.ui.viewers.tree.AbstractSelectTreeViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.AbstractSelectTreeViewer2;
 import org.eclipse.tracecompass.tmf.ui.viewers.xychart.TmfXYChartViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.xychart.XYChartLegendImageProvider;
@@ -206,7 +205,7 @@ public class ChartMultiViewer extends TmfTimeViewer implements IMultiViewer {
     }
 
     /**
-     * Method to couple {@link AbstractSelectTreeViewer} and
+     * Method to couple {@link AbstractSelectTreeViewer2} and
      * {@link TmfFilteredXYChartViewer} so that they use the same legend and
      * that the chart listens to selected items in the tree
      */

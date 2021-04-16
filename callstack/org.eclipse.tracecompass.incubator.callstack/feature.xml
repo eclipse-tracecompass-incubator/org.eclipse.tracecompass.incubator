@@ -38,7 +38,6 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.tracecompass.analysis.timing.ui"/>
       <import plugin="org.eclipse.tracecompass.tmf.ui"/>
-      <import plugin="org.swtchart"/>
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.help"/>
       <import plugin="org.eclipse.tracecompass.analysis.profiling.core"/>

@@ -14,7 +14,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.tracecompass.common.core,
  org.eclipse.tracecompass.incubator.ros.core,
  org.eclipse.tracecompass.tmf.ui,
- org.swtchart,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.analysis.os.linux.ui,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
