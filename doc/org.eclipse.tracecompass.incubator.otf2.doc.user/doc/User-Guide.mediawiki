@@ -1,0 +1,11 @@
+
+= OTF2 traces and analysis =
+
+This plugin provides analysises and views for OTF2 traces generated with Score-P and converted to CTF.
+
+To analyse you have to use [https://perftools.pages.jsc.fz-juelich.de/cicd/scorep/tags/scorep-7.0/html/index.html Score-P] and convert them with the [https://github.com/dorsal-lab/OTF2-to-CTF-converter converter] developed at DORSAL laboratory. If you have
+OTF2 installed and set in the PATH then you only need one command to build the converter and one command to convert the trace. The instructions are availables [https://github.com/dorsal-lab/OTF2-to-CTF-converter here].
+
+Test traces can be found [https://github.com/dorsal-lab/OTF2_testcases here].
+
+

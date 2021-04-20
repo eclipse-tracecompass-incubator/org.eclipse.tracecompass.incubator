@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            category="org.eclipse.linuxtools.tmf.ctf.core.category.ctf"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.otf2.core.trace"
+            isDirectory="true"
+            name="Open Trace Format 2 (in CTF)"
+            trace_type="org.eclipse.tracecompass.incubator.otf2.core.trace.Otf2Trace">
+      </type>
+   </extension>
+   <extension
+		point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.callstack.Otf2CallstackAnalysis"
+            automatic="true"
+            icon="icons/stckframe_obj.gif"
+            id="org.eclipse.tracecompass.incubator.otf2.core.analysis.callstack"
+            name="%otf2.analysis.callstack">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.otf2.core.trace.Otf2Trace">
+         </tracetype>
+      </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.communicators.Otf2CommunicatorsAnalysis"
+            automatic="false"
+            icon="icons/otf2-icon.png"
+            id="org.eclipse.tracecompass.incubator.otf2.core.analysis.communicators"
+            name="%otf2.analysis.communicators">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.otf2.core.trace.Otf2Trace">
+         </tracetype>
+      </module>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.communicators.Otf2CommunicatorsDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.otf2.core.analysis.communicators.dataprovider">
+      </dataProviderFactory>
+   </extension>
+</plugin>

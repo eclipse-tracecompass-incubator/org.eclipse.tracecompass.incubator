@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="org.eclipse.tracecompass.incubator.internal.otf2.ui.views.category"
+            name="%otf2.name"
+            parentCategory="org.eclipse.linuxtools.tmf.ui.views.category">
+      </category>
+      <view
+            category="org.eclipse.tracecompass.incubator.internal.otf2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.otf2.ui.views.communicators.Otf2CommunicatorsView"
+            id="org.eclipse.tracecompass.incubator.otf2.ui.views.communicators"
+            icon="icons/otf2-icon.png"
+            name="%otf2.view.communicators"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
+      <type
+      		icon="icons/otf2-icon.png"
+            tracetype="org.eclipse.tracecompass.incubator.otf2.core.trace">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.otf2.ui.views.communicators">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.communicators.Otf2CommunicatorsAnalysis">
+         </analysisModuleClass>
+      </output>
+   </extension>
+</plugin>

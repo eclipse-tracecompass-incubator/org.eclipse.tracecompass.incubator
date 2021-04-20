@@ -36,6 +36,9 @@
    <feature url="features/org.eclipse.tracecompass.incubator.opentracing_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.opentracing" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.otf2_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.otf2" version="0.0.0">
+      <category name="trace-types"/>
+   </feature>
    <feature url="features/org.eclipse.tracecompass.incubator.kernel_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.kernel" version="0.0.0">
       <category name="analyses"/>
    </feature>

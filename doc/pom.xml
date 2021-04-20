@@ -48,6 +48,7 @@
     <module>org.eclipse.tracecompass.incubator.eventfieldcount.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.filters.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.scripting.doc.user</module>
+    <module>org.eclipse.tracecompass.incubator.otf2.doc.user</module>
     <!-- insert modules here -->
   </modules>
 
