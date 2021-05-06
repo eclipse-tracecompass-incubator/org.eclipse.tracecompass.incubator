@@ -1,0 +1,26 @@
+From 392e1bba6327220d4b845536d1631077d77e2d30 Mon Sep 17 00:00:00 2001
+From: Bernd Hufmann <Bernd.Hufmann@ericsson.com>
+Date: Wed, 12 May 2021 11:04:55 -0400
+Subject: [PATCH] releng: Fix build with tracecompass-incubator-2020-06.target
+
+Change-Id: Ib0ee0bc968cf1f5888e919470177b313f5fd63ae
+Signed-off-by: Bernd Hufmann <Bernd.Hufmann@ericsson.com>
+---
+ .../traceserver.product                                          | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product b/trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product
+index 106f8c72..9e992f35 100644
+--- a/trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product
++++ b/trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product
+@@ -153,7 +153,6 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
+       <plugin id="org.eclipse.jetty.server"/>
+       <plugin id="org.eclipse.jetty.servlet"/>
+       <plugin id="org.eclipse.jetty.util"/>
+-      <plugin id="org.eclipse.jetty.util.ajax"/>
+       <plugin id="org.eclipse.ltk.core.refactoring"/>
+       <plugin id="org.eclipse.osgi"/>
+       <plugin id="org.eclipse.osgi.compatibility.state" fragment="true"/>
+-- 
+2.17.1
+
