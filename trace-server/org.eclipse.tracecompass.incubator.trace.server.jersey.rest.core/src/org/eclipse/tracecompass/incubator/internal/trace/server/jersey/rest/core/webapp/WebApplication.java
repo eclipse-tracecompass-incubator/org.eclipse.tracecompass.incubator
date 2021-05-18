@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Ericsson
+ * Copyright (c) 2017, 2021 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -23,6 +23,7 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Experiment;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
@@ -204,6 +205,7 @@ public class WebApplication {
         module.addSerializer(TmfTreeDataModel.class, new TmfTreeModelSerializer());
         module.addSerializer(OutputElementStyle.class, new OutputElementStyleSerializer());
         module.addSerializer(IVirtualTableLine.class, new VirtualTableLineSerializer());
+        module.addDeserializer(QueryParameters.class, new QueryParametersDeserializer());
         mapper.registerModule(module);
         return provider;
     }

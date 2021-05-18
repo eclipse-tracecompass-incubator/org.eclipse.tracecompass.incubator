@@ -12,7 +12,6 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -432,7 +431,7 @@ public class DataProviderService {
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
      * @param queryParameters
-     *            Parameters to fetch table columns as described by
+     *            Parameters to fetch annotations as described by
      *            {@link QueryParameters}
      * @return {@link TmfModelResponse} containing {@link AnnotationModel}
      */
@@ -499,22 +498,17 @@ public class DataProviderService {
      *            desired experiment UUID
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
-     * @param time
-     *            Time where to fetch the tooltip
-     * @param entryId
-     *            Entry Id to identify the state for the tooltip
-     * @param targetId
-     *            Target Id if the tooltip is for an arrow
+     * @param queryParameters
+     *            Parameters to fetch time graph tooltip as described by
+     *            {@link QueryParameters}
      * @return {@link GenericView} with the results
      */
-    @GET
+    @POST
     @Path("/timeGraph/{outputId}/tooltip")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTimeGraphTooltip(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
-            @QueryParam("time") long time,
-            @QueryParam("entryId") long entryId,
-            @QueryParam("targetId") long targetId) {
+            QueryParameters queryParameters) {
         if (outputId == null) {
             return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
         }
@@ -532,7 +526,7 @@ public class DataProviderService {
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
-            TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = provider.fetchTooltip(FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(time, time, 1, Arrays.asList(entryId, targetId))), null);
+            TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = provider.fetchTooltip(queryParameters.getParameters(), null);
             return Response.ok(response).build();
         }
     }

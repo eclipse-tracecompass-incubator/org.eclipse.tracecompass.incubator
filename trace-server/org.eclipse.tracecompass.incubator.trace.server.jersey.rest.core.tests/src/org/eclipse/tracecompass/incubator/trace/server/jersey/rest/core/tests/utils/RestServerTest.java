@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Ericsson
+ * Copyright (c) 2018, 2021 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -85,27 +85,32 @@ public abstract class RestServerTest {
     public static final String XY_PATH = "XY";
 
     /**
-     * xy series path segment
+     * XY series path segment
      */
     public static final String XY_SERIES_PATH = "xy";
 
     /**
-     * states path segment
+     * States path segment
      */
     public static final String STATE_PATH = "states";
 
     /**
-     * Time Graph path segment
+     * Tooltip path segment
+     */
+    public static final String TOOLTIP_PATH = "tooltip";
+
+    /**
+     * Table path segment
      */
     public static final String TABLE_PATH = "table";
 
     /**
-     * Time Graph path segment
+     * Column path segment
      */
     public static final String TABLE_COLUMN_PATH = "columns";
 
     /**
-     * Time Graph path segment
+     * Lines path segment
      */
     public static final String TABLE_LINE_PATH = "lines";
 
@@ -292,6 +297,24 @@ public abstract class RestServerTest {
                 .path(TIMEGRAPH_PATH)
                 .path(dataProviderId)
                 .path(STATE_PATH);
+    }
+
+    /**
+     * Get the {@link WebTarget} for the time graph tooltip endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tooltip endpoint
+     */
+    public static WebTarget getTimeGraphTooltipEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(TIMEGRAPH_PATH)
+                .path(dataProviderId)
+                .path(TOOLTIP_PATH);
     }
 
     /**

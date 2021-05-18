@@ -42,10 +42,12 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TableModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgEntryModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgStatesOutputResponseStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgTooltipOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgTreeOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphEntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphRowStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphStateStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TreeOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyOutputResponseStub;
@@ -56,6 +58,8 @@ import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterators;
 
 /**
  * Test the {@link DataProviderService}
@@ -68,11 +72,20 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
     private static final String XY_DATAPROVIDER_ID = "org.eclipse.tracecompass.analysis.os.linux.core.cpuusage.CpuUsageDataProvider";
     private static final String EVENTS_TABLE_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider";
-    private static final String REQUESTED_TIME_KEY = "requested_times";
+    private static final String REQUESTED_TIMES_KEY = "requested_times";
     private static final String REQUESTED_ITEMS_KEY = "requested_items";
+    private static final String REQUESTED_ELEMENT_KEY = "requested_element";
     private static final String REQUESTED_COLUMN_IDS_KEY = "requested_table_column_ids";
     private static final String REQUESTED_TABLE_INDEX_KEY = "requested_table_index";
     private static final String REQUESTED_TABLE_COUNT_KEY = "requested_table_count";
+    private static final String ELEMENT_TYPE = "elementType";
+    private static final String STATE = "state";
+    private static final String ANNOTATION = "annotation";
+    private static final String ARROW = "arrow";
+    private static final String TIME = "time";
+    private static final String DURATION = "duration";
+    private static final String ENTRY_ID = "entryId";
+    private static final String DESTINATION_ID = "destinationId";
     private static final long TABLE_INDEX = 0L;
     private static final long TABLE_COUNT = 100L;
 
@@ -107,7 +120,7 @@ public class DataProviderServiceTest extends RestServerTest {
         assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
 
         parameters = new HashMap<>();
-        parameters.put(REQUESTED_TIME_KEY, Collections.emptyList());
+        parameters.put(REQUESTED_TIMES_KEY, Collections.emptyList());
         Response defaults = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
         assertEquals("Default values should return OK code", 200, defaults.getStatus());
     }
@@ -131,7 +144,7 @@ public class DataProviderServiceTest extends RestServerTest {
             WebTarget xyTree = getXYTreeEndpoint(exp.getUUID().toString(), XY_DATAPROVIDER_ID);
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put(REQUESTED_TIME_KEY, ImmutableList.of(start, end));
+            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(start, end));
             TreeOutputResponseStub responseModel;
             Response tree = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
@@ -201,7 +214,7 @@ public class DataProviderServiceTest extends RestServerTest {
 
             Map<String, Object> parameters = new HashMap<>();
             TgTreeOutputResponseStub responseModel;
-            parameters.put(REQUESTED_TIME_KEY, ImmutableList.of(start, end));
+            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(start, end));
             Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
             responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
@@ -245,6 +258,54 @@ public class DataProviderServiceTest extends RestServerTest {
             assertFalse(rows.isEmpty());
             statesResponse.close();
 
+            // Test getting the time graph tooltip for a state
+            TimeGraphRowStub row = Iterators.getLast(rows.iterator());
+            TimeGraphStateStub state = row.getStates().get(0);
+            WebTarget tgTooltipEnpoint = getTimeGraphTooltipEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
+            parameters.put(REQUESTED_ITEMS_KEY, Collections.singletonList(row.getEntryId()));
+            parameters.put(REQUESTED_TIMES_KEY, Collections.singletonList(state.getStartTime()));
+            parameters.put(REQUESTED_ELEMENT_KEY, ImmutableMap.of(
+                    ELEMENT_TYPE, STATE,
+                    TIME, state.getStartTime(),
+                    DURATION, (state.getEndTime() - state.getStartTime())));
+            Response tooltipResponse = tgTooltipEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+            assertEquals("There should be a positive response for the data provider", 200, tooltipResponse.getStatus());
+
+            TgTooltipOutputResponseStub timegraphTooltipResponse = tooltipResponse.readEntity(TgTooltipOutputResponseStub.class);
+            assertNotNull(timegraphTooltipResponse);
+            assertEquals(Collections.emptyMap(), timegraphTooltipResponse.getModel());
+            tooltipResponse.close();
+
+            // Test getting the time graph tooltip for an annotation
+            long time = state.getStartTime();
+            parameters.put(REQUESTED_ITEMS_KEY, Collections.singletonList(row.getEntryId()));
+            parameters.put(REQUESTED_TIMES_KEY, Collections.singletonList(state.getStartTime()));
+            parameters.put(REQUESTED_ELEMENT_KEY, ImmutableMap.of(
+                    ELEMENT_TYPE, ANNOTATION,
+                    TIME, time,
+                    DURATION, 0L,
+                    ENTRY_ID, row.getEntryId()));
+            tooltipResponse = tgTooltipEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+            assertEquals("There should be a positive response for the data provider", 200, tooltipResponse.getStatus());
+
+            // Test getting the time graph tooltip for an annotation
+            TimeGraphRowStub destinationRow = Iterators.get(rows.iterator(), rows.size() - 2);
+            parameters.put(REQUESTED_ITEMS_KEY, Collections.singletonList(row.getEntryId()));
+            parameters.put(REQUESTED_TIMES_KEY, Collections.singletonList(state.getStartTime()));
+            parameters.put(REQUESTED_ELEMENT_KEY, ImmutableMap.of(
+                    ELEMENT_TYPE, ARROW,
+                    TIME, time,
+                    DURATION, 0L,
+                    ENTRY_ID, row.getEntryId(),
+                    DESTINATION_ID, destinationRow.getEntryId()));
+            tooltipResponse = tgTooltipEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+            assertEquals("There should be a positive response for the data provider", 200, tooltipResponse.getStatus());
+
+            timegraphTooltipResponse = tooltipResponse.readEntity(TgTooltipOutputResponseStub.class);
+            assertNotNull(timegraphTooltipResponse);
+            assertEquals(Collections.emptyMap(), timegraphTooltipResponse.getModel());
+            tooltipResponse.close();
+
         } catch (ProcessingException e) {
             // The failure from this exception alone is not helpful. Use the
             // suppressed exception's message be the failure message for more
@@ -272,7 +333,7 @@ public class DataProviderServiceTest extends RestServerTest {
             WebTarget tableColumns = getTableColumnsEndpoint(exp.getUUID().toString(), EVENTS_TABLE_DATAPROVIDER_ID);
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put(REQUESTED_TIME_KEY, ImmutableList.of(start, end));
+            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(start, end));
             TableColumnsOutputResponseStub responseModel;
             Response tree = tableColumns.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
