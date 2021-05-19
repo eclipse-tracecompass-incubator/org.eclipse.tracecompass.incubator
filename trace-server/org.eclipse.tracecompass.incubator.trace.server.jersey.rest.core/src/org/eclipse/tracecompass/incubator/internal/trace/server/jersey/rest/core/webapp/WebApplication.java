@@ -142,7 +142,17 @@ public class WebApplication {
         }
     }
 
-    private static ServerConnector getConnector(Server server, TraceServerConfiguration config) {
+    /**
+     * Given a server instance and its preferred configuration, a properly
+     * configured ServerConnector for the Jetty server is returned.
+     *
+     * @param server
+     *            the server instance
+     * @param config
+     *            a class describing the desired server configuration
+     * @return a configured ServerConnector instance
+     */
+    protected static ServerConnector getConnector(Server server, TraceServerConfiguration config) {
         ServerConnector serverConnector = null;
         if (config.useSSL()) {
 
@@ -168,7 +178,13 @@ public class WebApplication {
         return serverConnector;
     }
 
-    private static JacksonJaxbJsonProvider registerCustomMappers() {
+    /**
+     * Creates a JSON content type provider configured with custom mappers for
+     * reading and writing JSON from/to custom classes.
+     *
+     * @return the JSON content type provider providing custom mappers.
+     */
+    protected static JacksonJaxbJsonProvider registerCustomMappers() {
         ObjectMapper mapper = new ObjectMapper();
 
         // create JsonProvider to provide custom ObjectMapper
