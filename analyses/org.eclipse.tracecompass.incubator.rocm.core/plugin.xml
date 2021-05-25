@@ -2,6 +2,32 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmMetadataAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.rocm.core.analysis.functionname"
+            name="ROCm Function Name Analysis">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.rocm.core.trace.RocmTrace">
+         </tracetype>
+      </module>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.analysis.counters.core.CounterAnalysis"
+            automatic="true"
+            icon="icons/runtime.gif"
+            id="org.eclipse.tracecompass.analysis.counters.core.counteranalysis"
+            name="Counters">
+            <tracetype
+               class="org.eclipse.tracecompass.incubator.rocm.core.trace.RocmTrace">
+            </tracetype>
+      </module>
+   </extension>
+   <extension
          point="org.eclipse.linuxtools.tmf.core.tracetype">
       <type
             category="org.eclipse.linuxtools.tmf.ctf.core.category.ctf"
@@ -9,20 +35,28 @@
             id="org.eclipse.tracecompass.incubator.rocm.core.trace"
             isDirectory="true"
             name="%trace.rocm"
-            trace_type="org.eclipse.tracecompass.incubator.rocm.core.trace.RocmCtfTrace">
+            trace_type="org.eclipse.tracecompass.incubator.rocm.core.trace.RocmTrace">
       </type>
    </extension>
-   <extension 
-   		point="org.eclipse.linuxtools.tmf.core.analysis">
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
-            analysis_module="org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmCtfCallStackAnalysis"
+            analysis_module="org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmCallStackAnalysis"
             automatic="true"
-            id="org.eclipse.tracecompass.incubator.rocm.core.analysis.callstack"
+            id="org.eclipse.tracecompass.incubator.rocm.core.analysis.interval"
             name="ROCm API Analysis">
          <tracetype
                applies="true"
-               class="org.eclipse.tracecompass.incubator.rocm.core.trace.RocmCtfTrace">
+               class="org.eclipse.tracecompass.incubator.rocm.core.trace.RocmTrace">
          </tracetype>
       </module>
+   </extension>
+      <extension
+         point="org.eclipse.tracecompass.tmf.core.symbolProvider">
+      <providerFactory
+            class="org.eclipse.tracecompass.incubator.rocm.core.trace.RocmTraceSymbolProviderFactory"
+            id="org.eclipse.tracecompass.incubator.rocm.core.trace.providerfactory"
+            priority="56">
+      </providerFactory>
    </extension>
 </plugin>

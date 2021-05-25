@@ -1,5 +1,5 @@
-/*******************************************************************************
- * Copyright (c) 2020 École Polytechnique de Montréal
+/**********************************************************************
+ * Copyright (c) 2022 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -7,45 +7,45 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *******************************************************************************/
-package org.eclipse.tracecompass.incubator.internal.rocm.core.analysis;
+ **********************************************************************/
 
+package org.eclipse.tracecompass.incubator.internal.rocm.core.analysis;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
-import org.eclipse.tracecompass.tmf.core.analysis.requirements.TmfAbstractAnalysisRequirement;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 
 import com.google.common.collect.ImmutableList;
 
 /**
- * ROCm API call stack analysis which displays the main view of the different APIs and GPU kernels
+ * This analysis is a callstack analysis which summarizes the execution of a
+ * ROCm GPU program.
+ *
+ * It separates the execution into 3 categories: the GPU, the memory transfers,
+ * and the system API calls. Furthermore, some dependencies were modeled using
+ * arrows to show the user how these abstract layers relate to each other.
  *
  * @author Arnaud Fiorini
  */
-public class RocmCtfCallStackAnalysis extends InstrumentedCallStackAnalysis {
+public class RocmCallStackAnalysis extends InstrumentedCallStackAnalysis {
     /**
      * Call stack analysis ID
      */
-    public static final @NonNull String ID = "org.eclipse.tracecompass.incubator.rocm.core.analysis.callstack"; //$NON-NLS-1$
+    public static final @NonNull String ID = "org.eclipse.tracecompass.incubator.rocm.core.analysis.interval"; //$NON-NLS-1$
 
     @Override
-    protected ITmfStateProvider createStateProvider() {
-        return new RocmCtfCallStackStateProvider(Objects.requireNonNull(getTrace()));
-    }
-
-    @Override
-    public Iterable<TmfAbstractAnalysisRequirement> getAnalysisRequirements() {
-        return Collections.emptyList();
+    protected @NonNull ITmfStateProvider createStateProvider() {
+        return new RocmCallStackStateProvider(Objects.requireNonNull(getTrace()));
     }
 
     @Override
