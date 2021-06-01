@@ -45,7 +45,9 @@ public class TimeGraphStateSerializer extends StdSerializer<@NonNull TimeGraphSt
         gen.writeStartObject();
         gen.writeNumberField("start", value.getStartTime()); //$NON-NLS-1$
         gen.writeNumberField("end", value.getStartTime() + value.getDuration()); //$NON-NLS-1$
-        gen.writeStringField("label", value.getLabel()); //$NON-NLS-1$
+        if (value.getLabel() != null) {
+            gen.writeStringField("label", value.getLabel()); //$NON-NLS-1$
+        }
         OutputElementStyle style = value.getStyle();
         if (style != null) {
             gen.writeObjectField("style", value.getStyle()); //$NON-NLS-1$
