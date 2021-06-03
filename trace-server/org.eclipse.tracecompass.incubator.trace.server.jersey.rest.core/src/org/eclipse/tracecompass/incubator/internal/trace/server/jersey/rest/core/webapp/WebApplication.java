@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Ericsson
+ * Copyright (c) 2017, 2021 Ericsson and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -34,6 +34,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.Annotation;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.VirtualTableCell;
 import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
@@ -207,6 +208,7 @@ public class WebApplication {
         module.addSerializer(TmfTreeDataModel.class, new TmfTreeModelSerializer());
         module.addSerializer(OutputElementStyle.class, new OutputElementStyleSerializer());
         module.addSerializer(IVirtualTableLine.class, new VirtualTableLineSerializer());
+        module.addSerializer(VirtualTableCell.class, new VirtualTableCellSerializer());
         module.addDeserializer(QueryParameters.class, new QueryParametersDeserializer());
         mapper.registerModule(module);
         return provider;
