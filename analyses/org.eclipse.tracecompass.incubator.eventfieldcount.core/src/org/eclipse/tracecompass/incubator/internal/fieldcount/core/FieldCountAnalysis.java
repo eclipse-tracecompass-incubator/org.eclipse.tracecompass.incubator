@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.fieldcount.core;
 
 import java.lang.reflect.Type;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IResource;
@@ -39,10 +41,12 @@ import org.eclipse.tracecompass.internal.provisional.analysis.lami.core.types.La
 import org.eclipse.tracecompass.internal.provisional.analysis.lami.core.types.LamiLongNumber;
 import org.eclipse.tracecompass.internal.provisional.analysis.lami.core.types.LamiTimeRange;
 import org.eclipse.tracecompass.internal.provisional.analysis.lami.core.types.LamiTimestamp;
+import org.eclipse.tracecompass.internal.tmf.core.filter.TmfFilterHelper;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
+import org.eclipse.tracecompass.tmf.core.filter.ITmfFilter;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
@@ -68,7 +72,7 @@ public class FieldCountAnalysis extends LamiAnalysis {
      * This is a simple way to remove unique elements. There should be a smarter
      * way to do this.
      */
-    private static final int MEMORY_SANITY_LIMIT = 10000;
+    private static final int MEMORY_SANITY_LIMIT = 40000;
 
     /**
      * Constructor
@@ -96,7 +100,7 @@ public class FieldCountAnalysis extends LamiAnalysis {
         List<LamiResultTable> results = new ArrayList<>();
         List<ITmfEventAspect<?>> aspects = new ArrayList<>();
         TmfTimeRange tr = timeRange == null ? TmfTimeRange.ETERNITY : timeRange;
-        Set<String> forbidden = TmfBaseAspects.getBaseAspects().stream().map(aspect -> aspect.getName()).collect(Collectors.toSet());
+        Set<String> forbidden = TmfBaseAspects.getBaseAspects().stream().map(ITmfEventAspect::getName).collect(Collectors.toSet());
         Iterable<ITmfEventAspect<?>> eventAspects = getTraceAspects(trace);
         for (ITmfEventAspect<?> aspect : eventAspects) {
             Type[] genericInterfaces = aspect.getClass().getGenericInterfaces();
@@ -107,7 +111,9 @@ public class FieldCountAnalysis extends LamiAnalysis {
                 }
             }
         }
-        SubMonitor mon = SubMonitor.convert(monitor, "Event Count Analysis", workRemaining(trace));
+        ITmfFilter filter = TmfFilterHelper.buildFilterFromRegex(Collections.singleton(extraParamsString), trace);
+        Predicate<ITmfEvent> filterPred = (event -> filter == null || filter.matches(event));
+        SubMonitor mon = SubMonitor.convert(monitor, "Event Count Analysis", workRemaining(trace)); //$NON-NLS-1$
         AtomicLong done = new AtomicLong();
         Map<String, Multiset<String>> eventAspectCounts = new HashMap<>();
 
@@ -117,19 +123,22 @@ public class FieldCountAnalysis extends LamiAnalysis {
                 if (monitor.isCanceled()) {
                     cancel();
                 }
-                for (ITmfEventAspect<?> aspect : aspects) {
-                    Object resolved = aspect.resolve(event);
-                    if (resolved != null) {
-                        Multiset<String> dataSet = eventAspectCounts.computeIfAbsent(aspect.getName(), unused -> HashMultiset.create());
-                        if (dataSet.size() < MEMORY_SANITY_LIMIT || dataSet.contains(resolved)) {
-                            dataSet.add(String.valueOf(resolved));
+                if (filterPred.test(event)) {
+                    for (ITmfEventAspect<?> aspect : aspects) {
+                        Object resolved = aspect.resolve(event);
+                        if (resolved != null) {
+                            Multiset<String> dataSet = eventAspectCounts.computeIfAbsent(aspect.getName(), unused -> HashMultiset.create());
+                            if (dataSet.size() < MEMORY_SANITY_LIMIT || dataSet.contains(resolved)) {
+                                dataSet.add(String.valueOf(resolved));
+                            }
                         }
                     }
                 }
                 if ((done.incrementAndGet() & MASK) == 0) {
                     mon.setWorkRemaining(workRemaining(trace));
                     mon.worked(1);
-                    monitor.setTaskName("Event Count Analysis (" + done.get() + ")");
+
+                    monitor.setTaskName("Event Count Analysis (" + NumberFormat.getInstance().format(done.get()) + " events read)");
                 }
             }
 
