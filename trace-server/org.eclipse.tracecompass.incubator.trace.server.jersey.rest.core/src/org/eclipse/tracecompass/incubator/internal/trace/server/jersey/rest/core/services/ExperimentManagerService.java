@@ -52,7 +52,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.TraceAnnotationProvider;
-import org.eclipse.tracecompass.internal.tmf.core.markers.LostEventsOutputAnnotationProviderFactory;
+import org.eclipse.tracecompass.internal.tmf.core.annotations.LostEventsOutputAnnotationProviderFactory;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
