@@ -12,11 +12,14 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,6 +45,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TableColumnHeader;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TreeModelWrapper;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.VirtualTableModelWrapper;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.Annotation;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationCategoriesModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.IOutputAnnotationProvider;
@@ -59,6 +63,7 @@ import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
@@ -484,6 +489,13 @@ public class DataProviderService {
                 model = AnnotationModel.of(model, annotations.getModel());
             }
 
+            @Nullable Set<@NonNull String> selectedCategories = DataProviderParameterUtils.extractSelectedCategories(queryParameters.getParameters());
+            if (selectedCategories != null && model != null) {
+                // Make sure that only requested annotations are returned
+                @NonNull Map<@NonNull String, @NonNull Collection<@NonNull Annotation>> allAnnotations = new LinkedHashMap<>(model.getAnnotations());
+                allAnnotations.keySet().removeIf(cat -> !selectedCategories.contains(cat));
+                model = new AnnotationModel(allAnnotations);
+            }
             if (isComplete) {
                 return Response.ok(new TmfModelResponse<>(model, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
             }

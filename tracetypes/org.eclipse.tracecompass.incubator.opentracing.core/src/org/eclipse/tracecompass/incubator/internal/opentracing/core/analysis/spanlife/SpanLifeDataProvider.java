@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -379,6 +380,12 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
         if (filter == null) {
             return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.INCORRECT_QUERY_PARAMETERS);
         }
+
+        @Nullable Set<@NonNull String> selectedCategories = DataProviderParameterUtils.extractSelectedCategories(fetchParameters);
+        if ((selectedCategories != null && !selectedCategories.contains(IOpenTracingConstants.LOGS))) {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        }
+
         Map<Long, Integer> entries = getSelectedEntries(filter);
         Collection<@NonNull Integer> quarks = entries.values();
         if (ss == null || quarks.isEmpty()) {
