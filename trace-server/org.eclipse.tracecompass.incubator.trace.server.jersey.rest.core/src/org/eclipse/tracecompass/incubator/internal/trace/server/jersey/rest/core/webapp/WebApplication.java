@@ -96,16 +96,7 @@ public class WebApplication {
         sch.setContextPath(CONTEXT_PATH);
 
         ResourceConfig rc = new ResourceConfig();
-
-        rc.register(TraceManagerService.class);
-        rc.register(ExperimentManagerService.class);
-        rc.register(DataProviderService.class);
-        rc.register(FilterService.class);
-        rc.register(HealthService.class);
-        rc.register(XmlManagerService.class);
-        rc.register(CORSFilter.class);
-        rc.register(registerCustomMappers());
-
+        registerResourcesAndMappers(rc);
         ServletContainer sc = new ServletContainer(rc);
         ServletHolder holder = new ServletHolder(sc);
         sch.addServlet(holder, PATH_SPEC);
@@ -143,6 +134,25 @@ public class WebApplication {
         if (fConfig.getPort() != TraceServerConfiguration.TEST_PORT) {
             fServer.join();
         }
+    }
+
+    /**
+     * Given a {@link ResourceConfig}, register resources (i.e. endpoints) and
+     * custom mappers (i.e. serializers) for this web application.
+     *
+     * @param rc
+     *            the {@link ResourceConfig} instance to be configured with
+     *            resources and mappers
+     */
+    protected void registerResourcesAndMappers(ResourceConfig rc) {
+        rc.register(TraceManagerService.class);
+        rc.register(ExperimentManagerService.class);
+        rc.register(DataProviderService.class);
+        rc.register(FilterService.class);
+        rc.register(HealthService.class);
+        rc.register(XmlManagerService.class);
+        rc.register(CORSFilter.class);
+        rc.register(registerCustomMappers());
     }
 
     /**

@@ -51,6 +51,16 @@ public class Application implements IApplication {
     private WebApplication fWebAppl;
     private Location fInstanceLoc = null;
 
+    /**
+     * Constructor with initialized {@link WebApplication}
+     *
+     * @param webApp
+     *            a {@link WebApplication} instance which will be started by
+     *            this Application
+     */
+    public Application(WebApplication webApp) {
+        fWebAppl = webApp;
+    }
 
     @Override
     public Object start(IApplicationContext context) throws Exception {
@@ -83,7 +93,9 @@ public class Application implements IApplication {
             return Integer.valueOf(exitCode.ordinal());
         }
 
-        fWebAppl = new WebApplication();
+        if (fWebAppl == null) {
+            fWebAppl = new WebApplication();
+        }
         try {
             fWebAppl.start();
         } catch (Exception e) {
