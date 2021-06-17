@@ -106,7 +106,8 @@ public class SWSLatencyAnalysis extends AbstractSegmentStoreAnalysisEventBasedMo
             final String eventName = event.getName();
 
             if (eventName.equals(layout.eventSchedProcessWakeup()) ||
-                    eventName.equals(layout.eventSchedProcessWakeupNew())) {
+                    eventName.equals(layout.eventSchedProcessWakeupNew()) ||
+                    eventName.equals(layout.eventSchedProcessWaking())) {
                 /* This is a sched_wakeup event */
                 Integer tid = event.getContent().getFieldValue(Integer.class, layout.fieldTid());
 
@@ -234,7 +235,6 @@ public class SWSLatencyAnalysis extends AbstractSegmentStoreAnalysisEventBasedMo
                     int res = Integer.compare(((SchedWS) segment1).getTid(), ((SchedWS) segment2).getTid());
                     return (res != 0 ? res : SegmentComparators.INTERVAL_START_COMPARATOR.thenComparing(SegmentComparators.INTERVAL_END_COMPARATOR).compare(segment1, segment2));
                 }
-
                 return 0;
             };
         }
