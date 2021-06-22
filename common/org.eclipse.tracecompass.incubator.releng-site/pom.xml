@@ -43,7 +43,7 @@
         <removeDefaultCategory>true</removeDefaultCategory>
         <skipWebContentGeneration>true</skipWebContentGeneration>
         <associateSites>
-           <site>https://download.eclipse.org/ease/release/0.7.0</site>
+           <site>https://download.eclipse.org/ease/release/0.8.0</site>
            <site>http://eclipse.py4j.org</site>
         </associateSites>
         <skipBuildInfo>true</skipBuildInfo>
