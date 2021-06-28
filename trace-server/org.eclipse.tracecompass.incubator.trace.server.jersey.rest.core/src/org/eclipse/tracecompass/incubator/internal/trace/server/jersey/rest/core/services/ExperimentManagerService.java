@@ -52,7 +52,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.TraceAnnotationProvider;
-import org.eclipse.tracecompass.internal.tmf.core.annotations.LostEventsOutputAnnotationProviderFactory;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
@@ -61,7 +60,6 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceAdapterManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 import com.google.common.collect.HashMultiset;
@@ -85,13 +83,6 @@ public class ExperimentManagerService {
     private static final String EXPERIMENTS_FOLDER = "Experiments"; //$NON-NLS-1$
     private static final String TRACES_FOLDER = "Traces"; //$NON-NLS-1$
     private static final String SUFFIX = "_exp"; //$NON-NLS-1$
-
-    private static final LostEventsOutputAnnotationProviderFactory fLostEventOutputAnnotationProviderFactory;
-    static {
-        fLostEventOutputAnnotationProviderFactory = new LostEventsOutputAnnotationProviderFactory();
-        TmfTraceAdapterManager.registerFactory(fLostEventOutputAnnotationProviderFactory, ITmfTrace.class);
-    }
-
 
     /**
      * Getter for the list of experiments from the trace manager
