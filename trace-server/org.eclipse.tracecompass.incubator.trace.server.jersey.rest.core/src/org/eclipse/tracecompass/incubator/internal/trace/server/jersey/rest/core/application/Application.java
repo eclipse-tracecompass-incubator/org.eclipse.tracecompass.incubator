@@ -48,8 +48,16 @@ public class Application implements IApplication {
         }
     }
 
-    private WebApplication fWebAppl;
+    private WebApplication fWebAppl = null;
     private Location fInstanceLoc = null;
+
+
+    /**
+     * Default constructor
+     */
+    public Application() {
+        // empty constructor
+    }
 
     /**
      * Constructor with initialized {@link WebApplication}
