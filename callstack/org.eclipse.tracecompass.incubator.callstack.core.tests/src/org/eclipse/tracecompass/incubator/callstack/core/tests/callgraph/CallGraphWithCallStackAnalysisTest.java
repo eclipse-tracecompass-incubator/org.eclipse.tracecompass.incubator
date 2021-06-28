@@ -37,6 +37,7 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.c
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -317,6 +318,7 @@ public class CallGraphWithCallStackAnalysisTest extends CallStackTestBase {
      * @throws TmfAnalysisException
      *             Propagates exceptions
      */
+    @Ignore
     @Test
     public void testCallGraphWithCpuTime() throws TmfAnalysisException {
         IHostModel model = ModelManager.getModelFor(getTrace().getHostId());
