@@ -1,0 +1,8 @@
+
+= System =
+
+Custom parsers for system or syslog logs.
+
+There are currently more than one single file in the OpenSSH(d) case, until they can be reconciled whenever applicable.
+
+This plugin is limited to those parsers made available under the resources folder, thus has no Trace Compass UI or real tests.

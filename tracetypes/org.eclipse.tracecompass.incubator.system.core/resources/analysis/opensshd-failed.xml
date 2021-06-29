@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *****************************************************************************
+ * Copyright (c) 2021 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *****************************************************************************
+-->
+<tmfxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../org.eclipse.tracecompass.tmf.analysis.xml.core/src/org/eclipse/tracecompass/tmf/analysis/xml/core/module/xmlDefinition.xsd">
+	<stateProvider version="0" id="ssh.failed.connections">
+		<head>
+			<traceType id="custom.txt.trace:Syslog:OpenSSHD" />
+			<label value="Failed connections" />
+		</head>
+		<eventHandler eventName="AUTH FAILURE">
+			<stateChange>
+				<stateAttribute type="eventField" value="UserID" />
+				<stateAttribute type="eventField" value="Message" />
+				<stateValue type="int" value="1" increment="true" />
+			</stateChange>
+			<stateChange>
+				<stateAttribute type="eventField" value="UserID" />
+				<stateValue type="int" value="1" increment="true" />
+			</stateChange>
+		</eventHandler>
+	</stateProvider>
+	<xyView id="failed.connections">
+		<head>
+			<analysis id="ssh.failed.connections" />
+			<label value="Failed Connections" />
+		</head>
+		<entry path="*" displayType="delta">
+			<display type="self" />
+		</entry>
+	</xyView>
+</tmfxml>

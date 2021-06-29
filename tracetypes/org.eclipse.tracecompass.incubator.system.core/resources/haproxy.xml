@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ *****************************************************************************
+ * Copyright (c) 2021 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *****************************************************************************
+-->
+<CustomTxtTraceDefinitionList>
+    <Definition category="Syslog" name="HAProxy">
+        <InputLine>
+            <Cardinality max="2147483647" min="0"/>
+            <RegEx>\S+\s\S+\s\S+\s(\S+)\s(\S+):\s(\S+)\s\[(\S+)\]\s(\S+)[\_\-]in(\S*)\s\S+[\_\-]out(\S+)\s(\S+)\s(\S+)\s(.*\S)</RegEx>
+            <InputData action="0" format="" name="selfIP" tag="OTHER"/>
+            <InputData action="0" format="" name="Source" tag="OTHER"/>
+            <InputData action="0" format="" name="IP" tag="OTHER"/>
+            <InputData action="0" format="dd/MMM/yyyy:hh:mm:ss.SSS" name="Timestamp" tag="TIMESTAMP"/>
+            <InputData action="0" format="" name="Event type" tag="EVENT_TYPE"/>
+            <InputData action="0" format="" name="srcPath" tag="OTHER"/>
+            <InputData action="0" format="" name="dstPath" tag="OTHER"/>
+            <InputData action="0" format="" name="Eh?" tag="OTHER"/>
+            <InputData action="0" format="" name="IDK" tag="OTHER"/>
+            <InputData action="0" format="" name="Message" tag="MESSAGE"/>
+        </InputLine>
+        <OutputColumn name="Source" tag="OTHER"/>
+        <OutputColumn name="Timestamp" tag="TIMESTAMP"/>
+        <OutputColumn name="srcPath" tag="OTHER"/>
+        <OutputColumn name="dstPath" tag="OTHER"/>
+        <OutputColumn name="Eh?" tag="OTHER"/>
+        <OutputColumn name="Message" tag="MESSAGE"/>
+        <OutputColumn name="selfIP" tag="OTHER"/>
+        <OutputColumn name="Event type" tag="EVENT_TYPE"/>
+        <OutputColumn name="IDK" tag="OTHER"/>
+        <OutputColumn name="IP" tag="OTHER"/>
+    </Definition>
+</CustomTxtTraceDefinitionList>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ *****************************************************************************
+ * Copyright (c) 2021 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *****************************************************************************
+-->
+<CustomTxtTraceDefinitionList>
+    <Definition category="Gerrit" name="ReplicationLog">
+        <TimeStampOutputFormat>yyyy-MM-dd HH:mm:ss.SSS</TimeStampOutputFormat>
+        <InputLine>
+            <Cardinality max="2147483647" min="0"/>
+            <RegEx>\s*\[(\d\d\d\d\-\d\d\-\d\d\s+\d\d\:\d\d\:\d\d\,\d\d\d)\]\s*\[([0-9a-fA-F]*)\]\s*(.*\S)</RegEx>
+            <InputData action="0" format="yyyy-MM-dd HH:mm:ss,SSS" name="Timestamp" tag="TIMESTAMP"/>
+            <InputData action="0" format="" name="ID" tag="OTHER"/>
+            <InputData action="0" format="" name="Message" tag="MESSAGE"/>
+        </InputLine>
+        <OutputColumn name="Timestamp" tag="TIMESTAMP"/>
+        <OutputColumn name="ID" tag="OTHER"/>
+        <OutputColumn name="Message" tag="MESSAGE"/>
+    </Definition>
+</CustomTxtTraceDefinitionList>

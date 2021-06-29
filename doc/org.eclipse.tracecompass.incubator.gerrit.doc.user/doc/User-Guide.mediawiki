@@ -1,0 +1,8 @@
+
+= Gerrit =
+
+Custom parsers for [https://www.gerritcodereview.com/ Gerrit Code Review] logs.
+
+RateLimiterStatsLog pertains to the non-Core Gerrit [https://gerrit.googlesource.com/plugins/rate-limiter rate-limiter plugin].
+
+This plugin is limited to those parsers made available under the resources folder, thus has no Trace Compass UI or real tests.

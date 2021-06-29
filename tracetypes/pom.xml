@@ -62,6 +62,12 @@
     <module>org.eclipse.tracecompass.incubator.otf2.core</module>
     <module>org.eclipse.tracecompass.incubator.otf2.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.otf2.ui</module>
+    <module>org.eclipse.tracecompass.incubator.gerrit</module>
+    <module>org.eclipse.tracecompass.incubator.gerrit.core</module>
+    <module>org.eclipse.tracecompass.incubator.gerrit.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.system</module>
+    <module>org.eclipse.tracecompass.incubator.system.core</module>
+    <module>org.eclipse.tracecompass.incubator.system.core.tests</module>
     <!-- insert modules here -->
   </modules>
 
