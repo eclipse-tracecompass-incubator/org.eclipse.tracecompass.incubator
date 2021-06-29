@@ -34,13 +34,13 @@ copyright = args.copyright
 baseDir = os.path.dirname(os.path.realpath(__file__))
 
 featurePluginStrPlaceholder = "<!-- insert plugins here -->"
-featurePluginStr = """ 
+featurePluginStr = """
    <plugin
          id="{%plugin}"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/> 
+         unpack="false"/>
 """
 
 pomModulePlaceholder = "<!-- insert modules here -->"
