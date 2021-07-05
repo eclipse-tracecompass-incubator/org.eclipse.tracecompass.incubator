@@ -86,6 +86,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.w3c.dom.Element;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
 /**
@@ -373,13 +374,16 @@ public class DataProviderService {
      *            desired experiment UUID
      * @param outputId
      *            Eclipse extension point ID for the data provider to query
+     * @param markerSetId
+     *            marker set ID
      * @return {@link TmfModelResponse} containing {@link AnnotationCategoriesModel}
      */
     @GET
     @Path("/{outputId}/annotations")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAnnotationCategories(@PathParam("expUUID") UUID expUUID,
-            @PathParam("outputId") String outputId) {
+            @PathParam("outputId") String outputId,
+            @QueryParam("markerSetId") String markerSetId) {
 
         if (outputId == null) {
             return Response.status(Status.PRECONDITION_FAILED).entity(MISSING_OUTPUTID).build();
@@ -403,8 +407,11 @@ public class DataProviderService {
             AnnotationCategoriesModel model = null;
             // Fetch trace annotation categories
             TraceAnnotationProvider traceAnnotationProvider = ExperimentManagerService.getTraceAnnotationProvider(expUUID);
-            @NonNull Map<@NonNull String, @NonNull Object> params = Collections.emptyMap();
             if (traceAnnotationProvider != null) {
+                // Parameter is only applicable for trace annotation provider
+                @NonNull Map<@NonNull String, @NonNull Object> params =
+                        (markerSetId == null) ? Collections.emptyMap() :
+                            ImmutableMap.of(DataProviderParameterUtils.REQUESTED_MARKER_SET_KEY, markerSetId);
                 TmfModelResponse<@NonNull AnnotationCategoriesModel> traceAnnotations = traceAnnotationProvider.fetchAnnotationCategories(params, null);
                 if (traceAnnotations.getStatus() == ITmfResponse.Status.CANCELLED || traceAnnotations.getStatus() == ITmfResponse.Status.FAILED) {
                     return Response.ok(new TmfModelResponse<>(new AnnotationCategoriesModel(Collections.emptyList()), traceAnnotations.getStatus(), traceAnnotations.getStatusMessage())).build();
@@ -414,7 +421,7 @@ public class DataProviderService {
             }
             // Fetch data provider annotation categories
             if (provider instanceof IOutputAnnotationProvider) {
-                TmfModelResponse<@NonNull AnnotationCategoriesModel> annotations = ((IOutputAnnotationProvider) provider).fetchAnnotationCategories(params, null);
+                TmfModelResponse<@NonNull AnnotationCategoriesModel> annotations = ((IOutputAnnotationProvider) provider).fetchAnnotationCategories(Collections.emptyMap(), null);
                 if (annotations.getStatus() == ITmfResponse.Status.CANCELLED || annotations.getStatus() == ITmfResponse.Status.FAILED) {
                     return Response.ok(new TmfModelResponse<>(new AnnotationCategoriesModel(Collections.emptyList()), annotations.getStatus(), annotations.getStatusMessage())).build();
                 }
