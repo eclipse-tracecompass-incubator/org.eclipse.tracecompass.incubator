@@ -57,6 +57,8 @@ import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlOutputE
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils.OutputType;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output.XmlDataProviderManager;
+import org.eclipse.tracecompass.internal.tmf.core.markers.MarkerConfigXmlParser;
+import org.eclipse.tracecompass.internal.tmf.core.markers.MarkerSet;
 import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
@@ -365,6 +367,28 @@ public class DataProviderService {
 
             TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(queryParameters.getParameters(), null);
             return Response.ok(response).build();
+        }
+    }
+
+    /**
+     * Query the provider for available marker sets
+     *
+     * @param expUUID
+     *            desired experiment UUID
+     * @return {@link TmfModelResponse} containing {@link AnnotationCategoriesModel}
+     */
+    @GET
+    @Path("/markerSets")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMarkerSets(@PathParam("expUUID") UUID expUUID) {
+
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getMarkerSets").build()) { //$NON-NLS-1$
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
+            List<MarkerSet> markerSets = MarkerConfigXmlParser.getMarkerSets();
+            return Response.ok(new TmfModelResponse<>(markerSets, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
         }
     }
 

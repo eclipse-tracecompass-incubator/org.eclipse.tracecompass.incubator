@@ -35,6 +35,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.Annotation;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.VirtualTableCell;
+import org.eclipse.tracecompass.internal.tmf.core.markers.MarkerSet;
 import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
@@ -219,6 +220,7 @@ public class WebApplication {
         module.addSerializer(OutputElementStyle.class, new OutputElementStyleSerializer());
         module.addSerializer(IVirtualTableLine.class, new VirtualTableLineSerializer());
         module.addSerializer(VirtualTableCell.class, new VirtualTableCellSerializer());
+        module.addSerializer(MarkerSet.class, new MarkerSetSerializer());
         module.addDeserializer(QueryParameters.class, new QueryParametersDeserializer());
         mapper.registerModule(module);
         return provider;
