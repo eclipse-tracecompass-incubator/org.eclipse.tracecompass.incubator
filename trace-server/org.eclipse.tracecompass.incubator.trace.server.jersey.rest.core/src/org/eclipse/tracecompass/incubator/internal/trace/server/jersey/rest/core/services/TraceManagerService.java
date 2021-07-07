@@ -21,7 +21,6 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -271,18 +270,19 @@ public class TraceManagerService {
             if (typeID == null) {
                 return null;
             }
-            TraceTypeHelper helper = TmfTraceType.getTraceType(typeID);
-            ITmfTrace trace = helper.getTraceClass().getDeclaredConstructor().newInstance();
-            String path = Objects.requireNonNull(ResourceUtil.getLocation(resource)).removeTrailingSeparator().toOSString();
-            String name = resource.getName();
-            trace.initTrace(resource, path, ITmfEvent.class, name, typeID);
-            trace.indexTrace(false);
-            // read first event to make sure start time is initialized
-            ITmfContext ctx = trace.seekEvent(0);
-            trace.getNext(ctx);
-            ctx.dispose();
+            ITmfTrace trace = TmfTraceType.instantiateTrace(typeID);
+            if (trace != null) {
+                String path = Objects.requireNonNull(ResourceUtil.getLocation(resource)).removeTrailingSeparator().toOSString();
+                String name = resource.getName();
+                trace.initTrace(resource, path, ITmfEvent.class, name, typeID);
+                trace.indexTrace(false);
+                // read first event to make sure start time is initialized
+                ITmfContext ctx = trace.seekEvent(0);
+                trace.getNext(ctx);
+                ctx.dispose();
+            }
             return trace;
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | CoreException | TmfTraceException e) {
+        } catch (CoreException | TmfTraceException e) {
             Activator.getInstance().logError("Failed to create trace instance for " + uuid, e); //$NON-NLS-1$
             return null;
         }
