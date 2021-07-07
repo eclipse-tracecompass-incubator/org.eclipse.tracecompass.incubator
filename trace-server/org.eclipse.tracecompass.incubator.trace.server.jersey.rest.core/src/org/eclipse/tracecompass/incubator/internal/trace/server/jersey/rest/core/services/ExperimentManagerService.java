@@ -428,7 +428,7 @@ public class ExperimentManagerService {
      *            queried {@link UUID}
      * @return the experiment or null if none match.
      */
-    public static @Nullable TmfExperiment getExperimentByUUID(UUID expUUID) {
+    public static synchronized @Nullable TmfExperiment getExperimentByUUID(UUID expUUID) {
         TmfExperiment experiment = EXPERIMENTS.get(expUUID);
         if (experiment == null) {
             experiment = createExperimentInstance(expUUID);
