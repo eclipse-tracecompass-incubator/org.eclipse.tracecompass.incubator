@@ -21,6 +21,9 @@ import java.util.TreeMap;
 
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.AbstractOtf2StateProvider;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Constants;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Events;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Fields;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2GlobalDefinitions;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.CollectiveOperationIdentifiers;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.MessageIdentifiers;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
@@ -85,7 +88,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
         public void enter(ITmfEvent event) {
             ITmfEventField content = event.getContent();
             fLatestEnteredTimestamp = event.getTimestamp().toNanos();
-            Integer regionId = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_REGION_REFERENCE);
+            Integer regionId = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_REGION);
             if (regionId == null) {
                 return;
             }
@@ -121,8 +124,8 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
              */
             ITmfEventField content = srcEvent.getContent();
             Integer srcRank = getRank(fId, communicator.fId);
-            Integer destRank = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_RECEIVER);
-            Integer messageTag = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_MESSAGE_TAG);
+            Integer destRank = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_RECEIVER);
+            Integer messageTag = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_MESSAGE_TAG);
             if (destRank == null || messageTag == null || srcRank == UNKNOWN_RANK) {
                 return;
             }
@@ -139,8 +142,8 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
         public void mpiRecv(ITmfEvent srcEvent, Communicator communicator, boolean isBlocking) {
             ITmfEventField content = srcEvent.getContent();
             Integer destRank = getRank(fId, communicator.fId);
-            Integer srcRank = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_SENDER);
-            Integer messageTag = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_MESSAGE_TAG);
+            Integer srcRank = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_SENDER);
+            Integer messageTag = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_MESSAGE_TAG);
             if (srcRank == null || messageTag == null || destRank == UNKNOWN_RANK) {
                 return;
             }
@@ -161,7 +164,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
              * The associated send begin timestamp must be retrieved
              */
             if (!isBlocking) {
-                Long requestId = content.getFieldValue(Long.class, IOtf2Constants.OTF2_REQUEST_ID);
+                Long requestId = content.getFieldValue(Long.class, IOtf2Fields.OTF2_REQUEST_ID);
                 if (requestId == null) {
                     return;
                 }
@@ -194,11 +197,11 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
          */
         private void mpiCollective(ITmfEvent event, Communicator communicator) {
             ITmfEventField content = event.getContent();
-            Integer operationCode = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_COLLECTIVE_OPERATION);
+            Integer operationCode = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_COLLECTIVE_OPERATION);
             if (operationCode == null) {
                 return;
             }
-            Integer root = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_ROOT);
+            Integer root = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_ROOT);
             if (root == null) {
                 return;
             }
@@ -371,38 +374,38 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
     @Override
     protected void processGlobalDefinition(ITmfEvent event, String name) {
         switch (name) {
-        case IOtf2Constants.OTF2_STRING: {
+        case IOtf2GlobalDefinitions.OTF2_STRING: {
             processStringDefinition(event);
             break;
         }
-        case IOtf2Constants.OTF2_REGION: {
+        case IOtf2GlobalDefinitions.OTF2_REGION: {
             processRegionDefinition(event);
             break;
         }
-        case IOtf2Constants.OTF2_LOCATION: {
+        case IOtf2GlobalDefinitions.OTF2_LOCATION: {
             ITmfEventField content = event.getContent();
-            Long locationReference = content.getFieldValue(Long.class, IOtf2Constants.OTF2_LOCATION_REFERENCE);
+            Long locationReference = content.getFieldValue(Long.class, IOtf2Fields.OTF2_SELF);
             if (locationReference == null) {
                 return;
             }
             fMapLocation.put(locationReference, new Location(locationReference));
             break;
         }
-        case IOtf2Constants.OTF2_COMM: {
+        case IOtf2GlobalDefinitions.OTF2_COMM: {
             processCommunicatorDefinition(event);
             ITmfEventField content = event.getContent();
-            Integer communicatorReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_COMMUNICATOR_REFERENCE);
+            Integer communicatorReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_SELF);
             if (communicatorReference == null) {
                 return;
             }
             fMapCommunicator.put(communicatorReference, new Communicator(communicatorReference));
             break;
         }
-        case IOtf2Constants.OTF2_GROUP: {
+        case IOtf2GlobalDefinitions.OTF2_GROUP: {
             processGroupDefinition(event);
             break;
         }
-        case IOtf2Constants.OTF2_GROUP_MEMBER: {
+        case IOtf2GlobalDefinitions.OTF2_GROUP_MEMBER: {
             processGroupMemberDefinition(event);
             break;
         }
@@ -419,23 +422,23 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             return;
         }
         switch (name) {
-        case IOtf2Constants.OTF2_ENTER: {
+        case IOtf2Events.OTF2_ENTER: {
             location.enter(event);
             break;
         }
-        case IOtf2Constants.OTF2_LEAVE: {
+        case IOtf2Events.OTF2_LEAVE: {
             if (location.fInCommunication) {
                 location.leaveMpiCommunication(event, ssb);
             }
             break;
         }
-        case IOtf2Constants.OTF2_MPI_SEND:
-        case IOtf2Constants.OTF2_MPI_ISEND:
-        case IOtf2Constants.OTF2_MPI_RECV:
-        case IOtf2Constants.OTF2_MPI_IRECV:
-        case IOtf2Constants.OTF2_MPI_COLLECTIVE_END: {
+        case IOtf2Events.OTF2_MPI_SEND:
+        case IOtf2Events.OTF2_MPI_ISEND:
+        case IOtf2Events.OTF2_MPI_RECV:
+        case IOtf2Events.OTF2_MPI_IRECV:
+        case IOtf2Events.OTF2_MPI_COLLECTIVE_END: {
             ITmfEventField content = event.getContent();
-            Integer communicatorId = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_COMMUNICATOR);
+            Integer communicatorId = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_COMMUNICATOR);
             Communicator communicator = fMapCommunicator.get(communicatorId);
             if (communicator == null) {
                 return;
@@ -475,20 +478,20 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             communicator.initialize(ssb);
         }
         switch (name) {
-        case IOtf2Constants.OTF2_MPI_SEND:
-        case IOtf2Constants.OTF2_MPI_ISEND: {
+        case IOtf2Events.OTF2_MPI_SEND:
+        case IOtf2Events.OTF2_MPI_ISEND: {
             location.mpiSend(event, communicator);
             break;
         }
-        case IOtf2Constants.OTF2_MPI_RECV: {
+        case IOtf2Events.OTF2_MPI_RECV: {
             location.mpiRecv(event, communicator, true);
             break;
         }
-        case IOtf2Constants.OTF2_MPI_IRECV: {
+        case IOtf2Events.OTF2_MPI_IRECV: {
             location.mpiRecv(event, communicator, false);
             break;
         }
-        case IOtf2Constants.OTF2_MPI_COLLECTIVE_END: {
+        case IOtf2Events.OTF2_MPI_COLLECTIVE_END: {
             location.mpiCollective(event, communicator);
             break;
         }
