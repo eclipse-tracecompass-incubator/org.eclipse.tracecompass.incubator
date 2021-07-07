@@ -166,8 +166,8 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
      */
     protected void processStringDefinition(ITmfEvent event) {
         ITmfEventField content = event.getContent();
-        Integer stringReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_STRING_REFERENCE);
-        String stringValue = content.getFieldValue(String.class, IOtf2Constants.OTF2_STRING_VALUE);
+        Integer stringReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_SELF);
+        String stringValue = content.getFieldValue(String.class, IOtf2Fields.OTF2_STRING_VALUE);
         if (stringReference == null || stringValue == null) {
             return;
         }
@@ -183,8 +183,8 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
      */
     protected void processRegionDefinition(ITmfEvent event) {
         ITmfEventField content = event.getContent();
-        Integer regionReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_REGION_REFERENCE);
-        Integer stringReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_NAME);
+        Integer regionReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_SELF);
+        Integer stringReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_NAME);
         if (regionReference == null || stringReference == null) {
             return;
         }
@@ -200,8 +200,8 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
      */
     protected void processCommunicatorDefinition(ITmfEvent event) {
         ITmfEventField content = event.getContent();
-        Integer communicatorReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_COMMUNICATOR_REFERENCE);
-        Integer groupReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_GROUP_REFERENCE);
+        Integer communicatorReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_SELF);
+        Integer groupReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_GROUP);
         if (communicatorReference == null || groupReference == null) {
             return;
         }
@@ -217,8 +217,8 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
      */
     protected void processGroupDefinition(ITmfEvent event) {
         ITmfEventField content = event.getContent();
-        Integer groupReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_GROUP_REFERENCE);
-        Integer numberOfMembers = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_NUMBER_OF_MEMBERS);
+        Integer groupReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_SELF);
+        Integer numberOfMembers = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_NUMBER_OF_MEMBERS);
         if (groupReference == null || numberOfMembers == null) {
             return;
         }
@@ -242,9 +242,9 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
      */
     protected void processGroupMemberDefinition(ITmfEvent event) {
         ITmfEventField content = event.getContent();
-        Integer groupReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_GROUP_REFERENCE);
-        Integer rank = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_RANK);
-        Long locationReference = content.getFieldValue(Long.class, IOtf2Constants.OTF2_LOCATION_REFERENCE);
+        Integer groupReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_GROUP);
+        Integer rank = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_RANK);
+        Long locationReference = content.getFieldValue(Long.class, IOtf2Fields.OTF2_LOCATION);
         if (groupReference == null || rank == null || locationReference == null) {
             return;
         }
@@ -290,7 +290,7 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
      */
     protected static long getLocationId(ITmfEvent event) {
         ITmfEventField content = event.getContent();
-        Long locationId = content.getFieldValue(Long.class, IOtf2Constants.OTF2_LOCATION_REFERENCE);
+        Long locationId = content.getFieldValue(Long.class, IOtf2Fields.OTF2_LOCATION_ID);
         return (locationId != null) ? locationId : UNKNOWN_LOCATION_ID;
     }
 

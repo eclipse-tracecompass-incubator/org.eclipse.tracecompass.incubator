@@ -30,6 +30,9 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Constants;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Events;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Fields;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2GlobalDefinitions;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.AllToRootIdentifiers;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.MessageIdentifiers;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.RootToAllIdentifiers;
@@ -100,7 +103,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
             ITmfEventField content = event.getContent();
             long timestamp = event.getTimestamp().toNanos();
             ssb.updateOngoingState(TmfStateValue.newValueLong(fLocationId), fLocationQuark);
-            Integer regionRef = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_REGION_REFERENCE);
+            Integer regionRef = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_REGION);
             if (regionRef == null) {
                 ssb.modifyAttribute(timestamp, null, fCallStackQuark);
                 return;
@@ -123,13 +126,13 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
          */
         public void mpiSend(ITmfEvent srcEvent) {
             ITmfEventField content = srcEvent.getContent();
-            Integer communicator = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_COMMUNICATOR);
+            Integer communicator = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_COMMUNICATOR);
             if (communicator == null) {
                 return;
             }
             Integer srcRank = getRank(fLocationId, communicator);
-            Integer destRank = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_RECEIVER);
-            Integer messageTag = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_MESSAGE_TAG);
+            Integer destRank = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_RECEIVER);
+            Integer messageTag = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_MESSAGE_TAG);
             if (destRank == null || messageTag == null || srcRank == UNKNOWN_RANK) {
                 return;
             }
@@ -145,13 +148,13 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
          */
         public void mpiRecv(ITmfEvent destEvent, ITmfStateSystemBuilder ssb) {
             ITmfEventField content = destEvent.getContent();
-            Integer communicator = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_COMMUNICATOR);
+            Integer communicator = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_COMMUNICATOR);
             if (communicator == null) {
                 return;
             }
-            Integer srcRank = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_SENDER);
+            Integer srcRank = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_SENDER);
             Integer destRank = getRank(fLocationId, communicator);
-            Integer messageTag = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_MESSAGE_TAG);
+            Integer messageTag = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_MESSAGE_TAG);
             if (srcRank == null || messageTag == null || destRank == UNKNOWN_RANK) {
                 return;
             }
@@ -179,9 +182,9 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
         public void mpiRootToAll(ITmfEvent destEvent, ITmfStateSystemBuilder ssb) {
             ITmfEventField content = destEvent.getContent();
             // Get the informations about the communication from the event
-            Integer root = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_ROOT);
-            Integer communicator = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_COMMUNICATOR);
-            Integer operationCode = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_COLLECTIVE_OPERATION);
+            Integer root = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_ROOT);
+            Integer communicator = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_COMMUNICATOR);
+            Integer operationCode = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_COLLECTIVE_OPERATION);
             if (root == null || communicator == null || operationCode == null) {
                 return;
             }
@@ -241,9 +244,9 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
         public void mpiAllToRoot(ITmfEvent srcEvent, ITmfStateSystemBuilder ssb) {
             ITmfEventField content = srcEvent.getContent();
             // Gets the informations about the communication from the event
-            Integer root = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_ROOT);
-            Integer communicator = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_COMMUNICATOR);
-            Integer operationCode = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_COLLECTIVE_OPERATION);
+            Integer root = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_ROOT);
+            Integer communicator = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_COMMUNICATOR);
+            Integer operationCode = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_COLLECTIVE_OPERATION);
             if (root == null || communicator == null || operationCode == null) {
                 return;
             }
@@ -330,31 +333,31 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
     @Override
     protected void processGlobalDefinition(ITmfEvent event, String name) {
         switch (name) {
-        case IOtf2Constants.OTF2_STRING: {
+        case IOtf2GlobalDefinitions.OTF2_STRING: {
             processStringDefinition(event);
             break;
         }
-        case IOtf2Constants.OTF2_REGION: {
+        case IOtf2GlobalDefinitions.OTF2_REGION: {
             processRegionDefinition(event);
             break;
         }
-        case IOtf2Constants.OTF2_LOCATION: {
+        case IOtf2GlobalDefinitions.OTF2_LOCATION: {
             processLocationDefinition(event);
             break;
         }
-        case IOtf2Constants.OTF2_LOCATION_GROUP: {
+        case IOtf2GlobalDefinitions.OTF2_LOCATION_GROUP: {
             processLocationGroupDefinition(event);
             break;
         }
-        case IOtf2Constants.OTF2_COMM: {
+        case IOtf2GlobalDefinitions.OTF2_COMM: {
             processCommunicatorDefinition(event);
             break;
         }
-        case IOtf2Constants.OTF2_GROUP: {
+        case IOtf2GlobalDefinitions.OTF2_GROUP: {
             processGroupDefinition(event);
             break;
         }
-        case IOtf2Constants.OTF2_GROUP_MEMBER: {
+        case IOtf2GlobalDefinitions.OTF2_GROUP_MEMBER: {
             processGroupMemberDefinition(event);
             break;
         }
@@ -365,9 +368,9 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
 
     private void processLocationDefinition(ITmfEvent event) {
         ITmfEventField content = event.getContent();
-        Long locationReference = content.getFieldValue(Long.class, IOtf2Constants.OTF2_LOCATION_REFERENCE);
-        Integer locationGroupReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_LOCATION_GROUP_REFERENCE);
-        Integer stringReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_NAME);
+        Long locationReference = content.getFieldValue(Long.class, IOtf2Fields.OTF2_SELF);
+        Integer locationGroupReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_LOCATION_GROUP);
+        Integer stringReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_NAME);
         if (locationReference == null || locationGroupReference == null || stringReference == null) {
             return;
         }
@@ -376,8 +379,8 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
 
     private void processLocationGroupDefinition(ITmfEvent event) {
         ITmfEventField content = event.getContent();
-        Integer locationGroupReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_LOCATION_GROUP_REFERENCE);
-        Integer stringReference = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_NAME);
+        Integer locationGroupReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_SELF);
+        Integer stringReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_NAME);
         if (locationGroupReference == null || stringReference == null) {
             return;
         }
@@ -403,29 +406,29 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
         }
 
         switch (name) {
-        case IOtf2Constants.OTF2_ENTER: {
+        case IOtf2Events.OTF2_ENTER: {
             location.enter(event, ssb);
             break;
         }
-        case IOtf2Constants.OTF2_LEAVE: {
+        case IOtf2Events.OTF2_LEAVE: {
             location.leave(event, ssb);
             break;
         }
-        case IOtf2Constants.OTF2_MPI_SEND:
-        case IOtf2Constants.OTF2_MPI_ISEND: {
+        case IOtf2Events.OTF2_MPI_SEND:
+        case IOtf2Events.OTF2_MPI_ISEND: {
             location.mpiSend(event);
             break;
         }
-        case IOtf2Constants.OTF2_MPI_RECV:
-        case IOtf2Constants.OTF2_MPI_IRECV: {
+        case IOtf2Events.OTF2_MPI_RECV:
+        case IOtf2Events.OTF2_MPI_IRECV: {
             location.mpiRecv(event, ssb);
             break;
         }
-        case IOtf2Constants.OTF2_MPI_COLLECTIVE_BEGIN: {
+        case IOtf2Events.OTF2_MPI_COLLECTIVE_BEGIN: {
             location.mpiCollectiveBegin(event);
             break;
         }
-        case IOtf2Constants.OTF2_MPI_COLLECTIVE_END: {
+        case IOtf2Events.OTF2_MPI_COLLECTIVE_END: {
             processMpiCollectiveEnd(event, ssb, location);
             break;
         }
@@ -466,7 +469,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
      */
     private static void processMpiCollectiveEnd(ITmfEvent event, ITmfStateSystemBuilder ssb, Location location) {
         ITmfEventField content = event.getContent();
-        Integer operationCode = content.getFieldValue(Integer.class, IOtf2Constants.OTF2_COLLECTIVE_OPERATION);
+        Integer operationCode = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_COLLECTIVE_OPERATION);
         if (operationCode == null) {
             return;
         }
