@@ -14,8 +14,8 @@ package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variab
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend.StateMachineBackendAnalysis;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.Operator;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraint;
@@ -37,8 +37,8 @@ import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variabl
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils.InterruptionReason;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils.ResponsibilityMap;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance;
-import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineReport;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance.InstanceStepInformation;
+import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineReport;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineUtils.TimestampInterval;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -169,8 +169,8 @@ public abstract class StateMachineVariableCounter extends StateMachineVariable {
     public InterruptionEventRunner getInterruptionEventRunner() {
         return new DefaultInterruptionEventRunner(
                 this,
-                NonNullUtils.checkNotNull(getCounterAttribute()),
-                NonNullUtils.checkNotNull(getInterruptionEventGetter()),
+                Objects.requireNonNull(getCounterAttribute()),
+                Objects.requireNonNull(getInterruptionEventGetter()),
                 new ResponsibilityMapGetter<InterruptionReason>() {
                     @Override
                     public ResponsibilityMap<InterruptionReason> execute(InterruptionIntervalSetDiff iisd) {

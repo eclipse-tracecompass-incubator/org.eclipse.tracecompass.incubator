@@ -14,7 +14,6 @@
 
 package org.eclipse.tracecompass.incubator.callstack.core.tests.lttng2.ust.callstack;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -23,9 +22,11 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.internal.lttng2.ust.core.callstack.LttngUstCallStackProvider;
 import org.eclipse.tracecompass.lttng2.ust.core.trace.LttngUstTrace;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
@@ -35,7 +36,6 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedE
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
-import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
@@ -310,7 +310,7 @@ public abstract class AbstractProviderTest {
 
         @Override
         protected ITmfStateProvider createStateProvider() {
-            return new LttngUstCallStackProvider(checkNotNull(getTrace()));
+            return new LttngUstCallStackProvider(Objects.requireNonNull(getTrace()));
         }
     }
 }

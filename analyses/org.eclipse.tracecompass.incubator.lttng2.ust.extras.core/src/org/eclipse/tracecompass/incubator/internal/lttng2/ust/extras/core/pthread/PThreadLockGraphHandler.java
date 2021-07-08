@@ -13,6 +13,7 @@ package org.eclipse.tracecompass.incubator.internal.lttng2.ust.extras.core.pthre
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -27,7 +28,6 @@ import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsExecuti
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsWorker;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.ProcessStatus;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
@@ -140,7 +140,7 @@ public class PThreadLockGraphHandler extends AbstractTraceEventHandler {
         LastLockOwner lastOwner = fLastLockOwner.get(fieldValue);
         if (lastOwner != null && lastOwner.fTid != tid && lastOwner.fVertex.getTs() > lastReqVertex.getTs()) {
             // This thread has been blocked, add the proper vertices and links
-            TmfGraph graph = NonNullUtils.checkNotNull(fProvider.getAssignedGraph());
+            TmfGraph graph = Objects.requireNonNull(fProvider.getAssignedGraph());
             // First add a vertex at the time of lock request
             graph.append(worker, lastReqVertex, EdgeType.RUNNING);
             // Then add the blocked transition for the current worker
@@ -179,7 +179,7 @@ public class PThreadLockGraphHandler extends AbstractTraceEventHandler {
         OsWorker worker = getOrCreateKernelWorker(event, tid);
         // Set the previous state to running for the worker and add a vertex at this
         // event, so it can be used by any thread that was blocked
-        TmfGraph graph = NonNullUtils.checkNotNull(fProvider.getAssignedGraph());
+        TmfGraph graph = Objects.requireNonNull(fProvider.getAssignedGraph());
         TmfVertex vertex = new TmfVertex(event.getTimestamp().toNanos());
         graph.append(worker, vertex, EdgeType.RUNNING);
         fLastLockOwner.put(fieldValue, new LastLockOwner(tid, vertex));

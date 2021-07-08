@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -61,7 +62,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.StateMachineVariable;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineUtils.TimestampInterval;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
@@ -344,7 +344,7 @@ public class ManageXaFParametersDialog extends Dialog {
 
         // Load parameters
         boolean modelProvided = Boolean.parseBoolean(properties.getProperty(XaFParameterProvider.PROPERTY_MODEL_PROVIDED, Boolean.TRUE.toString()));
-        String defaultModelLocation = (getDefaultModelFile() == null) ? StringUtils.EMPTY : NonNullUtils.checkNotNull(getDefaultModelFile()).getPath();
+        String defaultModelLocation = (getDefaultModelFile() == null) ? StringUtils.EMPTY : Objects.requireNonNull(getDefaultModelFile()).getPath();
         String modelLocation = properties.getProperty(XaFParameterProvider.PROPERTY_MODEL_LOCATION, defaultModelLocation);
 
         Set<String> selectedVariables;

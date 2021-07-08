@@ -187,9 +187,9 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
     // AggregatedCalledFunction secondNode) {
     // for (Map.Entry<Object, AggregatedCalledFunction> FunctionEntry :
     // secondNode.fChildren.entrySet()) {
-    // Object childSymbol = NonNullUtils.checkNotNull(FunctionEntry.getKey());
+    // Object childSymbol = Objects.requireNonNull(FunctionEntry.getKey());
     // AggregatedCalledFunction secondNodeChild =
-    // NonNullUtils.checkNotNull(FunctionEntry.getValue());
+    // Objects.requireNonNull(FunctionEntry.getValue());
     // AggregatedCalledFunction aggregatedCalledFunction =
     // firstNode.fChildren.get(childSymbol);
     // if (aggregatedCalledFunction == null) {

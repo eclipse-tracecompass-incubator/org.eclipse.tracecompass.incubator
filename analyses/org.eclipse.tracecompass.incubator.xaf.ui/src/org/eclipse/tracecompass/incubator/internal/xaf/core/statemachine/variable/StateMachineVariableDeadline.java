@@ -14,10 +14,10 @@ package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variab
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend.Attributes;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend.BackendStateValue;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraint;
@@ -37,9 +37,9 @@ import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variabl
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils.ResponsibilityMap;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils.State;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance;
+import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance.InstanceStepInformation;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineReport;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineUtils;
-import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance.InstanceStepInformation;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineUtils.TimestampInterval;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -181,7 +181,7 @@ public class StateMachineVariableDeadline extends StateMachineVariable {
         StateMachineReport.R.inc();
 
         try {
-            DefaultInterruptionEventRunner dier = new DefaultInterruptionEventRunner(this, NonNullUtils.checkNotNull(Attributes.STATE), new StateInterruptionEventGetter());
+            DefaultInterruptionEventRunner dier = new DefaultInterruptionEventRunner(this, Objects.requireNonNull(Attributes.STATE), new StateInterruptionEventGetter());
             smva.doAnalysis(dier);
         } catch (StateMachineNoValidCaseException | StateMachineNoInvalidCaseException e) {
             e.printStackTrace();
@@ -234,7 +234,7 @@ public class StateMachineVariableDeadline extends StateMachineVariable {
             StateMachineReport.R.inc();
 
             if (entry.getKey() instanceof State) {
-                BackendStateValue val = NonNullUtils.checkNotNull(((State) entry.getKey()).getValue());
+                BackendStateValue val = Objects.requireNonNull(((State) entry.getKey()).getValue());
                 switch (val) {
                 case UNKNOWN:
                     StateMachineReport.R.println("Now we can't do a thorough analysis, can we?"); //$NON-NLS-1$
@@ -340,8 +340,8 @@ public class StateMachineVariableDeadline extends StateMachineVariable {
 
                 ITmfEventField content = e.getContent();
                 data = String.format("%s (%s)", //$NON-NLS-1$
-                        NonNullUtils.checkNotNull(content.getField(layout.fieldNextComm())).getFormattedValue(),
-                        NonNullUtils.checkNotNull(content.getField(layout.fieldNextTid())).getFormattedValue());
+                        Objects.requireNonNull(content.getField(layout.fieldNextComm())).getFormattedValue(),
+                        Objects.requireNonNull(content.getField(layout.fieldNextTid())).getFormattedValue());
             } else if (s == BackendStateValue.IRQ) {
                 IKernelAnalysisEventLayout layout = ((IKernelTrace) e.getTrace()).getKernelEventLayout();
                 if (!e.getName().equals(layout.eventIrqHandlerEntry())) {

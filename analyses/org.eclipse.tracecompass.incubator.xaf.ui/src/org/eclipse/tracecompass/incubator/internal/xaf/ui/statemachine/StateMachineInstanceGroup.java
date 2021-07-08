@@ -18,11 +18,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsExecutionGraph;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend.StateMachineBackendAnalysis;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraint;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraintAdaptive;
@@ -280,7 +280,7 @@ public class StateMachineInstanceGroup {
         // Using the event TID, we can reduce the number of instances we have to watch
         List<StateMachineInstance> instances = null;
         if (eventTid != null && instancesPerTid.containsKey(eventTid)) {
-            instances = NonNullUtils.checkNotNull(instancesPerTid.get(eventTid));
+            instances = Objects.requireNonNull(instancesPerTid.get(eventTid));
         } else {
             instances = openInstancesList;
         }
@@ -293,7 +293,7 @@ public class StateMachineInstanceGroup {
             if(hasBeenUsed) {
                 if (!instance.hasNextNode()) {
                     if (eventTid != null && instancesPerTid.containsKey(eventTid)) {
-                        NonNullUtils.checkNotNull(instancesPerTid.get(eventTid)).remove(instance);
+                        Objects.requireNonNull(instancesPerTid.get(eventTid)).remove(instance);
                     }
                     openInstancesList.remove(instance);
                 }
@@ -324,7 +324,7 @@ public class StateMachineInstanceGroup {
                                     instancesPerTid.put(eventTid, new ArrayList<StateMachineInstance>());
                                 }
 
-                                NonNullUtils.checkNotNull(instancesPerTid.get(eventTid)).add(smi);
+                                Objects.requireNonNull(instancesPerTid.get(eventTid)).add(smi);
                             }
                         }
 

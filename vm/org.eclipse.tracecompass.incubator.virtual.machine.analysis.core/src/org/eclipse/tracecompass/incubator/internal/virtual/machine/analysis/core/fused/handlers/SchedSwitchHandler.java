@@ -11,9 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.handlers;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
@@ -65,8 +64,8 @@ public class SchedSwitchHandler extends VMKernelEventHandler {
 
         ITmfEventField content = event.getContent();
         Integer prevTid = ((Long) content.getField(getLayout().fieldPrevTid()).getValue()).intValue();
-        Long prevState = checkNotNull((Long) content.getField(getLayout().fieldPrevState()).getValue());
-        String nextProcessName = checkNotNull((String) content.getField(getLayout().fieldNextComm()).getValue());
+        Long prevState = Objects.requireNonNull((Long) content.getField(getLayout().fieldPrevState()).getValue());
+        String nextProcessName = Objects.requireNonNull((String) content.getField(getLayout().fieldNextComm()).getValue());
         Integer nextTid = ((Long) content.getField(getLayout().fieldNextTid()).getValue()).intValue();
         Integer nextPrio = ((Long) content.getField(getLayout().fieldNextPrio()).getValue()).intValue();
         String machineHost = event.getTrace().getHostId();

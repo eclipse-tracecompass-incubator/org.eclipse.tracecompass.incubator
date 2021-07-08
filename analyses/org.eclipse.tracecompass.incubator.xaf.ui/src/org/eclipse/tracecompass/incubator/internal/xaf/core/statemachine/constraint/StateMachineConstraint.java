@@ -13,8 +13,8 @@ package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constr
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.exception.StateMachineVariableException;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.StateMachineVariable;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance;
@@ -70,7 +70,7 @@ public class StateMachineConstraint {
      */
     public Class<?> getVarClass() {
         String varType = getVarName().split("/", 2)[0]; //$NON-NLS-1$
-        return NonNullUtils.checkNotNull(StateMachineVariable.VARIABLE_TYPES.get(varType));
+        return Objects.requireNonNull(StateMachineVariable.VARIABLE_TYPES.get(varType));
     }
 
     /**

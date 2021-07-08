@@ -11,9 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.analysis.nodes;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Collection;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.tracecompass.incubator.internal.ros.core.trace.layout.IRosEventLayout;
@@ -45,19 +44,19 @@ public class RosNodesAnalysisRequirement extends TmfCompositeAnalysisRequirement
     private static Collection<TmfAbstractAnalysisRequirement> getSubRequirements(IRosEventLayout layout) {
         // Requirement on init_node event
         TmfAnalysisEventRequirement initEventReq = new TmfAnalysisEventRequirement(
-                ImmutableSet.of(checkNotNull(layout.eventInitNode())),
+                ImmutableSet.of(Objects.requireNonNull(layout.eventInitNode())),
                 PriorityLevel.MANDATORY);
 
         // Optional requirement on shutdown_node event
         TmfAnalysisEventRequirement shutdownEventReq = new TmfAnalysisEventRequirement(
-                ImmutableSet.of(checkNotNull(layout.eventShutdownNode())),
+                ImmutableSet.of(Objects.requireNonNull(layout.eventShutdownNode())),
                 PriorityLevel.OPTIONAL);
         shutdownEventReq.addInformation("The shutdown_node event is optional because it isn't part of tracetools for the moment."); //$NON-NLS-1$
 
         // Requirement for shutdown_node procname field
         TmfAnalysisEventFieldRequirement shutdownProcnameReq = new TmfAnalysisEventFieldRequirement(
-                checkNotNull(layout.eventShutdownNode()),
-                ImmutableSet.of(checkNotNull(layout.contextProcname())),
+                Objects.requireNonNull(layout.eventShutdownNode()),
+                ImmutableSet.of(Objects.requireNonNull(layout.contextProcname())),
                 PriorityLevel.MANDATORY);
 
         return ImmutableSet.of(initEventReq, shutdownEventReq, shutdownProcnameReq);

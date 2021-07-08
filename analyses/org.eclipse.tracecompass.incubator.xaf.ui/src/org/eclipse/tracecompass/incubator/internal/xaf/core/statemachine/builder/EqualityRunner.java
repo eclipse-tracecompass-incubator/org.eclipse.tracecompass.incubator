@@ -11,6 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.builder;
 
+import java.util.Objects;
+
 /**
  * A class representing an equality runner used in the build process
  *
@@ -30,10 +32,7 @@ public class EqualityRunner<T> {
      * @return Whether t0 and t1 are equal
      */
     public boolean isEqual(T t0, T t1) {
-        if (t0 == null) {
-            return (t1 == null);
-        }
-        return t0.equals(t1);
+       return Objects.equals(t0, t1);
     }
 
     /**

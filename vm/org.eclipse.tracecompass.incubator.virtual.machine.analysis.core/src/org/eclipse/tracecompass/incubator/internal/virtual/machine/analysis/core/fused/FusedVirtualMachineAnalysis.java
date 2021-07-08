@@ -11,9 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -82,8 +81,8 @@ public class FusedVirtualMachineAnalysis extends TmfStateSystemAnalysisModule {
         // REQUIRED_EVENTS, ValuePriorityLevel.MANDATORY);
         // eventReq.addValues(OPTIONAL_EVENTS, ValuePriorityLevel.OPTIONAL);
         //
-        // REQUIREMENTS = checkNotNull(ImmutableSet.of(domainReq, eventReq));
-        REQUIREMENTS = checkNotNull(Collections.EMPTY_SET);
+        // REQUIREMENTS = Objects.requireNonNull(ImmutableSet.of(domainReq, eventReq));
+        REQUIREMENTS = Objects.requireNonNull(Collections.EMPTY_SET);
     }
 
     @Override

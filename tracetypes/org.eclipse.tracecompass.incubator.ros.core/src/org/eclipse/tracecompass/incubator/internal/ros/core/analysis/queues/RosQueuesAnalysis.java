@@ -11,8 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.analysis.queues;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -54,7 +53,7 @@ public class RosQueuesAnalysis extends AbstractRosAnalysis {
             if (trace != null) {
                 layout = trace.getEventLayout();
             }
-            requirements = ImmutableSet.of(new RosQueuesAnalysisRequirement(checkNotNull(layout)));
+            requirements = ImmutableSet.of(new RosQueuesAnalysisRequirement(Objects.requireNonNull(layout)));
             fAnalysisRequirements = requirements;
         }
         return requirements;

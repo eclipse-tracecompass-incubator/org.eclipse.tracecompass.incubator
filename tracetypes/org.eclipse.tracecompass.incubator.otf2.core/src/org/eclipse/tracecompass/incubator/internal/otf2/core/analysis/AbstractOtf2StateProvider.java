@@ -11,8 +11,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,7 +84,7 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
      *            the ID of the corresponding analysis
      */
     protected AbstractOtf2StateProvider(@Nullable ITmfTrace trace, String id) {
-        super(checkNotNull(trace), id);
+        super(Objects.requireNonNull(trace), id);
         fStringId = new HashMap<>();
         fRegionStringId = new HashMap<>();
         fCommunicatorGroup = new HashMap<>();

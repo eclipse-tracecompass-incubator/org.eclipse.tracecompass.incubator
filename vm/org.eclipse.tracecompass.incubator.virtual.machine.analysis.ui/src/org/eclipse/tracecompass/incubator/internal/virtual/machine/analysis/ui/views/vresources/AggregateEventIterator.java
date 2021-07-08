@@ -11,13 +11,12 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.vresources;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
@@ -123,6 +122,6 @@ public class AggregateEventIterator implements Iterator<@NonNull ITimeEvent> {
             }
         }
 
-        return checkNotNull(next);
+        return Objects.requireNonNull(next);
     }
 }

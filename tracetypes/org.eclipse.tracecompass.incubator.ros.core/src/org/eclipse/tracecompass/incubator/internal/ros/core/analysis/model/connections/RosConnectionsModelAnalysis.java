@@ -11,10 +11,9 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.analysis.model.connections;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -101,7 +100,7 @@ public class RosConnectionsModelAnalysis extends TmfAbstractAnalysisModule imple
                     }
                 }
             }
-            requirements = ImmutableSet.of(new RosConnectionsAnalysisRequirement(checkNotNull(layout)));
+            requirements = ImmutableSet.of(new RosConnectionsAnalysisRequirement(Objects.requireNonNull(layout)));
             fAnalysisRequirements = requirements;
         }
         return requirements;

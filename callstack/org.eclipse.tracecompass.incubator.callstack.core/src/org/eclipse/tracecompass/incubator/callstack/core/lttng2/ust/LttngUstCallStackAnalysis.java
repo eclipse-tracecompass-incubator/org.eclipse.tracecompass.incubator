@@ -11,8 +11,6 @@
 
 package org.eclipse.tracecompass.incubator.callstack.core.lttng2.ust;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
@@ -66,7 +64,7 @@ public class LttngUstCallStackAnalysis extends InstrumentedCallStackAnalysis {
 
     @Override
     protected @NonNull ITmfStateProvider createStateProvider() {
-        return new LttngUstCallStackProvider(checkNotNull(getTrace()));
+        return new LttngUstCallStackProvider(Objects.requireNonNull(getTrace()));
     }
 
     @Override

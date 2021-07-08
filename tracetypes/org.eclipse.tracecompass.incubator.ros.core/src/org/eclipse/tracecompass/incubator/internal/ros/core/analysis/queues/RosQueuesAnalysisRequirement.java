@@ -11,9 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.analysis.queues;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Collection;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.tracecompass.incubator.internal.ros.core.trace.layout.IRosEventLayout;
@@ -45,7 +44,7 @@ public class RosQueuesAnalysisRequirement extends TmfCompositeAnalysisRequiremen
 
         // Optional requirement on subscriber_callback_added event
         TmfAnalysisEventRequirement subCallbackAddedEventRe = new TmfAnalysisEventRequirement(
-                ImmutableSet.of(checkNotNull(layout.eventCallbackStart())),
+                ImmutableSet.of(Objects.requireNonNull(layout.eventCallbackStart())),
                 PriorityLevel.OPTIONAL);
 
         return ImmutableSet.of(subCallbackAddedEventRe);

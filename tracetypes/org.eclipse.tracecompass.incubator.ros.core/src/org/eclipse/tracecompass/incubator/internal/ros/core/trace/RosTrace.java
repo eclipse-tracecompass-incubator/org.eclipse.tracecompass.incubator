@@ -11,9 +11,9 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.trace;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -101,7 +101,7 @@ public class RosTrace extends CtfTmfTrace {
 
     private static @NonNull IRosEventLayout getLayout() {
         // Only one layout for the moment
-        return checkNotNull(IRosEventLayout.getDefault());
+        return Objects.requireNonNull(IRosEventLayout.getDefault());
     }
 
     @Override

@@ -11,8 +11,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -38,11 +36,11 @@ abstract class AbstractCalledFunction implements ICalledFunction {
     static final Comparator<ISegment> COMPARATOR;
     static {
         /*
-         * checkNotNull() has to be called separately, or else it breaks the
+         * requireNonNull() has to be called separately, or else it breaks the
          * type inference.
          */
         Comparator<ISegment> comp = Ordering.from(SegmentComparators.INTERVAL_START_COMPARATOR).compound(SegmentComparators.INTERVAL_END_COMPARATOR);
-        COMPARATOR = checkNotNull(comp);
+        COMPARATOR = Objects.requireNonNull(comp);
     }
 
     /**

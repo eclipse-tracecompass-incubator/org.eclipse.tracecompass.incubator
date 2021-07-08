@@ -11,9 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.analysis.connections;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Collection;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.tracecompass.incubator.internal.ros.core.trace.layout.IRosEventLayout;
@@ -44,7 +43,7 @@ public class RosConnectionsAnalysisRequirement extends TmfCompositeAnalysisRequi
     private static Collection<TmfAbstractAnalysisRequirement> getSubRequirements(IRosEventLayout layout) {
         // Requirement on new_connection event
         TmfAnalysisEventRequirement initEventReq = new TmfAnalysisEventRequirement(
-                ImmutableSet.of(checkNotNull(layout.eventNewConnection())),
+                ImmutableSet.of(Objects.requireNonNull(layout.eventNewConnection())),
                 PriorityLevel.MANDATORY);
 
         return ImmutableSet.of(initEventReq);

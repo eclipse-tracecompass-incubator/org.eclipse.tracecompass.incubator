@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Semaphore;
@@ -400,7 +401,7 @@ public class FlameGraphView extends TmfView {
 
         public void run(IProgressMonitor monitor) {
             try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:BuildThread", "trace", fBuildTrace.getName()).setParentScope(fScope).build()) { //$NON-NLS-1$ //$NON-NLS-2$
-                buildEntryList(fBuildTrace, fParentTrace, fParameters, NonNullUtils.checkNotNull(monitor));
+                buildEntryList(fBuildTrace, fParentTrace, fParameters, Objects.requireNonNull(monitor));
                 synchronized (fBuildJobMap) {
                     fBuildJobMap.remove(fBuildTrace);
                 }

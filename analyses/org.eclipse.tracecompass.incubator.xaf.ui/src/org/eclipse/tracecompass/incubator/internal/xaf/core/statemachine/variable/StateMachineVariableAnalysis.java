@@ -11,8 +11,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -39,7 +38,6 @@ import org.eclipse.tracecompass.analysis.graph.core.criticalpath.CriticalPathAlg
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsExecutionGraph;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsWorker;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend.Attributes;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend.BackendStateValue;
@@ -775,7 +773,7 @@ public class StateMachineVariableAnalysis {
             System.out.println("Invalid interruption list " + //$NON-NLS-1$
                                 keyMapToiisMap.get(entryReasonSolutions.getKey()) +
                                 " has been encountered " + //$NON-NLS-1$
-                                checkNotNull(keyMapToiisMap.get(entryReasonSolutions.getKey())).getCounter() +
+                                requireNonNull(keyMapToiisMap.get(entryReasonSolutions.getKey())).getCounter() +
                                 " times"); //$NON-NLS-1$
             System.out.println("Interruption lists identified as potential expected list instead of this invalid one:"); //$NON-NLS-1$
             String[] columnNames = {
@@ -807,7 +805,7 @@ public class StateMachineVariableAnalysis {
             keyMapToclosestValidIsiListMap.put(entryReasonSolutions.getKey(), validKeyToIsiMap.get(iisPerProbability.iterator().next().element.keyMap()));
 
             InterruptionIntervalSetDiff iisd = null;
-            InterruptionIntervalSet iisError = NonNullUtils.checkNotNull(keyMapToiisMap.get(entryReasonSolutions.getKey()));
+            InterruptionIntervalSet iisError = Objects.requireNonNull(keyMapToiisMap.get(entryReasonSolutions.getKey()));
             Iterator<ElementProbability<InterruptionIntervalSet>> it = iisPerProbability.iterator();
             while (it.hasNext()) {
                 ElementProbability<InterruptionIntervalSet> proba = it.next();
@@ -903,8 +901,8 @@ public class StateMachineVariableAnalysis {
         StateMachineInstanceGroup group = invalidIsiList.get(0).instance.getStateMachineInstanceGroup();
         for (TimestampInterval ti : intervals) {
             for (StateMachineBackendAnalysis module : group.getStateMachineBackendAnalysisModules()) {
-                if (module.getKernelTrace().getTimeRange().contains(checkNotNull(ti.getStartTime()))
-                        || module.getKernelTrace().getTimeRange().contains(checkNotNull(ti.getEndTime()))) {
+                if (module.getKernelTrace().getTimeRange().contains(Objects.requireNonNull(ti.getStartTime()))
+                        || module.getKernelTrace().getTimeRange().contains(Objects.requireNonNull(ti.getEndTime()))) {
                     intervalsPerTrace.put(module.getKernelTrace().getPath(), ti);
                 }
             }
@@ -1143,7 +1141,7 @@ public class StateMachineVariableAnalysis {
             }
 
             // Compute it for one of the valid cases
-            Iterator<InstanceStepInformation> it = checkNotNull(keyMapToclosestValidIsiListMap.get(keyMap)).iterator();
+            Iterator<InstanceStepInformation> it = Objects.requireNonNull(keyMapToclosestValidIsiListMap.get(keyMap)).iterator();
             InterruptionDurationSet validIds = null;
             while (validIds == null && it.hasNext()) {
                 InstanceStepInformation isi = it.next();
@@ -1312,9 +1310,9 @@ public class StateMachineVariableAnalysis {
             workerFound = true;
 
             // Compute the path for the period we're interested into
-            TmfVertex vstart = graph.getVertexAt(checkNotNull(ti.getStartTime()), lw);
-            TmfVertex vend = graph.getVertexAt(checkNotNull(ti.getEndTime()), lw);
-            TmfGraph path = new CriticalPathAlgorithmBounded(graph).compute(checkNotNull(vstart), checkNotNull(vend));
+            TmfVertex vstart = graph.getVertexAt(Objects.requireNonNull(ti.getStartTime()), lw);
+            TmfVertex vend = graph.getVertexAt(Objects.requireNonNull(ti.getEndTime()), lw);
+            TmfGraph path = new CriticalPathAlgorithmBounded(graph).compute(Objects.requireNonNull(vstart), Objects.requireNonNull(vend));
 
             // Then traverse that path to get the data for what happened in there
             path.scanLineTraverse(path.getHead(lw), new TmfGraphVisitor() {

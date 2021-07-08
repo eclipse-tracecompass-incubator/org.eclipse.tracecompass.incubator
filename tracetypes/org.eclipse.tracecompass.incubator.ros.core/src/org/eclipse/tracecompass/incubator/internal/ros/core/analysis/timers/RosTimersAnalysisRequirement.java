@@ -11,9 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.analysis.timers;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Collection;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.tracecompass.incubator.internal.ros.core.trace.layout.IRosEventLayout;
@@ -44,12 +43,12 @@ public class RosTimersAnalysisRequirement extends TmfCompositeAnalysisRequiremen
     private static Collection<TmfAbstractAnalysisRequirement> getSubRequirements(IRosEventLayout layout) {
         // Requirement on timer_added event
         TmfAnalysisEventRequirement timerAddedReq = new TmfAnalysisEventRequirement(
-                ImmutableSet.of(checkNotNull(layout.eventTimerAdded())),
+                ImmutableSet.of(Objects.requireNonNull(layout.eventTimerAdded())),
                 PriorityLevel.MANDATORY);
 
         // Requirement on timer_scheduled event
         TmfAnalysisEventRequirement timerScheduledReq = new TmfAnalysisEventRequirement(
-                ImmutableSet.of(checkNotNull(layout.eventTimerScheduled())),
+                ImmutableSet.of(Objects.requireNonNull(layout.eventTimerScheduled())),
                 PriorityLevel.MANDATORY);
 
         return ImmutableSet.of(timerAddedReq, timerScheduledReq);

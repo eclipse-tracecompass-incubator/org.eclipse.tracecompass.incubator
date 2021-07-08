@@ -27,7 +27,6 @@ import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModu
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInformationProvider;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.IVirtualMachineModel;
@@ -70,7 +69,7 @@ public class QemuKvmVmModel implements IVirtualMachineModel {
     /* Maps a virtual machine name to a virtual machine */
     private final Map<String, VirtualMachine> fKnownMachines = new HashMap<>();
     /* Associate a VM and a VCPU to a PCPU */
-    private final Table<VirtualMachine, VirtualCPU, Long> fVirtualToPhysicalCpu = NonNullUtils.checkNotNull(HashBasedTable.<VirtualMachine, VirtualCPU, Long> create());
+    private final Table<VirtualMachine, VirtualCPU, Long> fVirtualToPhysicalCpu = Objects.requireNonNull(HashBasedTable.<VirtualMachine, VirtualCPU, Long> create());
 
     private final TmfExperiment fExperiment;
 

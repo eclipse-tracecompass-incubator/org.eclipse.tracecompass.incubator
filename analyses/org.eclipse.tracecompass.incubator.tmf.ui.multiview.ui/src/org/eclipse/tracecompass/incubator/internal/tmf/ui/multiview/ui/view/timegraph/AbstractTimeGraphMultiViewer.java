@@ -11,8 +11,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.tmf.ui.multiview.ui.view.timegraph;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,7 +79,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
@@ -817,7 +814,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
         if (signal.getSource() == this || fTrace == null) {
             return;
         }
-        TmfTraceContext ctx = TmfTraceManager.getInstance().getTraceContext(checkNotNull(fTrace));
+        TmfTraceContext ctx = TmfTraceManager.getInstance().getTraceContext(Objects.requireNonNull(fTrace));
         final long startTime = ctx.getWindowRange().getStartTime().toNanos();
         final long endTime = ctx.getWindowRange().getEndTime().toNanos();
         Display.getDefault().asyncExec(() -> {
@@ -1628,7 +1625,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
                             ((ITimeGraphEntryComparator) comparator).setDirection(direction);
                         }
                         if (direction != SWT.DOWN) {
-                            comparator = checkNotNull(Collections.reverseOrder(comparator));
+                            comparator = Objects.requireNonNull(Collections.reverseOrder(comparator));
                         }
                         setEntryComparator(comparator);
                         fIsRevealSelection = true;
@@ -1665,7 +1662,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
                     ((ITimeGraphEntryComparator) comparator).setDirection(fSortDirection);
                 }
                 if (fSortDirection != SWT.DOWN) {
-                    comparator = checkNotNull(Collections.reverseOrder(comparator));
+                    comparator = Objects.requireNonNull(Collections.reverseOrder(comparator));
                 }
                 setEntryComparator(comparator);
             }
@@ -1743,7 +1740,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
 
         public void run(IProgressMonitor monitor) {
             try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "MultiTimeGraphViewer:BuildThread", "trace", fBuildTrace.getName()).setParentScope(fScope).build()) { //$NON-NLS-1$ //$NON-NLS-2$
-                buildEntryList(fBuildTrace, fParentTrace, NonNullUtils.checkNotNull(monitor));
+                buildEntryList(fBuildTrace, fParentTrace, Objects.requireNonNull(monitor));
                 synchronized (fBuildJobMap) {
                     fBuildJobMap.remove(fBuildTrace);
                 }

@@ -19,7 +19,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.scatter.AbstractSegmentStoreScatterChartTreeViewer2;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.swslatency.SWSLatencyAnalysis;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.xychart.TmfXYChartViewer;
@@ -54,7 +53,7 @@ public class SWSLatencyScatterView extends TmfChartView {
 
     @Override
     protected TmfXYChartViewer createChartViewer(@Nullable Composite parent) {
-        return new SWSLatencyScatterGraphViewer(NonNullUtils.checkNotNull(parent), nullToEmptyString(Messages.SWSLatencyScatterView_title), nullToEmptyString(Messages.SWSLatencyScatterView_xAxis),
+        return new SWSLatencyScatterGraphViewer(Objects.requireNonNull(parent), nullToEmptyString(Messages.SWSLatencyScatterView_title), nullToEmptyString(Messages.SWSLatencyScatterView_xAxis),
                 nullToEmptyString(Messages.SWSLatencyScatterView_yAxis));
     }
 

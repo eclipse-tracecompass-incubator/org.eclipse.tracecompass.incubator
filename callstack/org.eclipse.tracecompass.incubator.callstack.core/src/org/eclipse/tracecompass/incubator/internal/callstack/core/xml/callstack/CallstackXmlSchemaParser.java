@@ -15,8 +15,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.ITmfXmlSchemaParser;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.w3c.dom.Document;
@@ -36,7 +36,7 @@ public class CallstackXmlSchemaParser implements ITmfXmlSchemaParser {
         List<IAnalysisModuleHelper> list = new ArrayList<>();
         NodeList callstackNodes = doc.getElementsByTagName(CallstackXmlStrings.CALLSTACK);
         for (int i = 0; i < callstackNodes.getLength(); i++) {
-            Element node = NonNullUtils.checkNotNull((Element) callstackNodes.item(i));
+            Element node = Objects.requireNonNull((Element) callstackNodes.item(i));
 
             IAnalysisModuleHelper helper = new CallstackXmlModuleHelper(xmlFile, node);
             list.add(helper);

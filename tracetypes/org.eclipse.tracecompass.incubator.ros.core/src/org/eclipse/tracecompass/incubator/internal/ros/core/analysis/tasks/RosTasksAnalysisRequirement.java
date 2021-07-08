@@ -11,9 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.analysis.tasks;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Collection;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.tracecompass.incubator.internal.ros.core.trace.layout.IRosEventLayout;
@@ -44,7 +43,7 @@ public class RosTasksAnalysisRequirement extends TmfCompositeAnalysisRequirement
     private static Collection<TmfAbstractAnalysisRequirement> getSubRequirements(IRosEventLayout layout) {
         // Requirement on task_start event
         TmfAnalysisEventRequirement taskStartReq = new TmfAnalysisEventRequirement(
-                ImmutableSet.of(checkNotNull(layout.eventTaskStart())),
+                ImmutableSet.of(Objects.requireNonNull(layout.eventTaskStart())),
                 PriorityLevel.MANDATORY);
 
         return ImmutableSet.of(taskStartReq);

@@ -11,8 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.communicators;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
+import java.util.Objects;
 
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.AbstractOtf2Analysis;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
@@ -43,7 +42,7 @@ public class Otf2CommunicatorsAnalysis extends AbstractOtf2Analysis {
 
     @Override
     protected ITmfStateProvider createStateProvider() {
-        return new Otf2CommunicatorsStateProvider(checkNotNull(getTrace()));
+        return new Otf2CommunicatorsStateProvider(Objects.requireNonNull(getTrace()));
     }
 
     /**

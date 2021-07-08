@@ -11,12 +11,11 @@
 
 package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeSet;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -72,7 +71,7 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
 
     @Override
     protected ITmfStateProvider createStateProvider() {
-        return new StateMachineProviderEventTypes(checkNotNull(getTrace()));
+        return new StateMachineProviderEventTypes(Objects.requireNonNull(getTrace()));
     }
 
     @Override
@@ -90,14 +89,14 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
      * @return The value of the timer
      */
     public Long getTimer(long tid, long ts, String timer) {
-        ITmfStateSystem ss = checkNotNull(getStateSystem());
+        ITmfStateSystem ss = Objects.requireNonNull(getStateSystem());
         int quark;
         Long value;
         ITmfStateInterval intvl;
 
         long timestamp = ts;
-        if (getTrace() != null && ts > checkNotNull(getTrace()).getEndTime().toNanos()) {
-            timestamp = checkNotNull(getTrace()).getEndTime().toNanos();
+        if (getTrace() != null && ts > Objects.requireNonNull(getTrace()).getEndTime().toNanos()) {
+            timestamp = Objects.requireNonNull(getTrace()).getEndTime().toNanos();
         }
 
         try {
@@ -262,7 +261,7 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
      * @return The state interval of the attribute
      */
     public ITmfStateInterval getStateInterval(long tid, long ts, String attribute) {
-        ITmfStateSystem ss = checkNotNull(getStateSystem());
+        ITmfStateSystem ss = Objects.requireNonNull(getStateSystem());
         int quark;
         ITmfStateInterval intvl;
 
@@ -320,7 +319,7 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     public List<ITmfStateInterval> getAllStateIntervalInPeriod(long start, long end, String... attributePath) throws TimeRangeException {
         // List<ITmfStateInterval> stateIntervalList = new LinkedList<>();
 
-        ITmfStateSystem ss = checkNotNull(getStateSystem());
+        ITmfStateSystem ss = Objects.requireNonNull(getStateSystem());
         int quark;
         // ITmfStateInterval intvl;
 
@@ -438,7 +437,7 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
      */
     public Integer getCounter(long tid, long ts, String counter) {
         /*
-        ITmfStateSystem ss = checkNotNull(getStateSystem());
+        ITmfStateSystem ss = Objects.requireNonNull(getStateSystem());
         int quark, value;
         ITmfStateInterval intvl;
 
@@ -461,8 +460,8 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
         */
 
         long timestamp = ts;
-        if (getTrace() != null && ts > checkNotNull(getTrace()).getEndTime().toNanos()) {
-            timestamp = checkNotNull(getTrace()).getEndTime().toNanos();
+        if (getTrace() != null && ts > Objects.requireNonNull(getTrace()).getEndTime().toNanos()) {
+            timestamp = Objects.requireNonNull(getTrace()).getEndTime().toNanos();
         }
 
         ITmfStateInterval intvl = getStateInterval(tid, timestamp, counter);

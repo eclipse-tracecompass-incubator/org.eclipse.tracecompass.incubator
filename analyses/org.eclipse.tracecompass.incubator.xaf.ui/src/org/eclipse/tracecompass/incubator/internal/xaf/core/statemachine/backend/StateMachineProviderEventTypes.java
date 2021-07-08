@@ -11,11 +11,10 @@
 
 package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -111,7 +110,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
 
     @Override
     protected void eventHandle(ITmfEvent event) {
-        ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
+        ITmfStateSystemBuilder ss = Objects.requireNonNull(getStateSystemBuilder());
         int quark;
 
         /* Since this can be used for any trace types, normalize all the
@@ -129,7 +128,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             Integer nextPrio = ((Long)content.getField(layout.fieldNextPrio()).getValue()).intValue();
             Integer prevPrio = ((Long)content.getField(LAYOUT_PREV_PRIO).getValue()).intValue();
 
-            Integer cpu = checkNotNull((Integer)TmfTraceUtils.resolveEventAspectOfClassForEvent(getTrace(), TmfCpuAspect.class, event));
+            Integer cpu = Objects.requireNonNull((Integer)TmfTraceUtils.resolveEventAspectOfClassForEvent(getTrace(), TmfCpuAspect.class, event));
             threadByCPU.put(cpu, nextTid);
 
             ThreadInfo prevThreadInfo = getThreadInfoOrCreate(prevTid);
@@ -505,7 +504,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             Long tid = (Long)content.getField(LAYOUT_CONTEXT_VTID).getValue();
 
             /*
-            Integer cpu = checkNotNull((Integer)TmfTraceUtils.resolveEventAspectOfClassForEvent(getTrace(), TmfCpuAspect.class, event));
+            Integer cpu = Objects.requireNonNull((Integer)TmfTraceUtils.resolveEventAspectOfClassForEvent(getTrace(), TmfCpuAspect.class, event));
             Long tid = threadByCPU.get(cpu);
 
             if (tid == null) {
@@ -599,7 +598,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
     public void done() {
         int quark;
         TmfStateValue value;
-        ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
+        ITmfStateSystemBuilder ss = Objects.requireNonNull(getStateSystemBuilder());
         long traceStartTime = getTrace().getStartTime().toNanos();
         long traceEndTime = getTrace().getEndTime().toNanos();
 

@@ -14,7 +14,7 @@
 
 package org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
@@ -128,7 +128,7 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
             return;
         }
 
-        ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
+        ITmfStateSystemBuilder ss = Objects.requireNonNull(getStateSystemBuilder());
 
         handleFunctionEntry(ss, event);
         handleFunctionExit(ss, event);

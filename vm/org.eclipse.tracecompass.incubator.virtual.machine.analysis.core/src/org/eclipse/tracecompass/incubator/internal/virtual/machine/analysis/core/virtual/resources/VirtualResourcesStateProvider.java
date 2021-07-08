@@ -14,11 +14,10 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.DefaultEventLayout;
@@ -154,7 +153,7 @@ public class VirtualResourcesStateProvider extends AbstractTmfStateProvider {
             }
         }
 
-        ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
+        ITmfStateSystemBuilder ss = Objects.requireNonNull(getStateSystemBuilder());
 
         Collection<IVirtualMachineEventHandler> handlers = fEventNames.get(eventName);
         if (handlers.isEmpty()) {

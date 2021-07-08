@@ -11,11 +11,10 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.trace.layout;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -58,11 +57,11 @@ public interface IRosEventLayout {
                 method -> method.getName().startsWith("event")) //$NON-NLS-1$
                 .forEach(eventMethod -> {
                     try {
-                        eventNames.add(checkNotNull((String) eventMethod.invoke(this)));
+                        eventNames.add(Objects.requireNonNull((String) eventMethod.invoke(this)));
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                     }
                 });
-        return ImmutableList.copyOf(checkNotNull(eventNames));
+        return ImmutableList.copyOf(Objects.requireNonNull(eventNames));
     }
 
     // ------------------------------------------------------------------------

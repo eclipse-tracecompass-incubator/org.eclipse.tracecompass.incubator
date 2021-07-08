@@ -11,7 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils;
 
-import org.eclipse.tracecompass.common.core.NonNullUtils;
+import java.util.Objects;
 
 /**
  * Element representing a CPU Frequency state
@@ -83,7 +83,7 @@ public class CpuFrequency extends InterruptionReason {
                 }
                 return -1;
             }
-            return freq.compareTo(NonNullUtils.checkNotNull(cps.freq));
+            return freq.compareTo(Objects.requireNonNull(cps.freq));
         }
         return 0;
     }

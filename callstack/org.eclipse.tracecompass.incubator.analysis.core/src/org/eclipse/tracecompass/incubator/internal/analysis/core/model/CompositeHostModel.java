@@ -27,7 +27,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInformationProvider;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.ProcessStatus;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICpuTimeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ISamplingDataProvider;
@@ -59,10 +58,10 @@ import com.google.common.collect.Multimap;
 public class CompositeHostModel implements IHostModel {
 
     private final Multimap<ITmfTrace, Object> fTraceObjectMap = HashMultimap.create();
-    private final Set<ICpuTimeProvider> fCpuTimeProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<ICpuTimeProvider, Boolean>()));
-    private final Set<IThreadOnCpuProvider> fThreadOnCpuProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<IThreadOnCpuProvider, Boolean>()));
-    private final Set<ISamplingDataProvider> fSamplingDataProviders = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<ISamplingDataProvider, Boolean>()));
-    private final Set<KernelAnalysisModule> fKernelModules = NonNullUtils.checkNotNull(Collections.newSetFromMap(new WeakHashMap<KernelAnalysisModule, Boolean>()));
+    private final Set<ICpuTimeProvider> fCpuTimeProviders = Objects.requireNonNull(Collections.newSetFromMap(new WeakHashMap<ICpuTimeProvider, Boolean>()));
+    private final Set<IThreadOnCpuProvider> fThreadOnCpuProviders = Objects.requireNonNull(Collections.newSetFromMap(new WeakHashMap<IThreadOnCpuProvider, Boolean>()));
+    private final Set<ISamplingDataProvider> fSamplingDataProviders = Objects.requireNonNull(Collections.newSetFromMap(new WeakHashMap<ISamplingDataProvider, Boolean>()));
+    private final Set<KernelAnalysisModule> fKernelModules = Objects.requireNonNull(Collections.newSetFromMap(new WeakHashMap<KernelAnalysisModule, Boolean>()));
     private final String fHostId;
 
     /**

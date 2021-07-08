@@ -11,6 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.functiondensity;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -20,7 +22,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.density2.AbstractSegmentStoreDensityView;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.density2.AbstractSegmentStoreDensityViewer;
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.table.AbstractSegmentStoreTableViewer;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.segment.SegmentDurationAspect;
 import org.eclipse.tracecompass.tmf.core.segment.SegmentEndTimeAspect;
 import org.eclipse.tracecompass.tmf.core.segment.SegmentStartTimeAspect;
@@ -78,6 +79,6 @@ public class FunctionDensityView extends AbstractSegmentStoreDensityView {
 
     @Override
     protected AbstractSegmentStoreDensityViewer createSegmentStoreDensityViewer(Composite parent) {
-        return new FunctionDensityViewer(NonNullUtils.checkNotNull(parent), getViewSite().getSecondaryId());
+        return new FunctionDensityViewer(Objects.requireNonNull(parent), getViewSite().getSecondaryId());
     }
 }

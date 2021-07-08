@@ -11,9 +11,10 @@
 
 package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils;
 
+import java.util.Objects;
+
 import org.eclipse.tracecompass.analysis.graph.core.base.TmfEdge;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsWorker;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 
 /**
  * Element representing a Critical Path state
@@ -96,7 +97,7 @@ public class CriticalPathState extends InterruptionReason {
                 }
                 return -1;
             }
-            int cmp = type.compareTo(NonNullUtils.checkNotNull(cps.type));
+            int cmp = type.compareTo(Objects.requireNonNull(cps.type));
             if (cmp == 0) {
                 if (worker == null) {
                     if (cps.worker == null) {

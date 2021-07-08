@@ -11,8 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.analysis;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -42,7 +41,7 @@ public abstract class AbstractRosAnalysis extends TmfStateSystemAnalysisModule i
      *            the full analysis ID
      */
     public AbstractRosAnalysis(String id) {
-        setId(checkNotNull(id));
+        setId(Objects.requireNonNull(id));
     }
 
     @Override

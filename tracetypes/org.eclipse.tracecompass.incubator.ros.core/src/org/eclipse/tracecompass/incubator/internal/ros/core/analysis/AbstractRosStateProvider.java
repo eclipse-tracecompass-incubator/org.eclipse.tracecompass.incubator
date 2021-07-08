@@ -11,9 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.analysis;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
@@ -71,7 +70,7 @@ public abstract class AbstractRosStateProvider extends AbstractTmfStateProvider 
      *            the ID of the corresponding analysis
      */
     public AbstractRosStateProvider(ITmfTrace trace, @NonNull String id) {
-        super(checkNotNull(trace), id);
+        super(Objects.requireNonNull(trace), id);
         fLayout = IRosEventLayout.getDefault();
     }
 

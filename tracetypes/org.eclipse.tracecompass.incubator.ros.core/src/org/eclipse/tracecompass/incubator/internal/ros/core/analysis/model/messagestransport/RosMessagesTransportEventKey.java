@@ -11,7 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros.core.analysis.model.messagestransport;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.matching.TcpEventKey;
@@ -27,7 +27,7 @@ import com.google.common.hash.Hashing;
  */
 public class RosMessagesTransportEventKey extends TcpEventKey {
 
-    private static final HashFunction HF = checkNotNull(Hashing.goodFastHash(32));
+    private static final HashFunction HF = Objects.requireNonNull(Hashing.goodFastHash(32));
 
     private final NetworkConnection fConnectionInfo;
     private final long fFlags;

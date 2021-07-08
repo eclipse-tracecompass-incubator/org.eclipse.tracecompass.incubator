@@ -14,10 +14,9 @@
 
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.handlers;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
@@ -247,7 +246,7 @@ public class FusedVirtualMachineStateProvider extends AbstractTmfStateProvider {
         final String eventName = event.getName();
         final long ts = event.getTimestamp().getValue();
 
-        final ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
+        final ITmfStateSystemBuilder ss = Objects.requireNonNull(getStateSystemBuilder());
 
         /*
          * Do this block only all machines have their roles

@@ -17,10 +17,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend.StateMachineBackendAnalysis;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraint;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.Status;
@@ -91,7 +91,7 @@ public class StateMachineInstance implements Cloneable {
          * @return The interval of time for which we computed the given variable until the current step
          */
         public TimestampInterval getVariableInterval(String variableName) {
-            InstanceStepInformation initIsi = instance.getInstanceStepInformation(NonNullUtils.checkNotNull(variablesLastInit.get(variableName)));
+            InstanceStepInformation initIsi = instance.getInstanceStepInformation(Objects.requireNonNull(variablesLastInit.get(variableName)));
 
             // Timestamp of the start of the interval
             ITmfTimestamp intervalStart = initIsi.event.getTimestamp();
@@ -302,10 +302,10 @@ public class StateMachineInstance implements Cloneable {
                                 }
                             })
                             .filter(f -> f != null)
-                            .filter(f -> !NonNullUtils.checkNotNull(f).getName().startsWith("context.")) //$NON-NLS-1$
+                            .filter(f -> !Objects.requireNonNull(f).getName().startsWith("context.")) //$NON-NLS-1$
                             .map(f -> String.format("%s=%s", //$NON-NLS-1$
-                                    NonNullUtils.checkNotNull(f).getName(),
-                                    NonNullUtils.checkNotNull(f).getValue().toString()
+                                    Objects.requireNonNull(f).getName(),
+                                    Objects.requireNonNull(f).getValue().toString()
                                 ))
                             .collect(Collectors.toList())));
                 path.append("]"); //$NON-NLS-1$

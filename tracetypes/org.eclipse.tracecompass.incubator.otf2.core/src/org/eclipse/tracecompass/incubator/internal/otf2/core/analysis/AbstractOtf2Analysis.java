@@ -11,7 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.otf2.core.trace.Otf2Trace;
@@ -34,7 +34,7 @@ public abstract class AbstractOtf2Analysis extends TmfStateSystemAnalysisModule 
      *            the full analysis ID
      */
     public AbstractOtf2Analysis(String id) {
-        setId(checkNotNull(id));
+        setId(Objects.requireNonNull(id));
     }
 
     /**

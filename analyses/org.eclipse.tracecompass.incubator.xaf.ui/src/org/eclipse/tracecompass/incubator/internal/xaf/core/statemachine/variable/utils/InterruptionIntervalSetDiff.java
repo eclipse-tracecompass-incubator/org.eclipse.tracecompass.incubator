@@ -15,10 +15,9 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Map.Entry;
-
-import org.eclipse.tracecompass.common.core.NonNullUtils;
+import java.util.Objects;
+import java.util.TreeMap;
 
 /**
  * A special interval set that represents the difference between intervals or
@@ -327,7 +326,7 @@ public class InterruptionIntervalSetDiff {
              * ... get the minimum number of times that interval appears between
              * this instance and the other one.
              */
-            Integer count = Math.min(entry.getValue(), NonNullUtils.checkNotNull(toSearch.map.get(iiOther)));
+            Integer count = Math.min(entry.getValue(), Objects.requireNonNull(toSearch.map.get(iiOther)));
 
             // Then create a new interval with that same reason
             InterruptionInterval newii = new InterruptionInterval(ir);

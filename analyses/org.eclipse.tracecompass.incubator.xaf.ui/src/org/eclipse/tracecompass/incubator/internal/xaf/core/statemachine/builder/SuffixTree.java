@@ -17,12 +17,12 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 
 /**
  * TODO Review this class
@@ -119,7 +119,7 @@ public class SuffixTree<T extends Comparable<? super T>> {
     private List<T> getLongestCommonPrefix(List<T> l0, List<T> l1, int max) {
         int min = Math.min(Math.min(l0.size(), l1.size()), max);
         for (int i = 0; i < min; i++) {
-            if (!NonNullUtils.checkNotNull(l0.get(i)).equals(l1.get(i))) {
+            if (!Objects.requireNonNull(l0.get(i)).equals(l1.get(i))) {
                 return l0.subList(0, i);
             }
         }
@@ -402,7 +402,7 @@ public class SuffixTree<T extends Comparable<? super T>> {
 
                 int cmp = 0;
                 for (int i = 0; cmp == 0 && i < shortest.size(); i++) {
-                    cmp = NonNullUtils.checkNotNull(l0.get(i)).compareTo(l1.get(i));
+                    cmp = Objects.requireNonNull(l0.get(i)).compareTo(l1.get(i));
                 }
 
                 if (cmp == 0 && l0.size() != l1.size()) {
@@ -529,7 +529,7 @@ public class SuffixTree<T extends Comparable<? super T>> {
                 addSuffixLink(active_node); // rule 2
             } else {
                 // System.out.println("DEBUG: CONTAINS");
-                int next = NonNullUtils.checkNotNull(nodes.get(active_node).next.get(active_edge()));
+                int next = Objects.requireNonNull(nodes.get(active_node).next.get(active_edge()));
                 if (walkDown(next)) {
                     // System.out.println("DEBUG: WALKDOWN (OBS 2)");
                     continue; // observation 2

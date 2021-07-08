@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,7 +33,6 @@ import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.common.core.xml.XmlUtils;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.Operator;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraint;
@@ -193,7 +193,7 @@ public final class StateMachineUtils {
         for (Element s : statesList) {
             // Get the node in the HashMap
             String name = s.getAttributes().getNamedItem("id").getNodeValue(); //$NON-NLS-1$
-            StateMachineNode stateMachineNode = NonNullUtils.checkNotNull(nodeList.get(name));
+            StateMachineNode stateMachineNode = Objects.requireNonNull(nodeList.get(name));
 
             // Variables
             NodeList onentryList = s.getElementsByTagName("onentry"); //$NON-NLS-1$
@@ -216,7 +216,7 @@ public final class StateMachineUtils {
                     Class<?> variableClass = StateMachineVariable.class;
                     String[] splitVar = varName.split("/", 2); //$NON-NLS-1$
                     if (splitVar.length > 1 && StateMachineVariable.VARIABLE_TYPES.containsKey(splitVar[0])) {
-                        variableClass = NonNullUtils.checkNotNull(StateMachineVariable.VARIABLE_TYPES.get(splitVar[0]));
+                        variableClass = Objects.requireNonNull(StateMachineVariable.VARIABLE_TYPES.get(splitVar[0]));
                     }
 
                     Constructor<?> variableConstructor = null;
@@ -256,7 +256,7 @@ public final class StateMachineUtils {
         if (initialTransitions.isEmpty()) {
             Node initial = scxml.getAttributes().getNamedItem("initial"); //$NON-NLS-1$
             if (initial != null && nodeList.containsKey(initial.getNodeValue())) {
-                initialTransitions.addAll(NonNullUtils.checkNotNull(nodeList.get(initial.getNodeValue())).getTransitions());
+                initialTransitions.addAll(Objects.requireNonNull(nodeList.get(initial.getNodeValue())).getTransitions());
             }
         }
 
@@ -572,7 +572,7 @@ public final class StateMachineUtils {
          * @param end The end timestamp as an ITmfTimestamp object
          */
         public TimestampInterval(ITmfTimestamp start, ITmfTimestamp end) {
-            super(NonNullUtils.checkNotNull(start), NonNullUtils.checkNotNull(end));
+            super(Objects.requireNonNull(start), Objects.requireNonNull(end));
         }
 
         /**
@@ -580,8 +580,8 @@ public final class StateMachineUtils {
          * @param endTime The end timestamp as a long
          */
         public TimestampInterval(long startTime, long endTime) {
-            super(TmfTimestamp.create(NonNullUtils.checkNotNull(startTime), ITmfTimestamp.NANOSECOND_SCALE),
-                    TmfTimestamp.create(NonNullUtils.checkNotNull(endTime), ITmfTimestamp.NANOSECOND_SCALE));
+            super(TmfTimestamp.create(Objects.requireNonNull(startTime), ITmfTimestamp.NANOSECOND_SCALE),
+                    TmfTimestamp.create(Objects.requireNonNull(endTime), ITmfTimestamp.NANOSECOND_SCALE));
         }
 
         /**
