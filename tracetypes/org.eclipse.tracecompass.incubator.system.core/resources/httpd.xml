@@ -12,28 +12,33 @@
  *****************************************************************************
 -->
 <CustomTxtTraceDefinitionList>
-    <Definition category="Syslog" name="HTTPD">
-        <TimeStampOutputFormat>dd/MMM/yyyy:HH:mm:ss</TimeStampOutputFormat>
+    <Definition category="Apache" name="HTTPd">
+        <TimeStampOutputFormat>yyyy-MM-dd HH:mm:ss.SSS</TimeStampOutputFormat>
         <InputLine>
             <Cardinality max="2147483647" min="0"/>
-            <RegEx>^(\d+\.\d+\.\d+\.\d+)\s\-\s(\S+)\s\[([0-9]{2}\/[a-zA-Z]+\/[0-9]{4}:[0-9]{2}:[0-9]{2}:[0-9]{2} \+[0-9]{4})\]\s\"(GET|POST|PUT)\s(.*)\s(HTTP\/1.[0-1])"\s([1-5][0-9]{2})\s([0-9]+|\-)(.*)$</RegEx>
-            <InputData action="0" format="" name="clientIp" tag="OTHER"/>
-            <InputData action="0" format="" name="userId" tag="OTHER"/>
-            <InputData action="0" format="dd/MMM/yyyy:HH:mm:ss" name="Timestamp" tag="TIMESTAMP"/>
-            <InputData action="0" format="" name="Event type" tag="EVENT_TYPE"/>
-            <InputData action="0" format="" name="url" tag="OTHER"/>
+            <RegEx>\s*(\S+)\s*(\S*)\s*\-\s(\S+)\s\[(\S+\s*\S+)\]\s\"(\S+)\s+(\S+)\s(\S+)\"\s(\d+)\s(\S+)\s(\S+)\s\"(.*)\"</RegEx>
+            <InputData action="0" format="" name="IP" tag="OTHER"/>
+            <InputData action="0" format="" name="user identity" tag="OTHER"/>
+            <InputData action="0" format="" name="userid" tag="OTHER"/>
+            <InputData action="0" format="dd/MMM/yyyy:HH:mm:ss zzz" name="Timestamp" tag="TIMESTAMP"/>
+            <InputData action="0" format="" name="request type" tag="OTHER"/>
+            <InputData action="0" format="" name="endpoint" tag="OTHER"/>
             <InputData action="0" format="" name="protocol" tag="OTHER"/>
-            <InputData action="2" format="" name="Event type" tag="EVENT_TYPE"/>
-            <InputData action="0" format="" name="responseSize" tag="OTHER"/>
-            <InputData action="0" format="" name="userAgent" tag="OTHER"/>
+            <InputData action="0" format="" name="response" tag="OTHER"/>
+            <InputData action="0" format="" name="size (bytes)" tag="OTHER"/>
+            <InputData action="0" format="" name="referer" tag="OTHER"/>
+            <InputData action="0" format="" name="user-agent" tag="OTHER"/>
         </InputLine>
         <OutputColumn name="Timestamp" tag="TIMESTAMP"/>
-        <OutputColumn name="Event type" tag="EVENT_TYPE"/>
-        <OutputColumn name="clientIp" tag="OTHER"/>
-        <OutputColumn name="userId" tag="OTHER"/>
-        <OutputColumn name="url" tag="OTHER"/>
-        <OutputColumn name="responseSize" tag="OTHER"/>
-        <OutputColumn name="userAgent" tag="OTHER"/>
+        <OutputColumn name="IP" tag="OTHER"/>
+        <OutputColumn name="response" tag="OTHER"/>
+        <OutputColumn name="endpoint" tag="OTHER"/>
         <OutputColumn name="protocol" tag="OTHER"/>
+        <OutputColumn name="referer" tag="OTHER"/>
+        <OutputColumn name="user-agent" tag="OTHER"/>
+        <OutputColumn name="user identity" tag="OTHER"/>
+        <OutputColumn name="userid" tag="OTHER"/>
+        <OutputColumn name="request type" tag="OTHER"/>
+        <OutputColumn name="size (bytes)" tag="OTHER"/>
     </Definition>
 </CustomTxtTraceDefinitionList>
