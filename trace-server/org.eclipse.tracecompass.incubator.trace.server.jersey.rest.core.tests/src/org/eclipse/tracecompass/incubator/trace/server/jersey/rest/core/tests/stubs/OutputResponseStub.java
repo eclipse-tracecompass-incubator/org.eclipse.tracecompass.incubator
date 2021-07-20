@@ -28,7 +28,7 @@ public abstract class OutputResponseStub implements Serializable {
 
     private static final long serialVersionUID = -3731497188853515695L;
     private static final String STATUS_FAILED = "FAILED";
-    private static final String STATUS_CANCELLED = "CAMCELLED";
+    private static final String STATUS_CANCELLED = "CANCELLED";
     private static final String STATUS_COMPLETED = "COMPLETED";
     private static final String STATUS_RUNNING = "RUNNING";
     private static final List<String> STATUSES = ImmutableList.of(STATUS_FAILED, STATUS_CANCELLED, STATUS_COMPLETED, STATUS_RUNNING);
