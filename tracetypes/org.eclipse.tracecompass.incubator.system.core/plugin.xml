@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.system.core.analsysis.httpd.HttpdRetryConnectionAnalysis"
+            id="org.eclipse.tracecompass.incubator.internal.system.core.analsysis.httpd.HttpdRetryConnectionAnalysis"
+            name="%analysis.httpd.retry">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTrace"
+               id="custom.txt.trace:Apache:HTTPd">
+         </tracetype>
+      </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.system.core.analsysis.httpd.HttpdConnectionAnalysis"
+            id="org.eclipse.tracecompass.incubator.internal.system.core.analsysis.httpd.HttpdConnectionAnalysis"
+            name="%analysis.httpd.connect">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTrace"
+               id="custom.txt.trace:Apache:HTTPd">
+         </tracetype>
+      </module>
+   </extension>
+
+</plugin>
