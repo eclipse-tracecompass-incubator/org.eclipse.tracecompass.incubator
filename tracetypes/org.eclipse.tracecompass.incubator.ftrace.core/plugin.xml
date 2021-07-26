@@ -13,7 +13,7 @@
             id="org.eclipse.tracecompass.incubator.ftrace.core"
             isDirectory="false"
             name="%trace.ftrace"
-            trace_type="org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.FtraceTrace">
+            trace_type="org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.TextFtraceTrace">
       </type>
       <type
             category="org.eclipse.tracecompass.incubator.ftrace.core"
@@ -22,6 +22,14 @@
             isDirectory="false"
             name="%trace.ftrace.bin"
             trace_type="org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.BinaryFTrace">
+      </type>
+      <type
+            category="org.eclipse.tracecompass.incubator.ftrace.core"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.ftrace.core.trimmed"
+            isDirectory="false"
+            name="%trace.ftrace.trimmed"
+            trace_type="org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.TrimmedFtraceTrace">
       </type>
    </extension>
    <extension
@@ -33,6 +41,10 @@
       <type
             icon="icons/ftrace.png"
             tracetype="org.eclipse.tracecompass.incubator.ftrace.core.bin">
+      </type>
+      <type
+            icon="icons/ftrace.png"
+            tracetype="org.eclipse.tracecompass.incubator.ftrace.core.trimmed">
       </type>
    </extension>
    <extension

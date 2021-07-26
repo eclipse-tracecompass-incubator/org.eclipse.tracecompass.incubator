@@ -55,6 +55,7 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     private static final int ESTIMATED_EVENT_SIZE = 90;
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
     private static final TmfContext INVALID_CONTEXT = new TmfContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
+    private long fFileStart = 0;
 
     /**
      * Trace file locations
@@ -82,9 +83,27 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
         try {
             fFile = new File(path);
             fFileInput = new BufferedRandomAccessFile(fFile, "r"); //$NON-NLS-1$
+            fFileStart = getFileStart();
         } catch (IOException e) {
             throw new TmfTraceException(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Gets the file start
+     *
+     * @return the file start
+     * @throws IOException
+     *             read error
+     */
+    protected long getFileStart() throws IOException {
+        long start = 0;
+        String line = fFileInput.readLine();
+        while (line != null && line.trim().startsWith("#")) { //$NON-NLS-1$
+            start = fFileInput.getFilePointer();
+            line = fFileInput.readLine();
+        }
+        return start;
     }
 
     @Override
@@ -135,7 +154,7 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
      */
     protected ITmfContext seek(RandomAccessFile fileInput, ITmfLocation location, final TmfContext context) throws IOException {
         if (location == null) {
-            fileInput.seek(0);
+            fileInput.seek(fFileStart);
             long lineStartOffset = fileInput.getFilePointer();
             String line = fileInput.readLine();
             if (line == null) {
@@ -184,7 +203,7 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     protected ITmfEvent parseEvent(RandomAccessFile fileInput, TmfLongLocation tmfLongLocation, long rank) {
         Long locationInfo = tmfLongLocation.getLocationInfo();
         if (tmfLongLocation.equals(NULL_LOCATION)) {
-            locationInfo = 0L;
+            locationInfo = fFileStart;
         }
         if (locationInfo != null) {
             try {

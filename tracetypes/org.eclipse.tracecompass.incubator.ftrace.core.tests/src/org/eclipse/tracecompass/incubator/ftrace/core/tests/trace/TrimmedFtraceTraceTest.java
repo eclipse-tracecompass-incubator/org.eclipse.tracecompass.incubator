@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ecole Polytechnique de Montreal
+ * Copyright (c) 2021 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -11,28 +11,24 @@
 
 package org.eclipse.tracecompass.incubator.ftrace.core.tests.trace;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.tracecompass.incubator.ftrace.core.tests.ActivatorTest;
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.FtraceTrace;
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.TextFtraceTrace;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.tracecompass.incubator.ftrace.core.tests.ActivatorTest;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.FtraceTrace;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.trace.TrimmedFtraceTrace;
+import org.junit.Test;
+
 /**
  * Ftrace Trace Test Class
  *
- * @author Guillaume Champagne
- * @author Alexis-Maurer Fortin
- * @author Hugo Genesse
- * @author Pierre-Yves Lajoie
- * @author Eva Terriault
+ * @author Matthew Khouzam
  */
-public class FtraceTraceTest {
+public class TrimmedFtraceTraceTest {
 
     private static final String TRACE_PATH = "res";
 
@@ -46,7 +42,7 @@ public class FtraceTraceTest {
 
         File[] traceFiles = file.listFiles();
         assertTrue(traceFiles.length > 0);
-        FtraceTrace ftraceTrace = new TextFtraceTrace();
+        FtraceTrace ftraceTrace = new TrimmedFtraceTrace();
         for (File f : traceFiles) {
             IStatus status = ftraceTrace.validate(null, f.getAbsolutePath());
 
@@ -59,7 +55,7 @@ public class FtraceTraceTest {
      */
     @Test
     public void testValidateFileDoesNotExist() {
-        FtraceTrace ftraceTrace = new TextFtraceTrace();
+        FtraceTrace ftraceTrace = new TrimmedFtraceTrace();
 
         IStatus status = ftraceTrace.validate(null, "");
 
@@ -71,7 +67,7 @@ public class FtraceTraceTest {
      */
     @Test
     public void testValidateDirectory() {
-        FtraceTrace ftraceTrace = new TextFtraceTrace();
+        FtraceTrace ftraceTrace = new TrimmedFtraceTrace();
 
         IStatus status = ftraceTrace.validate(null, "res/");
 

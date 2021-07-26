@@ -34,7 +34,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
  * @author Pierre-Yves Lajoie
  * @author Eva Terriault
  */
-public class FtraceTrace extends GenericFtrace {
+public abstract class FtraceTrace extends GenericFtrace {
 
     private static final int MAX_LINES = 100;
     private static final int MAX_CONFIDENCE = 100;
