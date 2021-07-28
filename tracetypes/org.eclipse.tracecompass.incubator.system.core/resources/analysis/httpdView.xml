@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *****************************************************************************
+ * Copyright (c) 2021 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *****************************************************************************
+-->
+<tmfxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../org.eclipse.tracecompass.tmf.analysis.xml.core/src/org/eclipse/tracecompass/tmf/analysis/xml/core/module/xmlDefinition.xsd">
+	<xyView id="endpoint.bandwidth">
+	
+		<head>
+			<analysis id="org.eclipse.tracecompass.incubator.internal.system.core.analsysis.httpd.HttpdConnectionAnalysis" />
+			<label value="Endpoint Bandwidth" />
+		</head>
+		<entry path="endpoint/*" displayType="delta">
+			<display type="self" />
+		</entry>
+	</xyView>
+	<xyView id="ip.bandwidth">
+	
+		<head>
+			<analysis id="org.eclipse.tracecompass.incubator.internal.system.core.analsysis.httpd.HttpdConnectionAnalysis" />
+			<label value="IP Bandwidth" />
+		</head>
+		<entry path="ip/*" displayType="delta">
+			<display type="self" />
+		</entry>
+	</xyView>
+	<xyView id="user.bandwidth">
+	
+		<head>
+			<analysis id="org.eclipse.tracecompass.incubator.internal.system.core.analsysis.httpd.HttpdConnectionAnalysis" />
+			<label value="User Bandwidth" />
+		</head>
+		<entry path="user/*" displayType="delta">
+			<display type="self" />
+		</entry>
+	</xyView>
+</tmfxml>
