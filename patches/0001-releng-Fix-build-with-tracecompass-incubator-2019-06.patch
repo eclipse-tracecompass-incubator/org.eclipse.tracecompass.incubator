@@ -1,15 +1,20 @@
-From 896de05af529efbbabab895c2b80d3b319c619db Mon Sep 17 00:00:00 2001
+From a8922992f78eb169a01f82e3171b0e5dc32e6a11 Mon Sep 17 00:00:00 2001
 From: Bernd Hufmann <Bernd.Hufmann@ericsson.com>
-Date: Mon, 4 Jan 2021 21:03:04 -0500
+Date: Fri, 30 Jul 2021 10:05:45 -0400
 Subject: [PATCH] releng: Fix build with tracecompass-incubator-2019-06.target
 
-Change-Id: Ie33f260f1b06e370e6fd7d14144c4c4b2f687945
+Change-Id: I6b22ca14a8df66938d1ce0871dce3c354dcbb092
 Signed-off-by: Bernd Hufmann <Bernd.Hufmann@ericsson.com>
 ---
- .../core/tests/stubs/FilterBoxServiceStub.java  | 17 +++++++++--------
- .../filters/core/server/FilterBoxService.java   | 17 +++++++++--------
- .../traceserver.product                         |  1 -
- 3 files changed, 18 insertions(+), 17 deletions(-)
+ .../tests/stubs/FilterBoxServiceStub.java     | 17 +++--
+ .../filters/core/server/FilterBoxService.java | 17 +++--
+ .../META-INF/MANIFEST.MF                      |  2 +-
+ .../.classpath                                |  3 +
+ .../META-INF/MANIFEST.MF                      | 76 ++++++-------------
+ .../build.properties                          |  5 +-
+ .../rest/core/webapp/WebApplication.java      | 60 ++++++++++++++-
+ .../traceserver.product                       | 22 ++----
+ 8 files changed, 115 insertions(+), 87 deletions(-)
 
 diff --git a/analyses/org.eclipse.tracecompass.incubator.filters.core.tests/stubs/org/eclipse/tracecompass/incubator/filters/core/tests/stubs/FilterBoxServiceStub.java b/analyses/org.eclipse.tracecompass.incubator.filters.core.tests/stubs/org/eclipse/tracecompass/incubator/filters/core/tests/stubs/FilterBoxServiceStub.java
 index 88775c83..b99f4130 100644
@@ -154,18 +159,323 @@ index 353b602e..f863a63e 100644
          // May be implemented eventually
          throw new UnsupportedOperationException();
      }
+diff --git a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests/META-INF/MANIFEST.MF b/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests/META-INF/MANIFEST.MF
+index 155c572b..cfa22d01 100644
+--- a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests/META-INF/MANIFEST.MF
++++ b/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests/META-INF/MANIFEST.MF
+@@ -19,7 +19,7 @@ Require-Bundle: org.eclipse.core.runtime,
+  org.eclipse.tracecompass.lttng2.ust.core,
+  org.eclipse.tracecompass.lttng2.kernel.core,
+  org.eclipse.tracecompass.tmf.analysis.xml.core.tests,
+- jakarta.xml.bind,
++ javax.xml.bind,
+  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
+ Export-Package: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests,
+  org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services,
+diff --git a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/.classpath b/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/.classpath
+index b8d064f6..9a65750e 100644
+--- a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/.classpath
++++ b/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/.classpath
+@@ -11,5 +11,8 @@
+ 		</attributes>
+ 	</classpathentry>
+ 	<classpathentry kind="src" path="src"/>
++    <classpathentry exported="true" kind="lib" path="lib/validation-api-1.1.0.Final.jar"/>
++    <classpathentry exported="true" kind="lib" path="lib/jackson-module-jaxb-annotations-2.6.2.jar"/>
++    <classpathentry exported="true" kind="lib" path="lib/jersey-media-jaxb-2.22.1.jar"/>
+ 	<classpathentry kind="output" path="bin"/>
+ </classpath>
+diff --git a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/META-INF/MANIFEST.MF b/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/META-INF/MANIFEST.MF
+index f9919f6c..fe16b5a4 100644
+--- a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/META-INF/MANIFEST.MF
++++ b/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/META-INF/MANIFEST.MF
+@@ -36,62 +36,34 @@ Require-Bundle: org.eclipse.core.runtime,
+  com.fasterxml.jackson.core.jackson-databind,
+  com.fasterxml.jackson.datatype.jackson-datatype-guava,
+  com.fasterxml.jackson.jaxrs.jackson-jaxrs-base,
++ javax.xml.bind,
+  org.eclipse.tracecompass.tmf.analysis.xml.core,
+- org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional,
+- jakarta.xml.bind,
+- org.glassfish.hk2.osgi-resource-locator
+-Import-Package: com.fasterxml.jackson.module.jaxb,
+- com.fasterxml.jackson.module.jaxb.deser,
+- com.fasterxml.jackson.module.jaxb.ser,
+- com.google.common.annotations,
++ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
++Import-Package: com.google.common.annotations,
+  com.google.common.base,
+  com.google.common.collect,
+  com.google.common.primitives,
+- javax.validation;version="2.0.2",
+- javax.validation.bootstrap;version="2.0.2",
+- javax.validation.constraints;version="2.0.2",
+- javax.validation.constraintvalidation;version="2.0.2",
+- javax.validation.executable;version="2.0.2",
+- javax.validation.groups;version="2.0.2",
+- javax.validation.metadata;version="2.0.2",
+- javax.validation.spi;version="2.0.2",
+- javax.validation.valueextraction;version="2.0.2",
+  org.apache.commons.io,
+  org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module,
+- org.eclipse.tracecompass.tmf.analysis.xml.core.module,
+- org.glassfish.jersey.inject.hk2
+-Bundle-ClassPath: .
+-Export-Package: org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core;uses:="org.eclipse.tracecompass.common.core",
+- org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.application;uses:="org.eclipse.equinox.app,org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp",
+- org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views;
+-  uses:="org.eclipse.tracecompass.internal.provisional.tmf.core.model.table,
+-   org.eclipse.tracecompass.tmf.core.response,
+-   org.eclipse.tracecompass.tmf.core.trace,
+-   org.eclipse.tracecompass.tmf.core.model.tree",
+- org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
+-  uses:="org.eclipse.tracecompass.tmf.core.trace.experiment,
+-   org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations,
+-   org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views,
+-   org.eclipse.core.resources,
+-   org.eclipse.tracecompass.tmf.core.trace,
+-   javax.ws.rs.core",
+- org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp;
+-  uses:="org.eclipse.tracecompass.internal.provisional.tmf.core.model.table,
+-   org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services,
+-   org.eclipse.tracecompass.tmf.core.dataprovider,
+-   org.eclipse.tracecompass.internal.tmf.core.markers,
+-   org.eclipse.tracecompass.tmf.core.model.timegraph,
+-   org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views,
+-   com.fasterxml.jackson.core,
+-   org.eclipse.tracecompass.tmf.core.model.xy,
+-   javax.ws.rs.container,
+-   org.eclipse.tracecompass.tmf.core.model.tree,
+-   org.eclipse.tracecompass.tmf.core.model,
+-   com.fasterxml.jackson.databind.ser.std,
+-   org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations,
+-   org.eclipse.jetty.server,
+-   com.fasterxml.jackson.jaxrs.json,
+-   com.fasterxml.jackson.databind,
+-   org.glassfish.jersey.server,
+-   com.fasterxml.jackson.databind.deser.std"
++ org.eclipse.tracecompass.tmf.analysis.xml.core.module
++Bundle-ClassPath: .,
++ lib/validation-api-1.1.0.Final.jar,
++ lib/jackson-module-jaxb-annotations-2.6.2.jar,
++ lib/jersey-media-jaxb-2.22.1.jar
++Export-Package: com.fasterxml.jackson.module.jaxb;version="2.6.2",
++ com.fasterxml.jackson.module.jaxb.deser;version="2.6.2",
++ com.fasterxml.jackson.module.jaxb.ser;version="2.6.2",
++ javax.validation;version="1.1.0",
++ javax.validation.bootstrap;version="1.1.0",
++ javax.validation.constraints;version="1.1.0",
++ javax.validation.constraintvalidation;version="1.1.0",
++ javax.validation.executable;version="1.1.0",
++ javax.validation.groups;version="1.1.0",
++ javax.validation.metadata;version="1.1.0",
++ javax.validation.spi;version="1.1.0",
++ org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core,
++ org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.application,
++ org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views,
++ org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services,
++ org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp
+ Automatic-Module-Name: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core
+diff --git a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/build.properties b/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/build.properties
+index 7ba7f134..f33703e9 100644
+--- a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/build.properties
++++ b/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/build.properties
+@@ -15,4 +15,7 @@ bin.includes = META-INF/,\
+                about.html,\
+                plugin.properties,\
+                .,\
+-               plugin.xml
++               lib/validation-api-1.1.0.Final.jar,\
++               plugin.xml,\
++               lib/jackson-module-jaxb-annotations-2.6.2.jar,\
++               lib/jersey-media-jaxb-2.22.1.jar
+diff --git a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/src/org/eclipse/tracecompass/incubator/internal/trace/server/jersey/rest/core/webapp/WebApplication.java b/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/src/org/eclipse/tracecompass/incubator/internal/trace/server/jersey/rest/core/webapp/WebApplication.java
+index b162e93f..7530cdd6 100644
+--- a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/src/org/eclipse/tracecompass/incubator/internal/trace/server/jersey/rest/core/webapp/WebApplication.java
++++ b/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/src/org/eclipse/tracecompass/incubator/internal/trace/server/jersey/rest/core/webapp/WebApplication.java
+@@ -23,17 +23,37 @@ import org.eclipse.jetty.server.SslConnectionFactory;
+ import org.eclipse.jetty.servlet.ServletContextHandler;
+ import org.eclipse.jetty.servlet.ServletHolder;
+ import org.eclipse.jetty.util.ssl.SslContextFactory;
++import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
+ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
++import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Experiment;
+ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
+ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.FilterService;
+ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.HealthService;
++import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Trace;
+ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
+ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
++import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.Annotation;
++import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
++import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.VirtualTableCell;
++import org.eclipse.tracecompass.internal.tmf.core.markers.MarkerSet;
++import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
+ import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
+ import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
++import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
++import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
++import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
++import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
++import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
++import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeDataModel;
++import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
++import org.eclipse.tracecompass.tmf.core.model.xy.ITmfXyModel;
+ import org.glassfish.jersey.server.ResourceConfig;
+ import org.glassfish.jersey.servlet.ServletContainer;
+ 
++import com.fasterxml.jackson.databind.ObjectMapper;
++import com.fasterxml.jackson.databind.module.SimpleModule;
++import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
++
+ /**
+  *
+  * Simple web application using Jetty
+@@ -133,7 +153,7 @@ public class WebApplication {
+         rc.register(HealthService.class);
+         rc.register(XmlManagerService.class);
+         rc.register(CORSFilter.class);
+-        rc.register(JacksonObjectMapperProvider.class);
++        rc.register(registerCustomMappers());
+     }
+ 
+     /**
+@@ -150,7 +170,7 @@ public class WebApplication {
+         ServerConnector serverConnector = null;
+         if (config.useSSL()) {
+ 
+-            org.eclipse.jetty.util.ssl.SslContextFactory.Server contextFactory = new SslContextFactory.Server();
++            SslContextFactory contextFactory = new SslContextFactory.Server();
+             contextFactory.setKeyStorePath(config.getKeystore());
+             contextFactory.setKeyStorePassword(config.getKeystorePass());
+             contextFactory.setTrustAll(true);
+@@ -172,6 +192,40 @@ public class WebApplication {
+         return serverConnector;
+     }
+ 
++    /**
++     * Creates a JSON content type provider configured with custom mappers for
++     * reading and writing JSON from/to custom classes.
++     *
++     * @return the JSON content type provider providing custom mappers.
++     */
++    protected static JacksonJaxbJsonProvider registerCustomMappers() {
++        ObjectMapper mapper = new ObjectMapper();
++
++        // create JsonProvider to provide custom ObjectMapper
++        JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
++        provider.setMapper(mapper);
++
++        SimpleModule module = new SimpleModule();
++        module.addSerializer(Trace.class, new TraceSerializer());
++        module.addSerializer(Experiment.class, new ExperimentSerializer());
++        module.addSerializer(DataProviderDescriptor.class, new DataProviderDescriptorSerializer());
++        module.addSerializer(ITmfXyModel.class, new XYModelSerializer());
++        module.addSerializer(ISeriesModel.class, new SeriesModelSerializer());
++        module.addSerializer(TimeGraphState.class, new TimeGraphStateSerializer());
++        module.addSerializer(ITimeGraphArrow.class, new TimeGraphArrowSerializer());
++        module.addSerializer(TimeGraphRowModel.class, new TimeGraphRowModelSerializer());
++        module.addSerializer(TimeGraphEntryModel.class, new TimeGraphEntryModelSerializer());
++        module.addSerializer(Annotation.class, new AnnotationSerializer());
++        module.addSerializer(TmfTreeDataModel.class, new TmfTreeModelSerializer());
++        module.addSerializer(OutputElementStyle.class, new OutputElementStyleSerializer());
++        module.addSerializer(IVirtualTableLine.class, new VirtualTableLineSerializer());
++        module.addSerializer(VirtualTableCell.class, new VirtualTableCellSerializer());
++        module.addSerializer(MarkerSet.class, new MarkerSetSerializer());
++        module.addDeserializer(QueryParameters.class, new QueryParametersDeserializer());
++        mapper.registerModule(module);
++        return provider;
++    }
++
+     /**
+      * Method to stop the web application
+      */
+@@ -186,4 +240,4 @@ public class WebApplication {
+         }
+     }
+ 
+-}
++}
+\ No newline at end of file
 diff --git a/trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product b/trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product
-index e3cf9108..8132cb4b 100644
+index c15a9ba7..9e992f35 100644
 --- a/trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product
 +++ b/trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product
-@@ -151,7 +151,6 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
-       <plugin id="org.eclipse.jetty.server"/>
-       <plugin id="org.eclipse.jetty.servlet"/>
-       <plugin id="org.eclipse.jetty.util"/>
--      <plugin id="org.eclipse.jetty.util.ajax"/>
-       <plugin id="org.eclipse.ltk.core.refactoring"/>
-       <plugin id="org.eclipse.osgi"/>
-       <plugin id="org.eclipse.osgi.compatibility.state" fragment="true"/>
+@@ -11,11 +11,11 @@
+ -noSplash
+ -data @noDefault
+       </programArgs>
+-      <programArgsLin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=11
++      <programArgsLin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=1.8
+       </programArgsLin>
+-      <programArgsMac>-Xms512m -Xmx1024m -XstartOnFirstThread -Dosgi.requiredJavaVersion=11 -Dorg.eclipse.swt.internal.carbon.smallFonts
++      <programArgsMac>-Xms512m -Xmx1024m -XstartOnFirstThread -Dosgi.requiredJavaVersion=1.8 -Dorg.eclipse.swt.internal.carbon.smallFonts
+       </programArgsMac>
+-      <programArgsWin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=11
++      <programArgsWin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=1.8
+       </programArgsWin>
+       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
+       </vmArgsMac>
+@@ -30,10 +30,10 @@
+    </launcher>
+ 
+    <vm>
+-      <linux include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</linux>
+-      <macos include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</macos>
++      <linux include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8</linux>
++      <macos include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8</macos>
+       <solaris include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8</solaris>
+-      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</windows>
++      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8</windows>
+    </vm>
+ 
+    <license>
+@@ -101,19 +101,16 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
+       <plugin id="com.fasterxml.jackson.datatype.jackson-datatype-guava"/>
+       <plugin id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-base"/>
+       <plugin id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider"/>
+-      <plugin id="com.fasterxml.jackson.module.jackson-module-jaxb-annotations"/>
+       <plugin id="com.google.gson"/>
+       <plugin id="com.google.guava"/>
+       <plugin id="com.ibm.icu"/>
+-      <plugin id="com.sun.xml.bind.jaxb-osgi"/>
+-      <plugin id="jakarta.servlet-api"/>
+-      <plugin id="jakarta.validation.jakarta.validation-api"/>
+       <plugin id="jakarta.xml.bind"/>
+       <plugin id="javassist"/>
+       <plugin id="javax.activation"/>
+       <plugin id="javax.annotation"/>
+       <plugin id="javax.el"/>
+       <plugin id="javax.inject"/>
++      <plugin id="javax.persistence"/>
+       <plugin id="javax.servlet"/>
+       <plugin id="javax.servlet.jsp"/>
+       <plugin id="javax.ws.rs"/>
+@@ -191,23 +188,20 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
+       <plugin id="org.eclipse.tracecompass.tmf.ctf.core"/>
+       <plugin id="org.eclipse.tracecompass.tmf.filter.parser"/>
+       <plugin id="org.glassfish.hk2.api"/>
+-      <plugin id="org.glassfish.hk2.external.jakarta.inject"/>
+       <plugin id="org.glassfish.hk2.locator"/>
+       <plugin id="org.glassfish.hk2.osgi-resource-locator"/>
+       <plugin id="org.glassfish.hk2.utils"/>
++      <plugin id="org.glassfish.jersey.bundles.repackaged.jersey-guava"/>
+       <plugin id="org.glassfish.jersey.containers.servlet"/>
+       <plugin id="org.glassfish.jersey.containers.servlet.core"/>
+       <plugin id="org.glassfish.jersey.core.jersey-client"/>
+       <plugin id="org.glassfish.jersey.core.jersey-common"/>
+       <plugin id="org.glassfish.jersey.core.jersey-server"/>
+       <plugin id="org.glassfish.jersey.ext.entityfiltering"/>
+-      <plugin id="org.glassfish.jersey.inject.jersey-hk2"/>
+-      <plugin id="org.glassfish.jersey.media.jersey-media-jaxb"/>
+       <plugin id="org.glassfish.jersey.media.jersey-media-json-jackson"/>
+       <plugin id="org.hamcrest.core"/>
+       <plugin id="org.json"/>
+       <plugin id="org.junit"/>
+-      <plugin id="org.slf4j.api"/>
+    </plugins>
+ 
+    <configurations>
 -- 
 2.17.1
 
