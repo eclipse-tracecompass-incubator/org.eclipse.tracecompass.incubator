@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+ *****************************************************************************
+ * Copyright (c) 2021 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *****************************************************************************
+-->
+<CustomTxtTraceDefinitionList>
+    <Definition category="Syslog" name="PostgreSQL">
+        <TimeStampOutputFormat>yyyy-MM-dd HH:mm:ss.SSS</TimeStampOutputFormat>
+        <InputLine>
+            <Cardinality max="2147483647" min="0"/>
+            <RegEx>\s*\[(\d\d\d\d-\d\d-\d\d\s+\d\d:\d\d:\d\d)\s+CEST\]\s+(\S*):\s+(.*\S)</RegEx>
+            <InputData action="0" format="yyyy-MM-dd HH:mm:ss" name="Timestamp" tag="TIMESTAMP"/>
+            <InputData action="0" name="Command" tag="OTHER"/>
+            <InputData action="0" name="Message" tag="MESSAGE"/>
+            <InputLine>
+                <Cardinality max="2147483647" min="0"/>
+                <RegEx>\s*(.*\S)</RegEx>
+                <InputData action="1" format="" name="Message" tag="MESSAGE"/>
+            </InputLine>
+        </InputLine>
+        <InputLine>
+            <Cardinality max="2147483647" min="0"/>
+            <RegEx>\s*(\d\d\d\d-\d\d-\d\d\s+\d\d:\d\d:\d\d\.\d\d\d)\s+(\S*):\s+parameters:\s+(.*\S)</RegEx>
+            <InputData action="0" format="yyyy-MM-dd HH:mm:ss.SSS.SSS.SSS" name="Timestamp" tag="TIMESTAMP"/>
+            <InputData action="0" format="" name="Event type" tag="EVENT_TYPE"/>
+            <InputData action="0" format="" name="Parameters" tag="OTHER"/>
+        </InputLine>
+        <InputLine>
+            <Cardinality max="2147483647" min="0"/>
+            <RegEx>\s*(\d\d\d\d-\d\d-\d\d\s+\d\d:\d\d:\d\d\.\d\d\d)\s+(\S*):\s+duration:\s+(\S*)\s+(\S*)\s+(.*)\:(.*\S)</RegEx>
+            <InputData action="0" format="yyyy-MM-dd HH:mm:ss.SSS.SSS.SSS" name="Timestamp" tag="TIMESTAMP"/>
+            <InputData action="0" format="" name="Event type" tag="EVENT_TYPE"/>
+            <InputData action="0" format="" name="Duration" tag="OTHER"/>
+            <InputData action="0" format="" name="Unit" tag="OTHER"/>
+            <InputData action="0" format="" name="Execute" tag="OTHER"/>
+            <InputData action="0" format="" name="Command" tag="OTHER"/>
+        </InputLine>
+        <InputLine>
+            <Cardinality max="2147483647" min="0"/>
+            <RegEx>\s*(\d\d\d\d-\d\d-\d\d\s+\d\d:\d\d:\d\d\.\d\d\d)\s+\S*:\s+(.*\S)</RegEx>
+            <EventType>CESTLOG_WARN</EventType>
+            <InputData action="0" format="yyyy-MM-dd HH:mm:ss.SSS.SSS.SSS" name="Timestamp" tag="TIMESTAMP"/>
+            <InputData action="0" name="Message" tag="MESSAGE"/>
+        </InputLine>
+        <OutputColumn name="Timestamp" tag="TIMESTAMP"/>
+        <OutputColumn name="Event type" tag="EVENT_TYPE"/>
+        <OutputColumn name="Duration" tag="OTHER"/>
+        <OutputColumn name="Parameters" tag="OTHER"/>
+        <OutputColumn name="Unit" tag="OTHER"/>
+        <OutputColumn name="Execute" tag="OTHER"/>
+        <OutputColumn name="Command" tag="OTHER"/>
+        <OutputColumn name="Message" tag="MESSAGE"/>
+    </Definition>
+</CustomTxtTraceDefinitionList>
