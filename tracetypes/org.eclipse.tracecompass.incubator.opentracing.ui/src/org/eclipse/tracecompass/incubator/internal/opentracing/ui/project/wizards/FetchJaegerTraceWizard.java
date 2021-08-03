@@ -23,25 +23,24 @@ import org.eclipse.ui.IWorkbench;
  */
 public class FetchJaegerTraceWizard extends Wizard implements IImportWizard {
 
-//    private IStructuredSelection fSelection;
-    private FetchJaegerTracesNotAvailableWizardPage fPage;
+    private IStructuredSelection fSelection;
+    private FetchJaegerTracesWizardPage fPage;
 
     @Override
     public void init(IWorkbench workbench, IStructuredSelection selection) {
-//        fSelection = selection;
+        fSelection = selection;
         setWindowTitle(Messages.FetchJaegerTraceWizard_wizardTitle);
     }
 
     @Override
     public boolean performFinish() {
-        return true;
-//        return fPage.performFinish();
+        return fPage.performFinish();
     }
 
     @Override
     public void addPages() {
         super.addPages();
-        fPage = new FetchJaegerTracesNotAvailableWizardPage();
+        fPage = new FetchJaegerTracesWizardPage(fSelection);
         addPage(fPage);
     }
 
