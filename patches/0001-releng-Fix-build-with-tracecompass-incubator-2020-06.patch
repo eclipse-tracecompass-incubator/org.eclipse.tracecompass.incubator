@@ -1,19 +1,33 @@
-From 43164ace97c1c3beed83449373f47db8b8706082 Mon Sep 17 00:00:00 2001
-From: Bernd Hufmann <Bernd.Hufmann@ericsson.com>
-Date: Fri, 30 Jul 2021 10:21:08 -0400
+From 3b659ef136540ae9d033e248ef9f935d398c5ea6 Mon Sep 17 00:00:00 2001
+From: Francesco Robino <francesco.robino@ericsson.com>
+Date: Wed, 22 Sep 2021 13:19:39 +0200
 Subject: [PATCH] releng: Fix build with tracecompass-incubator-2020-06.target
 
-Change-Id: Id750837323a6085bc9b3e0f0872800d9bd4dc6bb
-Signed-off-by: Bernd Hufmann <Bernd.Hufmann@ericsson.com>
+Change-Id: I4ac33d2ebcf7a5083b16be6f6a78463c9528a9c8
+Signed-off-by: Francesco Robino <francesco.robino@ericsson.com>
 ---
+ .../feature.xml                               |  2 +-
  .../META-INF/MANIFEST.MF                      |  2 +-
  .../.classpath                                |  3 +
  .../META-INF/MANIFEST.MF                      | 76 ++++++-------------
  .../build.properties                          |  5 +-
  .../rest/core/webapp/WebApplication.java      | 60 ++++++++++++++-
  .../traceserver.product                       | 22 ++----
- 6 files changed, 97 insertions(+), 71 deletions(-)
+ 7 files changed, 98 insertions(+), 72 deletions(-)
 
+diff --git a/rcp/org.eclipse.tracecompass.incubator.rcp/feature.xml b/rcp/org.eclipse.tracecompass.incubator.rcp/feature.xml
+index 28fabcd8..21b0f1cc 100644
+--- a/rcp/org.eclipse.tracecompass.incubator.rcp/feature.xml
++++ b/rcp/org.eclipse.tracecompass.incubator.rcp/feature.xml
+@@ -259,7 +259,7 @@
+          unpack="false"/>
+ 
+    <plugin
+-         id="org.glassfish.jersey.inject.jersey-hk2"
++         id="org.glassfish.jersey.bundles.repackaged.jersey-guava"
+          download-size="0"
+          install-size="0"
+          version="0.0.0"
 diff --git a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests/META-INF/MANIFEST.MF b/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests/META-INF/MANIFEST.MF
 index 155c572b..cfa22d01 100644
 --- a/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests/META-INF/MANIFEST.MF
@@ -332,5 +346,5 @@ index c15a9ba7..9e992f35 100644
  
     <configurations>
 -- 
-2.17.1
+2.30.2
 

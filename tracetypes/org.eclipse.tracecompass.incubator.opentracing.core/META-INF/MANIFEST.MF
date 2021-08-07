@@ -23,3 +23,5 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.opentracing.core;x-f
  org.eclipse.tracecompass.incubator.internal.opentracing.core.event,
  org.eclipse.tracecompass.incubator.internal.opentracing.core.trace
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.opentracing.core
+Import-Package: javax.ws.rs.client,
+ javax.ws.rs.core

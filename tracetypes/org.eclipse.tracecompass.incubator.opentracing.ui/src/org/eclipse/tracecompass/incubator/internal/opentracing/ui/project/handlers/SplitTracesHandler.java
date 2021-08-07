@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2021 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -11,15 +11,20 @@
 
 package org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.handlers;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -29,9 +34,13 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.SplitImportTracesOperation;
+import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
+import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.ui.project.model.TmfCommonProjectElement;
 import org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceElement;
 import org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceFolder;
+import org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceTypeUIUtils;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -120,7 +129,9 @@ public class SplitTracesHandler extends AbstractHandler {
             try (JsonReader reader = new JsonReader(fileReader)) {
                 Gson gson = new Gson();
                 JsonObject object = gson.fromJson(reader, JsonObject.class);
-                SplitImportTracesOperation.splitAndImport(object, null, newTracesDestination, destinationFolder);
+                String newFolderPath = destinationFolder.getLocation().getPath() + newTracesDestination;
+                SplitImportTracesOperation.splitAndImport(object, null, newFolderPath,
+                        (tracesFolder, traceFile) -> SplitTracesHandler.refreshAndSetTraceType(tracesFolder, traceFile));
             }
         } catch (IOException e) {
         }
@@ -178,4 +189,57 @@ public class SplitTracesHandler extends AbstractHandler {
             }
         }
     }
+
+    /**
+     * Refresh resource hierarchy (to make the newly imported traces visible),
+     * and set the newly imported traces with the right trace type.
+     *
+     * @param tracesFolderAbsolutePath
+     *            absolute path indicating the folder where the jaeger trace is
+     *            stored
+     * @param jaegerTraceFileName
+     *            name of the (json) file containing the jaeger traces
+     * @return false if the operation failed, true otherwise
+     */
+    public static boolean refreshAndSetTraceType(String tracesFolderAbsolutePath, String jaegerTraceFileName) {
+        try {
+
+            IWorkspace ws = ResourcesPlugin.getWorkspace();
+            if (ws == null) {
+                return false;
+            }
+
+            /*
+             * Get the file representing the trace
+             */
+            File subTrace = new File(tracesFolderAbsolutePath + '/' + jaegerTraceFileName);
+            URI location = subTrace.toURI();
+            IFile[] files = ws.getRoot().findFilesForLocationURI(location);
+            /*
+             * Get the folder containing the trace
+             */
+            File tracesFolder = new File(tracesFolderAbsolutePath);
+            location = tracesFolder.toURI();
+            IContainer[] folders = ws.getRoot().findContainersForLocationURI(location);
+
+            if ((files.length == 0) || (folders.length==0) ) {
+                return false;
+            }
+
+            /*
+             * Refresh resource hierarchy, to make the newly imported traces
+             * visible.
+             */
+            folders[0].refreshLocal(IResource.DEPTH_INFINITE, null);
+            /*
+             * Set the newly imported traces with the right trace type.
+             */
+            TraceTypeHelper traceTypeHelper = TmfTraceType.getTraceType(TRACE_TYPE_ID);
+            TmfTraceTypeUIUtils.setTraceType(files[0], traceTypeHelper);
+        } catch (CoreException e) {
+            return false;
+        }
+        return true;
+    }
+
 }

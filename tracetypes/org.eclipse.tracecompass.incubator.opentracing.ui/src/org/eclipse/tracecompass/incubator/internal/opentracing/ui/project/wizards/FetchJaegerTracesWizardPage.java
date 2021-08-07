@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2021 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -14,7 +14,6 @@ package org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.wizar
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -37,7 +36,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.handlers.SplitImportTracesOperation;
+import org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.JaegerRestUtils;
+import org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.SplitImportTracesOperation;
+import org.eclipse.tracecompass.incubator.internal.opentracing.ui.project.handlers.SplitTracesHandler;
 import org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceFolder;
 
 import com.google.gson.Gson;
@@ -330,7 +331,9 @@ public class FetchJaegerTracesWizardPage extends WizardPage {
             List<String> checkedTraceIds = getCheckedTraces();
             IPath destinationFolderPath = fTmfTraceFolder.getPath().append(fTraceFolderName);
             String destinationSubPath = destinationFolderPath.makeRelativeTo(tracesFolder.getPath()).toOSString();
-            SplitImportTracesOperation.splitAndImport(fJaegerJsonTrace, checkedTraceIds, destinationSubPath, tracesFolder);
+            String newFolderPath = tracesFolder.getLocation().getPath() + destinationSubPath;
+            SplitImportTracesOperation.splitAndImport(fJaegerJsonTrace, checkedTraceIds,
+                    newFolderPath, (tFolder, tFile) -> SplitTracesHandler.refreshAndSetTraceType(tFolder, tFile));
             return true;
         }
 

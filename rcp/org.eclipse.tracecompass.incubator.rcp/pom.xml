@@ -66,6 +66,7 @@
                 <plugin id="org.eclipse.ease.modules.platform"/>
                 <plugin id="org.eclipse.nebula.widgets.opal.commons"/>
                 <plugin id="org.eclipse.nebula.widgets.opal.duallist"/>
+                <plugin id="org.aopalliance"/>
               </excludes>
             </configuration>
           </execution>
