@@ -20,8 +20,10 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.ProcessingException;
@@ -223,7 +225,7 @@ public class DataProviderServiceTest extends RestServerTest {
 
             // Make sure the analysis ran enough and we have a model
             int iteration = 0;
-            while (responseModel.isRunning() && responseModel.getModel() == null && iteration < MAX_ITER) {
+            while ((responseModel.isRunning() || responseModel.getModel() == null) && iteration < MAX_ITER) {
                 Thread.sleep(100);
                 treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
                 assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
@@ -240,12 +242,14 @@ public class DataProviderServiceTest extends RestServerTest {
             // add entries for the states query, and make sure they don't have
             // extra time fields
             List<Integer> items = new ArrayList<>();
+            // Find a specific call stack entry
             for (TimeGraphEntryStub entry : entries) {
                 items.add(entry.getId());
             }
 
             // Test getting the time graph row data
             WebTarget tgStatesEnpoint = getTimeGraphStatesEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
+            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(1450193697034689597L, 1450193697118480368L));
             parameters.put(REQUESTED_ITEMS_KEY, items);
             Response statesResponse = tgStatesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, statesResponse.getStatus());
@@ -259,7 +263,15 @@ public class DataProviderServiceTest extends RestServerTest {
             statesResponse.close();
 
             // Test getting the time graph tooltip for a state
-            TimeGraphRowStub row = Iterators.getLast(rows.iterator());
+            int callstackEntryIdForTooltip = findCallStackEntry(entries);
+            TimeGraphRowStub row = null;
+            for (Iterator<TimeGraphRowStub> iterator = rows.iterator(); iterator.hasNext();) {
+                TimeGraphRowStub timeGraphRowStub = iterator.next();
+                if (timeGraphRowStub.getEntryId() == callstackEntryIdForTooltip) {
+                    row = timeGraphRowStub;
+                }
+            }
+            assertNotNull(row);
             TimeGraphStateStub state = row.getStates().get(0);
             WebTarget tgTooltipEnpoint = getTimeGraphTooltipEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
             parameters.put(REQUESTED_ITEMS_KEY, Collections.singletonList(row.getEntryId()));
@@ -273,7 +285,10 @@ public class DataProviderServiceTest extends RestServerTest {
 
             TgTooltipOutputResponseStub timegraphTooltipResponse = tooltipResponse.readEntity(TgTooltipOutputResponseStub.class);
             assertNotNull(timegraphTooltipResponse);
-            assertEquals(Collections.emptyMap(), timegraphTooltipResponse.getModel());
+            Map<String, String> expectedTooltip = new HashMap<>();
+            expectedTooltip.put("Address", "0x804a291");
+            expectedTooltip.put("State", "000000000804a291");
+            assertEquals(expectedTooltip, timegraphTooltipResponse.getModel());
             tooltipResponse.close();
 
             // Test getting the time graph tooltip for an annotation
@@ -288,7 +303,7 @@ public class DataProviderServiceTest extends RestServerTest {
             tooltipResponse = tgTooltipEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, tooltipResponse.getStatus());
 
-            // Test getting the time graph tooltip for an annotation
+            // Test getting the time graph tooltip for an arrow
             TimeGraphRowStub destinationRow = Iterators.get(rows.iterator(), rows.size() - 2);
             parameters.put(REQUESTED_ITEMS_KEY, Collections.singletonList(row.getEntryId()));
             parameters.put(REQUESTED_TIMES_KEY, Collections.singletonList(state.getStartTime()));
@@ -312,6 +327,33 @@ public class DataProviderServiceTest extends RestServerTest {
             // help debugging failed tests.
             fail(e.getCause().getMessage());
         }
+    }
+
+    private static int findCallStackEntry(Set<TimeGraphEntryStub> entries) {
+        // Find trace entry
+        Optional<TimeGraphEntryStub> traceOptional = entries.stream().filter(entry -> entry.getParentId() == -1).findFirst();
+        assertTrue(traceOptional.isPresent());
+        int traceId = traceOptional.get().getId();
+
+        // Find process
+        final String processNameForTooltip = "UNKNOWN";
+        Optional<TimeGraphEntryStub> processOptional = entries.stream().filter(
+                entry -> processNameForTooltip.equals(entry.getLabels().get(0)) && entry.getParentId() == traceId).findFirst();
+        assertTrue(processOptional.isPresent());
+        int processEntryId = processOptional.get().getId();
+
+        // Find specific thread entry
+        final String threadNameForTooltip = "lemon_server-589";
+        Optional<TimeGraphEntryStub> threadOptional = entries.stream().filter(
+                entry -> threadNameForTooltip.equals(entry.getLabels().get(0)) && entry.getParentId() == processEntryId).findFirst();
+        assertTrue(threadOptional.isPresent());
+        int threadId = threadOptional.get().getId();
+
+        // Find first callstack entry under the thread entry
+        Optional<TimeGraphEntryStub> callstackOptional = entries.stream().filter(
+                entry -> threadNameForTooltip.equals(entry.getLabels().get(0)) && entry.getParentId() == threadId).findFirst();
+        assertTrue(callstackOptional.isPresent());
+        return callstackOptional.get().getId();
     }
 
     /**
