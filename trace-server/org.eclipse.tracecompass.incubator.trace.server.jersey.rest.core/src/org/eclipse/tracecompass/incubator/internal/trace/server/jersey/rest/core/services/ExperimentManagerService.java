@@ -75,6 +75,8 @@ import com.google.common.collect.Multiset;
 @Path("/experiments")
 public class ExperimentManagerService {
 
+    private static final String MISSING_PARAMETERS = "Missing query parameters"; //$NON-NLS-1$
+
     private static final Map<UUID, List<UUID>> TRACE_UUIDS = Collections.synchronizedMap(new HashMap<>());
     private static final Map<UUID, IResource> EXPERIMENT_RESOURCES = Collections.synchronizedMap(initExperimentResources());
     private static final Map<UUID, TmfExperiment> EXPERIMENTS = Collections.synchronizedMap(new HashMap<>());
@@ -247,6 +249,9 @@ public class ExperimentManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response postExperiment(QueryParameters queryParameters) {
         Map<String, Object> parameters = queryParameters.getParameters();
+        if (parameters == null) {
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+        }
         Object nameObj = parameters.get("name"); //$NON-NLS-1$
         Object tracesObj = parameters.get("traces"); //$NON-NLS-1$
         if (!(nameObj instanceof String) || !(tracesObj instanceof List<?>)) {

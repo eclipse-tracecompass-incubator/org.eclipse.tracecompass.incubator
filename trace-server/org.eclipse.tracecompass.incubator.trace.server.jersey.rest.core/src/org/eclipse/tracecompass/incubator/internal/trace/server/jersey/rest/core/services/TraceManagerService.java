@@ -69,6 +69,8 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 @Path("/traces")
 public class TraceManagerService {
 
+    private static final String MISSING_PARAMETERS = "Missing query parameters"; //$NON-NLS-1$
+
     private static final Map<UUID, IResource> TRACES = Collections.synchronizedMap(initTraces());
 
     private static final String TRACES_FOLDER = "Traces"; //$NON-NLS-1$
@@ -125,6 +127,9 @@ public class TraceManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response putTrace(QueryParameters queryParameters) {
         Map<String, Object> parameters = queryParameters.getParameters();
+        if (parameters == null) {
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+        }
         String name = (String) parameters.get("name");
         String path = (String) parameters.get("uri");
         Object typeIDObject = parameters.get("typeID");

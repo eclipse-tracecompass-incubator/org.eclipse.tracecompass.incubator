@@ -14,6 +14,8 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Definition of a parameters object received by the server from a client.
  *
@@ -46,14 +48,14 @@ public class QueryParameters {
     /**
      * @return Map of parameters
      */
-    public Map<String, Object> getParameters() {
+    public @Nullable Map<String, Object> getParameters() {
         return parameters;
     }
 
     /**
      * @return List of filters
      */
-    public List<Filter> getFilters() {
+    public @Nullable List<Filter> getFilters() {
         return filters;
     }
 }

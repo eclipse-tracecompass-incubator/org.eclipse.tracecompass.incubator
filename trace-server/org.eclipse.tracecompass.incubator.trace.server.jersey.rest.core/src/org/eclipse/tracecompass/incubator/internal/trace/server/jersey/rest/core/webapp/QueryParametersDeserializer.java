@@ -13,6 +13,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,32 +71,35 @@ public class QueryParametersDeserializer extends StdDeserializer<QueryParameters
         ObjectCodec codec = jp.getCodec();
         JsonNode node = codec.readTree(jp);
 
+        Map<String, Object> parameters = new HashMap<>();
+
         JsonNode parametersNode = node.get(PARAMETERS);
-        JsonParser parametersParser = parametersNode.traverse(codec);
-        parametersParser.nextToken();
-        Map<String, Object> parameters = ctxt.readValue(parametersParser, Map.class);
+        if (parametersNode != null) {
+            JsonParser parametersParser = parametersNode.traverse(codec);
+            parametersParser.nextToken();
+            parameters = ctxt.readValue(parametersParser, Map.class);
 
-        /* Replace default deserialized map with the correct element object */
-        parameters.computeIfPresent(DataProviderParameterUtils.REQUESTED_ELEMENT_KEY, (k, v) -> {
-            if (v instanceof Map) {
-                Map<String, Object> map = (Map<String, Object>) v;
-                Object elementType = map.get(ELEMENT_TYPE);
-                long time = ((Number) map.getOrDefault(TIME, 0L)).longValue();
-                long duration = ((Number) map.getOrDefault(DURATION, 0L)).longValue();
-                if (ElementType.STATE.equals(elementType)) {
-                    return new TimeGraphState(time, duration, null, null);
-                } else if (ElementType.ANNOTATION.equals(elementType)) {
-                    long entryId = ((Number) map.getOrDefault(ENTRY_ID, -1L)).longValue();
-                    return new Annotation(time, duration, entryId, AnnotationType.CHART, null, EMPTY_STYLE);
-                } else if (ElementType.ARROW.equals(elementType)) {
-                    long sourceId = ((Number) map.getOrDefault(ENTRY_ID, -1L)).longValue();
-                    long destinationId = ((Number) map.getOrDefault(DESTINATION_ID, -1L)).longValue();
-                    return new TimeGraphArrow(sourceId, destinationId, time, duration, EMPTY_STYLE);
+            /* Replace default deserialized map with the correct element object */
+            parameters.computeIfPresent(DataProviderParameterUtils.REQUESTED_ELEMENT_KEY, (k, v) -> {
+                if (v instanceof Map) {
+                    Map<String, Object> map = (Map<String, Object>) v;
+                    Object elementType = map.get(ELEMENT_TYPE);
+                    long time = ((Number) map.getOrDefault(TIME, 0L)).longValue();
+                    long duration = ((Number) map.getOrDefault(DURATION, 0L)).longValue();
+                    if (ElementType.STATE.equals(elementType)) {
+                        return new TimeGraphState(time, duration, null, null);
+                    } else if (ElementType.ANNOTATION.equals(elementType)) {
+                        long entryId = ((Number) map.getOrDefault(ENTRY_ID, -1L)).longValue();
+                        return new Annotation(time, duration, entryId, AnnotationType.CHART, null, EMPTY_STYLE);
+                    } else if (ElementType.ARROW.equals(elementType)) {
+                        long sourceId = ((Number) map.getOrDefault(ENTRY_ID, -1L)).longValue();
+                        long destinationId = ((Number) map.getOrDefault(DESTINATION_ID, -1L)).longValue();
+                        return new TimeGraphArrow(sourceId, destinationId, time, duration, EMPTY_STYLE);
+                    }
                 }
-            }
-            return null;
-        });
-
+                return null;
+            });
+        }
         List<Filter> filters = null;
         JsonNode filtersNode = node.get(FILTERS);
         if (filtersNode != null) {
