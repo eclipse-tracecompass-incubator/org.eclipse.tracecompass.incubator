@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +89,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.w3c.dom.Element;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
@@ -100,6 +102,7 @@ import com.google.common.collect.Iterables;
 @Path("/experiments/{expUUID}/outputs")
 public class DataProviderService {
     private static final String MISSING_PARAMETERS = "Missing query parameters"; //$NON-NLS-1$
+    private static final String WRONG_PARAMETERS = "Wrong query parameters"; //$NON-NLS-1$
     private static final String NO_PROVIDER = "Analysis cannot run"; //$NON-NLS-1$
     private static final String NO_SUCH_TRACE = "No Such Trace"; //$NON-NLS-1$
     private static final String MISSING_OUTPUTID = "Missing parameter outputId"; //$NON-NLS-1$
@@ -753,9 +756,9 @@ public class DataProviderService {
         if (params == null) {
             return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
-        TimeQueryFilter timeQueryFilter = FetchParametersUtils.createTimeQuery(params);
-        if (timeQueryFilter == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+        List<Long> timeRequested = DataProviderParameterUtils.extractTimeRequested(params);
+        if (timeRequested != null && timeRequested.size() == 1) {
+            return Response.status(Status.BAD_REQUEST).entity(WRONG_PARAMETERS).build();
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTree") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
@@ -776,7 +779,12 @@ public class DataProviderService {
                 // The analysis cannot be run on this trace
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
-
+            if (timeRequested == null || timeRequested.isEmpty()) {
+                // Make a shallow copy to be able to modify the map
+                params = new HashMap<>(params);
+                timeRequested = ImmutableList.of(experiment.getStartTime().toNanos(), experiment.getEndTime().toNanos());
+                params.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, timeRequested);
+            }
             TmfModelResponse<?> treeResponse = provider.fetchTree(params, null);
             Object model = treeResponse.getModel();
             return Response.ok(model instanceof TmfTreeModel ? new TmfModelResponse<>(new TreeModelWrapper((TmfTreeModel<@NonNull ITmfTreeDataModel>) model), treeResponse.getStatus(), treeResponse.getStatusMessage()) : treeResponse).build();
