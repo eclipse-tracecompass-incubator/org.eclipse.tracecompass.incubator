@@ -298,12 +298,11 @@ public class DataProviderService {
     public Response getStates(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_OUTPUTID).build();
-        }
+
         Map<String, Object> params = queryParameters.getParameters();
-        if (params == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+        Response errorResponse = validateQueryParameters(outputId, params);
+        if (errorResponse != null) {
+            return errorResponse;
         }
         SelectionTimeQueryFilter selectionTimeQueryFilter = FetchParametersUtils.createSelectionTimeQuery(params);
         if (selectionTimeQueryFilter == null) {
@@ -347,12 +346,11 @@ public class DataProviderService {
     public Response getArrows(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_OUTPUTID).build();
-        }
+
         Map<String, Object> params = queryParameters.getParameters();
-        if (params == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+        Response errorResponse = validateQueryParameters(outputId, params);
+        if (errorResponse != null) {
+            return errorResponse;
         }
         TimeQueryFilter timeQueryFilter = FetchParametersUtils.createTimeQuery(params);
         if (timeQueryFilter == null) {
@@ -486,12 +484,10 @@ public class DataProviderService {
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
 
-        if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_OUTPUTID).build();
-        }
         Map<String, Object> params = queryParameters.getParameters();
-        if (params == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+        Response errorResponse = validateQueryParameters(outputId, params);
+        if (errorResponse != null) {
+            return errorResponse;
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getAnnotations") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
@@ -563,12 +559,11 @@ public class DataProviderService {
     public Response getTimeGraphTooltip(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_OUTPUTID).build();
-        }
+
         Map<String, Object> params = queryParameters.getParameters();
-        if (params == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+        Response errorResponse = validateQueryParameters(outputId, params);
+        if (errorResponse != null) {
+            return errorResponse;
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTimeGraphTooltip") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
@@ -655,12 +650,11 @@ public class DataProviderService {
     public Response getLines(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_OUTPUTID).build();
-        }
+
         Map<String, Object> params = queryParameters.getParameters();
-        if (params == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+        Response errorResponse = validateQueryParameters(outputId, params);
+        if (errorResponse != null) {
+            return errorResponse;
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getLines") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
@@ -805,12 +799,11 @@ public class DataProviderService {
     public Response getStyles(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             QueryParameters queryParameters) {
-        if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_OUTPUTID).build();
-        }
+
         Map<String, Object> params = queryParameters.getParameters();
-        if (params == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+        Response errorResponse = validateQueryParameters(outputId, params);
+        if (errorResponse != null) {
+            return errorResponse;
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStyles") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
@@ -836,5 +829,15 @@ public class DataProviderService {
             // IOutputStyleProvider and let the client decide the style
             return Response.ok(new TmfModelResponse<>(new OutputStyleModel(Collections.emptyMap()), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
         }
+    }
+
+    private static Response validateQueryParameters(String outputId, Map<String, Object> params) {
+        if (outputId == null) {
+            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_OUTPUTID).build();
+        }
+        if (params == null) {
+            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+        }
+        return null;
     }
 }
