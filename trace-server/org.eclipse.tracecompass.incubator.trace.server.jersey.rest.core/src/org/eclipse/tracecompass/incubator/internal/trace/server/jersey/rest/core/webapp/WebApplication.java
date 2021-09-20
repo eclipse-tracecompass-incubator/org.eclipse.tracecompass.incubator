@@ -106,7 +106,7 @@ public class WebApplication {
             project.open(null);
         }
 
-        IFolder tracesFolder = project.getFolder("Traces");
+        IFolder tracesFolder = project.getFolder("Traces"); //$NON-NLS-1$
         if (!tracesFolder.exists()) {
             tracesFolder.create(true, true, null);
         }
