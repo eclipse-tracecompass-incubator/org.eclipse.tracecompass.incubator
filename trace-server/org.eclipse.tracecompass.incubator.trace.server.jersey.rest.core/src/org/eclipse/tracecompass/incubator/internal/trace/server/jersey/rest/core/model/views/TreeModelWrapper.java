@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.tmf.core.model.ITableColumnDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 
@@ -36,14 +37,19 @@ public class TreeModelWrapper {
      */
     public static class TreeColumnHeader {
         private final String fName;
+        private final String fTooltip;
 
         /**
          * Constructor with only the name
          *
-         * @param name The name of the column
+         * @param name
+         *            The name of the column
+         * @param tooltip
+         *            The tooltip text for the column
          */
-        public TreeColumnHeader(String name) {
+        public TreeColumnHeader(String name, String tooltip) {
             fName =name;
+            fTooltip = tooltip;
         }
 
         /**
@@ -54,6 +60,14 @@ public class TreeModelWrapper {
         public String getName() {
             return fName;
         }
+        /**
+         * Get the tooltip of the column
+         *
+         * @return The tooltip of the column
+         */
+        public String getTooltip() {
+            return fTooltip;
+        }
     }
 
     /**
@@ -62,9 +76,9 @@ public class TreeModelWrapper {
      */
     public TreeModelWrapper(TmfTreeModel<@NonNull ITmfTreeDataModel> model) {
         fModel = model;
-        List<@NonNull String> headers = model.getHeaders();
+        List<@NonNull ITableColumnDescriptor> headers = model.getColumnDescriptors();
         Builder<@NonNull TreeColumnHeader> builder = ImmutableList.builder();
-        headers.forEach(header -> builder.add(new TreeColumnHeader(header)));
+        headers.forEach(column -> builder.add(new TreeColumnHeader(column.getText(), column.getTooltip())));
         fHeaders = builder.build();
     }
 
