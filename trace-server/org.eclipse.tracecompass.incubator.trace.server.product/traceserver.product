@@ -98,7 +98,9 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
       <plugin id="com.fasterxml.jackson.core.jackson-core"/>
       <plugin id="com.fasterxml.jackson.core.jackson-databind"/>
+      <plugin id="com.fasterxml.jackson.dataformat.jackson-dataformat-yaml"/>
       <plugin id="com.fasterxml.jackson.datatype.jackson-datatype-guava"/>
+      <plugin id="com.fasterxml.jackson.datatype.jackson-datatype-jsr310"/>
       <plugin id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-base"/>
       <plugin id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider"/>
       <plugin id="com.fasterxml.jackson.module.jackson-module-jaxb-annotations"/>
@@ -106,6 +108,12 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <plugin id="com.google.guava"/>
       <plugin id="com.ibm.icu"/>
       <plugin id="com.sun.xml.bind.jaxb-osgi"/>
+      <plugin id="io.github.classgraph.classgraph"/>
+      <plugin id="io.swagger.core.v3.swagger-annotations"/>
+      <plugin id="io.swagger.core.v3.swagger-core"/>
+      <plugin id="io.swagger.core.v3.swagger-integration"/>
+      <plugin id="io.swagger.core.v3.swagger-jaxrs2"/>
+      <plugin id="io.swagger.core.v3.swagger-models"/>
       <plugin id="jakarta.servlet-api"/>
       <plugin id="jakarta.validation.jakarta.validation-api"/>
       <plugin id="jakarta.xml.bind"/>
@@ -208,6 +216,7 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <plugin id="org.json"/>
       <plugin id="org.junit"/>
       <plugin id="org.slf4j.api"/>
+      <plugin id="org.yaml.snakeyaml"/>
    </plugins>
 
    <configurations>

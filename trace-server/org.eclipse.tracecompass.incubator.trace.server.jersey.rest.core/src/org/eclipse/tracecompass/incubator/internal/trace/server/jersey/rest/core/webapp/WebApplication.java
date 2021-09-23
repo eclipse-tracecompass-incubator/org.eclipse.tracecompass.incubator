@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp;
 
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -134,6 +135,7 @@ public class WebApplication {
         rc.register(XmlManagerService.class);
         rc.register(CORSFilter.class);
         rc.register(JacksonObjectMapperProvider.class);
+        rc.register(OpenApiResource.class);
     }
 
     /**
