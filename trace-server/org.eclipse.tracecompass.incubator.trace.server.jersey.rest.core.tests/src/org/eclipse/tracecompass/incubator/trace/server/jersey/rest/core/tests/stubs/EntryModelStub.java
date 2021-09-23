@@ -12,8 +12,8 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.s
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -34,8 +34,8 @@ public class EntryModelStub implements Serializable {
 
     private static final long serialVersionUID = 6027193074532379770L;
 
-    private final Set<EntryStub> fEntries;
-    private final Set<EntryHeaderStub> fHeaders;
+    private final List<EntryStub> fEntries;
+    private final List<EntryHeaderStub> fHeaders;
 
     /**
      * {@link JsonCreator} Constructor for final fields
@@ -46,10 +46,10 @@ public class EntryModelStub implements Serializable {
      *            The set of headers for this model
      */
     @JsonCreator
-    public EntryModelStub(@JsonProperty("entries") Set<EntryStub> entries,
-            @JsonProperty("headers") Set<EntryHeaderStub> headers) {
+    public EntryModelStub(@JsonProperty("entries") List<EntryStub> entries,
+            @JsonProperty("headers") List<EntryHeaderStub> headers) {
         fEntries = Objects.requireNonNull(entries, "The 'entries' json field was not set");
-        fHeaders = headers == null ? Collections.emptySet() : headers;
+        fHeaders = headers == null ? Collections.emptyList() : headers;
     }
 
     /**
@@ -57,7 +57,7 @@ public class EntryModelStub implements Serializable {
      *
      * @return The entries in this model
      */
-    public Set<EntryStub> getEntries() {
+    public List<EntryStub> getEntries() {
         return fEntries;
     }
 
@@ -66,7 +66,7 @@ public class EntryModelStub implements Serializable {
      *
      * @return The headers in this model
      */
-    public Set<EntryHeaderStub> getHeaders() {
+    public List<EntryHeaderStub> getHeaders() {
         return fHeaders;
     }
 

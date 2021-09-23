@@ -35,6 +35,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ColumnHeaderEntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryHeaderStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
@@ -90,6 +91,8 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final String DESTINATION_ID = "destinationId";
     private static final long TABLE_INDEX = 0L;
     private static final long TABLE_COUNT = 100L;
+
+    private static final  List<EntryHeaderStub> EXPECTED_XY_TREE_HEADERS = ImmutableList.of(new EntryHeaderStub("Process", ""), new EntryHeaderStub("TID", ""), new EntryHeaderStub("%", ""), new EntryHeaderStub("Time", ""));
 
     /**
      * Test getting the data provider descriptors
@@ -166,9 +169,21 @@ public class DataProviderServiceTest extends RestServerTest {
                 xyResponse.close();
             }
 
+            // Verify tree model
             EntryModelStub model = responseModel.getModel();
+            assertNotNull(model);
+            List<EntryHeaderStub> headers = model.getHeaders();
+            assertNotNull(headers);
+            assertEquals(EXPECTED_XY_TREE_HEADERS.size(), headers.size());
+            // Verify tree headers
+            for (int i = 0; i < headers.size(); i++ ) {
+                EntryHeaderStub header = headers.get(i);
+                EntryHeaderStub expHeader = EXPECTED_XY_TREE_HEADERS.get(i);
+                assertTrue(expHeader.getName().equals(header.getName()) && expHeader.getTooltip().equals(header.getTooltip()));
+            }
+            // Verify Entries
             assertNotNull("The model is null, maybe the analysis did not run long enough?" + responseModel, model);
-            Set<EntryStub> entries = model.getEntries();
+            List<EntryStub> entries = model.getEntries();
             assertFalse(entries.isEmpty());
 
             // Test getting the XY series endpoint
