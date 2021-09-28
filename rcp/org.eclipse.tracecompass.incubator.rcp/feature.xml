@@ -259,7 +259,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.glassfish.jersey.inject.jersey-hk2"
+         id="org.glassfish.jersey.bundles.repackaged.jersey-guava"
          download-size="0"
          install-size="0"
          version="0.0.0"

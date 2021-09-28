@@ -23,16 +23,36 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Experiment;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.FilterService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.HealthService;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Trace;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.Annotation;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.VirtualTableCell;
+import org.eclipse.tracecompass.internal.tmf.core.markers.MarkerSet;
+import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
+import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphRowModel;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
+import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeDataModel;
+import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
+import org.eclipse.tracecompass.tmf.core.model.xy.ITmfXyModel;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
 /**
  *
@@ -133,7 +153,7 @@ public class WebApplication {
         rc.register(HealthService.class);
         rc.register(XmlManagerService.class);
         rc.register(CORSFilter.class);
-        rc.register(JacksonObjectMapperProvider.class);
+        rc.register(registerCustomMappers());
     }
 
     /**
@@ -150,7 +170,7 @@ public class WebApplication {
         ServerConnector serverConnector = null;
         if (config.useSSL()) {
 
-            org.eclipse.jetty.util.ssl.SslContextFactory.Server contextFactory = new SslContextFactory.Server();
+            SslContextFactory contextFactory = new SslContextFactory.Server();
             contextFactory.setKeyStorePath(config.getKeystore());
             contextFactory.setKeyStorePassword(config.getKeystorePass());
             contextFactory.setTrustAll(true);
@@ -170,6 +190,40 @@ public class WebApplication {
         }
         serverConnector.setPort(config.getPort());
         return serverConnector;
+    }
+
+    /**
+     * Creates a JSON content type provider configured with custom mappers for
+     * reading and writing JSON from/to custom classes.
+     *
+     * @return the JSON content type provider providing custom mappers.
+     */
+    protected static JacksonJaxbJsonProvider registerCustomMappers() {
+        ObjectMapper mapper = new ObjectMapper();
+
+        // create JsonProvider to provide custom ObjectMapper
+        JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
+        provider.setMapper(mapper);
+
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Trace.class, new TraceSerializer());
+        module.addSerializer(Experiment.class, new ExperimentSerializer());
+        module.addSerializer(DataProviderDescriptor.class, new DataProviderDescriptorSerializer());
+        module.addSerializer(ITmfXyModel.class, new XYModelSerializer());
+        module.addSerializer(ISeriesModel.class, new SeriesModelSerializer());
+        module.addSerializer(TimeGraphState.class, new TimeGraphStateSerializer());
+        module.addSerializer(ITimeGraphArrow.class, new TimeGraphArrowSerializer());
+        module.addSerializer(TimeGraphRowModel.class, new TimeGraphRowModelSerializer());
+        module.addSerializer(TimeGraphEntryModel.class, new TimeGraphEntryModelSerializer());
+        module.addSerializer(Annotation.class, new AnnotationSerializer());
+        module.addSerializer(TmfTreeDataModel.class, new TmfTreeModelSerializer());
+        module.addSerializer(OutputElementStyle.class, new OutputElementStyleSerializer());
+        module.addSerializer(IVirtualTableLine.class, new VirtualTableLineSerializer());
+        module.addSerializer(VirtualTableCell.class, new VirtualTableCellSerializer());
+        module.addSerializer(MarkerSet.class, new MarkerSetSerializer());
+        module.addDeserializer(QueryParameters.class, new QueryParametersDeserializer());
+        mapper.registerModule(module);
+        return provider;
     }
 
     /**
