@@ -94,11 +94,20 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.License;
+import io.swagger.v3.oas.annotations.servers.Server;
+
 /**
  * Service to query the {@link ITmfTreeDataProvider}s
  *
  * @author Loic Prieur-Drevon
  */
+@OpenAPIDefinition(info = @Info(title = EndpointConstants.TITLE, description = EndpointConstants.DESC, termsOfService = EndpointConstants.TERMS, contact = @Contact(email = EndpointConstants.EMAIL), license = @License(name = EndpointConstants.LICENSE, url = EndpointConstants.LICENSE_URL), version = EndpointConstants.VERSION), servers = {
+        @Server(url = EndpointConstants.SERVER)
+})
 @SuppressWarnings("restriction")
 @Path("/experiments/{expUUID}/outputs")
 public class DataProviderService {
