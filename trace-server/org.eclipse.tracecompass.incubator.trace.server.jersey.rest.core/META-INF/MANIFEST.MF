@@ -44,6 +44,7 @@ Import-Package: com.google.common.annotations,
  com.google.common.collect,
  com.google.common.primitives,
  org.apache.commons.io,
+ org.eclipse.tracecompass.internal.analysis.timing.core.event.matching,
  org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module,
  org.eclipse.tracecompass.tmf.analysis.xml.core.module
 Bundle-ClassPath: .,
