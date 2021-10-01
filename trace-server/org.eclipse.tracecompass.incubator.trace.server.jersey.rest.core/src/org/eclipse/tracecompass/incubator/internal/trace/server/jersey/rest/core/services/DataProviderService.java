@@ -46,6 +46,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TableColumnHeader;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TreeModelWrapper;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.VirtualTableModelWrapper;
+import org.eclipse.tracecompass.internal.analysis.timing.core.event.matching.EventMatchingLatencyAnalysis;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.Annotation;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationCategoriesModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationModel;
@@ -123,6 +124,12 @@ public class DataProviderService {
         list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
         list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.XY)));
 
+        /*
+         * Bug 576402:
+         * Filter out all "Event Matching Analysis" related data providers, e.g. "Latency vs Time",
+         * because are part in every experiment but won't provide any data.
+         */
+        list.removeIf(dp -> dp.getId().endsWith(EventMatchingLatencyAnalysis.ID));
         return Response.ok(list).build();
     }
 

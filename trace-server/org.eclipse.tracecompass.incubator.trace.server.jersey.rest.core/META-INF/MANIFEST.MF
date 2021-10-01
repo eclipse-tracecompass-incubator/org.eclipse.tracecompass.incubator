@@ -58,6 +58,7 @@ Import-Package: com.fasterxml.jackson.module.jaxb,
  javax.validation.spi;version="2.0.2",
  javax.validation.valueextraction;version="2.0.2",
  org.apache.commons.io,
+ org.eclipse.tracecompass.internal.analysis.timing.core.event.matching,
  org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module,
  org.eclipse.tracecompass.tmf.analysis.xml.core.module,
  org.glassfish.jersey.inject.hk2
