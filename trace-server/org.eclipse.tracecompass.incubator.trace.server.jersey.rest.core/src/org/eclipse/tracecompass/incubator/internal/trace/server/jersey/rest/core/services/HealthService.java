@@ -19,12 +19,15 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.collect.ImmutableMap;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 /**
  * Service to query the health status of the server
  *
  * @author Geneviève Bastien
  */
 @Path("/health")
+@Tag(name = EndpointConstants.DIA)
 public class HealthService {
 
     private static final String STATUS_KEY = "status"; //$NON-NLS-1$

@@ -66,6 +66,8 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 /**
  * Service to manage experiments
  *
@@ -73,6 +75,7 @@ import com.google.common.collect.Multiset;
  */
 @SuppressWarnings("restriction")
 @Path("/experiments")
+@Tag(name = EndpointConstants.EXP)
 public class ExperimentManagerService {
 
     private static final Map<UUID, List<UUID>> TRACE_UUIDS = Collections.synchronizedMap(new HashMap<>());

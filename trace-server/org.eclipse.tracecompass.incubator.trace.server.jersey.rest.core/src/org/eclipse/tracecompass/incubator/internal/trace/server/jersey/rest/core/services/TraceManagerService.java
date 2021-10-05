@@ -61,12 +61,15 @@ import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 /**
  * Service to manage traces.
  *
  * @author Loic Prieur-Drevon
  */
 @Path("/traces")
+@Tag(name = EndpointConstants.TRA)
 public class TraceManagerService {
 
     private static final Map<UUID, IResource> TRACES = Collections.synchronizedMap(initTraces());

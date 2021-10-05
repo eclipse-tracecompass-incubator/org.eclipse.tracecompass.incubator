@@ -99,6 +99,7 @@ import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Service to query the {@link ITmfTreeDataProvider}s
@@ -107,6 +108,19 @@ import io.swagger.v3.oas.annotations.servers.Server;
  */
 @OpenAPIDefinition(info = @Info(title = EndpointConstants.TITLE, description = EndpointConstants.DESC, termsOfService = EndpointConstants.TERMS, contact = @Contact(email = EndpointConstants.EMAIL), license = @License(name = EndpointConstants.LICENSE, url = EndpointConstants.LICENSE_URL), version = EndpointConstants.VERSION), servers = {
         @Server(url = EndpointConstants.SERVER)
+}, tags = {
+        @Tag(name = EndpointConstants.TRA, description = "How to manage physical traces on your server."),
+        @Tag(name = EndpointConstants.EXP, description = "How to manage experiments on your server; an experiment represents a collection of traces, which can produce output models."),
+        @Tag(name = EndpointConstants.BMR, description = "How to bookmark areas of interest in the trace."),
+        @Tag(name = EndpointConstants.DTR, description = "Learn about querying generic data tree models."),
+        @Tag(name = EndpointConstants.X_Y, description = "Learn about querying XY models."),
+        @Tag(name = EndpointConstants.TGR, description = "Learn about querying Time Graph models."),
+        @Tag(name = EndpointConstants.VTB, description = "Learn about querying virtual table models (e.g. Events Table)."),
+        @Tag(name = EndpointConstants.STY, description = "Retrieve styles for different outputs."),
+        @Tag(name = EndpointConstants.ANN, description = "Retrieve annotations for different outputs."),
+        @Tag(name = EndpointConstants.FIL, description = "How to filter and query."),
+        @Tag(name = EndpointConstants.FEA, description = "Discover the features which are available on a given server."),
+        @Tag(name = EndpointConstants.DIA, description = "Refer to the server's status.")
 })
 @SuppressWarnings("restriction")
 @Path("/experiments/{expUUID}/outputs")
@@ -123,6 +137,7 @@ public class DataProviderService {
      * @return the data provider descriptions with the queried {@link UUID} if it exists.
      */
     @GET
+    @Tag(name = EndpointConstants.EXP)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProviders(@PathParam("expUUID") UUID expUUID) {
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
@@ -153,6 +168,7 @@ public class DataProviderService {
      */
     @GET
     @Path("/{outputId}")
+    @Tag(name = EndpointConstants.EXP)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProvider(@PathParam("expUUID") UUID expUUID, @PathParam("outputId") String outputId) {
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
@@ -186,6 +202,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/XY/{outputId}/tree")
+    @Tag(name = EndpointConstants.X_Y)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getXYTree(@PathParam("expUUID") UUID expUUID,
@@ -206,6 +223,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/XY/{outputId}/xy")
+    @Tag(name = EndpointConstants.X_Y)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getXY(@PathParam("expUUID") UUID expUUID,
@@ -264,6 +282,7 @@ public class DataProviderService {
      */
     @GET
     @Path("/XY/{outputId}/tooltip")
+    @Tag(name = EndpointConstants.X_Y)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getXYTooltip(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
@@ -287,6 +306,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/timeGraph/{outputId}/tree")
+    @Tag(name = EndpointConstants.TGR)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTimeGraphTree(@PathParam("expUUID") UUID expUUID,
@@ -309,6 +329,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/timeGraph/{outputId}/states")
+    @Tag(name = EndpointConstants.TGR)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStates(@PathParam("expUUID") UUID expUUID,
@@ -357,6 +378,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/timeGraph/{outputId}/arrows")
+    @Tag(name = EndpointConstants.TGR)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getArrows(@PathParam("expUUID") UUID expUUID,
@@ -400,6 +422,7 @@ public class DataProviderService {
      */
     @GET
     @Path("/markerSets")
+    @Tag(name = EndpointConstants.ANN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMarkerSets(@PathParam("expUUID") UUID expUUID) {
 
@@ -425,6 +448,7 @@ public class DataProviderService {
      */
     @GET
     @Path("/{outputId}/annotations")
+    @Tag(name = EndpointConstants.ANN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAnnotationCategories(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
@@ -494,6 +518,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/{outputId}/annotations")
+    @Tag(name = EndpointConstants.ANN)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAnnotations(@PathParam("expUUID") UUID expUUID,
@@ -571,6 +596,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/timeGraph/{outputId}/tooltip")
+    @Tag(name = EndpointConstants.TGR)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTimeGraphTooltip(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
@@ -625,6 +651,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/table/{outputId}/columns")
+    @Tag(name = EndpointConstants.VTB)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getColumns(@PathParam("expUUID") UUID expUUID,
@@ -661,6 +688,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/table/{outputId}/lines")
+    @Tag(name = EndpointConstants.VTB)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLines(@PathParam("expUUID") UUID expUUID,
@@ -810,6 +838,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/{outputId}/style")
+    @Tag(name = EndpointConstants.STY)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStyles(@PathParam("expUUID") UUID expUUID,

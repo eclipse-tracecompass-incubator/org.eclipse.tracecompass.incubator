@@ -48,6 +48,23 @@ public class EndpointConstants {
     static final String VERSION = "0.1.0"; //$NON-NLS-1$
     static final String SERVER = "https://localhost:8080/tsp/api"; //$NON-NLS-1$
 
+    /**
+     * Swagger @Tag-s next below in alphabetical order for maintainability.
+     * 3-letters so they align in {@link DataProviderService}; readability.
+     */
+    static final String ANN = "Annotations"; //$NON-NLS-1$
+    static final String BMR = "Bookmarks"; //$NON-NLS-1$
+    static final String DIA = "Diagnostic"; //$NON-NLS-1$
+    static final String DTR = "Data Tree"; //$NON-NLS-1$
+    static final String EXP = "Experiments"; //$NON-NLS-1$
+    static final String FEA = "Features"; //$NON-NLS-1$
+    static final String FIL = "Filters"; //$NON-NLS-1$
+    static final String STY = "Styles"; //$NON-NLS-1$
+    static final String TGR = "TimeGraph"; //$NON-NLS-1$
+    static final String TRA = "Traces"; //$NON-NLS-1$
+    static final String VTB = "Virtual Tables"; //$NON-NLS-1$
+    static final String X_Y = "XY"; //$NON-NLS-1$
+
     private EndpointConstants() {
         // private constructor
     }
