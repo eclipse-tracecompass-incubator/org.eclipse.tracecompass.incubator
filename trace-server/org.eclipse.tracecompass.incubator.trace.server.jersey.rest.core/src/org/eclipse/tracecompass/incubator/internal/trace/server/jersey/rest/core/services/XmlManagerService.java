@@ -33,12 +33,15 @@ import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 /**
  * XML analysis and provider management
  *
  * @author Loic Prieur-Drevon
  */
 @Path("/xml")
+@Tag(name = EndpointConstants.XML)
 @SuppressWarnings("restriction")
 public class XmlManagerService {
 

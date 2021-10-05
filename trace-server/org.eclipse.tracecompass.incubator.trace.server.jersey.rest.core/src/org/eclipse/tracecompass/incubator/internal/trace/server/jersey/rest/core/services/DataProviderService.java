@@ -120,6 +120,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
         @Tag(name = EndpointConstants.TGR, description = "Learn about querying Time Graph models."),
         @Tag(name = EndpointConstants.TRA, description = "How to manage physical traces on your server."),
         @Tag(name = EndpointConstants.VTB, description = "Learn about querying virtual table models (e.g. Events Table)."),
+        @Tag(name = EndpointConstants.XML, description = "Learn about querying XML analyses."),
         @Tag(name = EndpointConstants.X_Y, description = "Learn about querying XY models.")
 })
 @SuppressWarnings("restriction")

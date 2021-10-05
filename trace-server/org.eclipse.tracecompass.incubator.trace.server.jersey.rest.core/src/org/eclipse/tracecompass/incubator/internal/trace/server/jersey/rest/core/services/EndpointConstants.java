@@ -63,6 +63,7 @@ public class EndpointConstants {
     static final String TGR = "TimeGraph"; //$NON-NLS-1$
     static final String TRA = "Traces"; //$NON-NLS-1$
     static final String VTB = "Virtual Tables"; //$NON-NLS-1$
+    static final String XML = "XML"; //$NON-NLS-1$
     static final String X_Y = "XY"; //$NON-NLS-1$
 
     private EndpointConstants() {
