@@ -109,18 +109,18 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @OpenAPIDefinition(info = @Info(title = EndpointConstants.TITLE, description = EndpointConstants.DESC, termsOfService = EndpointConstants.TERMS, contact = @Contact(email = EndpointConstants.EMAIL), license = @License(name = EndpointConstants.LICENSE, url = EndpointConstants.LICENSE_URL), version = EndpointConstants.VERSION), servers = {
         @Server(url = EndpointConstants.SERVER)
 }, tags = {
-        @Tag(name = EndpointConstants.TRA, description = "How to manage physical traces on your server."),
-        @Tag(name = EndpointConstants.EXP, description = "How to manage experiments on your server; an experiment represents a collection of traces, which can produce output models."),
-        @Tag(name = EndpointConstants.BMR, description = "How to bookmark areas of interest in the trace."),
-        @Tag(name = EndpointConstants.DTR, description = "Learn about querying generic data tree models."),
-        @Tag(name = EndpointConstants.X_Y, description = "Learn about querying XY models."),
-        @Tag(name = EndpointConstants.TGR, description = "Learn about querying Time Graph models."),
-        @Tag(name = EndpointConstants.VTB, description = "Learn about querying virtual table models (e.g. Events Table)."),
-        @Tag(name = EndpointConstants.STY, description = "Retrieve styles for different outputs."),
         @Tag(name = EndpointConstants.ANN, description = "Retrieve annotations for different outputs."),
-        @Tag(name = EndpointConstants.FIL, description = "How to filter and query."),
+        @Tag(name = EndpointConstants.BMR, description = "How to bookmark areas of interest in the trace."),
+        @Tag(name = EndpointConstants.DIA, description = "Refer to the server's status."),
+        @Tag(name = EndpointConstants.DTR, description = "Learn about querying generic data tree models."),
+        @Tag(name = EndpointConstants.EXP, description = "How to manage experiments on your server; an experiment represents a collection of traces, which can produce output models."),
         @Tag(name = EndpointConstants.FEA, description = "Discover the features which are available on a given server."),
-        @Tag(name = EndpointConstants.DIA, description = "Refer to the server's status.")
+        @Tag(name = EndpointConstants.FIL, description = "How to filter and query."),
+        @Tag(name = EndpointConstants.STY, description = "Retrieve styles for different outputs."),
+        @Tag(name = EndpointConstants.TGR, description = "Learn about querying Time Graph models."),
+        @Tag(name = EndpointConstants.TRA, description = "How to manage physical traces on your server."),
+        @Tag(name = EndpointConstants.VTB, description = "Learn about querying virtual table models (e.g. Events Table)."),
+        @Tag(name = EndpointConstants.X_Y, description = "Learn about querying XY models.")
 })
 @SuppressWarnings("restriction")
 @Path("/experiments/{expUUID}/outputs")
