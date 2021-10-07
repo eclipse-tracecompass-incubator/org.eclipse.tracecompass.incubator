@@ -25,9 +25,9 @@ cd trace-server/org.eclipse.tracecompass.incubator.trace.server.product/target/p
 This server is an implementation of the [Trace Server Protocol](https://github.com/theia-ide/trace-server-protocol) whose [API is documented](https://theia-ide.github.io/trace-server-protocol/) using the OpenAPI REST specification.
 
 OpenAPI REST specification:
-The REST API is documented using the OpenAPI specification in the API.json file.
+The REST API is documented using the OpenAPI specification in the API.yaml file.
 The file can be opened with an IDE plug-in, or Swagger tools.
-For more information, see [https://swagger.io/docs/](https://swagger.io/docs/).
+For more information, see [TSP's README](https://github.com/theia-ide/trace-server-protocol/blob/master/README.md#how-to).
 
 ## Run the Server with SSL
 
