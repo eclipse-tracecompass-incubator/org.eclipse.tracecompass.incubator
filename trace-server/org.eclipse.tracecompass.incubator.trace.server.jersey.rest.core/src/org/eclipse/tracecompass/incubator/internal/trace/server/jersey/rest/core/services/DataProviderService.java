@@ -11,6 +11,33 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ANN;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.BMR;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DESC;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DIA;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DTR;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.EMAIL;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.EXP;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.FEA;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.FIL;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.LICENSE;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.LICENSE_URL;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_OUTPUTID;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_PARAMETERS;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_PROVIDER;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_TRACE;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.SERVER;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.STY;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TERMS;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TGR;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TITLE;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TRA;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.VERSION;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.VTB;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.XML;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.X_Y;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -106,22 +133,22 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  *
  * @author Loic Prieur-Drevon
  */
-@OpenAPIDefinition(info = @Info(title = EndpointConstants.TITLE, description = EndpointConstants.DESC, termsOfService = EndpointConstants.TERMS, contact = @Contact(email = EndpointConstants.EMAIL), license = @License(name = EndpointConstants.LICENSE, url = EndpointConstants.LICENSE_URL), version = EndpointConstants.VERSION), servers = {
-        @Server(url = EndpointConstants.SERVER)
+@OpenAPIDefinition(info = @Info(title = TITLE, description = DESC, termsOfService = TERMS, contact = @Contact(email = EMAIL), license = @License(name = LICENSE, url = LICENSE_URL), version = VERSION), servers = {
+        @Server(url = SERVER)
 }, tags = {
-        @Tag(name = EndpointConstants.ANN, description = "Retrieve annotations for different outputs."),
-        @Tag(name = EndpointConstants.BMR, description = "How to bookmark areas of interest in the trace."),
-        @Tag(name = EndpointConstants.DIA, description = "Refer to the server's status."),
-        @Tag(name = EndpointConstants.DTR, description = "Learn about querying generic data tree models."),
-        @Tag(name = EndpointConstants.EXP, description = "How to manage experiments on your server; an experiment represents a collection of traces, which can produce output models."),
-        @Tag(name = EndpointConstants.FEA, description = "Discover the features which are available on a given server."),
-        @Tag(name = EndpointConstants.FIL, description = "How to filter and query."),
-        @Tag(name = EndpointConstants.STY, description = "Retrieve styles for different outputs."),
-        @Tag(name = EndpointConstants.TGR, description = "Learn about querying Time Graph models."),
-        @Tag(name = EndpointConstants.TRA, description = "How to manage physical traces on your server."),
-        @Tag(name = EndpointConstants.VTB, description = "Learn about querying virtual table models (e.g. Events Table)."),
-        @Tag(name = EndpointConstants.XML, description = "Learn about querying XML analyses."),
-        @Tag(name = EndpointConstants.X_Y, description = "Learn about querying XY models.")
+        @Tag(name = ANN, description = "Retrieve annotations for different outputs."),
+        @Tag(name = BMR, description = "How to bookmark areas of interest in the trace."),
+        @Tag(name = DIA, description = "Refer to the server's status."),
+        @Tag(name = DTR, description = "Learn about querying generic data tree models."),
+        @Tag(name = EXP, description = "How to manage experiments on your server; an experiment represents a collection of traces, which can produce output models."),
+        @Tag(name = FEA, description = "Discover the features which are available on a given server."),
+        @Tag(name = FIL, description = "How to filter and query."),
+        @Tag(name = STY, description = "Retrieve styles for different outputs."),
+        @Tag(name = TGR, description = "Learn about querying Time Graph models."),
+        @Tag(name = TRA, description = "How to manage physical traces on your server."),
+        @Tag(name = VTB, description = "Learn about querying virtual table models (e.g. Events Table)."),
+        @Tag(name = XML, description = "Learn about querying XML analyses."),
+        @Tag(name = X_Y, description = "Learn about querying XY models.")
 })
 @SuppressWarnings("restriction")
 @Path("/experiments/{expUUID}/outputs")
@@ -138,7 +165,7 @@ public class DataProviderService {
      * @return the data provider descriptions with the queried {@link UUID} if it exists.
      */
     @GET
-    @Tag(name = EndpointConstants.EXP)
+    @Tag(name = EXP)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProviders(@PathParam("expUUID") UUID expUUID) {
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
@@ -169,7 +196,7 @@ public class DataProviderService {
      */
     @GET
     @Path("/{outputId}")
-    @Tag(name = EndpointConstants.EXP)
+    @Tag(name = EXP)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProvider(@PathParam("expUUID") UUID expUUID, @PathParam("outputId") String outputId) {
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
@@ -203,7 +230,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/XY/{outputId}/tree")
-    @Tag(name = EndpointConstants.X_Y)
+    @Tag(name = X_Y)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getXYTree(@PathParam("expUUID") UUID expUUID,
@@ -224,27 +251,27 @@ public class DataProviderService {
      */
     @POST
     @Path("/XY/{outputId}/xy")
-    @Tag(name = EndpointConstants.X_Y)
+    @Tag(name = X_Y)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getXY(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId, QueryParameters queryParameters) {
         if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_OUTPUTID).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
         }
         Map<String, Object> params = queryParameters.getParameters();
         if (params == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
         SelectionTimeQueryFilter selectionTimeQueryFilter = FetchParametersUtils.createSelectionTimeQuery(params);
         if (selectionTimeQueryFilter == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getXY") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.NO_SUCH_TRACE).build();
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
             ITmfTreeXYDataProvider<@NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
@@ -257,7 +284,7 @@ public class DataProviderService {
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(EndpointConstants.NO_PROVIDER).build();
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
             TmfModelResponse<@NonNull ITmfXyModel> response = provider.fetchXY(params, null);
@@ -283,7 +310,7 @@ public class DataProviderService {
      */
     @GET
     @Path("/XY/{outputId}/tooltip")
-    @Tag(name = EndpointConstants.X_Y)
+    @Tag(name = X_Y)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getXYTooltip(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
@@ -307,7 +334,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/timeGraph/{outputId}/tree")
-    @Tag(name = EndpointConstants.TGR)
+    @Tag(name = TGR)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTimeGraphTree(@PathParam("expUUID") UUID expUUID,
@@ -330,7 +357,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/timeGraph/{outputId}/states")
-    @Tag(name = EndpointConstants.TGR)
+    @Tag(name = TGR)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStates(@PathParam("expUUID") UUID expUUID,
@@ -344,20 +371,20 @@ public class DataProviderService {
         }
         SelectionTimeQueryFilter selectionTimeQueryFilter = FetchParametersUtils.createSelectionTimeQuery(params);
         if (selectionTimeQueryFilter == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStates") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.NO_SUCH_TRACE).build();
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
             ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(experiment, outputId);
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(EndpointConstants.NO_PROVIDER).build();
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
             TmfModelResponse<TimeGraphModel> response = provider.fetchRowModel(params, null);
@@ -379,7 +406,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/timeGraph/{outputId}/arrows")
-    @Tag(name = EndpointConstants.TGR)
+    @Tag(name = TGR)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getArrows(@PathParam("expUUID") UUID expUUID,
@@ -393,20 +420,20 @@ public class DataProviderService {
         }
         TimeQueryFilter timeQueryFilter = FetchParametersUtils.createTimeQuery(params);
         if (timeQueryFilter == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getArrows") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.NO_SUCH_TRACE).build();
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
             ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(experiment, outputId);
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(EndpointConstants.NO_PROVIDER).build();
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
             TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(params, null);
@@ -423,14 +450,14 @@ public class DataProviderService {
      */
     @GET
     @Path("/markerSets")
-    @Tag(name = EndpointConstants.ANN)
+    @Tag(name = ANN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMarkerSets(@PathParam("expUUID") UUID expUUID) {
 
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getMarkerSets").build()) { //$NON-NLS-1$
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.NO_SUCH_TRACE).build();
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
             List<MarkerSet> markerSets = MarkerConfigXmlParser.getMarkerSets();
             return Response.ok(new TmfModelResponse<>(markerSets, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
@@ -449,20 +476,20 @@ public class DataProviderService {
      */
     @GET
     @Path("/{outputId}/annotations")
-    @Tag(name = EndpointConstants.ANN)
+    @Tag(name = ANN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAnnotationCategories(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
             @QueryParam("markerSetId") String markerSetId) {
 
         if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_OUTPUTID).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getAnnotationCategories") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.NO_SUCH_TRACE).build();
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
             ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
@@ -470,7 +497,7 @@ public class DataProviderService {
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(EndpointConstants.NO_PROVIDER).build();
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
             boolean isComplete = true;
@@ -519,7 +546,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/{outputId}/annotations")
-    @Tag(name = EndpointConstants.ANN)
+    @Tag(name = ANN)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAnnotations(@PathParam("expUUID") UUID expUUID,
@@ -535,7 +562,7 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.NO_SUCH_TRACE).build();
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
             ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
@@ -543,7 +570,7 @@ public class DataProviderService {
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(EndpointConstants.NO_PROVIDER).build();
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
             boolean isComplete = true;
@@ -597,7 +624,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/timeGraph/{outputId}/tooltip")
-    @Tag(name = EndpointConstants.TGR)
+    @Tag(name = TGR)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTimeGraphTooltip(@PathParam("expUUID") UUID expUUID,
             @PathParam("outputId") String outputId,
@@ -612,14 +639,14 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.NO_SUCH_TRACE).build();
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
             ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(experiment, outputId);
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(EndpointConstants.NO_PROVIDER).build();
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
             TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = provider.fetchTooltip(params, null);
@@ -652,7 +679,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/table/{outputId}/columns")
-    @Tag(name = EndpointConstants.VTB)
+    @Tag(name = VTB)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getColumns(@PathParam("expUUID") UUID expUUID,
@@ -689,7 +716,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/table/{outputId}/lines")
-    @Tag(name = EndpointConstants.VTB)
+    @Tag(name = VTB)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLines(@PathParam("expUUID") UUID expUUID,
@@ -705,12 +732,12 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.NO_SUCH_TRACE).build();
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
             ITmfVirtualTableDataProvider<? extends IVirtualTableLine, ? extends ITmfTreeDataModel> provider = manager.getDataProvider(experiment, outputId, ITmfVirtualTableDataProvider.class);
             if (provider == null) {
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(EndpointConstants.NO_PROVIDER).build();
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
             TmfModelResponse<?> response = provider.fetchLines(params, null);
@@ -784,21 +811,21 @@ public class DataProviderService {
 
     private Response getTree(UUID expUUID, String outputId, QueryParameters queryParameters) {
         if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_OUTPUTID).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
         }
         Map<String, Object> params = queryParameters.getParameters();
         if (params == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
         List<Long> timeRequested = DataProviderParameterUtils.extractTimeRequested(params);
         if (timeRequested != null && timeRequested.size() == 1) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.INVALID_PARAMETERS).build();
+            return Response.status(Status.BAD_REQUEST).entity(INVALID_PARAMETERS).build();
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTree") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.NO_SUCH_TRACE).build();
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
             ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
@@ -811,7 +838,7 @@ public class DataProviderService {
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(EndpointConstants.NO_PROVIDER).build();
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
             if (timeRequested == null || timeRequested.isEmpty()) {
                 // Make a shallow copy to be able to modify the map
@@ -839,7 +866,7 @@ public class DataProviderService {
      */
     @POST
     @Path("/{outputId}/style")
-    @Tag(name = EndpointConstants.STY)
+    @Tag(name = STY)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStyles(@PathParam("expUUID") UUID expUUID,
@@ -855,7 +882,7 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.NO_SUCH_TRACE).build();
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
             ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
@@ -863,7 +890,7 @@ public class DataProviderService {
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(EndpointConstants.NO_PROVIDER).build();
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
 
             if (provider instanceof IOutputStyleProvider) {
@@ -879,10 +906,10 @@ public class DataProviderService {
 
     private static Response validateQueryParameters(String outputId, Map<String, Object> params) {
         if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_OUTPUTID).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
         }
         if (params == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
         return null;
     }
