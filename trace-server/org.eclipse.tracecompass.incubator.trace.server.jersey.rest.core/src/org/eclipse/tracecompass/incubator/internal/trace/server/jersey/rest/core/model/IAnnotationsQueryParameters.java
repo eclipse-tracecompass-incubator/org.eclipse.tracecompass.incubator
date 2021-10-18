@@ -11,8 +11,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
-import org.eclipse.jdt.annotation.Nullable;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,19 +18,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
-public interface IQueryParameters {
+public interface IAnnotationsQueryParameters {
 
     /**
      * @return The parameters.
      */
-    @Nullable
     @Schema(required = true)
-    IParameters getParameters();
+    IAnnotationsParameters getParameters();
 
     /**
      * Property names below use underscores as per trace-server protocol.
      */
-    interface IParameters {
+    interface IAnnotationsParameters {
 
         @JsonProperty("requested_times")
         @Schema(required = true)

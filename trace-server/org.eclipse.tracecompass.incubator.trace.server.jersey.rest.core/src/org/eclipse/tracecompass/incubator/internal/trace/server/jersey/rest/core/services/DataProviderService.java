@@ -82,7 +82,9 @@ import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLo
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationCategoriesResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IMarkerSetsResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationsQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IArrowsQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITimeGraphArrowsResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TableColumnHeader;
@@ -431,9 +433,18 @@ public class DataProviderService {
     @Tag(name = TGR)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getArrows(@PathParam("expUUID") UUID expUUID,
-            @PathParam("outputId") String outputId,
-            QueryParameters queryParameters) {
+    @Operation(summary = "API to get the Time Graph arrows", description = "Unique entry point for all TimeGraph models, " +
+            "ensures that the same template is followed for all models", responses = {
+                    @ApiResponse(responseCode = "200", description = "Returns a sampled list of TimeGraph arrows", content = @Content(schema = @Schema(implementation = ITimeGraphArrowsResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Experiment or output provider not found", content = @Content(schema = @Schema(implementation = String.class)))
+            })
+    public Response getArrows(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @RequestBody(description = "Query parameters to fetch the timegraph arrows. " + TIMES, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX +
+                            "}}"), schema = @Schema(implementation = IArrowsQueryParameters.class))
+            }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();
         Response errorResponse = validateQueryParameters(outputId, params);
@@ -585,10 +596,10 @@ public class DataProviderService {
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the annotations. " +
-                    TIMES + ITEMS + MARKER_SET + MARKER_CATEGORIES, content = {
+                    TIMES + " " + ITEMS + MARKER_SET + MARKER_CATEGORIES, content = {
                             @Content(examples = @ExampleObject("{\"parameters\":{" +
-                                    TIMES_EX + ITEMS_EX + MARKER_SET_EX + MARKER_CATEGORIES_EX +
-                                    "}}"), schema = @Schema(implementation = IQueryParameters.class))
+                                    TIMES_EX + "," + ITEMS_EX + MARKER_SET_EX + MARKER_CATEGORIES_EX +
+                                    "}}"), schema = @Schema(implementation = IAnnotationsQueryParameters.class))
                     }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();
