@@ -97,6 +97,9 @@ public class EndpointConstants {
     static final String MARKER_SET_EX = "\"" + REQUESTED_MARKER_SET_KEY + "\": \"markerSetId\","; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_EX = "\"" + REQUESTED_TIME_KEY + "\": [111200000, 111300000, 111400000, 111500000]"; //$NON-NLS-1$ //$NON-NLS-2$
 
+    /** Swagger @ApiResponse description constants that are reused. */
+    static final String PROVIDER_NOT_FOUND = "Experiment or output provider not found"; //$NON-NLS-1$
+
     private EndpointConstants() {
         // private constructor
     }

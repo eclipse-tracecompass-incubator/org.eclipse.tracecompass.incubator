@@ -36,6 +36,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_PROVIDER;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_TRACE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.OUTPUT_ID;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.PROVIDER_NOT_FOUND;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.SERVER;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.STY;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TERMS;
@@ -83,7 +84,9 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationsQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IArrowsQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IColumnsQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IMarkerSetsResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITableColumnHeadersResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITimeGraphArrowsResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
@@ -436,7 +439,7 @@ public class DataProviderService {
     @Operation(summary = "API to get the Time Graph arrows", description = "Unique entry point for all TimeGraph models, " +
             "ensures that the same template is followed for all models", responses = {
                     @ApiResponse(responseCode = "200", description = "Returns a sampled list of TimeGraph arrows", content = @Content(schema = @Schema(implementation = ITimeGraphArrowsResponse.class))),
-                    @ApiResponse(responseCode = "404", description = "Experiment or output provider not found", content = @Content(schema = @Schema(implementation = String.class)))
+                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
             })
     public Response getArrows(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -731,9 +734,18 @@ public class DataProviderService {
     @Tag(name = VTB)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getColumns(@PathParam("expUUID") UUID expUUID,
-            @PathParam("outputId") String outputId,
-            QueryParameters queryParameters) {
+    @Operation(summary = "API to get table columns", description = "Unique entry point for output providers, " +
+            "to get the column entries", responses = {
+                    @ApiResponse(responseCode = "200", description = "Returns a list of table headers", content = @Content(schema = @Schema(implementation = ITableColumnHeadersResponse.class))),
+                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+            })
+    public Response getColumns(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @RequestBody(description = "Query parameters to fetch the table columns", content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = IColumnsQueryParameters.class))
+            }, required = true) QueryParameters queryParameters) {
+
         Response response = getTree(expUUID, outputId, queryParameters);
         Object entity = response.getEntity();
         if (!(entity instanceof TmfModelResponse<?>)) {
