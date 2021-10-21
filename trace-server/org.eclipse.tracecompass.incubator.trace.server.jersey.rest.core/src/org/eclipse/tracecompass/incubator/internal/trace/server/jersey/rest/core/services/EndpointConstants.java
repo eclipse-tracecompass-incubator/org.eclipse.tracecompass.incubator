@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_COLUMN_IDS_KEY;
 import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_ITEMS_KEY;
 import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_MARKER_CATEGORIES_KEY;
 import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_MARKER_SET_KEY;
+import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_TABLE_COUNT_KEY;
+import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_TABLE_INDEX_KEY;
 import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_TIME_KEY;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -39,6 +42,15 @@ public class EndpointConstants {
 
     /** Error message returned for a request with missing output Id */
     public static final String MISSING_OUTPUTID = "Missing parameter outputId"; //$NON-NLS-1$
+
+    /**
+     * Swagger constants redefined out of TmfEventTableDataProvider non-API
+     * restriction. This is unlike constants in DataProviderParameterUtils.
+     */
+    @SuppressWarnings("restriction")
+    private static final String TABLE_SEARCH_DIRECTION_KEY = org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider.TABLE_SEARCH_DIRECTION_KEY;
+    @SuppressWarnings("restriction")
+    private static final String TABLE_SEARCH_EXPRESSION_KEY = org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider.TABLE_SEARCH_EXPRESSION_KEY;
 
     /**
      * Swagger OpenAPI definitions used in the related annotations from
@@ -83,15 +95,31 @@ public class EndpointConstants {
      * Swagger @RequestBody description constants, named after their parameter
      * name, without the common 'requested' prefix; alphabetical order.
      */
+    static final String COLUMNS = "When '" + REQUESTED_COLUMN_IDS_KEY + "' is absent all columns are returned. When present it is the array of requested columnIds. "; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String COUNT = "The '" + REQUESTED_TABLE_COUNT_KEY + "' is the number of lines that should be returned. "; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String DIRECTION = "Use '" + TABLE_SEARCH_DIRECTION_KEY + "' to specify search direction [NEXT, PREVIOUS]. "; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String DIRECTION_COUNT = "If present, '" + REQUESTED_TABLE_COUNT_KEY + "' events are returned starting from the first matching event. " + //$NON-NLS-1$ //$NON-NLS-2$
+            "Matching and not matching events are returned. " + //$NON-NLS-1$
+            "Matching events will be tagged. " + //$NON-NLS-1$
+            "If no matches are found, an empty list will be returned."; //$NON-NLS-1$
+    static final String EXPRESSIONS = "Use '" + TABLE_SEARCH_EXPRESSION_KEY + "' for search providing a map of <columnId, regular expression>. Returned lines that match the search expression will be tagged. "; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String INDEX = "If '" + REQUESTED_TABLE_INDEX_KEY + "' is used it is the starting index of the lines to be returned. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ITEMS = "The array '" + REQUESTED_ITEMS_KEY + "' is the list of entryId being requested. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_CATEGORIES = "The array '" + REQUESTED_MARKER_CATEGORIES_KEY + "' is the list of requested annotation categories; if absent, all annotations are returned."; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_SET = "The string '" + REQUESTED_MARKER_SET_KEY + "' is the optional requested marker set's id. "; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String ONE_OF = "One of '" + REQUESTED_TABLE_INDEX_KEY + "' or '" + REQUESTED_TIME_KEY + "' should be present. "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    static final String TABLE_TIMES = "If '" + REQUESTED_TIME_KEY + "' is used it should contain an array with a single timestamp. The returned lines starting at the given timestamp (or the nearest following) will be returned. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES = "The array '" + REQUESTED_TIME_KEY + "' is the explicit array of requested sample times."; //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Swagger @RequestBody example constants, named after their parameter name,
      * without the common 'requested' prefix; alphabetical order.
      */
+    static final String COLUMNS_EX = "\"" + REQUESTED_COLUMN_IDS_KEY + "\": [0, 1, 2],"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String COUNT_EX = "\"" + REQUESTED_TABLE_COUNT_KEY + "\": 100,"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String DIRECTION_EX = "\"" + TABLE_SEARCH_DIRECTION_KEY + "\": \"NEXT\""; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String EXPRESSIONS_EX = "\"" + TABLE_SEARCH_EXPRESSION_KEY + "\": {\"1\": \"cpu.*\"},"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String INDEX_EX = "\"" + REQUESTED_TABLE_INDEX_KEY + "\": 0,"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ITEMS_EX = "\"" + REQUESTED_ITEMS_KEY + "\": [1, 2],"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_CATEGORIES_EX = "\"" + REQUESTED_MARKER_CATEGORIES_KEY + "\": [\"category1\", \"category2\"]"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_SET_EX = "\"" + REQUESTED_MARKER_SET_KEY + "\": \"markerSetId\","; //$NON-NLS-1$ //$NON-NLS-2$
