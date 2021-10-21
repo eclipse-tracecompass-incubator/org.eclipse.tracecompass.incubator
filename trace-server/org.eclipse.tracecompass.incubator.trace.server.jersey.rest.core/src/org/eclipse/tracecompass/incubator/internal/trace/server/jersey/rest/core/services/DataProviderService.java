@@ -98,6 +98,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationsQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IArrowsQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IColumnsQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IDataProvider;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ILinesQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IMarkerSetsResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITableColumnHeadersResponse;
@@ -228,7 +229,7 @@ public class DataProviderService {
     }
 
     /**
-     * Getter for the list of data provider descriptions
+     * Getter for a specific data provider description
      *
      * @param expUUID
      *            UUID of the experiment to search for
@@ -240,7 +241,13 @@ public class DataProviderService {
     @Path("/{outputId}")
     @Tag(name = EXP)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProvider(@PathParam("expUUID") UUID expUUID, @PathParam("outputId") String outputId) {
+    @Operation(summary = "Get the output descriptor for this experiment and output", responses = {
+            @ApiResponse(responseCode = "200", description = "Returns the output provider descriptor", content = @Content(schema = @Schema(implementation = IDataProvider.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response getProvider(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId) {
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
             return Response.status(Status.NOT_FOUND).build();
