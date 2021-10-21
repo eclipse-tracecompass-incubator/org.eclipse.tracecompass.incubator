@@ -168,21 +168,6 @@ public class ExperimentManagerService {
     }
 
     /**
-     * Get the outputs for an experiment
-     *
-     * @param expUUID
-     *            UUID of the experiment to get the outputs for
-     * @return The outputs for the experiment
-     */
-    @GET
-    @Path("/{expUUID}/outputs")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getOutputs(@PathParam("expUUID") UUID expUUID) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("Not implemented for " + expUUID).build(); //$NON-NLS-1$
-    }
-
-
-    /**
      * Delete an experiment by {@link UUID}.
      *
      * @param expUUID
@@ -310,7 +295,7 @@ public class ExperimentManagerService {
         EXPERIMENT_RESOURCES.put(expUUID, resource);
         TmfExperiment experiment = createExperimentInstance(expUUID);
         if (experiment == null) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to instantiate experiment").build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to instantiate experiment").build(); //$NON-NLS-1$
         }
 
         return Response.ok(Experiment.from(experiment, expUUID)).build();

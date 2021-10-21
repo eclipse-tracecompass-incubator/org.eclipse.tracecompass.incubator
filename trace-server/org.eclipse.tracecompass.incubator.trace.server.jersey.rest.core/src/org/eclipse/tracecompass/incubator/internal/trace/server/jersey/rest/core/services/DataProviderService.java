@@ -163,6 +163,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -210,7 +211,11 @@ public class DataProviderService {
     @GET
     @Tag(name = EXP)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProviders(@PathParam("expUUID") UUID expUUID) {
+    @Operation(summary = "Get the list of outputs for this experiment", responses = {
+            @ApiResponse(responseCode = "200", description = "Returns a list of output provider descriptors", content = @Content(array = @ArraySchema(schema = @Schema(implementation = IDataProvider.class)))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response getProviders(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
             return Response.status(Status.NOT_FOUND).build();
