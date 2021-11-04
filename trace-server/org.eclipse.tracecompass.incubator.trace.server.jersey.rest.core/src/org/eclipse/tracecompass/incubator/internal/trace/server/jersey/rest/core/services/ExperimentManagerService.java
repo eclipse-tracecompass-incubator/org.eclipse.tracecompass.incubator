@@ -323,7 +323,12 @@ public class ExperimentManagerService {
         createSupplementaryFolder(resource);
         // Instantiate the experiment and return it
         ITmfTrace[] traces = Lists.transform(traceUUIDs, uuid -> TraceManagerService.createTraceInstance(uuid)).toArray(new ITmfTrace[0]);
-        TmfExperiment experiment = new TmfExperiment(ITmfEvent.class, resource.getLocation().toOSString(), traces, TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, resource);
+        // Determine cache size for experiments
+        int cacheSize = Integer.MAX_VALUE;
+        for (ITmfTrace trace : traces) {
+            cacheSize = Math.min(cacheSize, trace.getCacheSize());
+        }
+        TmfExperiment experiment = new TmfExperiment(ITmfEvent.class, resource.getLocation().toOSString(), traces, cacheSize, resource);
         experiment.indexTrace(false);
         // read first event to make sure start time is initialized
         ITmfContext ctx = experiment.seekEvent(0);
