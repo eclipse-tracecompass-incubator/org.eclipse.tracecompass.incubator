@@ -390,4 +390,11 @@ public class TraceManagerService {
             current = current.getParentFile();
         }
     }
+
+    /**
+     * Dispose method to be only called at server shutdown.
+     */
+    public static void dispose() {
+        TRACES.clear();
+    }
 }

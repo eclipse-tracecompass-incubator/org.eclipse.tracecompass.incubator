@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp;
 
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -34,6 +36,10 @@ import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 
 /**
  *
@@ -113,9 +119,6 @@ public class WebApplication {
         }
 
         fServer.start();
-        if (fConfig.getPort() != TraceServerConfiguration.TEST_PORT) {
-            fServer.join();
-        }
     }
 
     /**
@@ -175,17 +178,27 @@ public class WebApplication {
     }
 
     /**
+     * Method to dispose all necessary resources.
+     *
+     * Needs to be called before calling {@link #stop()}
+     */
+    public void dispose() {
+        ExperimentManagerService.dispose();
+        TraceManagerService.dispose();
+    }
+
+    /**
      * Method to stop the web application
+     *
+     * @throws Exception
+     *             if server cannot be stopped
      */
     public void stop() {
         try {
             fServer.stop();
-            ResourcesPlugin.getWorkspace().getRoot()
-                    .getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME)
-                    .close(null);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ex) {
+            Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+            Platform.getLog(bundle).log(new Status(IStatus.ERROR, bundle.getSymbolicName(), "Error stopping server", ex)); //$NON-NLS-1$
         }
     }
-
 }
