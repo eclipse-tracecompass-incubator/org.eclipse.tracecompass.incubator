@@ -473,4 +473,21 @@ public class ExperimentManagerService {
     public static TraceAnnotationProvider getTraceAnnotationProvider(UUID uuid) {
         return TRACE_ANNOTATION_PROVIDERS.get(uuid);
     }
+
+    /**
+     * Dispose method to be only called at server shutdown. It disposes experiments, traces etc.
+     */
+    public static void dispose() {
+        for (TmfExperiment experiment : EXPERIMENTS.values()) {
+            if (experiment != null) {
+                TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(experiment, experiment));
+                // Experiment dispose() will dispose its traces as well.
+                experiment.dispose();
+            }
+        }
+        EXPERIMENTS.clear();
+        TRACE_UUIDS.clear();
+        EXPERIMENT_RESOURCES.clear();
+        TRACE_ANNOTATION_PROVIDERS.clear();
+    }
 }
