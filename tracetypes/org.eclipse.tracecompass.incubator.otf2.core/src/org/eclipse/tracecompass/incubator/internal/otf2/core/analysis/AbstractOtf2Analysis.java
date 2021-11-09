@@ -37,13 +37,6 @@ public abstract class AbstractOtf2Analysis extends TmfStateSystemAnalysisModule 
         setId(Objects.requireNonNull(id));
     }
 
-    /**
-     * Get the associated OTF2 state provider for this analysis
-     *
-     * @return the OTF2 state provider class for this analysis
-     */
-    abstract protected Class<?> getOtf2AnalysisStateProviderClass();
-
     @Override
     public @Nullable Otf2Trace getTrace() {
         return (Otf2Trace) super.getTrace();

@@ -18,6 +18,22 @@
       </view>
    </extension>
    <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="org.eclipse.tracecompass.incubator.internal.otf2.ui.views.category"
+            name="%otf2.name"
+            parentCategory="org.eclipse.linuxtools.tmf.ui.views.category">
+      </category>
+      <view
+            category="org.eclipse.tracecompass.incubator.internal.otf2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.otf2.ui.views.summarytimeline.Otf2SummaryTimelineView"
+            id="org.eclipse.tracecompass.incubator.otf2.ui.views.summarytimeline"
+            icon="icons/otf2-icon.png"
+            name="%otf2.view.summarytimeline"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
          point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
       <type
       		icon="icons/otf2-icon.png"
@@ -31,6 +47,16 @@
             id="org.eclipse.tracecompass.incubator.otf2.ui.views.communicators">
          <analysisModuleClass
                class="org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.communicators.Otf2CommunicatorsAnalysis">
+         </analysisModuleClass>
+      </output>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.otf2.ui.views.summarytimeline">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.summarytimeline.Otf2SummaryTimelineAnalysis">
          </analysisModuleClass>
       </output>
    </extension>

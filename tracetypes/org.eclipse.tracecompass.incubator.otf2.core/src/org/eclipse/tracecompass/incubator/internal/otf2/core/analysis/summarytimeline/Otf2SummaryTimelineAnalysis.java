@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.communicators;
+package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.summarytimeline;
 
 import java.util.Objects;
 
@@ -17,27 +17,25 @@ import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.AbstractOt
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 
 /**
- * MPI Communicators analysis
+ * Summary Timeline analysis
  *
  * @author Yoann Heitz
  */
-
-public class Otf2CommunicatorsAnalysis extends AbstractOtf2Analysis {
+public class Otf2SummaryTimelineAnalysis extends AbstractOtf2Analysis {
 
     /** The ID suffix of this analysis module */
-    public static final String ID_SUFFIX = ".communicators"; //$NON-NLS-1$
-
+    public static final String ID_SUFFIX = ".summarytimeline"; //$NON-NLS-1$
 
     /**
      * Constructor
      */
-    public Otf2CommunicatorsAnalysis() {
+    public Otf2SummaryTimelineAnalysis() {
         super(getFullAnalysisId());
     }
 
     @Override
     protected ITmfStateProvider createStateProvider() {
-        return new Otf2CommunicatorsStateProvider(Objects.requireNonNull(getTrace()));
+        return new Otf2SummaryTimelineStateProvider(Objects.requireNonNull(getTrace()));
     }
 
     /**
