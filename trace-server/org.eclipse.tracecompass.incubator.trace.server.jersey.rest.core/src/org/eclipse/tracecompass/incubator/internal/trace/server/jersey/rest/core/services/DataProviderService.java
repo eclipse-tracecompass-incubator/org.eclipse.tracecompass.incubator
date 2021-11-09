@@ -419,7 +419,7 @@ public class DataProviderService {
      *
      * @param expUUID
      *            desired experiment UUID
-     * @return {@link TmfModelResponse} containing {@link AnnotationCategoriesModel}
+     * @return {@link TmfModelResponse} containing the list of {@link MarkerSet}s
      */
     @GET
     @Path("/markerSets")
