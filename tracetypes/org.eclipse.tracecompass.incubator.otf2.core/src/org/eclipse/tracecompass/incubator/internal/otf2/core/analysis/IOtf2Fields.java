@@ -89,6 +89,11 @@ public interface IOtf2Fields {
     String OTF2_LOCATION = "location"; //$NON-NLS-1$
 
     /**
+     * LocationType field name
+     */
+    String OTF2_LOCATION_TYPE = "locationType"; //$NON-NLS-1$
+
+    /**
      * LocationID field name
      */
     String OTF2_LOCATION_ID = "locationID"; //$NON-NLS-1$

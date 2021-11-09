@@ -19,8 +19,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.internal.otf2.ui;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.otf2.ui.views;x-internal:=true,
- org.eclipse.tracecompass.incubator.internal.otf2.ui.views.communicators;x-internal:=true
+ org.eclipse.tracecompass.incubator.internal.otf2.ui.views.communicators;x-internal:=true,
+ org.eclipse.tracecompass.incubator.internal.otf2.ui.views.summarytimeline;x-internal:=true
 Import-Package: com.google.common.cache,
  com.google.common.collect,
- org.apache.commons.lang3
+ org.apache.commons.lang3,
+ org.eclipse.swtchart
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.otf2.ui
