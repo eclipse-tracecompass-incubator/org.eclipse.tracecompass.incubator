@@ -72,6 +72,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = EndpointConstants.TRA)
 public class TraceManagerService {
 
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").contains("Windows"); //$NON-NLS-1$ //$NON-NLS-2$
+
     private static final Map<UUID, IResource> TRACES = Collections.synchronizedMap(initTraces());
 
     private static final String TRACES_FOLDER = "Traces"; //$NON-NLS-1$
@@ -133,6 +135,16 @@ public class TraceManagerService {
         }
         String name = (String) parameters.get("name");
         String path = (String) parameters.get("uri");
+        if (IS_WINDOWS && path != null && path.startsWith("/")) { //$NON-NLS-1$
+            /*
+             * Workaround for path created by the theia-trace-extension, see
+             * https://github.com/theia-ide/theia-trace-extension/issues/545.
+             * This is caused by
+             * https://github.com/eclipse-theia/theia/issues/8098. Once issue
+             * #8098 is resolved this workaround can be removed.
+             */
+             path = path.substring(1);
+        }
         Object typeIDObject = parameters.get("typeID");
         String typeID = typeIDObject != null ? (String) typeIDObject : "";
 
@@ -163,7 +175,7 @@ public class TraceManagerService {
             }
             resource.setPersistentProperty(TmfCommonConstants.TRACETYPE, traceType);
         } else {
-            IPath targetLocation = org.eclipse.core.runtime.Path.forPosix(path).removeTrailingSeparator();
+            IPath targetLocation = getTargetLocation(path);
             IPath oldLocation = ResourceUtil.getLocation(resource);
             if (oldLocation == null || !targetLocation.equals(oldLocation.removeTrailingSeparator()) ||
                     !traceType.equals(resource.getPersistentProperty(TmfCommonConstants.TRACETYPE))) {
@@ -267,7 +279,7 @@ public class TraceManagerService {
         IProject project = root.getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME);
         project.refreshLocal(IResource.DEPTH_INFINITE, null);
         IFolder tracesFolder = project.getFolder(TRACES_FOLDER);
-        IPath targetLocation = org.eclipse.core.runtime.Path.forPosix(path);
+        IPath targetLocation = getTargetLocation(path);
         IPath resourcePath = targetLocation.removeLastSegments(1).append(name);
 
         IResource resource = null;
@@ -396,5 +408,13 @@ public class TraceManagerService {
      */
     public static void dispose() {
         TRACES.clear();
+    }
+
+    private static IPath getTargetLocation(String path) {
+        if (IS_WINDOWS) {
+            IPath p = org.eclipse.core.runtime.Path.forWindows(path);
+            return new org.eclipse.core.runtime.Path(p.toString().replace(":", "")).removeTrailingSeparator(); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        return org.eclipse.core.runtime.Path.forPosix(path).removeTrailingSeparator();
     }
 }
