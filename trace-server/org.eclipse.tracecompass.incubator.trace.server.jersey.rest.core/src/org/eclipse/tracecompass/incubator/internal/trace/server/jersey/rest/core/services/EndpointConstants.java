@@ -66,6 +66,14 @@ public class EndpointConstants {
     static final String XML = "XML"; //$NON-NLS-1$
     static final String X_Y = "XY"; //$NON-NLS-1$
 
+    /**
+     * Swagger @Parameter description constants, named after their parameter
+     * name; alphabetical order.
+     */
+    static final String EXP_UUID = "The UUID of the experiment in the server"; //$NON-NLS-1$
+    static final String MARKER_SET_ID = "The optional requested marker set's id"; //$NON-NLS-1$
+    static final String OUTPUT_ID = "The name of the output provider to query"; //$NON-NLS-1$
+
     private EndpointConstants() {
         // private constructor
     }
