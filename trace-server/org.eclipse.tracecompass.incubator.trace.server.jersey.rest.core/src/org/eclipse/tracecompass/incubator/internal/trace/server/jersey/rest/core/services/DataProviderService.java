@@ -22,8 +22,14 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.FEA;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.FIL;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ITEMS;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ITEMS_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.LICENSE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.LICENSE_URL;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MARKER_CATEGORIES;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MARKER_CATEGORIES_EX;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MARKER_SET;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MARKER_SET_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MARKER_SET_ID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_OUTPUTID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_PARAMETERS;
@@ -34,6 +40,8 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.STY;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TERMS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TGR;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMES;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMES_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TITLE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TRA;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.VERSION;
@@ -72,6 +80,8 @@ import org.eclipse.tracecompass.common.core.log.TraceCompassLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationCategoriesResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TableColumnHeader;
@@ -132,7 +142,9 @@ import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -562,9 +574,18 @@ public class DataProviderService {
     @Tag(name = ANN)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAnnotations(@PathParam("expUUID") UUID expUUID,
-            @PathParam("outputId") String outputId,
-            QueryParameters queryParameters) {
+    @Operation(summary = "API to get the annotations associated to this experiment and output", responses = {
+            @ApiResponse(responseCode = "200", description = "Annotation", content = @Content(schema = @Schema(implementation = IAnnotationResponse.class)))
+    })
+    public Response getAnnotations(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @RequestBody(description = "Query parameters to fetch the annotations. " +
+                    TIMES + ITEMS + MARKER_SET + MARKER_CATEGORIES, content = {
+                            @Content(examples = @ExampleObject("{\"parameters\":{" +
+                                    TIMES_EX + ITEMS_EX + MARKER_SET_EX + MARKER_CATEGORIES_EX +
+                                    "}}"), schema = @Schema(implementation = IQueryParameters.class))
+                    }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();
         Response errorResponse = validateQueryParameters(outputId, params);

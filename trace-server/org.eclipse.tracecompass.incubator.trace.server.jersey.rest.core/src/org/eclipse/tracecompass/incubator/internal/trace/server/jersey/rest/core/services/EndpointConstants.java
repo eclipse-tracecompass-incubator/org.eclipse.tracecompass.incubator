@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_ITEMS_KEY;
+import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_MARKER_CATEGORIES_KEY;
+import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_MARKER_SET_KEY;
+import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_TIME_KEY;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -73,6 +78,24 @@ public class EndpointConstants {
     static final String EXP_UUID = "The UUID of the experiment in the server"; //$NON-NLS-1$
     static final String MARKER_SET_ID = "The optional requested marker set's id"; //$NON-NLS-1$
     static final String OUTPUT_ID = "The name of the output provider to query"; //$NON-NLS-1$
+
+    /**
+     * Swagger @RequestBody description constants, named after their parameter
+     * name, without the common 'requested' prefix; alphabetical order.
+     */
+    static final String ITEMS = "The array '" + REQUESTED_ITEMS_KEY + "' is the list of entryId being requested. "; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String MARKER_CATEGORIES = "The array '" + REQUESTED_MARKER_CATEGORIES_KEY + "' is the list of requested annotation categories; if absent, all annotations are returned."; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String MARKER_SET = "The string '" + REQUESTED_MARKER_SET_KEY + "' is the optional requested marker set's id. "; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String TIMES = "The array '" + REQUESTED_TIME_KEY + "' is the explicit array of requested sample times. "; //$NON-NLS-1$ //$NON-NLS-2$
+
+    /**
+     * Swagger @RequestBody example constants, named after their parameter name,
+     * without the common 'requested' prefix; alphabetical order.
+     */
+    static final String ITEMS_EX = "\"" + REQUESTED_ITEMS_KEY + "\": [1, 2],"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String MARKER_CATEGORIES_EX = "\"" + REQUESTED_MARKER_CATEGORIES_KEY + "\": [\"category1\", \"category2\"]"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String MARKER_SET_EX = "\"" + REQUESTED_MARKER_SET_KEY + "\": \"markerSetId\","; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String TIMES_EX = "\"" + REQUESTED_TIME_KEY + "\": [111200000, 111300000, 111400000, 111500000],"; //$NON-NLS-1$ //$NON-NLS-2$
 
     private EndpointConstants() {
         // private constructor
