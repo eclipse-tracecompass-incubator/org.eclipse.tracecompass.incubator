@@ -81,6 +81,7 @@ import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLo
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationCategoriesResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IMarkerSetsResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
@@ -473,7 +474,10 @@ public class DataProviderService {
     @Path("/markerSets")
     @Tag(name = ANN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getMarkerSets(@PathParam("expUUID") UUID expUUID) {
+    @Operation(summary = "API to get marker sets available for this experiment", responses = {
+            @ApiResponse(responseCode = "200", description = "List of marker sets", content = @Content(schema = @Schema(implementation = IMarkerSetsResponse.class)))
+    })
+    public Response getMarkerSets(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
 
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getMarkerSets").build()) { //$NON-NLS-1$
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
