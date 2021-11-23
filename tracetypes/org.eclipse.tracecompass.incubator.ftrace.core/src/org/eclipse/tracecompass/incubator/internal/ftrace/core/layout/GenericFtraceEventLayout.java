@@ -33,6 +33,8 @@ public class GenericFtraceEventLayout extends DefaultEventLayout {
     private static final @NonNull String CHILD_TID = "child_pid"; //$NON-NLS-1$
     private static final @NonNull String TID = "pid"; //$NON-NLS-1$
     private static final @NonNull String CPU_FREQUENCY = "cpu_frequency"; //$NON-NLS-1$
+    private static final @NonNull String KMEM_PAGE_ALLOC = "mm_page_alloc"; //$NON-NLS-1$
+    private static final @NonNull String KMEM_PAGE_FREE = "mm_page_free"; //$NON-NLS-1$
     private static @Nullable GenericFtraceEventLayout INSTANCE;
 
     /**
@@ -87,4 +89,13 @@ public class GenericFtraceEventLayout extends DefaultEventLayout {
         return IGenericFtraceConstants.PROCESS_DUMP_EVENT_NAME;
     }
 
+    @Override
+    public @NonNull String eventKmemPageAlloc() {
+        return KMEM_PAGE_ALLOC;
+    }
+
+    @Override
+    public @NonNull String eventKmemPageFree() {
+        return KMEM_PAGE_FREE;
+    }
 }
