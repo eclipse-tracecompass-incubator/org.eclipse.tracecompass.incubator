@@ -40,5 +40,5 @@ public interface IOutputElementStyle {
     @Schema(description = "Style values or empty map if there are no values. " +
             "Keys and values are defined in " +
             "https://git.eclipse.org/r/plugins/gitiles/tracecompass/org.eclipse.tracecompass/+/refs/heads/master/tmf/org.eclipse.tracecompass.tmf.core/src/org/eclipse/tracecompass/tmf/core/model/StyleProperties.java")
-    Map<String, Object> getStyleValues();
+    Map<String, Object> getValues();
 }
