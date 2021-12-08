@@ -101,8 +101,10 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IDataProvider;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ILinesQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IMarkerSetsResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IStatesQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITableColumnHeadersResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITimeGraphArrowsResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITimeGraphStatesResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IVirtualTableResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
@@ -414,9 +416,17 @@ public class DataProviderService {
     @Tag(name = TGR)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getStates(@PathParam("expUUID") UUID expUUID,
-            @PathParam("outputId") String outputId,
-            QueryParameters queryParameters) {
+    @Operation(summary = "API to get the Time Graph states", description = "Unique entry point for all TimeGraph states, ensures that the same template is followed for all views", responses = {
+            @ApiResponse(responseCode = "200", description = "Returns a list of time graph rows", content = @Content(schema = @Schema(implementation = ITimeGraphStatesResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response getStates(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @RequestBody(description = "Query parameters to fetch the timegraph states. " + TIMES + " " + ITEMS, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX + "," + ITEMS_EX +
+                            "}}"), schema = @Schema(implementation = IStatesQueryParameters.class))
+            }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();
         Response errorResponse = validateQueryParameters(outputId, params);
@@ -626,9 +636,9 @@ public class DataProviderService {
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the annotations. " +
-                    TIMES + " " + ITEMS + MARKER_SET + MARKER_CATEGORIES, content = {
+                    TIMES + " " + ITEMS + " " + MARKER_SET + MARKER_CATEGORIES, content = {
                             @Content(examples = @ExampleObject("{\"parameters\":{" +
-                                    TIMES_EX + "," + ITEMS_EX + MARKER_SET_EX + MARKER_CATEGORIES_EX +
+                                    TIMES_EX + "," + ITEMS_EX + "," + MARKER_SET_EX + MARKER_CATEGORIES_EX +
                                     "}}"), schema = @Schema(implementation = IAnnotationsQueryParameters.class))
                     }, required = true) QueryParameters queryParameters) {
 

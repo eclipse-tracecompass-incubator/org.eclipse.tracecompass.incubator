@@ -104,7 +104,7 @@ public class EndpointConstants {
             "If no matches are found, an empty list will be returned."; //$NON-NLS-1$
     static final String EXPRESSIONS = "Use '" + TABLE_SEARCH_EXPRESSION_KEY + "' for search providing a map of <columnId, regular expression>. Returned lines that match the search expression will be tagged. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String INDEX = "If '" + REQUESTED_TABLE_INDEX_KEY + "' is used it is the starting index of the lines to be returned. "; //$NON-NLS-1$ //$NON-NLS-2$
-    static final String ITEMS = "The array '" + REQUESTED_ITEMS_KEY + "' is the list of entryId being requested. "; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String ITEMS = "The array '" + REQUESTED_ITEMS_KEY + "' is the list of entryId being requested."; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_CATEGORIES = "The array '" + REQUESTED_MARKER_CATEGORIES_KEY + "' is the list of requested annotation categories; if absent, all annotations are returned."; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_SET = "The string '" + REQUESTED_MARKER_SET_KEY + "' is the optional requested marker set's id. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ONE_OF = "One of '" + REQUESTED_TABLE_INDEX_KEY + "' or '" + REQUESTED_TIME_KEY + "' should be present. "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -120,7 +120,7 @@ public class EndpointConstants {
     static final String DIRECTION_EX = "\"" + TABLE_SEARCH_DIRECTION_KEY + "\": \"NEXT\""; //$NON-NLS-1$ //$NON-NLS-2$
     static final String EXPRESSIONS_EX = "\"" + TABLE_SEARCH_EXPRESSION_KEY + "\": {\"1\": \"cpu.*\"},"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String INDEX_EX = "\"" + REQUESTED_TABLE_INDEX_KEY + "\": 0,"; //$NON-NLS-1$ //$NON-NLS-2$
-    static final String ITEMS_EX = "\"" + REQUESTED_ITEMS_KEY + "\": [1, 2],"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String ITEMS_EX = "\"" + REQUESTED_ITEMS_KEY + "\": [1, 2]"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_CATEGORIES_EX = "\"" + REQUESTED_MARKER_CATEGORIES_KEY + "\": [\"category1\", \"category2\"]"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_SET_EX = "\"" + REQUESTED_MARKER_SET_KEY + "\": \"markerSetId\","; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_EX = "\"" + REQUESTED_TIME_KEY + "\": [111200000, 111300000, 111400000, 111500000]"; //$NON-NLS-1$ //$NON-NLS-2$
