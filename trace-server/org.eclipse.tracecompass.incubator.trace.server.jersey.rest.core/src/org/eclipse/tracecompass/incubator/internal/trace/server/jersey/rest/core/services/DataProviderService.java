@@ -239,7 +239,7 @@ public class DataProviderService {
      * @param expUUID
      *            UUID of the experiment to search for
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @return the data provider descriptions with the queried {@link UUID} if it exists.
      */
     @GET
@@ -276,7 +276,7 @@ public class DataProviderService {
      * @param expUUID
      *            desired experiment UUID
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch an XY tree as described by
      *            {@link QueryParameters}
@@ -298,7 +298,7 @@ public class DataProviderService {
      * @param expUUID
      *            {@link UUID} of the experiment to query
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch XY as described by {@link QueryParameters}
      * @return an {@link GenericView} with the results
@@ -352,7 +352,7 @@ public class DataProviderService {
      * @param expUUID
      *            {@link UUID} of the experiment to query
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param xValue
      *            Given X value to fetch the tooltip
      * @param yValue
@@ -380,7 +380,7 @@ public class DataProviderService {
      * @param expUUID
      *            {@link UUID} of the experiment to query
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch time graph tree as described by
      *            {@link QueryParameters}
@@ -403,7 +403,7 @@ public class DataProviderService {
      * @param expUUID
      *            desired experiment UUID
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch time graph states as described by
      *            {@link QueryParameters}
@@ -452,7 +452,7 @@ public class DataProviderService {
      * @param expUUID
      *            desired experiment UUID
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch time graph arrows as described by
      *            {@link QueryParameters}
@@ -535,7 +535,7 @@ public class DataProviderService {
      * @param expUUID
      *            desired experiment UUID
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param markerSetId
      *            marker set ID
      * @return {@link TmfModelResponse} containing {@link AnnotationCategoriesModel}
@@ -608,7 +608,7 @@ public class DataProviderService {
      * @param expUUID
      *            desired experiment UUID
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch annotations as described by
      *            {@link QueryParameters}
@@ -695,7 +695,7 @@ public class DataProviderService {
      * @param expUUID
      *            desired experiment UUID
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch time graph tooltip as described by
      *            {@link QueryParameters}
@@ -750,7 +750,7 @@ public class DataProviderService {
      * @param expUUID
      *            desired experiment UUID
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch table columns as described by
      *            {@link QueryParameters}
@@ -796,7 +796,7 @@ public class DataProviderService {
      * @param expUUID
      *            desired experiment UUID
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch table lines as described by
      *            {@link QueryParameters}
@@ -958,7 +958,7 @@ public class DataProviderService {
      * @param expUUID
      *            desired experiment UUID
      * @param outputId
-     *            Eclipse extension point ID for the data provider to query
+     *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch styles as described by
      *            {@link QueryParameters}
