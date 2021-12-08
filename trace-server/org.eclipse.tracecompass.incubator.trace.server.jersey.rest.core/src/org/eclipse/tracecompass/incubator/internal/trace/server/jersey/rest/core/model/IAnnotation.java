@@ -18,9 +18,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
-@Schema(description = "An annotation is used to mark an interesting area at a given time or time range", requiredProperties = {
-        "time", "duration", "entryId", "type"
-})
+@Schema(description = "An annotation is used to mark an interesting area at a given time or time range")
 public interface IAnnotation {
 
     /**
@@ -33,25 +31,25 @@ public interface IAnnotation {
     /**
      * @return The time.
      */
-    @Schema(description = "Time of this annotation")
+    @Schema(description = "Time of this annotation", required = true)
     long getTime();
 
     /**
      * @return The duration.
      */
-    @Schema(description = "Duration of this annotation")
+    @Schema(description = "Duration of this annotation", required = true)
     long getDuration();
 
     /**
      * @return The entry ID.
      */
-    @Schema(description = "Entry's unique ID or -1 if annotation not associated with an entry")
+    @Schema(description = "Entry's unique ID or -1 if annotation not associated with an entry", required = true)
     long getEntryId();
 
     /**
      * @return The type.
      */
-    @Schema(description = "Type of annotation indicating its location")
+    @Schema(description = "Type of annotation indicating its location", required = true)
     AnnotationType getType();
 
     /**

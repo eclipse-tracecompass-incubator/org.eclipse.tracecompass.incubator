@@ -18,36 +18,30 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
-@Schema(requiredProperties = {
-        "start",
-        "end",
-        "sourceId",
-        "targetId"
-})
 public interface ITimeGraphArrow {
 
     /**
      * @return The start time.
      */
-    @Schema(description = "Start time for this arrow")
+    @Schema(description = "Start time for this arrow", required = true)
     long getStart();
 
     /**
      * @return The end time.
      */
-    @Schema(description = "End time for this arrow")
+    @Schema(description = "End time for this arrow", required = true)
     long getEnd();
 
     /**
      * @return The source ID.
      */
-    @Schema(description = "Source entry's unique ID")
+    @Schema(description = "Source entry's unique ID", required = true)
     long getSourceId();
 
     /**
      * @return The target ID.
      */
-    @Schema(description = "Target entry's unique ID")
+    @Schema(description = "Target entry's unique ID", required = true)
     long getTargetId();
 
     /**
