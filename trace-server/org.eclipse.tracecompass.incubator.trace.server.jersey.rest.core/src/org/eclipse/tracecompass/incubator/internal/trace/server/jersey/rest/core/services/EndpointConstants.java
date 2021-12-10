@@ -113,6 +113,7 @@ public class EndpointConstants {
     static final String ONE_OF = "One of '" + REQUESTED_TABLE_INDEX_KEY + "' or '" + REQUESTED_TIME_KEY + "' should be present. "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     static final String TABLE_TIMES = "If '" + REQUESTED_TIME_KEY + "' is used it should contain an array with a single timestamp. The returned lines starting at the given timestamp (or the nearest following) will be returned. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES = "The array '" + REQUESTED_TIME_KEY + "' is the explicit array of requested sample times."; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String TIMES_TREE = "When '" + REQUESTED_TIME_KEY + "' is absent the tree for the full range is returned. When present it specifies a range as [start, end]."; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_TT = "The array '" + REQUESTED_TIME_KEY + "' is an array with a single timestamp. "; //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
@@ -130,6 +131,7 @@ public class EndpointConstants {
     static final String MARKER_CATEGORIES_EX = "\"" + REQUESTED_MARKER_CATEGORIES_KEY + "\": [\"category1\", \"category2\"]"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_SET_EX = "\"" + REQUESTED_MARKER_SET_KEY + "\": \"markerSetId\","; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_EX = "\"" + REQUESTED_TIME_KEY + "\": [111200000, 111300000, 111400000, 111500000]"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String TIMES_EX_TREE = "\"" + REQUESTED_TIME_KEY + "\": [111111111, 222222222]"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_EX_TT = "\"" + REQUESTED_TIME_KEY + "\": [111200000],"; //$NON-NLS-1$ //$NON-NLS-2$
 
     /** Swagger @ApiResponse description constants that are reused. */
