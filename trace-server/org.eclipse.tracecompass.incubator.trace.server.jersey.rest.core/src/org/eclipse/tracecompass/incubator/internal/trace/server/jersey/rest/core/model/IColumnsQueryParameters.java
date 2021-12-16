@@ -11,6 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -21,6 +23,7 @@ public interface IColumnsQueryParameters {
     /**
      * @return The parameters.
      */
+    @NonNull
     @Schema(required = true)
     IColumnsParameters getParameters();
 

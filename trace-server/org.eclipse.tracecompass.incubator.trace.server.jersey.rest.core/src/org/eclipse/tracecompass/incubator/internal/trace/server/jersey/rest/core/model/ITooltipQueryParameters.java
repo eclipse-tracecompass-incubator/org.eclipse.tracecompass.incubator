@@ -11,6 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,6 +25,7 @@ public interface ITooltipQueryParameters {
     /**
      * @return The parameters.
      */
+    @NonNull
     @Schema(required = true)
     ITooltipParameters getParameters();
 
@@ -40,6 +43,7 @@ public interface ITooltipQueryParameters {
         int[] getRequestedItems();
 
         @JsonProperty("requested_element")
+        @NonNull
         @Schema(required = true)
         IElement getRequestedElement();
     }

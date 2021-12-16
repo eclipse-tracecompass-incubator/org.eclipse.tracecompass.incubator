@@ -13,6 +13,8 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,6 +27,7 @@ public interface ILinesQueryParameters {
     /**
      * @return The parameters.
      */
+    @NonNull
     @Schema(required = true)
     ILinesParameters getParameters();
 

@@ -13,6 +13,8 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -31,5 +33,6 @@ public interface ITimeGraphRowModel {
      * @return The states.
      */
     @ArraySchema(arraySchema = @Schema(description = "List of the time graph entry states associated to this entry and zoom level", required = true))
+    @NonNull
     List<ITimeGraphState> getStates();
 }

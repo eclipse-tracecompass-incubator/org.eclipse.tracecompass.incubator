@@ -11,6 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -29,6 +31,7 @@ public interface IElement {
     /**
      * @return The element type.
      */
+    @NonNull
     @Schema(description = "The type of element", required = true)
     ElementType getElementType();
 

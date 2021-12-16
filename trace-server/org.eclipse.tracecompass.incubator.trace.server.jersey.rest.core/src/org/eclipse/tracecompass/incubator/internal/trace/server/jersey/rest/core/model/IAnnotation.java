@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -49,6 +50,7 @@ public interface IAnnotation {
     /**
      * @return The type.
      */
+    @NonNull
     @Schema(description = "Type of annotation indicating its location", required = true)
     AnnotationType getType();
 
