@@ -15,7 +15,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.junit,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.analysis.os.linux.core,
- org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional,
+ org.apache.commons.io,
+ org.eclipse.tracecompass.testtraces.tracecompass-test-traces-ftrace
 Export-Package: org.eclipse.tracecompass.incubator.ftrace.core.tests,
  org.eclipse.tracecompass.incubator.ftrace.core.tests.event,
  org.eclipse.tracecompass.incubator.ftrace.core.tests.trace

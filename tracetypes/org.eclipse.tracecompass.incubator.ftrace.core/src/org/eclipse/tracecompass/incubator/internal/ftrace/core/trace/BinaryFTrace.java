@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2022 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -66,7 +66,7 @@ public class BinaryFTrace extends GenericFtrace implements ITmfPropertiesProvide
                         if (read == magicLength && Arrays.equals(TRACE_CMD_DAT_MAGIC, start)) {
                             ProcessBuilder pb = new ProcessBuilder(TRACE_CMD);
                             Process traceCmd = pb.start();
-                            try (BufferedReader br = new BufferedReader(new InputStreamReader(traceCmd.getInputStream(), Charset.forName("UTF-8")));) { //$NON-NLS-1$
+                            try (BufferedReader br = new BufferedReader(new InputStreamReader(traceCmd.getInputStream(), StandardCharsets.UTF_8));) {
                                 String line = br.readLine();
                                 while (line != null) {
                                     if (line.contains(REPORT)) {
@@ -107,7 +107,10 @@ public class BinaryFTrace extends GenericFtrace implements ITmfPropertiesProvide
             pb.redirectOutput(file);
             try {
                 pb.start().waitFor();
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
+                throw new TmfTraceException(e.getMessage(), e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new TmfTraceException(e.getMessage(), e);
             }
             if (!file.exists()) {

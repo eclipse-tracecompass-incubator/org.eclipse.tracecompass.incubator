@@ -1,0 +1,24 @@
+/*******************************************************************************
+ * Copyright (c) 2022 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
+
+package org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header;
+
+/**
+ * An enumerator for function types of function address to name mapping for binary FTrace.
+ *
+ * @author Hoang Thuan Pham
+ */
+public enum BinaryFTraceFunctionType {
+    /**
+     * Unknown type, currently not supporting function types.
+     */
+    UNKNOWN
+}

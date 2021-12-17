@@ -14,10 +14,13 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.analysis.os.linux.core,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
-Export-Package: org.eclipse.tracecompass.incubator.internal.ftrace.core;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests",
- org.eclipse.tracecompass.incubator.internal.ftrace.core.event,
+Export-Package: org.eclipse.tracecompass.incubator.ftrace.core.binary.parser;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests",
+ org.eclipse.tracecompass.incubator.internal.ftrace.core;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests",
+ org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.event;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests",
+ org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests",
+ org.eclipse.tracecompass.incubator.internal.ftrace.core.event;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests",
  org.eclipse.tracecompass.incubator.internal.ftrace.core.layout;x-internal:=true,
- org.eclipse.tracecompass.incubator.internal.ftrace.core.trace
+ org.eclipse.tracecompass.incubator.internal.ftrace.core.trace;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests"
 Import-Package: com.google.common.collect,
  com.google.common.primitives,
  org.apache.commons.lang3
