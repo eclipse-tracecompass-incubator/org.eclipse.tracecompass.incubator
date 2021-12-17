@@ -18,18 +18,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
-public interface IColumnsQueryParameters {
+public interface IOptionalQueryParameters {
 
     /**
      * @return The parameters.
      */
     @NonNull
     @Schema(required = true)
-    IColumnsParameters getParameters();
+    IOptionalParameters getParameters();
 
     /**
      * No expected properties below, as per current trace-server protocol.
      */
-    interface IColumnsParameters {
+    interface IOptionalParameters {
     }
 }

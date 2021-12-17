@@ -107,12 +107,11 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationsQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IArrowsQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IColumnsQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IDataProvider;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ILinesQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IMarkerSetsResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IStatesQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IStylesQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IOptionalQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IRequestedQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IStylesResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITableColumnHeadersResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITimeGraphArrowsResponse;
@@ -122,7 +121,6 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITooltipQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITreeQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IVirtualTableResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IXYQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IXYResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
@@ -339,7 +337,7 @@ public class DataProviderService {
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the XY model. " + TIMES + " " + ITEMS_XY, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX + "," + ITEMS_EX +
-                            "}}"), schema = @Schema(implementation = IXYQueryParameters.class))
+                            "}}"), schema = @Schema(implementation = IRequestedQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
         if (outputId == null) {
@@ -464,7 +462,7 @@ public class DataProviderService {
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the timegraph states. " + TIMES + " " + ITEMS, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX + "," + ITEMS_EX +
-                            "}}"), schema = @Schema(implementation = IStatesQueryParameters.class))
+                            "}}"), schema = @Schema(implementation = IRequestedQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();
@@ -828,7 +826,7 @@ public class DataProviderService {
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the table columns", content = {
-                    @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = IColumnsQueryParameters.class))
+                    @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = IOptionalQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
         Response response = getTree(expUUID, outputId, queryParameters);
@@ -1034,7 +1032,7 @@ public class DataProviderService {
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the style map", content = {
-                    @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = IStylesQueryParameters.class))
+                    @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = IOptionalQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();

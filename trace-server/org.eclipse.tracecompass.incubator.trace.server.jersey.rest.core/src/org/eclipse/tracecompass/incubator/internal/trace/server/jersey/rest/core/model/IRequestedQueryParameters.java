@@ -20,19 +20,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
-public interface IStatesQueryParameters {
+public interface IRequestedQueryParameters {
 
     /**
      * @return The parameters.
      */
     @NonNull
     @Schema(required = true)
-    IStatesParameters getParameters();
+    IRequestedParameters getParameters();
 
     /**
      * Property names below use underscores as per trace-server protocol.
      */
-    interface IStatesParameters {
+    interface IRequestedParameters {
 
         @JsonProperty("requested_times")
         @Schema(required = true)
