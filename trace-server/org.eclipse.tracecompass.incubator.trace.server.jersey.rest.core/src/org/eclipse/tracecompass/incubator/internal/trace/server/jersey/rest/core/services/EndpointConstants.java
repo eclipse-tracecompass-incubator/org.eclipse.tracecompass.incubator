@@ -108,6 +108,7 @@ public class EndpointConstants {
     static final String INDEX = "If '" + REQUESTED_TABLE_INDEX_KEY + "' is used it is the starting index of the lines to be returned. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ITEMS = "The array '" + REQUESTED_ITEMS_KEY + "' is the list of entryId being requested."; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ITEMS_TT = "The array '" + REQUESTED_ITEMS_KEY + "' is an array with a single entryId being requested. "; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String ITEMS_XY = "The array '" + REQUESTED_ITEMS_KEY + "' is the list of entryId or seriesId being requested."; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_CATEGORIES = "The array '" + REQUESTED_MARKER_CATEGORIES_KEY + "' is the list of requested annotation categories; if absent, all annotations are returned."; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_SET = "The string '" + REQUESTED_MARKER_SET_KEY + "' is the optional requested marker set's id. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ONE_OF = "One of '" + REQUESTED_TABLE_INDEX_KEY + "' or '" + REQUESTED_TIME_KEY + "' should be present. "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -135,6 +136,7 @@ public class EndpointConstants {
     static final String TIMES_EX_TT = "\"" + REQUESTED_TIME_KEY + "\": [111200000],"; //$NON-NLS-1$ //$NON-NLS-2$
 
     /** Swagger @ApiResponse description constants that are reused. */
+    static final String ANALYSIS_NOT_POSSIBLE = "Analysis not possible for this trace"; //$NON-NLS-1$
     static final String PROVIDER_NOT_FOUND = "Experiment or output provider not found"; //$NON-NLS-1$
 
     private EndpointConstants() {

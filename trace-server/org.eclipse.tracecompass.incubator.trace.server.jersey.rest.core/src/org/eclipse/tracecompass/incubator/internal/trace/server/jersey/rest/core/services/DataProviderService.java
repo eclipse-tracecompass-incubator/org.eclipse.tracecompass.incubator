@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ANALYSIS_NOT_POSSIBLE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ANN;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.BMR;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COLUMNS;
@@ -39,6 +40,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ITEMS_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ITEMS_EX_TT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ITEMS_TT;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ITEMS_XY;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.LICENSE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.LICENSE_URL;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MARKER_CATEGORIES;
@@ -120,6 +122,8 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITooltipQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITreeQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IVirtualTableResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IXYQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IXYResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TableColumnHeader;
@@ -324,8 +328,20 @@ public class DataProviderService {
     @Tag(name = X_Y)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getXY(@PathParam("expUUID") UUID expUUID,
-            @PathParam("outputId") String outputId, QueryParameters queryParameters) {
+    @Operation(summary = "API to get the XY model", description = "Unique endpoint for all xy models, " +
+            "ensures that the same template is followed for all endpoints.", responses = {
+                    @ApiResponse(responseCode = "200", description = "Return the queried XYResponse", content = @Content(schema = @Schema(implementation = IXYResponse.class))),
+                    @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "405", description = ANALYSIS_NOT_POSSIBLE, content = @Content(schema = @Schema(implementation = String.class)))
+            })
+    public Response getXY(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @RequestBody(description = "Query parameters to fetch the XY model. " + TIMES + " " + ITEMS_XY, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX + "," + ITEMS_EX +
+                            "}}"), schema = @Schema(implementation = IXYQueryParameters.class))
+            }, required = true) QueryParameters queryParameters) {
+
         if (outputId == null) {
             return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
         }
