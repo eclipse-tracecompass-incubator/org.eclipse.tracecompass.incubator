@@ -23,15 +23,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Hidden;
 
 /**
  * Service to manage filters
  *
  * @author Simon Delisle
  */
+@Hidden
 @Path("/filters")
-@Tag(name = EndpointConstants.FIL)
 public class FilterService {
 
     /**
