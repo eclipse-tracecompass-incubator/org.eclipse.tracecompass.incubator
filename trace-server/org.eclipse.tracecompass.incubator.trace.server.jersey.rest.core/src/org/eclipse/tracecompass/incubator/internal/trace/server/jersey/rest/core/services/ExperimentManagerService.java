@@ -11,6 +11,9 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.EXP_UUID;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_EXPERIMENT;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +53,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IExperiment;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IExperimentQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.TraceAnnotationProvider;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
@@ -66,6 +71,13 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
@@ -93,7 +105,10 @@ public class ExperimentManagerService {
      * @return The set of opened experiments
      */
     @GET
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get the list of experiments on the server", responses = {
+            @ApiResponse(responseCode = "200", description = "Returns a list of experiments", content = @Content(array = @ArraySchema(schema = @Schema(implementation = IExperiment.class))))
+    })
     public Response getExperiments() {
         synchronized (EXPERIMENT_RESOURCES) {
             List<Experiment> experiments = Lists.transform(new ArrayList<>(EXPERIMENT_RESOURCES.entrySet()), e -> {
@@ -159,11 +174,16 @@ public class ExperimentManagerService {
      */
     @GET
     @Path("/{expUUID}")
-    @Produces({ MediaType.APPLICATION_JSON })
-    public Response getExperiment(@PathParam("expUUID") UUID expUUID) {
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get the model object for an experiment", responses = {
+            @ApiResponse(responseCode = "200", description = "Return the experiment model", content = @Content(schema = @Schema(implementation = IExperiment.class))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response getExperiment(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
         TmfExperiment experiment = getExperimentByUUID(expUUID);
         if (experiment != null) {
-            return Response.ok(Experiment.from(experiment, expUUID)).build();        }
+            return Response.ok(Experiment.from(experiment, expUUID)).build();
+        }
         return Response.status(Status.NOT_FOUND).build();
     }
 
@@ -177,8 +197,12 @@ public class ExperimentManagerService {
      */
     @DELETE
     @Path("/{expUUID}")
-    @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteExperiment(@PathParam("expUUID") UUID expUUID) {
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Remove an experiment from the server", responses = {
+            @ApiResponse(responseCode = "200", description = "The trace was successfully deleted, return the deleted experiment.", content = @Content(schema = @Schema(implementation = IExperiment.class))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response deleteExperiment(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
         IResource resource = EXPERIMENT_RESOURCES.remove(expUUID);
         if (resource == null) {
             return Response.status(Status.NOT_FOUND).build();
@@ -233,7 +257,12 @@ public class ExperimentManagerService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response postExperiment(QueryParameters queryParameters) {
+    @Operation(summary = "Create a new experiment on the server", responses = {
+            @ApiResponse(responseCode = "200", description = "The experiment was successfully created", content = @Content(schema = @Schema(implementation = IExperiment.class)))
+    })
+    public Response postExperiment(@RequestBody(content = {
+            @Content(schema = @Schema(implementation = IExperimentQueryParameters.class))
+    }, required = true) QueryParameters queryParameters) {
         Map<String, Object> parameters = queryParameters.getParameters();
         if (parameters == null) {
             return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
