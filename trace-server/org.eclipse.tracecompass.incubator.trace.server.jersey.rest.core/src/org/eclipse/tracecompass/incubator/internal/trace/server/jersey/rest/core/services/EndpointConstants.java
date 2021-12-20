@@ -133,7 +133,9 @@ public class EndpointConstants {
 
     /** Swagger @ApiResponse description constants that are reused. */
     static final String ANALYSIS_NOT_POSSIBLE = "Analysis not possible for this trace"; //$NON-NLS-1$
+    static final String CONSISTENT_PARENT = "The returned model must be consistent, parentIds must refer to a parent which exists in the model."; //$NON-NLS-1$
     static final String PROVIDER_NOT_FOUND = "Experiment or output provider not found"; //$NON-NLS-1$
+    static final String TREE_ENTRIES = "Unique entry point for output providers, to get the tree of visible entries"; //$NON-NLS-1$
 
     private EndpointConstants() {
         // private constructor
