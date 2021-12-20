@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.ftrace.core.binary.parser;
+package org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.parser;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

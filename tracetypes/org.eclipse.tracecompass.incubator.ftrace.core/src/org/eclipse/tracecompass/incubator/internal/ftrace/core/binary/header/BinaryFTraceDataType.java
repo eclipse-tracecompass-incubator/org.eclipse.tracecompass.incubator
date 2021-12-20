@@ -11,15 +11,16 @@
 
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header;
 
-import java.util.regex.Pattern;
-
+import org.apache.commons.lang3.ArrayUtils;
 /**
  * Represents different data types of a binary FTrace file
  *
- * Linux basic data types: http://www.it.uc3m.es/pbasanta/asng/course_notes/data_types_en.html
+ * Linux basic data types:
+ * http://www.it.uc3m.es/pbasanta/asng/course_notes/data_types_en.html
  *
- * These are the special types that can be converted back to basic types:
- * Linux kernel data types: https://kernelnewbies.org/InternalKernelDataTypes#:~:text=There%20are%20some%20native%20kernel,prevent%20a%20lot%20of%20problems.
+ * These are the special types that can be converted back to basic types: Linux
+ * kernel data types:
+ * https://kernelnewbies.org/InternalKernelDataTypes#:~:text=There%20are%20some%20native%20kernel,prevent%20a%20lot%20of%20problems.
  *
  * @author Hoang Thuan Pham
  */
@@ -28,102 +29,57 @@ public enum BinaryFTraceDataType {
     /**
      * Data type unknown (Regex rejects all)
      */
-    UNKNOWN(rejectAll()),
+    UNKNOWN(0, null),
     /**
      * An 8-bit (1 byte) value that represents a character. C char is 1 byte
      * while Java char is 2 bytes.
      */
-    CHAR(Pattern.compile("[^\\*]*(char)[^\\*\\[\\]]*")), //$NON-NLS-1$
-    /**
-     * 1 byte numeric value
-     */
-    BYTE(Pattern.compile("[^\\*]*(u8|s8)[^\\*\\[\\]]*")), //$NON-NLS-1$
+    CHAR(1, new String[] { "char", "s8", "u8" }), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     /**
      * 2 bytes numeric value
      */
-    SHORT(Pattern.compile("[^\\*]*(short|u16|s16)[^\\*\\[\\]]*")), //$NON-NLS-1$
+    SHORT(2, new String[] { "short", "u16", "s16" }), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     /**
      * 4 bytes numeric value
      */
-    INT(Pattern.compile("[^\\*]*(int|u32|s32|pid_t)[^\\*\\[\\]]*")), //$NON-NLS-1$
+    INT(4, new String[] { "int", "s32", "u32", "pid_t", "uint32_t" }), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
     /**
      * 4 to 8 bytes numeric value
      */
-    LONG(Pattern.compile("[^\\*]*(long|u64|s64)[^\\*\\[\\]]*")), //$NON-NLS-1$
-    /**
-     * 8 bytes floating point value
-     */
-    DOUBLE(rejectAll()),
-    /**
-     * A string as an array of characters
-     */
-    STRING(Pattern.compile(".*char.*\\[[0-9]*\\]$")), //$NON-NLS-1$
-    /**
-     * A boolean value (1 byte)
-     */
-    BOOL(Pattern.compile(".*bool.*")), //$NON-NLS-1$
-    /**
-     * 4 bytes floating point value
-     */
-    FLOAT(rejectAll()),
-    /**
-     * Unsigned 8 bits value
-     */
-    U8(rejectAll()),
-    /**
-     * Unsigned 16 bits value
-     */
-    U16(rejectAll()),
-    /**
-     * Signed 8 bits value
-     */
-    S8(rejectAll()),
-    /**
-     * Signed 16 bits value
-     */
-    S16(rejectAll()),
-    /**
-     * Signed 32 bits value
-     */
-    U32(rejectAll()),
-    /**
-     * Signed 64 bits value
-     */
-    U64(rejectAll()),
-    /**
-     * Signed 32 bits value
-     */
-    S32(rejectAll()),
-    /**
-     * Signed 64 bits value
-     */
-    S64(rejectAll()),
-    /**
-     * The value is a pointer
-     */
-    POINTER(Pattern.compile(".*\\*.*")); //$NON-NLS-1$
+    LONG(8, new String[] { "long", "s64", "u64" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-    private static Pattern sRejectAll = null;
+    private final int fSize;
+    private final String[] fTypeIdentifiers;
 
-    private static Pattern rejectAll() {
-        if (sRejectAll == null) {
-            sRejectAll = Pattern.compile("^[^.]*"); //$NON-NLS-1$
-        }
-        return sRejectAll;
+    private BinaryFTraceDataType(int size, String[] typeIdentifiers) {
+        fSize = size;
+        fTypeIdentifiers = typeIdentifiers;
     }
 
-    private final Pattern fPattern;
-
     /**
-     * Return matcher pattern
+     * Get the size of the data bytes.
      *
-     * @return the matcher pattern
+     * @return The size of the data in bytes
      */
-    public Pattern getPattern() {
-        return fPattern;
+    public int getSize() {
+        return fSize;
     }
 
-    private BinaryFTraceDataType(Pattern pattern) {
-        fPattern = pattern;
+    /**
+     * Return the {@link BinaryFTraceDataType} base on a string.
+     *
+     * @param typeIdentifier
+     *            The string value of the data type
+     * @return The data type as a {@link BinaryFTraceDataType} enum value
+     */
+    public static BinaryFTraceDataType getDataType(String typeIdentifier) {
+        for (BinaryFTraceDataType type: BinaryFTraceDataType.values()) {
+            if (ArrayUtils.contains(type.fTypeIdentifiers, typeIdentifier)) {
+                return type;
+            }
+        }
+
+        return BinaryFTraceDataType.UNKNOWN;
     }
+
 }
