@@ -28,6 +28,9 @@ public class BinaryFTraceFormatField {
     private final int fOffset;
     private final int fSize;
     private final BinaryFTraceValueSign fSigned;
+    private final boolean fDataLoc;
+    private final int fArrayLength;
+    private final boolean fPointer;
 
     /**
      * Constructor
@@ -35,12 +38,16 @@ public class BinaryFTraceFormatField {
     private BinaryFTraceFormatField(BinaryFTraceFormatFieldBuilder builder) {
         fFieldName = builder.fBuilderFieldName;
         fFieldType = builder.fBuilderFieldType;
-        fStrFieldType = builder.fBuilderStrFieldType; // Stores the string of the data type
-                            // in case the
-                            // value is unknown
+        fStrFieldType = builder.fBuilderStrFieldType; // Stores the string of
+                                                      // the data type
+        // in case the
+        // value is unknown
         fOffset = builder.fBuilderOffset;
         fSize = builder.fBuilderSize;
         fSigned = builder.fBuilderSigned;
+        fDataLoc = builder.fBuilderDataLoc;
+        fArrayLength = builder.fBuilderArrayLength;
+        fPointer = builder.fBuilderPointer;
     }
 
     /**
@@ -98,6 +105,44 @@ public class BinaryFTraceFormatField {
         return fSigned;
     }
 
+    /**
+     * Get the data loc flag of the field
+     *
+     * @return True if the field is a data loc field
+     */
+    public boolean isDataLoc() {
+        return fDataLoc;
+    }
+
+    /**
+     * Get the array length of the field.
+     *
+     * @return -1 if the field is not an array field; 0 if the length is not yet
+     *         determined, but the field is an array; non-zero array length
+     *         otherwise.
+     */
+    public int getArrayLength() {
+        return fArrayLength;
+    }
+
+    /**
+     * Check if the field is a pointer
+     *
+     * @return True if the field is a pointer, false otherwise.
+     */
+    public boolean isPointer() {
+        return fPointer;
+    }
+
+    /**
+     * Check if a field is a string. A string is an array of characters.
+     *
+     * @return True if the field is a string; false otherwise.
+     */
+    public boolean isString() {
+        return fFieldType == BinaryFTraceDataType.CHAR && fArrayLength >= 0;
+    }
+
     @Override
     public String toString() {
         StringBuilder strBuilder = new StringBuilder();
@@ -117,12 +162,27 @@ public class BinaryFTraceFormatField {
      * @author Hoang Thuan Pham
      */
     public static class BinaryFTraceFormatFieldBuilder {
+        /**
+         * The default value for the array length field. The value -1 signifies
+         * that this field is not an array.
+         */
+        public static final int DEFAULT_ARRAY_LENGTH = -1;
+        /**
+         * The default length for arrays with unknown length. One of the
+         * examples of arrays with unknown length is when reading the data_loc
+         * field.
+         */
+        public static final int UNKNOWN_ARRAY_LENGTH = 0;
+
         private String fBuilderFieldName;
         private BinaryFTraceDataType fBuilderFieldType;
         private String fBuilderStrFieldType;
         private int fBuilderOffset;
         private int fBuilderSize;
         private BinaryFTraceValueSign fBuilderSigned;
+        private boolean fBuilderDataLoc;
+        private int fBuilderArrayLength;
+        private boolean fBuilderPointer;
 
         /**
          * Constructor
@@ -134,12 +194,16 @@ public class BinaryFTraceFormatField {
             fBuilderOffset = -1;
             fBuilderSize = 0;
             fBuilderSigned = BinaryFTraceValueSign.UNSIGNED;
+            fBuilderDataLoc = false;
+            fBuilderArrayLength = -1;
+            fBuilderPointer = false;
         }
 
         /**
          * Set the field name of the FTrace format field.
          *
-         * @param fieldName The name of the field
+         * @param fieldName
+         *            The name of the field
          * @return The current builder
          */
         public BinaryFTraceFormatFieldBuilder fieldName(String fieldName) {
@@ -150,7 +214,9 @@ public class BinaryFTraceFormatField {
         /**
          * Set the field type (data type) of the FTrace format field
          *
-         * @param fieldType The {@link BinaryFTraceDataType} value that represents the data type of the field
+         * @param fieldType
+         *            The {@link BinaryFTraceDataType} value that represents the
+         *            data type of the field
          * @return The current builder
          */
         public BinaryFTraceFormatFieldBuilder fieldType(BinaryFTraceDataType fieldType) {
@@ -159,10 +225,12 @@ public class BinaryFTraceFormatField {
         }
 
         /**
-         * Set the original field type-name string of the field. It contains the field and the C modifiers.
-         * It is helpful to store this information to debug when trace compass cannot parse the field.
+         * Set the original field type-name string of the field. It contains the
+         * field and the C modifiers. It is helpful to store this information to
+         * debug when trace compass cannot parse the field.
          *
-         * @param strFieldType The original field type-name string of the field.
+         * @param strFieldType
+         *            The original field type-name string of the field.
          * @return The current builder
          */
         public BinaryFTraceFormatFieldBuilder strFieldType(String strFieldType) {
@@ -171,9 +239,11 @@ public class BinaryFTraceFormatField {
         }
 
         /**
-         * Set the offset (in bytes) where the field value starts relative to the trace event binary payload.
+         * Set the offset (in bytes) where the field value starts relative to
+         * the trace event binary payload.
          *
-         * @param offset The offset (in bytes) where the field value starts
+         * @param offset
+         *            The offset (in bytes) where the field value starts
          * @return The current builder
          */
         public BinaryFTraceFormatFieldBuilder offset(int offset) {
@@ -184,7 +254,8 @@ public class BinaryFTraceFormatField {
         /**
          * Set the size of the field (in bytes).
          *
-         * @param size The size of the field (in bytes)
+         * @param size
+         *            The size of the field (in bytes)
          * @return The current builder
          */
         public BinaryFTraceFormatFieldBuilder size(int size) {
@@ -195,7 +266,9 @@ public class BinaryFTraceFormatField {
         /**
          * Set the sign of the field. A field value can be signed or unsigned.
          *
-         * @param signed The {@link BinaryFTraceValueSign} that represents the sign of the value
+         * @param signed
+         *            The {@link BinaryFTraceValueSign} that represents the sign
+         *            of the value
          * @return The current builder
          */
         public BinaryFTraceFormatFieldBuilder signed(BinaryFTraceValueSign signed) {
@@ -204,7 +277,51 @@ public class BinaryFTraceFormatField {
         }
 
         /**
-         * Create an immutable {@link BinaryFTraceFormatField} based on current state of the builder.
+         * Set the data loc flag of the field. If a field is a data loc, it
+         * contains the location of the actual data in the event binary data.
+         *
+         * @param isDataLoc
+         *            The {@link BinaryFTraceValueSign} that represents the
+         *            dataloc flag of the value
+         * @return The current builder
+         */
+        public BinaryFTraceFormatFieldBuilder dataLoc(boolean isDataLoc) {
+            fBuilderDataLoc = isDataLoc;
+            return this;
+        }
+
+        /**
+         * Set the array flag of the field, indicating that the field is an
+         * array. If the the field is a string, the field type will be char and
+         * the array flag should be set to true.
+         *
+         * @param arrayLength
+         *            The length of the array; -1 if the field is not an array,
+         *            0 if the length is unknown and a positive value if the
+         *            length of the array is known.
+         * @return The current builder
+         */
+        public BinaryFTraceFormatFieldBuilder array(int arrayLength) {
+            fBuilderArrayLength = arrayLength;
+            return this;
+        }
+
+        /**
+         * Set the pointer flag of this field, indicating whether this field is
+         * a pointer or not.
+         *
+         * @param isPointer
+         *            True if the field is a pointer, false otherwise.
+         * @return The current builder
+         */
+        public BinaryFTraceFormatFieldBuilder pointer(boolean isPointer) {
+            fBuilderPointer = isPointer;
+            return this;
+        }
+
+        /**
+         * Create an immutable {@link BinaryFTraceFormatField} based on current
+         * state of the builder.
          *
          * @return A {@link BinaryFTraceFormatField} object
          */

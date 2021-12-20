@@ -13,6 +13,8 @@ package org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.event;
 
 import java.util.regex.Pattern;
 
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceEventFormat;
+
 /**
  * Constants values used for parsing Binary FTrace file.
  *
@@ -94,18 +96,6 @@ public final class BinaryFTraceConstants {
      */
     public static final String EVENT_FORMAT_FIELD_MODIFIER_SEPARATOR = " "; //$NON-NLS-1$
     /**
-     * A type modifier that indicates the field is a constant.
-     */
-    public static final String EVENT_FORMAT_FIELD_CONSTANT_MODIFIER = "const"; //$NON-NLS-1$
-    /**
-     * A type modifier that indicates the field is a signed value.
-     */
-    public static final String EVENT_FORMAT_FIELD_SIGNED_MODIFIER = "signed"; //$NON-NLS-1$
-    /**
-     * A type modifier that indicates the field is a unsigned value.
-     */
-    public static final String EVENT_FORMAT_FIELD_UNSIGNED_MODIFIER = "unsigned"; //$NON-NLS-1$
-    /**
      * A type modifier that indicates the data type of the field is used
      * internally.
      */
@@ -113,35 +103,7 @@ public final class BinaryFTraceConstants {
     /**
      * A prefix indicating that the field is a common field.
      */
-    public static final String EVENT_FORMAT_COMMON_FIELD_PREFIX = "common_"; //$NON-NLS-1$
-    /**
-     * A modifier indicating that the field is of type pid_t (int).
-     */
-    public static final String FIELD_MODIFIER_PID_T = "pid_t"; //$NON-NLS-1$
-    /**
-     * A modifier indicating that the field is a string (is a char array).
-     */
-    public static final String FIELD_MODIFIER_CHAR_ARRAY = "char[]"; //$NON-NLS-1$
-    /**
-     * Pattern to validate the signed property of a field in an event format.
-     */
-    public static final Pattern VALID_SIGN_VALUES = Pattern.compile("[01]"); //$NON-NLS-1$
-
-    /**
-     * A regex pattern that matches the array data type in the field property of
-     * a event format field.
-     */
-    public static final Pattern PATTERN_DATA_TYPE_ARRAY = Pattern.compile(".*\\[[0-9]*\\]$"); //$NON-NLS-1$
-    /**
-     * A regex pattern that matches the square brackets that indicate the size
-     * of an array.
-     */
-    public static final Pattern PATTERN_DATA_TYPE_ARRAY_SIZE = Pattern.compile("\\[([0-9]*)\\]"); //$NON-NLS-1$
-    /**
-     * A regex pattern that matches the pointer type modifier.
-     */
-    public static final Pattern PATTERN_POINTER_TYPE = Pattern.compile(".*\\*.*"); //$NON-NLS-1$
-
+    public final static String EVENT_FORMAT_COMMON_FIELD_PREFIX = "common_"; //$NON-NLS-1$
     // Constants for parsing binary FTRace in general
     /**
      * A newline character. Has to be string type to be used by String.split()
@@ -206,5 +168,60 @@ public final class BinaryFTraceConstants {
     /**
      * Value indicating that the file is a fly record file.
      */
-    public static final String FLYRECORD_SECTION_NAME = "flyrecord"; //$NON-NLS-1$
+    public final static String FLYRECORD_SECTION_NAME = "flyrecord"; //$NON-NLS-1$
+
+    /**
+     * A pattern to match the field name and the field data modifiers used for parsing.
+     */
+    public final static Pattern FIELD_NAME_PATTERN = Pattern
+            .compile("(?<dataLoc>__data_loc\\s)?(?<const>const\\s)?(?<sign>(unsigned|signed)\\s)?" + //$NON-NLS-1$
+                     "(?<type>[a-z0-9|_]*)(?<arrayType>\\[\\])?\\s" + //$NON-NLS-1$
+                     "(\\*const\\s)?" + //$NON-NLS-1$
+                     "(?<pointer>\\*\\s)?" + //$NON-NLS-1$
+                     "(?<identifier>[^\\[\\]]*)(\\[(?<arrayLength>[0-9]*)\\])?$"); //$NON-NLS-1$
+
+    /**
+     * Data loc group in {@link BinaryFTraceConstants#FIELD_NAME_PATTERN}
+     */
+    public final static String DATALOC_GROUP = "dataLoc"; //$NON-NLS-1$
+
+    /**
+     * Constant group in {@link BinaryFTraceConstants#FIELD_NAME_PATTERN}
+     */
+    public final static String CONST_GROUP = "const"; //$NON-NLS-1$
+
+    /**
+     * Sign group in {@link BinaryFTraceConstants#FIELD_NAME_PATTERN}
+     */
+    public final static String SIGN_GROUP = "sign"; //$NON-NLS-1$
+
+    /**
+     * Data type group in {@link BinaryFTraceConstants#FIELD_NAME_PATTERN}
+     */
+    public final static String DATA_TYPE_GROUP = "type"; //$NON-NLS-1$
+
+    /**
+     * Array type group in {@link BinaryFTraceConstants#FIELD_NAME_PATTERN}
+     */
+    public final static String ARRAY_GROUP = "arrayType"; //$NON-NLS-1$
+
+    /**
+     * Pointer group in {@link BinaryFTraceConstants#FIELD_NAME_PATTERN}
+     */
+    public final static String POINTER_GROUP = "pointer"; //$NON-NLS-1$
+
+    /**
+     * Name group in {@link BinaryFTraceConstants#FIELD_NAME_PATTERN}
+     */
+    public final static String NAME_GROUP = "identifier"; //$NON-NLS-1$
+
+    /**
+     * Array length group in {@link BinaryFTraceConstants#FIELD_NAME_PATTERN}
+     */
+    public final static String ARRAY_LENGTH_GROUP = "arrayLength"; //$NON-NLS-1$
+
+    /**
+     * The field name for the common_type field in a {@link BinaryFTraceEventFormat}.
+     */
+    public final static String COMMON_TYPE = "common_type"; //$NON-NLS-1$
 }

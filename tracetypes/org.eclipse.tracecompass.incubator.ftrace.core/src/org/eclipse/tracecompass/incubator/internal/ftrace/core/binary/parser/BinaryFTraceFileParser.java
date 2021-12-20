@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.ftrace.core.binary.parser;
+package org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.parser;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
@@ -161,7 +161,7 @@ public class BinaryFTraceFileParser {
         return buffer.getNextInt();
     }
 
-    private static List<BinaryFTraceFormatField> parseHeaderPage(BinaryFTraceByteBuffer buffer) throws IOException {
+    private static List<BinaryFTraceFormatField> parseHeaderPage(BinaryFTraceByteBuffer buffer) throws IOException  {
         buffer.getNextBytesAsString(12); // Skipping the section name
         long headerPageSize = buffer.getNextLong();
         String headerPageContent = buffer.getNextBytesAsString(headerPageSize);
