@@ -87,6 +87,7 @@ public class EndpointConstants {
     static final String EXP_UUID = "UUID of the experiment to query"; //$NON-NLS-1$
     static final String MARKER_SET_ID = "The optional requested marker set's id"; //$NON-NLS-1$
     static final String OUTPUT_ID = "ID of the output provider to query"; //$NON-NLS-1$
+    static final String TRACE_UUID = "UUID of the trace to query"; //$NON-NLS-1$
 
     /**
      * Swagger @RequestBody description constants, named after their parameter
@@ -131,9 +132,12 @@ public class EndpointConstants {
     static final String TIMES_EX_TREE = "\"" + REQUESTED_TIME_KEY + "\": [111111111, 222222222]"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_EX_TT = "\"" + REQUESTED_TIME_KEY + "\": [111200000],"; //$NON-NLS-1$ //$NON-NLS-2$
 
-    /** Swagger @ApiResponse description constants that are reused. */
+    /** Swagger @ApiResponse description constants reused, or centralized. */
     static final String ANALYSIS_NOT_POSSIBLE = "Analysis not possible for this trace"; //$NON-NLS-1$
+    static final String CANNOT_READ = "Cannot read this trace type"; //$NON-NLS-1$
     static final String CONSISTENT_PARENT = "The returned model must be consistent, parentIds must refer to a parent which exists in the model."; //$NON-NLS-1$
+    static final String NAME_EXISTS = "There was already a trace with this name"; //$NON-NLS-1$
+    static final String NOT_SUPPORTED = "Trace type not supported"; //$NON-NLS-1$
     static final String NO_SUCH_EXPERIMENT = "No such experiment"; //$NON-NLS-1$
     static final String PROVIDER_NOT_FOUND = "Experiment or output provider not found"; //$NON-NLS-1$
     static final String TREE_ENTRIES = "Unique entry point for output providers, to get the tree of visible entries"; //$NON-NLS-1$

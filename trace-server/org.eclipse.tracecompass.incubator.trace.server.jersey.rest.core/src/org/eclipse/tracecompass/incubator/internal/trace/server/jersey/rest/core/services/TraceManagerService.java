@@ -11,6 +11,12 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CANNOT_READ;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NAME_EXISTS;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NOT_SUPPORTED;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_TRACE;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TRACE_UUID;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -50,6 +56,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITrace;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITraceQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -61,6 +69,13 @@ import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
@@ -84,7 +99,10 @@ public class TraceManagerService {
      * @return a response containing the list of traces
      */
     @GET
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get the list of physical traces imported on the server", responses = {
+            @ApiResponse(responseCode = "200", description = "Returns a list of traces", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ITrace.class))))
+    })
     public Response getTraces() {
         synchronized (TRACES) {
             List<Trace> traces = new ArrayList<>();
@@ -128,7 +146,16 @@ public class TraceManagerService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response putTrace(QueryParameters queryParameters) {
+    @Operation(summary = "Import a trace", description = "Import a trace to the trace server. Return some base information once imported.", responses = {
+            @ApiResponse(responseCode = "200", description = "The trace has been successfully added to the trace server", content = @Content(schema = @Schema(implementation = ITrace.class))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "406", description = CANNOT_READ, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "409", description = NAME_EXISTS, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "501", description = NOT_SUPPORTED, content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response putTrace(@RequestBody(content = {
+            @Content(schema = @Schema(implementation = ITraceQueryParameters.class))
+    }, required = true) QueryParameters queryParameters) {
         Map<String, Object> parameters = queryParameters.getParameters();
         if (parameters == null) {
             return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
@@ -164,7 +191,7 @@ public class TraceManagerService {
 
         List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(path, typeID);
         if (traceTypes.isEmpty()) {
-            return Response.status(Status.NOT_IMPLEMENTED).entity("Trace type not supported").build(); //$NON-NLS-1$
+            return Response.status(Status.NOT_IMPLEMENTED).entity(NOT_SUPPORTED).build();
         }
         String traceType = traceTypes.get(0).getTraceTypeId();
 
@@ -331,8 +358,12 @@ public class TraceManagerService {
      */
     @GET
     @Path("/{uuid}")
-    @Produces({ MediaType.APPLICATION_JSON })
-    public Response getTrace(@PathParam("uuid") @NotNull UUID uuid) {
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get the model object for a trace", responses = {
+            @ApiResponse(responseCode = "200", description = "Return the trace model", content = @Content(schema = @Schema(implementation = ITrace.class))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response getTrace(@Parameter(description = TRACE_UUID) @PathParam("uuid") @NotNull UUID uuid) {
         Trace trace = createTraceModel(uuid);
         if (trace == null) {
             return Response.status(Status.NOT_FOUND).build();
@@ -349,8 +380,12 @@ public class TraceManagerService {
      */
     @DELETE
     @Path("/{uuid}")
-    @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteTrace(@PathParam("uuid") @NotNull UUID uuid) {
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Remove a trace from the server and disk", responses = {
+            @ApiResponse(responseCode = "200", description = "The trace was successfully deleted", content = @Content(schema = @Schema(implementation = ITrace.class))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response deleteTrace(@Parameter(description = TRACE_UUID) @PathParam("uuid") @NotNull UUID uuid) {
         Trace trace = createTraceModel(uuid);
         if (trace == null) {
             return Response.status(Status.NOT_FOUND).build();
