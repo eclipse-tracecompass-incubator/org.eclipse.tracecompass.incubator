@@ -16,6 +16,8 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.Nullable;
 
+import io.swagger.v3.oas.annotations.Hidden;
+
 /**
  * Definition of a parameters object received by the server from a client.
  *
@@ -48,6 +50,7 @@ public class QueryParameters {
     /**
      * @return Map of parameters
      */
+    @Hidden
     public @Nullable Map<String, Object> getParameters() {
         return parameters;
     }
@@ -55,6 +58,7 @@ public class QueryParameters {
     /**
      * @return List of filters
      */
+    @Hidden
     public @Nullable List<Filter> getFilters() {
         return filters;
     }
