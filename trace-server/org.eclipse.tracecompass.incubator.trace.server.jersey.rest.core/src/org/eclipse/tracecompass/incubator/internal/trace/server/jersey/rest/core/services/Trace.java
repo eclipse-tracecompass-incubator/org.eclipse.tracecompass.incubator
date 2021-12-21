@@ -86,7 +86,7 @@ public final class Trace implements Serializable {
                 trace.getNbEvents(),
                 trace.getStartTime().toNanos(),
                 trace.getEndTime().toNanos(),
-                trace.isIndexing() ? "RUNNING" : "COMPLETED");
+                trace.isIndexing() ? "RUNNING" : "COMPLETED"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     /**
@@ -110,7 +110,7 @@ public final class Trace implements Serializable {
                 0L,
                 0L,
                 0L,
-                "CLOSED");
+                "CLOSED"); //$NON-NLS-1$
     }
 
     /**
@@ -171,6 +171,6 @@ public final class Trace implements Serializable {
 
     @Override
     public String toString() {
-        return "Trace [fName=" + fName + ", fUUID=" + fUUID + ", fPath=" + fPath + ", fNbEvents=" + fNbEvents + ", fStart=" + fStart + ", fEnd=" + fEnd + ", fIndexingStatus=" + fIndexingStatus + "]";
+        return "Trace [fName=" + fName + ", fUUID=" + fUUID + ", fPath=" + fPath + ", fNbEvents=" + fNbEvents + ", fStart=" + fStart + ", fEnd=" + fEnd + ", fIndexingStatus=" + fIndexingStatus + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
     }
 }

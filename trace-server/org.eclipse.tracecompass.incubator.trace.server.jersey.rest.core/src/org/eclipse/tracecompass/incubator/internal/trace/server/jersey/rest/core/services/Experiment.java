@@ -92,7 +92,7 @@ public final class Experiment implements Serializable {
                 experiment.getNbEvents(),
                 experiment.getStartTime().toNanos(),
                 experiment.getEndTime().toNanos(),
-                experiment.isIndexing() ? "RUNNING" : "COMPLETED",
+                experiment.isIndexing() ? "RUNNING" : "COMPLETED", //$NON-NLS-1$ //$NON-NLS-2$
                 traces);
     }
 
@@ -113,7 +113,7 @@ public final class Experiment implements Serializable {
                 0L,
                 0L,
                 0L,
-                "CLOSED",
+                "CLOSED", //$NON-NLS-1$
                 traces);
     }
 
@@ -175,6 +175,6 @@ public final class Experiment implements Serializable {
 
     @Override
     public String toString() {
-        return "Experiment [fName=" + fName + ", fUUID=" + fUUID + ", fNbEvents=" + fNbEvents + ", fStart=" + fStart + ", fEnd=" + fEnd + ", fIndexingStatus=" + fIndexingStatus + ", fTraces=" + fTraces + "]";
+        return "Experiment [fName=" + fName + ", fUUID=" + fUUID + ", fNbEvents=" + fNbEvents + ", fStart=" + fStart + ", fEnd=" + fEnd + ", fIndexingStatus=" + fIndexingStatus + ", fTraces=" + fTraces + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
     }
 }

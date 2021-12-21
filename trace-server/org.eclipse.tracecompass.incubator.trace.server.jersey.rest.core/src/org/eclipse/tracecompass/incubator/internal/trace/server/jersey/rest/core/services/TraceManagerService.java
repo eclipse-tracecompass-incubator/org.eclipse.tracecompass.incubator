@@ -133,8 +133,8 @@ public class TraceManagerService {
         if (parameters == null) {
             return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
         }
-        String name = (String) parameters.get("name");
-        String path = (String) parameters.get("uri");
+        String name = (String) parameters.get("name"); //$NON-NLS-1$
+        String path = (String) parameters.get("uri"); //$NON-NLS-1$
         if (IS_WINDOWS && path != null && path.startsWith("/")) { //$NON-NLS-1$
             /*
              * Workaround for path created by the theia-trace-extension, see
@@ -145,8 +145,8 @@ public class TraceManagerService {
              */
              path = path.substring(1);
         }
-        Object typeIDObject = parameters.get("typeID");
-        String typeID = typeIDObject != null ? (String) typeIDObject : "";
+        Object typeIDObject = parameters.get("typeID"); //$NON-NLS-1$
+        String typeID = typeIDObject != null ? (String) typeIDObject : ""; //$NON-NLS-1$
 
         try {
             return put(path, name, typeID);
