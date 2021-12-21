@@ -68,7 +68,6 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TREE_ENTRIES;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.VERSION;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.VTB;
-import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.XML;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.X_Y;
 
 import java.util.ArrayList;
@@ -205,7 +204,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
         @Tag(name = TGR, description = "Learn about querying Time Graph models."),
         @Tag(name = TRA, description = "How to manage physical traces on your server."),
         @Tag(name = VTB, description = "Learn about querying virtual table models (e.g. Events Table)."),
-        @Tag(name = XML, description = "Learn about querying XML analyses."),
         @Tag(name = X_Y, description = "Learn about querying XY models.")
 })
 @SuppressWarnings("restriction")

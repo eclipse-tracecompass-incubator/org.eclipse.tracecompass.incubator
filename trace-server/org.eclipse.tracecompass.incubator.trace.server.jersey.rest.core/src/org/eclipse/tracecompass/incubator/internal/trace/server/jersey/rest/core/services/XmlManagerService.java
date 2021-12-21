@@ -33,15 +33,15 @@ import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Hidden;
 
 /**
  * XML analysis and provider management
  *
  * @author Loic Prieur-Drevon
  */
+@Hidden
 @Path("/xml")
-@Tag(name = EndpointConstants.XML)
 @SuppressWarnings("restriction")
 public class XmlManagerService {
 
@@ -51,7 +51,7 @@ public class XmlManagerService {
      * @return list of available XML files, encapsulated in a response.
      */
     @GET
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getXml() {
         return Response.ok(Maps.transformValues(XmlUtils.listFiles(), File::getAbsolutePath)).build();
     }
@@ -116,5 +116,4 @@ public class XmlManagerService {
         }
         return Response.serverError().build();
     }
-
 }
