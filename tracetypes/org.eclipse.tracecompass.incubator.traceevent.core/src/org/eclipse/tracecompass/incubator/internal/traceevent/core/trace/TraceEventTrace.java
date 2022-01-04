@@ -128,7 +128,7 @@ public class TraceEventTrace extends JsonTrace {
 
         try {
             if (!TmfTraceUtils.isText(file)) {
-                return new TraceValidationStatus(confidence, Activator.PLUGIN_ID);
+                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Trace events are text only"); //$NON-NLS-1$
             }
         } catch (IOException e) {
             Activator.getInstance().logError("Error validating file: " + path, e); //$NON-NLS-1$
