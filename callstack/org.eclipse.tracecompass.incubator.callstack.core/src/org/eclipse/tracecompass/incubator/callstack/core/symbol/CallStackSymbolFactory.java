@@ -11,6 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.callstack.core.symbol;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
 import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.symbol.ResolvableSymbol;
@@ -22,6 +24,8 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.symbol.StringS
  * @author Geneviève Bastien
  */
 public final class CallStackSymbolFactory {
+
+    private static final Pattern IS_NUMBER = Pattern.compile("[0-9A-Fa-f]+");
 
     private CallStackSymbolFactory() {
         // Utility class, not to be instantiated
@@ -45,11 +49,14 @@ public final class CallStackSymbolFactory {
             return new ResolvableSymbol(longAddress, element.getSymbolKeyAt(timestamp), timestamp);
         }
         if (symbol instanceof String) {
-            try {
-                long longAddress = Long.parseUnsignedLong((String) symbol, 16);
-                return new ResolvableSymbol(longAddress, element.getSymbolKeyAt(timestamp), timestamp);
-            } catch (NumberFormatException e) {
-                // Not a long number, use a string symbol
+            String strSymbol = (String) symbol;
+            if (IS_NUMBER.matcher(strSymbol).matches()) {
+                try {
+                    long longAddress = Long.parseUnsignedLong(strSymbol, 16);
+                    return new ResolvableSymbol(longAddress, element.getSymbolKeyAt(timestamp), timestamp);
+                } catch (NumberFormatException e) {
+                    // Not a long number, use a string symbol
+                }
             }
         }
         return new StringSymbol(symbol);
