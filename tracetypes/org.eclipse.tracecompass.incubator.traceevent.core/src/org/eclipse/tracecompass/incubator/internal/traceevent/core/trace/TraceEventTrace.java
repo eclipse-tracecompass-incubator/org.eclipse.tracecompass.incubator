@@ -288,41 +288,42 @@ public class TraceEventTrace extends JsonTrace {
         if (args == null) {
             return;
         }
+        Map<@NonNull String, @NonNull String> properties = fProperties;
         switch (name) {
         case PROCESS_NAME:
             String procName = (String) args.get(NAME_ARG);
             fPidNames.put(field.getPid(), procName);
             if (procName != null) {
-                fProperties.put(PID_PREFIX + field.getPid(), procName);
+                properties.put(PID_PREFIX + field.getPid(), procName);
             }
             break;
         case PROCESS_LABELS:
             String procLabels = (String) args.get(LABELS);
             if (procLabels != null) {
-                fProperties.put(PID_LABEL_PREFIX + field.getPid(), procLabels);
+                properties.put(PID_LABEL_PREFIX + field.getPid(), procLabels);
             }
             break;
         case PROCESS_SORT_INDEX:
             String sortIndex = (String) args.get(SORT_INDEX);
             if (sortIndex != null) {
-                fProperties.put(name + '-' + field.getPid(), sortIndex);
+                properties.put(name + '-' + field.getPid(), sortIndex);
             }
             break;
         case THREAD_NAME:
             String threadName = (String) args.get(NAME_ARG);
             fTidNames.put(field.getTid(), threadName);
             if (threadName != null) {
-                fProperties.put(TID_PREFIX + field.getTid(), threadName);
+                properties.put(TID_PREFIX + field.getTid(), threadName);
             }
             break;
         case THREAD_SORT_INDEX:
             sortIndex = (String) args.get(SORT_INDEX);
             if (sortIndex != null) {
-                fProperties.put(name + '-' + field.getTid(), sortIndex);
+                properties.put(name + '-' + field.getTid(), sortIndex);
             }
             break;
         default:
-            fProperties.put(name, String.valueOf(args));
+            properties.put(name, String.valueOf(args));
             break;
         }
 
