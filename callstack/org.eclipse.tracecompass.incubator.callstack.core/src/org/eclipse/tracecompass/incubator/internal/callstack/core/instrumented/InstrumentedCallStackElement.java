@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
@@ -47,6 +48,7 @@ public class InstrumentedCallStackElement extends CallStackElement {
 
     private static final String INSTRUMENTED = "instrumented"; //$NON-NLS-1$
 
+    private static final Pattern IS_INTEGER = Pattern.compile("\\d+");  //$NON-NLS-1$
     private final ITmfStateSystem fStateSystem;
     private final int fQuark;
     private final IHostIdResolver fHostResolver;
@@ -190,7 +192,9 @@ public class InstrumentedCallStackElement extends CallStackElement {
                     try {
                         // Otherwise, try to take the attribute name as the key
                         String processName = fStateSystem.getAttributeName(fQuark);
-                        processId = Integer.parseInt(processName);
+                        if (IS_INTEGER.matcher(processName).matches()) {
+                            processId = Integer.parseInt(processName);
+                        }
                     } catch (NumberFormatException e) {
                         /* use default processId */
                     }
