@@ -11,6 +11,10 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.ui.views.functiondensity;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.viewers.TableViewer;
@@ -18,6 +22,7 @@ import org.eclipse.tracecompass.analysis.timing.core.segmentstore.ISegmentStoreP
 import org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.table.AbstractSegmentStoreTableViewer;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * Displays the Call Stack data in a column table
@@ -50,10 +55,17 @@ public class FunctionTableViewer extends AbstractSegmentStoreTableViewer {
 
     @Override
     protected @Nullable ISegmentStoreProvider getSegmentStoreProvider(@NonNull ITmfTrace trace) {
-        IAnalysisModule modules = trace.getAnalysisModule(fAnalysisId);
-        if (!(modules instanceof ISegmentStoreProvider)) {
+        IAnalysisModule module = trace.getAnalysisModule(fAnalysisId);
+        if (!(module instanceof ISegmentStoreProvider)) {
+            Iterable<@NonNull ISegmentStoreProvider> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, ISegmentStoreProvider.class);
+            Optional<@NonNull ISegmentStoreProvider> providers = StreamSupport.stream(modules.spliterator(), false)
+                    .filter(mod -> (mod instanceof IAnalysisModule && Objects.equals(fAnalysisId, ((IAnalysisModule) mod).getId())))
+                    .findFirst();
+            if (providers.isPresent()) {
+                return providers.get();
+            }
             return null;
         }
-        return (ISegmentStoreProvider) modules;
+        return (ISegmentStoreProvider) module;
     }
 }
