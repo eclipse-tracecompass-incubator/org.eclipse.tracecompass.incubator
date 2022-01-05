@@ -39,6 +39,11 @@ public interface IOtf2Fields {
     String OTF2_NAME = "name"; //$NON-NLS-1$
 
     /**
+     * Class name field name
+     */
+    String OTF2_CLASS_NAME = "className"; //$NON-NLS-1$
+
+    /**
      * Communicator field name
      */
     String OTF2_COMMUNICATOR = "communicator"; //$NON-NLS-1$
@@ -84,12 +89,22 @@ public interface IOtf2Fields {
     String OTF2_SELF = "self"; //$NON-NLS-1$
 
     /**
+     * System tree parent field name
+     */
+    String OTF2_SYSTEM_TREE_PARENT = "systemTreeParent"; //$NON-NLS-1$
+
+    /**
      * Location field name
      */
     String OTF2_LOCATION = "location"; //$NON-NLS-1$
 
     /**
-     * LocationType field name
+     * Location group type field name
+     */
+    String OTF2_LOCATION_GROUP_TYPE = "locationGroupType"; //$NON-NLS-1$
+
+    /**
+     * Location type field name
      */
     String OTF2_LOCATION_TYPE = "locationType"; //$NON-NLS-1$
 

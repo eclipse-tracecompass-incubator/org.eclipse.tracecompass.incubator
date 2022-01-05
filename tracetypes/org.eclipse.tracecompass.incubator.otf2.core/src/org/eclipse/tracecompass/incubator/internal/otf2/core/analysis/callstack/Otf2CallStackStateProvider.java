@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.callstack;
 
 import java.util.Map;
+import java.util.Queue;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
@@ -53,6 +54,132 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
     public static final String PROCESSES = "Processes"; //$NON-NLS-1$
 
     /**
+     * Whitespace string
+     */
+    public static final String WHITESPACE = " "; //$NON-NLS-1$
+
+    /**
+     * Long representing the maximum value for a 32-bits unsigned integer
+     */
+    protected static final long MAX_UINT32 = (1L << 32) - 1;
+
+    /**
+     * A class representing a node from the system tree. It is used to represent
+     * how the different machines are distributed into a MPI cluster and how the
+     * MPI ranks are distributed on each node.
+     *
+     * @author Yoann Heitz
+     *
+     */
+    private class SystemTreeNode {
+        private final long fParentId;
+        private final int fNameId;
+        private final int fClassNameId;
+        private int fSystemTreeNodeQuark;
+
+        public SystemTreeNode(long parentId, int nameId, int classNameId) {
+            fParentId = parentId;
+            fNameId = nameId;
+            fClassNameId = classNameId;
+            fSystemTreeNodeQuark = UNKNOWN_ID;
+        }
+
+        public String getFullName() {
+            Map<Integer, String> stringIds = getStringId();
+            String name = stringIds.get(fNameId);
+            String className = stringIds.get(fClassNameId);
+            return className + WHITESPACE + name;
+        }
+
+        /*
+         * The method used to initialize the quark associated to this node. If
+         * the node ID of the parent of this node is the maximum value for
+         * unsigned integer, then this node is the root of a system tree. Else,
+         * the parent node is usually a machine node. Its quark must be
+         * retrieved and initialized if it was not done before.
+         */
+        public void initializeQuarks(ITmfStateSystemBuilder ssb) {
+            if (fParentId == MAX_UINT32) {
+                fSystemTreeNodeQuark = ssb.getQuarkAbsoluteAndAdd(PROCESSES, getFullName());
+            } else {
+                int machineQuark = getSystemTreeNodeQuark(fParentId);
+                if (machineQuark == UNKNOWN_ID) {
+                    SystemTreeNode parentNode = fMapSystemTreeNode.get(fParentId);
+                    if (parentNode == null) {
+                        return;
+                    }
+                    parentNode.initializeQuarks(ssb);
+                    machineQuark = getSystemTreeNodeQuark(fParentId);
+                }
+                if (machineQuark != UNKNOWN_ID) {
+                    fSystemTreeNodeQuark = ssb.getQuarkRelativeAndAdd(machineQuark, getFullName());
+                }
+            }
+        }
+
+        public int getQuark() {
+            return fSystemTreeNodeQuark;
+        }
+    }
+
+    private int getSystemTreeNodeQuark(long systemTreeNodeId) {
+        SystemTreeNode systemTreeNode = fMapSystemTreeNode.get(systemTreeNodeId);
+        if (systemTreeNode == null) {
+            return UNKNOWN_ID;
+        }
+        return systemTreeNode.getQuark();
+    }
+
+    /**
+     * A class representing a location group. It is used to represent a MPI
+     * rank. The group is associated to a system tree node which is the node on
+     * which is running this MPI rank.
+     *
+     * @author Yoann Heitz
+     *
+     */
+    private class LocationGroup {
+        private final long fParentId;
+        private final int fNameId;
+        private final int fType;
+        private int fLocationGroupQuark;
+
+        public LocationGroup(long parentId, int nameId, int type) {
+            fParentId = parentId;
+            fNameId = nameId;
+            fType = type;
+            fLocationGroupQuark = UNKNOWN_ID;
+        }
+
+        public String getFullName() {
+            String name = getStringId().get(fNameId);
+            if (fType == 1 && name != null) {
+                return name;
+            }
+            return UNKNOWN;
+        }
+
+        public void initializeQuarks(ITmfStateSystemBuilder ssb) {
+            int nodeQuark = getSystemTreeNodeQuark(fParentId);
+            if (nodeQuark != UNKNOWN_ID) {
+                fLocationGroupQuark = ssb.getQuarkRelativeAndAdd(nodeQuark, getFullName());
+            }
+        }
+
+        public int getQuark() {
+            return fLocationGroupQuark;
+        }
+    }
+
+    private int getLocationGroupQuark(int locationGroupId) {
+        LocationGroup locationGroup = fMapLocationGroup.get(locationGroupId);
+        if (locationGroup == null) {
+            return UNKNOWN_ID;
+        }
+        return locationGroup.getQuark();
+    }
+
+    /**
      * A class representing a location. When an OTF2 event is encountered,
      * methods from this class will be used to modify the state of the
      * associated attributes.
@@ -80,20 +207,15 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
 
         /*
          * This method will be called by each location when all definitions have
-         * been read : the names of the location and of the parent process may
-         * be computed at this moment, and the corresponding quarks may be
-         * created.
+         * been read : the name of the location may be computed at this moment,
+         * and the corresponding quark may be created.
          */
         public void initializeQuarks(ITmfStateSystemBuilder ssb) {
-            // Get the names of the location and its parent process
+            // Get the name of the location
             String locationName = getStringFromStringId(fLocationNameId);
-            Integer processStringId = fLocationGroupStringId.get(fProcessId);
-            if (processStringId == null) {
-                processStringId = UNKNOWN_ID;
-            }
-            String processName = getStringFromStringId(processStringId);
-            // Create the associated quarks
-            int processQuark = ssb.getQuarkAbsoluteAndAdd(PROCESSES, processName);
+
+            // Create the associated quark
+            int processQuark = getLocationGroupQuark(fProcessId);
             fLocationQuark = ssb.getQuarkRelativeAndAdd(processQuark, locationName);
             fCallStackQuark = ssb.getQuarkRelativeAndAdd(fLocationQuark, InstrumentedCallStackAnalysis.CALL_STACK);
         }
@@ -299,11 +421,12 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
     /**
      * Mapping tables required for this analysis
      */
-    private final Map<Integer, Integer> fLocationGroupStringId;
-    private final Map<Long, Location> fMapLocation;
-    private final Map<MessageIdentifiers, ITmfEvent> fMsgDataEvent;
-    private final LinkedList<RootToAllIdentifiers> fRootToAllQueue;
-    private final LinkedList<AllToRootIdentifiers> fAllToRootQueue;
+    private final Map<Long, SystemTreeNode> fMapSystemTreeNode = new HashMap<>();
+    private final Map<Integer, LocationGroup> fMapLocationGroup = new HashMap<>();
+    private final Map<Long, Location> fMapLocation = new HashMap<>();
+    private final Map<MessageIdentifiers, ITmfEvent> fMsgDataEvent = new HashMap<>();
+    private final Queue<RootToAllIdentifiers> fRootToAllQueue = new LinkedList<>();
+    private final Queue<AllToRootIdentifiers> fAllToRootQueue = new LinkedList<>();
     private boolean fAllDefinitionsRead;
 
     /**
@@ -312,17 +435,12 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
      */
     public Otf2CallStackStateProvider(@Nullable ITmfTrace trace) {
         super(trace, ID);
-        fLocationGroupStringId = new HashMap<>();
-        fMsgDataEvent = new HashMap<>();
-        fMapLocation = new HashMap<>();
-        fRootToAllQueue = new LinkedList<>();
-        fAllToRootQueue = new LinkedList<>();
         fAllDefinitionsRead = false;
     }
 
     @Override
     public int getVersion() {
-        return 1;
+        return 2;
     }
 
     @Override
@@ -361,6 +479,10 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
             processGroupMemberDefinition(event);
             break;
         }
+        case IOtf2GlobalDefinitions.OTF2_SYSTEM_TREE_NODE: {
+            processSystemTreeNodeDefinition(event);
+            break;
+        }
         default:
             return;
         }
@@ -380,11 +502,27 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
     private void processLocationGroupDefinition(ITmfEvent event) {
         ITmfEventField content = event.getContent();
         Integer locationGroupReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_SELF);
-        Integer stringReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_NAME);
-        if (locationGroupReference == null || stringReference == null) {
+        Integer nameReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_NAME);
+        Integer locationGroupType = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_LOCATION_GROUP_TYPE);
+        Long parentReference = content.getFieldValue(Long.class, IOtf2Fields.OTF2_SYSTEM_TREE_PARENT);
+        if (locationGroupReference == null || nameReference == null || locationGroupType == null || parentReference == null) {
             return;
         }
-        fLocationGroupStringId.put(locationGroupReference, stringReference);
+        LocationGroup locationGroup = new LocationGroup(parentReference, nameReference, locationGroupType);
+        fMapLocationGroup.put(locationGroupReference, locationGroup);
+    }
+
+    private void processSystemTreeNodeDefinition(ITmfEvent event) {
+        ITmfEventField content = event.getContent();
+        Long selfReference = content.getFieldValue(Long.class, IOtf2Fields.OTF2_SELF);
+        Integer nameReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_NAME);
+        Integer classNameReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_CLASS_NAME);
+        Long parentReference = content.getFieldValue(Long.class, IOtf2Fields.OTF2_SYSTEM_TREE_PARENT);
+        if (selfReference == null || nameReference == null || classNameReference == null || parentReference == null) {
+            return;
+        }
+        SystemTreeNode systemTreeNode = new SystemTreeNode(parentReference, nameReference, classNameReference);
+        fMapSystemTreeNode.put(selfReference, systemTreeNode);
     }
 
     @Override
@@ -441,6 +579,12 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
      * Iterates over all the location and initializes the associated quarks
      */
     private void initializeQuarks(ITmfStateSystemBuilder ssb) {
+        for (SystemTreeNode systemTreeNode : fMapSystemTreeNode.values()) {
+            systemTreeNode.initializeQuarks(ssb);
+        }
+        for (LocationGroup locationGroup : fMapLocationGroup.values()) {
+            locationGroup.initializeQuarks(ssb);
+        }
         for (Location location : fMapLocation.values()) {
             location.initializeQuarks(ssb);
         }

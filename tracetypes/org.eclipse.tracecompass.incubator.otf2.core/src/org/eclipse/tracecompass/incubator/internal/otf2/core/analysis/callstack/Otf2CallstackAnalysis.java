@@ -13,8 +13,13 @@ package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.callstack
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
+import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.AbstractOtf2Analysis;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Constants;
@@ -22,6 +27,8 @@ import org.eclipse.tracecompass.incubator.otf2.core.trace.Otf2Trace;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * OTF2 callstack analysis
@@ -32,10 +39,16 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 public class Otf2CallstackAnalysis extends InstrumentedCallStackAnalysis {
 
     private static final String ID_SUFFIX = ".callstack"; //$NON-NLS-1$
+    private static final int THREAD_DEPTH = 3;
 
     @Override
     public String getId() {
         return AbstractOtf2Analysis.getAnalysisIdFromSuffix(ID_SUFFIX);
+    }
+
+    @Override
+    protected @NonNull IThreadIdResolver getCallStackTidResolver() {
+        return new CallStackSeries.AttributeValueThreadResolver(THREAD_DEPTH);
     }
 
     @Override
@@ -58,5 +71,19 @@ public class Otf2CallstackAnalysis extends InstrumentedCallStackAnalysis {
             return Collections.emptyList();
         }
         return ss.getSubAttributes(edgeQuark, false);
+    }
+
+    /**
+     * Get the patterns for the clusters, nodes, processes and threads
+     *
+     * @return The patterns for the different levels in the state system
+     */
+    @Override
+    protected List<String[]> getPatterns() {
+        return ImmutableList.of(
+                new String[] { CallStackStateProvider.PROCESSES, "*" }, //$NON-NLS-1$
+                new String[] { "*" }, //$NON-NLS-1$
+                new String[] { "*" }, //$NON-NLS-1$
+                new String[] { "*" }); //$NON-NLS-1$
     }
 }

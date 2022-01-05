@@ -354,4 +354,13 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
         return members;
     }
 
+    /**
+     * Getter for the fStringId field
+     *
+     * @return the fStringId field
+     */
+    protected Map<Integer, String> getStringId() {
+        return fStringId;
+    }
+
 }
