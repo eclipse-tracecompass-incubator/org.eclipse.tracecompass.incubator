@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.eclipse.tracecompass.incubator.ftrace.core.tests.shared.FTraceUtils;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceFileType;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceHeaderInfo;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceVersion;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceVersionHeader;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.parser.BinaryFTraceFileParser;
 import org.eclipse.tracecompass.testtraces.ftrace.FtraceTestTrace;
@@ -71,7 +72,7 @@ public class FTraceBinaryHeaderTest {
     public void testMagicValues() throws Exception {
         BinaryFTraceVersionHeader magicValues = BinaryFTraceFileParser.getFtraceVersionHeader(traceURL);
         assertArrayEquals(magicValues.getMagicValues(), TRACE_CMD_V6_DAT_MAGIC);
-        assertTrue(isSupportedFTraceVersion(magicValues.getFTraceVersion()));
+        assertTrue(magicValues.getFTraceVersion() == BinaryFTraceVersion.V6);
     }
 
     /**
