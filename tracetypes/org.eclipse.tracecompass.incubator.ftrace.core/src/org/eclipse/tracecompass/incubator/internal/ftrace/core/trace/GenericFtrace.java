@@ -48,7 +48,8 @@ import java.util.regex.Matcher;
  */
 public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     /**
-     * FTrace magic number
+     * FTrace magic numbers. These are the magic values at the beginning of a
+     * binary FTrace.
      */
     protected static final byte[] TRACE_CMD_DAT_MAGIC = { 0x17, 0x08, 0x44, 't', 'r', 'a', 'c', 'i', 'n', 'g' };
 

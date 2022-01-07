@@ -15,6 +15,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.internal.ftrace.core;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests",
+ org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.context;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests",
  org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.event;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests",
  org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests",
  org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.iterator;x-friends:="org.eclipse.tracecompass.incubator.ftrace.core.tests",

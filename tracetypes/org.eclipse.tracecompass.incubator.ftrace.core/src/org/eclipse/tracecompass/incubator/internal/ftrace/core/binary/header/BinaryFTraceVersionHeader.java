@@ -20,7 +20,7 @@ package org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header;
  */
 public class BinaryFTraceVersionHeader {
     private final byte[] fMagicValues;
-    private final int fFTraceVersion;
+    private final BinaryFTraceVersion fFTraceVersion;
 
     /**
      * Constructor
@@ -30,7 +30,7 @@ public class BinaryFTraceVersionHeader {
      * @param fTraceVersion
      *            The version of FTrace
      */
-    public BinaryFTraceVersionHeader(byte[] magicValues, int fTraceVersion) {
+    public BinaryFTraceVersionHeader(byte[] magicValues, BinaryFTraceVersion fTraceVersion) {
         fMagicValues = magicValues;
         fFTraceVersion = fTraceVersion;
     }
@@ -50,7 +50,7 @@ public class BinaryFTraceVersionHeader {
      *
      * @return The FTrace version
      */
-    public int getFTraceVersion() {
+    public BinaryFTraceVersion getFTraceVersion() {
         return fFTraceVersion;
     }
 }

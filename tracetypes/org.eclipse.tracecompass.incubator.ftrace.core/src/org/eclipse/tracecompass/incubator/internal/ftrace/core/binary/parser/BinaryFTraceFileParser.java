@@ -33,6 +33,7 @@ import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.Bin
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceHeaderInfo;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceHeaderInfo.BinaryFTraceHeaderInfoBuilder;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceOption;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceVersion;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceVersionHeader;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 
@@ -135,8 +136,9 @@ public class BinaryFTraceFileParser {
     private static BinaryFTraceVersionHeader getMagicValuesAndFtraceVersion(BinaryFTraceByteBuffer buffer) throws TmfTraceException {
         try {
             byte[] bytes = buffer.getNextBytes(10);
-            int ftraceVersion = Integer.parseInt(buffer.getNextString().trim());
-            return new BinaryFTraceVersionHeader(bytes, ftraceVersion);
+            int ftraceVersionInt = Integer.parseInt(buffer.getNextString().trim());
+            BinaryFTraceVersion ftraceVersionEnum = BinaryFTraceVersion.getVersionAsEnum(ftraceVersionInt);
+            return new BinaryFTraceVersionHeader(bytes, ftraceVersionEnum);
         } catch (IOException e) {
             throw new TmfTraceException("Cannot parse the magic values and FTrace version. Make sure you use trace-cmd v.2.9 and above.", e); //$NON-NLS-1$
         }

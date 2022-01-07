@@ -27,7 +27,7 @@ public class BinaryFTraceHeaderInfo {
     private String fFilePath;
 
     // Some metadata aboout the file
-    private final int fVersion;
+    private final BinaryFTraceVersion fVersion;
     private final ByteOrder fEndianess;
     private final int fLongValueSize;
     private final int fHostMachinePageSize;
@@ -98,7 +98,7 @@ public class BinaryFTraceHeaderInfo {
      *
      * @return The FTrace version of the file
      */
-    public int getVersion() {
+    public BinaryFTraceVersion getVersion() {
         return fVersion;
     }
 
@@ -366,7 +366,7 @@ public class BinaryFTraceHeaderInfo {
         private String fBuilderFilePath;
 
         // Some metadata aboout the file
-        private int fBuilderVersion;
+        private BinaryFTraceVersion fBuilderVersion;
         private ByteOrder fBuilderEndianess;
         private int fBuilderLongValueSize;
         private int fBuilderHostMachinePageSize;
@@ -390,7 +390,7 @@ public class BinaryFTraceHeaderInfo {
          */
         public BinaryFTraceHeaderInfoBuilder() {
             fBuilderFilePath = ""; //$NON-NLS-1$
-            fBuilderVersion = -1;
+            fBuilderVersion = BinaryFTraceVersion.NOT_SUPPORTED;
             fBuilderEndianess = ByteOrder.BIG_ENDIAN; // Because Java by default
                                                       // is big
             // endian.
@@ -431,7 +431,7 @@ public class BinaryFTraceHeaderInfo {
          *            The FTrace version
          * @return The current {@link BinaryFTraceHeaderInfoBuilder}.
          */
-        public BinaryFTraceHeaderInfoBuilder version(int builderVersion) {
+        public BinaryFTraceHeaderInfoBuilder version(BinaryFTraceVersion builderVersion) {
             fBuilderVersion = builderVersion;
             return this;
         }
