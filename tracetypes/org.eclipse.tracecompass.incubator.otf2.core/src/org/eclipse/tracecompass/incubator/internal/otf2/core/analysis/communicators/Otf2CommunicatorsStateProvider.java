@@ -357,14 +357,14 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             Long beginCommunicatorUseTimestamp = Math.min(recvBeginTimestamp, sentMessage.getBeginTimestamp());
             // When the communication began, 2 locations were expected to use
             // the communicator
-            communicator.fTimestampsPendingThreads.put(beginCommunicatorUseTimestamp, 2L);
+            communicator.incrementPendingThreads(beginCommunicatorUseTimestamp, 2L);
 
             /*
              * When the send event was encountered, the sender finished to use
              * the communicator. It is the same for the receive event
              */
-            communicator.fTimestampsPendingThreads.put(sentMessage.getBeginTimestamp(), -1L);
-            communicator.fTimestampsPendingThreads.put(srcEvent.getTimestamp().toNanos(), -1L);
+            communicator.incrementPendingThreads(sentMessage.getBeginTimestamp(), -1L);
+            communicator.incrementPendingThreads(srcEvent.getTimestamp().toNanos(), -1L);
             fCurrentCommunicator = communicator;
             fRank = destRank;
         }
@@ -401,7 +401,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
                      * location is expected to use the communicator at this
                      * timestamp
                      */
-                    communicator.fTimestampsPendingThreads.put(event.getTimestamp().toNanos(), -1L);
+                    communicator.incrementPendingThreads(event.getTimestamp().toNanos(), -1L);
                     if (collectiveOperation.isOperationDone()) {
                         /*
                          * If the communication is done then we search for the
@@ -411,7 +411,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
                          * communicator were expected to use this communicator
                          * and it is needed to store this change
                          */
-                        communicator.fTimestampsPendingThreads.put(Collections.min(collectiveOperation.getEnterTimestamps()), (long) communicator.fLocations.size());
+                        communicator.incrementPendingThreads(Collections.min(collectiveOperation.getEnterTimestamps()), communicator.fLocations.size());
                         communicator.fCollectiveOperations.remove(collectiveOperation);
                     }
                     return;
@@ -427,10 +427,10 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             communicator.fCollectiveOperations.add(collectiveOperation);
             collectiveOperation.locationCalledOperation(fId, fLatestEnteredTimestamp);
 
-            communicator.fTimestampsPendingThreads.put(event.getTimestamp().toNanos(), -1L);
+            communicator.incrementPendingThreads(event.getTimestamp().toNanos(), -1L);
 
             if (collectiveOperation.isOperationDone()) {
-                communicator.fTimestampsPendingThreads.put(Collections.min(collectiveOperation.getEnterTimestamps()), (long) communicator.fLocations.size());
+                communicator.incrementPendingThreads(Collections.min(collectiveOperation.getEnterTimestamps()), communicator.fLocations.size());
                 communicator.fCollectiveOperations.remove(collectiveOperation);
             }
         }
@@ -457,6 +457,15 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
          * communicator over the time.
          */
         protected final SortedMap<Long, Long> fTimestampsPendingThreads;
+
+        /*
+         * This function is used to increment the number of pending threads for
+         * this communicator by a specific value (it can be negative) at a
+         * specific timestamp.
+         */
+        private void incrementPendingThreads(long timestamp, long value) {
+            fTimestampsPendingThreads.merge(timestamp, value, (oldValue, newValue) -> oldValue + newValue);
+        }
 
         public Communicator(int id) {
             fId = id;
