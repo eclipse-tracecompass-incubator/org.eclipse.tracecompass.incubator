@@ -56,4 +56,9 @@ public interface IOtf2Events {
      * MPI CollectiveEnd event name
      */
     String OTF2_MPI_COLLECTIVE_END = "MpiCollectiveEnd"; //$NON-NLS-1$
+
+    /**
+     * MPI IRecv Request event name
+     */
+    String OTF2_MPI_IRECV_REQUEST = "MpiIrecvRequest"; //$NON-NLS-1$
 }
