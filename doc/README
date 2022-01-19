@@ -1,6 +1,7 @@
+# Building the documentation
+
 This describes how to build the documentation found in the
 org.eclipse.tracecompass.incubator.*.doc.* plugins.
-
 
 Your Eclipse environment first needs to have the "Mylyn Wikitext" plugin
 installed. It can be found in the default Eclipse repository, under
