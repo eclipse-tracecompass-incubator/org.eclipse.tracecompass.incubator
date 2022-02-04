@@ -1,7 +1,11 @@
 
 = ftrace =
 
-Trace Compass supports the raw textual format of various ftrace plugins.
+Trace Compass supports the raw textual format and binary format (version 6) of various ftrace
+plugins.
+
+See [https://man7.org/linux/man-pages/man5/trace-cmd.dat.5.html the trace-cmd.dat man page] for
+more information on the binary ftrace format (version 6).
 
 == Supported ftrace features ==
 
@@ -21,9 +25,12 @@ To resolve the symbols correctly in the trace, you'll need the symbols from the 
 
 == Generating a trace ==
 
-There are two ways to generate the trace in the human readable raw format. Using ftrace via the debugfs filesystem or using the trace-cmd command-line tool.
+There are two ways to generate an ftrace trace, using ftrace via the debugfs filesystem
+or using the trace-cmd command-line tool.
 
 === Debugfs filesystem ===
+
+Use the debugfs filesystem to generate a trace in human readable raw format.
 
 Mount the debugfs filesystem using the following command:
 
@@ -49,11 +56,29 @@ The trace can be obtained in raw format in the ''trace'' file:
 
 === trace-cmd ===
 
+Trace-cmd can be used to generate traces in binary format or human readable format. Currently,
+the only supported binary ftrace version is 6. Before generating the traces, make sure to have
+the latest version of trace-cmd (>= 2.9) and related libraries if not installed (libtraceevents
+and libtracefs).
+
+==== Binary format ====
+
+The following section describes how to generate a trace in human readable raw format using
+trace-cmd.
+
 Recording of a trace can be started by the following command:
 
   # trace-cmd record -e sched_switch -e sched_wakeup
 
-The recorded trace would contain only ''sched_switch'' and ''sched_wakeup'' events. Outputting the recorded trace is done using the following command:
+The trace is recorded in binary format in the ''trace.dat'' file. In the example above, the
+recorded trace would contain only ''sched_switch'' and ''sched_wakeup'' events.
+
+==== Human readable raw format ====
+
+To obtain a human readable trace, first follow the instructions to produce a trace in binary format
+described in the preceeding section.
+
+Next, outputting the recorded trace is done using the following command:
 
   # trace-cmd report -R
 
