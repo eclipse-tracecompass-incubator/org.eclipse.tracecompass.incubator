@@ -58,7 +58,7 @@ public class FTraceBinaryHeaderTest {
      */
     @BeforeClass
     public static void testInit() throws IOException {
-        traceURL = FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_4_CPU);
+        traceURL = FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_MULTIPLE_CPUS);
     }
 
     /**

@@ -49,7 +49,7 @@ public class BinaryFTraceCPUSectionIteratorTest {
      */
     @BeforeClass
     public static void init() throws Exception {
-        multipleEventTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_4_CPU));
+        multipleEventTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_MULTIPLE_CPUS));
         cpu = multipleEventTrace.getCpus().get(BinaryFTraceCPUSectionIteratorTestData.CPU_NUMBER);
     }
 

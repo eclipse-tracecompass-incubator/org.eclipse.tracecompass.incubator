@@ -44,7 +44,7 @@ public class BinaryFTraceReaderTest {
      */
     @BeforeClass
     public static void initTest() throws Exception {
-        multipleEventTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_4_CPU));
+        multipleEventTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_MULTIPLE_CPUS));
         emptyTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_EMPTY));
     }
 

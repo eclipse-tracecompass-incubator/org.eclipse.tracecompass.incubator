@@ -52,7 +52,7 @@ public class BinaryFTraceCPUPageIteratorTest {
     @BeforeClass
     public static void init() throws Exception {
         singleEventTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_SINGLE_EVENT));
-        multipleEventTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_4_CPU));
+        multipleEventTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_MULTIPLE_CPUS));
     }
 
     /**
