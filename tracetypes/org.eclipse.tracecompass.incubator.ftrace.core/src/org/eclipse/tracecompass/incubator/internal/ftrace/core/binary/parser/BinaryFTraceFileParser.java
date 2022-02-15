@@ -139,7 +139,7 @@ public class BinaryFTraceFileParser {
             int ftraceVersionInt = Integer.parseInt(buffer.getNextString().trim());
             BinaryFTraceVersion ftraceVersionEnum = BinaryFTraceVersion.getVersionAsEnum(ftraceVersionInt);
             return new BinaryFTraceVersionHeader(bytes, ftraceVersionEnum);
-        } catch (IOException e) {
+        } catch (IOException | NumberFormatException e) {
             throw new TmfTraceException("Cannot parse the magic values and FTrace version. Make sure you use trace-cmd v.2.9 and above.", e); //$NON-NLS-1$
         }
     }
