@@ -32,6 +32,7 @@ import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Globa
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.AllToRootIdentifiers;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.MessageIdentifiers;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.RootToAllIdentifiers;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.trace.Location;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.trace.LocationGroup;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.trace.SystemTreeNode;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
@@ -157,19 +158,14 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
      * @author Yoann Heitz
      *
      */
-    private class Location {
+    private class CallstackLocation extends Location {
 
-        private final long fLocationId;
-        private final int fLocationNameId;
-        private final int fProcessId;
         private long fCollectiveBeginTimestamp;
         private int fLocationQuark;
         private int fCallStackQuark;
 
-        public Location(long id, int nameId, int processId) {
-            fLocationId = id;
-            fLocationNameId = nameId;
-            fProcessId = processId;
+        public CallstackLocation(ITmfEvent event) {
+            super(event);
             fCollectiveBeginTimestamp = 0L;
             fLocationQuark = UNKNOWN_ID;
             fCallStackQuark = UNKNOWN_ID;
@@ -182,10 +178,10 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
          */
         public void initializeQuarks(ITmfStateSystemBuilder ssb) {
             // Get the name of the location
-            String locationName = getStringFromStringId(fLocationNameId);
+            String locationName = getName(getStringId());
 
             // Create the associated quark
-            int processQuark = getLocationGroupQuark(fProcessId);
+            int processQuark = getLocationGroupQuark(getLocationGroupId());
             fLocationQuark = ssb.getQuarkRelativeAndAdd(processQuark, locationName);
             fCallStackQuark = ssb.getQuarkRelativeAndAdd(fLocationQuark, InstrumentedCallStackAnalysis.CALL_STACK);
         }
@@ -194,7 +190,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
         public void enter(ITmfEvent event, ITmfStateSystemBuilder ssb) {
             ITmfEventField content = event.getContent();
             long timestamp = event.getTimestamp().toNanos();
-            ssb.updateOngoingState(TmfStateValue.newValueLong(fLocationId), fLocationQuark);
+            ssb.updateOngoingState(TmfStateValue.newValueLong(getId()), fLocationQuark);
             Integer regionRef = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_REGION);
             if (regionRef == null) {
                 ssb.modifyAttribute(timestamp, null, fCallStackQuark);
@@ -222,7 +218,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
             if (communicator == null) {
                 return;
             }
-            Integer srcRank = getRank(fLocationId, communicator);
+            Integer srcRank = getRank(getId(), communicator);
             Integer destRank = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_RECEIVER);
             Integer messageTag = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_MESSAGE_TAG);
             if (destRank == null || messageTag == null || srcRank == UNKNOWN_RANK) {
@@ -245,7 +241,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
                 return;
             }
             Integer srcRank = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_SENDER);
-            Integer destRank = getRank(fLocationId, communicator);
+            Integer destRank = getRank(getId(), communicator);
             Integer messageTag = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_MESSAGE_TAG);
             if (srcRank == null || messageTag == null || destRank == UNKNOWN_RANK) {
                 return;
@@ -256,7 +252,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
             }
             long srcLocationId = getLocationId(srcEvent);
             HostThread src = new HostThread(srcEvent.getTrace().getHostId(), (int) srcLocationId);
-            HostThread dest = new HostThread(destEvent.getTrace().getHostId(), (int) fLocationId);
+            HostThread dest = new HostThread(destEvent.getTrace().getHostId(), (int) getId());
             addArrow(ssb, srcEvent.getTimestamp().toNanos(), destEvent.getTimestamp().toNanos(), messageTag, src, dest);
         }
 
@@ -288,7 +284,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
              */
             RootToAllIdentifiers associatedOperation = null;
             for (RootToAllIdentifiers operationProperties : fRootToAllQueue) {
-                if (operationProperties.isAssociatedOperation(operationCode, srcLocationId, communicator, fLocationId)) {
+                if (operationProperties.isAssociatedOperation(operationCode, srcLocationId, communicator, getId())) {
                     associatedOperation = operationProperties;
                 }
             }
@@ -309,19 +305,19 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
             }
 
             // Update the state of the communication and draw edge
-            associatedOperation.locationCalledOperation(fLocationId, fCollectiveBeginTimestamp);
+            associatedOperation.locationCalledOperation(getId(), fCollectiveBeginTimestamp);
 
             if (associatedOperation.isOperationDone()) {
                 fRootToAllQueue.remove(associatedOperation);
             }
-            if (srcLocationId == fLocationId) {
+            if (srcLocationId == getId()) {
                 return;
             }
             if (srcEvent == null) {
                 srcEvent = associatedOperation.getBeginEvent();
             }
             HostThread src = new HostThread(srcEvent.getTrace().getHostId(), (int) srcLocationId);
-            HostThread dest = new HostThread(destEvent.getTrace().getHostId(), (int) fLocationId);
+            HostThread dest = new HostThread(destEvent.getTrace().getHostId(), (int) getId());
             addArrow(ssb, srcEvent.getTimestamp().toNanos(), destEvent.getTimestamp().toNanos(), root, src, dest);
 
         }
@@ -349,7 +345,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
              */
             AllToRootIdentifiers associatedOperation = null;
             for (AllToRootIdentifiers operationProperties : fAllToRootQueue) {
-                if (operationProperties.isAssociatedOperation(operationCode, destLocationId, communicator, fLocationId)) {
+                if (operationProperties.isAssociatedOperation(operationCode, destLocationId, communicator, getId())) {
                     associatedOperation = operationProperties;
                 }
             }
@@ -366,7 +362,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
             }
 
             // Updates the state of the communication
-            associatedOperation.locationCalledOperation(fLocationId, srcEvent);
+            associatedOperation.locationCalledOperation(getId(), srcEvent);
 
             /*
              * If the communication is finished (routine called by all the
@@ -393,7 +389,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
      */
     private final Map<Long, CallstackSystemTreeNode> fMapSystemTreeNode = new HashMap<>();
     private final Map<Long, CallstackLocationGroup> fMapLocationGroup = new HashMap<>();
-    private final Map<Long, Location> fMapLocation = new HashMap<>();
+    private final Map<Long, CallstackLocation> fMapLocation = new HashMap<>();
     private final Map<MessageIdentifiers, ITmfEvent> fMsgDataEvent = new HashMap<>();
     private final Queue<RootToAllIdentifiers> fRootToAllQueue = new LinkedList<>();
     private final Queue<AllToRootIdentifiers> fAllToRootQueue = new LinkedList<>();
@@ -459,14 +455,8 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
     }
 
     private void processLocationDefinition(ITmfEvent event) {
-        ITmfEventField content = event.getContent();
-        Long locationReference = content.getFieldValue(Long.class, IOtf2Fields.OTF2_SELF);
-        Integer locationGroupReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_LOCATION_GROUP);
-        Integer stringReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_NAME);
-        if (locationReference == null || locationGroupReference == null || stringReference == null) {
-            return;
-        }
-        fMapLocation.put(locationReference, new Location(locationReference, stringReference, locationGroupReference));
+        CallstackLocation location = new CallstackLocation(event);
+        fMapLocation.put(location.getId(), location);
     }
 
     private void processLocationGroupDefinition(ITmfEvent event) {
@@ -492,7 +482,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
         }
 
         long locationId = getLocationId(event);
-        Location location = fMapLocation.get(locationId);
+        CallstackLocation location = fMapLocation.get(locationId);
         if (location == null) {
             return;
         }
@@ -539,7 +529,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
         for (CallstackLocationGroup locationGroup : fMapLocationGroup.values()) {
             locationGroup.initializeQuarks(ssb);
         }
-        for (Location location : fMapLocation.values()) {
+        for (CallstackLocation location : fMapLocation.values()) {
             location.initializeQuarks(ssb);
         }
     }
@@ -565,7 +555,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
      * Calls the corresponding method from the associated location given the
      * type of event
      */
-    private static void processMpiCollectiveEnd(ITmfEvent event, ITmfStateSystemBuilder ssb, Location location) {
+    private static void processMpiCollectiveEnd(ITmfEvent event, ITmfStateSystemBuilder ssb, CallstackLocation location) {
         ITmfEventField content = event.getContent();
         Integer operationCode = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_COLLECTIVE_OPERATION);
         if (operationCode == null) {
