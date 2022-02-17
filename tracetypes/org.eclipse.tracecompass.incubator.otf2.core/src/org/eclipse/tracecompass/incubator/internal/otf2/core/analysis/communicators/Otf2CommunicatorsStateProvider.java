@@ -18,6 +18,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -29,6 +30,7 @@ import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Field
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2GlobalDefinitions;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.CollectiveOperationIdentifiers;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.MessageIdentifiers;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.trace.Location;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -103,9 +105,8 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
      *
      * @author Yoann Heitz
      */
-    private class Location {
+    private class CommunicatorsLocation extends Location {
 
-        private final long fId;
         private Communicator fCurrentCommunicator;
         private String fLatestEnteredRegion;
         private long fLatestEnteredTimestamp;
@@ -117,8 +118,8 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
         private final Deque<IRecvRequest> fIRecvRequests;
         private final Deque<StateSystemUpdateTriplet> fPendingStateSystemUpdates;
 
-        public Location(long id) {
-            fId = id;
+        public CommunicatorsLocation(ITmfEvent event) {
+            super(event);
             fCurrentCommunicator = new Communicator(UNKNOWN_RANK);
             fLatestEnteredRegion = IOtf2Constants.UNKNOWN_STRING;
             fLatestEnteredTimestamp = 0L;
@@ -296,7 +297,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
              * communication when encountered.
              */
             ITmfEventField content = srcEvent.getContent();
-            Integer srcRank = getRank(fId, communicator.fId);
+            Integer srcRank = getRank(getId(), communicator.fId);
             Integer destRank = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_RECEIVER);
             Integer messageTag = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_MESSAGE_TAG);
             if (destRank == null || messageTag == null || srcRank == UNKNOWN_RANK) {
@@ -314,14 +315,14 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
          */
         public void mpiRecv(ITmfEvent srcEvent, Communicator communicator, boolean isBlocking) {
             ITmfEventField content = srcEvent.getContent();
-            Integer destRank = getRank(fId, communicator.fId);
+            Integer destRank = getRank(getId(), communicator.fId);
             Integer srcRank = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_SENDER);
             Integer messageTag = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_MESSAGE_TAG);
             if (srcRank == null || messageTag == null || destRank == UNKNOWN_RANK) {
                 return;
             }
 
-            Location srcLocation = fMapLocation.get(communicator.fLocations.get(srcRank));
+            CommunicatorsLocation srcLocation = fMapLocation.get(communicator.fLocations.get(srcRank));
             if (srcLocation == null) {
                 return;
             }
@@ -374,6 +375,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
          * for a collective routine
          */
         private void mpiCollective(ITmfEvent event, Communicator communicator) {
+            long id = getId();
             ITmfEventField content = event.getContent();
             Integer operationCode = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_COLLECTIVE_OPERATION);
             if (operationCode == null) {
@@ -384,7 +386,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
                 return;
             }
             fCurrentCommunicator = communicator;
-            fRank = getRank(fId, communicator.fId);
+            fRank = getRank(id, communicator.fId);
             /*
              * The associated collective operation is searched in the list of
              * ongoing collective operations in the associated communicator
@@ -394,8 +396,8 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
                  * If the communication is found, the state of the communication
                  * and of the communicator are updated
                  */
-                if (collectiveOperation.isAssociatedOperation(operationCode, root, fId)) {
-                    collectiveOperation.locationCalledOperation(fId, fLatestEnteredTimestamp);
+                if (collectiveOperation.isAssociatedOperation(operationCode, root, id)) {
+                    collectiveOperation.locationCalledOperation(id, fLatestEnteredTimestamp);
                     /*
                      * We store the change for the communicator : one less
                      * location is expected to use the communicator at this
@@ -425,7 +427,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
              */
             CollectiveOperationIdentifiers collectiveOperation = new CollectiveOperationIdentifiers(operationCode, root, new ArrayList<>(communicator.fLocations));
             communicator.fCollectiveOperations.add(collectiveOperation);
-            collectiveOperation.locationCalledOperation(fId, fLatestEnteredTimestamp);
+            collectiveOperation.locationCalledOperation(id, fLatestEnteredTimestamp);
 
             communicator.incrementPendingThreads(event.getTimestamp().toNanos(), -1L);
 
@@ -518,7 +520,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
         }
     }
 
-    private final Map<Long, Location> fMapLocation;
+    private final Map<Long, CommunicatorsLocation> fMapLocation;
     private final Map<Integer, Communicator> fMapCommunicator;
     private final long fLastTimestamp;
 
@@ -573,12 +575,8 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             break;
         }
         case IOtf2GlobalDefinitions.OTF2_LOCATION: {
-            ITmfEventField content = event.getContent();
-            Long locationReference = content.getFieldValue(Long.class, IOtf2Fields.OTF2_SELF);
-            if (locationReference == null) {
-                return;
-            }
-            fMapLocation.put(locationReference, new Location(locationReference));
+            CommunicatorsLocation location = new CommunicatorsLocation(event);
+            fMapLocation.put(location.getId(), location);
             break;
         }
         case IOtf2GlobalDefinitions.OTF2_COMM: {
@@ -607,7 +605,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
     @Override
     protected void processOtf2Event(ITmfEvent event, String name, ITmfStateSystemBuilder ssb) {
         Long locationId = getLocationId(event);
-        Location location = fMapLocation.get(locationId);
+        CommunicatorsLocation location = fMapLocation.get(locationId);
         if (location == null) {
             return;
         }
@@ -668,8 +666,8 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
      * some IRecvRequests were not resolved
      */
     private void processLocationsAttributes(ITmfStateSystemBuilder ssb) {
-        for (Map.Entry<Long, Location> locationEntry : fMapLocation.entrySet()) {
-            Location location = locationEntry.getValue();
+        for (Entry<Long, CommunicatorsLocation> locationEntry : fMapLocation.entrySet()) {
+            CommunicatorsLocation location = locationEntry.getValue();
             location.flushAllUpdates(ssb);
         }
     }
@@ -678,7 +676,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
      * Calls the corresponding method from the associated location given the
      * type of event
      */
-    private static void processMpiCommunication(ITmfEvent event, ITmfStateSystemBuilder ssb, String name, Location location, Communicator communicator) {
+    private static void processMpiCommunication(ITmfEvent event, ITmfStateSystemBuilder ssb, String name, CommunicatorsLocation location, Communicator communicator) {
         if (!communicator.isInitialized()) {
             communicator.initialize(ssb);
         }
