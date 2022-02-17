@@ -239,6 +239,11 @@ public interface IOtf2Constants {
     }
 
     /**
+     * int constant representing OTF2 undefined uint8 value
+     */
+    int OTF2_UNDEFINED_UINT8 = (1 << 8) - 1;
+
+    /**
      * long constant representing OTF2 undefined uint32 value
      */
     long OTF2_UNDEFINED_UINT32 = (1L << 32) - 1;
@@ -270,4 +275,14 @@ public interface IOtf2Constants {
      * Constant representing an unknown system tree node reference.
      */
     long OTF2_UNKNOWN_SYSTEM_TREE_NODE = OTF2_UNDEFINED_UINT32;
+
+    /**
+     * Constant representing an unknown location group reference.
+     */
+    long OTF2_UNKNOWN_LOCATION_GROUP = OTF2_UNDEFINED_UINT32;
+
+    /**
+     * Constant representing an unknown location group type.
+     */
+    int OTF2_UNKNOWN_LOCATION_GROUP_TYPE = OTF2_UNDEFINED_UINT8;
 }
