@@ -237,4 +237,37 @@ public interface IOtf2Constants {
             return CollectiveOperation.UNKNOWN_OPERATION;
         }
     }
+
+    /**
+     * long constant representing OTF2 undefined uint32 value
+     */
+    long OTF2_UNDEFINED_UINT32 = (1L << 32) - 1;
+
+    /**
+     * In the following lines, undefined and unknown constants are defined for
+     * the different OTF2 references.
+     *
+     * The undefined constants should be used when no issues occurred while
+     * reading a reference field but when the reference value is the undefined
+     * value in the OTF2 standards.
+     *
+     * The unknown constants should be used when an issue occurred while reading
+     * a reference but a default value should be used to continue to process the
+     * trace.
+     */
+
+    /**
+     * Constant representing an unknown string reference.
+     */
+    long OTF2_UNKNOWN_STRING = OTF2_UNDEFINED_UINT32;
+
+    /**
+     * Constant representing an undefined system tree node reference.
+     */
+    long OTF2_UNDEFINED_SYSTEM_TREE_NODE = OTF2_UNDEFINED_UINT32;
+
+    /**
+     * Constant representing an unknown system tree node reference.
+     */
+    long OTF2_UNKNOWN_SYSTEM_TREE_NODE = OTF2_UNDEFINED_UINT32;
 }
