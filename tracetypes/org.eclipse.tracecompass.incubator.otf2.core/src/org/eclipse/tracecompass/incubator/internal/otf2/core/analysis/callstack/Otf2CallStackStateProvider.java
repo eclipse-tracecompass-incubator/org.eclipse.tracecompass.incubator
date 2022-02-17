@@ -11,25 +11,20 @@
 
 package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.callstack;
 
-import java.util.Map;
-import java.util.Queue;
-import java.util.HashMap;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
-import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.AbstractOtf2StateProvider;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Constants;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Events;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Fields;
@@ -37,7 +32,13 @@ import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Globa
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.AllToRootIdentifiers;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.MessageIdentifiers;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.RootToAllIdentifiers;
-import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.AbstractOtf2StateProvider;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.trace.SystemTreeNode;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
+import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
  * Main state provider that defines the enter/leave states
@@ -54,16 +55,6 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
     public static final String PROCESSES = "Processes"; //$NON-NLS-1$
 
     /**
-     * Whitespace string
-     */
-    public static final String WHITESPACE = " "; //$NON-NLS-1$
-
-    /**
-     * Long representing the maximum value for a 32-bits unsigned integer
-     */
-    protected static final long MAX_UINT32 = (1L << 32) - 1;
-
-    /**
      * A class representing a node from the system tree. It is used to represent
      * how the different machines are distributed into a MPI cluster and how the
      * MPI ranks are distributed on each node.
@@ -71,24 +62,12 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
      * @author Yoann Heitz
      *
      */
-    private class SystemTreeNode {
-        private final long fParentId;
-        private final int fNameId;
-        private final int fClassNameId;
+    private class CallstackSystemTreeNode extends SystemTreeNode {
         private int fSystemTreeNodeQuark;
 
-        public SystemTreeNode(long parentId, int nameId, int classNameId) {
-            fParentId = parentId;
-            fNameId = nameId;
-            fClassNameId = classNameId;
+        public CallstackSystemTreeNode(ITmfEvent event) {
+            super(event);
             fSystemTreeNodeQuark = UNKNOWN_ID;
-        }
-
-        public String getFullName() {
-            Map<Integer, String> stringIds = getStringId();
-            String name = stringIds.get(fNameId);
-            String className = stringIds.get(fClassNameId);
-            return className + WHITESPACE + name;
         }
 
         /*
@@ -99,20 +78,22 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
          * retrieved and initialized if it was not done before.
          */
         public void initializeQuarks(ITmfStateSystemBuilder ssb) {
-            if (fParentId == MAX_UINT32) {
-                fSystemTreeNodeQuark = ssb.getQuarkAbsoluteAndAdd(PROCESSES, getFullName());
+            String fullName = getFullName(getStringId());
+            long parentId = getParentId();
+            if (isRootNode()) {
+                fSystemTreeNodeQuark = ssb.getQuarkAbsoluteAndAdd(PROCESSES, fullName);
             } else {
-                int machineQuark = getSystemTreeNodeQuark(fParentId);
+                int machineQuark = getSystemTreeNodeQuark(parentId);
                 if (machineQuark == UNKNOWN_ID) {
-                    SystemTreeNode parentNode = fMapSystemTreeNode.get(fParentId);
+                    CallstackSystemTreeNode parentNode = fMapSystemTreeNode.get(parentId);
                     if (parentNode == null) {
                         return;
                     }
                     parentNode.initializeQuarks(ssb);
-                    machineQuark = getSystemTreeNodeQuark(fParentId);
+                    machineQuark = getSystemTreeNodeQuark(parentId);
                 }
                 if (machineQuark != UNKNOWN_ID) {
-                    fSystemTreeNodeQuark = ssb.getQuarkRelativeAndAdd(machineQuark, getFullName());
+                    fSystemTreeNodeQuark = ssb.getQuarkRelativeAndAdd(machineQuark, fullName);
                 }
             }
         }
@@ -123,7 +104,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
     }
 
     private int getSystemTreeNodeQuark(long systemTreeNodeId) {
-        SystemTreeNode systemTreeNode = fMapSystemTreeNode.get(systemTreeNodeId);
+        CallstackSystemTreeNode systemTreeNode = fMapSystemTreeNode.get(systemTreeNodeId);
         if (systemTreeNode == null) {
             return UNKNOWN_ID;
         }
@@ -421,7 +402,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
     /**
      * Mapping tables required for this analysis
      */
-    private final Map<Long, SystemTreeNode> fMapSystemTreeNode = new HashMap<>();
+    private final Map<Long, CallstackSystemTreeNode> fMapSystemTreeNode = new HashMap<>();
     private final Map<Integer, LocationGroup> fMapLocationGroup = new HashMap<>();
     private final Map<Long, Location> fMapLocation = new HashMap<>();
     private final Map<MessageIdentifiers, ITmfEvent> fMsgDataEvent = new HashMap<>();
@@ -513,16 +494,8 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
     }
 
     private void processSystemTreeNodeDefinition(ITmfEvent event) {
-        ITmfEventField content = event.getContent();
-        Long selfReference = content.getFieldValue(Long.class, IOtf2Fields.OTF2_SELF);
-        Integer nameReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_NAME);
-        Integer classNameReference = content.getFieldValue(Integer.class, IOtf2Fields.OTF2_CLASS_NAME);
-        Long parentReference = content.getFieldValue(Long.class, IOtf2Fields.OTF2_SYSTEM_TREE_PARENT);
-        if (selfReference == null || nameReference == null || classNameReference == null || parentReference == null) {
-            return;
-        }
-        SystemTreeNode systemTreeNode = new SystemTreeNode(parentReference, nameReference, classNameReference);
-        fMapSystemTreeNode.put(selfReference, systemTreeNode);
+        CallstackSystemTreeNode systemTreeNode = new CallstackSystemTreeNode(event);
+        fMapSystemTreeNode.put(systemTreeNode.getId(), systemTreeNode);
     }
 
     @Override
@@ -579,7 +552,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
      * Iterates over all the location and initializes the associated quarks
      */
     private void initializeQuarks(ITmfStateSystemBuilder ssb) {
-        for (SystemTreeNode systemTreeNode : fMapSystemTreeNode.values()) {
+        for (CallstackSystemTreeNode systemTreeNode : fMapSystemTreeNode.values()) {
             systemTreeNode.initializeQuarks(ssb);
         }
         for (LocationGroup locationGroup : fMapLocationGroup.values()) {
