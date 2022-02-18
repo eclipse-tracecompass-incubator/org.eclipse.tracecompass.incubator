@@ -31,7 +31,8 @@ public class TrimmedFtraceTrace extends FtraceTrace {
         IStatus status = super.validate(project, path);
         if (status instanceof TraceValidationStatus) {
             TraceValidationStatus traceValidationStatus = (TraceValidationStatus) status;
-            status = new TraceValidationStatus(traceValidationStatus.getConfidence() - 1, traceValidationStatus.getPlugin());
+            int trimmedConfidence = Math.max(0, traceValidationStatus.getConfidence() - 1);
+            status = new TraceValidationStatus(trimmedConfidence, traceValidationStatus.getPlugin());
         }
         return status;
     }
