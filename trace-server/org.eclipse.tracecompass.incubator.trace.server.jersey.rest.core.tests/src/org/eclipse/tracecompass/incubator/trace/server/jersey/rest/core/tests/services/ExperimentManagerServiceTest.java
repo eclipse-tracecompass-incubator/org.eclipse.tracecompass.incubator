@@ -12,7 +12,10 @@
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,12 +27,26 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
+import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
+import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
+import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
+import org.eclipse.tracecompass.tmf.core.io.ResourceUtil;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableSet;
@@ -195,4 +212,71 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         assertEquals("Deleting an experiment should not change the trace set", traceSet, getTraces(traces));
     }
 
+    /**
+     * Test workspace structure for experiments
+     *
+     * @throws CoreException
+     *             when a CoreException occurs
+     * @throws IOException
+     *             Exception thrown by getting trace path
+     */
+    @Test
+    public void testWorkspaceStructure() throws CoreException, IOException {
+        WebTarget applicationTarget = getApplicationEndpoint();
+        WebTarget tracesTarget = applicationTarget.path(TRACES);
+        WebTarget experimentsTarget = applicationTarget.path(EXPERIMENTS);
+
+        TraceModelStub ustStub = assertPost(tracesTarget, CONTEXT_SWITCHES_UST_STUB);
+        TraceModelStub kernelStub = assertPost(tracesTarget, CONTEXT_SWITCHES_KERNEL_STUB);
+
+        List<String> traceUUIDs = new ArrayList<>();
+        traceUUIDs.add(ustStub.getUUID().toString());
+        traceUUIDs.add(kernelStub.getUUID().toString());
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(NAME, EXPECTED.getName());
+        parameters.put(TRACES, traceUUIDs);
+
+        Response response = experimentsTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+        assertNotNull(response);
+
+        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+
+        // Make sure that workspace is refreshed
+        root.refreshLocal(IResource.DEPTH_INFINITE, null);
+
+        // Check for Tracing project with name "Tracing"
+        IProject tracingProject = root.getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME);
+        assertTrue(tracingProject.exists());
+        assertTrue(tracingProject.isNatureEnabled(TmfProjectNature.ID));
+
+        IFolder experimentsFolder = tracingProject.getFolder("Experiments");
+        assertTrue(experimentsFolder.exists());
+
+        // Check for experiment folder
+        IFolder expFolder = experimentsFolder.getFolder(TEST);
+        assertTrue(expFolder.exists());
+
+        // Check for Trace in the Experiments/test directory
+        String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath().replaceAll("/$", "");
+        IPath path = Path.fromOSString(contextSwitchesKernelPath);
+
+        // Check if trace parent folder was created
+        IFolder traceParent = expFolder.getFolder(path.removeLastSegments(1));
+        assertTrue(traceParent.exists());
+
+        /*
+         * Check for trace with name "kernel" under the trace parent directory.
+         * Note that the trace is a dummy file (even if the trace is a directory trace)
+         * which is not a symbolic link.
+         */
+        IFile trace = traceParent.getFile(CONTEXT_SWITCHES_KERNEL_NAME);
+        assertTrue(trace.exists());
+        assertTrue(!ResourceUtil.isSymbolicLink(trace));
+
+        String traceType = trace.getPersistentProperty(TmfCommonConstants.TRACETYPE);
+        assertNotNull(traceType);
+
+        assertEquals("org.eclipse.linuxtools.lttng2.kernel.tracetype", traceType);
+    }
 }
