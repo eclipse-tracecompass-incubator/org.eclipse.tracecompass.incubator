@@ -137,16 +137,31 @@ public abstract class RestServerTest {
     protected static TraceModelStub CONTEXT_SWITCHES_UST_STUB;
 
     /**
+     * The name used when posting the trace.
+     */
+    protected static final String CONTEXT_SWITCHES_UST_NAME = "ust";
+
+    /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL}.
      */
     protected static TraceModelStub CONTEXT_SWITCHES_KERNEL_STUB;
 
     /**
+     * The name used when posting the trace.
+     */
+    protected static final String CONTEXT_SWITCHES_KERNEL_NAME = "kernel";
+
+    /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#ARM_64_BIT_HEADER}, with the same name as {@link #CONTEXT_SWITCHES_KERNEL_STUB}
      */
     protected static TraceModelStub ARM_64_KERNEL_STUB;
+
+    /**
+     * The name used when posting the trace.
+     */
+    protected static final String ARM_64_KERNEL_NAME = "kernel";
 
     /**
      * Expected toString() of all data providers for this experiment
@@ -162,13 +177,13 @@ public abstract class RestServerTest {
     @BeforeClass
     public static void beforeTest() throws IOException {
         String contextSwitchesUstPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath().replaceAll("/$", "");
-        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub("ust", contextSwitchesUstPath);
+        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath);
 
         String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath().replaceAll("/$", "");
-        CONTEXT_SWITCHES_KERNEL_STUB = new TraceModelStub("kernel", contextSwitchesKernelPath);
+        CONTEXT_SWITCHES_KERNEL_STUB = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath);
 
         String arm64Path = FileLocator.toFileURL(CtfTestTrace.ARM_64_BIT_HEADER.getTraceURL()).getPath().replaceAll("/$", "");
-        ARM_64_KERNEL_STUB = new TraceModelStub("kernel", arm64Path);
+        ARM_64_KERNEL_STUB = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path);
 
         ImmutableList.Builder<DataProviderDescriptorStub> b = ImmutableList.builder();
         b.add(new DataProviderDescriptorStub("org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack",
