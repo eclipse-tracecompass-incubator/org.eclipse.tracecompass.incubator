@@ -58,8 +58,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITrace;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITraceQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.TraceQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -103,7 +102,7 @@ public class TraceManagerService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the list of physical traces imported on the server", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns a list of traces", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ITrace.class))))
+            @ApiResponse(responseCode = "200", description = "Returns a list of traces", content = @Content(array = @ArraySchema(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Trace.class))))
     })
     public Response getTraces() {
         synchronized (TRACES) {
@@ -149,7 +148,7 @@ public class TraceManagerService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Import a trace", description = "Import a trace to the trace server. Return some base information once imported.", responses = {
-            @ApiResponse(responseCode = "200", description = "The trace has been successfully added to the trace server", content = @Content(schema = @Schema(implementation = ITrace.class))),
+            @ApiResponse(responseCode = "200", description = "The trace has been successfully added to the trace server", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Trace.class))),
             @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "406", description = CANNOT_READ, content = @Content(schema = @Schema(implementation = String.class))),
@@ -158,7 +157,7 @@ public class TraceManagerService {
             @ApiResponse(responseCode = "501", description = NOT_SUPPORTED, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response putTrace(@RequestBody(content = {
-            @Content(schema = @Schema(implementation = ITraceQueryParameters.class))
+            @Content(schema = @Schema(implementation = TraceQueryParameters.class))
     }, required = true) QueryParameters queryParameters) {
         Map<String, Object> parameters = queryParameters.getParameters();
         if (parameters == null) {
@@ -364,7 +363,7 @@ public class TraceManagerService {
     @Path("/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the model object for a trace", responses = {
-            @ApiResponse(responseCode = "200", description = "Return the trace model", content = @Content(schema = @Schema(implementation = ITrace.class))),
+            @ApiResponse(responseCode = "200", description = "Return the trace model", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Trace.class))),
             @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getTrace(@Parameter(description = TRACE_UUID) @PathParam("uuid") @NotNull UUID uuid) {
@@ -386,7 +385,7 @@ public class TraceManagerService {
     @Path("/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Remove a trace from the server and disk", responses = {
-            @ApiResponse(responseCode = "200", description = "The trace was successfully deleted", content = @Content(schema = @Schema(implementation = ITrace.class))),
+            @ApiResponse(responseCode = "200", description = "The trace was successfully deleted", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Trace.class))),
             @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "409", description = "The trace is in use by at least one experiment thus cannot be deleted", content = @Content(schema = @Schema(implementation = String.class)))
     })

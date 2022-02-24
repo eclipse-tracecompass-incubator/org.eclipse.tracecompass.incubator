@@ -55,8 +55,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IExperiment;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IExperimentQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ExperimentQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.TraceAnnotationProvider;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
@@ -109,7 +108,7 @@ public class ExperimentManagerService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the list of experiments on the server", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns a list of experiments", content = @Content(array = @ArraySchema(schema = @Schema(implementation = IExperiment.class))))
+            @ApiResponse(responseCode = "200", description = "Returns a list of experiments", content = @Content(array = @ArraySchema(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Experiment.class))))
     })
     public Response getExperiments() {
         synchronized (EXPERIMENT_RESOURCES) {
@@ -178,7 +177,7 @@ public class ExperimentManagerService {
     @Path("/{expUUID}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the model object for an experiment", responses = {
-            @ApiResponse(responseCode = "200", description = "Return the experiment model", content = @Content(schema = @Schema(implementation = IExperiment.class))),
+            @ApiResponse(responseCode = "200", description = "Return the experiment model", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Experiment.class))),
             @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getExperiment(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
@@ -201,7 +200,7 @@ public class ExperimentManagerService {
     @Path("/{expUUID}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Remove an experiment from the server", responses = {
-            @ApiResponse(responseCode = "200", description = "The trace was successfully deleted, return the deleted experiment.", content = @Content(schema = @Schema(implementation = IExperiment.class))),
+            @ApiResponse(responseCode = "200", description = "The trace was successfully deleted, return the deleted experiment.", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Experiment.class))),
             @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response deleteExperiment(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
@@ -260,14 +259,14 @@ public class ExperimentManagerService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Create a new experiment on the server", responses = {
-            @ApiResponse(responseCode = "200", description = "The experiment was successfully created", content = @Content(schema = @Schema(implementation = IExperiment.class))),
+            @ApiResponse(responseCode = "200", description = "The experiment was successfully created", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Experiment.class))),
             @ApiResponse(responseCode = "204", description = "The experiment has at least one trace which hasn't been created yet", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "409", description = "The experiment (name) already exists and both differ", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to post experiment", content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response postExperiment(@RequestBody(content = {
-            @Content(schema = @Schema(implementation = IExperimentQueryParameters.class))
+            @Content(schema = @Schema(implementation = ExperimentQueryParameters.class))
     }, required = true) QueryParameters queryParameters) {
         Map<String, Object> parameters = queryParameters.getParameters();
         if (parameters == null) {

@@ -99,26 +99,26 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationCategoriesResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IAnnotationsQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IArrowsQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IDataProvider;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ILinesQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IMarkerSetsResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IOptionalQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IRequestedQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IStylesResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITableColumnHeadersResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITimeGraphArrowsResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITimeGraphStatesResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITimeGraphTooltipResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITimeGraphTreeResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITooltipQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ITreeQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IVirtualTableResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IXYResponse;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.IXYTreeResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.AnnotationCategoriesResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.AnnotationResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.AnnotationsQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ArrowsQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.DataProvider;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.LinesQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.MarkerSetsResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.OptionalQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.RequestedQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.StylesResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.TableColumnHeadersResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.TimeGraphArrowsResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.TimeGraphStatesResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.TimeGraphTooltipResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.TimeGraphTreeResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.TooltipQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.TreeQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.VirtualTableResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.XYResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.XYTreeResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TableColumnHeader;
@@ -223,7 +223,7 @@ public class DataProviderService {
     @Tag(name = EXP)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the list of outputs for this experiment", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns a list of output provider descriptors", content = @Content(array = @ArraySchema(schema = @Schema(implementation = IDataProvider.class)))),
+            @ApiResponse(responseCode = "200", description = "Returns a list of output provider descriptors", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DataProvider.class)))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getProviders(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
@@ -258,7 +258,7 @@ public class DataProviderService {
     @Tag(name = EXP)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the output descriptor for this experiment and output", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns the output provider descriptor", content = @Content(schema = @Schema(implementation = IDataProvider.class))),
+            @ApiResponse(responseCode = "200", description = "Returns the output provider descriptor", content = @Content(schema = @Schema(implementation = DataProvider.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getProvider(
@@ -300,7 +300,7 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the XY tree", description = TREE_ENTRIES, responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of XY entries. " +
-                    CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = IXYTreeResponse.class))),
+                    CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = XYTreeResponse.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
@@ -310,7 +310,7 @@ public class DataProviderService {
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the XY tree. " + TIMES_TREE, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX_TREE +
-                            "}}"), schema = @Schema(implementation = ITreeQueryParameters.class))
+                            "}}"), schema = @Schema(implementation = TreeQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
         return getTree(expUUID, outputId, queryParameters);
     }
@@ -333,7 +333,7 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the XY model", description = "Unique endpoint for all xy models, " +
             "ensures that the same template is followed for all endpoints.", responses = {
-                    @ApiResponse(responseCode = "200", description = "Return the queried XYResponse", content = @Content(schema = @Schema(implementation = IXYResponse.class))),
+                    @ApiResponse(responseCode = "200", description = "Return the queried XYResponse", content = @Content(schema = @Schema(implementation = XYResponse.class))),
                     @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
@@ -343,7 +343,7 @@ public class DataProviderService {
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the XY model. " + TIMES + " " + ITEMS_XY, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX + "," + ITEMS_EX +
-                            "}}"), schema = @Schema(implementation = IRequestedQueryParameters.class))
+                            "}}"), schema = @Schema(implementation = RequestedQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
         if (outputId == null) {
@@ -429,7 +429,7 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the Time Graph tree", description = TREE_ENTRIES, responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of Time Graph entries. " +
-                    CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = ITimeGraphTreeResponse.class))),
+                    CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = TimeGraphTreeResponse.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
@@ -439,7 +439,7 @@ public class DataProviderService {
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the timegraph tree. " + TIMES_TREE, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX_TREE +
-                            "}}"), schema = @Schema(implementation = ITreeQueryParameters.class))
+                            "}}"), schema = @Schema(implementation = TreeQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
         return getTree(expUUID, outputId, queryParameters);
     }
@@ -462,7 +462,7 @@ public class DataProviderService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the Time Graph states", description = "Unique entry point for all TimeGraph states, ensures that the same template is followed for all views", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns a list of time graph rows", content = @Content(schema = @Schema(implementation = ITimeGraphStatesResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Returns a list of time graph rows", content = @Content(schema = @Schema(implementation = TimeGraphStatesResponse.class))),
             @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
@@ -472,7 +472,7 @@ public class DataProviderService {
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the timegraph states. " + TIMES + " " + ITEMS, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX + "," + ITEMS_EX +
-                            "}}"), schema = @Schema(implementation = IRequestedQueryParameters.class))
+                            "}}"), schema = @Schema(implementation = RequestedQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();
@@ -522,7 +522,7 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the Time Graph arrows", description = "Unique entry point for all TimeGraph models, " +
             "ensures that the same template is followed for all models", responses = {
-                    @ApiResponse(responseCode = "200", description = "Returns a sampled list of TimeGraph arrows", content = @Content(schema = @Schema(implementation = ITimeGraphArrowsResponse.class))),
+                    @ApiResponse(responseCode = "200", description = "Returns a sampled list of TimeGraph arrows", content = @Content(schema = @Schema(implementation = TimeGraphArrowsResponse.class))),
                     @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
@@ -532,7 +532,7 @@ public class DataProviderService {
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the timegraph arrows. " + TIMES, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX +
-                            "}}"), schema = @Schema(implementation = IArrowsQueryParameters.class))
+                            "}}"), schema = @Schema(implementation = ArrowsQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();
@@ -575,7 +575,7 @@ public class DataProviderService {
     @Tag(name = ANN)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get marker sets available for this experiment", responses = {
-            @ApiResponse(responseCode = "200", description = "List of marker sets", content = @Content(schema = @Schema(implementation = IMarkerSetsResponse.class))),
+            @ApiResponse(responseCode = "200", description = "List of marker sets", content = @Content(schema = @Schema(implementation = MarkerSetsResponse.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getMarkerSets(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
@@ -605,7 +605,7 @@ public class DataProviderService {
     @Tag(name = ANN)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get annotation categories associated to this experiment and output", responses = {
-            @ApiResponse(responseCode = "200", description = "Annotation categories", content = @Content(schema = @Schema(implementation = IAnnotationCategoriesResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Annotation categories", content = @Content(schema = @Schema(implementation = AnnotationCategoriesResponse.class))),
             @ApiResponse(responseCode = "400", description = MISSING_OUTPUTID, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
@@ -683,7 +683,7 @@ public class DataProviderService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the annotations associated to this experiment and output", responses = {
-            @ApiResponse(responseCode = "200", description = "Annotation", content = @Content(schema = @Schema(implementation = IAnnotationResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Annotation", content = @Content(schema = @Schema(implementation = AnnotationResponse.class))),
             @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
@@ -695,7 +695,7 @@ public class DataProviderService {
                     TIMES + " " + ITEMS + " " + MARKER_SET + MARKER_CATEGORIES, content = {
                             @Content(examples = @ExampleObject("{\"parameters\":{" +
                                     TIMES_EX + "," + ITEMS_EX + "," + MARKER_SET_EX + MARKER_CATEGORIES_EX +
-                                    "}}"), schema = @Schema(implementation = IAnnotationsQueryParameters.class))
+                                    "}}"), schema = @Schema(implementation = AnnotationsQueryParameters.class))
                     }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();
@@ -773,7 +773,7 @@ public class DataProviderService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get a Time Graph tooltip", description = "Endpoint to retrieve tooltips for time graph", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns a list of tooltip keys to values", content = @Content(schema = @Schema(implementation = ITimeGraphTooltipResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Returns a list of tooltip keys to values", content = @Content(schema = @Schema(implementation = TimeGraphTooltipResponse.class))),
             @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
@@ -783,7 +783,7 @@ public class DataProviderService {
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the timegraph tooltip. " + TIMES_TT + ITEMS_TT + ELEMENT, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX_TT + ITEMS_EX_TT + ELEMENT_EX +
-                            "}}"), schema = @Schema(implementation = ITooltipQueryParameters.class))
+                            "}}"), schema = @Schema(implementation = TooltipQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();
@@ -840,7 +840,7 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get table columns", description = "Unique entry point for output providers, " +
             "to get the column entries", responses = {
-                    @ApiResponse(responseCode = "200", description = "Returns a list of table headers", content = @Content(schema = @Schema(implementation = ITableColumnHeadersResponse.class))),
+                    @ApiResponse(responseCode = "200", description = "Returns a list of table headers", content = @Content(schema = @Schema(implementation = TableColumnHeadersResponse.class))),
                     @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
@@ -849,7 +849,7 @@ public class DataProviderService {
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the table columns", content = {
-                    @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = IOptionalQueryParameters.class))
+                    @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = OptionalQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
         Response response = getTree(expUUID, outputId, queryParameters);
@@ -887,7 +887,7 @@ public class DataProviderService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get virtual table lines", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns a table model with a 2D array of strings and metadata", content = @Content(schema = @Schema(implementation = IVirtualTableResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Returns a table model with a 2D array of strings and metadata", content = @Content(schema = @Schema(implementation = VirtualTableResponse.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class))),
@@ -900,7 +900,7 @@ public class DataProviderService {
                     INDEX + TABLE_TIMES + COUNT + COLUMNS + EXPRESSIONS + DIRECTION + DIRECTION_COUNT, content = {
                             @Content(examples = @ExampleObject("{\"parameters\":{" +
                                     INDEX_EX + COUNT_EX + COLUMNS_EX + EXPRESSIONS_EX + DIRECTION_EX +
-                                    "}}"), schema = @Schema(implementation = ILinesQueryParameters.class))
+                                    "}}"), schema = @Schema(implementation = LinesQueryParameters.class))
                     }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();
@@ -1050,7 +1050,7 @@ public class DataProviderService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the style map associated to this experiment and output", responses = {
-            @ApiResponse(responseCode = "200", description = "Style model that can be used jointly with OutputElementStyle to retrieve specific style values", content = @Content(schema = @Schema(implementation = IStylesResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Style model that can be used jointly with OutputElementStyle to retrieve specific style values", content = @Content(schema = @Schema(implementation = StylesResponse.class))),
             @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
@@ -1059,7 +1059,7 @@ public class DataProviderService {
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the style map", content = {
-                    @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = IOptionalQueryParameters.class))
+                    @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = OptionalQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
         Map<String, Object> params = queryParameters.getParameters();
