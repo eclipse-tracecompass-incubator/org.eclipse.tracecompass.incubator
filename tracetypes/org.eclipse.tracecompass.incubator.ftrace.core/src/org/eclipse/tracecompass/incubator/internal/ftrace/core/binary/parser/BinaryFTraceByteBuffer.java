@@ -18,10 +18,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceDataType;
+
+import com.google.common.annotations.VisibleForTesting;
+
 /**
  * A reader for Ftrace files that utilizes ByteBuffer
  *
- * @author HoangPham
+ * @author Hoang Thuan Pham
  */
 public class BinaryFTraceByteBuffer implements AutoCloseable {
     private static final int BUFFER_SIZE = 4096;
@@ -30,6 +34,7 @@ public class BinaryFTraceByteBuffer implements AutoCloseable {
     private FileChannel fFileChannel;
     private ByteBuffer fByteBuffer;
     private ByteOrder fByteOrder = ByteOrder.BIG_ENDIAN;
+    private long fCurrentOffset;
 
     /**
      * Constructor
@@ -43,6 +48,7 @@ public class BinaryFTraceByteBuffer implements AutoCloseable {
         fTraceFile = new RandomAccessFile(path, "r"); //$NON-NLS-1$
         fFileChannel = fTraceFile.getChannel();
         fByteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+        fCurrentOffset = 0;
     }
 
     /**
@@ -112,6 +118,7 @@ public class BinaryFTraceByteBuffer implements AutoCloseable {
 
         fByteBuffer.get(bytesArray);
         fByteBuffer.compact(); // Compact the size of the buffer
+        fCurrentOffset += byteCount;
 
         return bytesArray;
     }
@@ -145,7 +152,10 @@ public class BinaryFTraceByteBuffer implements AutoCloseable {
 
         fByteBuffer.compact(); // Compact the size of the buffer
 
-        return strBuilder.toString();
+        String returnString = strBuilder.toString();
+        fCurrentOffset += (returnString.length() + BinaryFTraceHeaderElementSize.STRING_TERMINATOR);
+
+        return returnString;
     }
 
     /**
@@ -184,7 +194,7 @@ public class BinaryFTraceByteBuffer implements AutoCloseable {
      *             Cannot read data from the buffer
      */
     public int getNextInt() throws IOException {
-        byte[] byteArray = getNextBytes(4);
+        byte[] byteArray = getNextBytes(BinaryFTraceDataType.INT.getSize());
 
         ByteBuffer wrapped = ByteBuffer.wrap(byteArray).order(fByteOrder);
         return wrapped.getInt();
@@ -240,16 +250,16 @@ public class BinaryFTraceByteBuffer implements AutoCloseable {
     public void movePointerToOffset(long offset) throws IOException {
         fByteBuffer.clear();
         fTraceFile.seek(offset);
+        fCurrentOffset = offset;
     }
 
     /**
      * Get the current offset location of the pointer of the byte buffer
      *
      * @return The current offset of the file pointer
-     * @throws IOException
-     *             Cannot get the current offset of the byte buffer
      */
-    public long getCurrentFileOffset() throws IOException {
-        return fTraceFile.getFilePointer();
+    @VisibleForTesting
+    public long getCurrentOffset() {
+        return fCurrentOffset;
     }
 }
