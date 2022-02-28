@@ -28,4 +28,9 @@ public class BinaryFTraceHeaderElementSize {
      * termination character is 1 byte
      */
     public static final int STRING_TERMINATOR = 1;
+
+    /**
+     * The size of the page header of a binary FTrace CPU data page in bytes
+     */
+    public static final int PAGE_HEADER_SIZE = 16;
 }

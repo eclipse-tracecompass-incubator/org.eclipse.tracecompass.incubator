@@ -19,30 +19,27 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.event.BinaryFTraceConstants;
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceCPUDataPage;
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceCPUDataPage.BinaryFTraceCPUDataPageBuilder;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceEventFormat;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceEventSystem;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceFileCPU;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceFileType;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceFormatField;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceFunctionAddressNameMapping;
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceFunctionType;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceHeaderEvent;
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceHeaderEvent.BinaryFTraceHeaderEventBuilder;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceHeaderInfo;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceHeaderInfo.BinaryFTraceHeaderInfoBuilder;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceOption;
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceVersion;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceVersionHeader;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 
 /**
- * A binary parser to parse binary FTrace files.
+ * An implementation of {@link AbstractBinaryFTraceFileParser}. The class
+ * provides the reading logic for the binary FTrace header, such as the order of
+ * which the different sections are read.
  *
  * @author Hoang Thuan Pham
  */
-public class BinaryFTraceFileParser {
+public class BinaryFTraceFileParser extends AbstractBinaryFTraceFileParser {
     /**
      * Constructor
      */
@@ -61,12 +58,21 @@ public class BinaryFTraceFileParser {
      *             Cannot open or parse the file
      */
     public static BinaryFTraceVersionHeader getFtraceVersionHeader(String path) throws TmfTraceException {
-        try (BinaryFTraceByteBuffer buffer = new BinaryFTraceByteBuffer(path);) {
-            return getMagicValuesAndFtraceVersion(buffer);
+        try (BinaryFTraceByteBuffer buffer = new BinaryFTraceByteBuffer(path)) {
+            return getFtraceVersionHeader(buffer);
+        } catch (IOException e) {
+            throw new TmfTraceException("Cannot open trace file", e); //$NON-NLS-1$
+        }
+    }
+
+    private static BinaryFTraceVersionHeader getFtraceVersionHeader(BinaryFTraceByteBuffer buffer) throws TmfTraceException {
+        try {
+            byte[] bytes = buffer.getNextBytes(10);
+            String strVersion = buffer.getNextString().trim();
+            return getMagicValuesAndFtraceVersion(bytes, strVersion);
         } catch (IOException e) {
             throw new TmfTraceException("FTrace Version Header not readible", e); //$NON-NLS-1$
         }
-
     }
 
     /**
@@ -86,7 +92,7 @@ public class BinaryFTraceFileParser {
             builder.filePath(path);
 
             // Parse initial data section
-            BinaryFTraceVersionHeader versionHeader = getMagicValuesAndFtraceVersion(buffer);
+            BinaryFTraceVersionHeader versionHeader = getFtraceVersionHeader(buffer);
             builder.version(versionHeader.getFTraceVersion());
 
             ByteOrder endianess = getFileEndianess(buffer);
@@ -124,199 +130,84 @@ public class BinaryFTraceFileParser {
             } else if (sectionType.equals(BinaryFTraceConstants.FLYRECORD_SECTION_NAME)) {
                 builder.fileType(BinaryFTraceFileType.FLY_RECORD);
                 builder.cpus(parseFlyRecordSection(buffer, cpuCount, pageSize));
-
             }
             return builder.build();
         } catch (IOException ex) {
             throw new TmfTraceException(ex.getMessage(), ex);
         }
-
     }
 
-    private static BinaryFTraceVersionHeader getMagicValuesAndFtraceVersion(BinaryFTraceByteBuffer buffer) throws TmfTraceException {
-        try {
-            byte[] bytes = buffer.getNextBytes(10);
-            int ftraceVersionInt = Integer.parseInt(buffer.getNextString().trim());
-            BinaryFTraceVersion ftraceVersionEnum = BinaryFTraceVersion.getVersionAsEnum(ftraceVersionInt);
-            return new BinaryFTraceVersionHeader(bytes, ftraceVersionEnum);
-        } catch (IOException | NumberFormatException e) {
-            throw new TmfTraceException("Cannot parse the magic values and FTrace version. Make sure you use trace-cmd v.2.9 and above.", e); //$NON-NLS-1$
-        }
-    }
-
-    private static ByteOrder getFileEndianess(BinaryFTraceByteBuffer buffer) throws IOException {
-        int endianess = buffer.getNextBytes(1)[0];
-        ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
-        if (endianess == 0) {
-            byteOrder = ByteOrder.LITTLE_ENDIAN;
-        }
-        buffer.setByteOrder(byteOrder);
-
-        return byteOrder;
-    }
-
-    private static int getLongValueSize(BinaryFTraceByteBuffer buffer) throws IOException {
-        return buffer.getNextBytes(1)[0];
-    }
-
-    private static int getHostPageSize(BinaryFTraceByteBuffer buffer) throws IOException {
-        return buffer.getNextInt();
-    }
-
-    private static List<BinaryFTraceFormatField> parseHeaderPage(BinaryFTraceByteBuffer buffer) throws IOException  {
+    private static List<BinaryFTraceFormatField> parseHeaderPage(BinaryFTraceByteBuffer buffer) throws IOException {
         buffer.getNextBytesAsString(12); // Skipping the section name
         long headerPageSize = buffer.getNextLong();
         String headerPageContent = buffer.getNextBytesAsString(headerPageSize);
-        String[] strFields = headerPageContent.split(BinaryFTraceConstants.NEW_LINE);
-        return BinaryFTraceParsingUtils.parseEventFormatFields(strFields);
+        return extractHeaderPageContent(headerPageContent);
     }
 
     private static BinaryFTraceHeaderEvent parseHeaderEvent(BinaryFTraceByteBuffer buffer) throws IOException {
         buffer.getNextBytesAsString(13); // Skipping the section header
 
-        BinaryFTraceHeaderEventBuilder builder = new BinaryFTraceHeaderEventBuilder();
         long headerEventSize = buffer.getNextLong();
         String strHeaderEventInfo = buffer.getNextBytesAsString(headerEventSize);
 
-        String[] arrInfo = strHeaderEventInfo.split(BinaryFTraceConstants.NEW_LINE);
-
-        for (String info : arrInfo) {
-            if (info.contains(BinaryFTraceConstants.HEADER_EVENT_TYPE_LENGTH_VALUE_SEPARATOR)) {
-                String[] keyValuePair = info.split(BinaryFTraceConstants.HEADER_EVENT_TYPE_LENGTH_VALUE_SEPARATOR);
-                String key = keyValuePair[0];
-                int value = Integer.parseInt(keyValuePair[1].trim());
-
-                if (key.contains(BinaryFTraceConstants.HEADER_EVENT_INFO_PADDING_LABEL)) {
-                    builder.paddingTypeLen(value);
-                } else if (key.contains(BinaryFTraceConstants.HEADER_EVENT_INFO_EXTENDED_TIMESTAMP_LABEL)) {
-                    builder.timeExtendedTypeLen(value);
-                } else if (key.contains(BinaryFTraceConstants.HEADER_EVENT_INFO_TIMESTAMP_LABEL)) {
-                    builder.timeStampTypeLen(value);
-                } else if (key.contains(BinaryFTraceConstants.HEADER_EVENT_INFO_DATA_MAX_TYPE_LENGTH_LABEL)) {
-                    builder.dataMaxTypeLen(value);
-                }
-            } else if (info.contains(BinaryFTraceConstants.HEADER_EVENT_LABEL_VALUE_SEPARATOR)) {
-                String[] keyValuePair = info.split(BinaryFTraceConstants.HEADER_EVENT_LABEL_VALUE_SEPARATOR);
-                String key = keyValuePair[0].trim();
-                String value = keyValuePair[1].trim();
-                int numOfBits = Integer.parseInt(value.split(BinaryFTraceConstants.HEADER_EVENT_BIT_VALUE_UNIT_SEPARATOR)[0]);
-                if (key.contains(BinaryFTraceConstants.HEADER_EVENT_INFO_TYPE_LENGTH_SIZE_LABEL)) {
-                    builder.typeLen(numOfBits);
-                } else if (key.contains(BinaryFTraceConstants.HEADER_EVENT_INFO_TIMESTAMP_SIZE_LABEL)) {
-                    builder.timeDelta(numOfBits);
-                }
-            }
-        }
-
-        return builder.build();
+        return extractHeaderEventContent(strHeaderEventInfo);
     }
 
     private static Map<Integer, BinaryFTraceEventFormat> parseTraceEventsFormat(BinaryFTraceByteBuffer buffer) throws IOException {
-        Map<Integer, BinaryFTraceEventFormat> lstEventFormats = new HashMap<>();
+        ArrayList<String> eventFormats = new ArrayList<>();
 
         int numOfTraceEventFormats = buffer.getNextInt();
 
         for (int i = 0; i < numOfTraceEventFormats; i++) {
-            long formatFileSize = buffer.getNextLong();
-            String strEventFormat = buffer.getNextBytesAsString(formatFileSize);
-            BinaryFTraceEventFormat eventFormat = BinaryFTraceParsingUtils.parseEventFormat(strEventFormat);
-            lstEventFormats.put(eventFormat.getEventFormatID(), eventFormat);
+            long formatSize = buffer.getNextLong();
+            eventFormats.add(buffer.getNextBytesAsString(formatSize));
         }
 
-        return lstEventFormats;
+        return extractTraceEventsFormat(eventFormats);
     }
 
     private static List<BinaryFTraceEventSystem> parseEventSystemsAndFormats(BinaryFTraceByteBuffer buffer) throws IOException {
-        List<BinaryFTraceEventSystem> lstEventSystems = new ArrayList<>();
+        HashMap<String, List<String>> eventSystemData = new HashMap<>();
+
         int numOfEventSystems = buffer.getNextInt();
 
         for (int i = 0; i < numOfEventSystems; i++) {
             String eventSystemName = buffer.getNextString();
             int numOfEvents = buffer.getNextInt();
 
-            Map<Integer, BinaryFTraceEventFormat> lstEventFormat = new HashMap<>();
+            ArrayList<String> lstEventFormat = new ArrayList<>();
             for (int j = 0; j < numOfEvents; j++) {
                 long fileSize = buffer.getNextLong();
-                String strEventFormat = buffer.getNextBytesAsString(fileSize);
-                BinaryFTraceEventFormat eventFormat = BinaryFTraceParsingUtils.parseEventFormat(strEventFormat);
-                lstEventFormat.put(eventFormat.getEventFormatID(), eventFormat);
+                lstEventFormat.add(buffer.getNextBytesAsString(fileSize));
             }
 
-            BinaryFTraceEventSystem eventSystem = new BinaryFTraceEventSystem(eventSystemName, lstEventFormat);
-            lstEventSystems.add(eventSystem);
+            eventSystemData.put(eventSystemName, lstEventFormat);
         }
 
-        return lstEventSystems;
+        return extractEventSystemsAndFormats(eventSystemData);
     }
 
     private static Map<String, BinaryFTraceFunctionAddressNameMapping> parseFunctionMapping(BinaryFTraceByteBuffer buffer) throws IOException {
-        Map<String, BinaryFTraceFunctionAddressNameMapping> hashMap = new HashMap<>();
         int dataSize = buffer.getNextInt();
         String strMappings = buffer.getNextBytesAsString(dataSize);
-        String[] mappings = strMappings.split(BinaryFTraceConstants.NEW_LINE);
 
-        for (String mapping : mappings) {
-            String[] values = mapping.split(BinaryFTraceConstants.FUNCTION_ADDRESS_NAME_SEPARATOR);
-
-            BinaryFTraceFunctionAddressNameMapping objMapping = new BinaryFTraceFunctionAddressNameMapping(
-                    values[0], // Function memory address
-                    BinaryFTraceFunctionType.UNKNOWN, // Temporary value, will
-                                                      // be improve in the
-                                                      // future
-                    values[2]); // Function name
-            hashMap.put(values[0], objMapping);
-        }
-
-        return hashMap;
+        return extractFunctionMappingContent(strMappings);
     }
 
     private static Map<String, String> parseTracePrintKInfo(BinaryFTraceByteBuffer buffer) throws IOException {
-        Map<String, String> addressStringMapping = new HashMap<>();
         int dataSize = buffer.getNextInt();
         String strMappings = buffer.getNextBytesAsString(dataSize);
-        String[] arrMappings = strMappings.split(BinaryFTraceConstants.NEW_LINE);
-
-        for (String mapping : arrMappings) {
-            String[] keyValuePair = mapping.split(BinaryFTraceConstants.HEADER_EVENT_LABEL_VALUE_SEPARATOR);
-            String address = keyValuePair[0].trim();
-            keyValuePair[1] = keyValuePair[1].trim();
-            String mappedString = keyValuePair[1].substring(1, keyValuePair[1].length() - 1); // Strip
-                                                                                              // the
-                                                                                              // quotation
-                                                                                              // mark
-            addressStringMapping.put(address, mappedString);
-        }
-
-        return addressStringMapping;
+        return extractPrintKContent(strMappings);
     }
 
     private static Map<Integer, String> parseProcessToFunctionNameMapping(BinaryFTraceByteBuffer buffer) throws IOException {
-        // Max value of PID is 2^22 for 64 bits system so theoretically an
-        // integer key
-        // is enough
-        Map<Integer, String> hashMap = new HashMap<>();
-
         long dataSize = buffer.getNextLong();
         String strMappings = buffer.getNextBytesAsString(dataSize);
 
-        if (!strMappings.trim().isEmpty()) {
-            String[] arrMappings = strMappings.split(BinaryFTraceConstants.NEW_LINE);
-            for (String mapping : arrMappings) {
-                String[] keyValuePair = mapping.split(BinaryFTraceConstants.FUNCTION_ADDRESS_NAME_SEPARATOR);
-                hashMap.put(Integer.parseInt(keyValuePair[0]), keyValuePair[1]);
-            }
-        }
-
-        return hashMap;
-    }
-
-    private static int parseCPUCount(BinaryFTraceByteBuffer buffer) throws IOException {
-        return buffer.getNextInt();
+        return extractFunctionNameMapping(strMappings);
     }
 
     private static List<BinaryFTraceFileCPU> parseFlyRecordSection(BinaryFTraceByteBuffer buffer, int cpuCount, int pageSize) throws IOException {
-        List<BinaryFTraceFileCPU> lstCPU = new ArrayList<>();
-
         // Obtain the starting offset and the size of each CPU section
         long[] cpuSectionStartingOffset = new long[cpuCount];
         long[] cpuSectionSize = new long[cpuCount];
@@ -325,57 +216,40 @@ public class BinaryFTraceFileParser {
             cpuSectionSize[i] = buffer.getNextLong();
         }
 
-        for (int i = 0; i < cpuCount; i++) {
-            // First look for the starting offset and size of the CPU data
-            // section (in bytes).
-            long sectionStartingOffset = cpuSectionStartingOffset[i];
-            long sectionSize = cpuSectionSize[i];
-            int cpuNumber = i;
+        return parseCPUPageHeader(buffer, cpuSectionStartingOffset, cpuSectionSize, pageSize);
+    }
 
-            /*
-             * Look for the last page in the section first to prevent modifying
-             * existing pages.
-             */
-            long pageStartingOffset = sectionStartingOffset + sectionSize - pageSize;
-            BinaryFTraceCPUDataPage nextPage = null;
-            BinaryFTraceCPUDataPageBuilder pageBuilder = new BinaryFTraceCPUDataPageBuilder();
+    private static List<BinaryFTraceFileCPU> parseCPUPageHeader(BinaryFTraceByteBuffer buffer, long[] cpuSectionStartingOffset, long[] cpuSectionSize, int pageSize) throws IOException {
+        Map<Integer, List<Long>> mapTimeStamp = new HashMap<>();
+        Map<Integer, List<Long>> mapFlag = new HashMap<>();
+        Map<Integer, List<Long>> mapStartingOffset = new HashMap<>();
 
-            List<BinaryFTraceCPUDataPage> lstPages = new ArrayList<>();
-            while (pageStartingOffset >= sectionStartingOffset) {
-                buffer.movePointerToOffset(pageStartingOffset); // Move the
-                                                                // pointer the
-                                                                // the page
-                                                                // starting
-                                                                // offset
-                long timestamp = buffer.getNextLong();
-                long flags = buffer.getNextLong();
-                long pageDataStartingOffset = pageStartingOffset + 16; // Can be
-                                                                       // improved
+        int cpuCount = cpuSectionStartingOffset.length;
 
-                BinaryFTraceCPUDataPage currentPage = pageBuilder.pageStartingOffset(pageStartingOffset)
-                        .pageDataStartingOffset(pageDataStartingOffset)
-                        .timeStamp(timestamp)
-                        .flags(flags)
-                        .cpu(cpuNumber)
-                        .nextPage(nextPage)
-                        .size(pageSize)
-                        .build();
+        for (int cpuNumber = 0; cpuNumber < cpuCount; cpuNumber++) {
+            // Parse the header information for each page
+            List<Long> lstTimeStamp = new ArrayList<>();
+            List<Long> lstFlag = new ArrayList<>();
+            List<Long> lstStartingOffset = new ArrayList<>();
 
-                lstPages.add(0, currentPage);
-                nextPage = currentPage;
+            long sectionStartingOffset = cpuSectionStartingOffset[cpuNumber];
+            long pageStartingOffset = sectionStartingOffset;
+            long endingOffset = sectionStartingOffset + cpuSectionSize[cpuNumber];
+            while (pageStartingOffset < endingOffset) {
+                buffer.movePointerToOffset(pageStartingOffset);
 
-                pageStartingOffset = pageStartingOffset - pageSize;
+                lstTimeStamp.add(buffer.getNextLong());
+                lstFlag.add(buffer.getNextLong());
+                lstStartingOffset.add(pageStartingOffset);
+                pageStartingOffset = pageStartingOffset + pageSize;
             }
 
-            // This should be tested when there are multiple CPUs because
-            // data is paged
-            BinaryFTraceFileCPU cpu = new BinaryFTraceFileCPU(sectionStartingOffset, sectionSize, cpuNumber, lstPages);
-
-            // Parse various CPUs information
-            lstCPU.add(cpu);
+            mapTimeStamp.put(cpuNumber, lstTimeStamp);
+            mapFlag.put(cpuNumber, lstFlag);
+            mapStartingOffset.put(cpuNumber, lstStartingOffset);
         }
 
-        return lstCPU;
+        return initializeCPUs(mapTimeStamp, mapFlag, cpuSectionStartingOffset, cpuSectionSize, pageSize);
     }
 
     /**
@@ -389,24 +263,30 @@ public class BinaryFTraceFileParser {
      * @return A list of {@link BinaryFTraceOption} that contains the option
      *         strings
      * @throws IOException
-     *             if an error occured while reading the option strings
+     *             if an error occurred while reading the option strings
      */
     private static List<BinaryFTraceOption> parseOptionsSection(BinaryFTraceByteBuffer buffer) throws IOException {
-        List<BinaryFTraceOption> lstOptions = new ArrayList<>();
+        ArrayList<Short> optionTypes = new ArrayList<>();
+        ArrayList<String> optionData = new ArrayList<>();
 
-        short optionType = buffer.getNextShort();
-        while (optionType > 0) {
-            int optionSize = buffer.getNextInt();
-            String optionData = buffer.getNextBytesAsString(optionSize).trim();
+        short optionType = 0;
+        int optionSize = 0;
 
-            BinaryFTraceOption newOption = new BinaryFTraceOption(optionType, optionData);
-            lstOptions.add(newOption);
-
-            // Read the next option
+        do {
             optionType = buffer.getNextShort();
-        }
 
-        return lstOptions;
+            if (optionType > 0) {
+                optionSize = buffer.getNextInt();
+
+                optionTypes.add(optionType);
+                optionData.add(buffer.getNextBytesAsString(optionSize).trim());
+            }
+        } while (optionType > 0);
+
+        return extractOptionsSection(optionTypes, optionData);
     }
 
+    private static int parseCPUCount(BinaryFTraceByteBuffer buffer) throws IOException {
+        return buffer.getNextInt();
+    }
 }
