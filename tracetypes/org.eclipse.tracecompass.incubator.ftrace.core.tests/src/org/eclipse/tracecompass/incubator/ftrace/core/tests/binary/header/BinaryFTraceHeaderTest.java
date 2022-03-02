@@ -11,19 +11,35 @@
 
 package org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header;
 
+import static org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header.BinaryFTraceHeaderTestData.CPU2_INDEX;
+import static org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header.BinaryFTraceHeaderTestData.CPU2_NUM_OF_PAGES;
+import static org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header.BinaryFTraceHeaderTestData.FIRST_PAGE_DATA_OFFSET;
+import static org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header.BinaryFTraceHeaderTestData.FIRST_PAGE_FLAG;
+import static org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header.BinaryFTraceHeaderTestData.FIRST_PAGE_STARTING_OFFSET;
+import static org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header.BinaryFTraceHeaderTestData.FIRST_PAGE_TIME_STAMP;
+import static org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header.BinaryFTraceHeaderTestData.PAGE_SIZE;
+import static org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header.BinaryFTraceHeaderTestData.SECOND_PAGE_DATA_OFFSET;
+import static org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header.BinaryFTraceHeaderTestData.SECOND_PAGE_FLAG;
+import static org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header.BinaryFTraceHeaderTestData.SECOND_PAGE_STARTING_OFFSET;
+import static org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.header.BinaryFTraceHeaderTestData.SECOND_PAGE_TIME_STAMP;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
 import org.eclipse.tracecompass.incubator.ftrace.core.tests.shared.FTraceUtils;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceCPUDataPage;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceFileCPU;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceFileType;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceHeaderInfo;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceVersion;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceVersionHeader;
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.parser.BinaryFTraceFileParser;
 import org.eclipse.tracecompass.testtraces.ftrace.FtraceTestTrace;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -33,7 +49,7 @@ import org.junit.Test;
  * @author Hoang Thuan Pham
  *
  */
-public class FTraceBinaryHeaderTest {
+public class BinaryFTraceHeaderTest {
     /**
      * The file is obtained by running trace-cmd for the ls command: trace-cmd
      * record -e all ls.
@@ -104,6 +120,41 @@ public class FTraceBinaryHeaderTest {
     public void testTraceType() throws Exception {
         BinaryFTraceHeaderInfo test = BinaryFTraceFileParser.parse(traceURL);
         assertEquals(test.getFileType(), BinaryFTraceFileType.FLY_RECORD);
+    }
+
+    /**
+     * Test for CPU Section paging. Each CPU section data is paged into multiple
+     * pages with the same size. This test checks if the pages are parsed
+     * correcly.
+     *
+     * @throws TmfTraceException
+     *             if an error occurred while parsing the trace header
+     */
+    @Test
+    public void testCpuSectionPaging() throws TmfTraceException {
+        BinaryFTraceHeaderInfo traceHeader = BinaryFTraceFileParser.parse(traceURL);
+        BinaryFTraceFileCPU cpuSection = traceHeader.getCpus().get(CPU2_INDEX);
+        assertNotNull(cpuSection);
+
+        assertEquals(cpuSection.getPages().size(), CPU2_NUM_OF_PAGES);
+
+        // Get the first page in the list of pages
+        BinaryFTraceCPUDataPage firstPage = cpuSection.getPages().get(0);
+        assertEquals(firstPage.getPageStartingOffset(), FIRST_PAGE_STARTING_OFFSET);
+        assertEquals(firstPage.getDataStartingOffset(), FIRST_PAGE_DATA_OFFSET);
+        assertEquals(firstPage.getFlags(), FIRST_PAGE_FLAG);
+        assertEquals(firstPage.getSize(), PAGE_SIZE);
+        assertEquals(firstPage.getTimeStamp(), FIRST_PAGE_TIME_STAMP);
+
+        BinaryFTraceCPUDataPage nextPage = firstPage.getNextPage();
+        assertEquals(nextPage.getPageStartingOffset(), SECOND_PAGE_STARTING_OFFSET);
+        assertEquals(nextPage.getDataStartingOffset(), SECOND_PAGE_DATA_OFFSET);
+        assertEquals(nextPage.getFlags(), SECOND_PAGE_FLAG);
+        assertEquals(nextPage.getSize(), PAGE_SIZE);
+        assertEquals(nextPage.getTimeStamp(), SECOND_PAGE_TIME_STAMP);
+
+        BinaryFTraceCPUDataPage nullPage = nextPage.getNextPage();
+        assertNull(nullPage);
     }
 
     /**
