@@ -12,6 +12,8 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.EXP_UUID;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_PARAMETERS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_EXPERIMENT;
 
 import java.io.ByteArrayInputStream;
@@ -259,14 +261,15 @@ public class ExperimentManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Create a new experiment on the server", responses = {
             @ApiResponse(responseCode = "200", description = "The experiment was successfully created", content = @Content(schema = @Schema(implementation = IExperiment.class))),
-            @ApiResponse(responseCode = "204", description = "The experiment has at least one trace which hasn't been created yet", content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "204", description = "The experiment has at least one trace which hasn't been created yet", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response postExperiment(@RequestBody(content = {
             @Content(schema = @Schema(implementation = IExperimentQueryParameters.class))
     }, required = true) QueryParameters queryParameters) {
         Map<String, Object> parameters = queryParameters.getParameters();
         if (parameters == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
         Object nameObj = parameters.get("name"); //$NON-NLS-1$
         Object tracesObj = parameters.get("traces"); //$NON-NLS-1$

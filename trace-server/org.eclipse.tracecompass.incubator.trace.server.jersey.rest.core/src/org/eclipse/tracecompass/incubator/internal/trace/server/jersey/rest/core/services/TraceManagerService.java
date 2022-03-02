@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CANNOT_READ;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_PARAMETERS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NAME_EXISTS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NOT_SUPPORTED;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_TRACE;
@@ -148,6 +149,7 @@ public class TraceManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Import a trace", description = "Import a trace to the trace server. Return some base information once imported.", responses = {
             @ApiResponse(responseCode = "200", description = "The trace has been successfully added to the trace server", content = @Content(schema = @Schema(implementation = ITrace.class))),
+            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "406", description = CANNOT_READ, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "409", description = NAME_EXISTS, content = @Content(schema = @Schema(implementation = String.class))),
@@ -158,7 +160,7 @@ public class TraceManagerService {
     }, required = true) QueryParameters queryParameters) {
         Map<String, Object> parameters = queryParameters.getParameters();
         if (parameters == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
         String name = (String) parameters.get("name"); //$NON-NLS-1$
         String path = (String) parameters.get("uri"); //$NON-NLS-1$
