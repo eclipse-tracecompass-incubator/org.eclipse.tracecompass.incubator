@@ -225,12 +225,12 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the list of outputs for this experiment", responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of output provider descriptors", content = @Content(array = @ArraySchema(schema = @Schema(implementation = IDataProvider.class)))),
-            @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getProviders(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
-            return Response.status(Status.NOT_FOUND).build();
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
         }
         List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(experiment);
         list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
@@ -267,7 +267,7 @@ public class DataProviderService {
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId) {
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
-            return Response.status(Status.NOT_FOUND).build();
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
         }
         List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(experiment);
         list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
@@ -335,7 +335,7 @@ public class DataProviderService {
             "ensures that the same template is followed for all endpoints.", responses = {
                     @ApiResponse(responseCode = "200", description = "Return the queried XYResponse", content = @Content(schema = @Schema(implementation = IXYResponse.class))),
                     @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "405", description = ANALYSIS_NOT_POSSIBLE, content = @Content(schema = @Schema(implementation = String.class)))
             })
     public Response getXY(
@@ -572,7 +572,8 @@ public class DataProviderService {
     @Tag(name = ANN)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get marker sets available for this experiment", responses = {
-            @ApiResponse(responseCode = "200", description = "List of marker sets", content = @Content(schema = @Schema(implementation = IMarkerSetsResponse.class)))
+            @ApiResponse(responseCode = "200", description = "List of marker sets", content = @Content(schema = @Schema(implementation = IMarkerSetsResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getMarkerSets(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
 
@@ -602,7 +603,8 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get annotation categories associated to this experiment and output", responses = {
             @ApiResponse(responseCode = "200", description = "Annotation categories", content = @Content(schema = @Schema(implementation = IAnnotationCategoriesResponse.class))),
-            @ApiResponse(responseCode = "400", description = MISSING_OUTPUTID, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = MISSING_OUTPUTID, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getAnnotationCategories(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -678,7 +680,8 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the annotations associated to this experiment and output", responses = {
             @ApiResponse(responseCode = "200", description = "Annotation", content = @Content(schema = @Schema(implementation = IAnnotationResponse.class))),
-            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getAnnotations(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -1040,7 +1043,8 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the style map associated to this experiment and output", responses = {
             @ApiResponse(responseCode = "200", description = "Style model that can be used jointly with OutputElementStyle to retrieve specific style values", content = @Content(schema = @Schema(implementation = IStylesResponse.class))),
-            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getStyles(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
