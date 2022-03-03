@@ -158,6 +158,14 @@ public final class BinaryFTraceConstants {
 
     // Constants to parse the trace
     /**
+     * The header of the Header Event section.
+     */
+    public static final String HEADER_EVENT_SECTION_HEADER = "header_event"; //$NON-NLS-1$
+    /**
+     * The header of the Header Page section.
+     */
+    public static final String HEADER_PAGE_SECTION_HEADER = "header_page"; //$NON-NLS-1$
+    /**
      * Label for each trace file option.
      */
     public static final String OPTIONS_SECTION_NAME = "options"; //$NON-NLS-1$

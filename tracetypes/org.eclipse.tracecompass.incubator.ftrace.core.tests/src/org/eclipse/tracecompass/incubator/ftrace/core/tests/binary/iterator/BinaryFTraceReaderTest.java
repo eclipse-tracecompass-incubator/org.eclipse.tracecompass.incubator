@@ -32,9 +32,7 @@ import org.junit.Test;
  * @author Hoang Thuan Pham
  */
 public class BinaryFTraceReaderTest {
-    private static BinaryFTraceHeaderInfo multipleEventTrace; // trace with 4
-                                                              // CPU
-    private static BinaryFTraceHeaderInfo emptyTrace; // empty trace file
+    private static BinaryFTraceHeaderInfo multipleEventTrace;
 
     /**
      * Initialize data for the test
@@ -45,7 +43,6 @@ public class BinaryFTraceReaderTest {
     @BeforeClass
     public static void initTest() throws Exception {
         multipleEventTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_MULTIPLE_CPUS));
-        emptyTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_EMPTY));
     }
 
     /**
@@ -110,10 +107,6 @@ public class BinaryFTraceReaderTest {
      */
     @Test
     public void testHasMoreEvents() throws Exception {
-        try (BinaryFTraceReader reader = new BinaryFTraceReader(emptyTrace)) {
-            assertFalse(reader.hasMoreEvents());
-        }
-
         try (BinaryFTraceReader reader = new BinaryFTraceReader(multipleEventTrace)) {
             // The first event in trace
             assertTrue(reader.hasMoreEvents());

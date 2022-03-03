@@ -20,8 +20,6 @@ import java.nio.channels.FileChannel;
 
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceDataType;
 
-import com.google.common.annotations.VisibleForTesting;
-
 /**
  * A reader for Ftrace files that utilizes ByteBuffer
  *
@@ -258,8 +256,18 @@ public class BinaryFTraceByteBuffer implements AutoCloseable {
      *
      * @return The current offset of the file pointer
      */
-    @VisibleForTesting
     public long getCurrentOffset() {
         return fCurrentOffset;
+    }
+
+    /**
+     * Get the size of the file that is currently being read
+     *
+     * @return The file size
+     * @throws IOException
+     *             If an error occurred while reading the file size
+     */
+    public long getFileSize() throws IOException {
+        return fTraceFile.length();
     }
 }
