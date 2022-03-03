@@ -132,7 +132,6 @@ public class EndpointConstants {
     static final String TIMES_EX_TT = "\"" + REQUESTED_TIME_KEY + "\": [111200000],"; //$NON-NLS-1$ //$NON-NLS-2$
 
     /** Swagger @ApiResponse description constants reused, or centralized. */
-    static final String ANALYSIS_NOT_POSSIBLE = "Analysis not possible for this trace"; //$NON-NLS-1$
     static final String CANNOT_READ = "Cannot read this trace type"; //$NON-NLS-1$
     static final String CONSISTENT_PARENT = "The returned model must be consistent, parentIds must refer to a parent which exists in the model."; //$NON-NLS-1$
     static final String NAME_EXISTS = "There was already a trace with this name"; //$NON-NLS-1$

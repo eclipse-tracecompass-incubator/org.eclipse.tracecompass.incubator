@@ -11,7 +11,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
-import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ANALYSIS_NOT_POSSIBLE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ANN;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COLUMNS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COLUMNS_EX;
@@ -303,7 +302,8 @@ public class DataProviderService {
             @ApiResponse(responseCode = "200", description = "Returns a list of XY entries. " +
                     CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = IXYTreeResponse.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getXYTree(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -336,7 +336,7 @@ public class DataProviderService {
                     @ApiResponse(responseCode = "200", description = "Return the queried XYResponse", content = @Content(schema = @Schema(implementation = IXYResponse.class))),
                     @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "405", description = ANALYSIS_NOT_POSSIBLE, content = @Content(schema = @Schema(implementation = String.class)))
+                    @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
             })
     public Response getXY(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -431,7 +431,8 @@ public class DataProviderService {
             @ApiResponse(responseCode = "200", description = "Returns a list of Time Graph entries. " +
                     CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = ITimeGraphTreeResponse.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getTimeGraphTree(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -463,7 +464,8 @@ public class DataProviderService {
     @Operation(summary = "API to get the Time Graph states", description = "Unique entry point for all TimeGraph states, ensures that the same template is followed for all views", responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of time graph rows", content = @Content(schema = @Schema(implementation = ITimeGraphStatesResponse.class))),
             @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getStates(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -522,7 +524,8 @@ public class DataProviderService {
             "ensures that the same template is followed for all models", responses = {
                     @ApiResponse(responseCode = "200", description = "Returns a sampled list of TimeGraph arrows", content = @Content(schema = @Schema(implementation = ITimeGraphArrowsResponse.class))),
                     @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
             })
     public Response getArrows(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -604,7 +607,8 @@ public class DataProviderService {
     @Operation(summary = "API to get annotation categories associated to this experiment and output", responses = {
             @ApiResponse(responseCode = "200", description = "Annotation categories", content = @Content(schema = @Schema(implementation = IAnnotationCategoriesResponse.class))),
             @ApiResponse(responseCode = "400", description = MISSING_OUTPUTID, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getAnnotationCategories(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -681,7 +685,8 @@ public class DataProviderService {
     @Operation(summary = "API to get the annotations associated to this experiment and output", responses = {
             @ApiResponse(responseCode = "200", description = "Annotation", content = @Content(schema = @Schema(implementation = IAnnotationResponse.class))),
             @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getAnnotations(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -770,7 +775,8 @@ public class DataProviderService {
     @Operation(summary = "API to get a Time Graph tooltip", description = "Endpoint to retrieve tooltips for time graph", responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of tooltip keys to values", content = @Content(schema = @Schema(implementation = ITimeGraphTooltipResponse.class))),
             @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getTimeGraphTooltip(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -836,7 +842,8 @@ public class DataProviderService {
             "to get the column entries", responses = {
                     @ApiResponse(responseCode = "200", description = "Returns a list of table headers", content = @Content(schema = @Schema(implementation = ITableColumnHeadersResponse.class))),
                     @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
             })
     public Response getColumns(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -883,6 +890,7 @@ public class DataProviderService {
             @ApiResponse(responseCode = "200", description = "Returns a table model with a 2D array of strings and metadata", content = @Content(schema = @Schema(implementation = IVirtualTableResponse.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Error reading the experiment", content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getLines(
@@ -1044,7 +1052,8 @@ public class DataProviderService {
     @Operation(summary = "API to get the style map associated to this experiment and output", responses = {
             @ApiResponse(responseCode = "200", description = "Style model that can be used jointly with OutputElementStyle to retrieve specific style values", content = @Content(schema = @Schema(implementation = IStylesResponse.class))),
             @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getStyles(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
