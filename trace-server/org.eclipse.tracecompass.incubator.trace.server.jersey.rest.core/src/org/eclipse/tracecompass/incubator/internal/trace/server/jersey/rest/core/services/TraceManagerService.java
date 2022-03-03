@@ -385,7 +385,8 @@ public class TraceManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Remove a trace from the server and disk", responses = {
             @ApiResponse(responseCode = "200", description = "The trace was successfully deleted", content = @Content(schema = @Schema(implementation = ITrace.class))),
-            @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "409", description = "The trace is in use by at least one experiment thus cannot be deleted", content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response deleteTrace(@Parameter(description = TRACE_UUID) @PathParam("uuid") @NotNull UUID uuid) {
         Trace trace = createTraceModel(uuid);
