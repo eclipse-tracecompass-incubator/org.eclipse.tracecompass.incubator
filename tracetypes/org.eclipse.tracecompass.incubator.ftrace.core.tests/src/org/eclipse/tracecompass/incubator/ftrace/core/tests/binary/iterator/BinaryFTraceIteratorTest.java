@@ -14,7 +14,6 @@ package org.eclipse.tracecompass.incubator.ftrace.core.tests.binary.iterator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -40,10 +39,7 @@ import org.junit.Test;
  * @author Hoang Thuan Pham
  */
 public class BinaryFTraceIteratorTest {
-    // Trace with 4 CPUs
     private static BinaryFTraceHeaderInfo multipleEventTrace;
-    // An empty trace that is recorded on a machine that has 4 CPUs
-    private static BinaryFTraceHeaderInfo emptyTrace;
 
     private static BinaryFTrace ftrace;
 
@@ -59,7 +55,6 @@ public class BinaryFTraceIteratorTest {
     public static void initTest() throws TmfTraceException, IOException {
         ftrace = new BinaryFTrace();
         multipleEventTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_MULTIPLE_CPUS));
-        emptyTrace = BinaryFTraceFileParser.parse(FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_EMPTY));
     }
 
     /**
@@ -100,13 +95,6 @@ public class BinaryFTraceIteratorTest {
      */
     @Test
     public void testHasMoreEvents() throws IOException {
-        // This trace has no events, so has more events returns false
-        assertNotNull(ftrace);
-        try (BinaryFTraceIterator iterator = new BinaryFTraceIterator(emptyTrace, ftrace)) {
-            assertFalse(iterator.hasMoreEvents());
-        }
-
-        // This trace has multiple events, so has more events returns true
         assertNotNull(ftrace);
         try (BinaryFTraceIterator iterator = new BinaryFTraceIterator(multipleEventTrace, ftrace)) {
             assertTrue(iterator.hasMoreEvents());
@@ -126,12 +114,6 @@ public class BinaryFTraceIteratorTest {
             GenericFtraceEvent event = iterator.getCurrentEvent();
             assertEquals(event.getName(), BinaryFTraceIteratorTestData.FIRST_TRACE_EVENT_NAME);
             assertEquals(event.getTimestamp().toNanos(), BinaryFTraceIteratorTestData.FIRST_TRACE_EVENT_TS);
-        }
-
-        assertNotNull(ftrace);
-        try (BinaryFTraceIterator iterator = new BinaryFTraceIterator(emptyTrace, ftrace)) {
-            GenericFtraceEvent event = iterator.getCurrentEvent();
-            assertNull(event);
         }
     }
 

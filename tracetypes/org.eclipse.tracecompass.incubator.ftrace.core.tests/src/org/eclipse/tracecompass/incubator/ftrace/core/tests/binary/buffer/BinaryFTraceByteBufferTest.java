@@ -31,9 +31,6 @@ public class BinaryFTraceByteBufferTest {
     private static final String TRACING = "tracing";
     private static final String VERSION = "6";
     private static final int RANDOM_OFFSET = 3;
-    private static final int MAGIC_VALUE_SIZE = 3;
-    private static final int TRACING_STRING_SIZE = 7;
-    private static final int FTRACE_VERSION_SIZE = 1;
 
     /**
      * Test to make sure the current offset is incremented properly when reading
@@ -50,17 +47,17 @@ public class BinaryFTraceByteBufferTest {
 
         try (BinaryFTraceByteBuffer buffer = new BinaryFTraceByteBuffer(traceLocation)) {
             // Read the magic values
-            buffer.getNextBytes(MAGIC_VALUE_SIZE);
-            currentOffset += MAGIC_VALUE_SIZE;
+            buffer.getNextBytes(BinaryFTraceHeaderElementSize.MAGIC_VALUE);
+            currentOffset += BinaryFTraceHeaderElementSize.MAGIC_VALUE;
             assertEquals(buffer.getCurrentOffset(), currentOffset);
 
-            String tracingString = buffer.getNextBytesAsString(TRACING_STRING_SIZE);
-            currentOffset += TRACING_STRING_SIZE;
+            String tracingString = buffer.getNextBytesAsString(BinaryFTraceHeaderElementSize.TRACING_STRING);
+            currentOffset += BinaryFTraceHeaderElementSize.TRACING_STRING;
             assertEquals(tracingString, TRACING);
             assertEquals(buffer.getCurrentOffset(), currentOffset);
 
             String versionString = buffer.getNextString();
-            currentOffset += (FTRACE_VERSION_SIZE + BinaryFTraceHeaderElementSize.STRING_TERMINATOR);
+            currentOffset += (BinaryFTraceHeaderElementSize.FTRACE_VERSION + BinaryFTraceHeaderElementSize.STRING_TERMINATOR);
             assertEquals(versionString, VERSION);
             assertEquals(buffer.getCurrentOffset(), currentOffset);
 

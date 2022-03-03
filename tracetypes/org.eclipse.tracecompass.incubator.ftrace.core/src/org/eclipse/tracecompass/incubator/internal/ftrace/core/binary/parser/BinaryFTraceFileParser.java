@@ -40,11 +40,34 @@ import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
  * @author Hoang Thuan Pham
  */
 public class BinaryFTraceFileParser extends AbstractBinaryFTraceFileParser {
+    private static final String UNSECURE_TRACE_ERROR_MESSAGE = "Buffer overrun stopped"; //$NON-NLS-1$
+
     /**
      * Constructor
      */
     private BinaryFTraceFileParser() {
         // Do nothing
+    }
+
+    private static void validate(BinaryFTraceByteBuffer buffer, long bytesToRead) throws TmfTraceException, IOException {
+        /*
+         * Validate if read reading bytesToRead amount of bytes will go over the
+         * file size limit. There is no need to wrap IOException to
+         * TmfTraceException, it will be done in the public functions.
+         */
+        if (buffer.getCurrentOffset() + bytesToRead > buffer.getFileSize()) {
+            /*
+             * When Trace Compass encounter a unsecure trace, it needs to halt
+             * the parsing process and return an error message to the user.
+             *
+             * In addition, since the occurrences of unsecure trace is much less
+             * likely compared to good traces, and this function is called in
+             * multiple places, making this function return a boolean and write
+             * an if-else statement every time to check for the return value is
+             * not efficient.
+             */
+            throw new TmfTraceException(getUnsecureFileErrorMessage(buffer.getCurrentOffset(), buffer.getFileSize(), bytesToRead));
+        }
     }
 
     /**
@@ -67,6 +90,8 @@ public class BinaryFTraceFileParser extends AbstractBinaryFTraceFileParser {
 
     private static BinaryFTraceVersionHeader getFtraceVersionHeader(BinaryFTraceByteBuffer buffer) throws TmfTraceException {
         try {
+            validate(buffer, BinaryFTraceHeaderElementSize.getMagicValueSectionSize());
+
             byte[] bytes = buffer.getNextBytes(10);
             String strVersion = buffer.getNextString().trim();
             return getMagicValuesAndFtraceVersion(bytes, strVersion);
@@ -137,48 +162,62 @@ public class BinaryFTraceFileParser extends AbstractBinaryFTraceFileParser {
         }
     }
 
-    private static List<BinaryFTraceFormatField> parseHeaderPage(BinaryFTraceByteBuffer buffer) throws IOException {
+    private static List<BinaryFTraceFormatField> parseHeaderPage(BinaryFTraceByteBuffer buffer) throws IOException, TmfTraceException {
+        validate(buffer, BinaryFTraceHeaderElementSize.getHeaderPageSectionHeaderSize());
         buffer.getNextBytesAsString(12); // Skipping the section name
         long headerPageSize = buffer.getNextLong();
+
+        validate(buffer, headerPageSize);
         String headerPageContent = buffer.getNextBytesAsString(headerPageSize);
         return extractHeaderPageContent(headerPageContent);
     }
 
-    private static BinaryFTraceHeaderEvent parseHeaderEvent(BinaryFTraceByteBuffer buffer) throws IOException {
+    private static BinaryFTraceHeaderEvent parseHeaderEvent(BinaryFTraceByteBuffer buffer) throws IOException, TmfTraceException {
+        validate(buffer, BinaryFTraceHeaderElementSize.getHeaderEventSectionHeaderSize());
         buffer.getNextBytesAsString(13); // Skipping the section header
-
         long headerEventSize = buffer.getNextLong();
-        String strHeaderEventInfo = buffer.getNextBytesAsString(headerEventSize);
 
+        validate(buffer, headerEventSize);
+        String strHeaderEventInfo = buffer.getNextBytesAsString(headerEventSize);
         return extractHeaderEventContent(strHeaderEventInfo);
     }
 
-    private static Map<Integer, BinaryFTraceEventFormat> parseTraceEventsFormat(BinaryFTraceByteBuffer buffer) throws IOException {
+    private static Map<Integer, BinaryFTraceEventFormat> parseTraceEventsFormat(BinaryFTraceByteBuffer buffer) throws IOException, TmfTraceException {
         ArrayList<String> eventFormats = new ArrayList<>();
 
+        validate(buffer, BinaryFTraceHeaderElementSize.EVENT_COUNT);
         int numOfTraceEventFormats = buffer.getNextInt();
 
         for (int i = 0; i < numOfTraceEventFormats; i++) {
+            validate(buffer, BinaryFTraceHeaderElementSize.EVENT_SIZE);
             long formatSize = buffer.getNextLong();
+
+            validate(buffer, formatSize);
             eventFormats.add(buffer.getNextBytesAsString(formatSize));
         }
 
         return extractTraceEventsFormat(eventFormats);
     }
 
-    private static List<BinaryFTraceEventSystem> parseEventSystemsAndFormats(BinaryFTraceByteBuffer buffer) throws IOException {
+    private static List<BinaryFTraceEventSystem> parseEventSystemsAndFormats(BinaryFTraceByteBuffer buffer) throws IOException, TmfTraceException {
         HashMap<String, List<String>> eventSystemData = new HashMap<>();
 
+        validate(buffer, BinaryFTraceHeaderElementSize.EVENT_SYSTEM_COUNT);
         int numOfEventSystems = buffer.getNextInt();
 
         for (int i = 0; i < numOfEventSystems; i++) {
             String eventSystemName = buffer.getNextString();
+
+            validate(buffer, BinaryFTraceHeaderElementSize.EVENT_COUNT);
             int numOfEvents = buffer.getNextInt();
 
             ArrayList<String> lstEventFormat = new ArrayList<>();
             for (int j = 0; j < numOfEvents; j++) {
-                long fileSize = buffer.getNextLong();
-                lstEventFormat.add(buffer.getNextBytesAsString(fileSize));
+                validate(buffer, BinaryFTraceHeaderElementSize.EVENT_SIZE);
+                long eventSize = buffer.getNextLong();
+
+                validate(buffer, eventSize);
+                lstEventFormat.add(buffer.getNextBytesAsString(eventSize));
             }
 
             eventSystemData.put(eventSystemName, lstEventFormat);
@@ -187,39 +226,62 @@ public class BinaryFTraceFileParser extends AbstractBinaryFTraceFileParser {
         return extractEventSystemsAndFormats(eventSystemData);
     }
 
-    private static Map<String, BinaryFTraceFunctionAddressNameMapping> parseFunctionMapping(BinaryFTraceByteBuffer buffer) throws IOException {
+    private static Map<String, BinaryFTraceFunctionAddressNameMapping> parseFunctionMapping(BinaryFTraceByteBuffer buffer) throws IOException, TmfTraceException {
+        validate(buffer, BinaryFTraceHeaderElementSize.SMALL_SECTION_SIZE);
         int dataSize = buffer.getNextInt();
-        String strMappings = buffer.getNextBytesAsString(dataSize);
 
+        validate(buffer, dataSize);
+        String strMappings = buffer.getNextBytesAsString(dataSize);
         return extractFunctionMappingContent(strMappings);
     }
 
-    private static Map<String, String> parseTracePrintKInfo(BinaryFTraceByteBuffer buffer) throws IOException {
+    private static Map<String, String> parseTracePrintKInfo(BinaryFTraceByteBuffer buffer) throws IOException, TmfTraceException {
+        validate(buffer, BinaryFTraceHeaderElementSize.SMALL_SECTION_SIZE);
         int dataSize = buffer.getNextInt();
+
+        validate(buffer, dataSize);
         String strMappings = buffer.getNextBytesAsString(dataSize);
         return extractPrintKContent(strMappings);
     }
 
-    private static Map<Integer, String> parseProcessToFunctionNameMapping(BinaryFTraceByteBuffer buffer) throws IOException {
+    private static Map<Integer, String> parseProcessToFunctionNameMapping(BinaryFTraceByteBuffer buffer) throws IOException, TmfTraceException {
+        validate(buffer, BinaryFTraceHeaderElementSize.LARGE_SECTION_SIZE);
         long dataSize = buffer.getNextLong();
-        String strMappings = buffer.getNextBytesAsString(dataSize);
 
+        validate(buffer, dataSize);
+        String strMappings = buffer.getNextBytesAsString(dataSize);
         return extractFunctionNameMapping(strMappings);
     }
 
-    private static List<BinaryFTraceFileCPU> parseFlyRecordSection(BinaryFTraceByteBuffer buffer, int cpuCount, int pageSize) throws IOException {
+    private static List<BinaryFTraceFileCPU> parseFlyRecordSection(BinaryFTraceByteBuffer buffer, int cpuCount, int pageSize) throws IOException, TmfTraceException {
+        // Validate that the size of the CPU information section is valid
+        validate(buffer, (long) cpuCount * (BinaryFTraceHeaderElementSize.CPU_SECTION_OFFSET + BinaryFTraceHeaderElementSize.CPU_SECTION_SIZE));
+
         // Obtain the starting offset and the size of each CPU section
+        long totalTraceSize = 0;
+
         long[] cpuSectionStartingOffset = new long[cpuCount];
         long[] cpuSectionSize = new long[cpuCount];
         for (int i = 0; i < cpuCount; i++) {
             cpuSectionStartingOffset[i] = buffer.getNextLong();
             cpuSectionSize[i] = buffer.getNextLong();
+
+            totalTraceSize += cpuSectionSize[i];
+
+            if (cpuSectionStartingOffset[i] + cpuSectionSize[i] > buffer.getFileSize()) {
+                String errorMessage = getUnsecureFileErrorMessage(cpuSectionStartingOffset[i], buffer.getCurrentOffset(), cpuSectionSize[i]);
+                throw new TmfTraceException(errorMessage);
+            }
+        }
+
+        if (totalTraceSize == 0) {
+            throw new TmfTraceException("Empty trace."); //$NON-NLS-1$
         }
 
         return parseCPUPageHeader(buffer, cpuSectionStartingOffset, cpuSectionSize, pageSize);
     }
 
-    private static List<BinaryFTraceFileCPU> parseCPUPageHeader(BinaryFTraceByteBuffer buffer, long[] cpuSectionStartingOffset, long[] cpuSectionSize, int pageSize) throws IOException {
+    private static List<BinaryFTraceFileCPU> parseCPUPageHeader(BinaryFTraceByteBuffer buffer, long[] cpuSectionStartingOffset, long[] cpuSectionSize, int pageSize) throws IOException, TmfTraceException {
         Map<Integer, List<Long>> mapTimeStamp = new HashMap<>();
         Map<Integer, List<Long>> mapFlag = new HashMap<>();
         Map<Integer, List<Long>> mapStartingOffset = new HashMap<>();
@@ -238,6 +300,9 @@ public class BinaryFTraceFileParser extends AbstractBinaryFTraceFileParser {
             while (pageStartingOffset < endingOffset) {
                 buffer.movePointerToOffset(pageStartingOffset);
 
+                // Make sure that we can read the page header at least
+                validate(buffer, BinaryFTraceHeaderElementSize.PAGE_HEADER_SIZE);
+
                 lstTimeStamp.add(buffer.getNextLong());
                 lstFlag.add(buffer.getNextLong());
                 lstStartingOffset.add(pageStartingOffset);
@@ -252,20 +317,7 @@ public class BinaryFTraceFileParser extends AbstractBinaryFTraceFileParser {
         return initializeCPUs(mapTimeStamp, mapFlag, cpuSectionStartingOffset, cpuSectionSize, pageSize);
     }
 
-    /**
-     * Parse the options section of a binary ftrace trace. The option section
-     * are just some metadata to provide additional information about the trace.
-     * The information are just regular text strings and is independent from the
-     * parsing of the trace.
-     *
-     * @param buffer
-     *            The buffer that currently reading the trace file
-     * @return A list of {@link BinaryFTraceOption} that contains the option
-     *         strings
-     * @throws IOException
-     *             if an error occurred while reading the option strings
-     */
-    private static List<BinaryFTraceOption> parseOptionsSection(BinaryFTraceByteBuffer buffer) throws IOException {
+    private static List<BinaryFTraceOption> parseOptionsSection(BinaryFTraceByteBuffer buffer) throws IOException, TmfTraceException {
         ArrayList<Short> optionTypes = new ArrayList<>();
         ArrayList<String> optionData = new ArrayList<>();
 
@@ -273,9 +325,11 @@ public class BinaryFTraceFileParser extends AbstractBinaryFTraceFileParser {
         int optionSize = 0;
 
         do {
+            validate(buffer, BinaryFTraceHeaderElementSize.OPTION_TYPE);
             optionType = buffer.getNextShort();
 
             if (optionType > 0) {
+                validate(buffer, BinaryFTraceHeaderElementSize.OPTION_SIZE);
                 optionSize = buffer.getNextInt();
 
                 optionTypes.add(optionType);
@@ -286,7 +340,14 @@ public class BinaryFTraceFileParser extends AbstractBinaryFTraceFileParser {
         return extractOptionsSection(optionTypes, optionData);
     }
 
-    private static int parseCPUCount(BinaryFTraceByteBuffer buffer) throws IOException {
+    private static int parseCPUCount(BinaryFTraceByteBuffer buffer) throws IOException, TmfTraceException {
+        validate(buffer, BinaryFTraceHeaderElementSize.SMALL_SECTION_SIZE);
         return buffer.getNextInt();
+    }
+
+    private static String getUnsecureFileErrorMessage(long offset, long fileSize, long bytesToRead) {
+        String errorMessage = UNSECURE_TRACE_ERROR_MESSAGE +
+                ". Requested %d from %d, but file is %d bytes long."; //$NON-NLS-1$
+        return String.format(errorMessage, bytesToRead, offset, fileSize);
     }
 }
