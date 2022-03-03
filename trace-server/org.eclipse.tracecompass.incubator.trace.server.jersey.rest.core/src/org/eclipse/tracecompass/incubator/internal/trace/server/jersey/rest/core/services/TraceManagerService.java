@@ -16,6 +16,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NAME_EXISTS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NOT_SUPPORTED;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_TRACE;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TRACE_CREATION_FAILED;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TRACE_UUID;
 
 import java.io.File;
@@ -153,6 +154,7 @@ public class TraceManagerService {
             @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "406", description = CANNOT_READ, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "409", description = NAME_EXISTS, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "500", description = TRACE_CREATION_FAILED, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "501", description = NOT_SUPPORTED, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response putTrace(@RequestBody(content = {
@@ -200,7 +202,7 @@ public class TraceManagerService {
         IResource resource = getResource(path, name);
         if (!resource.exists()) {
             if (!createResource(path, resource)) {
-                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Trace resource creation failed").build(); //$NON-NLS-1$
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity(TRACE_CREATION_FAILED).build();
             }
             resource.setPersistentProperty(TmfCommonConstants.TRACETYPE, traceType);
         } else {

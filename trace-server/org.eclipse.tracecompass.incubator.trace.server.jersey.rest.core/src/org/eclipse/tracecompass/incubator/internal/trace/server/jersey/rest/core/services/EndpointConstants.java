@@ -138,6 +138,7 @@ public class EndpointConstants {
     static final String NOT_SUPPORTED = "Trace type not supported"; //$NON-NLS-1$
     static final String NO_SUCH_EXPERIMENT = "No such experiment"; //$NON-NLS-1$
     static final String PROVIDER_NOT_FOUND = "Experiment or output provider not found"; //$NON-NLS-1$
+    static final String TRACE_CREATION_FAILED = "Trace resource creation failed"; //$NON-NLS-1$
     static final String TREE_ENTRIES = "Unique entry point for output providers, to get the tree of visible entries"; //$NON-NLS-1$
 
     private EndpointConstants() {
