@@ -101,18 +101,6 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
         }
     }
 
-    /**
-     * Basic check to figure out if further processing should be done with an
-     * event
-     *
-     * @param event
-     *            the event
-     * @return true if the event should be handled, false otherwise
-     */
-    protected static boolean considerEvent(ITmfEvent event) {
-        return true;
-    }
-
     @Override
     protected void eventHandle(ITmfEvent event) {
         ITmfEventField content = event.getContent();
@@ -363,4 +351,21 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
         return fStringId;
     }
 
+    /**
+     * Return the location id of a process into an MPI communicator.
+     *
+     * @param rank
+     *            The rank of the process in the communicator
+     * @param communicatorReference
+     *            The communicator id
+     * @return The rank of the location into the communicator, unknown if the
+     *         rank number is >= to the number of members defined.
+     */
+    protected long getLocationIdFromRank(Integer rank, Integer communicatorReference) {
+        ArrayList<Long> members = getMembersFromCommunicatorReference(communicatorReference);
+        if (rank >= members.size()) {
+            return UNKNOWN_RANK;
+        }
+        return members.get(rank);
+    }
 }

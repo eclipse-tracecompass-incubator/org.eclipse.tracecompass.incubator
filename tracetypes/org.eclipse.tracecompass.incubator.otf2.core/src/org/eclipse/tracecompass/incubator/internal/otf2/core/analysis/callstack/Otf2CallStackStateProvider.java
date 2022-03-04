@@ -534,23 +534,6 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
         }
     }
 
-    /**
-     * Return the location id of a process into an MPI communicator.
-     *
-     * @param rank
-     *            The rank of the process in the communicator
-     * @param communicatorReference
-     *            The communicator id
-     * @return The rank of the location into the communicator
-     */
-    protected long getLocationIdFromRank(Integer rank, Integer communicatorReference) {
-        ArrayList<Long> members = getMembersFromCommunicatorReference(communicatorReference);
-        if (rank >= members.size()) {
-            return UNKNOWN_RANK;
-        }
-        return members.get(rank);
-    }
-
     /*
      * Calls the corresponding method from the associated location given the
      * type of event

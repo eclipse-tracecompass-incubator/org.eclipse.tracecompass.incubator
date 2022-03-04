@@ -47,6 +47,17 @@
                class="org.eclipse.tracecompass.incubator.otf2.core.trace.Otf2Trace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.flows.Otf2FlowsAnalysis"
+            automatic="false"
+            icon="icons/otf2-icon.png"
+            id="org.eclipse.tracecompass.incubator.otf2.core.analysis.flows"
+            name="%otf2.analysis.flows">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.otf2.core.trace.Otf2Trace">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
@@ -55,11 +66,18 @@
             id="org.eclipse.tracecompass.incubator.otf2.core.analysis.communicators.dataprovider">
       </dataProviderFactory>
    </extension>
-      <extension
+   <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
       <dataProviderFactory
             class="org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.summarytimeline.Otf2SummaryTimelineDataProviderFactory"
             id="org.eclipse.tracecompass.incubator.otf2.core.analysis.summarytimeline.dataprovider">
+      </dataProviderFactory>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.flows.Otf2FlowsDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.otf2.core.analysis.flows.dataprovider">
       </dataProviderFactory>
    </extension>
 </plugin>
