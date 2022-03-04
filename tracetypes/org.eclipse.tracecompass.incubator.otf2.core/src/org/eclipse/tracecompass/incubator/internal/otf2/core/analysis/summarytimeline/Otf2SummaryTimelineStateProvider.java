@@ -218,7 +218,5 @@ public class Otf2SummaryTimelineStateProvider extends AbstractOtf2StateProvider 
         default:
             break;
         }
-
     }
-
 }

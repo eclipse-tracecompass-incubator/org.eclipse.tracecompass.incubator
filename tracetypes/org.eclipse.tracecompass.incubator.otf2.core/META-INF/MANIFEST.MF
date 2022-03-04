@@ -24,6 +24,7 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.otf2.core;x-friends:
  org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.callstack;x-friends:="org.eclipse.tracecompass.incubator.otf2.ui",
  org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.communicators;x-friends:="org.eclipse.tracecompass.incubator.otf2.ui",
  org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.summarytimeline;x-friends:="org.eclipse.tracecompass.incubator.otf2.ui",
+ org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.flows;x-friends:="org.eclipse.tracecompass.incubator.otf2.ui",
  org.eclipse.tracecompass.incubator.otf2.core.trace;x-friends:="org.eclipse.tracecompass.incubator.otf2.ui,org.eclipse.tracecompass.incubator.otf2.core.tests"
 Import-Package: com.google.common.collect,
  org.apache.commons.io,

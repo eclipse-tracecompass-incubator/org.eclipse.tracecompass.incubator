@@ -20,6 +20,7 @@ Require-Bundle: org.eclipse.ui,
 Export-Package: org.eclipse.tracecompass.incubator.internal.otf2.ui;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.otf2.ui.views;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.otf2.ui.views.communicators;x-internal:=true,
+ org.eclipse.tracecompass.incubator.internal.otf2.ui.views.flows;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.otf2.ui.views.summarytimeline;x-internal:=true
 Import-Package: com.google.common.cache,
  com.google.common.collect,

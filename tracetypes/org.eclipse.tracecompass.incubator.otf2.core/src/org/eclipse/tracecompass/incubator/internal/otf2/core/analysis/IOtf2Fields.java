@@ -122,4 +122,19 @@ public interface IOtf2Fields {
      * Location group field name
      */
     String OTF2_LOCATION_GROUP = "locationGroup"; //$NON-NLS-1$
+
+    /**
+     * Message length field name
+     */
+    String OTF2_MESSAGE_LENGTH = "msgLength"; //$NON-NLS-1$
+
+    /**
+     * Size received field name
+     */
+    String OTF2_SIZE_RECEIVED = "sizeReceived"; //$NON-NLS-1$
+
+    /**
+     * Size sent field name
+     */
+    String OTF2_SIZE_SENT = "sizeSent"; //$NON-NLS-1$
 }
