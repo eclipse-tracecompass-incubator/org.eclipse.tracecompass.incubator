@@ -23,12 +23,12 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.IFlameChartProvider;
 import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
-import org.eclipse.tracecompass.internal.tmf.core.model.xy.TmfTreeXYCompositeDataProvider;
+import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.TmfTimeGraphCompositeDataProvider;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
-import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -63,7 +63,7 @@ public class FlameChartDataProviderFactory implements IDataProviderFactory {
         if (traces.size() > 1) {
             // Try creating a composite only if there are many traces, otherwise, the
             // previous call to create should have returned the data provider
-            return TmfTreeXYCompositeDataProvider.create(traces, Objects.requireNonNull(Messages.FlameChartDataProvider_Title), FlameChartDataProvider.ID, secondaryId);
+            return TmfTimeGraphCompositeDataProvider.create(traces, FlameChartDataProvider.ID, secondaryId);
         }
         return null;
 
