@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021, 2022 Ericsson
+ * Copyright (c) 2022 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -11,35 +11,29 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
-import org.eclipse.jdt.annotation.NonNull;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
-public interface RequestedQueryParameters {
+@Schema(description = "A time range with optional number of timestamps to be sampled")
+public interface TimeRange {
 
     /**
-     * @return The parameters.
+     * @return The start time.
      */
-    @NonNull
-    @Schema(required = true)
-    RequestedParameters getParameters();
+    @Schema(description = "The start of the time range", required = true)
+    long getStart();
 
     /**
-     * Property names below use underscores as per trace-server protocol.
+     * @return The end time.
      */
-    interface RequestedParameters {
+    @Schema(description = "The end of the time range", required = true)
+    long getEnd();
 
-        @JsonProperty("requested_timerange")
-        @Schema(required = true)
-        TimeRange getRequestedTimeRange();
-
-        @JsonProperty("requested_items")
-        @Schema(required = true)
-        int[] getRequestedItems();
-    }
+    /**
+     * @return The number of times to be sampled.
+     */
+    @Schema(description = "The number of timestamps to be sampled (1-65536) in the given range", required = false)
+    int getNbTimes();
 }

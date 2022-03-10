@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2021, 2022 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -34,8 +34,8 @@ public interface ArrowsQueryParameters {
      */
     interface ArrowsParameters {
 
-        @JsonProperty("requested_times")
+        @JsonProperty("requested_timerange")
         @Schema(required = true)
-        long[] getRequestedTimes();
+        TimeRange getRequestedTimeRange();
     }
 }

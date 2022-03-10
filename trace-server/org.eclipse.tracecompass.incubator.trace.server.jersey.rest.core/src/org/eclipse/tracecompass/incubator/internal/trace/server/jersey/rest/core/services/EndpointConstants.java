@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2021, 2022 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -44,6 +44,8 @@ public class EndpointConstants {
     /** Error message returned for a request with missing output Id */
     public static final String MISSING_OUTPUTID = "Missing parameter outputId"; //$NON-NLS-1$
 
+    /** Query parameter key for requested time range */
+    private static final String REQUESTED_TIMERANGE_KEY = "requested_timerange"; //$NON-NLS-1$
     /**
      * Swagger constants redefined out of TmfEventTableDataProvider non-API
      * restriction. This is unlike constants in DataProviderParameterUtils.
@@ -109,8 +111,8 @@ public class EndpointConstants {
     static final String MARKER_SET = "The string '" + REQUESTED_MARKER_SET_KEY + "' is the optional requested marker set's id. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ONE_OF = "One of '" + REQUESTED_TABLE_INDEX_KEY + "' or '" + REQUESTED_TIME_KEY + "' should be present. "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     static final String TABLE_TIMES = "If '" + REQUESTED_TIME_KEY + "' is used it should contain an array with a single timestamp. The returned lines starting at the given timestamp (or the nearest following) will be returned. "; //$NON-NLS-1$ //$NON-NLS-2$
-    static final String TIMES = "The array '" + REQUESTED_TIME_KEY + "' is the explicit array of requested sample times."; //$NON-NLS-1$ //$NON-NLS-2$
-    static final String TIMES_TREE = "When '" + REQUESTED_TIME_KEY + "' is absent the tree for the full range is returned. When present it specifies a range as [start, end]."; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String TIMERANGE = "The object '" + REQUESTED_TIMERANGE_KEY + "' is the requested time range and number of samples."; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String TIMERANGE_TREE = "The object '" + REQUESTED_TIMERANGE_KEY + "' specifies the requested time range. When absent the tree for the full range is returned."; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_TT = "The array '" + REQUESTED_TIME_KEY + "' is an array with a single timestamp. "; //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
@@ -127,8 +129,8 @@ public class EndpointConstants {
     static final String ITEMS_EX_TT = "\"" + REQUESTED_ITEMS_KEY + "\": [1],"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_CATEGORIES_EX = "\"" + REQUESTED_MARKER_CATEGORIES_KEY + "\": [\"category1\", \"category2\"]"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_SET_EX = "\"" + REQUESTED_MARKER_SET_KEY + "\": \"markerSetId\","; //$NON-NLS-1$ //$NON-NLS-2$
-    static final String TIMES_EX = "\"" + REQUESTED_TIME_KEY + "\": [111200000, 111300000, 111400000, 111500000]"; //$NON-NLS-1$ //$NON-NLS-2$
-    static final String TIMES_EX_TREE = "\"" + REQUESTED_TIME_KEY + "\": [111111111, 222222222]"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String TIMERANGE_EX = "\"" + REQUESTED_TIME_KEY + "\": {\"start\": 111111111, \"end\": 222222222, \"nbTimes\": 1920}"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String TIMERANGE_EX_TREE = "\"" + REQUESTED_TIME_KEY + "\": {\"start\": 111111111, \"end\": 222222222}"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_EX_TT = "\"" + REQUESTED_TIME_KEY + "\": [111200000],"; //$NON-NLS-1$ //$NON-NLS-2$
 
     /** Swagger @ApiResponse description constants reused, or centralized. */

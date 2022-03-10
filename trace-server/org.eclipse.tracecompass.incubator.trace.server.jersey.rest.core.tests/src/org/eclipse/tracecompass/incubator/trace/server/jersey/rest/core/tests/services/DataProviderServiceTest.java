@@ -75,6 +75,7 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
     private static final String XY_DATAPROVIDER_ID = "org.eclipse.tracecompass.analysis.os.linux.core.cpuusage.CpuUsageDataProvider";
     private static final String EVENTS_TABLE_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider";
+    private static final String REQUESTED_TIMERANGE_KEY = "requested_timerange";
     private static final String REQUESTED_TIMES_KEY = "requested_times";
     private static final String REQUESTED_ITEMS_KEY = "requested_items";
     private static final String REQUESTED_ELEMENT_KEY = "requested_element";
@@ -89,6 +90,9 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final String DURATION = "duration";
     private static final String ENTRY_ID = "entryId";
     private static final String DESTINATION_ID = "destinationId";
+    private static final String START = "start";
+    private static final String END = "end";
+    private static final String NB_TIMES = "nbTimes";
     private static final long TABLE_INDEX = 0L;
     private static final long TABLE_COUNT = 100L;
 
@@ -192,6 +196,8 @@ public class DataProviderServiceTest extends RestServerTest {
             for (EntryStub entry : entries) {
                 items.add(entry.getId());
             }
+            parameters.remove(REQUESTED_TIMES_KEY);
+            parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, start, END, end, NB_TIMES, 10));
             parameters.put(REQUESTED_ITEMS_KEY, items);
             Response series = xySeriesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, series.getStatus());
@@ -264,7 +270,8 @@ public class DataProviderServiceTest extends RestServerTest {
 
             // Test getting the time graph row data
             WebTarget tgStatesEnpoint = getTimeGraphStatesEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
-            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(1450193697034689597L, 1450193697118480368L));
+            parameters.remove(REQUESTED_TIMES_KEY);
+            parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, 1450193697034689597L, END, 1450193697118480368L, NB_TIMES, 10));
             parameters.put(REQUESTED_ITEMS_KEY, items);
             Response statesResponse = tgStatesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, statesResponse.getStatus());

@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2021, 2022 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -12,16 +12,19 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.Filter;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.Annotation;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.IAnnotation.AnnotationType;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphArrow;
@@ -56,8 +59,13 @@ public class QueryParametersDeserializer extends StdDeserializer<QueryParameters
     private static final String FILTERS = "filters"; //$NON-NLS-1$
     private static final String PARAMETERS = "parameters"; //$NON-NLS-1$
     private static final String TIME = "time"; //$NON-NLS-1$
+    private static final String REQUESTED_TIMERANGE_KEY = "requested_timerange"; //$NON-NLS-1$
+    private static final String START = "start"; //$NON-NLS-1$
+    private static final String END = "end"; //$NON-NLS-1$
+    private static final String NBTIMES = "nbTimes"; //$NON-NLS-1$
 
     private static final @NonNull OutputElementStyle EMPTY_STYLE = new OutputElementStyle(null, Collections.emptyMap());
+    private static final long MAX_NBTIMES = 1 << 16;
 
     /**
      * Constructor
@@ -77,10 +85,10 @@ public class QueryParametersDeserializer extends StdDeserializer<QueryParameters
         if (parametersNode != null) {
             JsonParser parametersParser = parametersNode.traverse(codec);
             parametersParser.nextToken();
-            parameters = ctxt.readValue(parametersParser, Map.class);
+            Map<String, Object>  params = ctxt.readValue(parametersParser, Map.class);
 
             /* Replace default deserialized map with the correct element object */
-            parameters.computeIfPresent(DataProviderParameterUtils.REQUESTED_ELEMENT_KEY, (k, v) -> {
+            params.computeIfPresent(DataProviderParameterUtils.REQUESTED_ELEMENT_KEY, (k, v) -> {
                 if (v instanceof Map) {
                     Map<String, Object> map = (Map<String, Object>) v;
                     Object elementType = map.get(ELEMENT_TYPE);
@@ -99,6 +107,39 @@ public class QueryParametersDeserializer extends StdDeserializer<QueryParameters
                 }
                 return null;
             });
+
+            /* Transform requested timerange to requested times array */
+            AtomicReference requestedTimes = new AtomicReference<>();
+            params.computeIfPresent(REQUESTED_TIMERANGE_KEY, (k, v) -> {
+                if (v instanceof Map) {
+                    Map<String, Object> map = (Map<String, Object>) v;
+                    Object startObj = map.get(START);
+                    Object endObj = map.get(END);
+                    Object nbTimesObj = map.get(NBTIMES);
+                    if (!(startObj instanceof Number && endObj instanceof Number)) {
+                        return null;
+                    }
+                    long start = ((Number) startObj).longValue();
+                    long end = ((Number) endObj).longValue();
+                    if (!(nbTimesObj instanceof Number)) {
+                        requestedTimes.set(Arrays.asList(start, end));
+                        return null;
+                    }
+                    long nbTimes = Math.min(((Number) nbTimesObj).longValue(), MAX_NBTIMES);
+                    if (nbTimes <= 1) {
+                        requestedTimes.set(Arrays.asList(start, end));
+                        return null;
+                    }
+                    long resolution = (end - start) / (nbTimes - 1);
+                    requestedTimes.set(StateSystemUtils.getTimes(start, end, resolution));
+                    return null;
+                }
+                return v;
+            });
+            if (requestedTimes.get() != null) {
+                params.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, requestedTimes.get());
+            }
+            parameters = params;
         }
         List<Filter> filters = null;
         JsonNode filtersNode = node.get(FILTERS);

@@ -56,11 +56,11 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TABLE_TIMES;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TERMS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TGR;
-import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMES;
-import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMES_EX;
-import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMES_EX_TREE;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_EX;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_EX_TREE;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_TREE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMES_EX_TT;
-import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMES_TREE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMES_TT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TITLE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TRA;
@@ -308,8 +308,8 @@ public class DataProviderService {
     public Response getXYTree(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
-            @RequestBody(description = "Query parameters to fetch the XY tree. " + TIMES_TREE, content = {
-                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX_TREE +
+            @RequestBody(description = "Query parameters to fetch the XY tree. " + TIMERANGE_TREE, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMERANGE_EX_TREE +
                             "}}"), schema = @Schema(implementation = TreeQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
         return getTree(expUUID, outputId, queryParameters);
@@ -341,8 +341,8 @@ public class DataProviderService {
     public Response getXY(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
-            @RequestBody(description = "Query parameters to fetch the XY model. " + TIMES + " " + ITEMS_XY, content = {
-                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX + "," + ITEMS_EX +
+            @RequestBody(description = "Query parameters to fetch the XY model. " + TIMERANGE + " " + ITEMS_XY, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMERANGE_EX + "," + ITEMS_EX +
                             "}}"), schema = @Schema(implementation = RequestedQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
@@ -437,8 +437,8 @@ public class DataProviderService {
     public Response getTimeGraphTree(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
-            @RequestBody(description = "Query parameters to fetch the timegraph tree. " + TIMES_TREE, content = {
-                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX_TREE +
+            @RequestBody(description = "Query parameters to fetch the timegraph tree. " + TIMERANGE_TREE, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMERANGE_EX_TREE +
                             "}}"), schema = @Schema(implementation = TreeQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
         return getTree(expUUID, outputId, queryParameters);
@@ -470,8 +470,8 @@ public class DataProviderService {
     public Response getStates(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
-            @RequestBody(description = "Query parameters to fetch the timegraph states. " + TIMES + " " + ITEMS, content = {
-                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX + "," + ITEMS_EX +
+            @RequestBody(description = "Query parameters to fetch the timegraph states. " + TIMERANGE + " " + ITEMS, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMERANGE_EX + "," + ITEMS_EX +
                             "}}"), schema = @Schema(implementation = RequestedQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
@@ -530,8 +530,8 @@ public class DataProviderService {
     public Response getArrows(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
-            @RequestBody(description = "Query parameters to fetch the timegraph arrows. " + TIMES, content = {
-                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMES_EX +
+            @RequestBody(description = "Query parameters to fetch the timegraph arrows. " + TIMERANGE, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMERANGE_EX +
                             "}}"), schema = @Schema(implementation = ArrowsQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
@@ -692,9 +692,9 @@ public class DataProviderService {
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @RequestBody(description = "Query parameters to fetch the annotations. " +
-                    TIMES + " " + ITEMS + " " + MARKER_SET + MARKER_CATEGORIES, content = {
+                    TIMERANGE + " " + ITEMS + " " + MARKER_SET + MARKER_CATEGORIES, content = {
                             @Content(examples = @ExampleObject("{\"parameters\":{" +
-                                    TIMES_EX + "," + ITEMS_EX + "," + MARKER_SET_EX + MARKER_CATEGORIES_EX +
+                                    TIMERANGE_EX + "," + ITEMS_EX + "," + MARKER_SET_EX + MARKER_CATEGORIES_EX +
                                     "}}"), schema = @Schema(implementation = AnnotationsQueryParameters.class))
                     }, required = true) QueryParameters queryParameters) {
 
