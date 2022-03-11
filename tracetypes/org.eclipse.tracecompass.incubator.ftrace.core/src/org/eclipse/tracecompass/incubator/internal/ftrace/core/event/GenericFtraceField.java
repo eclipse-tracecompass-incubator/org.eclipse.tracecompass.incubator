@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.LinuxValues;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.layout.GenericFtraceEventLayout;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 
@@ -37,9 +38,11 @@ import java.util.regex.Pattern;
 @NonNullByDefault
 public class GenericFtraceField {
 
-    private static final Pattern KEYVAL_PATTERN = Pattern.compile("(?<key>[^\\s=\\[\\],]+)(=|:)\\s*(?<val>[^\\s=\\[\\],]+)"); //$NON-NLS-1$
+    private static final Pattern KEYVAL_KEY_PATTERN = Pattern.compile("(?<key>[^\\s=\\[\\],]+)(=|:)"); //$NON-NLS-1$
+    private static final Pattern KEYVAL_VALUE_PATTERN = Pattern.compile("\\s*(?<value>[^\\[\\],]+).*"); //$NON-NLS-1$
     private static final String KEYVAL_KEY_GROUP = "key"; //$NON-NLS-1$
-    private static final String KEYVAL_VAL_GROUP = "val"; //$NON-NLS-1$
+    private static final String KEYVAL_VALUE_GROUP = "value"; //$NON-NLS-1$
+
 
     private static final double SECONDS_TO_NANO = 1000000000.0;
     private static final Map<Character, @NonNull Long> PREV_STATE_LUT;
@@ -129,40 +132,66 @@ public class GenericFtraceField {
 
             Map<@NonNull String, @NonNull Object> fields = new HashMap<>();
 
-            Matcher keyvalMatcher = KEYVAL_PATTERN.matcher(attributes);
-            while (keyvalMatcher.find()) {
-                String key = keyvalMatcher.group(KEYVAL_KEY_GROUP);
-                String value = keyvalMatcher.group(KEYVAL_VAL_GROUP);
-                if (value != null) {
-                    // This is a temporary solution. Refactor suggestions are welcome.
-                    if (key.equals("prev_state")) { //$NON-NLS-1$
-                        fields.put(key, parsePrevStateValue(value));
-                    } else if (StringUtils.isNumeric(value)) {
-                        if (key.equals("parent_pid") && name.equals("sched_process_fork")) {//$NON-NLS-1$ //$NON-NLS-2$
-                            key = "pid"; //$NON-NLS-1$
-                        }
-                        fields.put(key, Long.parseUnsignedLong(value));
-                    } else {
-                        fields.put(key, decodeString(value));
+            if (attributes != null && !attributes.isEmpty()) {
+                int valStart = 0;
+                Matcher keyvalMatcher = KEYVAL_KEY_PATTERN.matcher(attributes);
+                String key = null;
+                while (keyvalMatcher.find()) {
+                    if (key != null && valStart > 0) {
+                        String value = attributes.substring(valStart, keyvalMatcher.start());
+                        putKeyValueField(name, fields, key, value);
                     }
+                    valStart = keyvalMatcher.end();
+                    key = keyvalMatcher.group(KEYVAL_KEY_GROUP);
                 }
-            }
 
-            /*
-             * If anything else fails, but we have discovered sort of a valid event
-             * attributes lets just add the unparsed attributes with key "data".
-             */
-            if (fields.isEmpty() && attributes != null && !attributes.isEmpty()) {
-                String key = "data"; //$NON-NLS-1$
-                if (name.equals(IGenericFtraceConstants.FTRACE_EXIT_SYSCALL)) {
-                    key = "ret"; //$NON-NLS-1$
+                if (key != null && valStart > 0) {
+                    String value = attributes.substring(valStart, attributes.length());
+                    putKeyValueField(name, fields, key, value);
                 }
-                fields.put(key, decodeString(attributes));
+
+                /*
+                 * If anything else fails, but we have discovered sort of a valid event
+                 * attributes lets just add the unparsed attributes with key "data".
+                 */
+                if (fields.isEmpty()) {
+                    key = "data"; //$NON-NLS-1$
+                    if (name.equals(IGenericFtraceConstants.FTRACE_EXIT_SYSCALL)) {
+                        key = "ret"; //$NON-NLS-1$
+                    }
+                    fields.put(key, decodeString(attributes));
+                }
             }
 
             return new GenericFtraceField(name, cpu, timestampInNano, pid, tid, fields);
         }
         return null;
+    }
+
+    private static void putKeyValueField(String name, Map<@NonNull String, @NonNull Object> fields, String key, String value) {
+        Matcher valMatcher = KEYVAL_VALUE_PATTERN.matcher(value);
+        String actualValue;
+        if (valMatcher.matches()) {
+            actualValue = valMatcher.group(KEYVAL_VALUE_GROUP).trim();
+        } else {
+            actualValue = value;
+        }
+        if (!actualValue.trim().isEmpty()) {
+            // This is a temporary solution. Refactor suggestions
+            // are welcome.
+            final GenericFtraceEventLayout eventLayout = GenericFtraceEventLayout.getInstance();
+            if (key.equals(eventLayout.fieldPrevState())) {
+                fields.put(key, parsePrevStateValue(actualValue));
+            } else if (StringUtils.isNumeric(actualValue)) {
+                String actualKey = key;
+                if (key.equals("parent_pid") && name.equals(eventLayout.eventSchedProcessFork())) { //$NON-NLS-1$
+                    actualKey = eventLayout.fieldTid();
+                }
+                fields.put(actualKey, Long.parseUnsignedLong(actualValue));
+            } else {
+                fields.put(key, decodeString(actualValue));
+            }
+        }
     }
 
     private static Object decodeString(String val) {

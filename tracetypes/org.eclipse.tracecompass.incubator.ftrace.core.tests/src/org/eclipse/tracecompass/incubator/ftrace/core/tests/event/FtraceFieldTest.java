@@ -53,6 +53,32 @@ public class FtraceFieldTest {
     }
 
     /**
+     * Testing of parse line with function using line from an ftrace output where
+     * the command name contains a space (comm=daemo su), check that the parsed
+     * comm field value is the complete name, including the space.
+     */
+    @Test
+    public void testParseEventWithCommPropertyWithSpace() {
+        String line = "kworker/0:0-9514  [000] d..4  3210.263482: sched_wakeup: comm=daemo su pid=16620 prio=120 success=1 target_cpu=000";
+
+        GenericFtraceField field = GenericFtraceField.parseLine(line);
+
+        assertNotNull(field);
+        assertEquals((Integer) 0, field.getCpu());
+        assertEquals((Integer) 9514, field.getPid());
+        assertEquals((Integer) 9514, field.getTid());
+        assertEquals(3210263482000L, (long) field.getTs());
+        assertEquals("sched_wakeup", field.getName());
+
+        assertEquals(5, field.getContent().getFields().size());
+        assertEquals("daemo su", field.getContent().getFieldValue(String.class, "comm"));
+        assertEquals((Long) 1L, field.getContent().getFieldValue(Long.class, "success"));
+        assertEquals((Long) 16620L, field.getContent().getFieldValue(Long.class, "pid"));
+        assertEquals((Long) 120L, field.getContent().getFieldValue(Long.class, "prio"));
+        assertEquals((Long) 0L, field.getContent().getFieldValue(Long.class, "target_cpu"));
+    }
+
+    /**
      * Testing of parse line with function using line from an ftrace output
      */
     @Test
