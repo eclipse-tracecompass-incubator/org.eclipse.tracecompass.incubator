@@ -35,7 +35,7 @@ parser.add_argument('-b','--before', help = '(Optional) Include commits before a
 
 args = parser.parse_args()
 
-tagPattern = re.compile("^\[([A-Za-z]*)\](.*)")
+tagPattern = re.compile("^\[([A-Za-z]*)\]\s*(.*\S)\s*")
 
 notTags = ["main"]
 startHead = "date:"
