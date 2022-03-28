@@ -129,7 +129,6 @@ public class DataProviderServiceTest extends RestServerTest {
         assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
 
         parameters = new HashMap<>();
-        parameters.put(REQUESTED_TIMES_KEY, Collections.emptyList());
         Response defaults = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
         assertEquals("Default values should return OK code", 200, defaults.getStatus());
     }

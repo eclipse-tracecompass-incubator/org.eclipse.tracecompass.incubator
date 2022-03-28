@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2021, 2022 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -14,7 +14,6 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Experiment;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Trace;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.Annotation;
@@ -69,7 +68,6 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
             module.addSerializer(IVirtualTableLine.class, new VirtualTableLineSerializer());
             module.addSerializer(VirtualTableCell.class, new VirtualTableCellSerializer());
             module.addSerializer(MarkerSet.class, new MarkerSetSerializer());
-            module.addDeserializer(QueryParameters.class, new QueryParametersDeserializer());
 
             // create JsonProvider to provide custom ObjectMapper
             JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();

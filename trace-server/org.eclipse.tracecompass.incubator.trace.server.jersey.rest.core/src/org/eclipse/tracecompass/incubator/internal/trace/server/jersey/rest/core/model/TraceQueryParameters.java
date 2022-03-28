@@ -37,7 +37,7 @@ public interface TraceQueryParameters {
     /**
      * @return The URI.
      */
-    @JsonProperty("URI")
+    @JsonProperty("uri")
     @NonNull
     @Schema(description = "URI of the trace", required = true)
     String getUri();

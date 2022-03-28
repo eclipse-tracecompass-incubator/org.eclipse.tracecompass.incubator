@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Ericsson
+ * Copyright (c) 2017, 2022 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -140,7 +140,6 @@ import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output.XmlDataPro
 import org.eclipse.tracecompass.internal.tmf.core.markers.MarkerConfigXmlParser;
 import org.eclipse.tracecompass.internal.tmf.core.markers.MarkerSet;
 import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
-import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisManager;
@@ -151,8 +150,6 @@ import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.Pr
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
 import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
 import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
-import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
-import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
@@ -346,16 +343,9 @@ public class DataProviderService {
                             "}}"), schema = @Schema(implementation = RequestedQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
-        if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
-        }
-        Map<String, Object> params = queryParameters.getParameters();
-        if (params == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
-        }
-        SelectionTimeQueryFilter selectionTimeQueryFilter = FetchParametersUtils.createSelectionTimeQuery(params);
-        if (selectionTimeQueryFilter == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+        Response errorResponse = validateParameters(outputId, queryParameters);
+        if (errorResponse != null) {
+            return errorResponse;
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getXY") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
@@ -375,6 +365,12 @@ public class DataProviderService {
             if (provider == null) {
                 // The analysis cannot be run on this trace
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            Map<String, Object> params = queryParameters.getParameters();
+            String errorMessage = QueryParametersUtil.validateRequestedQueryParameters(params);
+            if (errorMessage != null) {
+                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
             }
 
             TmfModelResponse<@NonNull ITmfXyModel> response = provider.fetchXY(params, null);
@@ -475,14 +471,9 @@ public class DataProviderService {
                             "}}"), schema = @Schema(implementation = RequestedQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
-        Map<String, Object> params = queryParameters.getParameters();
-        Response errorResponse = validateQueryParameters(outputId, params);
+        Response errorResponse = validateParameters(outputId, queryParameters);
         if (errorResponse != null) {
             return errorResponse;
-        }
-        SelectionTimeQueryFilter selectionTimeQueryFilter = FetchParametersUtils.createSelectionTimeQuery(params);
-        if (selectionTimeQueryFilter == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStates") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
@@ -496,6 +487,12 @@ public class DataProviderService {
             if (provider == null) {
                 // The analysis cannot be run on this trace
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            Map<String, Object> params = queryParameters.getParameters();
+            String errorMessage = QueryParametersUtil.validateRequestedQueryParameters(params);
+            if (errorMessage != null) {
+                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
             }
 
             TmfModelResponse<TimeGraphModel> response = provider.fetchRowModel(params, null);
@@ -535,14 +532,9 @@ public class DataProviderService {
                             "}}"), schema = @Schema(implementation = ArrowsQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
-        Map<String, Object> params = queryParameters.getParameters();
-        Response errorResponse = validateQueryParameters(outputId, params);
+        Response errorResponse = validateParameters(outputId, queryParameters);
         if (errorResponse != null) {
             return errorResponse;
-        }
-        TimeQueryFilter timeQueryFilter = FetchParametersUtils.createTimeQuery(params);
-        if (timeQueryFilter == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getArrows") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
@@ -556,6 +548,12 @@ public class DataProviderService {
             if (provider == null) {
                 // The analysis cannot be run on this trace
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            Map<String, Object> params = queryParameters.getParameters();
+            String errorMessage = QueryParametersUtil.validateArrowsQueryParameters(params);
+            if (errorMessage != null) {
+                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
             }
 
             TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(params, null);
@@ -698,8 +696,7 @@ public class DataProviderService {
                                     "}}"), schema = @Schema(implementation = AnnotationsQueryParameters.class))
                     }, required = true) QueryParameters queryParameters) {
 
-        Map<String, Object> params = queryParameters.getParameters();
-        Response errorResponse = validateQueryParameters(outputId, params);
+        Response errorResponse = validateParameters(outputId, queryParameters);
         if (errorResponse != null) {
             return errorResponse;
         }
@@ -716,6 +713,12 @@ public class DataProviderService {
             if (provider == null) {
                 // The analysis cannot be run on this trace
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            Map<String, Object> params = queryParameters.getParameters();
+            String errorMessage = QueryParametersUtil.validateAnnotationsQueryParameters(params);
+            if (errorMessage != null) {
+                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
             }
 
             boolean isComplete = true;
@@ -786,8 +789,7 @@ public class DataProviderService {
                             "}}"), schema = @Schema(implementation = TooltipQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
-        Map<String, Object> params = queryParameters.getParameters();
-        Response errorResponse = validateQueryParameters(outputId, params);
+        Response errorResponse = validateParameters(outputId, queryParameters);
         if (errorResponse != null) {
             return errorResponse;
         }
@@ -803,6 +805,12 @@ public class DataProviderService {
             if (provider == null) {
                 // The analysis cannot be run on this trace
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            Map<String, Object> params = queryParameters.getParameters();
+            String errorMessage = QueryParametersUtil.validateTooltipQueryParameters(params);
+            if (errorMessage != null) {
+                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
             }
 
             TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = provider.fetchTooltip(params, null);
@@ -903,8 +911,7 @@ public class DataProviderService {
                                     "}}"), schema = @Schema(implementation = LinesQueryParameters.class))
                     }, required = true) QueryParameters queryParameters) {
 
-        Map<String, Object> params = queryParameters.getParameters();
-        Response errorResponse = validateQueryParameters(outputId, params);
+        Response errorResponse = validateParameters(outputId, queryParameters);
         if (errorResponse != null) {
             return errorResponse;
         }
@@ -918,6 +925,12 @@ public class DataProviderService {
             ITmfVirtualTableDataProvider<? extends IVirtualTableLine, ? extends ITmfTreeDataModel> provider = manager.getDataProvider(experiment, outputId, ITmfVirtualTableDataProvider.class);
             if (provider == null) {
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            Map<String, Object> params = queryParameters.getParameters();
+            String errorMessage = QueryParametersUtil.validateLinesQueryParameters(params);
+            if (errorMessage != null) {
+                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
             }
 
             TmfModelResponse<?> response = provider.fetchLines(params, null);
@@ -990,16 +1003,14 @@ public class DataProviderService {
     }
 
     private Response getTree(UUID expUUID, String outputId, QueryParameters queryParameters) {
-        if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
+        Response errorResponse = validateParameters(outputId, queryParameters);
+        if (errorResponse != null) {
+            return errorResponse;
         }
         Map<String, Object> params = queryParameters.getParameters();
-        if (params == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
-        }
-        List<Long> timeRequested = DataProviderParameterUtils.extractTimeRequested(params);
-        if (timeRequested != null && timeRequested.size() == 1) {
-            return Response.status(Status.BAD_REQUEST).entity(INVALID_PARAMETERS).build();
+        String errorMessage = QueryParametersUtil.validateTreeQueryParameters(params);
+        if (errorMessage != null) {
+            return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTree") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
@@ -1020,6 +1031,7 @@ public class DataProviderService {
                 // The analysis cannot be run on this trace
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
+            List<Long> timeRequested = DataProviderParameterUtils.extractTimeRequested(params);
             if (timeRequested == null || timeRequested.isEmpty()) {
                 // Make a shallow copy to be able to modify the map
                 params = new HashMap<>(params);
@@ -1062,11 +1074,11 @@ public class DataProviderService {
                     @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = OptionalQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
-        Map<String, Object> params = queryParameters.getParameters();
-        Response errorResponse = validateQueryParameters(outputId, params);
+        Response errorResponse = validateParameters(outputId, queryParameters);
         if (errorResponse != null) {
             return errorResponse;
         }
+        Map<String, Object> params = queryParameters.getParameters();
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStyles") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
@@ -1093,11 +1105,11 @@ public class DataProviderService {
         }
     }
 
-    private static Response validateQueryParameters(String outputId, Map<String, Object> params) {
+    private static Response validateParameters(String outputId, QueryParameters queryParameters) {
         if (outputId == null) {
             return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
         }
-        if (params == null) {
+        if (queryParameters == null) {
             return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
         return null;

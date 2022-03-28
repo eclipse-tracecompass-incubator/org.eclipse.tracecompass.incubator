@@ -159,9 +159,14 @@ public class TraceManagerService {
     public Response putTrace(@RequestBody(content = {
             @Content(schema = @Schema(implementation = TraceQueryParameters.class))
     }, required = true) QueryParameters queryParameters) {
-        Map<String, Object> parameters = queryParameters.getParameters();
-        if (parameters == null) {
+
+        if (queryParameters == null) {
             return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+        }
+        Map<String, Object> parameters = queryParameters.getParameters();
+        String errorMessage = QueryParametersUtil.validateTraceQueryParameters(parameters);
+        if (errorMessage != null) {
+            return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
         }
         String name = (String) parameters.get("name"); //$NON-NLS-1$
         String path = (String) parameters.get("uri"); //$NON-NLS-1$
