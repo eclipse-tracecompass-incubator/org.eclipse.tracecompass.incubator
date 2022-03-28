@@ -26,7 +26,6 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Experiment;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
@@ -223,7 +222,6 @@ public class WebApplication {
         module.addSerializer(IVirtualTableLine.class, new VirtualTableLineSerializer());
         module.addSerializer(VirtualTableCell.class, new VirtualTableCellSerializer());
         module.addSerializer(MarkerSet.class, new MarkerSetSerializer());
-        module.addDeserializer(QueryParameters.class, new QueryParametersDeserializer());
         mapper.registerModule(module);
         return provider;
     }

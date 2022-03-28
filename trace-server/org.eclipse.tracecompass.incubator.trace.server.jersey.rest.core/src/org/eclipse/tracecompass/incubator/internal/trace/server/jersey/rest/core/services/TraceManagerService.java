@@ -126,12 +126,17 @@ public class TraceManagerService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response putTrace(QueryParameters queryParameters) {
-        Map<String, Object> parameters = queryParameters.getParameters();
-        if (parameters == null) {
+
+        if (queryParameters == null) {
             return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
         }
-        String name = (String) parameters.get("name");
-        String path = (String) parameters.get("uri");
+        Map<String, Object> parameters = queryParameters.getParameters();
+        String errorMessage = QueryParametersUtil.validateTraceQueryParameters(parameters);
+        if (errorMessage != null) {
+            return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+        }
+        String name = (String) parameters.get("name"); //$NON-NLS-1$
+        String path = (String) parameters.get("uri"); //$NON-NLS-1$
         if (IS_WINDOWS && path != null && path.startsWith("/")) { //$NON-NLS-1$
             /*
              * Workaround for path created by the theia-trace-extension, see

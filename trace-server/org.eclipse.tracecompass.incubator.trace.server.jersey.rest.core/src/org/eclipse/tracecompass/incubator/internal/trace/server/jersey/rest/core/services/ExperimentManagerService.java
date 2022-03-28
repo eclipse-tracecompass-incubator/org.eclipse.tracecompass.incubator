@@ -246,20 +246,21 @@ public class ExperimentManagerService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response postExperiment(QueryParameters queryParameters) {
-        Map<String, Object> parameters = queryParameters.getParameters();
-        if (parameters == null) {
+
+        if (queryParameters == null) {
             return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
         }
-        Object nameObj = parameters.get("name"); //$NON-NLS-1$
-        Object tracesObj = parameters.get("traces"); //$NON-NLS-1$
-        if (!(nameObj instanceof String) || !(tracesObj instanceof List<?>)) {
-            return Response.status(Status.BAD_REQUEST).build();
+        Map<String, Object> parameters = queryParameters.getParameters();
+        String errorMessage = QueryParametersUtil.validateExperimentQueryParameters(parameters);
+        if (errorMessage != null) {
+            return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
         }
-        String name = (String) nameObj;
+        String name = Objects.requireNonNull((String) parameters.get("name")); //$NON-NLS-1$
+        List<String> tracesObj = Objects.requireNonNull((List<String>) parameters.get("traces")); //$NON-NLS-1$
         List<UUID> traceUUIDs = new ArrayList<>();
 
         List<IResource> traceResources = new ArrayList<>();
-        for (Object uuidObj : (List<?>) tracesObj) {
+        for (Object uuidObj : tracesObj) {
             if (!(uuidObj instanceof String)) {
                 return Response.status(Status.BAD_REQUEST).build();
             }

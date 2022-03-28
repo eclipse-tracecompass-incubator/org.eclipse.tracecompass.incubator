@@ -11,9 +11,11 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -22,7 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Simon Delisle
  */
 public class QueryParameters {
-    private Map<String, Object> parameters;
+    private @NonNull Map<String, Object> parameters;
     private List<Filter> filters;
 
     /**
@@ -30,6 +32,7 @@ public class QueryParameters {
      */
     public QueryParameters() {
         // Default constructor for Jackson
+        this.parameters = new HashMap<>();
     }
 
     /**
@@ -41,14 +44,14 @@ public class QueryParameters {
      *            List of filters
      */
     public QueryParameters(Map<String, Object> parameters, List<Filter> filters) {
-        this.parameters = parameters;
+        this.parameters = parameters != null ? parameters : new HashMap<>();
         this.filters = filters;
     }
 
     /**
      * @return Map of parameters
      */
-    public @Nullable Map<String, Object> getParameters() {
+    public @NonNull Map<String, Object> getParameters() {
         return parameters;
     }
 
