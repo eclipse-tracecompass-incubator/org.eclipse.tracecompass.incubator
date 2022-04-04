@@ -176,7 +176,7 @@ public class GenericFtraceField {
         } else {
             actualValue = value;
         }
-        if (!actualValue.isBlank()) {
+        if (!actualValue.trim().isEmpty()) {
             // This is a temporary solution. Refactor suggestions
             // are welcome.
             final GenericFtraceEventLayout eventLayout = GenericFtraceEventLayout.getInstance();
