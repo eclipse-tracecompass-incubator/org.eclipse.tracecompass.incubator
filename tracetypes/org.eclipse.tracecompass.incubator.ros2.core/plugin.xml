@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            category="org.eclipse.linuxtools.tmf.ctf.core.category.ctf"
+            event_type="org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent"
+            id="org.eclipse.tracecompass.incubator.ros2.core.trace"
+            isDirectory="true"
+            name="%tracetype.type.ros2"
+            trace_type="org.eclipse.tracecompass.incubator.internal.ros2.core.trace.Ros2Trace">
+      </type>
+      <experiment
+            experiment_type="org.eclipse.tracecompass.incubator.internal.ros2.core.trace.Ros2Experiment"
+            id="org.eclipse.tracecompass.incubator.ros2.core.trace.Ros2Experiment"
+            name="%tracetype.experiment.ros2">
+      </experiment>
+   </extension>
+
+</plugin>

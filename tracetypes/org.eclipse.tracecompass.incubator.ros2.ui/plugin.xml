@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="org.eclipse.tracecompass.incubator.internal.ros2.ui.views.category"
+            name="%ros2.name"
+            parentCategory="org.eclipse.linuxtools.tmf.ui.views.category">
+      </category>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
+      <type
+            icon="icons/ros2.png"
+            tracetype="org.eclipse.tracecompass.incubator.ros2.core.trace">
+      </type>
+      <experiment
+            icon="icons/ros2.png"
+            tracetype="org.eclipse.tracecompass.incubator.ros2.core.trace.Ros2Experiment">
+      </experiment>
+   </extension>
+
+</plugin>
