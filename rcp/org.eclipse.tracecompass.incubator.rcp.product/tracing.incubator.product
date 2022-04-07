@@ -154,6 +154,7 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <feature id="org.eclipse.tracecompass.incubator.opentracing"/>
       <feature id="org.eclipse.tracecompass.incubator.perf.profiling"/>
       <feature id="org.eclipse.tracecompass.incubator.ros"/>
+      <feature id="org.eclipse.tracecompass.incubator.ros2"/>
       <feature id="org.eclipse.tracecompass.incubator.rocm"/>
       <feature id="org.eclipse.tracecompass.incubator.tracecompass"/>
       <feature id="org.eclipse.tracecompass.incubator.traceevent"/>

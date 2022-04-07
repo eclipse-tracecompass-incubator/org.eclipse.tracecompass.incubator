@@ -68,6 +68,22 @@
          </tracetype>
       </module>
       <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.messageflow.Ros2MessageFlowAnalysis"
+            applies_experiment="true"
+            automatic="false"
+            icon="icons/ros2.png"
+            id="org.eclipse.tracecompass.incubator.ros2.core.analysis.messageflow"
+            name="%analysis.ros2.messageflow">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.ros2.core.trace.Ros2Trace">
+         </tracetype>
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.ros2.core.trace.Ros2Experiment">
+         </tracetype>
+      </module>
+      <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.messagelinks.Ros2MessageCausalLinksAnalysis"
             applies_experiment="true"
             automatic="false"
@@ -93,6 +109,10 @@
       <dataProviderFactory
             class="org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.executor.Ros2ExecutorDataProviderFactory"
             id="org.eclipse.tracecompass.incubator.ros2.core.analysis.executor.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.messageflow.Ros2MessageFlowDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.ros2.core.analysis.messageflow.dataprovider">
       </dataProviderFactory>
    </extension>
 
