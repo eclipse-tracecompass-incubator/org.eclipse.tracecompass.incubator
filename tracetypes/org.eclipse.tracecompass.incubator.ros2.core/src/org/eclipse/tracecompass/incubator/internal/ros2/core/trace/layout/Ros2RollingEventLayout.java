@@ -52,6 +52,9 @@ public class Ros2RollingEventLayout implements IRos2EventLayout {
     private static final String RCLCPP_EXECUTOR_WAIT_FOR_WORK = "ros2:rclcpp_executor_wait_for_work";
     private static final String RCLCPP_EXECUTOR_EXECUTE = "ros2:rclcpp_executor_execute";
 
+    private static final String MESSAGE_LINK_PERIODIC_ASYNC = "ros2:message_link_periodic_async";
+    private static final String MESSAGE_LINK_PARTIAL_SYNC = "ros2:message_link_partial_sync";
+
     private static final String DDS_CREATE_WRITER = "dds:create_writer";
     private static final String DDS_WRITE_PRE = "dds:write_pre";
     private static final String DDS_WRITE = "dds:write";
@@ -91,6 +94,10 @@ public class Ros2RollingEventLayout implements IRos2EventLayout {
     private static final String GOAL_LABEL = "goal_label";
     private static final String TIMEOUT = "timeout";
     private static final String HANDLE = "handle";
+
+    private static final String SUBS = "subs";
+    private static final String PUBS = "pubs";
+
     private static final String GID_PREFIX = "gid_prefix";
     private static final String GID_ENTITY = "gid_entity";
     private static final String WRITER = "writer";
@@ -322,6 +329,22 @@ public class Ros2RollingEventLayout implements IRos2EventLayout {
         return RCLCPP_EXECUTOR_EXECUTE;
     }
 
+    // Message causal links
+
+    // message_link_periodic_async
+
+    @Override
+    public String eventMessageLinkPeriodicAsync() {
+        return MESSAGE_LINK_PERIODIC_ASYNC;
+    }
+
+    // message_link_partial_sync
+
+    @Override
+    public String eventMessageLinkPartialSync() {
+        return MESSAGE_LINK_PARTIAL_SYNC;
+    }
+
     // DDS
 
     // dds:create_writer
@@ -521,6 +544,18 @@ public class Ros2RollingEventLayout implements IRos2EventLayout {
     @Override
     public String fieldHandle() {
         return HANDLE;
+    }
+
+    // Message causal links
+
+    @Override
+    public String fieldSubs() {
+        return SUBS;
+    }
+
+    @Override
+    public String fieldPubs() {
+        return PUBS;
     }
 
     // DDS

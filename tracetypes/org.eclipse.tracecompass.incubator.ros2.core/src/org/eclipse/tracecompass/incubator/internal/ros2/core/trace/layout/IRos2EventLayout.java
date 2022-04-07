@@ -209,6 +209,18 @@ public interface IRos2EventLayout {
      */
     String eventRclcppExecutorExecute();
 
+    // Message causal links
+
+    /**
+     * <code>message_link_periodic_async</code>
+     */
+    String eventMessageLinkPeriodicAsync();
+
+    /**
+     * <code>message_link_partial_sync</code>
+     */
+    String eventMessageLinkPartialSync();
+
     // DDS
 
     /**
@@ -272,6 +284,10 @@ public interface IRos2EventLayout {
     String fieldGoalLabel();
     String fieldTimeout();
     String fieldHandle();
+
+    // Message causal links
+    String fieldSubs();
+    String fieldPubs();
 
     // DDS
     String fieldGidPrefix();

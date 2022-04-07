@@ -26,6 +26,7 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.ros2.core;x-friends:
  org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.objects,
  org.eclipse.tracecompass.incubator.internal.ros2.core.model,
  org.eclipse.tracecompass.incubator.internal.ros2.core.model.executor,
+ org.eclipse.tracecompass.incubator.internal.ros2.core.model.messagelinks,
  org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages,
  org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects,
  org.eclipse.tracecompass.incubator.internal.ros2.core.trace;x-friends:="org.eclipse.tracecompass.incubator.ros2.core.tests,org.eclipse.tracecompass.incubator.ros2.ui",
