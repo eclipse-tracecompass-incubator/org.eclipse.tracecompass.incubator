@@ -13,6 +13,13 @@ package org.eclipse.tracecompass.incubator.internal.ros2.core;
 
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.executor.Ros2ExecutorStateInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2CallbackInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2CallbackPublicationInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2MessageTransportInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2PubInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2SubCallbackInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2TakeInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2TimerCallbackInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
@@ -53,6 +60,14 @@ public class Activator extends TraceCompassActivator {
         CustomStateValue.registerCustomFactory(Ros2SubscriptionObject.CUSTOM_TYPE_ID, Ros2SubscriptionObject.ROS2_SUBSCRIPTION_OBJECT_VALUE_FACTORY);
         CustomStateValue.registerCustomFactory(Ros2TimerObject.CUSTOM_TYPE_ID, Ros2TimerObject.ROS2_TIMER_OBJECT_VALUE_FACTORY);
         CustomStateValue.registerCustomFactory(Ros2CallbackObject.CUSTOM_TYPE_ID, Ros2CallbackObject.ROS2_CALLBACK_OBJECT_VALUE_FACTORY);
+        // Instances (for messages analysis)
+        CustomStateValue.registerCustomFactory(Ros2PubInstance.CUSTOM_TYPE_ID, Ros2PubInstance.ROS2_PUB_INSTANCE_VALUE_FACTORY);
+        CustomStateValue.registerCustomFactory(Ros2TakeInstance.CUSTOM_TYPE_ID, Ros2TakeInstance.ROS2_TAKE_INSTANCE_VALUE_FACTORY);
+        CustomStateValue.registerCustomFactory(Ros2CallbackInstance.CUSTOM_TYPE_ID, Ros2CallbackInstance.ROS2_CALLBACK_INSTANCE_VALUE_FACTORY);
+        CustomStateValue.registerCustomFactory(Ros2SubCallbackInstance.CUSTOM_TYPE_ID, Ros2SubCallbackInstance.ROS2_SUB_CALLBACK_INSTANCE_VALUE_FACTORY);
+        CustomStateValue.registerCustomFactory(Ros2TimerCallbackInstance.CUSTOM_TYPE_ID, Ros2TimerCallbackInstance.ROS2_TIMER_CALLBACK_INSTANCE_VALUE_FACTORY);
+        CustomStateValue.registerCustomFactory(Ros2MessageTransportInstance.CUSTOM_TYPE_ID, Ros2MessageTransportInstance.ROS2_MESSAGE_TRANSPORT_INSTANCE_VALUE_FACTORY);
+        CustomStateValue.registerCustomFactory(Ros2CallbackPublicationInstance.CUSTOM_TYPE_ID, Ros2CallbackPublicationInstance.ROS2_CALLBACK_PUBLICATION_INSTANCE_VALUE_FACTORY);
         // Executor analysis
         CustomStateValue.registerCustomFactory(Ros2ExecutorStateInstance.CUSTOM_TYPE_ID, Ros2ExecutorStateInstance.ROS2_EXECUTOR_STATE_INSTANCE_VALUE_FACTORY);
     }

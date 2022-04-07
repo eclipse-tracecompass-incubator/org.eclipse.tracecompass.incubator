@@ -27,7 +27,7 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 public class Ros2ExecutorStateInstance extends CustomStateValue {
 
     /** Custom type value ID for this object */
-    public static final byte CUSTOM_TYPE_ID = 70;
+    public static final byte CUSTOM_TYPE_ID = 72;
     /** CustomStateValueFactory for this object */
     public static final @NonNull CustomStateValueFactory ROS2_EXECUTOR_STATE_INSTANCE_VALUE_FACTORY = Ros2ExecutorStateInstance::read;
 

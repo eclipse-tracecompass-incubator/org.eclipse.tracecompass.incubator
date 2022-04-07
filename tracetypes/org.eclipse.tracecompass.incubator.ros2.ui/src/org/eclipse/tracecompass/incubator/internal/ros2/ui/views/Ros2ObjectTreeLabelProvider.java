@@ -35,7 +35,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 public class Ros2ObjectTreeLabelProvider {
 
     /** Tree columns for this provider */
-    private static final String[] TREE_COLUMNS = new String[] { StringUtils.EMPTY, "Handle", "PID", "Hostname", "Host ID" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    public static final String[] TREE_COLUMNS = new String[] { StringUtils.EMPTY, "Handle", "PID", "Hostname", "Host ID" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
     private static final String COLUMN_TEXT_PREFIX_MACHINE = "🤖 "; //$NON-NLS-1$
     private static final String COLUMN_TEXT_PREFIX_NODE = "🔲 "; //$NON-NLS-1$
