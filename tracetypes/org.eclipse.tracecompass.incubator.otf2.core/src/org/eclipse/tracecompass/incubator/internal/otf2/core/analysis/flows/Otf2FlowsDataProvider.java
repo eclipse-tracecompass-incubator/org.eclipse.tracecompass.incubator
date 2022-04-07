@@ -52,7 +52,6 @@ import com.google.common.collect.Multimap;
  *
  * @author Yoann Heitz
  */
-
 @SuppressWarnings("restriction")
 public class Otf2FlowsDataProvider extends AbstractTimeGraphDataProvider<Otf2FlowsAnalysis, TimeGraphEntryModel> implements IOutputStyleProvider {
 

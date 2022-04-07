@@ -80,4 +80,11 @@
             id="org.eclipse.tracecompass.incubator.otf2.core.analysis.flows.dataprovider">
       </dataProviderFactory>
    </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.flows.Otf2FlowsXYDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.otf2.core.analysis.flows.xy.dataprovider">
+      </dataProviderFactory>
+   </extension>
 </plugin>
