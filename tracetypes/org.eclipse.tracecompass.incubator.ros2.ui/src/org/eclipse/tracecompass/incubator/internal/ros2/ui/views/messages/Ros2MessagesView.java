@@ -21,6 +21,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.messages.Ros2MessagesDataProvider;
 import org.eclipse.tracecompass.incubator.internal.ros2.ui.Activator;
 import org.eclipse.tracecompass.incubator.internal.ros2.ui.views.AbstractRos2DataProviderTimeGraphView;
+import org.eclipse.tracecompass.incubator.internal.ros2.ui.views.Ros2HideInternalObjectsAction;
 import org.eclipse.tracecompass.incubator.internal.ros2.ui.views.Ros2ObjectTreeLabelProvider;
 import org.eclipse.ui.IWorkbenchActionConstants;
 
@@ -69,6 +70,10 @@ public class Ros2MessagesView extends AbstractRos2DataProviderTimeGraphView {
         // Hide arrows button
         IAction hideArrowsAction = getTimeGraphViewer().getHideArrowsAction(section);
         manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, hideArrowsAction);
+
+        // Hide internal objects
+        IAction hideInternalAction = new Ros2HideInternalObjectsAction(getTimeGraphViewer());
+        manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, hideInternalAction);
 
         // Add a separator to local tool bar
         manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new Separator());
