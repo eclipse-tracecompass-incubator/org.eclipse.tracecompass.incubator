@@ -68,6 +68,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
 import org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProviderPreferencePage;
 import org.eclipse.tracecompass.tmf.ui.symbols.SymbolProviderConfigDialog;
+import org.eclipse.tracecompass.tmf.ui.views.TmfViewFactory;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
@@ -368,13 +369,14 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
     @Override
     protected String getProviderId() {
         String secondaryId = this.getViewSite().getSecondaryId();
-        return (secondaryId == null) ? FlameChartDataProvider.ID : FlameChartDataProvider.ID + ':' + secondaryId;
+        return (secondaryId == null) ? FlameChartDataProvider.ID :
+            FlameChartDataProvider.ID + ':' + secondaryId.split(TmfViewFactory.INTERNAL_SECONDARY_ID_SEPARATOR)[0]; //NOSONAR
     }
 
     @Override
     protected void buildEntryList(final ITmfTrace trace, final ITmfTrace parentTrace, final IProgressMonitor monitor) {
         FlameChartDataProvider provider = DataProviderManager
-                .getInstance().getDataProvider(trace, getProviderId(), FlameChartDataProvider.class);
+                .getInstance().getOrCreateDataProvider(trace, getProviderId(), FlameChartDataProvider.class);
         if (provider == null) {
             addUnavailableEntry(trace, parentTrace);
             return;
