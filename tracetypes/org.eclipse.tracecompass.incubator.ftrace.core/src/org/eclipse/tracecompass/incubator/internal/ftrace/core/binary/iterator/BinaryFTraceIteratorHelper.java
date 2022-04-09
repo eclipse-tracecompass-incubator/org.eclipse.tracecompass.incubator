@@ -227,6 +227,11 @@ public class BinaryFTraceIteratorHelper {
     }
 
     private static String readStringField(byte[] fieldData) {
+        for (int i = 0; i < fieldData.length; i++) {
+            if (fieldData[i] == 0) {
+                return new String(fieldData, 0, i);
+            }
+        }
         return new String(fieldData);
     }
 
