@@ -77,8 +77,9 @@ public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalys
      */
     private final ListenerList<IAnalysisProgressListener> fListeners = new ListenerList<>(ListenerList.IDENTITY);
 
-    /*
-     * Whether the callgraph execution will be triggered automatically after build
+    /**
+     * Whether the callgraph execution will be triggered automatically after
+     * build.
      */
     private boolean fAutomaticCallgraph = true;
 
