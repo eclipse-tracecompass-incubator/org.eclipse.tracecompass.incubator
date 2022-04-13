@@ -17,5 +17,24 @@
             name="%tracetype.experiment.ros2">
       </experiment>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.objects.Ros2ObjectsAnalysis"
+            applies_experiment="true"
+            automatic="true"
+            icon="icons/ros2.png"
+            id="org.eclipse.tracecompass.incubator.ros2.core.analysis.objects"
+            name="%analysis.ros2.objects">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.ros2.core.trace.Ros2Trace">
+         </tracetype>
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.ros2.core.trace.Ros2Experiment">
+         </tracetype>
+      </module>
+   </extension>
 
 </plugin>
