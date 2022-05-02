@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
+@Schema(description = "This model includes the series output style values.")
 public interface SeriesModel {
 
     /**
@@ -49,4 +50,11 @@ public interface SeriesModel {
     @JsonProperty("yValues")
     @ArraySchema(arraySchema = @Schema(description = "Series' Y values", required = true))
     long[] getYValues();
+
+    /**
+     * @return The series style.
+     */
+    @NonNull
+    @Schema(required = true)
+    OutputElementStyle getStyle();
 }

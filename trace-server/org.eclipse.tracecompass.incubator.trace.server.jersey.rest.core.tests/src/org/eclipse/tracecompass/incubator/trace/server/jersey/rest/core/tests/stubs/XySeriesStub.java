@@ -33,7 +33,7 @@ public class XySeriesStub implements Serializable {
     private final int fId;
     private final List<Long> fXValues;
     private final List<Double> fYValues;
-    private final @Nullable OutputElementStyleStub fStyle;
+    private final OutputElementStyleStub fStyle;
     private final XyAxisStub fXAxis;
     private final XyAxisStub fYAxis;
 
@@ -67,7 +67,7 @@ public class XySeriesStub implements Serializable {
         fId = Objects.requireNonNull(id, "The 'seriesId' json field was not set");
         fXValues = Objects.requireNonNull(xValues, "The 'xValues' json field was not set");
         fYValues = Objects.requireNonNull(yValues, "The 'yValues' json field was not set");
-        fStyle = style;
+        fStyle = Objects.requireNonNull(style, "The 'style' json field was not set");
         fXAxis = xAxis;
         fYAxis = yAxis;
     }
@@ -113,7 +113,7 @@ public class XySeriesStub implements Serializable {
      *
      * @return The style
      */
-    public @Nullable OutputElementStyleStub getStyle() {
+    public OutputElementStyleStub getStyle() {
         return fStyle;
     }
 
@@ -134,5 +134,4 @@ public class XySeriesStub implements Serializable {
     public @Nullable XyAxisStub getYAxis() {
         return fYAxis;
     }
-
 }
