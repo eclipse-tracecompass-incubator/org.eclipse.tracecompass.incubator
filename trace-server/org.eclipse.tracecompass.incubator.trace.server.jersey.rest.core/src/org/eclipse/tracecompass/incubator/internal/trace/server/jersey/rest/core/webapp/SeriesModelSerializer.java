@@ -14,11 +14,14 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
+import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Serializer for XY series model {@link ISeriesModel}
@@ -46,7 +49,11 @@ public class SeriesModelSerializer extends StdSerializer<@NonNull ISeriesModel> 
         gen.writeStringField("seriesName", value.getName()); //$NON-NLS-1$
         gen.writeObjectField("xValues", value.getXAxis()); //$NON-NLS-1$
         gen.writeObjectField("yValues", value.getData()); //$NON-NLS-1$
+
+        // no-op trim below, null-related (unlikely case) warning otherwise-
+        String type = value.getDisplayType().name().toLowerCase().trim();
+        OutputElementStyle style = new OutputElementStyle(null, ImmutableMap.of(StyleProperties.SERIES_TYPE, type));
+        gen.writeObjectField("style", style); //$NON-NLS-1$
         gen.writeEndObject();
     }
-
 }
