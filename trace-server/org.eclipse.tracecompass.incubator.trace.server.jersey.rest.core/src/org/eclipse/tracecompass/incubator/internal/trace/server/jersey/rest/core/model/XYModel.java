@@ -15,6 +15,7 @@ import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -33,6 +34,6 @@ public interface XYModel {
      * @return The series.
      */
     @NonNull
-    @Schema(required = true)
+    @ArraySchema(arraySchema = @Schema(description = "The collection of series", required = true))
     Collection<@NonNull SeriesModel> getSeries();
 }
