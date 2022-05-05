@@ -14,8 +14,6 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.Nullable;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -31,7 +29,6 @@ public class XyModelStub implements Serializable {
 
     private final Set<XySeriesStub> fSeries;
     private final String fTitle;
-    private final @Nullable Boolean fCommonXAxis;
 
     /**
      * {@link JsonCreator} Constructor for final fields
@@ -40,16 +37,12 @@ public class XyModelStub implements Serializable {
      *            The set of series for this model
      * @param title
      *            The title of this model
-     * @param commonXAxis
-     *            Whether it uses a common X axis
      */
     @JsonCreator
     public XyModelStub(@JsonProperty("series") Set<XySeriesStub> series,
-            @JsonProperty("title") String title,
-            @JsonProperty("commonXAxis") Boolean commonXAxis) {
+            @JsonProperty("title") String title) {
         fSeries = Objects.requireNonNull(series, "The 'series' json field was not set");
         fTitle = Objects.requireNonNull(title, "The 'title' json field was not set");
-        fCommonXAxis = commonXAxis;
     }
 
     /**
@@ -69,14 +62,4 @@ public class XyModelStub implements Serializable {
     public String getTitle() {
         return fTitle;
     }
-
-    /**
-     * Get whether this model uses a common x axis
-     *
-     * @return Whether this model uses a common x axis
-     */
-    public @Nullable Boolean getCommonXAxis() {
-        return fCommonXAxis;
-    }
-
 }
