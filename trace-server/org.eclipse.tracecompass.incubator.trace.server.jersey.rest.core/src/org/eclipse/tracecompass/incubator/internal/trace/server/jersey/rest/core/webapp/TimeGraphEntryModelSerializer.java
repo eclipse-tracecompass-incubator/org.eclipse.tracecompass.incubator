@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2020 École Polytechnique de Montréal
+ * Copyright (c) 2020, 2022 École Polytechnique de Montréal and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -12,6 +12,10 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
@@ -19,6 +23,7 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.google.common.collect.Multimap;
 
 /**
  * Serializer for time graph entry model {@link ITimeGraphEntryModel}
@@ -53,6 +58,20 @@ public class TimeGraphEntryModelSerializer extends StdSerializer<@NonNull ITimeG
         gen.writeNumberField("start", value.getStartTime()); //$NON-NLS-1$
         gen.writeNumberField("end", value.getEndTime()); //$NON-NLS-1$
         gen.writeBooleanField("hasData", value.hasRowModel()); //$NON-NLS-1$
+        @NonNull Multimap<@NonNull String, @NonNull Object> metadata = value.getMetadata();
+        if (!metadata.isEmpty()) {
+            Map<String, Collection<Object>> serializedMap = new HashMap<>();
+            // Only allow a String or Number in the metadata
+            for (Entry<@NonNull String, Collection<@NonNull Object>> entry : metadata.asMap().entrySet()) {
+                Collection<@NonNull Object> collection = entry.getValue();
+                if ((collection != null) &&
+                        (collection.stream().allMatch(String.class::isInstance) ||
+                                collection.stream().allMatch(Number.class::isInstance))) {
+                    serializedMap.put(entry.getKey(), collection);
+                }
+            }
+            gen.writeObjectField("metadata", serializedMap); //$NON-NLS-1$
+        }
         gen.writeEndObject();
     }
 

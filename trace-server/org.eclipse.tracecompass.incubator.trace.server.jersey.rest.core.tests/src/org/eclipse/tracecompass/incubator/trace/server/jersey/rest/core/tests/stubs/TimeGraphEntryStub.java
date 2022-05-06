@@ -10,7 +10,9 @@
  **********************************************************************/
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,6 +29,7 @@ public class TimeGraphEntryStub extends EntryStub {
 
     private final Long fStartTime;
     private final Long fEndTime;
+    private final Map<String, Collection<Object>> fMetadata;
 
     /**
      * {@link JsonCreator} Constructor for final fields
@@ -45,6 +48,8 @@ public class TimeGraphEntryStub extends EntryStub {
      *            Whether has row model property
      * @param style
      *            The style of this entry
+     * @param metadata
+     *            The metadata of the entry
      */
     @JsonCreator
     public TimeGraphEntryStub(@JsonProperty("labels") List<String> labels,
@@ -53,10 +58,12 @@ public class TimeGraphEntryStub extends EntryStub {
             @JsonProperty("start") Long startTime,
             @JsonProperty("end") Long endTime,
             @JsonProperty("hasData") boolean hasRowModel,
-            @JsonProperty("style") OutputElementStyleStub style) {
+            @JsonProperty("style") OutputElementStyleStub style,
+            @JsonProperty("metadata") Map<String, Collection<Object>> metadata) {
         super(labels, id, parentId, hasRowModel, style);
         fStartTime = startTime;
         fEndTime = endTime;
+        fMetadata = metadata;
     }
 
     /**
@@ -77,4 +84,12 @@ public class TimeGraphEntryStub extends EntryStub {
         return fEndTime;
     }
 
+    /**
+     * Get the metadata of this entry
+     *
+     * @return The metadata of the entry
+     */
+    public Map<String, Collection<Object>> getMetadata() {
+        return fMetadata;
+    }
 }
