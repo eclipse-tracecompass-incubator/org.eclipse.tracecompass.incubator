@@ -99,7 +99,7 @@ public class QueryParametersUtil {
      */
     public static String validateTreeQueryParameters(Map<String, Object> params) {
         String errorMessage;
-        if ((errorMessage = validateRequestedTimeRange(params, false)) != null) {
+        if ((errorMessage = validateRequestedTimeRange(params, false, true)) != null) {
             return errorMessage;
         }
         return null;
@@ -114,7 +114,7 @@ public class QueryParametersUtil {
      */
     public static String validateRequestedQueryParameters(Map<String, Object> params) {
         String errorMessage;
-        if ((errorMessage = validateRequestedTimeRange(params, true)) != null) {
+        if ((errorMessage = validateRequestedTimeRange(params, true, false)) != null) {
             return errorMessage;
         }
         if ((errorMessage = validateRequestedItems(params, true)) != null) {
@@ -132,7 +132,7 @@ public class QueryParametersUtil {
      */
     public static String validateArrowsQueryParameters(Map<String, Object> params) {
         String errorMessage;
-        if ((errorMessage = validateRequestedTimeRange(params, true)) != null) {
+        if ((errorMessage = validateRequestedTimeRange(params, true, false)) != null) {
             return errorMessage;
         }
         return null;
@@ -147,7 +147,7 @@ public class QueryParametersUtil {
      */
     public static String validateAnnotationsQueryParameters(Map<String, Object> params) {
         String errorMessage;
-        if ((errorMessage = validateRequestedTimeRange(params, true)) != null) {
+        if ((errorMessage = validateRequestedTimeRange(params, true, false)) != null) {
             return errorMessage;
         }
         if ((errorMessage = validateRequestedItems(params, false)) != null) {
@@ -242,9 +242,11 @@ public class QueryParametersUtil {
      *            the mutable map of query parameters
      * @param required
      *            true if the parameter is required
+     * @param isTree
+     *            true if parameter requested_times is for a tree query
      * @return an error message if validation fails, or null otherwise
      */
-    private static String validateRequestedTimeRange(Map<String, Object> params, boolean required) {
+    private static String validateRequestedTimeRange(Map<String, Object> params, boolean required, boolean isTree) {
         Object requestedTimeRange = params.get(REQUESTED_TIMERANGE_KEY);
         Object requestedTimes = params.get(DataProviderParameterUtils.REQUESTED_TIME_KEY);
         if (required && requestedTimeRange == null && requestedTimes == null) {
@@ -282,7 +284,7 @@ public class QueryParametersUtil {
             params.remove(REQUESTED_TIMERANGE_KEY);
         } else if (requestedTimes != null) {
             List<@NonNull Long> timeRequested = DataProviderParameterUtils.extractTimeRequested(params);
-            if (timeRequested == null || timeRequested.isEmpty()) {
+            if ((timeRequested == null) || (isTree && timeRequested.size() == 1) || (!isTree && timeRequested.isEmpty())) {
                 return INVALID_PARAMETERS + SEP + DataProviderParameterUtils.REQUESTED_TIME_KEY;
             }
             params.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, timeRequested);
