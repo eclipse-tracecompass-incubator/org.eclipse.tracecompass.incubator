@@ -124,7 +124,13 @@ public class QueryParametersUtilTest {
         assertNull(
                 QueryParametersUtil.validateTreeQueryParameters(Maps.newHashMap(ImmutableMap.of(
                         REQUESTED_TIMERANGE, ImmutableMap.of(START, 0L, END, 1000L)))));
+
         assertEquals(INVALID_REQUESTED_TIMES,
+                QueryParametersUtil.validateTreeQueryParameters(Maps.newHashMap(ImmutableMap.of(
+                        REQUESTED_TIMES, Arrays.asList(0L)))));
+        assertNull(
+                QueryParametersUtil.validateTreeQueryParameters(Maps.newHashMap()));
+        assertNull(
                 QueryParametersUtil.validateTreeQueryParameters(Maps.newHashMap(ImmutableMap.of(
                         REQUESTED_TIMES, Arrays.asList()))));
         assertNull(
