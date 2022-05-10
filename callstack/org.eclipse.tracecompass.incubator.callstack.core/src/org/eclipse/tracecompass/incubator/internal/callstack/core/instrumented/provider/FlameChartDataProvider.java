@@ -470,7 +470,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
         // many hosts
         Set<ITmfTrace> tracesForHost = TmfTraceManager.getInstance().getTracesForHost(getTrace().getHostId());
         for (ITmfTrace trace : tracesForHost) {
-            ThreadStatusDataProvider dataProvider = DataProviderManager.getInstance().getDataProvider(trace, ThreadStatusDataProvider.ID, ThreadStatusDataProvider.class);
+            ThreadStatusDataProvider dataProvider = DataProviderManager.getInstance().getOrCreateDataProvider(trace, ThreadStatusDataProvider.ID, ThreadStatusDataProvider.class);
             if (dataProvider != null) {
                 // Get the tree for the trace's current range
                 TmfModelResponse<TmfTreeModel<TimeGraphEntryModel>> threadTreeResp = dataProvider.fetchTree(FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(start, Long.MAX_VALUE, 2)), monitor);
