@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 École Polytechnique de Montréal
+ * Copyright (c) 2019, 2022 École Polytechnique de Montréal and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -229,7 +229,7 @@ public class DataProviderScriptingModule {
         DataDrivenOutputEntry entry = new DataDrivenOutputEntry(Collections.emptyList(), path, null, true,
                 display, id, parent, name, DisplayType.ABSOLUTE);
 
-        ITimeGraphDataProvider<TimeGraphEntryModel> provider = DataDrivenTimeGraphProviderFactory.create(trace, stateSystems, Collections.singletonList(entry), Collections.emptyList(), ScriptingDataProviderManager.PROVIDER_ID + DataProviderConstants.ID_SEPARATOR + analysisName);
+        ITimeGraphDataProvider<TimeGraphEntryModel> provider = DataDrivenTimeGraphProviderFactory.create(trace, stateSystems, Collections.singletonList(entry), Collections.emptyList(), ScriptingDataProviderManager.createProviderId(analysisName));
         ScriptingDataProviderManager.getInstance().registerDataProvider(trace, provider);
         return provider;
     }

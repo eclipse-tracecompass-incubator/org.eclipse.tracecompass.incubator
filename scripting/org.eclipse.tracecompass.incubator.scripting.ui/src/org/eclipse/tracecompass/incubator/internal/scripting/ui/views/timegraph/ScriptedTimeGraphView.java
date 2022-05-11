@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 École Polytechnique de Montréal
+ * Copyright (c) 2019, 2022 École Polytechnique de Montréal and 0thers
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -16,7 +16,10 @@ import java.util.Collections;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.data.provider.ScriptedTimeGraphDataProvider;
+import org.eclipse.tracecompass.incubator.internal.scripting.core.data.provider.ScriptingDataProviderManager;
 import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
@@ -56,6 +59,15 @@ public class ScriptedTimeGraphView extends BaseDataProviderTimeGraphView {
     }
 
     @Override
+    public void createPartControl(Composite parent) {
+        super.createPartControl(parent);
+        String title = ScriptingDataProviderManager.extractProviderName(NonNullUtils.nullToEmptyString(getProviderId()));
+        if (title != null) {
+            setPartName(title);
+        }
+    }
+
+    @Override
     protected String getProviderId() {
         String secondaryId = getViewSite().getSecondaryId();
         if (secondaryId != null) {
@@ -88,5 +100,4 @@ public class ScriptedTimeGraphView extends BaseDataProviderTimeGraphView {
         fProvider = dataProvider;
         super.buildEntryList(trace, parentTrace, monitor);
     }
-
 }
