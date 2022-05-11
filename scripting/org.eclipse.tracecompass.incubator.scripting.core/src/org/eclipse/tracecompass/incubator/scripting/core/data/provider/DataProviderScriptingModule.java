@@ -35,7 +35,6 @@ import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
-import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
@@ -369,7 +368,7 @@ public class DataProviderScriptingModule {
         DataDrivenOutputEntry entry = new DataDrivenOutputEntry(Collections.emptyList(), path, null, true,
                 display, id, parent, name, displayType);
 
-        ITmfTreeXYDataProvider<ITmfTreeDataModel> provider = DataDrivenXYProviderFactory.create(trace, stateSystems, Collections.singletonList(entry), ScriptingDataProviderManager.PROVIDER_ID + DataProviderConstants.ID_SEPARATOR + analysisName);
+        ITmfTreeXYDataProvider<ITmfTreeDataModel> provider = DataDrivenXYProviderFactory.create(trace, stateSystems, Collections.singletonList(entry), ScriptingDataProviderManager.createProviderId(analysisName));
         ScriptingDataProviderManager.getInstance().registerDataProvider(trace, provider);
         return provider;
     }
