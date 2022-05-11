@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2020 VMware, Inc.
+ *  Copyright (c) 2020, 2022 VMware, Inc and others.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -16,7 +16,8 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Composite;
-
+import org.eclipse.tracecompass.common.core.NonNullUtils;
+import org.eclipse.tracecompass.incubator.internal.scripting.core.data.provider.ScriptingDataProviderManager;
 import org.eclipse.tracecompass.incubator.internal.scripting.ui.views.xychart.ScriptedXYTreeViewer;
 import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfViewer;
@@ -48,6 +49,15 @@ public class ScriptedScatterView extends TmfChartView {
      */
     public ScriptedScatterView() {
         super(ID);
+    }
+
+    @Override
+    public void createPartControl(Composite parent) {
+        super.createPartControl(parent);
+        String title = ScriptingDataProviderManager.extractProviderName(NonNullUtils.nullToEmptyString(getSecondaryIdName()));
+        if (title != null) {
+            setPartName(title);
+        }
     }
 
     @Override
