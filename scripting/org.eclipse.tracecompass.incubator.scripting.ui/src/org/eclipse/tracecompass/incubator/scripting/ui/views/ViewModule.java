@@ -19,6 +19,7 @@ import org.eclipse.tracecompass.incubator.internal.scripting.ui.views.histogram.
 import org.eclipse.tracecompass.incubator.internal.scripting.ui.views.scatter.ScriptedScatterView;
 import org.eclipse.tracecompass.incubator.internal.scripting.ui.views.timegraph.ScriptedTimeGraphView;
 import org.eclipse.tracecompass.incubator.internal.scripting.ui.views.xychart.ScriptedXYView;
+import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
@@ -75,7 +76,7 @@ public class ViewModule {
         final IWorkbench wb = PlatformUI.getWorkbench();
         final IWorkbenchPage activePage = wb.getActiveWorkbenchWindow().getActivePage();
 
-        return activePage.showView(ScriptedTimeGraphView.ID, name.replace(":", ScriptedTimeGraphView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
+        return activePage.showView(ScriptedTimeGraphView.ID, name.replace(DataProviderConstants.ID_SEPARATOR, ScriptedTimeGraphView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
     }
 
     /**
@@ -149,7 +150,7 @@ public class ViewModule {
         final IWorkbench wb = PlatformUI.getWorkbench();
         final IWorkbenchPage activePage = wb.getActiveWorkbenchWindow().getActivePage();
 
-        return activePage.showView(ScriptedXYView.ID, name.replace(":", ScriptedXYView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
+        return activePage.showView(ScriptedXYView.ID, name.replace(DataProviderConstants.ID_SEPARATOR, ScriptedXYView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
     }
 
     /**
@@ -179,7 +180,7 @@ public class ViewModule {
         final IWorkbench wb = PlatformUI.getWorkbench();
         final IWorkbenchPage activePage = wb.getActiveWorkbenchWindow().getActivePage();
 
-        return activePage.showView(ScriptedHistogramView.ID, name.replace(":", ScriptedHistogramView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
+        return activePage.showView(ScriptedHistogramView.ID, name.replace(DataProviderConstants.ID_SEPARATOR, ScriptedHistogramView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
     }
 
     /**
@@ -209,7 +210,7 @@ public class ViewModule {
         final IWorkbench wb = PlatformUI.getWorkbench();
         final IWorkbenchPage activePage = wb.getActiveWorkbenchWindow().getActivePage();
 
-        return activePage.showView(ScriptedScatterView.ID, name.replace(":", ScriptedScatterView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
+        return activePage.showView(ScriptedScatterView.ID, name.replace(DataProviderConstants.ID_SEPARATOR, ScriptedScatterView.COLON), IWorkbenchPage.VIEW_ACTIVATE); //$NON-NLS-1$
     }
 
 }

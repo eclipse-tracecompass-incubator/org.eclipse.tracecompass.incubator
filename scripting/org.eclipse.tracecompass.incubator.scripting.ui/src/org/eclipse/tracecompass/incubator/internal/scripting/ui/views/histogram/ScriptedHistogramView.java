@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.tracecompass.incubator.internal.scripting.ui.views.xychart.ScriptedXYTreeViewer;
+import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.xychart.TmfXYChartViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.xychart.linechart.TmfXYChartSettings;
@@ -60,6 +61,6 @@ public class ScriptedHistogramView extends TmfChartView {
     }
 
     private String getSecondaryIdName() {
-        return getViewSite().getSecondaryId().replace(ScriptedHistogramView.COLON, ":"); //$NON-NLS-1$
+        return getViewSite().getSecondaryId().replace(ScriptedHistogramView.COLON, DataProviderConstants.ID_SEPARATOR);
     }
 }
