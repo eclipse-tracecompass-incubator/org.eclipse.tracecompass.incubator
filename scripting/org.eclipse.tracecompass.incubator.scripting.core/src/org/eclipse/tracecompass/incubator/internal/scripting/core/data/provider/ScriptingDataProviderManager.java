@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 École Polytechnique de Montréal
+ * Copyright (c) 2019, 2022 École Polytechnique de Montréal and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -140,4 +140,33 @@ public class ScriptingDataProviderManager {
         }).start();
     }
 
+    /**
+     * Constructs a scripted data provider ID from the provider name:
+     * "PROVIDER_ID:dpName"
+     *
+     * @param providerName
+     *          the secondary ID string
+     * @return scripted data provider ID
+     */
+    public static String createProviderId(String providerName) {
+        return PROVIDER_ID + DataProviderConstants.ID_SEPARATOR + providerName;
+    }
+
+    /**
+     * This method extracts the data provider name from provider IDs.
+     *
+     * Scripted data provider have the data provider name encoded in the
+     * data provider ID: "PROVIDER_ID:dpName".
+     *
+     * @param providerId the input data provider ID
+     *
+     * @return the data provider secondary name or null
+     */
+    public static @Nullable String extractProviderName(String providerId) {
+        int index = providerId.indexOf(DataProviderConstants.ID_SEPARATOR);
+        if ((index > 0) && index < providerId.length() - 1) {
+            return providerId.substring(index + 1);
+        }
+        return null;
+    }
 }
