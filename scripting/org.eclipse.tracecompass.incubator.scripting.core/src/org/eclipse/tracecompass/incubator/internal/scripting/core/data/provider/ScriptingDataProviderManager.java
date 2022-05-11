@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.scripting.core.data.provider
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
@@ -90,7 +91,7 @@ public class ScriptingDataProviderManager {
     public @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> getProvider(ITmfTrace trace, String id) {
         Collection<ITmfTreeDataProvider<? extends ITmfTreeDataModel>> dps = fInstances.get(trace);
         for (ITmfTreeDataProvider<? extends ITmfTreeDataModel> dataProvider : dps) {
-            if (dataProvider.getId().equals(PROVIDER_ID + ':' + id)) {
+            if (dataProvider.getId().equals(PROVIDER_ID + DataProviderConstants.ID_SEPARATOR + id)) {
                 return dataProvider;
             }
         }

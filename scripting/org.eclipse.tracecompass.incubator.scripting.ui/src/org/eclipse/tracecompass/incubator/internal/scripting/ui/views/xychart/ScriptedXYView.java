@@ -16,6 +16,7 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.xychart.TmfXYChartViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.xychart.linechart.TmfFilteredXYChartViewer;
@@ -60,6 +61,6 @@ public class ScriptedXYView extends TmfChartView {
     }
 
     private String getSecondaryIdName() {
-        return getViewSite().getSecondaryId().replace(ScriptedXYView.COLON, ":"); //$NON-NLS-1$
+        return getViewSite().getSecondaryId().replace(ScriptedXYView.COLON, DataProviderConstants.ID_SEPARATOR);
     }
 }

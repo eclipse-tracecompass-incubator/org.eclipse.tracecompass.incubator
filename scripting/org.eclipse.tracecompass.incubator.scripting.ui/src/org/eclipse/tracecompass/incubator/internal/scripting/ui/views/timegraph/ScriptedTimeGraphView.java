@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.data.provider.ScriptedTimeGraphDataProvider;
+import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
@@ -58,7 +59,7 @@ public class ScriptedTimeGraphView extends BaseDataProviderTimeGraphView {
     protected String getProviderId() {
         String secondaryId = getViewSite().getSecondaryId();
         if (secondaryId != null) {
-            return secondaryId.replace(COLON, ":"); //$NON-NLS-1$
+            return secondaryId.replace(COLON, DataProviderConstants.ID_SEPARATOR);
         }
         return super.getProviderId();
     }
