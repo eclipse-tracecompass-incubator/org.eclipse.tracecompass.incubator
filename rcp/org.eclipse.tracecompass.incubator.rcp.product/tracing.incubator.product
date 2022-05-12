@@ -148,6 +148,7 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <feature id="org.eclipse.tracecompass.incubator.eventfieldcount"/>
       <feature id="org.eclipse.tracecompass.incubator.ftrace"/>
       <feature id="org.eclipse.tracecompass.incubator.hudson.maven"/>
+      <feature id="org.eclipse.tracecompass.incubator.inandout"/>
       <feature id="org.eclipse.tracecompass.incubator.kernel"/>
       <feature id="org.eclipse.tracecompass.incubator.lttng2.ust.extras"/>
       <feature id="org.eclipse.tracecompass.incubator.opentracing"/>
@@ -167,7 +168,6 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <feature id="org.eclipse.tracecompass.incubator.scripting" installMode="root"/>
       <feature id="org.eclipse.tracecompass.incubator.scripting.javascript" installMode="root"/>
       <feature id="org.eclipse.tracecompass.incubator.scripting.python" installMode="root"/>
-      <feature id="org.eclipse.tracecompass.incubator.inandout" installMode="root"/>
    </features>
 
    <configurations>
