@@ -57,4 +57,14 @@ public interface IOtf2GlobalDefinitions {
      * Group member name
      */
     String OTF2_GROUP_MEMBER = "GroupMember"; //$NON-NLS-1$
+
+    /**
+     * Metric member name
+     */
+    String OTF2_METRIC_MEMBER = "MetricMember"; //$NON-NLS-1$
+
+    /**
+     * Metric class name
+     */
+    String OTF2_METRIC_CLASS = "MetricClass"; //$NON-NLS-1$
 }

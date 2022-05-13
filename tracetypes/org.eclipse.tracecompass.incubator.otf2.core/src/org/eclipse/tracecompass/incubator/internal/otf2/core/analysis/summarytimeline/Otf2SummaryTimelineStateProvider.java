@@ -13,6 +13,7 @@ package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.summaryti
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -113,7 +114,7 @@ public class Otf2SummaryTimelineStateProvider extends AbstractOtf2StateProvider 
             String regionName = getRegionNameFromRegionId(regionId);
             int newTypeQuark = getQuarkFromRegion(regionName, ssb);
             if (!fStatusQuarkStack.empty()) {
-                Integer currentQuark = fStatusQuarkStack.peek();
+                Integer currentQuark = Objects.requireNonNull(fStatusQuarkStack.peek());
                 incrementConcernedQuarks(ssb, timestamp, currentQuark, -1. / fNumberOfLocations);
             }
             incrementConcernedQuarks(ssb, timestamp, newTypeQuark, 1. / fNumberOfLocations);
@@ -127,10 +128,10 @@ public class Otf2SummaryTimelineStateProvider extends AbstractOtf2StateProvider 
                 return;
             }
             long timestamp = event.getTimestamp().toNanos();
-            Integer currentTypeQuark = fStatusQuarkStack.pop();
+            Integer currentTypeQuark = Objects.requireNonNull(fStatusQuarkStack.pop());
             incrementConcernedQuarks(ssb, timestamp, currentTypeQuark, -1. / fNumberOfLocations);
             if (!fStatusQuarkStack.empty()) {
-                Integer newTypeQuark = fStatusQuarkStack.peek();
+                Integer newTypeQuark = Objects.requireNonNull(fStatusQuarkStack.peek());
                 incrementConcernedQuarks(ssb, timestamp, newTypeQuark, 1. / fNumberOfLocations);
             }
         }

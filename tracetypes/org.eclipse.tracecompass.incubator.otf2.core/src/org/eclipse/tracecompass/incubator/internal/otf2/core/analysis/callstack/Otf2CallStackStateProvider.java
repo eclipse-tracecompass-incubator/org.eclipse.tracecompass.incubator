@@ -171,10 +171,13 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
             fCallStackQuark = UNKNOWN_ID;
         }
 
-        /*
+        /**
          * This method will be called by each location when all definitions have
          * been read : the name of the location may be computed at this moment,
          * and the corresponding quark may be created.
+         *
+         * @param ssb
+         *            The state system to write to
          */
         public void initializeQuarks(ITmfStateSystemBuilder ssb) {
             // Get the name of the location
@@ -205,12 +208,14 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
             ssb.popAttribute(timestamp, fCallStackQuark);
         }
 
-        /*
+        /**
          * This method is called when a location finished to send data through a
          * MPI routine (it does not mean the location exited the associated code
          * region). It stores the informations about the send event in order to
          * link it to the receive event when encountered.
          *
+         * @param srcEvent
+         *            The event generated when sending data
          */
         public void mpiSend(ITmfEvent srcEvent) {
             ITmfEventField content = srcEvent.getContent();
@@ -227,12 +232,16 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
             fMsgDataEvent.put(new MessageIdentifiers(communicator, srcRank, destRank, messageTag), srcEvent);
         }
 
-        /*
+        /**
          * This method is called when a location finished to receive data
          * through a MPI routine (it does not mean the location exited the
          * associated code region). It searches for the associated send event
          * and draw an edge between the two events.
          *
+         * @param destEvent
+         *            The event generated when receiving data
+         * @param ssb
+         *            The state system to write to
          */
         public void mpiRecv(ITmfEvent destEvent, ITmfStateSystemBuilder ssb) {
             ITmfEventField content = destEvent.getContent();
@@ -261,11 +270,16 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
             fCollectiveBeginTimestamp = event.getTimestamp().toNanos();
         }
 
-        /*
+        /**
          * Called when a location finished an one to all MPI operation. This
          * location is necessarily a destination in an exchange of data. The
          * event corresponding to the root sending the data is retrieved in
          * order to draw an edge
+         *
+         * @param destEvent
+         *            The event that waits for all MPI operations to finish
+         * @param ssb
+         *            The state system to write to
          */
         public void mpiRootToAll(ITmfEvent destEvent, ITmfStateSystemBuilder ssb) {
             ITmfEventField content = destEvent.getContent();
@@ -322,12 +336,17 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
 
         }
 
-        /*
+        /**
          * Called when a location finished an all to one MPI operation. This
          * location is necessarily a source in an exchange of data. The
          * informations about the event are stored : if it is the root
          * (receiver) that call this method then the communication is done and
          * edges may be drawn.
+         *
+         * @param srcEvent
+         *            The event that generates this operation
+         * @param ssb
+         *            The state system to write to
          */
         public void mpiAllToRoot(ITmfEvent srcEvent, ITmfStateSystemBuilder ssb) {
             ITmfEventField content = srcEvent.getContent();
@@ -519,7 +538,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
         }
     }
 
-    /*
+    /**
      * Iterates over all the location and initializes the associated quarks
      */
     private void initializeQuarks(ITmfStateSystemBuilder ssb) {
@@ -534,7 +553,7 @@ public class Otf2CallStackStateProvider extends AbstractOtf2StateProvider {
         }
     }
 
-    /*
+    /**
      * Calls the corresponding method from the associated location given the
      * type of event
      */

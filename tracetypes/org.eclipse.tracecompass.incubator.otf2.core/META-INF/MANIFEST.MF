@@ -16,6 +16,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.tmf.ctf.core,
  org.eclipse.tracecompass.incubator.callstack.core,
  org.eclipse.tracecompass.analysis.os.linux.core,
+ org.eclipse.tracecompass.analysis.counters.core,
  org.eclipse.tracecompass.incubator.analysis.core;bundle-version="0.0.1",
  org.eclipse.tracecompass.analysis.timing.core;bundle-version="5.2.1",
  org.eclipse.tracecompass.segmentstore.core;bundle-version="3.0.1"
@@ -28,5 +29,8 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.otf2.core;x-friends:
  org.eclipse.tracecompass.incubator.otf2.core.trace;x-friends:="org.eclipse.tracecompass.incubator.otf2.ui,org.eclipse.tracecompass.incubator.otf2.core.tests"
 Import-Package: com.google.common.collect,
  org.apache.commons.io,
- org.apache.commons.lang3.math
+ org.apache.commons.lang3;version="3.1.0",
+ org.apache.commons.lang3.math,
+ org.eclipse.tracecompass.analysis.counters.core,
+ org.eclipse.tracecompass.analysis.counters.core.aspects
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.otf2.core
