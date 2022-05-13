@@ -58,7 +58,7 @@ public interface IOtf2Constants {
     /**
      * Enum for collective MPI operations
      */
-    public enum CollectiveOperation {
+    enum CollectiveOperation {
         /**
          * MPI_Barrier operation
          */
@@ -185,7 +185,7 @@ public interface IOtf2Constants {
      *            The code for the collective operation
      * @return the associated operation member from CollectiveOperation
      */
-    public static CollectiveOperation getOperation(int operationCode) {
+    static CollectiveOperation getOperation(int operationCode) {
         switch (operationCode) {
         case 0:
             return CollectiveOperation.BARRIER;
@@ -254,6 +254,11 @@ public interface IOtf2Constants {
     long OTF2_UNDEFINED_UINT64 = ~(0L);
 
     /**
+     * long constant representing OTF2 undefined int64 value
+     */
+    long OTF2_UNDEFINED_INT64 = ~(OTF2_UNDEFINED_UINT64 >>> 1);
+
+    /**
      * In the following lines, undefined and unknown constants are defined for
      * the different OTF2 references.
      *
@@ -295,4 +300,79 @@ public interface IOtf2Constants {
      * Constant representing an unknown location group type.
      */
     int OTF2_UNKNOWN_LOCATION_GROUP_TYPE = OTF2_UNDEFINED_UINT8;
+
+    /**
+     * Constant representing an unknown metric member reference.
+     */
+    long OTF2_UNKNOWN_METRIC_MEMBER = OTF2_UNDEFINED_UINT32;
+
+    /**
+     * Constant representing an unknown metric type.
+     */
+    int OTF2_UNKNOWN_METRIC_TYPE = OTF2_UNDEFINED_UINT8;
+
+    /**
+     * Constant representing an unknown metric mode.
+     */
+    int OTF2_UNKNOWN_METRIC_MODE = OTF2_UNDEFINED_UINT8;
+
+    /**
+     * Constant representing an unknown value type.
+     */
+    int OTF2_UNKNOWN_VALUE_TYPE = OTF2_UNDEFINED_UINT8;
+
+    /**
+     * Constant representing an unknown base.
+     */
+    int OTF2_UNKNOWN_BASE = OTF2_UNDEFINED_UINT8;
+
+    /**
+     * Constant representing an unknown exponent.
+     */
+    long OTF2_UNKNOWN_EXPONENT = OTF2_UNDEFINED_INT64;
+
+    /**
+     * Constant representing an unknown metric class reference.
+     */
+    long OTF2_UNKNOWN_METRIC_CLASS = OTF2_UNDEFINED_UINT32;
+
+    /**
+     * Value of the "base" field for a binary metric
+     */
+    int BINARY_BASE_CODE = 0;
+
+    /**
+     * Value of the "base" field for a decimal metric
+     */
+    int DECIMAL_BASE_CODE = 1;
+
+    /**
+     * Mask to get the mode of a metric
+     */
+    int METRIC_MODE_MASK = ((1 << 4) - 1);
+
+    /**
+     * OTF2_METRIC_ABSOLUTE_POINT code
+     */
+    int OTF2_METRIC_ABSOLUTE_POINT = 4;
+
+    /**
+     * OTF2_METRIC_ABSOLUTE_NEXT code
+     */
+    int OTF2_METRIC_ABSOLUTE_NEXT = 6;
+
+    /**
+     * OTF2_TYPE_INT64 value
+     */
+    int OTF2_TYPE_INT64 = 4;
+
+    /**
+     * OTF2_TYPE_UINT64 value
+     */
+    int OTF2_TYPE_UINT64 = 8;
+
+    /**
+     * OTF2_TYPE_DOUBLE value
+     */
+    int OTF2_TYPE_DOUBLE = 10;
 }

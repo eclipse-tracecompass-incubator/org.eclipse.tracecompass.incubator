@@ -14,6 +14,15 @@
    </extension>
    <extension
 		point="org.eclipse.linuxtools.tmf.core.analysis">
+       <module
+            analysis_module="org.eclipse.tracecompass.analysis.counters.core.CounterAnalysis"
+            automatic="false"
+            id="org.eclipse.tracecompass.analysis.counters.core.counteranalysis"
+            name="Counters">
+            <tracetype
+               class="org.eclipse.tracecompass.incubator.otf2.core.trace.Otf2Trace">
+            </tracetype>
+      </module>
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.callstack.Otf2CallstackAnalysis"
             automatic="true"

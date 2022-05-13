@@ -14,6 +14,10 @@ package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis;
 /**
  * CTF fields name after conversion from OTF2
  *
+ * These fields are used to access parameters from CTF events that were
+ * converted from OTF2. They are defined in the OTF2-to-CTF converter:
+ * https://github.com/dorsal-lab/OTF2-to-CTF-converter
+ *
  * @author Yoann Heitz
  */
 public interface IOtf2Fields {
@@ -137,4 +141,59 @@ public interface IOtf2Fields {
      * Size sent field name
      */
     String OTF2_SIZE_SENT = "sizeSent"; //$NON-NLS-1$
+
+    /**
+     * Metric members field name
+     */
+    String OTF2_METRIC_MEMBERS = "metricMembers"; //$NON-NLS-1$
+
+    /**
+     * Description field name
+     */
+    String OTF2_DESCRIPTION = "description"; //$NON-NLS-1$
+
+    /**
+     * Metric type field name
+     */
+    String OTF2_METRIC_TYPE = "metricType"; //$NON-NLS-1$
+
+    /**
+     * Metric mode field name
+     */
+    String OTF2_METRIC_MODE = "metricMode"; //$NON-NLS-1$
+
+    /**
+     * Value type field name
+     */
+    String OTF2_VALUE_TYPE = "valueType"; //$NON-NLS-1$
+
+    /**
+     * Base field name
+     */
+    String OTF2_BASE = "base"; //$NON-NLS-1$
+
+    /**
+     * Exponent field name
+     */
+    String OTF2_EXPONENT = "exponent"; //$NON-NLS-1$
+
+    /**
+     * Unit field name
+     */
+    String OTF2_UNIT = "unit"; //$NON-NLS-1$
+
+    /**
+     * Metric value field name
+     */
+    String OTF2_METRIC_VALUE = "metricValue"; //$NON-NLS-1$
+
+    /**
+     * Metric field name
+     */
+    String OTF2_METRIC = "metric"; //$NON-NLS-1$
+
+    /**
+     * Index field name
+     */
+    String OTF2_INDEX = "index"; //$NON-NLS-1$
 }

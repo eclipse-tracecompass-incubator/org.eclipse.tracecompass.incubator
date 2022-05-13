@@ -11,14 +11,15 @@
 
 package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.communicators;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -32,7 +33,6 @@ import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.CollectiveOpera
 import org.eclipse.tracecompass.incubator.internal.otf2.core.mpi.MessageIdentifiers;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.trace.Location;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
-
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -54,9 +54,9 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
      * Rank
      */
     private static final String RANK = "Rank "; //$NON-NLS-1$
-    private static int VERSION_NUMBER = 1;
+    private static final int VERSION_NUMBER = 1;
 
-    /*
+    /**
      * A class representing an IRecvRequest. For each asynchronous receive
      * operation, an instance is partially constructed when the communication is
      * launched and completely filled with the communicator informations when
@@ -83,7 +83,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
 
     }
 
-    /*
+    /**
      * A class implementing a triplet representing a change in the StateSystem.
      * It contains the quark on which this change occurs, the new string value
      * for this quark and the timestamp for this change
@@ -132,7 +132,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             fPendingStateSystemUpdates = new LinkedList<>();
         }
 
-        /*
+        /**
          * This method is called when an IRecvRequest was checked and resolved
          * (the corresponding IRecv event has been encountered). It updates the
          * IRecvRequest object created for this request
@@ -148,7 +148,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             }
         }
 
-        /*
+        /**
          * This method flushes the StateSystem updates when an IRecvRequest has
          * been completed. When an asynchronous Receive is encountered, no
          * information about the communicator is given at first. First an
@@ -180,9 +180,12 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             }
         }
 
-        /*
+        /**
          * This method is called when all the trace has been read. It flushes
          * the StateSystem updates that were stored during an unresolved request
+         *
+         * @param ssb
+         *            The state system to write to
          */
         public void flushAllUpdates(ITmfStateSystemBuilder ssb) {
             /*
@@ -242,7 +245,6 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
          * @param event
          *            the ITmfEvent associated to the OTF2 IRecvRequest event
          */
-
         public void mpiIRecvRequest(ITmfEvent event) {
             ITmfEventField content = event.getContent();
             Long requestID = content.getFieldValue(Long.class, IOtf2Fields.OTF2_REQUEST_ID);
@@ -308,10 +310,17 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             fRank = srcRank;
         }
 
-        /*
+        /**
          * This method searches for the associated Send event, updates the state
          * of the location and stores the changes for the associated
          * communicator attribute and their timestamps.
+         *
+         * @param srcEvent
+         *            The event that is generated when receiving data
+         * @param communicator
+         *            The communicator used to send data
+         * @param isBlocking
+         *            Boolean that specifies if the receive is blocking
          */
         public void mpiRecv(ITmfEvent srcEvent, Communicator communicator, boolean isBlocking) {
             ITmfEventField content = srcEvent.getContent();
@@ -370,7 +379,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             fRank = destRank;
         }
 
-        /*
+        /**
          * This methods is called when a location finished to use a communicator
          * for a collective routine
          */
@@ -444,7 +453,6 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
      * not be used outside of this State Provider
      *
      * @author Yoann Heitz
-     *
      */
     private class Communicator {
         protected final int fId;
@@ -452,7 +460,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
         protected int fQuark;
         protected List<Long> fLocations;
         protected final List<CollectiveOperationIdentifiers> fCollectiveOperations;
-        /*
+        /**
          * Sorted map that links timestamp with changes in the number of pending
          * locations. This sorted map will be iterated over at the end of the
          * trace to update the state of the attribute associated to this
@@ -460,7 +468,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
          */
         protected final SortedMap<Long, Long> fTimestampsPendingThreads;
 
-        /*
+        /**
          * This function is used to increment the number of pending threads for
          * this communicator by a specific value (it can be negative) at a
          * specific timestamp.
@@ -487,9 +495,12 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             return fQuarkInitialized;
         }
 
-        /*
+        /**
          * Initialize the quark for the communicator and the quarks for each
          * location in the communicator
+         *
+         * @param ssb
+         *            The state system builder to create the quarks
          */
         public void initialize(ITmfStateSystemBuilder ssb) {
             ArrayList<Long> locations = getMembersFromCommunicatorReference(fId);
@@ -501,17 +512,20 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
             fQuarkInitialized = true;
         }
 
-        /*
+        /**
          * Updates the number of pending locations in the communicator over the
          * time. This method should be called when the trace has completely been
          * read.
+         *
+         * @param ssb
+         *            The state system builder to modify the communicator quark
          */
         public void updatePendingLocations(ITmfStateSystemBuilder ssb) {
             if (isInitialized()) {
                 Long pendingThreads = 0L;
                 for (Map.Entry<Long, Long> entry : fTimestampsPendingThreads.entrySet()) {
-                    Long timestamp = entry.getKey();
-                    Long value = entry.getValue();
+                    Long timestamp = Objects.requireNonNull(entry.getKey());
+                    Long value = Objects.requireNonNull(entry.getValue());
                     pendingThreads += value;
                     ssb.modifyAttribute(timestamp, pendingThreads, fQuark);
                 }
@@ -644,19 +658,19 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
         }
     }
 
-    /*
+    /**
      * Checks whether this event is the last one in the trace
      */
     private boolean isLastEvent(ITmfEvent event) {
         return fLastTimestamp == event.getTimestamp().toNanos();
     }
 
-    /*
+    /**
      * Updates the states of each communicators over the trace time range
      */
     private void processCommunicatorsAttributes(ITmfStateSystemBuilder ssb) {
         for (Map.Entry<Integer, Communicator> communicatorEntry : fMapCommunicator.entrySet()) {
-            Communicator communicator = communicatorEntry.getValue();
+            Communicator communicator = Objects.requireNonNull(communicatorEntry.getValue());
             communicator.updatePendingLocations(ssb);
         }
     }
@@ -667,7 +681,7 @@ public class Otf2CommunicatorsStateProvider extends AbstractOtf2StateProvider {
      */
     private void processLocationsAttributes(ITmfStateSystemBuilder ssb) {
         for (Entry<Long, CommunicatorsLocation> locationEntry : fMapLocation.entrySet()) {
-            CommunicatorsLocation location = locationEntry.getValue();
+            CommunicatorsLocation location = Objects.requireNonNull(locationEntry.getValue());
             location.flushAllUpdates(ssb);
         }
     }
