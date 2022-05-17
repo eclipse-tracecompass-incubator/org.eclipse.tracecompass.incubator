@@ -25,33 +25,6 @@
   <name>Trace Compass Incubator Repository</name>
   <packaging>eclipse-repository</packaging>
 
-<build>
-  <plugins>
-    <plugin>
-      <groupId>org.jboss.tools.tycho-plugins</groupId>
-      <artifactId>repository-utils</artifactId>
-      <executions>
-        <execution>
-          <id>generate-facade</id>
-          <phase>package</phase>
-          <goals>
-            <goal>generate-repository-facade</goal>
-          </goals>
-        </execution>
-      </executions>
-      <configuration>
-        <removeDefaultCategory>true</removeDefaultCategory>
-        <skipWebContentGeneration>true</skipWebContentGeneration>
-        <associateSites>
-           <site>https://download.eclipse.org/ease/release/0.8.0</site>
-           <site>http://eclipse.py4j.org</site>
-        </associateSites>
-        <skipBuildInfo>true</skipBuildInfo>
-      </configuration>
-    </plugin>
-  </plugins>
-</build>
-
 <profiles>
   <profile>
     <id>deploy-update-site</id>
