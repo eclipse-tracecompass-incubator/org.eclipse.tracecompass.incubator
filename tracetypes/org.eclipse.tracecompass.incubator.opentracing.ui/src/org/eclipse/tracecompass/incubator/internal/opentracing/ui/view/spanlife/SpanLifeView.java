@@ -12,8 +12,10 @@
 package org.eclipse.tracecompass.incubator.internal.opentracing.ui.view.spanlife;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
@@ -45,10 +47,10 @@ public class SpanLifeView extends BaseDataProviderTimeGraphView {
      * Span life view Id
      */
     public static final String ID = "org.eclipse.tracecompass.incubator.opentracing.ui.view.life.spanlife.view"; //$NON-NLS-1$
+
     private static final RGBA MARKER_COLOR = new RGBA(200, 0, 0, 150);
 
     private static final Image ERROR_IMAGE = Objects.requireNonNull(Activator.getDefault()).getImageFromPath("icons/delete_button.gif"); //$NON-NLS-1$
-
 
     private static class SpanTreeLabelProvider extends TreeLabelProvider {
 
@@ -88,11 +90,22 @@ public class SpanLifeView extends BaseDataProviderTimeGraphView {
     }
 
     @Override
-    protected @NonNull List<IMarkerEvent> getViewMarkerList(long startTime, long endTime,
+    protected @NonNull List<IMarkerEvent> getViewMarkerList(Iterable<@NonNull TimeGraphEntry> entries, long startTime, long endTime,
             long resolution, @NonNull IProgressMonitor monitor) {
         ITimeGraphEntry[] expandedElements = getTimeGraphViewer().getExpandedElements();
+        List<ITimeGraphEntry> queriedElements = new ArrayList<>();
+        for (ITimeGraphEntry candidate : expandedElements) {
+            if (StreamSupport.stream(entries.spliterator(), false).anyMatch(candidate::equals)) {
+                queriedElements.add(candidate);
+            }
+        }
+        if (queriedElements.isEmpty()) {
+            // Fall-back to this method's previous implementation to not break
+            // anything. Still possible to improve caller's efficiency later.
+            queriedElements = Arrays.asList(expandedElements);
+        }
         List<IMarkerEvent> markers = new ArrayList<>();
-        for (ITimeGraphEntry element : expandedElements) {
+        for (ITimeGraphEntry element : queriedElements) {
             ITmfTreeDataModel entryModel = ((TimeGraphEntry) element).getEntryModel();
             if (entryModel instanceof SpanLifeEntryModel) {
                 SpanLifeEntryModel model = (SpanLifeEntryModel) entryModel;
