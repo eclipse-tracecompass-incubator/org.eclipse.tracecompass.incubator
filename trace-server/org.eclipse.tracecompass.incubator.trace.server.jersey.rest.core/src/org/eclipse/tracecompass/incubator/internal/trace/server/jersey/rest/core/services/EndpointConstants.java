@@ -129,8 +129,8 @@ public class EndpointConstants {
     static final String ITEMS_EX_TT = "\"" + REQUESTED_ITEMS_KEY + "\": [1],"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_CATEGORIES_EX = "\"" + REQUESTED_MARKER_CATEGORIES_KEY + "\": [\"category1\", \"category2\"]"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_SET_EX = "\"" + REQUESTED_MARKER_SET_KEY + "\": \"markerSetId\","; //$NON-NLS-1$ //$NON-NLS-2$
-    static final String TIMERANGE_EX = "\"" + REQUESTED_TIME_KEY + "\": {\"start\": 111111111, \"end\": 222222222, \"nbTimes\": 1920}"; //$NON-NLS-1$ //$NON-NLS-2$
-    static final String TIMERANGE_EX_TREE = "\"" + REQUESTED_TIME_KEY + "\": {\"start\": 111111111, \"end\": 222222222}"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String TIMERANGE_EX = "\"" + REQUESTED_TIMERANGE_KEY + "\": {\"start\": 111111111, \"end\": 222222222, \"nbTimes\": 1920}"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String TIMERANGE_EX_TREE = "\"" + REQUESTED_TIMERANGE_KEY + "\": {\"start\": 111111111, \"end\": 222222222}"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_EX_TT = "\"" + REQUESTED_TIME_KEY + "\": [111200000],"; //$NON-NLS-1$ //$NON-NLS-2$
 
     /** Swagger @ApiResponse description constants reused, or centralized. */
