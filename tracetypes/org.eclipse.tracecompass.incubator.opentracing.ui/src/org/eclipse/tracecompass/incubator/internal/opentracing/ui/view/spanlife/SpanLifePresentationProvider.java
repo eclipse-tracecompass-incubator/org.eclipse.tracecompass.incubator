@@ -31,7 +31,6 @@ import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
-import org.eclipse.tracecompass.tmf.core.presentation.IYAppearance;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
@@ -68,15 +67,15 @@ public class SpanLifePresentationProvider extends TimeGraphPresentationProvider 
             new StateItem(new RGB(0, 91, 150), "Third Service Class"), //$NON-NLS-1$
             new StateItem(new RGB(3, 57, 108), "Forth Service Class"), //$NON-NLS-1$
             new StateItem(new RGB(1, 31, 75), "Fifth Service Class"), //$NON-NLS-1$
-            new StateItem(ImmutableMap.of(StyleProperties.STYLE_NAME, ERROR, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.CROSS, StyleProperties.HEIGHT,
+            new StateItem(ImmutableMap.of(StyleProperties.STYLE_NAME, ERROR, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, StyleProperties.SymbolType.CROSS, StyleProperties.HEIGHT,
                     0.4f)),
             new StateItem(
-                    ImmutableMap.of(StyleProperties.STYLE_NAME, EVENT, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.DIAMOND, StyleProperties.HEIGHT,
+                    ImmutableMap.of(StyleProperties.STYLE_NAME, EVENT, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, StyleProperties.SymbolType.DIAMOND, StyleProperties.HEIGHT,
                             0.3f)),
             new StateItem(
-                    ImmutableMap.of(StyleProperties.STYLE_NAME, MESSAGE, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.CIRCLE, StyleProperties.HEIGHT,
+                    ImmutableMap.of(StyleProperties.STYLE_NAME, MESSAGE, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, StyleProperties.SymbolType.CIRCLE, StyleProperties.HEIGHT,
                             0.3f)),
-            new StateItem(ImmutableMap.of(StyleProperties.STYLE_NAME, STACK, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, IYAppearance.SymbolStyle.SQUARE,
+            new StateItem(ImmutableMap.of(StyleProperties.STYLE_NAME, STACK, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, StyleProperties.SymbolType.SQUARE,
                     StyleProperties.HEIGHT, 0.3f)),
             new StateItem(ImmutableMap.of(StyleProperties.STYLE_NAME, OTHER, StyleProperties.BACKGROUND_COLOR, MARKER_HEX_COLOR, StyleProperties.OPACITY, OPACITY, StyleProperties.SYMBOL_TYPE, FLAG_EMOJI, StyleProperties.HEIGHT, 0.3f))
     };
