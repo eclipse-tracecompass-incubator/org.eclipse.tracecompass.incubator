@@ -14,7 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.scripting.ui.views.histogram
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
-import org.eclipse.tracecompass.tmf.core.presentation.IYAppearance;
+import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.ui.viewers.xychart.linechart.TmfFilteredXYChartViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.xychart.linechart.TmfXYChartSettings;
 
@@ -43,7 +43,7 @@ public class ScriptedHistogramViewer extends TmfFilteredXYChartViewer {
 
     @Override
     public @NonNull OutputElementStyle getSeriesStyle(@NonNull Long seriesId) {
-        return getPresentationProvider().getSeriesStyle(seriesId, IYAppearance.Type.BAR, DEFAULT_SERIES_WIDTH);
+        return getPresentationProvider().getSeriesStyle(seriesId, StyleProperties.SeriesType.BAR, DEFAULT_SERIES_WIDTH);
     }
 
 }
