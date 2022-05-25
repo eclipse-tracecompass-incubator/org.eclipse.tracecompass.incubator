@@ -187,7 +187,7 @@ public class TraceScriptingModule extends AbstractScriptModule {
     @WrapToScript
     public ScriptEventsIterator getEventIterator(@Nullable ITmfTrace trace) {
         if (trace == null) {
-            throw new NullPointerException("Trace should not be null"); //$NON-NLS-1$
+            throw new IllegalArgumentException("Trace should not be null"); //$NON-NLS-1$
         }
 
         ScriptEventRequest scriptEventRequest = new ScriptEventRequest();
