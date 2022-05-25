@@ -26,14 +26,6 @@ import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 public class OpenTracingExperiment extends TmfExperiment {
 
     /**
-     * Constructor
-     */
-    @Deprecated
-    public OpenTracingExperiment() {
-        super();
-    }
-
-    /**
      * Constructor of an open tracing experiment
      *
      * @param type
@@ -44,10 +36,11 @@ public class OpenTracingExperiment extends TmfExperiment {
      *            The experiment set of traces
      * @param indexPageSize
      *            The experiment index page size. You can use
-     *            {@link TmfExperiment#DEFAULT_INDEX_PAGE_SIZE} for a default value.
+     *            {@link TmfExperiment#DEFAULT_INDEX_PAGE_SIZE} for a default
+     *            value.
      * @param resource
-     *            The resource associated to the experiment. You can use 'null' for
-     *            no resources (tests, etc.)
+     *            The resource associated to the experiment. You can use 'null'
+     *            for no resources (tests, etc.)
      */
     public OpenTracingExperiment(final Class<? extends ITmfEvent> type,
             final String path,
