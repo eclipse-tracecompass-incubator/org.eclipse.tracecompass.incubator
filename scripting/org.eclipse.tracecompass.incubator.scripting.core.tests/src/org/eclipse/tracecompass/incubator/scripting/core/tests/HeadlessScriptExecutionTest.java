@@ -22,8 +22,8 @@ import org.eclipse.tracecompass.incubator.scripting.core.tests.stubs.ScriptingTe
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * Test the {@link ScriptExecutionHelper} class
@@ -96,5 +96,4 @@ public class HeadlessScriptExecutionTest {
         Object result = ScriptExecutionHelper.executeScript(String.valueOf(path.toOSString()));
         assertEquals(36, result);
     }
-
 }

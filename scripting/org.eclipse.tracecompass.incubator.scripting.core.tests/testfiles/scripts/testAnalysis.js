@@ -10,9 +10,13 @@
 
 // load Trace Compass modules
 loadModule('/TraceCompass/Analysis')
+loadModule('/TraceCompass/Trace')
 
-// Create an analysis named activetid.js.
-var analysis = getAnalysis("activetid.js")
+// Get the active trace
+var trace = getActiveTrace()
+
+// Create an analysis named activetid.js
+var analysis = createScriptedAnalysis(trace, "activetid.js")
 
 if (analysis == null) {
 	print("Trace is null")

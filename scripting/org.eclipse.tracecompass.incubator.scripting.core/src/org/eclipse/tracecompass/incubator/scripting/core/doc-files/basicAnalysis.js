@@ -13,10 +13,14 @@
 // load Trace Compass modules
 loadModule('/TraceCompass/Analysis');
 loadModule('/TraceCompass/DataProvider');
+loadModule('/TraceCompass/Trace');
 loadModule('/TraceCompass/View');
 
-// Create an analysis named activetid.js.
-var analysis = getAnalysis("activetid.js");
+// Get the active trace
+var trace = getActiveTrace();
+
+// Create an analysis named activetid.js
+var analysis = createScriptedAnalysis(trace, "activetid.js");
 
 if (analysis == null) {
 	print("Trace is null");
@@ -40,8 +44,8 @@ function runAnalysis() {
 		// Do something when the event is a sched_switch
 		if (event.getName() == "sched_switch") {
 			// This function is a wrapper to get the value of field CPU in the event, or return null if the field is not present
-			cpu = getFieldValue(event, "CPU");
-			tid = getFieldValue(event, "next_tid");
+			cpu = getEventFieldValue(event, "CPU");
+			tid = getEventFieldValue(event, "next_tid");
 			if ((cpu != null) && (tid != null)) {
 				// Write the tid to the state system, for the attribute corresponding to the cpu
 				quark = ss.getQuarkAbsoluteAndAdd(cpu);
