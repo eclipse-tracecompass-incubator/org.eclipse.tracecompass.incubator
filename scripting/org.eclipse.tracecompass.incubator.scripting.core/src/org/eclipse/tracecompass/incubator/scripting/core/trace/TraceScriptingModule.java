@@ -48,31 +48,6 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 public class TraceScriptingModule extends AbstractScriptModule {
 
     /**
-     * Fully open a trace in the Trace Compass application, ie it will open as
-     * if the user had opened it in the UI, running all automatic analyses, etc.
-     * If the trace is successfully opened, it becomes the currently active
-     * trace.
-     *
-     * @param projectName
-     *            The name of the project
-     * @param traceName
-     *            the trace to open
-     * @param isExperiment
-     *            is the trace an experiment
-     * @return The trace
-     * @deprecated This method was never supported, to open a trace in Trace
-     *             Compass, use the <code>openTrace</code> method from the
-     *             <code>'/TraceCompass/TraceUI'</code> module
-     */
-    @Deprecated
-    @WrapToScript
-    public ITmfTrace openTrace(String projectName, String traceName, @ScriptParameter(defaultValue = "false") boolean isExperiment) {
-        // TODO may need to be implemented for Theia.
-        // Can not do anything without the UI
-        throw new UnsupportedOperationException("Load the /TraceCompass/TraceUI module instead"); //$NON-NLS-1$
-    }
-
-    /**
      * The trace will be opened, its events can be queried, but the analyses
      * will not have been run on it, they will not be available. The trace
      * content will not be opened in the UI and it won't be able to populate any
@@ -117,7 +92,6 @@ public class TraceScriptingModule extends AbstractScriptModule {
         String traceFile = split[split.length - 1];
         IFile file = subFolder.getFile(traceFile);
 
-
         IPath location = file.getLocation();
         if (location == null) {
             return null;
@@ -134,7 +108,8 @@ public class TraceScriptingModule extends AbstractScriptModule {
         }
     }
 
-    private static ITmfTrace openAndInitializeTrace(IFile file, String location, String name, String typeID) throws TmfTraceException, InstantiationException, IllegalAccessException, FileNotFoundException, TmfTraceImportException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+    private static ITmfTrace openAndInitializeTrace(IFile file, String location, String name, String typeID)
+            throws TmfTraceException, InstantiationException, IllegalAccessException, FileNotFoundException, TmfTraceImportException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         List<TraceTypeHelper> traceTypes = TmfTraceType.selectTraceType(location, typeID);
         if (traceTypes.isEmpty()) {
             throw new FileNotFoundException(Messages.noTraceType);
