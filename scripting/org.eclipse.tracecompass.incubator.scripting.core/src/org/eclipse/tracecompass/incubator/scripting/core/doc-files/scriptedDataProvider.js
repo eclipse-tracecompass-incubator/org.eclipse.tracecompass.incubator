@@ -13,11 +13,15 @@
 // load Trace Compass modules
 loadModule('/TraceCompass/Analysis');
 loadModule('/TraceCompass/DataProvider');
+loadModule('/TraceCompass/Trace');
 loadModule('/TraceCompass/View');
 loadModule('/TraceCompass/Utils');
 
-// Create an analysis named mpiring.js.
-var analysis = getAnalysis("mpiring.js");
+// Get the active trace
+var trace = getActiveTrace();
+
+// Create an analysis named activetid.js
+var analysis = createScriptedAnalysis(trace, "activetid.js");
 
 if (analysis == null) {
 	print("Trace is null");
@@ -48,15 +52,15 @@ function runAnalysis() {
 		name = event.getName();
 		if (name == "mpi:mpi_init_exit") {
 			// This function is a wrapper to get the value of field CPU in the event, or return null if the field is not present
-			resourceId = getFieldValue(event, "res");
-			tid = getFieldValue(event, "tid");
+			resourceId = getEventFieldValue(event, "res");
+			tid = getEventFieldValue(event, "tid");
 			if ((resourceId != null) && (tid != null)) {
 				// Save the association between tid and resource
 				tidToResMap[tid] = resourceId;
 			}
 		} else if (name == "mpi:mpi_recv_entry") {
 			// First get the current resource from its tid
-			tid = getFieldValue(event, "tid");
+			tid = getEventFieldValue(event, "tid");
 			if (tid != null) {
 				resourceId = tidToResMap[tid];
 				if (resourceId != null) {
@@ -66,7 +70,7 @@ function runAnalysis() {
 				}
 			}
 		} else if (name == "mpi:mpi_recv_exit") {
-			tid = getFieldValue(event, "tid");
+			tid = getEventFieldValue(event, "tid");
 			if (tid != null) {
 				resourceId = tidToResMap[tid];
 				if (resourceId != null) {
@@ -75,7 +79,7 @@ function runAnalysis() {
 					ss.removeAttribute(event.getTimestamp().toNanos(), quark);
 				}
 				// We received a message, see if we can close a pending arrow
-				source = getFieldValue(event, "source");
+				source = getEventFieldValue(event, "source");
 				
 				if (source != null) {
 					pending = pendingArrows[resourceId];
@@ -89,7 +93,7 @@ function runAnalysis() {
 			}
 			
 		} else if (name == "mpi:mpi_send_entry") {
-			tid = getFieldValue(event, "tid");
+			tid = getEventFieldValue(event, "tid");
 			if (tid != null) {
 				resourceId = tidToResMap[tid];
 				if (resourceId != null) {
@@ -98,13 +102,13 @@ function runAnalysis() {
 					ss.modifyAttribute(event.getTimestamp().toNanos(), "Sending message", quark);
 				}
 				// Prepare the start of an arrow
-				dest = getFieldValue(event, "dest");
+				dest = getEventFieldValue(event, "dest");
 				if (dest != null) {
 					pendingArrows[dest] = {"time" : event.getTimestamp().toNanos(), "source" : resourceId, "dest" : dest};
 				}
 			}
 		} else if (name == "mpi:mpi_send_exit") {
-			tid = getFieldValue(event, "tid");
+			tid = getEventFieldValue(event, "tid");
 			if (tid != null) {
 				resourceId = tidToResMap[tid];
 				if (resourceId != null) {

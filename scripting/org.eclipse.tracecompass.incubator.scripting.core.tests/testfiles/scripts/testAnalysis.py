@@ -10,9 +10,13 @@
 
 # load Trace Compass modules
 loadModule('/TraceCompass/Analysis')
+loadModule('/TraceCompass/Trace')
+
+# Get the active trace
+trace = getActiveTrace()
 
 # Create an analysis for this script
-analysis = getAnalysis("activetid_python.js")
+analysis = createScriptedAnalysis(trace, "activetid_python.js")
 
 if analysis is None:
     print("Trace is null")

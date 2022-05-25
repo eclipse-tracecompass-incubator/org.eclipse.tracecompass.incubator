@@ -12,13 +12,17 @@
 
 # load proper Trace Compass modules
 loadModule('/TraceCompass/Analysis');
+loadModule('/TraceCompass/Trace');
 loadModule('/TraceCompass/View');
 loadModule('/TraceCompass/DataProvider');
 
 from py4j.java_gateway import JavaClass
 
+# Get the active trace
+trace = getActiveTrace()
+
 # Create an analysis for this script
-analysis = getAnalysis("activetid_python.js")
+analysis = createScriptedAnalysis(trace, "activetid_python.js")
 
 if analysis is None:
     print("Trace is null")
@@ -51,8 +55,8 @@ def runAnalysis():
         # Do something when the event is a sched_switch
         if event.getName() == "sched_switch":
             # This function is a wrapper to get the value of field CPU in the event, or return null if the field is not present
-            cpu = getFieldValue(event, "CPU")
-            tid = getFieldValue(event, "next_tid")
+            cpu = getEventFieldValue(event, "CPU")
+            tid = getEventFieldValue(event, "next_tid")
             if (not(cpu is None) and not(tid is None)):
                 # Write the tid to the state system, for the attribute corresponding to the cpu
                 quark = ss.getQuarkAbsoluteAndAdd(strToVarargs(str(cpu)))
