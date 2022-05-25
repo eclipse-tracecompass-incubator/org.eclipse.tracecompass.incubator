@@ -11,10 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.traceevent.core.event;
 
-import java.util.Collections;
 import java.util.logging.Level;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
@@ -32,20 +30,8 @@ public class TraceEventEvent extends TmfEvent implements ITmfSourceLookup {
 
     private final @Nullable ITmfCallsite fCallsite;
     private final Level fLogLevel;
-    private @NonNull final String fName;
+    private final @NonNull String fName;
     private final TraceEventField fField;
-
-    /**
-     * Constructor
-     */
-    @Deprecated
-    public TraceEventEvent() {
-        super();
-        fCallsite = null;
-        fLogLevel = Level.OFF;
-        fName = StringUtils.EMPTY;
-        fField = new TraceEventField(StringUtils.EMPTY, 0, "X", null, null, null, null, null, Collections.EMPTY_MAP); //$NON-NLS-1$
-    }
 
     /**
      * Constructor for simple traceEventEvent
@@ -79,6 +65,7 @@ public class TraceEventEvent extends TmfEvent implements ITmfSourceLookup {
     public @Nullable ITmfCallsite getCallsite() {
         return fCallsite;
     }
+
     /**
      * Get the loglevel of the event
      *
