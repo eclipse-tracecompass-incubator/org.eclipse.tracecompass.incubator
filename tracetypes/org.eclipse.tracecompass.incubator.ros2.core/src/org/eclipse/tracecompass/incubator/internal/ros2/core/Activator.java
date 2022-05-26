@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.ros2.core;
 
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.executor.Ros2ExecutorStateInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
@@ -46,12 +47,14 @@ public class Activator extends TraceCompassActivator {
 
     @Override
     protected void startActions() {
-        // Objects
+        // Objects analysis
         CustomStateValue.registerCustomFactory(Ros2NodeObject.CUSTOM_TYPE_ID, Ros2NodeObject.ROS2_NODE_OBJECT_VALUE_FACTORY);
         CustomStateValue.registerCustomFactory(Ros2PublisherObject.CUSTOM_TYPE_ID, Ros2PublisherObject.ROS2_PUBLISHER_OBJECT_VALUE_FACTORY);
         CustomStateValue.registerCustomFactory(Ros2SubscriptionObject.CUSTOM_TYPE_ID, Ros2SubscriptionObject.ROS2_SUBSCRIPTION_OBJECT_VALUE_FACTORY);
         CustomStateValue.registerCustomFactory(Ros2TimerObject.CUSTOM_TYPE_ID, Ros2TimerObject.ROS2_TIMER_OBJECT_VALUE_FACTORY);
         CustomStateValue.registerCustomFactory(Ros2CallbackObject.CUSTOM_TYPE_ID, Ros2CallbackObject.ROS2_CALLBACK_OBJECT_VALUE_FACTORY);
+        // Executor analysis
+        CustomStateValue.registerCustomFactory(Ros2ExecutorStateInstance.CUSTOM_TYPE_ID, Ros2ExecutorStateInstance.ROS2_EXECUTOR_STATE_INSTANCE_VALUE_FACTORY);
     }
 
     @Override

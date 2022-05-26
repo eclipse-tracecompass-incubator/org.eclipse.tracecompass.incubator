@@ -8,6 +8,24 @@
             name="%ros2.name"
             parentCategory="org.eclipse.linuxtools.tmf.ui.views.category">
       </category>
+      <view
+            category="org.eclipse.tracecompass.incubator.internal.ros2.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.ros2.ui.views.executor.Ros2ExecutorView"
+            icon="icons/obj16/ros2_messages.png"
+            id="org.eclipse.tracecompass.incubator.ros2.ui.views.executor"
+            name="%ros2.view.executor"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.ros2.ui.views.executor">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.executor.Ros2ExecutorAnalysis">
+         </analysisModuleClass>
+      </output>
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.ui.tracetypeui">

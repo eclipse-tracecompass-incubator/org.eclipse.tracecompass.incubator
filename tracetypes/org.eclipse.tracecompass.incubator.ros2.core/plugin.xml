@@ -35,6 +35,29 @@
                class="org.eclipse.tracecompass.incubator.internal.ros2.core.trace.Ros2Experiment">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.executor.Ros2ExecutorAnalysis"
+            applies_experiment="true"
+            automatic="false"
+            icon="icons/ros2.png"
+            id="org.eclipse.tracecompass.incubator.ros2.core.analysis.executor"
+            name="%analysis.ros2.executor">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.ros2.core.trace.Ros2Trace">
+         </tracetype>
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.ros2.core.trace.Ros2Experiment">
+         </tracetype>
+      </module>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.executor.Ros2ExecutorDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.ros2.core.analysis.executor.dataprovider">
+      </dataProviderFactory>
    </extension>
 
 </plugin>
