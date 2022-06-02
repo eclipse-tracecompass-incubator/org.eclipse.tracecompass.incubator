@@ -53,3 +53,6 @@ sed -i -e s/$oldVersion/$newVersion/g ../../rcp/org.eclipse.tracecompass.incubat
 
 #Update .product rcp/org.eclipse.tracecompass.incubator.rcp.product/tracing.incubator.product
 sed -i -e s/$oldVersion/$newVersion/g ../../rcp/org.eclipse.tracecompass.incubator.rcp.product/tracing.incubator.product
+#Update .product trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product
+sed -i -e s/$oldVersion/$newVersion/g ../../trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product
+

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-   Copyright (C) 2017, 2021 �cole Polytechnique de Montr�al and others
+   Copyright (C) 2017, 2021 École Polytechnique de Montréal and others
 
    All rights reserved. This program and the accompanying materials
    are made available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,7 @@
 
   <groupId>org.eclipse.tracecompass.incubator</groupId>
   <artifactId>org.eclipse.tracecompass.incubator</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Trace Compass Incubator Parent</name>
 
@@ -404,7 +404,7 @@
               <groupId>org.eclipse.tracecompass.incubator</groupId>
               <artifactId>org.eclipse.tracecompass.incubator.target</artifactId>
               <classifier>${target-platform}</classifier>
-              <version>0.1.0-SNAPSHOT</version>
+              <version>0.2.0-SNAPSHOT</version>
             </artifact>
           </target>
         </configuration>
