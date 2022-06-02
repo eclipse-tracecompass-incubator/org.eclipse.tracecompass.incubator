@@ -15,27 +15,47 @@
     <Definition category="Syslog" name="HAProxy">
         <InputLine>
             <Cardinality max="2147483647" min="0"/>
-            <RegEx>\S+\s+\S+\s\S+\s(\S+)\s(\S+):\s(\S+)\s\[(\S+)\]\s(\S+)[\_\-]in(\S*)\s\S+[\_\-]out(\S+)\s(\S+)\s(\S+)\s(.*\S)</RegEx>
+            <RegEx>\S+\s+\S+\s\S+\s(\S+)\s(\S+):\s(\S+):(\S+)\s\[(\S+)\]\s(\S+)[\_\-]in(\S*)\s\S+[\_\-]out(\S+)\s(\d+)/(\d+)/(\d+)\s(\d+)\s\S+\s(\d+)/(\d+)/(\d+)/(\d+)/(\d+)\s(\d+)/(\d+)\s(.*\S)</RegEx>
             <InputData action="0" format="" name="selfIP" tag="OTHER"/>
             <InputData action="0" format="" name="Source" tag="OTHER"/>
             <InputData action="0" format="" name="IP" tag="OTHER"/>
-            <InputData action="0" format="dd/MMM/yyyy:hh:mm:ss.SSS" name="Timestamp" tag="TIMESTAMP"/>
-            <InputData action="0" format="" name="Event type" tag="EVENT_TYPE"/>
+            <InputData action="0" format="" name="Port" tag="OTHER"/>
+            <InputData action="0" format="dd/MMM/yyyy:HH:mm:ss.SSS" name="Timestamp" tag="TIMESTAMP"/>
+            <InputData action="0" format="" name="protocol" tag="OTHER"/>
             <InputData action="0" format="" name="srcPath" tag="OTHER"/>
             <InputData action="0" format="" name="dstPath" tag="OTHER"/>
-            <InputData action="0" format="" name="Eh?" tag="OTHER"/>
-            <InputData action="0" format="" name="IDK" tag="OTHER"/>
+            <InputData action="0" format="" name="time in queue (ms)" tag="OTHER"/>
+            <InputData action="0" format="" name="time establishing connection (ms)" tag="OTHER"/>
+            <InputData action="0" format="" name="total time from request to receipt (ms)" tag="OTHER"/>
+            <InputData action="0" format="" name="Bytes Read" tag="OTHER"/>
+            <InputData action="0" format="" name="Active Connections" tag="OTHER"/>
+            <InputData action="0" format="" name="Front-End Connections" tag="OTHER"/>
+            <InputData action="0" format="" name="Back-End Connections" tag="OTHER"/>
+            <InputData action="0" format="" name="Server Connections" tag="OTHER"/>
+            <InputData action="0" format="" name="Retries" tag="OTHER"/>
+            <InputData action="0" format="" name="Server Queue" tag="OTHER"/>
+            <InputData action="0" format="" name="Back-End Queue" tag="OTHER"/>
             <InputData action="0" format="" name="Message" tag="MESSAGE"/>
         </InputLine>
         <OutputColumn name="Source" tag="OTHER"/>
         <OutputColumn name="Timestamp" tag="TIMESTAMP"/>
         <OutputColumn name="srcPath" tag="OTHER"/>
         <OutputColumn name="dstPath" tag="OTHER"/>
-        <OutputColumn name="Eh?" tag="OTHER"/>
         <OutputColumn name="Message" tag="MESSAGE"/>
-        <OutputColumn name="selfIP" tag="OTHER"/>
-        <OutputColumn name="Event type" tag="EVENT_TYPE"/>
-        <OutputColumn name="IDK" tag="OTHER"/>
         <OutputColumn name="IP" tag="OTHER"/>
+        <OutputColumn name="Port" tag="OTHER"/>
+        <OutputColumn name="selfIP" tag="OTHER"/>
+        <OutputColumn name="protocol" tag="OTHER"/>
+        <OutputColumn name="Bytes Read" tag="OTHER"/>
+        <OutputColumn name="Active Connections" tag="OTHER"/>
+        <OutputColumn name="Front-End Connections" tag="OTHER"/>
+        <OutputColumn name="Back-End Connections" tag="OTHER"/>
+        <OutputColumn name="Server Connections" tag="OTHER"/>
+        <OutputColumn name="Retries" tag="OTHER"/>
+        <OutputColumn name="Server Queue" tag="OTHER"/>
+        <OutputColumn name="Back-End Queue" tag="OTHER"/>
+        <OutputColumn name="time in queue (ms)" tag="OTHER"/>
+        <OutputColumn name="time establishing connection (ms)" tag="OTHER"/>
+        <OutputColumn name="total time from request to receipt (ms)" tag="OTHER"/>
     </Definition>
 </CustomTxtTraceDefinitionList>
