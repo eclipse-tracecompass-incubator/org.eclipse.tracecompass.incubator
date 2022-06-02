@@ -15,7 +15,7 @@
     <Definition category="Syslog" name="HAProxy">
         <InputLine>
             <Cardinality max="2147483647" min="0"/>
-            <RegEx>\S+\s\S+\s\S+\s(\S+)\s(\S+):\s(\S+)\s\[(\S+)\]\s(\S+)[\_\-]in(\S*)\s\S+[\_\-]out(\S+)\s(\S+)\s(\S+)\s(.*\S)</RegEx>
+            <RegEx>\S+\s+\S+\s\S+\s(\S+)\s(\S+):\s(\S+)\s\[(\S+)\]\s(\S+)[\_\-]in(\S*)\s\S+[\_\-]out(\S+)\s(\S+)\s(\S+)\s(.*\S)</RegEx>
             <InputData action="0" format="" name="selfIP" tag="OTHER"/>
             <InputData action="0" format="" name="Source" tag="OTHER"/>
             <InputData action="0" format="" name="IP" tag="OTHER"/>
