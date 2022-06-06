@@ -14,10 +14,12 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.s
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,6 +33,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ColumnHeaderEntryStub;
@@ -55,6 +58,7 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XySeriesStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp.TestDataProviderService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
@@ -453,4 +457,74 @@ public class DataProviderServiceTest extends RestServerTest {
         }
     }
 
+    /**
+     * Using the custom data provider verify that only allowed types (Number,
+     * String) are serialized in the metadata map of time graph entries.
+     */
+    @Test
+    public void testTimeGraphMetaDataSerializer() {
+        @SuppressWarnings("resource")
+        Response treeResponse = null;
+        try {
+            ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_STUB.getName(), CONTEXT_SWITCHES_UST_STUB);
+
+            // Test getting the time graph tree
+            WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), TestDataProviderService.INVALID_ENTRY_METADATA);
+
+            Map<String, Object> parameters = new HashMap<>();
+            TgTreeOutputResponseStub responseModel;
+            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(1450193697034689597L, 1450193745774189602L));
+            treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+            assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
+            responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
+            assertNotNull(responseModel);
+
+            // Verify Time Graph Entries
+            Set<TimeGraphEntryStub> entries = responseModel.getModel().getEntries();
+            assertEquals(2, entries.size());
+            for (TimeGraphEntryStub entry : entries) {
+                verifyEntry(entry);
+            }
+        } catch (ProcessingException e) {
+            // The failure from this exception alone is not helpful. Use the
+            // suppressed exception's message be the failure message for more
+            // help debugging failed tests.
+            fail(e.getCause().getMessage());
+        } finally {
+            if (treeResponse != null) {
+                treeResponse.close();
+            }
+        }
+    }
+
+    private static void verifyMetadata(Map<String, Collection<Object>> metadata, String key, Class<?> clazz) {
+        Collection<Object> col = metadata.get(key);
+        assertNotNull(key, col);
+        assertTrue(key, col.stream().allMatch(clazz::isInstance));
+    }
+
+    private static void verifyEntry(TimeGraphEntryStub entry) {
+        assertFalse(entry.getLabels().isEmpty());
+        if (entry.getLabels().get(0).equals(TestDataProviderService.ENTRY_NAME_WITH_METADATA)) {
+            // Verify supported values for metadata in entry
+            @Nullable Map<String, Collection<Object>> metadata = entry.getMetadata();
+            assertNotNull(metadata);
+            verifyMetadata(metadata, TestDataProviderService.VALID_TEST_KEY_BYTE, Number.class);
+            verifyMetadata(metadata, TestDataProviderService.VALID_TEST_KEY_SHORT, Number.class);
+            verifyMetadata(metadata, TestDataProviderService.VALID_TEST_KEY_INT, Number.class);
+            verifyMetadata(metadata, TestDataProviderService.VALID_TEST_KEY_LONG, Number.class);
+            verifyMetadata(metadata, TestDataProviderService.VALID_TEST_KEY_FLOAT, Number.class);
+            verifyMetadata(metadata, TestDataProviderService.VALID_TEST_KEY_DOUBLE, Number.class);
+            verifyMetadata(metadata, TestDataProviderService.VALID_TEST_KEY_STRING, String.class);
+
+            // Verify unsupported object
+            Collection<Object> col = metadata.get(TestDataProviderService.INVALID_TEST_KEY);
+            assertNull(TestDataProviderService.INVALID_TEST_KEY, col);
+        }
+
+        if (entry.getLabels().get(0).equals(TestDataProviderService.ENTRY_NAME_WITHOUT_METADATA)) {
+            // Verify that entry doesn't have metadata
+            assertNull(entry.getMetadata());
+        }
+    }
 }

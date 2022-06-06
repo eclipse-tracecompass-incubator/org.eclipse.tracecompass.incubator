@@ -36,6 +36,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp.TestWebApplication;
 import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.junit.After;
@@ -54,7 +55,7 @@ import com.google.common.collect.ImmutableList;
  */
 public abstract class RestServerTest {
     private static final String SERVER = "http://localhost:8378/tsp/api"; //$NON-NLS-1$
-    private static final WebApplication fWebApp = new WebApplication(new TraceServerConfiguration(TraceServerConfiguration.TEST_PORT, false, null, null));
+    private static final WebApplication fWebApp = new TestWebApplication(new TraceServerConfiguration(TraceServerConfiguration.TEST_PORT, false, null, null));
     /**
      * Traces endpoint path (relative to application).
      */
