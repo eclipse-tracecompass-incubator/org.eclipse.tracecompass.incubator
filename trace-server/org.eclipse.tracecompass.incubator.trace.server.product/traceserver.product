@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Trace Compass Trace Server (Jersey Rest)" uid="traceserver" id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" application="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" version="0.2.0.qualifier" useFeatures="false" includeLaunchers="true">
+<product name="Trace Compass Trace Server (Jersey Rest)" uid="traceserver" id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" application="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" version="0.2.0.qualifier" useFeatures="false" includeLaunchers="true" autoIncludeRequirements="true">
 
    <configIni use="default">
    </configIni>
@@ -216,6 +216,12 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <plugin id="org.hamcrest.core"/>
       <plugin id="org.json"/>
       <plugin id="org.junit"/>
+      <plugin id="org.osgi.service.prefs"/>
+      <plugin id="org.osgi.util.function"/>
+      <plugin id="org.osgi.util.measurement"/>
+      <plugin id="org.osgi.util.position"/>
+      <plugin id="org.osgi.util.promise"/>
+      <plugin id="org.osgi.util.xml"/>
       <plugin id="org.slf4j.api"/>
       <plugin id="org.yaml.snakeyaml"/>
    </plugins>
