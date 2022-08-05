@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="TODO" uid="skeleton.tracecompass.rcp" id="skeleton.tracecompass.rcp.branding.product" application="org.eclipse.tracecompass.rcp.ui.application" version="1.0.0.qualifier" useFeatures="true" includeLaunchers="true" autoIncludeRequirements="true">
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <programArgs>-data @user.home/.skeleton-ws
+      </programArgs>
+      <programArgsLin>--launcher.GTK_version 3
+      </programArgsLin>
+      <vmArgsLin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=11
+      </vmArgsLin>
+      <vmArgsMac>-Xms512m -Xmx1024m -XstartOnFirstThread -Dosgi.requiredJavaVersion=11 -Dorg.eclipse.swt.internal.carbon.smallFonts
+      </vmArgsMac>
+      <vmArgsWin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=11
+      </vmArgsWin>
+   </launcherArgs>
+
+   <windowImages i16="/skeleton.tracecompass.rcp.branding/icons/png/tc_icon_16x16.png" i32="/skeleton.tracecompass.rcp.branding/icons/png/tc_icon_32x32.png" i48="/skeleton.tracecompass.rcp.branding/icons/png/tc_icon_48x48.png" i64="/skeleton.tracecompass.rcp.branding/icons/png/tc_icon_64x64.png" i128="/skeleton.tracecompass.rcp.branding/icons/png/tc_icon_128x128.png" i256="/skeleton.tracecompass.rcp.branding/icons/png/tc_icon_256x256.png"/>
+
+   <splash
+      location="skeleton.tracecompass.rcp.branding" />
+   <launcher name="skeleton-launcher">
+      <linux icon="../skeleton.tracecompass.rcp.branding/icons/xpm/tc_icon_256x256.xpm"/>
+      <macosx icon="../skeleton.tracecompass.rcp.branding/icons/icns/tc_icon.icns"/>
+      <win useIco="true">
+         <ico path="../skeleton.tracecompass.rcp.branding/icons/ico/tc_icon.ico"/>
+         <bmp/>
+      </win>
+   </launcher>
+
+   <vm>
+      <linux include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</linux>
+      <macos include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</macos>
+      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</windows>
+   </vm>
+
+   <features>
+      <feature id="org.eclipse.equinox.p2.core.feature"/>
+      <feature id="org.eclipse.platform"/>
+      <feature id="org.eclipse.help"/>
+      <feature id="org.eclipse.emf.ecore"/>
+      <feature id="org.eclipse.equinox.p2.rcp.feature"/>
+      <feature id="org.eclipse.equinox.p2.user.ui"/>
+      <feature id="org.eclipse.tracecompass.tmf"/>
+      <feature id="org.eclipse.rcp"/>
+      <feature id="org.eclipse.e4.rcp"/>
+      <feature id="org.eclipse.emf.common"/>
+      <feature id="org.eclipse.equinox.p2.extras.feature"/>
+      <feature id="org.eclipse.tracecompass.ctf"/>
+      <feature id="org.eclipse.tracecompass.tmf.ctf"/>
+      <feature id="org.eclipse.tracecompass.tmf.cli"/>
+      <feature id="org.eclipse.tracecompass.tmf.pcap"/>
+      <feature id="org.eclipse.ecf.core.ssl.feature"/>
+      <feature id="org.eclipse.ecf.filetransfer.ssl.feature"/>
+      <feature id="org.eclipse.ecf.core.feature"/>
+      <feature id="org.eclipse.ecf.filetransfer.feature"/>
+      <feature id="org.eclipse.ecf.filetransfer.httpclient5.feature"/>
+      <feature id="org.eclipse.tracecompass.tmf.cli" installMode="root"/>
+      <feature id="org.eclipse.tracecompass.rcp" installMode="root"/>
+      <feature id="org.eclipse.tracecompass.incubator.filters" installMode="root"/>
+      <feature id="org.eclipse.tracecompass.incubator.scripting" installMode="root"/>
+      <feature id="org.eclipse.tracecompass.incubator.scripting.javascript" installMode="root"/>
+      <feature id="org.eclipse.tracecompass.incubator.scripting.python" installMode="root"/>
+      <feature id="skeleton.tracecompass.rcp" installMode="root"/>
+      <feature id="skeleton.tracecompass.rcp.branding.feature" installMode="root"/>
+   </features>
+
+   <configurations>
+      <plugin id="org.apache.felix.scr" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="4" />
+      <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
+      <plugin id="org.eclipse.tracecompass.rcp.ui" autoStart="false" startLevel="5" />
+      <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="3" />
+   </configurations>
+
+   <preferencesInfo>
+      <targetfile overwrite="false"/>
+   </preferencesInfo>
+
+   <cssInfo>
+   </cssInfo>
+
+</product>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>skeleton.tracecompass.parent</artifactId>
+    <groupId>skeleton.tracecompass</groupId>
+    <version>0.2.0-SNAPSHOT</version>
+    <relativePath>../skeleton.tracecompass.parent/pom.xml</relativePath>
+  </parent>
+
+  <artifactId>skeleton.tracecompass.rcp</artifactId>
+  <packaging>eclipse-feature</packaging>
+
+  <name>skeleton RCP Feature</name>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho.extras</groupId>
+        <artifactId>tycho-source-feature-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <executions>
+          <execution>
+            <id>source-feature</id>
+            <phase>package</phase>
+            <goals>
+              <goal>source-feature</goal>
+            </goals>
+            <configuration>
+              <excludes>
+                <plugin id="javax.ws.rs"/>
+                <plugin id="org.eclipse.lsp4j"/>
+                <plugin id="org.eclipse.lsp4j.jsonrpc"/>
+                <plugin id="org.eclipse.xtext.xbase.lib"/>
+                <plugin id="org.apache.commons.lang"/>
+                <plugin id="org.eclipse.ease.ui.scripts"/>
+                <plugin id="org.eclipse.ease"/>
+                <plugin id="org.eclipse.ease.classloader"/>
+                <plugin id="org.eclipse.ease.ui"/>
+                <plugin id="org.mozilla.javascript"/>
+                <plugin id="org.eclipse.wst.jsdt.ui"/>
+                <plugin id="org.eclipse.wst.jsdt.debug.ui"/>
+                <plugin id="org.eclipse.wst.jsdt.core"/>
+                <plugin id="com.google.javascript"/>
+                <plugin id="com.google.protobuf"/>
+                <plugin id="org.eclipse.wst.jsdt.debug.core"/>
+                <plugin id="org.eclipse.wst.jsdt.manipulation"/>
+                <plugin id="py4j-java"/>
+                <plugin id="py4j-python"/>
+                <plugin id="org.eclipse.ease.modules.platform"/>
+                <plugin id="org.eclipse.nebula.widgets.opal.commons"/>
+                <plugin id="org.eclipse.nebula.widgets.opal.duallist"/>
+                <plugin id="org.eclipse.tracecompass.analysis.os.linux.core"/>
+                <plugin id="org.eclipse.tracecompass.incubator.tmf.ui.multiview.ui"/>
+                <feature id ="org.eclipse.ease.lang.javascript.feature"/>
+                <feature id ="org.eclipse.ease.lang.python.py4j.feature"/>
+                <feature id ="org.eclipse.ease.lang.python.feature"/>
+                <feature id ="org.eclipse.ease.python.jython.feature"/>
+                <feature id ="org.eclipse.ease.engine.jython.feature"/>
+              </excludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-p2-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <executions>
+          <execution>
+            <id>attached-p2-metadata</id>
+            <phase>package</phase>
+            <goals>
+              <goal>p2-metadata</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
