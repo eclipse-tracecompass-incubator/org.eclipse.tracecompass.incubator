@@ -27,7 +27,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Bernd Hufmann
  */
 @NonNullByDefault
-public class EndpointConstants {
+public final class EndpointConstants {
 
     /** Error message returned for a request with missing parameters */
     public static final String MISSING_PARAMETERS = "Missing query parameters"; //$NON-NLS-1$
