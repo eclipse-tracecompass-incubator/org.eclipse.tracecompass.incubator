@@ -46,14 +46,15 @@ public final class EndpointConstants {
 
     /** Query parameter key for requested time range */
     private static final String REQUESTED_TIMERANGE_KEY = "requested_timerange"; //$NON-NLS-1$
+
     /**
-     * Swagger constants redefined out of TmfEventTableDataProvider non-API
+     * Swagger constants redefined out of AbstractTmfTableDataProvider non-API
      * restriction. This is unlike constants in DataProviderParameterUtils.
      */
     @SuppressWarnings("restriction")
-    private static final String TABLE_SEARCH_DIRECTION_KEY = org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider.TABLE_SEARCH_DIRECTION_KEY;
+    private static final String TABLE_SEARCH_DIRECTION_KEY = org.eclipse.tracecompass.internal.tmf.core.model.AbstractTmfTableDataProvider.TABLE_SEARCH_DIRECTION_KEY;
     @SuppressWarnings("restriction")
-    private static final String TABLE_SEARCH_EXPRESSION_KEY = org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider.TABLE_SEARCH_EXPRESSION_KEY;
+    private static final String TABLE_SEARCH_EXPRESSION_KEY = org.eclipse.tracecompass.internal.tmf.core.model.AbstractTmfTableDataProvider.TABLE_SEARCH_EXPRESSION_KEY;
 
     /**
      * Swagger OpenAPI definitions used in the related annotations from
