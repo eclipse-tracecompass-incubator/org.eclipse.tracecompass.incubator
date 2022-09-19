@@ -18,6 +18,8 @@ import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParamet
 import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_TABLE_COUNT_KEY;
 import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_TABLE_INDEX_KEY;
 import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.REQUESTED_TIME_KEY;
+import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.TABLE_SEARCH_DIRECTION_KEY;
+import static org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils.TABLE_SEARCH_EXPRESSIONS_KEY;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -46,15 +48,6 @@ public final class EndpointConstants {
 
     /** Query parameter key for requested time range */
     private static final String REQUESTED_TIMERANGE_KEY = "requested_timerange"; //$NON-NLS-1$
-
-    /**
-     * Swagger constants redefined out of AbstractTmfTableDataProvider non-API
-     * restriction. This is unlike constants in DataProviderParameterUtils.
-     */
-    @SuppressWarnings("restriction")
-    private static final String TABLE_SEARCH_DIRECTION_KEY = org.eclipse.tracecompass.internal.tmf.core.model.AbstractTmfTableDataProvider.TABLE_SEARCH_DIRECTION_KEY;
-    @SuppressWarnings("restriction")
-    private static final String TABLE_SEARCH_EXPRESSION_KEY = org.eclipse.tracecompass.internal.tmf.core.model.AbstractTmfTableDataProvider.TABLE_SEARCH_EXPRESSION_KEY;
 
     /**
      * Swagger OpenAPI definitions used in the related annotations from
@@ -103,7 +96,7 @@ public final class EndpointConstants {
             "Matching events will be tagged. " + //$NON-NLS-1$
             "If no matches are found, an empty list will be returned."; //$NON-NLS-1$
     static final String ELEMENT = " The object '" + REQUESTED_ELEMENT_KEY + "' is the element for which the tooltip is requested."; //$NON-NLS-1$ //$NON-NLS-2$
-    static final String EXPRESSIONS = "Use '" + TABLE_SEARCH_EXPRESSION_KEY + "' for search providing a map of <columnId, regular expression>. Returned lines that match the search expression will be tagged. "; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String EXPRESSIONS = "Use '" + TABLE_SEARCH_EXPRESSIONS_KEY + "' for search providing a map of <columnId, regular expression>. Returned lines that match the search expression will be tagged. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String INDEX = "If '" + REQUESTED_TABLE_INDEX_KEY + "' is used it is the starting index of the lines to be returned. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ITEMS = "The array '" + REQUESTED_ITEMS_KEY + "' is the list of entryId being requested."; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ITEMS_TT = "The array '" + REQUESTED_ITEMS_KEY + "' is an array with a single entryId being requested. "; //$NON-NLS-1$ //$NON-NLS-2$
@@ -124,7 +117,7 @@ public final class EndpointConstants {
     static final String COUNT_EX = "\"" + REQUESTED_TABLE_COUNT_KEY + "\": 100,"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String DIRECTION_EX = "\"" + TABLE_SEARCH_DIRECTION_KEY + "\": \"NEXT\""; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ELEMENT_EX = "\"" + REQUESTED_ELEMENT_KEY + "\": {\"elementType\": \"state\", \"time\": 111100000, \"duration\": 100000}"; //$NON-NLS-1$ //$NON-NLS-2$
-    static final String EXPRESSIONS_EX = "\"" + TABLE_SEARCH_EXPRESSION_KEY + "\": {\"1\": \"cpu.*\"},"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String EXPRESSIONS_EX = "\"" + TABLE_SEARCH_EXPRESSIONS_KEY + "\": {\"1\": \"cpu.*\"},"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String INDEX_EX = "\"" + REQUESTED_TABLE_INDEX_KEY + "\": 0,"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ITEMS_EX = "\"" + REQUESTED_ITEMS_KEY + "\": [1, 2]"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ITEMS_EX_TT = "\"" + REQUESTED_ITEMS_KEY + "\": [1],"; //$NON-NLS-1$ //$NON-NLS-2$
