@@ -28,12 +28,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.scripting.core.analysis.ScriptedAnalysis;
-import org.eclipse.tracecompass.internal.tmf.core.model.AbstractTmfTraceDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
+import org.eclipse.tracecompass.tmf.core.model.AbstractTmfTraceDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
@@ -57,7 +57,6 @@ import com.google.common.collect.Multimap;
  * @author Loic Prieur-Drevon
  * @author Geneviève Bastien
  */
-@SuppressWarnings("restriction")
 public class ScriptedTimeGraphDataProvider extends AbstractTmfTraceDataProvider implements ITimeGraphDataProvider<ITimeGraphEntryModel> {
 
     /**

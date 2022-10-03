@@ -52,7 +52,6 @@ import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTr
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.FlameChartEntryModel.EntryType;
 import org.eclipse.tracecompass.internal.provisional.statesystem.core.statevalue.CustomStateValue;
-import org.eclipse.tracecompass.internal.tmf.core.model.AbstractTmfTraceDataProvider;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
@@ -64,6 +63,7 @@ import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
+import org.eclipse.tracecompass.tmf.core.model.AbstractTmfTraceDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
 import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
 import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;

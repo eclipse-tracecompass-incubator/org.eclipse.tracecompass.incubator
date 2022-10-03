@@ -30,7 +30,6 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.inputoutput.Disk
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.inputoutput.DiskUtils;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.inputoutput.InputOutputAnalysisModule;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.inputoutput.IoOperationType;
-import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
@@ -42,6 +41,7 @@ import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;

@@ -22,12 +22,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
-import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
@@ -151,7 +151,6 @@ public class ObjectLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         return true;
     }
 
-    @SuppressWarnings("restriction")
     @Override
     protected @NonNull TmfTreeModel<@NonNull TimeGraphEntryModel> getTree(@NonNull ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
         Builder<@NonNull TimeGraphEntryModel> builder = new Builder<>();

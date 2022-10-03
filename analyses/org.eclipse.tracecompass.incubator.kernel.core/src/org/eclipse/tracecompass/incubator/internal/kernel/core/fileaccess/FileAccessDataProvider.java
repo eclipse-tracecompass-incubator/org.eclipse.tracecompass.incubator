@@ -37,7 +37,6 @@ import org.eclipse.tracecompass.incubator.internal.kernel.core.fileaccess.FileEn
 import org.eclipse.tracecompass.incubator.internal.kernel.core.io.IoAnalysis;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.io.IoStateProvider;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
-import org.eclipse.tracecompass.internal.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
@@ -49,6 +48,7 @@ import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.core.model.filters.SelectionTimeQueryFilter;
+import org.eclipse.tracecompass.tmf.core.model.timegraph.AbstractTimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphRowModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphState;
