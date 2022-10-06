@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="tracecompass-incubator-master" sequenceNumber="60">
+<target name="tracecompass-incubator-master" sequenceNumber="61">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.cdt.gnu.dsf.feature.group" version="0.0.0"/>
@@ -169,7 +169,7 @@
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.tracecompass.testtraces.tracecompass-test-traces-ctf" version="0.0.0"/>
 <unit id="org.eclipse.tracecompass.testtraces.tracecompass-test-traces-ftrace" version="0.0.0"/>
-<repository location="https://archive.eclipse.org/tracecompass/tracecompass-test-traces/repository/1.8.0/"/>
+<repository location="https://archive.eclipse.org/tracecompass/tracecompass-test-traces/repository/1.9.0/"/>
 </location>
 	<location includeDependencyScope="provided" includeSource="true" missingManifest="generate" type="Maven">
 		<dependencies>
