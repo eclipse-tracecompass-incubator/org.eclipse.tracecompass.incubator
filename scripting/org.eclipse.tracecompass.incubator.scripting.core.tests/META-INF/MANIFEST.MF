@@ -5,7 +5,7 @@ Bundle-Vendor: %Bundle-Vendor
 Bundle-SymbolicName: org.eclipse.tracecompass.incubator.scripting.core.tests
 Bundle-Version: 0.1.1.qualifier
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Activator: org.eclipse.tracecompass.incubator.scripting.core.tests.ActivatorTest
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.core.runtime,
