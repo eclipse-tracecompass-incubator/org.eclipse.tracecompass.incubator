@@ -177,7 +177,7 @@
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.tracecompass.testtraces.tracecompass-test-traces-ctf" version="0.0.0"/>
 <unit id="org.eclipse.tracecompass.testtraces.tracecompass-test-traces-ftrace" version="0.0.0"/>
-<repository location="https://archive.eclipse.org/tracecompass/tracecompass-test-traces/repository/1.8.0/"/>
+<repository location="https://archive.eclipse.org/tracecompass/tracecompass-test-traces/repository/1.9.0/"/>
 </location>
     <location includeDependencyScope="provided" includeSource="true" missingManifest="generate" type="Maven">
         <dependencies>
