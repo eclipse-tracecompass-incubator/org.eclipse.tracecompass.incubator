@@ -14,7 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.Annotation;
+import org.eclipse.tracecompass.tmf.core.model.annotations.Annotation;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;

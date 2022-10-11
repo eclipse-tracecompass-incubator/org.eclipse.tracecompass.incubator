@@ -51,9 +51,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
-import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.TraceAnnotationProvider;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.model.annotations.TraceAnnotationProvider;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
@@ -71,7 +71,6 @@ import com.google.common.collect.Multiset;
  *
  * @author Loic Prieur-Drevon
  */
-@SuppressWarnings("restriction")
 @Path("/experiments")
 public class ExperimentManagerService {
 
