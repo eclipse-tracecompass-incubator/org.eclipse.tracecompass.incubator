@@ -116,13 +116,31 @@ class FlowsLocation extends Location implements IFlowsNode {
     }
 
     /**
+     * Getter for the fOutputMessageSize attribute
+     *
+     * @return The output message size
+     */
+    public Long getOutputMessageSize() {
+        return fOutputMessageSize;
+    }
+
+    /**
      * Updates the fOutputMessageSize field with a new value
      *
      * @param messageLength
      *            the new value for the fOutputMessageSize field
      */
-    public void updateOutputMessageSize(Long messageLength) {
+    public void setOutputMessageSize(Long messageLength) {
         fOutputMessageSize = messageLength;
+    }
+
+    /**
+     * Getter for the fInputMessageSize attribute
+     *
+     * @return The input message size
+     */
+    public Long getInputMessageSize() {
+        return fInputMessageSize;
     }
 
     /**
@@ -131,7 +149,7 @@ class FlowsLocation extends Location implements IFlowsNode {
      * @param messageLength
      *            the new value for the fInputMessageSize field
      */
-    public void updateInputMessageSize(Long messageLength) {
+    public void setInputMessageSize(Long messageLength) {
         fInputMessageSize = messageLength;
     }
 

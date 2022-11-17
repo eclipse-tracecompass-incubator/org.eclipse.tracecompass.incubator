@@ -67,4 +67,9 @@ public interface IOtf2GlobalDefinitions {
      * Metric class name
      */
     String OTF2_METRIC_CLASS = "MetricClass"; //$NON-NLS-1$
+
+    /**
+     * Attribute definition name
+     */
+    String OTF2_ATTRIBUTE = "Attribute"; //$NON-NLS-1$
 }

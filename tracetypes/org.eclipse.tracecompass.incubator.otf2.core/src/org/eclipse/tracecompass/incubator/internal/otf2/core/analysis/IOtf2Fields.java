@@ -168,6 +168,16 @@ public interface IOtf2Fields {
     String OTF2_VALUE_TYPE = "valueType"; //$NON-NLS-1$
 
     /**
+     * Value field name
+     */
+    String OTF2_VALUE = "value"; //$NON-NLS-1$
+
+    /**
+     * Type field name
+     */
+    String OTF2_TYPE = "type"; //$NON-NLS-1$
+
+    /**
      * Base field name
      */
     String OTF2_BASE = "base"; //$NON-NLS-1$
@@ -196,4 +206,9 @@ public interface IOtf2Fields {
      * Index field name
      */
     String OTF2_INDEX = "index"; //$NON-NLS-1$
+
+    /**
+     * Attribute field name
+     */
+    String OTF2_ATTRIBUTE = "attribute"; //$NON-NLS-1$
 }

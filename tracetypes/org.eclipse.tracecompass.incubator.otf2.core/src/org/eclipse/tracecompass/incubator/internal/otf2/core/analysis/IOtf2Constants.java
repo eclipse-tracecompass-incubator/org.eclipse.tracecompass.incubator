@@ -56,6 +56,11 @@ public interface IOtf2Constants {
     String OTF2_EVENT = "Event"; //$NON-NLS-1$
 
     /**
+     * Attribute event type
+     */
+    String OTF2_ATTRIBUTE = "EventAttribute"; //$NON-NLS-1$
+
+    /**
      * Enum for collective MPI operations
      */
     enum CollectiveOperation {

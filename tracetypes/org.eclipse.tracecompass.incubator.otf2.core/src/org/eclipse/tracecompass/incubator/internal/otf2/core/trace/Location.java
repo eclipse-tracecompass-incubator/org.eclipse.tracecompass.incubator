@@ -26,8 +26,6 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
  */
 public class Location {
 
-    private static final String UNKNOWN = "UNKNOWN"; //$NON-NLS-1$
-
     private final long fId;
     private final long fNameId;
     private final long fLocationGroupId;
@@ -60,7 +58,7 @@ public class Location {
     public String getName(Map<Integer, String> stringIdMap) {
         String name = stringIdMap.get((int) fNameId);
         if (name == null) {
-            return UNKNOWN;
+            return IOtf2Constants.UNKNOWN_STRING;
         }
         return name;
     }
