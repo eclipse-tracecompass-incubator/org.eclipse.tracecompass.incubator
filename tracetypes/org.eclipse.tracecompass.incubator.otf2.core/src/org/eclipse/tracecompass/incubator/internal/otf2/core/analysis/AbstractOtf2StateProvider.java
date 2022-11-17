@@ -21,6 +21,7 @@ import java.util.regex.Matcher;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.callstack.Otf2CallStackStateProvider;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.trace.AttributeDefinition;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
@@ -51,9 +52,9 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
     protected static final int UNKNOWN_ID = -1;
 
     /**
-     * Unknown string
+     * Attribute id to attribute event definition
      */
-    protected static final String UNKNOWN = "UNKNOWN"; //$NON-NLS-1$
+    protected final Map<Integer, AttributeDefinition> fAttributeDefinitions;
 
     /**
      * String id to string value mapping
@@ -89,6 +90,7 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
         fRegionStringId = new HashMap<>();
         fCommunicatorGroup = new HashMap<>();
         fGroupMembers = new HashMap<>();
+        fAttributeDefinitions = new HashMap<>();
     }
 
     @Override
@@ -130,9 +132,27 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
             processOtf2Event(event, otf2EventName, ssb);
             break;
         }
+        case IOtf2Constants.OTF2_ATTRIBUTE: {
+            processOtf2EventAttribute(event, otf2EventName, ssb);
+            break;
+        }
         default:
             return;
         }
+    }
+
+    /**
+     * Process OTF2 Event attribute
+     *
+     * @param event
+     *            The event to process
+     * @param otf2EventName
+     *            The attribute name
+     * @param ssb
+     *            The state system builder
+     */
+    protected void processOtf2EventAttribute(ITmfEvent event, String otf2EventName, ITmfStateSystemBuilder ssb) {
+        // Do nothing
     }
 
     /**
@@ -245,6 +265,22 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
     }
 
     /**
+     * Default method to process an attribute definition
+     *
+     * @param event
+     *            The event to process
+     */
+    protected void processAttributeDefinition(ITmfEvent event) {
+        Integer attributeId = event.getContent().getFieldValue(Integer.class, IOtf2Fields.OTF2_SELF);
+        Integer nameId = event.getContent().getFieldValue(Integer.class, IOtf2Fields.OTF2_NAME);
+        Integer descriptionId = event.getContent().getFieldValue(Integer.class, IOtf2Fields.OTF2_DESCRIPTION);
+        Integer typeId = event.getContent().getFieldValue(Integer.class, IOtf2Fields.OTF2_TYPE);
+        if (attributeId != null && nameId != null && descriptionId != null && typeId != null) {
+            fAttributeDefinitions.put(attributeId, new AttributeDefinition(nameId, descriptionId, typeId));
+        }
+    }
+
+    /**
      * Process an OTF2 event
      *
      * @param event
@@ -276,7 +312,7 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
      *            The event
      * @return The location id
      */
-    protected static long getLocationId(ITmfEvent event) {
+    protected long getLocationId(ITmfEvent event) {
         ITmfEventField content = event.getContent();
         Long locationId = content.getFieldValue(Long.class, IOtf2Fields.OTF2_LOCATION_ID);
         return (locationId != null) ? locationId : UNKNOWN_LOCATION_ID;
@@ -308,7 +344,7 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
     protected String getStringFromStringId(int stringId) {
         String stringValue = fStringId.get(stringId);
         if (stringValue == null) {
-            return UNKNOWN;
+            return IOtf2Constants.UNKNOWN_STRING;
         }
         return stringValue;
     }
@@ -322,7 +358,7 @@ public abstract class AbstractOtf2StateProvider extends AbstractTmfStateProvider
     protected String getRegionNameFromRegionId(int regionId) {
         Integer stringId = fRegionStringId.get(regionId);
         if (stringId == null) {
-            return UNKNOWN;
+            return IOtf2Constants.UNKNOWN_STRING;
         }
         return getStringFromStringId(stringId);
     }

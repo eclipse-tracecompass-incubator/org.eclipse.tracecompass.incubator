@@ -33,7 +33,7 @@ public abstract class AbstractOtf2Analysis extends TmfStateSystemAnalysisModule 
      * @param id
      *            the full analysis ID
      */
-    public AbstractOtf2Analysis(String id) {
+    protected AbstractOtf2Analysis(String id) {
         setId(Objects.requireNonNull(id));
     }
 

@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -100,8 +101,8 @@ public class Otf2FlowsDataProvider extends AbstractTimeGraphDataProvider<Otf2Flo
     @Override
     public TmfModelResponse<Map<String, String>> fetchTooltip(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         ITmfStateSystem ss = getAnalysisModule().getStateSystem();
-        @Nullable List<Long> requestedTimes = DataProviderParameterUtils.extractTimeRequested(fetchParameters);
-        @Nullable List<Long> requestedEntries = DataProviderParameterUtils.extractSelectedItems(fetchParameters);
+        List<Long> requestedTimes = DataProviderParameterUtils.extractTimeRequested(fetchParameters);
+        List<Long> requestedEntries = DataProviderParameterUtils.extractSelectedItems(fetchParameters);
         if (ss == null || requestedEntries == null || requestedEntries.size() != 1 || requestedTimes == null || requestedTimes.size() != 1) {
             return new TmfModelResponse<>(null, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
         }
@@ -130,48 +131,29 @@ public class Otf2FlowsDataProvider extends AbstractTimeGraphDataProvider<Otf2Flo
         return new TmfModelResponse<>(model, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
-    /**
-     * Returns the depth of a quark in the state system
-     *
-     * @param ss
-     *            the state system
-     * @param quark
-     *            the quark for which we want to know the depth
-     * @return the depth of the quark in the state system
-     */
-    private int getQuarkDepth(ITmfStateSystem ss, int quark) {
-        int parentQuark = ss.getParentAttributeQuark(quark);
-        if (parentQuark == ITmfStateSystem.ROOT_ATTRIBUTE) {
-            return 0;
+    private void fillLeafQuarks(ITmfStateSystem ss, Map<Integer, FlowsRowModel> quarkRowMap, List<Integer> leafQuarks, int quark) {
+        List<Integer> subQuarks = ss.getSubAttributes(quark, false);
+        if (subQuarks.isEmpty()) {
+            leafQuarks.add(quark);
         }
-        return 1 + getQuarkDepth(ss, parentQuark);
+        FlowsRowModel parentFlowsRowModel = quarkRowMap.get(quark);
+        for (Integer subQuark : subQuarks) {
+            quarkRowMap.put(subQuark, new FlowsRowModel(getId(subQuark), new ArrayList<>(), parentFlowsRowModel));
+            fillLeafQuarks(ss, quarkRowMap, leafQuarks, subQuark);
+        }
     }
 
-    private static final int MAX_DEPTH = 4;
-
-    /**
-     * Return a map associating depths to the list of quarks at this depth in
-     * the state system
-     *
-     * @param ss
-     *            the state system
-     * @return a map associating depths to the list of quarks at this depth in
-     *         the state system
-     */
-    private Map<Integer, List<Integer>> getDepthToQuarksMap(ITmfStateSystem ss) {
-        List<Integer> allQuarks = ss.getSubAttributes(ITmfStateSystem.ROOT_ATTRIBUTE, true);
-        Map<Integer, List<Integer>> depthToQuarks = new HashMap<>();
-        for (int depth = 0; depth <= MAX_DEPTH; depth++) {
-            depthToQuarks.put(depth, new ArrayList<>());
-        }
-        for (int quark : allQuarks) {
-            int depth = getQuarkDepth(ss, quark);
-            List<Integer> quarksAtThisDepth = depthToQuarks.get(depth);
-            if (quarksAtThisDepth != null) {
-                quarksAtThisDepth.add(quark);
+    private void fillRowModels(ITmfStateSystem ss, Map<Integer, FlowsRowModel> quarkRowMap, int childQuark, Map<Integer, Predicate<Multimap<String, Object>>> predicates, @Nullable IProgressMonitor monitor) {
+        Integer parentQuark = ss.getParentAttributeQuark(childQuark);
+        if (parentQuark != ITmfStateSystem.ROOT_ATTRIBUTE) {
+            FlowsRowModel parentFlowRowModel = quarkRowMap.get(childQuark);
+            FlowsRowModel flowRowModel = quarkRowMap.get(parentQuark);
+            if (parentFlowRowModel != null && flowRowModel != null) {
+                flowRowModel.computeStatisticsAndStates(this, predicates, monitor);
+                quarkRowMap.put(parentQuark, flowRowModel);
+                fillRowModels(ss, quarkRowMap, parentQuark, predicates, monitor);
             }
         }
-        return depthToQuarks;
     }
 
     @Override
@@ -186,64 +168,36 @@ public class Otf2FlowsDataProvider extends AbstractTimeGraphDataProvider<Otf2Flo
         if (filter == null) {
             return null;
         }
-
         Collection<Long> times = getTimes(filter, ss.getStartTime(), ss.getCurrentEndTime());
 
-        Map<Integer, List<Integer>> depthToQuark = getDepthToQuarksMap(ss);
-        Map<Long, FlowsRowModel> idRowModelMap = new HashMap<>();
+        // Query the intervals for the leaf quarks (Threads) and create flows
+        // row models.
+        List<Integer> leafQuarks = new ArrayList<>();
+        Map<Integer, FlowsRowModel> quarkRowMap = new HashMap<>();
+        fillLeafQuarks(ss, quarkRowMap, leafQuarks, ITmfStateSystem.ROOT_ATTRIBUTE);
 
-        //Initialize row models
-        for (int depth = 0; depth <= MAX_DEPTH; depth++) {
-            List<Integer> quarksAtThisDepth = depthToQuark.get(depth);
-            if (quarksAtThisDepth == null) {
-                return null;
-            }
-            for (int quark : quarksAtThisDepth) {
-                long entryId = getId(quark);
-                int parentQuark = ss.getParentAttributeQuark(quark);
-                long parentEntryId = getId(parentQuark);
-                FlowsRowModel parentRowModel = null;
-                if (parentQuark != ITmfStateSystem.ROOT_ATTRIBUTE) {
-                    parentRowModel = idRowModelMap.get(parentEntryId);
-                }
-                idRowModelMap.put(entryId, new FlowsRowModel(entryId, new ArrayList<>(), parentRowModel));
-            }
-        }
-
-        // Query the intervals for the quarks at maximum depth (representing
-        // threads) and fill the row models
-        List<Integer> threadQuarks = depthToQuark.get(MAX_DEPTH);
-        if (threadQuarks == null) {
-            return null;
-        }
-        for (ITmfStateInterval interval : ss.query2D(threadQuarks, times)) {
+        // Add Flow from the state system
+        for (ITmfStateInterval interval : ss.query2D(leafQuarks, times)) {
             int quark = interval.getAttribute();
-            long entryId = getId(quark);
-            FlowsRowModel rowModel = idRowModelMap.get(entryId);
             long startTime = interval.getStartTime();
             long endTime = interval.getEndTime();
             double flowValue = interval.getValueDouble();
+            FlowsRowModel rowModel = quarkRowMap.get(quark);
             if (rowModel != null) {
                 rowModel.addFlowChange(startTime, flowValue);
                 rowModel.addFlowChange(endTime, -flowValue);
             }
         }
-
+        // Calculate flow of the parents
+        for (int leafQuark : leafQuarks) {
+            fillRowModels(ss, quarkRowMap, leafQuark, predicates, monitor);
+        }
         List<ITimeGraphRowModel> rows = new ArrayList<>();
-        for (int depth = 0; depth <= MAX_DEPTH; depth++) {
-            List<Integer> quarksAtThisDepth = depthToQuark.get(depth);
-            if (quarksAtThisDepth == null) {
-                return null;
-            }
-            for (int quark : quarksAtThisDepth) {
-                long entryId = getId(quark);
-                FlowsRowModel rowModel = idRowModelMap.get(entryId);
-                if (rowModel != null) {
-                    rowModel.computeStatisticsAndStates(this, predicates, monitor);
-                    List<ITimeGraphState> eventList = rowModel.getStates();
-                    rows.add(new TimeGraphRowModel(entryId, eventList));
-                }
-            }
+        // Retrieve the resulting rows
+        for (Map.Entry<Integer, FlowsRowModel> entry : quarkRowMap.entrySet()) {
+            long entryId = getId(entry.getKey());
+            List<ITimeGraphState> eventList = Objects.requireNonNull(entry.getValue()).getStates();
+            rows.add(new TimeGraphRowModel(entryId, eventList));
         }
         return new TimeGraphModel(rows);
     }

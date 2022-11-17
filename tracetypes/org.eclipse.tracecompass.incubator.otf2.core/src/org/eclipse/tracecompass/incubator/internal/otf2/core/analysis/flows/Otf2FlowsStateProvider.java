@@ -11,14 +11,23 @@
 
 package org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.flows;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.AbstractOtf2StateProvider;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Events;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Fields;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2GlobalDefinitions;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.Otf2Type;
+import org.eclipse.tracecompass.incubator.internal.otf2.core.trace.AttributeDefinition;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.util.Pair;
 
 /**
  * State provider for the OTF2 MPI messages flow analysis
@@ -28,11 +37,14 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 public class Otf2FlowsStateProvider extends AbstractOtf2StateProvider {
 
-    private static int VERSION_NUMBER = 1;
+    private static final int VERSION_NUMBER = 1;
     private final FlowsNodeMap<Long, FlowsLocation> fMapLocation = new FlowsNodeMap<>();
     private final FlowsNodeMap<Long, FlowsLocationGroup> fMapLocationGroup = new FlowsNodeMap<>();
     private final FlowsNodeMap<Long, FlowsSystemTreeNode> fMapSystemTreeNode = new FlowsNodeMap<>();
-    private boolean initialized = false;
+    /** List of event attributes in pairs of attributeId and attributeValue */
+    private List<Pair<Integer, Object>> fEventAttributes = new ArrayList<>();
+    private Map<FlowsLocation, FlowsLocation> fRankToAcceleratorMap = new HashMap<>();
+    private boolean fInitialized = false;
 
     /**
      * Constructor
@@ -84,6 +96,10 @@ public class Otf2FlowsStateProvider extends AbstractOtf2StateProvider {
             processSystemTreeNodeDefinition(event);
             break;
         }
+        case IOtf2GlobalDefinitions.OTF2_ATTRIBUTE: {
+            processAttributeDefinition(event);
+            break;
+        }
         default:
             return;
         }
@@ -122,26 +138,29 @@ public class Otf2FlowsStateProvider extends AbstractOtf2StateProvider {
         fMapSystemTreeNode.put(systemTreeNode.getId(), systemTreeNode);
     }
 
+    private void initializeQuarks(ITmfStateSystemBuilder ssb) {
+        for (FlowsSystemTreeNode systemTreeNode : fMapSystemTreeNode.values()) {
+            if (systemTreeNode != null) {
+                systemTreeNode.initializeQuarks(ssb, fMapSystemTreeNode, getStringId());
+            }
+        }
+        for (FlowsLocationGroup locationGroup : fMapLocationGroup.values()) {
+            if (locationGroup != null) {
+                locationGroup.initializeQuarks(ssb, fMapSystemTreeNode, getStringId());
+            }
+        }
+        for (FlowsLocation location : fMapLocation.values()) {
+            if (location != null) {
+                location.initializeQuarks(ssb, fMapLocationGroup, getStringId());
+            }
+        }
+        fInitialized = true;
+    }
+
     @Override
     protected void processOtf2Event(ITmfEvent event, String name, ITmfStateSystemBuilder ssb) {
-        if (!initialized) {
-            for (FlowsSystemTreeNode systemTreeNode : fMapSystemTreeNode.values()) {
-                if (systemTreeNode != null) {
-                    systemTreeNode.initializeQuarks(ssb, fMapSystemTreeNode, getStringId());
-                }
-            }
-            for (FlowsLocationGroup locationGroup : fMapLocationGroup.values()) {
-                if (locationGroup != null) {
-                    locationGroup.initializeQuarks(ssb, fMapSystemTreeNode, getStringId());
-                }
-
-            }
-            for (FlowsLocation location : fMapLocation.values()) {
-                if (location != null) {
-                    location.initializeQuarks(ssb, fMapLocationGroup, getStringId());
-                }
-            }
-            initialized = true;
+        if (!fInitialized) {
+            initializeQuarks(ssb);
         }
         switch (name) {
         case IOtf2Events.OTF2_ENTER: {
@@ -166,6 +185,15 @@ public class Otf2FlowsStateProvider extends AbstractOtf2StateProvider {
         }
         default:
             return;
+        }
+    }
+
+    @Override
+    protected void processOtf2EventAttribute(ITmfEvent event, String otf2EventName, ITmfStateSystemBuilder ssb) {
+        Integer eventAttributeId = event.getContent().getFieldValue(Integer.class, IOtf2Fields.OTF2_ATTRIBUTE);
+        Object eventAttributeValue = event.getContent().getFieldValue(Object.class, IOtf2Fields.OTF2_VALUE);
+        if (eventAttributeId != null && eventAttributeValue != null) {
+            fEventAttributes.add(new Pair<>(eventAttributeId, eventAttributeValue));
         }
     }
 
@@ -196,7 +224,39 @@ public class Otf2FlowsStateProvider extends AbstractOtf2StateProvider {
         if (location == null) {
             return;
         }
-        location.processLeave(ssb, event.getTimestamp().toNanos());
+        FlowsLocation acceleratorLocation = fRankToAcceleratorMap.get(location);
+        if (acceleratorLocation != null) {
+            acceleratorLocation.setLatestEnteredTimestamp(location.getLatestEnteredTimestamp());
+            acceleratorLocation.setInputMessageSize(location.getInputMessageSize());
+            acceleratorLocation.setOutputMessageSize(location.getOutputMessageSize());
+            acceleratorLocation.processLeave(ssb, event.getTimestamp().toNanos());
+            location.setInputMessageSize(0L);
+            location.setOutputMessageSize(0L);
+        } else {
+            location.processLeave(ssb, event.getTimestamp().toNanos());
+        }
+    }
+
+    private void addFlowsLocationMapping(FlowsLocation location) {
+        // Search for memory location in event attributes
+        Long groupLocationId = null;
+        int eventAttributeIndex = -1;
+        for (Pair<Integer, Object> attribute : fEventAttributes) {
+            eventAttributeIndex++;
+            AttributeDefinition attributeDefinition = this.fAttributeDefinitions.get(attribute.getFirst());
+            if (attributeDefinition != null && attributeDefinition.getType() == Otf2Type.OTF2_TYPE_LOCATION_GROUP) {
+                groupLocationId = (Long) attribute.getSecond();
+            }
+        }
+        if (groupLocationId != null) {
+            // Rempve the event attribute because it has been mapped
+            fEventAttributes.remove(eventAttributeIndex);
+            for (FlowsLocation acceleratorLocation : fMapLocation.values()) {
+                if (Objects.requireNonNull(acceleratorLocation).getLocationGroupId() == groupLocationId) {
+                    fRankToAcceleratorMap.put(location, acceleratorLocation);
+                }
+            }
+        }
     }
 
     /**
@@ -206,14 +266,14 @@ public class Otf2FlowsStateProvider extends AbstractOtf2StateProvider {
      *            an Event_MpiSend event
      */
     private void processMpiSend(ITmfEvent event) {
-        Long locationId = getLocationId(event);
         ITmfEventField content = event.getContent();
         Long messageLength = content.getFieldValue(Long.class, IOtf2Fields.OTF2_MESSAGE_LENGTH);
+        Long locationId = getLocationId(event);
         FlowsLocation location = fMapLocation.get(locationId);
-        if (location == null || messageLength == null) {
-            return;
+        if (location != null && messageLength != null) {
+            location.setOutputMessageSize(messageLength);
+            addFlowsLocationMapping(location);
         }
-        location.updateOutputMessageSize(messageLength);
     }
 
     /**
@@ -223,14 +283,14 @@ public class Otf2FlowsStateProvider extends AbstractOtf2StateProvider {
      *            an Event_MpiRecv event
      */
     private void processMpiRecv(ITmfEvent event) {
-        Long locationId = getLocationId(event);
         ITmfEventField content = event.getContent();
         Long messageLength = content.getFieldValue(Long.class, IOtf2Fields.OTF2_MESSAGE_LENGTH);
+        Long locationId = getLocationId(event);
         FlowsLocation location = fMapLocation.get(locationId);
-        if (location == null || messageLength == null) {
-            return;
+        if (location != null && messageLength != null) {
+            location.setInputMessageSize(messageLength);
+            addFlowsLocationMapping(location);
         }
-        location.updateInputMessageSize(messageLength);
     }
 
     /**
@@ -248,7 +308,7 @@ public class Otf2FlowsStateProvider extends AbstractOtf2StateProvider {
         if (location == null || receivedMessageLength == null || sentMessageLength == null) {
             return;
         }
-        location.updateInputMessageSize(receivedMessageLength);
-        location.updateOutputMessageSize(sentMessageLength);
+        location.setInputMessageSize(receivedMessageLength);
+        location.setOutputMessageSize(sentMessageLength);
     }
 }
