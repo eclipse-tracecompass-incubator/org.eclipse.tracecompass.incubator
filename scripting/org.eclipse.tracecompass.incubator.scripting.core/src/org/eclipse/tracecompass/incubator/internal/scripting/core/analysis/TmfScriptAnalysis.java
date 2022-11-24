@@ -54,12 +54,14 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
      * ID of this analysis
      */
     public static final String ID = "org.eclipse.tracecompass.incubator.scripting.analysis"; //$NON-NLS-1$
+
     private static final String SUPP_FOLDER = "scripts"; //$NON-NLS-1$
     private static final String STATE_SYSTEM_FOLDER = "stateSystem"; //$NON-NLS-1$
+
     /*
      * Size of the blocking queue to use when building a state history
      */
-    private final int QUEUE_SIZE = 10000;
+    private static final int QUEUE_SIZE = 10000;
 
     // Save the state systems
     private final Map<String, ITmfStateSystem> fStateSystems = new HashMap<>();
@@ -85,7 +87,6 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
                     @Override
                     public FileVisitResult visitFile(Path file, @Nullable BasicFileAttributes attrs) throws IOException {
                         try {
-
                             String ssid = String.valueOf(file.getFileName());
                             IStateHistoryBackend backend = StateHistoryBackendFactory.createHistoryTreeBackendExistingFile(
                                     ssid, Objects.requireNonNull(file.toFile()), 1);
@@ -104,7 +105,6 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
                         }
                         return FileVisitResult.CONTINUE;
                     }
-
                 });
             } catch (IOException e) {
                 Activator.getInstance().logWarning("Uncaught error opening state system files", e); //$NON-NLS-1$
@@ -170,5 +170,4 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
         // this will need to change
         return waitForCompletion();
     }
-
 }
