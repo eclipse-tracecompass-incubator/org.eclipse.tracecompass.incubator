@@ -78,8 +78,12 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
     @SuppressWarnings("null")
     @Override
     protected boolean executeAnalysis(IProgressMonitor monitor) throws TmfAnalysisException {
+        // Historically expect files to be ready for reading during this stage.
+        readStateSystemsIfReady(true);
+        return true;
+    }
 
-        // Read the state systems of this analysis
+    private void readStateSystemsIfReady(boolean expectAlwaysReadable) {
         Path suppFolder = getStateSystemFolder();
         if (Files.exists(suppFolder)) {
             try {
@@ -101,8 +105,15 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
                              * internal files.
                              *
                              * TODO: Support a version ID?
+                             *
+                             * Alternatively, this may happen upon an incomplete
+                             * state-system file being read. Likely if it is
+                             * still being created concurrently thus not ready
+                             * for reading yet. Warn only if not expecting this.
                              */
-                            Activator.getInstance().logWarning("Error opening a file that should contain a state system: " + file.getFileName(), e); //$NON-NLS-1$
+                            if (expectAlwaysReadable) {
+                                Activator.getInstance().logWarning("Error opening a file that should contain a state system: " + file.getFileName(), e); //$NON-NLS-1$
+                            }
                         }
                         return FileVisitResult.CONTINUE;
                     }
@@ -111,8 +122,6 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
                 Activator.getInstance().logWarning("Uncaught error opening state system files", e); //$NON-NLS-1$
             }
         }
-
-        return true;
     }
 
     @Override
@@ -131,8 +140,8 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
      * @param id
      *            The ID of the state system to get
      * @param useExisting
-     *            Whether to use a pre-existing state system with that name or
-     *            create a new one
+     *            Whether to use a pre-existing state system with that name, or
+     *            create a new one despite analysis deemed as completed by now
      * @return A new state system
      */
     public @Nullable ITmfStateSystem getStateSystem(String id, boolean useExisting) {
@@ -159,6 +168,10 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
 
     @Override
     public Iterable<ITmfStateSystem> getStateSystems() {
+        // Try to always (re)read them from disk, in case they changed up there,
+        // off-line. Don't expect them to always be ready for reading yet
+        // though, as some files might still undergo building.
+        readStateSystemsIfReady(false);
         return fStateSystems.values();
     }
 
