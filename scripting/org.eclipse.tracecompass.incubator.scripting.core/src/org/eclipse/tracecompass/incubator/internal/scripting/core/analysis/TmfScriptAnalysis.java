@@ -75,6 +75,7 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
         return Objects.requireNonNull(Paths.get(suppDir, SUPP_FOLDER, STATE_SYSTEM_FOLDER));
     }
 
+    @SuppressWarnings("null")
     @Override
     protected boolean executeAnalysis(IProgressMonitor monitor) throws TmfAnalysisException {
 
