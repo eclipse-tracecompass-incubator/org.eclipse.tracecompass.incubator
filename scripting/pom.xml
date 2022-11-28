@@ -56,15 +56,15 @@
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <version>2.9.1</version>
+                    <version>3.1.0</version>
                     <configuration>
                         <outputDirectory>${project.build.directory}/../mydocs </outputDirectory>
-                        <doclet>org.eclipse.ease.helpgenerator.V8ModuleDoclet</doclet>
+                        <doclet>org.eclipse.ease.helpgenerator.V9ModuleDoclet</doclet>
                         <docletPath>${doclet.path}</docletPath>
 			<additionalparam>-root ${basedir} -failOnHTMLError true
                                            -failOnMissingDocs true</additionalparam>
 
-                        <useStandardDocletOptions>true</useStandardDocletOptions>
+                        <useStandardDocletOptions>false</useStandardDocletOptions>
                         <excludePackageNames>org.eclipse.tracecompass.incubator.internal.*:*.test*</excludePackageNames>
                         <links>
                             <link>https://osgi.org/javadoc/r6/cmpn</link>
