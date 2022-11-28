@@ -47,8 +47,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <testArgLine></testArgLine>
 
-    <jdk.version>11</jdk.version>
-    <jdk.release>11</jdk.release>
+    <jdk.version>17</jdk.version>
+    <jdk.release>17</jdk.release>
 
     <tycho-version>2.7.3</tycho-version>
     <tycho-extras-version>2.7.3</tycho-extras-version>
