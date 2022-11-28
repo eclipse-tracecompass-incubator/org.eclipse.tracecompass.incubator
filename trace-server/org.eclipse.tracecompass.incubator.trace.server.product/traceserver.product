@@ -3,6 +3,7 @@
 
 <product name="Trace Compass Trace Server (Jersey Rest)" uid="traceserver" id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" application="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" version="0.4.0.qualifier" useFeatures="false" includeLaunchers="true" autoIncludeRequirements="true">
 
+
    <configIni use="default">
    </configIni>
 
@@ -11,11 +12,11 @@
 -noSplash
 -data @noDefault
       </programArgs>
-      <programArgsLin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=11
+      <programArgsLin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=17
       </programArgsLin>
-      <programArgsMac>-Xms512m -Xmx1024m -XstartOnFirstThread -Dosgi.requiredJavaVersion=11 -Dorg.eclipse.swt.internal.carbon.smallFonts
+      <programArgsMac>-Xms512m -Xmx1024m -XstartOnFirstThread -Dosgi.requiredJavaVersion=17 -Dorg.eclipse.swt.internal.carbon.smallFonts
       </programArgsMac>
-      <programArgsWin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=11
+      <programArgsWin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=17
       </programArgsWin>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
@@ -23,17 +24,18 @@
 
    <windowImages/>
 
+
    <launcher name="tracecompass-server">
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
 
+
    <vm>
-      <linux include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</linux>
-      <macos include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</macos>
-      <solaris include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8</solaris>
-      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</windows>
+      <linux include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17</linux>
+      <macos include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17</macos>
+      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17</windows>
    </vm>
 
    <license>
@@ -217,7 +219,16 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <plugin id="org.json"/>
       <plugin id="org.junit"/>
       <plugin id="org.mozilla.javascript"/>
+      <plugin id="org.osgi.service.cm"/>
+      <plugin id="org.osgi.service.component"/>
+      <plugin id="org.osgi.service.device"/>
+      <plugin id="org.osgi.service.event"/>
+      <plugin id="org.osgi.service.metatype"/>
       <plugin id="org.osgi.service.prefs"/>
+      <plugin id="org.osgi.service.provisioning"/>
+      <plugin id="org.osgi.service.upnp"/>
+      <plugin id="org.osgi.service.useradmin"/>
+      <plugin id="org.osgi.service.wireadmin"/>
       <plugin id="org.osgi.util.function"/>
       <plugin id="org.osgi.util.measurement"/>
       <plugin id="org.osgi.util.position"/>
