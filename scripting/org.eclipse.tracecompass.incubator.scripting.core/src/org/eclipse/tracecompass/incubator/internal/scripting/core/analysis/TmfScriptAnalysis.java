@@ -75,7 +75,6 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
         return Objects.requireNonNull(Paths.get(suppDir, SUPP_FOLDER, STATE_SYSTEM_FOLDER));
     }
 
-    @SuppressWarnings("null")
     @Override
     protected boolean executeAnalysis(IProgressMonitor monitor) throws TmfAnalysisException {
         // Historically expect files to be ready for reading during this stage.
@@ -83,6 +82,7 @@ public class TmfScriptAnalysis extends TmfAbstractAnalysisModule implements ITmf
         return true;
     }
 
+    @SuppressWarnings("null")
     private void readStateSystemsIfReady(boolean expectAlwaysReadable) {
         Path suppFolder = getStateSystemFolder();
         if (Files.exists(suppFolder)) {
