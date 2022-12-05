@@ -309,7 +309,7 @@ public class TraceManagerService {
      */
     private static synchronized boolean createResource(String path, IResource resource) throws CoreException {
         // create the resource hierarchy.
-        IPath targetLocation = org.eclipse.core.runtime.Path.forPosix(path);
+        IPath targetLocation = new org.eclipse.core.runtime.Path(path);
         createFolder((IFolder) resource.getParent(), null);
         if (!ResourceUtil.createSymbolicLink(resource, targetLocation, true, null)) {
             return false;
@@ -412,11 +412,21 @@ public class TraceManagerService {
         TRACES.clear();
     }
 
+    /**
+     * Get the location in the workspace that will represent this path on disk.
+     *
+     * @param path
+     *            The full path to the trace on disk
+     * @return The path in the workspace where the trace is represented
+     */
     private static IPath getTargetLocation(String path) {
-        if (IS_WINDOWS) {
-            IPath p = org.eclipse.core.runtime.Path.forWindows(path);
-            return new org.eclipse.core.runtime.Path(p.toString().replace(":", "")).removeTrailingSeparator(); //$NON-NLS-1$ //$NON-NLS-2$
+        IPath p = new org.eclipse.core.runtime.Path(path);
+        if (p.getDevice() != null) {
+            // We need to make a path that is a valid file/folder location within the Eclipse
+            // workspace, this means if there is a device involved we need to drop the :
+            // or else later we'll fail to make the path
+            p = new org.eclipse.core.runtime.Path(p.toString().replace(":", "")); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        return org.eclipse.core.runtime.Path.forPosix(path).removeTrailingSeparator();
+        return p.removeTrailingSeparator();
     }
 }
