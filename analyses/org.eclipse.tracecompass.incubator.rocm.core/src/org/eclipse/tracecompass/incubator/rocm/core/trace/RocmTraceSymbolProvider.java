@@ -59,15 +59,15 @@ public class RocmTraceSymbolProvider implements ISymbolProvider {
     public @Nullable TmfResolvedSymbol getSymbol(long address) {
         RocmMetadataAnalysis module = TmfTraceUtils.getAnalysisModuleOfClass(getTrace(),
                 RocmMetadataAnalysis.class, RocmMetadataAnalysis.ID);
-        if (module == null || address == -1) {
+        if (module == null) {
             /*
              * The analysis is not available for this trace, we won't be able to
              * find the information.
              */
-            return new TmfResolvedSymbol(address, StringUtils.EMPTY);
+            return null;
         }
         ITmfStateSystem ss = module.getStateSystem();
-        if (ss == null) {
+        if (ss == null || address == -1) {
             return new TmfResolvedSymbol(address, StringUtils.EMPTY);
         }
         String functionName;
