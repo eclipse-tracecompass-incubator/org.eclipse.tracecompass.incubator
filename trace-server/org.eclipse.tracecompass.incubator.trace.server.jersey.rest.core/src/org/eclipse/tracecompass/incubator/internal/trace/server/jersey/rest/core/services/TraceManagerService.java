@@ -168,8 +168,9 @@ public class TraceManagerService {
             return Response.status(Status.NOT_IMPLEMENTED).entity("Trace type not supported").build(); //$NON-NLS-1$
         }
         String traceType = traceTypes.get(0).getTraceTypeId();
+        String traceName = name == null ? Paths.get(path).getFileName().toString() : name;
 
-        IResource resource = getResource(path, name);
+        IResource resource = getResource(path, traceName);
         if (!resource.exists()) {
             if (!createResource(path, resource)) {
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Trace resource creation failed").build(); //$NON-NLS-1$
