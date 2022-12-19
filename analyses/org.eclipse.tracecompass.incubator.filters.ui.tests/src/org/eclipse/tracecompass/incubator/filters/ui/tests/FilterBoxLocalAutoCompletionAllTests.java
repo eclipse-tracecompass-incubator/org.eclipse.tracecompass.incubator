@@ -15,7 +15,7 @@ package org.eclipse.tracecompass.incubator.filters.ui.tests;
 import static org.junit.Assert.assertEquals;
 
 import org.eclipse.tracecompass.incubator.internal.filters.ui.lspFilterTextbox.FilterBoxLocalTextCompletion;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 /**
  *

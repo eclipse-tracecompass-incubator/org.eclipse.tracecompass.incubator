@@ -16,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import org.eclipse.tracecompass.incubator.internal.filters.ui.lspFilterTextbox.RecentlyUsedFilters;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 /**
  * This class tests the {@link RecentlyUsedFilters}
