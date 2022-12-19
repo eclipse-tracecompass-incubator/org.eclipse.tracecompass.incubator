@@ -1,7 +1,7 @@
 # LC_COLLATE=C sort
-**/.pydevproject
 */.settings/org.sonar.ide.eclipse.core.prefs
 .DS_Store
+.pydevproject
 bin/
 target/
 workspace/
