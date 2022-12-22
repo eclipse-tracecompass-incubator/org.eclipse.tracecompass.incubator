@@ -178,10 +178,14 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
             // Now we have a data event, we store the event type length, we save
             // the event type length and delta time
             // to load the event lazily later
-            fEventDef = new BinaryFTraceEventDefinition(fCurrentOffset, getCurrentEventPayloadSize());
+            int payloadSize = getCurrentEventPayloadSize();
+
+            // fCurrentOffset may have been modified by getCurrentEventPayloadSize(), pass it
+            // after calling the function above
+            fEventDef = new BinaryFTraceEventDefinition(fCurrentOffset, payloadSize);
 
             // Move the pointer to the next event
-            skip(fEventDef.getPayloadSize());
+            skip(payloadSize);
 
             // We peek the next event, to see if the event is an time extended
             // event
@@ -297,7 +301,8 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
             // length
             BinaryFTraceByteBuffer buffer = fBuffer;
             if (buffer != null) {
-                payloadSize = buffer.getNextInt();
+                // the size includes the size field itself, subtract it to get the actual event length
+                payloadSize = buffer.getNextInt() - 4;
                 this.fCurrentOffset += 4;
             }
         } else if (fCurrentTypeLen <= fFileHeader.getHeaderEventInfo().getDataMaxTypeLen()) {
