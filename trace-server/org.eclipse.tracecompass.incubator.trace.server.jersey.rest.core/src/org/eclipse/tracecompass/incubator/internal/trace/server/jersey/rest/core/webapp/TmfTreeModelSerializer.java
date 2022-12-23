@@ -15,6 +15,7 @@ import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeDataModel;
+import org.eclipse.tracecompass.tmf.core.model.xy.ITmfXyEntryModel;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -51,7 +52,11 @@ public class TmfTreeModelSerializer extends StdSerializer<@NonNull TmfTreeDataMo
         }
         gen.writeEndArray();
         gen.writeBooleanField("hasData", value.hasRowModel()); //$NON-NLS-1$
+
+        if (value instanceof ITmfXyEntryModel) {
+            ITmfXyEntryModel xyValue = (ITmfXyEntryModel) value;
+            gen.writeBooleanField("isDefault", xyValue.isDefault()); //$NON-NLS-1$
+        }
         gen.writeEndObject();
     }
-
 }
