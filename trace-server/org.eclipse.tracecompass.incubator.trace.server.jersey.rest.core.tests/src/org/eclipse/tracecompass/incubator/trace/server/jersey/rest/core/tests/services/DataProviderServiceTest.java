@@ -39,8 +39,6 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ColumnHeaderEntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryHeaderStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryModelStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.LineModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TableColumnsOutputResponseStub;
@@ -54,10 +52,12 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphRowStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphStateStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TreeOutputResponseStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyEntryModelStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyEntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XySeriesStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyTreeOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp.TestDataProviderService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
@@ -78,6 +78,7 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final int MAX_ITER = 40;
     private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
     private static final String XY_DATAPROVIDER_ID = "org.eclipse.tracecompass.analysis.os.linux.core.cpuusage.CpuUsageDataProvider";
+    private static final String XY_HISTOGRAM_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider";
     private static final String EVENTS_TABLE_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider";
     private static final String REQUESTED_TIMERANGE_KEY = "requested_timerange";
     private static final String REQUESTED_TIMES_KEY = "requested_times";
@@ -157,10 +158,10 @@ public class DataProviderServiceTest extends RestServerTest {
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(start, end));
-            TreeOutputResponseStub responseModel;
+            XyTreeOutputResponseStub responseModel;
             Response tree = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
-            responseModel = tree.readEntity(TreeOutputResponseStub.class);
+            responseModel = tree.readEntity(XyTreeOutputResponseStub.class);
             assertNotNull(responseModel);
             tree.close();
 
@@ -170,14 +171,14 @@ public class DataProviderServiceTest extends RestServerTest {
                 Thread.sleep(100);
                 Response xyResponse = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
                 assertEquals("There should be a positive response for the data provider", 200, xyResponse.getStatus());
-                responseModel = xyResponse.readEntity(TreeOutputResponseStub.class);
+                responseModel = xyResponse.readEntity(XyTreeOutputResponseStub.class);
                 assertNotNull(responseModel);
                 iteration++;
                 xyResponse.close();
             }
 
             // Verify tree model
-            EntryModelStub model = responseModel.getModel();
+            XyEntryModelStub model = responseModel.getModel();
             assertNotNull(model);
             List<EntryHeaderStub> headers = model.getHeaders();
             assertNotNull(headers);
@@ -190,13 +191,13 @@ public class DataProviderServiceTest extends RestServerTest {
             }
             // Verify Entries
             assertNotNull("The model is null, maybe the analysis did not run long enough?" + responseModel, model);
-            List<EntryStub> entries = model.getEntries();
+            List<XyEntryStub> entries = model.getEntries();
             assertFalse(entries.isEmpty());
 
             // Test getting the XY series endpoint
             WebTarget xySeriesEnpoint = getXYSeriesEndpoint(exp.getUUID().toString(), XY_DATAPROVIDER_ID);
             List<Integer> items = new ArrayList<>();
-            for (EntryStub entry : entries) {
+            for (XyEntryStub entry : entries) {
                 items.add(entry.getId());
             }
             parameters.remove(REQUESTED_TIMES_KEY);
@@ -212,6 +213,67 @@ public class DataProviderServiceTest extends RestServerTest {
             assertFalse(xySeries.isEmpty());
             series.close();
 
+        } catch (ProcessingException e) {
+            // The failure from this exception alone is not helpful. Use the
+            // suppressed exception's message be the failure message for more
+            // help debugging failed tests.
+            fail(e.getCause().getMessage());
+        }
+    }
+
+    /**
+     * Verify that Histogram Data Provider fetchTree() interface and verify that
+     * the serialized fields are the expected ones according to the protocol.
+     *
+     * @throws InterruptedException
+     *             Exception thrown while waiting to execute again
+     */
+    @Test
+    public void testHistogramDataProvider() throws InterruptedException {
+        long start = 1412670961211260539L;
+        long end = 1412670967217750839L;
+        try {
+            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_STUB.getName(), ARM_64_KERNEL_STUB);
+
+            // Test getting the tree endpoint for an XY chart
+            WebTarget xyTree = getXYTreeEndpoint(exp.getUUID().toString(), XY_HISTOGRAM_DATAPROVIDER_ID);
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(start, end));
+            XyTreeOutputResponseStub responseModel;
+            Response tree = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+            assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
+            responseModel = tree.readEntity(XyTreeOutputResponseStub.class);
+            assertNotNull(responseModel);
+            tree.close();
+
+            // Make sure the analysis ran enough and we have a model
+            int iteration = 0;
+            while (responseModel.isRunning() && responseModel.getModel() == null && iteration < MAX_ITER) {
+                Thread.sleep(100);
+                Response xyResponse = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+                assertEquals("There should be a positive response for the data provider", 200, xyResponse.getStatus());
+                responseModel = xyResponse.readEntity(XyTreeOutputResponseStub.class);
+                assertNotNull(responseModel);
+                iteration++;
+                xyResponse.close();
+            }
+
+            // Verify tree model
+            XyEntryModelStub model = responseModel.getModel();
+            assertNotNull(model);
+            // Verify Entries
+            assertNotNull("The model is null, maybe the analysis did not run long enough?" + responseModel, model);
+            List<XyEntryStub> entries = model.getEntries();
+            assertFalse(entries.isEmpty());
+
+            for (XyEntryStub entry : entries) {
+                if (entry.getParentId() == -1) {
+                    assertFalse(entry.isDefault());
+                } else {
+                    assertTrue(entry.isDefault());
+                }
+            }
         } catch (ProcessingException e) {
             // The failure from this exception alone is not helpful. Use the
             // suppressed exception's message be the failure message for more
