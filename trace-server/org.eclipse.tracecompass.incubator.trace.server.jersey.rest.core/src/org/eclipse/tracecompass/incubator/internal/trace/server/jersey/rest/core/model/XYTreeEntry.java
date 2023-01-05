@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2023 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -11,19 +11,21 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
-import org.eclipse.jdt.annotation.Nullable;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
-@Schema(allOf = GenericResponse.class)
-public interface XYTreeResponse {
+@Schema(allOf = TreeDataModel.class)
+public interface XYTreeEntry {
 
     /**
-     * @return The model.
+     * @return whether or not the entry is a default entry and its xy data
+     *         should be fetched by default.
      */
-    @Nullable
-    XYTreeEntryModel getModel();
+    @JsonProperty("isDefault")
+    @Schema(description = "Optional flag to indicate whether or not the entry is a default entry and its xy data should be fetched by default.")
+    boolean isDefault();
 }

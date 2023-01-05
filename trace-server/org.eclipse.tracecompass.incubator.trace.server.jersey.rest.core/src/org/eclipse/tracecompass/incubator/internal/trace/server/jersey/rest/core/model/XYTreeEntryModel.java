@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2023 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -11,19 +11,21 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
-import org.eclipse.jdt.annotation.Nullable;
+import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
-@Schema(allOf = GenericResponse.class)
-public interface XYTreeResponse {
+@Schema(allOf = TreeEntryModel.class)
+public interface XYTreeEntryModel {
 
     /**
-     * @return The model.
+     * @return The entries.
      */
-    @Nullable
-    XYTreeEntryModel getModel();
+    @NonNull
+    List<@NonNull XYTreeEntry> getEntries();
 }
