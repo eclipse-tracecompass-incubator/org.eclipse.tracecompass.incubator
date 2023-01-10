@@ -14,7 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variab
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Random;
+import java.security.SecureRandom;
 
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance.InstanceStepInformation;
 
@@ -50,7 +50,7 @@ public class IsiSampleIterator implements Iterator<InstanceStepInformation> {
             size = (int)sample;
             count = size;
             iterator = new Iterator<InstanceStepInformation>() {
-                private Random rand = new Random();
+                private SecureRandom rand = new SecureRandom();
                 private ArrayList<InstanceStepInformation> isiList = new ArrayList<>(collection);
 
                 @Override

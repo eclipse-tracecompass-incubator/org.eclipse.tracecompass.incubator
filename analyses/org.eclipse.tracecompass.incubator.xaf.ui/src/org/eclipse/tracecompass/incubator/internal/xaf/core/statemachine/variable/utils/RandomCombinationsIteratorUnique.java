@@ -13,7 +13,7 @@ package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variab
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -24,7 +24,7 @@ class RandomCombinationsIteratorUnique implements Iterator<int[]> {
     private final int n, k;
     private Integer count = null;
     private int[] origin, solution;
-    private Random rand = new Random();
+    private SecureRandom rand = new SecureRandom();
     private Set<Integer> used = new TreeSet<>();
 
     public RandomCombinationsIteratorUnique(int n, int k) {

@@ -12,7 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils;
 
 import java.util.Iterator;
-import java.util.Random;
+import java.security.SecureRandom;
 
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineReport;
 
@@ -22,7 +22,7 @@ class RandomCombinationsIterator implements Iterator<int[]> {
     private final int n, k;
     private Integer count = null;
     private int[] origin, solution;
-    private Random rand = new Random();
+    private SecureRandom rand = new SecureRandom();
 
     public RandomCombinationsIterator(int n, int k) {
         this.n = n;
