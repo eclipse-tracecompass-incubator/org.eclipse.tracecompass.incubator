@@ -109,7 +109,7 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
             // can thus return 0 !
             return 0L;
         } catch (StateSystemDisposedException e) {
-            e.printStackTrace();
+            Activator.logError(e.getMessage(), e);
             return null;
         }
 
@@ -121,7 +121,7 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
             // we thus can return value
             return value;
         } catch (StateSystemDisposedException e) {
-            e.printStackTrace();
+            Activator.logError(e.getMessage(), e);
             return null;
         }
         Long value2 = intvlend.getStateValue().unboxLong();
@@ -277,7 +277,7 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
             //e.printStackTrace();
             return null;
         } catch (RuntimeException e) { // For debugging purposes...
-            e.printStackTrace();
+            Activator.logError(e.getMessage(), e);
             return null;
         }
     }
@@ -331,11 +331,11 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
             return new LinkedList<>();
             // return stateIntervalList;
         } catch (StateSystemDisposedException e) {
-            e.printStackTrace();
+            Activator.logError(e.getMessage(), e);
             return new LinkedList<>();
             // return stateIntervalList;
         } catch (RuntimeException e) { // For debugging purposes...
-            e.printStackTrace();
+            Activator.logError(e.getMessage(), e);
             return new LinkedList<>();
             // return stateIntervalList;
         }
@@ -391,7 +391,7 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
                 stateIntervalList.addAll(StateSystemUtils.queryHistoryRange(ss, attributeQuark, ti.getStartTime().getValue(), ti.getEndTime().getValue()));
             }
         } catch (AttributeNotFoundException | StateSystemDisposedException | TimeRangeException e) {
-            e.printStackTrace();
+            Activator.logError(e.getMessage(), e);
         }
 
         stateIntervalList.sort(new Comparator<ITmfStateInterval>() {

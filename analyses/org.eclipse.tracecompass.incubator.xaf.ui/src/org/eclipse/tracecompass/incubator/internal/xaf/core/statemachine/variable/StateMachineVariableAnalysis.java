@@ -1131,7 +1131,7 @@ public class StateMachineVariableAnalysis {
                 try {
                     criticalPathSteps = getCriticalPathSteps(isi);
                 } catch (CriticalPathAlgorithmException | StateMachineTIDNotFoundException e) {
-                    e.printStackTrace();
+                    Activator.getInstance().logError(e.getMessage(), e);
                     continue;
                 }
 
@@ -1148,7 +1148,7 @@ public class StateMachineVariableAnalysis {
                 try {
                     criticalPathSteps = getCriticalPathSteps(isi);
                 } catch (CriticalPathAlgorithmException | StateMachineTIDNotFoundException e) {
-                    e.printStackTrace();
+                    Activator.getInstance().logError(e.getMessage(), e);
                     continue;
                 }
 

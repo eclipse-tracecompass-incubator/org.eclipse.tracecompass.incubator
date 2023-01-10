@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.handlers;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedAttributes;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualCPU;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.VirtualMachine;
@@ -77,7 +78,7 @@ public class SysExitHandler extends VMKernelEventHandler {
             try {
                 modify = ss.querySingleState(timestamp, machineNameQuark).getStateValue().unboxStr().equals(host.getHostId());
             } catch (StateSystemDisposedException e) {
-                e.printStackTrace();
+            	Activator.getInstance().logError(e.getMessage(), e);
             }
         }
 

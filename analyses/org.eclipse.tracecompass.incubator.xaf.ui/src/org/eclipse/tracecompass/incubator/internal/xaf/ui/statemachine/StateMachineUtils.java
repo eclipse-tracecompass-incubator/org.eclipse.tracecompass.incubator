@@ -39,6 +39,7 @@ import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constra
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraintAdaptive;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.ValueType;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.StateMachineVariable;
+import org.eclipse.tracecompass.incubator.internal.xaf.ui.Activator;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
@@ -225,7 +226,7 @@ public final class StateMachineUtils {
                         variableConstructor = variableClass.getConstructor(String.class, Comparable.class);
                         stateMachineVariable = (StateMachineVariable)variableConstructor.newInstance(varName, varValue);
                     } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        e.printStackTrace();
+                        Activator.logError(e.getMessage(), e);
                     }
 
                     if (stateMachineVariable != null) {

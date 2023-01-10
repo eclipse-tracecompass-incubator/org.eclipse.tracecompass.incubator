@@ -48,6 +48,7 @@ import org.eclipse.ease.service.IScriptService;
 import org.eclipse.ease.service.ScriptService;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.scripting.core.Activator;
 import org.eclipse.tracecompass.incubator.scripting.core.tests.stubs.ScriptingTestUtils;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -296,7 +297,7 @@ public class ScriptTest {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Activator.getInstance().logError(e.getMessage(), e);
             }
         }
     }

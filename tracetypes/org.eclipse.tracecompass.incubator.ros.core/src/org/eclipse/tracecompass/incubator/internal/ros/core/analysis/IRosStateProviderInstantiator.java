@@ -42,7 +42,7 @@ public interface IRosStateProviderInstantiator {
         try {
             return Objects.requireNonNull((ITmfStateProvider) stateProvider.getConstructor(ITmfTrace.class).newInstance(trace));
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-            e.printStackTrace();
+            Activator.getInstance().logError(e.getMessage(), e);
         }
         Activator.getInstance().logError("Error instantiating state provider; using ROS Nodes state provider instead for: " + stateProvider.toString()); //$NON-NLS-1$
         return new RosNodesStateProvider(trace);

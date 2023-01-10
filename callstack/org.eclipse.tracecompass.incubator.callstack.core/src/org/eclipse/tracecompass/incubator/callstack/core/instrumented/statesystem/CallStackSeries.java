@@ -512,7 +512,7 @@ public class CallStackSeries implements ISegmentStore<ISegment> {
                 }
             }
         } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
-            e.printStackTrace();
+            Activator.getInstance().logError(e.getMessage(), e);
         }
         return map;
     }

@@ -12,7 +12,10 @@
 package org.eclipse.tracecompass.incubator.internal.xaf.ui;
 
 import java.net.URL;
+import java.util.Objects;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
@@ -78,6 +81,19 @@ public class Activator extends AbstractUIPlugin {
             }
         }
         return icon;
+    }
+
+    /**
+     * Logs a message and exception with severity ERROR in the runtime log of
+     * the plug-in.
+     *
+     * @param message
+     *            A message to log
+     * @param exception
+     *            The corresponding exception
+     */
+    public static void logError(@Nullable String message, Throwable exception) {
+        Objects.requireNonNull(plugin).getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message, exception));
     }
 }
 

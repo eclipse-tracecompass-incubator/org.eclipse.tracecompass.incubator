@@ -17,6 +17,7 @@ import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.WorkspaceService;
 import org.eclipse.tracecompass.incubator.filters.core.tests.environment.TestEnvironment;
+import org.eclipse.tracecompass.incubator.internal.filters.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.filters.core.server.FilterWorkspaceService;
 
 /**
@@ -85,7 +86,7 @@ public class LSPServerStub implements LanguageServer {
             // Get the value from the real server
             returnVal = fStub.getProxyServer().shutdown().get();
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            Activator.getInstance().logError(e.getMessage(), e);
         }
         // Pass it back to the real client
         return CompletableFuture.completedFuture(returnVal);

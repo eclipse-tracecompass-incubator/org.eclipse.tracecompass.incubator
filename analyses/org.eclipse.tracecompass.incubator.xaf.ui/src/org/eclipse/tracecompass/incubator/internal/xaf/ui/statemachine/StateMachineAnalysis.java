@@ -247,7 +247,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                     throw new RuntimeException("No initial transition found");
                 }
             } catch (SAXException | IOException | ParserConfigurationException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
                 System.exit(1);
             }
         }
@@ -281,7 +281,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                 writer.write(StateMachineUtils.StateMachineToDot.drawStateMachine(initialTransitions));
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
             }
 
             if (model != null) {
@@ -289,7 +289,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                 try (PrintWriter writer = new PrintWriter(model, "UTF-8")) {
                     writer.write(StateMachineUtils.getXMLFromModel(initialTransitions));
                 } catch (FileNotFoundException | UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
 
                 boolean checkModel = Boolean.parseBoolean(xafproperties.getProperty(XaFParameterProvider.PROPERTY_CHECK_MODEL, Boolean.TRUE.toString()));
@@ -382,7 +382,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                                                 try {
                                                     modelProject.delete(true, true, null);
                                                 } catch (CoreException e) {
-                                                    e.printStackTrace();
+                                                    Activator.logError(e.getMessage(), e);
                                                 }
                                             }
                                         }
@@ -397,7 +397,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                                     });
                                 } catch (CoreException e) {
                                     // TODO Auto-generated catch block
-                                    e.printStackTrace();
+                                    Activator.logError(e.getMessage(), e);
                                 }
                             }
                         }
@@ -409,7 +409,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                             try {
                                 finishedEditingLock.wait();
                             } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                Activator.logError(e.getMessage(), e);
                                 return false;
                             }
                         }

@@ -36,6 +36,7 @@ import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variabl
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils.InterruptionReason;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils.ResponsibilityMap;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils.State;
+import org.eclipse.tracecompass.incubator.internal.xaf.ui.Activator;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance.InstanceStepInformation;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineReport;
@@ -184,7 +185,7 @@ public class StateMachineVariableDeadline extends StateMachineVariable {
             DefaultInterruptionEventRunner dier = new DefaultInterruptionEventRunner(this, Objects.requireNonNull(Attributes.STATE), new StateInterruptionEventGetter());
             smva.doAnalysis(dier);
         } catch (StateMachineNoValidCaseException | StateMachineNoInvalidCaseException e) {
-            e.printStackTrace();
+            Activator.logError(e.getMessage(), e);
             return null;
         }
 

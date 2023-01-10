@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.callstack.core.Activator;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
@@ -123,7 +124,7 @@ public class Otf2FlowsDataProvider extends AbstractTimeGraphDataProvider<Otf2Flo
                 totalFlow += interval.getValueDouble();
             }
         } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
-            e.printStackTrace();
+            Activator.getInstance().logError(e.getMessage(), e);
         }
 
         Map<String, String> model = new HashMap<>();

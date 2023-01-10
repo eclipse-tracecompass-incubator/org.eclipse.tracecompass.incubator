@@ -36,6 +36,7 @@ import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variabl
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils.InterruptionIntervalSetDiff;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils.InterruptionReason;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.utils.ResponsibilityMap;
+import org.eclipse.tracecompass.incubator.internal.xaf.ui.Activator;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance.InstanceStepInformation;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineReport;
@@ -213,7 +214,7 @@ public abstract class StateMachineVariableCounter extends StateMachineVariable {
             try {
                 smva.doPartialAnalysis(interruptionEventRunner);
             } catch (StateMachineNoInvalidCaseException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
                 return null;
             }
         } else {
@@ -225,7 +226,7 @@ public abstract class StateMachineVariableCounter extends StateMachineVariable {
             try {
                 smva.doAnalysis(interruptionEventRunner);
             } catch (StateMachineNoValidCaseException | StateMachineNoInvalidCaseException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
                 return null;
             }
         }

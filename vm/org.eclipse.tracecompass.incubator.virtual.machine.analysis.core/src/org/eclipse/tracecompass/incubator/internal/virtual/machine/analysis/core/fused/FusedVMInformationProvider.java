@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.StateValues;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
@@ -143,7 +144,7 @@ public final class FusedVMInformationProvider {
             return ssq.getQuarkAbsolute(FusedAttributes.THREADS);
         } catch (AttributeNotFoundException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            Activator.getInstance().logError(e.getMessage(), e);
         }
         return -1;
     }

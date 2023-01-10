@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.tracecompass.incubator.internal.xaf.ui.Activator;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisParamProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
@@ -119,7 +120,7 @@ public class XaFParameterProvider extends TmfAbstractAnalysisParamProvider {
             try (OutputStream output = new FileOutputStream(configFile)) {
                 prop.store(output, null);
             } catch (IOException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
             }
         }
     }

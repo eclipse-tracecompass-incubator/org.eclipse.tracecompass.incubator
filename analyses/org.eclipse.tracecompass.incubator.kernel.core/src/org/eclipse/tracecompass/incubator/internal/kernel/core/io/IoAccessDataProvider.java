@@ -32,6 +32,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
+import org.eclipse.tracecompass.incubator.internal.kernel.core.Activator;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.inputoutput.IODataPalette;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
@@ -180,7 +181,7 @@ public class IoAccessDataProvider extends AbstractStateSystemAnalysisDataProvide
             return new TmfModelResponse<>(models, complete ? Status.COMPLETED : Status.RUNNING,
                     complete ? CommonStatusMessage.COMPLETED : CommonStatusMessage.RUNNING);
         } catch (StateSystemDisposedException | TimeRangeException | IndexOutOfBoundsException e) {
-            e.printStackTrace();
+            Activator.getInstance().logError(e.getMessage(), e);
             return new TmfModelResponse<>(null, Status.FAILED, String.valueOf(e.getMessage()));
         }
     }

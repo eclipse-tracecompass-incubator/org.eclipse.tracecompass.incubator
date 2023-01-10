@@ -35,6 +35,7 @@ import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constra
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraintAdaptive;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.StateMachineVariable;
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variable.StateMachineVariableTimer;
+import org.eclipse.tracecompass.incubator.internal.xaf.ui.Activator;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstance;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineInstanceGroup;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineNode;
@@ -470,7 +471,7 @@ public class BuilderInstanceGroup {
                         variables.add(newVariable);
                         newNode.addVariable(newVariable);
                     } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        e.printStackTrace();
+                        Activator.logError(e.getMessage(), e);
                     }
                 }
 

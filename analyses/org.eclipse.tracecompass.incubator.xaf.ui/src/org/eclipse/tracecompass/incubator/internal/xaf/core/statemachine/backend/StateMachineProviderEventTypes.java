@@ -20,6 +20,7 @@ import java.util.TreeMap;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
+import org.eclipse.tracecompass.incubator.internal.xaf.ui.Activator;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
@@ -146,7 +147,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     ss.modifyAttribute(ts, value, quark);
                     nextThreadInfo.cpu_last = cpu;
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             }
 
@@ -158,7 +159,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     ss.modifyAttribute(ts, value, quark);
                     nextThreadInfo.prio_last = nextPrio;
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             }
 
@@ -176,7 +177,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                 TmfStateValue value = TmfStateValue.newValueLong(s.getValue());
                 ss.modifyAttribute(ts, value, quark);
             } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
             }
 
             // TIMER_WAIT_(BLOCKED|FOR_CPU)
@@ -198,7 +199,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                         TmfStateValue value = TmfStateValue.newValueLong(nextThreadInfo.cumul_wait_blocked);
                         ss.modifyAttribute(ts, value, quark);
                     } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                        e.printStackTrace();
+                        Activator.logError(e.getMessage(), e);
                     }
                 } else {
                     // TIMER_WAIT_FOR_CPU
@@ -215,7 +216,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                         TmfStateValue value = TmfStateValue.newValueLong(nextThreadInfo.cumul_wait_for_cpu);
                         ss.modifyAttribute(ts, value, quark);
                     } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                        e.printStackTrace();
+                        Activator.logError(e.getMessage(), e);
                     }
                 }
             }
@@ -238,7 +239,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     // Reset last wakeup time to null, so that it will be used only next time we receive a sched_waking
                     nextThreadInfo.last_wakeup = null;
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             }
 
@@ -254,7 +255,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     ss.modifyAttribute(ts, value, quark);
                     prevThreadInfo.prio_last = prevPrio;
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             }
 
@@ -278,7 +279,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     TmfStateValue value = TmfStateValue.newValueLong(prevThreadInfo.cumul_cpu_usage);
                     ss.modifyAttribute(ts, value, quark);
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             //}
             nextThreadInfo.last_ts = ts;
@@ -305,7 +306,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     TmfStateValue value = TmfStateValue.newValueInt(prevThreadInfo.counter_preempt);
                     ss.modifyAttribute(ts, value, quark);
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             } else {
                 // STATE: Change to BLOCKED
@@ -318,7 +319,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                 TmfStateValue value = TmfStateValue.newValueLong(s.getValue());
                 ss.modifyAttribute(ts, value, quark);
             } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
             }
         } else if (eventName.equals(layout.eventSchedPiSetprio())) {
             ITmfEventField content = event.getContent();
@@ -337,7 +338,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     ss.modifyAttribute(ts, value, quark);
                     toThreadInfo.prio_last = newPrio;
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             }
 
@@ -365,7 +366,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                         TmfStateValue value = TmfStateValue.newValueLong(fromThreadInfo.sched_pi_cumul);
                         ss.modifyAttribute(ts, value, quark);
                     } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                        e.printStackTrace();
+                        Activator.logError(e.getMessage(), e);
                     }
                 }
                 // Then clear the list of fromTids
@@ -402,7 +403,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     ss.modifyAttribute(ts, value, quark);
                     threadInfo.prio_last = prio;
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             }
 
@@ -419,7 +420,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                 TmfStateValue value = TmfStateValue.newValueLong(s.getValue());
                 ss.modifyAttribute(ts, value, quark);
             } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
             }
         } else if (eventName.equals(EVENT_POWER_CPU_FREQUENCY)) {
             ITmfEventField content = event.getContent();
@@ -431,7 +432,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                 TmfStateValue value = TmfStateValue.newValueLong(freq);
                 ss.modifyAttribute(ts, value, quark);
             } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
             }
         } else if (eventName.equals(layout.eventSoftIrqEntry()) || eventName.equals(EVENT_IRQ_SOFTIRQ_ENTRY)) {
             ITmfEventField content = event.getContent();
@@ -452,7 +453,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                 TmfStateValue value = TmfStateValue.newValueLong(s.getValue());
                 ss.modifyAttribute(ts, value, quark);
             } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
             }
         } else if (eventName.equals(layout.eventHRTimerExpireEntry()) || eventName.equals("timer_hrtimer_expire_entry")) { //$NON-NLS-1$
             ITmfEventField content = event.getContent();
@@ -472,7 +473,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                 TmfStateValue value = TmfStateValue.newValueLong(s.getValue());
                 ss.modifyAttribute(ts, value, quark);
             } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
             }
         } else if (eventName.equals(layout.eventIrqHandlerEntry())) {
             ITmfEventField content = event.getContent();
@@ -493,7 +494,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                 TmfStateValue value = TmfStateValue.newValueLong(s.getValue());
                 ss.modifyAttribute(ts, value, quark);
             } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
             }
             // TODO: démarrer le timer de IRQ preemption, qui sera stoppé lors du irq handler exit
             // TODO: augmenter le compteur de préemptions ? (probablement!)
@@ -534,7 +535,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                         TmfStateValue value = TmfStateValue.newValueInt(0);
                         ss.modifyAttribute(getTrace().getStartTime().toNanos(), value, quark);
                     } catch (StateValueTypeException | IndexOutOfBoundsException e) {
-                        e.printStackTrace();
+                        Activator.logError(e.getMessage(), e);
                     }
                 }
 
@@ -542,7 +543,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     TmfStateValue value = TmfStateValue.newValueInt(threadInfo.counter_syscalls);
                     ss.modifyAttribute(ts, value, quark);
                 } catch (StateValueTypeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
 
                 // STATE: Change to SYSCALL
@@ -553,7 +554,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     TmfStateValue value = TmfStateValue.newValueLong(s.getValue());
                     ss.modifyAttribute(ts, value, quark);
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             }
         } else if (eventName.equals(layout.eventSoftIrqExit()) || eventName.equals("irq_softirq_exit") //$NON-NLS-1$
@@ -583,7 +584,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                 TmfStateValue value = TmfStateValue.newValueLong(s.getValue());
                 ss.modifyAttribute(ts, value, quark);
             } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                e.printStackTrace();
+                Activator.logError(e.getMessage(), e);
             }
         //} else if (eventName.equals(layout.eventIrqHandlerExit())) {
             // TODO: stopper le timer de IRQ preemption
@@ -627,7 +628,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     // Reset last wakeup time to null, so that it will be used only next time we receive a sched_waking
                     threadInfo.last_wakeup = null;
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             }
 
@@ -649,7 +650,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     value = TmfStateValue.newValueLong(threadInfo.cumul_wait_blocked);
                     ss.modifyAttribute(traceEndTime, value, quark);
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             } else if (stateValue == BackendStateValue.PREEMPTED) {
                 // TIMER_WAIT_FOR_CPU
@@ -666,7 +667,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     value = TmfStateValue.newValueLong(threadInfo.cumul_wait_for_cpu);
                     ss.modifyAttribute(traceEndTime, value, quark);
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             } else {
                 // TIMER_CPU_USAGE
@@ -686,7 +687,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     value = TmfStateValue.newValueLong(threadInfo.cumul_cpu_usage);
                     ss.modifyAttribute(traceEndTime, value, quark);
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                    Activator.logError(e.getMessage(), e);
                 }
             }
             threadInfo.last_ts = traceEndTime;
