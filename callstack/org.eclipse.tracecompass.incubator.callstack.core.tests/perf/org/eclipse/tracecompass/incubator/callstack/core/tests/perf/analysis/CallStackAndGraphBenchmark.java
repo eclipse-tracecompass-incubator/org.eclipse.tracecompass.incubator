@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
+import java.security.SecureRandom;
 
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
@@ -66,7 +66,7 @@ public abstract class CallStackAndGraphBenchmark {
     private static final String TEST_CALLGRAPH_QUERY = "CallGraph Query (%s)";
     private static final String TEST_CALLGRAPH_GROUPBY = "CallGraph Group By (%s)";
 
-    private static final long SEED = 473892745896L;
+    private static final byte[] SEED = {0x45, 0x73, 0x74, 0x65, 0x6c, 0x6c, 0x65};
 
     private static final int LOOP_COUNT = 5;
 
@@ -133,7 +133,7 @@ public abstract class CallStackAndGraphBenchmark {
                 long delta = endTime - startTime;
 
                 // Get partial callgraphs
-                Random randomGenerator = new Random(SEED);
+                SecureRandom randomGenerator = new SecureRandom(SEED);
                 callgraphQueryPm.start();
                 for (int j = 0; j < 50; j++) {
                     long time0 = Math.abs(randomGenerator.nextLong()) % delta;
