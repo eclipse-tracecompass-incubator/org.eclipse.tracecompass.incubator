@@ -34,7 +34,9 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
+import org.glassfish.jersey.message.GZipEncoder;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.filter.EncodingFilter;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -138,6 +140,7 @@ public class WebApplication {
         rc.register(XmlManagerService.class);
         rc.register(CORSFilter.class);
         rc.register(JacksonObjectMapperProvider.class);
+        EncodingFilter.enableFor(rc, GZipEncoder.class);
         rc.register(OpenApiResource.class);
     }
 
