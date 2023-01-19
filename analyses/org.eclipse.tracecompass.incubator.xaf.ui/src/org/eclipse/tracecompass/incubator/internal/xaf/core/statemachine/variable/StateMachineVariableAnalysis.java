@@ -1156,7 +1156,7 @@ public class StateMachineVariableAnalysis {
             }
 
             if (validIds == null || iis.isEmpty()) {
-                System.out.println("Not enough information for a comparison"); //$NON-NLS-1$
+                Activator.getInstance().logWarning("Not enough information for a comparison"); //$NON-NLS-1$
                 continue;
             }
 
@@ -1286,7 +1286,7 @@ public class StateMachineVariableAnalysis {
             // Get the general graph for the trace
             TmfGraph graph = g.getGraph();
             if (graph == null) {
-                System.out.println("graph == null"); //$NON-NLS-1$
+                Activator.getInstance().logWarning("graph == null"); //$NON-NLS-1$
                 continue;
             }
             graphFound = true;
@@ -1304,7 +1304,7 @@ public class StateMachineVariableAnalysis {
             }
 
             if (lw == null) {
-                System.out.println("lw == null"); //$NON-NLS-1$
+                Activator.getInstance().logWarning("lw == null"); //$NON-NLS-1$
                 continue;
             }
             workerFound = true;

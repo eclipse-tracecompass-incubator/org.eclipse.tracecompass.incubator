@@ -17,6 +17,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.ros.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ros.core.trace.layout.IRosEventLayout;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
@@ -133,7 +134,7 @@ public abstract class AbstractRosStateProvider extends AbstractTmfStateProvider 
     protected static Object getField(@NonNull ITmfEvent event, @NonNull String fieldName) {
         Object val = event.getContent().getFieldValue(Object.class, fieldName);
         if (val == null) {
-            System.out.println("woops"); //$NON-NLS-1$
+            Activator.getInstance().logWarning("woops"); //$NON-NLS-1$
         }
         return val;
     }

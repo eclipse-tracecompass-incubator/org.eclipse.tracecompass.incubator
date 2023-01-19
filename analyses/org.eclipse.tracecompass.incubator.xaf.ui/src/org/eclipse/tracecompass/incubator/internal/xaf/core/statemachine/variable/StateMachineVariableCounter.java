@@ -185,7 +185,7 @@ public abstract class StateMachineVariableCounter extends StateMachineVariable {
         // Treat only constants for now
         // TODO: treat comparison between variables
         if (constraint.getValueType() != ValueType.CONSTANT) {
-            System.out.println("TODO"); //$NON-NLS-1$
+            Activator.logWarning("TODO"); //$NON-NLS-1$
             return null;
         }
 
@@ -219,7 +219,7 @@ public abstract class StateMachineVariableCounter extends StateMachineVariable {
             }
         } else {
             if (validIsiList == null || validIsiList.isEmpty()) {
-                System.out.print("No valid instance for a full analysis"); //$NON-NLS-1$
+                Activator.logWarning("No valid instance for a full analysis"); //$NON-NLS-1$
                 return null;
             }
 

@@ -862,9 +862,8 @@ public class VirtualResourcesView extends AbstractStateSystemTimeGraphView {
         long begin = getBeginSelectedTime();
         long end = getEndSelectedTime();
 
-        System.out.println("Begin time: " + FormatTimeUtils.formatTime(begin, FormatTimeUtils.TimeFormat.CALENDAR, FormatTimeUtils.Resolution.NANOSEC)); //$NON-NLS-1$
-        System.out.println("End time: " + FormatTimeUtils.formatTime(end, FormatTimeUtils.TimeFormat.CALENDAR, FormatTimeUtils.Resolution.NANOSEC)); //$NON-NLS-1$
-        System.out.println();
+        Activator.getDefault().logInfo("Begin time: " + FormatTimeUtils.formatTime(begin, FormatTimeUtils.TimeFormat.CALENDAR, FormatTimeUtils.Resolution.NANOSEC)); //$NON-NLS-1$
+        Activator.getDefault().logInfo("End time: " + FormatTimeUtils.formatTime(end, FormatTimeUtils.TimeFormat.CALENDAR, FormatTimeUtils.Resolution.NANOSEC)); //$NON-NLS-1$
 
     }
 

@@ -102,7 +102,7 @@ public final class StateMachineUtils {
             String targetNode = targetAttribute.getNodeValue();
             StateMachineNode nextNode = nodeList.get(targetNode);
             if (nextNode == null) {
-                System.out.println("Transition to unknown node: "+targetNode); //$NON-NLS-1$
+                Activator.logWarning("Transition to unknown node: "+targetNode); //$NON-NLS-1$
                 continue;
             }
 
@@ -117,7 +117,7 @@ public final class StateMachineUtils {
 
                     Matcher m = CONDITION_PATTERN.matcher(condition);
                     if (!m.find()) {
-                        System.out.println("Unmatching condition: "+condition); //$NON-NLS-1$
+                        Activator.logWarning("Unmatching condition: "+condition); //$NON-NLS-1$
                         continue;
                     }
 
@@ -182,7 +182,7 @@ public final class StateMachineUtils {
 
                 String name = id.getNodeValue();
                 if (nodeList.containsKey(name)) {
-                    System.out.println("Node "+name+" already exists"); //$NON-NLS-1$ //$NON-NLS-2$
+                    Activator.logWarning("Node "+name+" already exists"); //$NON-NLS-1$ //$NON-NLS-2$
                 }
 
                 nodeList.put(name, new StateMachineNode(name));

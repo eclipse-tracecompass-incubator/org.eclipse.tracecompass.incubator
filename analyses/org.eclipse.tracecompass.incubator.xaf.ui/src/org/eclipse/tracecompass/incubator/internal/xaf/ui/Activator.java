@@ -84,6 +84,27 @@ public class Activator extends AbstractUIPlugin {
     }
 
     /**
+     * Logs a message with severity INFO in the runtime log of the plug-in.
+     *
+     * @param message
+     *            A message to log
+     */
+    public static void logInfo(String message) {
+        Objects.requireNonNull(plugin).getLog().log(new Status(IStatus.INFO, PLUGIN_ID, message));
+    }
+
+    /**
+     * Logs a message and exception with severity WARNING in the runtime log of
+     * the plug-in.
+     *
+     * @param message
+     *            A message to log
+     */
+    public static void logWarning(@Nullable String message) {
+        Objects.requireNonNull(plugin).getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, message));
+    }
+
+    /**
      * Logs a message and exception with severity ERROR in the runtime log of
      * the plug-in.
      *

@@ -165,11 +165,11 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
             if (kernelAnalysisModule != null) {
                 IStatus status = kernelAnalysisModule.schedule();
                 if (!status.isOK()) {
-                    System.out.println("kernelAnalysisModule status is not ok");
+                    Activator.logWarning("kernelAnalysisModule status is not ok");
                 }
             } else {
 
-                System.out.println("kernelAnalysisModule is null");
+                Activator.logWarning("kernelAnalysisModule is null");
             }
         }
 
@@ -184,10 +184,10 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                 if (status.isOK()) {
                     stateMachineBackendAnalysis.waitForCompletion();
                 } else {
-                    System.out.println("stateMachineAnalysisModule status is not ok");
+                    Activator.logWarning("stateMachineAnalysisModule status is not ok");
                 }
             } else {
-                System.out.println("stateMachineAnalysisModule is null");
+                Activator.logWarning("stateMachineAnalysisModule is null");
             }
         }
 
@@ -201,10 +201,10 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
             if (criticalPathAnalysisModule != null) {
                 IStatus status = criticalPathAnalysisModule.schedule();
                 if (!status.isOK()) {
-                    System.out.println("fModuleCriticalPath status is not ok");
+                    Activator.logWarning("fModuleCriticalPath status is not ok");
                 }
             } else {
-                System.out.println("fModuleCriticalPath is null");
+                Activator.logWarning("fModuleCriticalPath is null");
             }
         }
 
@@ -454,7 +454,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
             }
         }
         if (print) {
-            System.out.println(smig.toString());
+            Activator.logWarning(smig.toString());
         }
 
         benchmarkObject.stop();

@@ -277,12 +277,12 @@ public class BuilderInstanceGroup {
             eventListPerGroup.add(st.getLongestNonOverlappingRepeatedSubstringWithoutRepeat());
         } else {
             Collection<List<BuilderEventInfo>> lcsGroups = getLCSgroups();
-            System.out.println("DEBUG: Group NB = " + lcsGroups.size()); //$NON-NLS-1$ //
+            Activator.logInfo("DEBUG: Group NB = " + lcsGroups.size()); //$NON-NLS-1$ //
                                                                          // FIXME:
                                                                          // DEBUG
                                                                          // OUTPUT
             double groupingRate = (eventsPerTid.size() - lcsGroups.size()) * 1. / eventsPerTid.size();
-            System.out.println("DEBUG: Grouping rate = " + groupingRate); //$NON-NLS-1$ //
+            Activator.logInfo("DEBUG: Grouping rate = " + groupingRate); //$NON-NLS-1$ //
                                                                           // FIXME:
                                                                           // DEBUG
                                                                           // OUTPUT
@@ -299,7 +299,7 @@ public class BuilderInstanceGroup {
                         .max((s0, s1) -> Integer.compare(s0, s1))
                         .orElse(0);
 
-                System.out.println("DEBUG: Max number of content = " + maxNumberOfContent); //$NON-NLS-1$ //
+                Activator.logInfo("DEBUG: Max number of content = " + maxNumberOfContent); //$NON-NLS-1$ //
                                                                                             // FIXME:
                                                                                             // DEBUG
                                                                                             // OUTPUT
@@ -308,11 +308,11 @@ public class BuilderInstanceGroup {
                 // names
                 Collection<List<BuilderEventInfo>> idealLcsGroups = getLCSgroups(new BuilderEventInfoNameEqualityRunner());
                 double idealGroupingRate = (eventsPerTid.size() - idealLcsGroups.size()) * 1. / eventsPerTid.size();
-                System.out.println("DEBUG: Ideal group NB = " + idealLcsGroups.size()); //$NON-NLS-1$ //
+                Activator.logInfo("DEBUG: Ideal group NB = " + idealLcsGroups.size()); //$NON-NLS-1$ //
                                                                                         // FIXME:
                                                                                         // DEBUG
                                                                                         // OUTPUT
-                System.out.println("DEBUG: Ideal grouping rate = " + idealGroupingRate); //$NON-NLS-1$ //
+                Activator.logInfo("DEBUG: Ideal grouping rate = " + idealGroupingRate); //$NON-NLS-1$ //
                                                                                          // FIXME:
                                                                                          // DEBUG
                                                                                          // OUTPUT
@@ -346,11 +346,11 @@ public class BuilderInstanceGroup {
                     }
                 }
 
-                System.out.println("DEBUG: Final group NB = " + lcsGroups.size()); //$NON-NLS-1$ //
+                Activator.logInfo("DEBUG: Final group NB = " + lcsGroups.size()); //$NON-NLS-1$ //
                                                                                    // FIXME:
                                                                                    // DEBUG
                                                                                    // OUTPUT
-                System.out.println("DEBUG: Final grouping rate = " + groupingRate); //$NON-NLS-1$ //
+                Activator.logInfo("DEBUG: Final grouping rate = " + groupingRate); //$NON-NLS-1$ //
                                                                                     // FIXME:
                                                                                     // DEBUG
                                                                                     // OUTPUT
@@ -367,10 +367,11 @@ public class BuilderInstanceGroup {
     /**
      * Test
      */
+    @SuppressWarnings("null")
     public void doTest() {
-        System.out.println("DEBUG: Number of instances: " + eventsPerTid.size()); //$NON-NLS-1$
+        Activator.logInfo("DEBUG: Number of instances: " + eventsPerTid.size()); //$NON-NLS-1$
         for (Entry<Integer, List<BuilderEventInfo>> entry : eventsPerTid.entrySet()) {
-            System.out.println("DEBUG:    - instance " + entry.getKey() + ": " + entry.getValue().size() + " events"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            Activator.logInfo("DEBUG:    - instance " + entry.getKey() + ": " + entry.getValue().size() + " events"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             /*
              * for (int i = 0; i < entry.getValue().size(); i++) {
              * System.out.println("        - event "+i+": " +
@@ -419,7 +420,7 @@ public class BuilderInstanceGroup {
         StateMachineInstanceGroup smig = new StateMachineInstanceGroup(initialTransitions, stateMachineBackendAnalysis, lttngKernelExecutionGraphModules);
         smig.buildOn(fExperiment);
 
-        System.out.println(
+        Activator.logInfo(
                 StateMachineToDot.drawStateMachine(initialTransitions));
         System.exit(0);
 

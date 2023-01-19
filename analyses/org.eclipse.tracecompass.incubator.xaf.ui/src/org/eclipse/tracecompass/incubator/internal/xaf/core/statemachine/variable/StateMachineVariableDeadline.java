@@ -159,11 +159,11 @@ public class StateMachineVariableDeadline extends StateMachineVariable {
         // Treat only constants for now
         // TODO: treat comparison between variables
         if (constraint.getValueType() != ValueType.CONSTANT) {
-            System.out.println("TODO"); //$NON-NLS-1$
+            Activator.logWarning("TODO"); //$NON-NLS-1$
             return null;
         }
         if (validIsiList == null || validIsiList.isEmpty()) {
-            System.out.print("No valid instance"); //$NON-NLS-1$
+            Activator.logWarning("No valid instance"); //$NON-NLS-1$
             return null;
         }
 

@@ -35,6 +35,7 @@ import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.tracecompass.analysis.os.linux.core.tid.TidAnalysisModule;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfBenchmarkTrace;
+import org.eclipse.tracecompass.incubator.internal.scripting.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.ScriptExecutionHelper;
 import org.eclipse.tracecompass.incubator.scripting.core.trace.ScriptEventsIterator;
 import org.eclipse.tracecompass.incubator.scripting.core.trace.TraceScriptingModule;
@@ -139,7 +140,7 @@ public class ScriptingBenchmark {
     private static final Runnable EMPTY = () -> {
         // Do nothing much, to benchmark script initialization
         int i = 0;
-        System.out.println(i);
+        Activator.getInstance().logInfo(Integer.toString(i));
     };
 
     private static final Runnable SIMPLE_COMPUTATION = () -> {
@@ -201,7 +202,7 @@ public class ScriptingBenchmark {
                     schedSwitchCnt++;
                 }
             }
-            System.out.println("Count sched switch: " + schedSwitchCnt);
+            Activator.getInstance().logInfo("Count sched switch: " + schedSwitchCnt);
         } catch (TmfTraceException e) {
             fail(e.getMessage());
         } finally {
@@ -459,7 +460,7 @@ public class ScriptingBenchmark {
             pmPython.start();
             ScriptExecutionHelper.executeScript(Objects.requireNonNull(absoluteFilePath.toOSString()), JYTHON_ENGINE, fArguments);
             pmPython.stop();
-            System.out.println("Did iteration " + i);
+            Activator.getInstance().logInfo("Did iteration " + i);
         }
         pmPython.commit();
     }
