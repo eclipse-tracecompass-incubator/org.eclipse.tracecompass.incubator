@@ -21,6 +21,8 @@ import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.dialogs.Dialog;
@@ -43,10 +45,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.tracecompass.incubator.internal.inandout.core.analysis.InAndOutAnalysisModule;
 import org.eclipse.tracecompass.incubator.internal.inandout.core.analysis.SegmentSpecifier;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.ui.dialog.TmfFileDialogFactory;
 
 /**
  * Configuration dialog
@@ -61,6 +66,7 @@ public class InAndOutConfigDialog extends Dialog {
     private File fPath = null;
     private ITmfTrace fTrace;
     private boolean fChanged = false;
+    private static final String PREF_SAVED_OPEN_CONFIG_LOCATION = "PREF_LAST_OPEN_CONFIG_LOCATION"; //$NON-NLS-1$
 
     /**
      * Constructor
@@ -94,7 +100,7 @@ public class InAndOutConfigDialog extends Dialog {
         Composite localParent = (Composite) super.createDialogArea(parent);
         localParent.addControlListener(resizeLayouter(localParent));
         localParent.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).create());
-        localParent.setLayoutData(GridDataFactory.fillDefaults().hint(400, 240).grab(true, true).create());
+        localParent.setLayoutData(GridDataFactory.fillDefaults().hint(400, 340).grab(true, true).create());
 
         fSpecifiers = new ListViewer(localParent);
         fSpecifiers.setLabelProvider(new LabelProvider());
@@ -152,6 +158,26 @@ public class InAndOutConfigDialog extends Dialog {
         }));
         reset.setText("Reset"); //$NON-NLS-1$
 
+        Button importButton = new Button(controls, SWT.PUSH);
+        importButton.setEnabled(true);
+        importButton.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(@Nullable SelectionEvent e) {
+                importFile();
+            }
+        });
+        importButton.setText("Import..."); //$NON-NLS-1$
+
+        Button exportButton = new Button(controls, SWT.PUSH);
+        exportButton.setEnabled(true);
+        exportButton.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(@Nullable SelectionEvent e) {
+                exportFile();
+            }
+        });
+        exportButton.setText("Export..."); //$NON-NLS-1$
+
         Button up = new Button(controls, SWT.PUSH);
         up.setEnabled(false);
         fSpecifiers.addSelectionChangedListener(event -> up.setEnabled(!event.getSelection().isEmpty() && fData.size() != 1));
@@ -179,6 +205,51 @@ public class InAndOutConfigDialog extends Dialog {
         down.setText("v"); //$NON-NLS-1$
         localParent.pack();
         return localParent;
+    }
+
+    private void exportFile() {
+        FileDialog dialog = TmfFileDialogFactory.create(Display.getCurrent().getActiveShell(), SWT.SAVE);
+        dialog.setFilterExtensions(new String[] { "*.json" }); //$NON-NLS-1$
+        loadFileDialogSettings(dialog);
+        String selectedFileName = dialog.open();
+        if (selectedFileName != null) {
+            File fileName = new File(selectedFileName);
+            InAndOutAnalysisModule.write(fileName, fData);
+            saveFileDialogSettings(fileName.getParent());
+        }
+    }
+
+    private void importFile() {
+        FileDialog dialog = TmfFileDialogFactory.create(Display.getCurrent().getActiveShell(), SWT.OPEN);
+        dialog.setFilterExtensions(new String[] { "*.json"}); //$NON-NLS-1$
+        loadFileDialogSettings(dialog);
+        String selectedFileName = dialog.open();
+        if (selectedFileName != null) {
+            File fileName = new File (selectedFileName);
+            List<@NonNull SegmentSpecifier> read = InAndOutAnalysisModule.read(fileName);
+            fData.addAll(read);
+            fSpecifiers.refresh();
+            saveFileDialogSettings(fileName.getParent());
+        }
+    }
+
+    private static void loadFileDialogSettings(FileDialog fd) {
+        IEclipsePreferences defaultPreferences = InstanceScope.INSTANCE.getNode(Activator.PLUGIN_ID);
+        String lastLocation = defaultPreferences.get(PREF_SAVED_OPEN_CONFIG_LOCATION, null);
+        if (lastLocation != null && !lastLocation.isEmpty()) {
+            File parentFile = new File(lastLocation).getParentFile();
+            if (parentFile != null && parentFile.exists()) {
+                fd.setFilterPath(parentFile.toString());
+            }
+        }
+    }
+
+    private static void saveFileDialogSettings(String filePath) {
+        if (filePath == null) {
+            return;
+        }
+
+        InstanceScope.INSTANCE.getNode(Activator.PLUGIN_ID).put(PREF_SAVED_OPEN_CONFIG_LOCATION, filePath);
     }
 
     private static ControlListener resizeLayouter(Composite composite) {

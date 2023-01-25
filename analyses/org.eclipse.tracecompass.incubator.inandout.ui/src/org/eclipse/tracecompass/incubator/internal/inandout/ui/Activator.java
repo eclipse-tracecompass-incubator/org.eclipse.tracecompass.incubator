@@ -43,7 +43,7 @@ public class Activator extends AbstractUIPlugin {
      *
      * @return the shared instance
      */
-    public static @Nullable Activator getDefault() {
+    public static Activator getDefault() {
         return plugin;
     }
 }
