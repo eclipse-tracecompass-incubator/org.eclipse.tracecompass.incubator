@@ -76,6 +76,11 @@ public abstract class RestServerTest {
     public static final String TREE_PATH = "tree";
 
     /**
+     * Data Tree path segment
+     */
+    public static final String DATATREE_PATH = "data";
+
+    /**
      * Time Graph path segment
      */
     public static final String TIMEGRAPH_PATH = "timeGraph";
@@ -277,6 +282,25 @@ public abstract class RestServerTest {
                 .path(TABLE_PATH)
                 .path(dataProviderId)
                 .path(TABLE_LINE_PATH);
+    }
+
+
+    /**
+     * Get the {@link WebTarget} for the data-tree tree endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getDataTreeEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(DATATREE_PATH)
+                .path(dataProviderId)
+                .path(TREE_PATH);
     }
 
     /**

@@ -68,6 +68,7 @@ public final class EndpointConstants {
      */
     static final String ANN = "Annotations"; //$NON-NLS-1$
     static final String DIA = "Diagnostic"; //$NON-NLS-1$
+    static final String DT = "Data Tree"; //$NON-NLS-1$
     static final String EXP = "Experiments"; //$NON-NLS-1$
     static final String STY = "Styles"; //$NON-NLS-1$
     static final String TGR = "TimeGraph"; //$NON-NLS-1$

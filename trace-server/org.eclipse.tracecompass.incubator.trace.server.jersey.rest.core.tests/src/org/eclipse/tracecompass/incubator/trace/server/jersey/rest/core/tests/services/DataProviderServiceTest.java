@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
@@ -39,6 +40,8 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ColumnHeaderEntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryHeaderStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryModelStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.LineModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TableColumnsOutputResponseStub;
@@ -52,6 +55,7 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphRowStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphStateStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TreeOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyEntryModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyEntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyModelStub;
@@ -77,6 +81,7 @@ import com.google.common.collect.Iterators;
 public class DataProviderServiceTest extends RestServerTest {
     private static final int MAX_ITER = 40;
     private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
+    private static final String STATISTICS_DATAPROVIDER_ID = "org.eclipse.tracecompass.analysis.timing.core.segmentstore.SegmentStoreStatisticsDataProvider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack";
     private static final String XY_DATAPROVIDER_ID = "org.eclipse.tracecompass.analysis.os.linux.core.cpuusage.CpuUsageDataProvider";
     private static final String XY_HISTOGRAM_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider";
     private static final String EVENTS_TABLE_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider";
@@ -87,6 +92,7 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final String REQUESTED_COLUMN_IDS_KEY = "requested_table_column_ids";
     private static final String REQUESTED_TABLE_INDEX_KEY = "requested_table_index";
     private static final String REQUESTED_TABLE_COUNT_KEY = "requested_table_count";
+    private static final String IS_FILTERED_KEY = "isFiltered";
     private static final String ELEMENT_TYPE = "elementType";
     private static final String STATE = "state";
     private static final String ANNOTATION = "annotation";
@@ -102,6 +108,10 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final long TABLE_COUNT = 100L;
 
     private static final  List<EntryHeaderStub> EXPECTED_XY_TREE_HEADERS = ImmutableList.of(new EntryHeaderStub("Process", ""), new EntryHeaderStub("TID", ""), new EntryHeaderStub("%", ""), new EntryHeaderStub("Time", ""));
+
+    private static List<String> STATISTICS_TREE_HEADERS = ImmutableList.of("Label", "Minimum", "Maximum", "Average", "Std Dev", "Count", "Total");
+    private static List<String> SAMPLE_TOTAL_STATS_LABELS = ImmutableList.of("ust", "1 ns", "5.979 s", "10.845 ms", "196.299 ms", "1948", "21.127 s");
+    private static List<String> SAMPLE_SELECTION_STATS_LABELS = ImmutableList.of("Selection", "49.665 µs", "5.979 s", "11.388 ms", "201.201 ms", "1854", "21.113 s");
 
     /**
      * Test getting the data provider descriptors
@@ -274,6 +284,57 @@ public class DataProviderServiceTest extends RestServerTest {
                     assertTrue(entry.isDefault());
                 }
             }
+        } catch (ProcessingException e) {
+            // The failure from this exception alone is not helpful. Use the
+            // suppressed exception's message be the failure message for more
+            // help debugging failed tests.
+            fail(e.getCause().getMessage());
+        }
+    }
+
+    /**
+     * Ensure that a data tree data provider exists and returns correct data.
+     * It does not test the data itself, simply that the serialized fields are
+     * the expected ones.
+     *
+     * @throws InterruptedException
+     *             Exception thrown while waiting to execute again
+     */
+    @Test
+    public void testDataTreeDataProvider() throws InterruptedException {
+        long start = 1450193697034689597L;
+        long end = 1450193745774189602L;
+        try {
+            ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_STUB.getName(), CONTEXT_SWITCHES_UST_STUB);
+
+            // Test getting the time graph tree
+            WebTarget dataTree = getDataTreeEndpoint(exp.getUUID().toString(), STATISTICS_DATAPROVIDER_ID);
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, start, END, end));
+            EntryModelStub model = getDataTreeEntryModel(dataTree, parameters);
+            List<EntryStub> totalEntries = model.getEntries();
+
+            List<String> sampleLabels = totalEntries.get(0).getLabels();
+            for(String sample : SAMPLE_TOTAL_STATS_LABELS) {
+                assertTrue(sampleLabels.contains(sample));
+            }
+
+            // Query selection time range
+            end = end - 100000000L;
+            parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, start, END, end));
+            parameters.put(IS_FILTERED_KEY, true);
+            model = getDataTreeEntryModel(dataTree, parameters);
+            List<EntryStub> selectionRangeEntries = model.getEntries();
+            assertFalse(selectionRangeEntries.isEmpty());
+            // the result model contains total and selection statistics
+            assertTrue(selectionRangeEntries.size() > totalEntries.size());
+
+            sampleLabels = selectionRangeEntries.get(totalEntries.size()).getLabels();
+            for(String sample : SAMPLE_SELECTION_STATS_LABELS) {
+                assertTrue(sampleLabels.contains(sample));
+            }
+
         } catch (ProcessingException e) {
             // The failure from this exception alone is not helpful. Use the
             // suppressed exception's message be the failure message for more
@@ -588,5 +649,37 @@ public class DataProviderServiceTest extends RestServerTest {
             // Verify that entry doesn't have metadata
             assertNull(entry.getMetadata());
         }
+    }
+
+    private static EntryModelStub getDataTreeEntryModel(WebTarget dataTree, Map<String, Object> parameters) throws InterruptedException {
+        TreeOutputResponseStub responseModel;
+        Response treeResponse = dataTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+        assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
+        responseModel = treeResponse.readEntity(TreeOutputResponseStub.class);
+        assertNotNull(responseModel);
+        treeResponse.close();
+
+        // Make sure the analysis ran enough and we have a model
+        int iteration = 0;
+        while ((responseModel.isRunning() || responseModel.getModel() == null) && iteration < MAX_ITER) {
+            Thread.sleep(100);
+            treeResponse = dataTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+            assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
+            responseModel = treeResponse.readEntity(TreeOutputResponseStub.class);
+            assertNotNull(responseModel);
+            iteration++;
+            treeResponse.close();
+        }
+
+        EntryModelStub model = responseModel.getModel();
+        assertNotNull("The model is null, maybe the analysis did not run long enough?" + responseModel, model);
+        List<EntryStub> totalEntries = model.getEntries();
+        assertFalse(totalEntries.isEmpty());
+
+        List<String> headerLabels = model.getHeaders().stream().map(EntryHeaderStub::getName).collect(Collectors.toList());
+        for(String header : STATISTICS_TREE_HEADERS) {
+            assertTrue(headerLabels.contains(header));
+        }
+        return model;
     }
 }

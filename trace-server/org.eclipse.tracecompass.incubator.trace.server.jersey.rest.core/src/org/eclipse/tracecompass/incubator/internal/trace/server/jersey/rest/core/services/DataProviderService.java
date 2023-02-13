@@ -22,6 +22,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DIRECTION;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DIRECTION_COUNT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DIRECTION_EX;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ELEMENT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ELEMENT_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.EMAIL;
@@ -276,6 +277,40 @@ public class DataProviderService {
         }
 
         return Response.status(Status.NOT_FOUND).build();
+    }
+
+    /**
+     * Query the provider for the data tree entries.
+     *
+     * @param expUUID
+     *            desired experiment UUID
+     * @param outputId
+     *            Output ID for the data provider to query
+     * @param queryParameters
+     *            Parameters to fetch a data tree as described by
+     *            {@link QueryParameters}
+     * @return an {@link GenericView} with the results
+     */
+    @POST
+    @Path("/data/{outputId}/tree")
+    @Tag(name = DT)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "API to get the data tree", description = TREE_ENTRIES, responses = {
+            @ApiResponse(responseCode = "200", description = "Returns a list of data tree entries. " +
+                    CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = XYTreeResponse.class))),
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response getDataTree(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @RequestBody(description = "Query parameters to fetch the data tree entries. " + TIMERANGE_TREE, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMERANGE_EX_TREE +
+                            "}}"), schema = @Schema(implementation = TreeQueryParameters.class))
+            }, required = true) QueryParameters queryParameters) {
+        return getTree(expUUID, outputId, queryParameters);
     }
 
     /**
