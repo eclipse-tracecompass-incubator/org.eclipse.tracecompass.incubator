@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2021, 2023 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -33,4 +33,11 @@ public interface TreeColumnHeader {
     @Schema(description = "Displayed tooltip for this header. " +
             "Optional, no tooltip is applied if absent.")
     String getTooltip();
+
+    /**
+     * @return The data type of the column.
+     */
+    @Schema(description = "Data type of column. " +
+            "Optional, data type STRING is applied if absent.")
+    DataType getDataType();
 }
