@@ -107,11 +107,11 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final long TABLE_INDEX = 0L;
     private static final long TABLE_COUNT = 100L;
 
-    private static final  List<EntryHeaderStub> EXPECTED_XY_TREE_HEADERS = ImmutableList.of(new EntryHeaderStub("Process", ""), new EntryHeaderStub("TID", ""), new EntryHeaderStub("%", ""), new EntryHeaderStub("Time", ""));
+    private static final  List<EntryHeaderStub> EXPECTED_XY_TREE_HEADERS = ImmutableList.of(new EntryHeaderStub("Process", "", null), new EntryHeaderStub("TID", "", null), new EntryHeaderStub("%", "", null), new EntryHeaderStub("Time", "", null));
 
-    private static List<String> STATISTICS_TREE_HEADERS = ImmutableList.of("Label", "Minimum", "Maximum", "Average", "Std Dev", "Count", "Total");
-    private static List<String> SAMPLE_TOTAL_STATS_LABELS = ImmutableList.of("ust", "1 ns", "5.979 s", "10.845 ms", "196.299 ms", "1948", "21.127 s");
-    private static List<String> SAMPLE_SELECTION_STATS_LABELS = ImmutableList.of("Selection", "49.665 µs", "5.979 s", "11.388 ms", "201.201 ms", "1854", "21.113 s");
+    private static List<String> STATISTICS_TREE_HEADERS = ImmutableList.of("Label", "Minimum", "Maximum", "Average", "Std Dev", "Count", "Total", "Min Time Range", "Max Time Range");
+    private static List<String> SAMPLE_TOTAL_STATS_LABELS = ImmutableList.of("ust", "1 ns", "5.979 s", "10.845 ms", "196.299 ms", "1948", "21.127 s", "[1450193745774189602,1450193745774189603]", "[1450193722283061910,1450193728261604656]");
+    private static List<String> SAMPLE_SELECTION_STATS_LABELS = ImmutableList.of("Selection", "49.665 µs", "5.979 s", "11.388 ms", "201.201 ms", "1854", "21.113 s", "[1450193730177271075,1450193730177320740]", "[1450193722283061910,1450193728261604656]");
 
     /**
      * Test getting the data provider descriptors

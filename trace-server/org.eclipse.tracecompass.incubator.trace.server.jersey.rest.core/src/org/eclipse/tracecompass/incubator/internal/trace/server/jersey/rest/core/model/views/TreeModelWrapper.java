@@ -14,6 +14,8 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataType;
 import org.eclipse.tracecompass.tmf.core.model.ITableColumnDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
@@ -38,6 +40,7 @@ public class TreeModelWrapper {
     public static class TreeColumnHeader {
         private final String fName;
         private final String fTooltip;
+        private final @Nullable String fDataType;
 
         /**
          * Constructor with only the name
@@ -46,10 +49,18 @@ public class TreeModelWrapper {
          *            The name of the column
          * @param tooltip
          *            The tooltip text for the column
+         * @param dataType
+         *            The data type {@link DataType}
          */
-        public TreeColumnHeader(String name, String tooltip) {
-            fName =name;
+        public TreeColumnHeader(String name, String tooltip, DataType dataType) {
+            fName = name;
             fTooltip = tooltip;
+            if (dataType.equals(DataType.STRING)) {
+                // Default case
+                fDataType = null;
+            } else {
+                fDataType = dataType.name();
+            }
         }
 
         /**
@@ -68,6 +79,15 @@ public class TreeModelWrapper {
         public String getTooltip() {
             return fTooltip;
         }
+
+        /**
+         * Gets the data type of the column
+         *
+         * @return data type.
+         */
+        public @Nullable String getDataType() {
+            return fDataType;
+        }
     }
 
     /**
@@ -78,7 +98,7 @@ public class TreeModelWrapper {
         fModel = model;
         List<@NonNull ITableColumnDescriptor> headers = model.getColumnDescriptors();
         Builder<@NonNull TreeColumnHeader> builder = ImmutableList.builder();
-        headers.forEach(column -> builder.add(new TreeColumnHeader(column.getText(), column.getTooltip())));
+        headers.forEach(column -> builder.add(new TreeColumnHeader(column.getText(), column.getTooltip(), column.getDataType())));
         fHeaders = builder.build();
     }
 

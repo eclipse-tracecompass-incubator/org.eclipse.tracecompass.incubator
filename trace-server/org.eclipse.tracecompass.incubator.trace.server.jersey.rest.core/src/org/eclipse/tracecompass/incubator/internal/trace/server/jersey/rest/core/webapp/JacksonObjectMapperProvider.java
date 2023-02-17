@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TreeModelWrapper.TreeColumnHeader;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Experiment;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Trace;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
@@ -64,6 +65,7 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
             module.addSerializer(TimeGraphEntryModel.class, new TimeGraphEntryModelSerializer());
             module.addSerializer(Annotation.class, new AnnotationSerializer());
             module.addSerializer(TmfTreeDataModel.class, new TmfTreeModelSerializer());
+            module.addSerializer(TreeColumnHeader.class, new TreeColumnHeaderSerializer());
             module.addSerializer(OutputElementStyle.class, new OutputElementStyleSerializer());
             module.addSerializer(IVirtualTableLine.class, new VirtualTableLineSerializer());
             module.addSerializer(VirtualTableCell.class, new VirtualTableCellSerializer());

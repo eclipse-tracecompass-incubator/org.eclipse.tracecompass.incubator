@@ -28,6 +28,7 @@ public class EntryHeaderStub implements Serializable {
 
     private final String fName;
     private final String fTooltip;
+    private final String fDataType;
 
     /**
      * {@link JsonCreator} Constructor for final fields
@@ -36,12 +37,16 @@ public class EntryHeaderStub implements Serializable {
      *            the name of the header
      * @param tooltip
      *            The tooltip for this header
+     * @param dataType
+     *            The data type of the column
      */
     @JsonCreator
     public EntryHeaderStub(@JsonProperty("name") String name,
-            @JsonProperty("tooltip") String tooltip) {
+            @JsonProperty("tooltip") String tooltip,
+            @JsonProperty("dataType") String dataType) {
         fName = Objects.requireNonNull(name, "The 'name' json field was not set");
         fTooltip = tooltip;
+        fDataType = dataType;
     }
 
     /**
@@ -60,5 +65,14 @@ public class EntryHeaderStub implements Serializable {
      */
     public String getTooltip() {
         return fTooltip;
+    }
+
+    /**
+     * Get the data type of the column
+     *
+     * @return The data type of the column
+     */
+    public String getDataType() {
+        return fDataType;
     }
 }
