@@ -11,11 +11,18 @@
 
 package org.eclipse.tracecompass.incubator.ftrace.core.tests.event;
 
-import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.GenericFtraceField;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.event.GenericFtraceField;
+import org.junit.Test;
 
 /**
  * FtraceField test class
@@ -53,9 +60,9 @@ public class FtraceFieldTest {
     }
 
     /**
-     * Testing of parse line with function using line from an ftrace output where
-     * the command name contains a space (comm=daemo su), check that the parsed
-     * comm field value is the complete name, including the space.
+     * Testing of parse line with function using line from an ftrace output
+     * where the command name contains a space (comm=daemo su), check that the
+     * parsed comm field value is the complete name, including the space.
      */
     @Test
     public void testParseEventWithCommPropertyWithSpace() {
@@ -166,8 +173,8 @@ public class FtraceFieldTest {
     }
 
     /**
-     * Testing of parse line with Irq_raise event function using line from an ftrace
-     * output
+     * Testing of parse line with Irq_raise event function using line from an
+     * ftrace output
      */
     @Test
     public void testParseIrqRaise() {
@@ -176,10 +183,66 @@ public class FtraceFieldTest {
         GenericFtraceField field = GenericFtraceField.parseLine(line);
 
         assertNotNull(field);
+        assertEquals(2, field.getContent().getFields().size());
         assertEquals((Integer) 1, field.getCpu());
         assertEquals("softirq_raise", field.getName());
 
         assertEquals((Long) 9L, field.getContent().getFieldValue(Long.class, "vec"));
         assertEquals("RCU", field.getContent().getFieldValue(String.class, "action"));
+    }
+
+    /**
+     * Testing of parse line with odd comm names
+     */
+    @Test
+    public void testSpecialCharsInComm() {
+        List<@NonNull ResultsParse> tests = List.of(new ResultsParse(
+                "           <...>-919973  [019] ..... 40313.809636: sched_process_fork: comm=runc:[2:INIT] pid=919973 child_comm=runc:[2:INIT] child_pid=919974",
+                19, "sched_process_fork", Objects.requireNonNull(Map.of("comm", "runc:[2:INIT]")), 4),
+                new ResultsParse("ksoftirqd/16-112     [016] ..s.. 40318.937233: sched_process_free: comm=runc:[2:INIT] pid=920437 prio=120",
+                        16, "sched_process_free", Objects.requireNonNull(Map.of("comm", "runc:[2:INIT]")), 3),
+                new ResultsParse("<idle>-0       [021] ..s1. 40318.941173: sched_process_free: comm=runc:[0:PARENT] pid=920430 prio=120",
+                        21, "sched_process_free", Objects.requireNonNull(Map.of("comm", "runc:[0:PARENT]")), 3),
+                new ResultsParse("<idle>-0       [021] ..s1. 40318.941177: sched_process_free: comm=runc:[1:CHILD] pid=920431 prio=120",
+                        21, "sched_process_free", Objects.requireNonNull(Map.of("comm", "runc:[1:CHILD]")), 3),
+                new ResultsParse("kworker/0:0-9514  [000] d..4  3210.263482: sched_wakeup: comm=daemo su pid=16620 prio=120 success=1 target_cpu=000",
+                        0, "sched_wakeup", Objects.requireNonNull(Map.of("comm", "daemo su")), 5));
+        for (ResultsParse test : tests) {
+            test.test();
+        }
+    }
+
+    @NonNullByDefault
+    private static class ResultsParse {
+
+        private final String fInput;
+        private final Integer fCpu;
+        private final String fName;
+        private Map<String, Object> fFields;
+        private int fFieldCount;
+
+        public ResultsParse(String input, Integer cpu, String name, Map<String, Object> fields, int fieldCount) {
+            assertNotNull(input);
+            assertNotNull(cpu);
+            assertNotNull(name);
+            assertNotNull(fields);
+            assertNotNull(fieldCount);
+            fInput = input;
+            fCpu = cpu;
+            fName = name;
+            fFields = fields;
+            fFieldCount = fieldCount;
+        }
+
+        public void test() {
+            GenericFtraceField field = GenericFtraceField.parseLine(fInput);
+            assertNotNull(fInput, field);
+            assertEquals(fInput, fCpu, field.getCpu());
+            assertEquals(fInput, fName, field.getName());
+            assertEquals(fInput, fFieldCount, field.getContent().getFields().size());
+            for (Entry<String, Object> currentField : fFields.entrySet()) {
+                assertEquals(fInput + ' ' + currentField.getKey(), currentField.getValue(), field.getContent().getFieldValue(String.class, currentField.getKey()));
+            }
+        }
     }
 }

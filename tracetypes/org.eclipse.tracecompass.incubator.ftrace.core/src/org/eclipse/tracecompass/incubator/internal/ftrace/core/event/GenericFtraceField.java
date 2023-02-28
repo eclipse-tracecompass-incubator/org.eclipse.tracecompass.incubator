@@ -38,8 +38,12 @@ import java.util.regex.Pattern;
 @NonNullByDefault
 public class GenericFtraceField {
 
-    private static final Pattern KEYVAL_KEY_PATTERN = Pattern.compile("(?<key>[^\\s=\\[\\],]+)(=|:)"); //$NON-NLS-1$
+    private static final Pattern KEYVAL_KEY_PATTERN = Pattern.compile("(?<key>[^\\s=\\[\\],]+)(?<separator>[=:])"); //$NON-NLS-1$
     private static final Pattern KEYVAL_VALUE_PATTERN = Pattern.compile("\\s*(?<value>[^\\[\\],]+).*"); //$NON-NLS-1$
+    private static final Pattern KEYVAL_VALUE_DOCKER_BYPASS = Pattern.compile("\\S+:\\[\\S+:\\S+\\]"); //$NON-NLS-1$
+    private static final Map<String, Pattern> KEYVAL_KEY_PATTERN_MAP = Map.of("=", Pattern.compile("(?<key>[^\\s=\\[\\],]+)(?<separator>=)"), //$NON-NLS-1$ //$NON-NLS-2$
+            ":", Pattern.compile("(?<key>[^\\s=\\[\\],]+)(?<separator>:)"), //$NON-NLS-1$ //$NON-NLS-2$
+            "", KEYVAL_KEY_PATTERN); //$NON-NLS-1$
     private static final String KEYVAL_KEY_GROUP = "key"; //$NON-NLS-1$
     private static final String KEYVAL_VALUE_GROUP = "value"; //$NON-NLS-1$
 
@@ -136,18 +140,22 @@ public class GenericFtraceField {
                 int valStart = 0;
                 Matcher keyvalMatcher = KEYVAL_KEY_PATTERN.matcher(attributes);
                 String key = null;
+                separator = null;
                 while (keyvalMatcher.find()) {
-                    if (key != null && valStart > 0) {
-                        String value = attributes.substring(valStart, keyvalMatcher.start());
+                    if (key != null) {
+                        int start = keyvalMatcher.start();
+                        String value = attributes.substring(0, start);
                         putKeyValueField(name, fields, key, value);
                     }
                     valStart = keyvalMatcher.end();
                     key = keyvalMatcher.group(KEYVAL_KEY_GROUP);
+                    separator = keyvalMatcher.group(IGenericFtraceConstants.FTRACE_SEPARATOR_GROUP);
+                    attributes = attributes.substring(valStart);
+                    keyvalMatcher = KEYVAL_KEY_PATTERN_MAP.getOrDefault(separator, KEYVAL_KEY_PATTERN).matcher(attributes);
                 }
 
                 if (key != null && valStart > 0) {
-                    String value = attributes.substring(valStart, attributes.length());
-                    putKeyValueField(name, fields, key, value);
+                    putKeyValueField(name, fields, key, attributes);
                 }
 
                 /*
@@ -169,12 +177,12 @@ public class GenericFtraceField {
     }
 
     private static void putKeyValueField(String name, Map<@NonNull String, @NonNull Object> fields, String key, String value) {
-        Matcher valMatcher = KEYVAL_VALUE_PATTERN.matcher(value);
         String actualValue;
-        if (valMatcher.matches()) {
+        Matcher valMatcher = KEYVAL_VALUE_PATTERN.matcher(value);
+        if (!KEYVAL_VALUE_DOCKER_BYPASS.matcher(value).find() && valMatcher.matches()) {
             actualValue = valMatcher.group(KEYVAL_VALUE_GROUP).trim();
         } else {
-            actualValue = value;
+            actualValue = value.trim();
         }
         if (!actualValue.trim().isEmpty()) {
             // This is a temporary solution. Refactor suggestions
