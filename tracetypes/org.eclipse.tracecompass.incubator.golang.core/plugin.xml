@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.golang"
+            isDirectory="false"
+            name="Golang Exection Trace"
+            trace_type="org.eclipse.tracecompass.incubator.internal.golang.core.trace.GolangTrace">
+      </type>
+   </extension>
+
+</plugin>
