@@ -223,7 +223,6 @@ public class GolangTrace extends TmfTrace {
         fAspects.add(new TmfEventFieldAspect(OFFSET, OFFSET, ITmfEvent::getContent));
         fAspects.add(new TmfEventFieldAspect(NAME, NAME, ITmfEvent::getContent));
         fAspects.add(new TmfEventFieldAspect("taskid", "taskid", ITmfEvent::getContent));
-        fAspects.add(new TmfEventFieldAspect(P_FIELD, P_FIELD, ITmfEvent::getContent));
         fAspects.add(new TmfEventFieldAspect(G_FIELD, G_FIELD, ITmfEvent::getContent));
         fAspects.add(new TmfEventFieldAspect(STACK_ID, STACK_ID, ITmfEvent::getContent));
         fAspects.add(new TmfCallsiteAspect() {

@@ -13,7 +13,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.common.core,
  org.eclipse.tracecompass.tmf.ui,
  org.eclipse.tracecompass.tmf.core,
- org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional,
+ org.eclipse.tracecompass.analysis.os.linux.core
 Export-Package: org.eclipse.tracecompass.incubator.internal.golang.core;x-friends:="org.eclipse.tracecompass.incubator.golang.core.tests",
+ org.eclipse.tracecompass.incubator.internal.golang.core.analysis.memory,
  org.eclipse.tracecompass.incubator.internal.golang.core.trace
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.golang.core
+Import-Package: com.google.common.collect
