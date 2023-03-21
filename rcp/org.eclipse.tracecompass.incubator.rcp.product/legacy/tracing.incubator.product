@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Trace Compass (Incubator)" uid="org.eclipse.tracecompass.incubator.rcp" id="org.eclipse.tracecompass.incubator.rcp.branding.product" application="org.eclipse.tracecompass.rcp.ui.application" version="0.4.0.qualifier" useFeatures="true" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="Trace Compass (Incubator)" uid="org.eclipse.tracecompass.incubator.rcp" id="org.eclipse.tracecompass.incubator.rcp.branding.product" application="org.eclipse.tracecompass.rcp.ui.application" version="0.5.0.qualifier" useFeatures="true" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="/org.eclipse.tracecompass.incubator.rcp.branding/icons/tc_about.png"/>
       <text>
          Trace Compass (Incubator)
 
-Version: 0.4.0
+Version: 0.5.0
 
 Copyright (c) 2019, 2022 École Polytechnique de Montréal and others
 
@@ -29,11 +29,11 @@ SPDX-License-Identifier: EPL-2.0
       </programArgs>
       <programArgsLin>--launcher.GTK_version 3
       </programArgsLin>
-      <vmArgsLin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=17
+      <vmArgsLin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=11
       </vmArgsLin>
-      <vmArgsMac>-Xms512m -Xmx1024m -XstartOnFirstThread -Dosgi.requiredJavaVersion=17 -Dorg.eclipse.swt.internal.carbon.smallFonts
+      <vmArgsMac>-Xms512m -Xmx1024m -XstartOnFirstThread -Dosgi.requiredJavaVersion=11 -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
-      <vmArgsWin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=17
+      <vmArgsWin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=11
       </vmArgsWin>
    </launcherArgs>
 
@@ -51,10 +51,10 @@ SPDX-License-Identifier: EPL-2.0
    </launcher>
 
    <vm>
-      <linux include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17</linux>
-      <macos include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17</macos>
+      <linux include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</linux>
+      <macos include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</macos>
       <solaris include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8</solaris>
-      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17</windows>
+      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</windows>
    </vm>
 
    <license>

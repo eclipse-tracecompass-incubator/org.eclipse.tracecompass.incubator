@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Trace Compass Trace Server (Jersey Rest)" uid="traceserver" id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" application="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" version="0.4.0.qualifier" useFeatures="false" includeLaunchers="true" autoIncludeRequirements="true">
-
+<product name="Trace Compass Trace Server (Jersey Rest)" uid="traceserver" id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" application="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" version="0.5.0.qualifier" useFeatures="false" includeLaunchers="true" autoIncludeRequirements="true">
 
    <configIni use="default">
    </configIni>
@@ -12,11 +11,11 @@
 -noSplash
 -data @noDefault
       </programArgs>
-      <programArgsLin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=17
+      <programArgsLin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=11
       </programArgsLin>
-      <programArgsMac>-Xms512m -Xmx1024m -XstartOnFirstThread -Dosgi.requiredJavaVersion=17 -Dorg.eclipse.swt.internal.carbon.smallFonts
+      <programArgsMac>-Xms512m -Xmx1024m -XstartOnFirstThread -Dosgi.requiredJavaVersion=11 -Dorg.eclipse.swt.internal.carbon.smallFonts
       </programArgsMac>
-      <programArgsWin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=17
+      <programArgsWin>-Xms512m -Xmx1024m  -Dosgi.requiredJavaVersion=11
       </programArgsWin>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
@@ -24,18 +23,16 @@
 
    <windowImages/>
 
-
    <launcher name="tracecompass-server">
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
 
-
    <vm>
-      <linux include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17</linux>
-      <macos include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17</macos>
-      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17</windows>
+      <linux include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</linux>
+      <macos include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</macos>
+      <windows include="false">org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11</windows>
    </vm>
 
    <license>
