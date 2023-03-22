@@ -51,8 +51,8 @@ sed -i -e s/$oldVersion.qualifier/$newVersion.qualifier/g ../../rcp/org.eclipse.
 #rcp/org.eclipse.tracecompass.incubator.rcp.branding/plugin.xml aboutText
 sed -i -e s/$oldVersion/$newVersion/g ../../rcp/org.eclipse.tracecompass.incubator.rcp.branding/plugin.xml
 
-#Update .product rcp/org.eclipse.tracecompass.incubator.rcp.product/tracing.incubator.product
-sed -i -e s/$oldVersion/$newVersion/g ../../rcp/org.eclipse.tracecompass.incubator.rcp.product/tracing.incubator.product
-#Update .product trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product
-sed -i -e s/$oldVersion/$newVersion/g ../../trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product
+#Update .product rcp/org.eclipse.tracecompass.incubator.rcp.product/(*/)tracing.incubator.product
+find ../../rcp/org.eclipse.tracecompass.incubator.rcp.product/ -name "*.product" -type f -exec sed -i -e s/$oldVersion/$newVersion/g {} \;
+#Update .product trace-server/org.eclipse.tracecompass.incubator.trace.server.product/(*/)traceserver.product
+find ../../trace-server/org.eclipse.tracecompass.incubator.trace.server.product/ -name "*.product" -type f -exec sed -i -e s/$oldVersion/$newVersion/g {} \;
 
