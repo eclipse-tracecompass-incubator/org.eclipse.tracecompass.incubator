@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -19,6 +20,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -85,7 +89,9 @@ public final class Experiment implements Serializable {
      */
     public static Experiment from(TmfExperiment experiment, UUID expUUID) {
         Iterator<UUID> iter = ExperimentManagerService.getTraceUUIDs(expUUID).iterator();
-        Set<Trace> traces = Sets.newLinkedHashSet(Lists.transform(experiment.getTraces(),
+        // Get all the leaf traces from experiment
+        @NonNull List<@NonNull ITmfTrace> children = new ArrayList<>(TmfTraceManager.getTraceSet(experiment));
+        Set<Trace> traces = Sets.newLinkedHashSet(Lists.transform(children,
                 t -> Trace.from(t, iter.next())));
         return new Experiment(experiment.getName(),
                 expUUID,

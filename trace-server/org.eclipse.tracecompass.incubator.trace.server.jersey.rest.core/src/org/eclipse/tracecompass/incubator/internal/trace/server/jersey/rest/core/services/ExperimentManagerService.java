@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -53,6 +54,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ExperimentQueryParameters;
@@ -61,6 +63,7 @@ import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.model.annotations.TraceAnnotationProvider;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
+import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
@@ -343,6 +346,7 @@ public class ExperimentManagerService {
         }
         // Create and set the supplementary folder
         createSupplementaryFolder(resource);
+
         // Instantiate the experiment and return it
         ITmfTrace[] traces = Lists.transform(traceUUIDs, uuid -> TraceManagerService.createTraceInstance(uuid)).toArray(new ITmfTrace[0]);
         // Determine cache size for experiments
@@ -350,18 +354,61 @@ public class ExperimentManagerService {
         for (ITmfTrace trace : traces) {
             cacheSize = Math.min(cacheSize, trace.getCacheSize());
         }
-        TmfExperiment experiment = new TmfExperiment(ITmfEvent.class, resource.getLocation().toOSString(), traces, cacheSize, resource);
-        experiment.indexTrace(false);
-        // read first event to make sure start time is initialized
-        ITmfContext ctx = experiment.seekEvent(0);
-        experiment.getNext(ctx);
-        ctx.dispose();
+        TmfExperiment experiment = null;
+        try {
+            String experimentTypeId = getOrDetectExerimentType(resource, traces);
+            experiment = TmfTraceType.instantiateExperiment(experimentTypeId);
+            if (experiment != null) {
+                experiment.initExperiment(ITmfEvent.class, resource.getLocation().toOSString(), traces, cacheSize, resource, experimentTypeId);
+                experiment.indexTrace(false);
+                // read first event to make sure start time is initialized
+                ITmfContext ctx = experiment.seekEvent(0);
+                experiment.getNext(ctx);
+                ctx.dispose();
 
-        TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(ExperimentManagerService.class, experiment, null));
+                TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(ExperimentManagerService.class, experiment, null));
 
-        EXPERIMENTS.put(expUUID, experiment);
-        TRACE_ANNOTATION_PROVIDERS.put(expUUID, new TraceAnnotationProvider(experiment));
+                EXPERIMENTS.put(expUUID, experiment);
+                TRACE_ANNOTATION_PROVIDERS.put(expUUID, new TraceAnnotationProvider(experiment));
+                return experiment;
+            }
+        } catch (CoreException e) {
+            Activator.getInstance().logWarning("Error instantiating experiment"); //$NON-NLS-1$
+        }
         return experiment;
+    }
+
+    /**
+     * Get experiment type from experiment resource or auto-detect if it has not
+     * been detected. It will fall-back to the default experiment if experiment
+     * type can't be retrieved or detected.
+     *
+     * @param resource
+     *            the experiment resource
+     * @param traces
+     *            array for traces for the experiment
+     * @return experiment type ID
+     * @throws CoreException
+     *             in case of error handling Eclipse resource
+     */
+    private static @NonNull String getOrDetectExerimentType(IResource resource, ITmfTrace[] traces) throws CoreException {
+        String experimentTypeId = TmfTraceType.getTraceTypeId(resource);
+        if (experimentTypeId == null) {
+            // Fall-back experiment type.
+            experimentTypeId = TmfTraceType.DEFAULT_EXPERIMENT_TYPE;
+            // Auto-detect experiment type
+            List<TraceTypeHelper> helpers = TmfTraceType.selectExperimentType(Arrays.asList(traces), null);
+            if (!helpers.isEmpty()) {
+                experimentTypeId = helpers.get(0).getTraceTypeId();
+            }
+            resource.setPersistentProperty(TmfCommonConstants.TRACETYPE, experimentTypeId);
+        } else if (TmfTraceType.getTraceAttributes(experimentTypeId) == null) {
+            // Plug-in for experiment type not available. Fall-back to default
+            // experiment type.
+            Activator.getInstance().logWarning("Extension for experiment type (" + experimentTypeId + ") not installed. Fall-back to generic experiment."); //$NON-NLS-1$ //$NON-NLS-2$
+            experimentTypeId = TmfTraceType.DEFAULT_EXPERIMENT_TYPE;
+        }
+        return experimentTypeId;
     }
 
     /**
@@ -414,8 +461,6 @@ public class ExperimentManagerService {
         for (IResource traceResource : traceResources) {
             addTrace(folder, traceResource);
         }
-        // set the experiment type
-        folder.setPersistentProperty(TmfCommonConstants.TRACETYPE, TmfTraceType.DEFAULT_EXPERIMENT_TYPE);
     }
 
     private static void addTrace(IFolder folder, IResource traceResource) throws CoreException {
