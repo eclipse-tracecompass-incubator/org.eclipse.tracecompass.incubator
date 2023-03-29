@@ -18,7 +18,7 @@ For information on running the Trace Compass Trace Server, refer to the [README]
 
 ## Project rules and guidelines
 
-This project is an incubator which aims at rapid availability of new features and prototypes, to provide new functionnalities to end users and get feedback from them during the development process. As such, code style and design architecture will not be looked at too much during reviews, though some advices and ideas can be discussed. The features have to work as expected though and not break anything in Trace Compass.
+This project is an incubator which aims at rapid availability of new features and prototypes, to provide new functionalities to end users and get feedback from them during the development process. As such, code style and design architecture will not be looked at too much during reviews, though some advices and ideas can be discussed. The features have to work as expected though and not break anything in Trace Compass.
 
 - Add unit tests: CI will be run on every patch on gerrit, so having unit tests ensures that a patch does not break anything somewhere else. Also, these plugins are work in progress. Having unit tests makes it easier to manipulate code structure and algorithms by knowing the expected results. Tests need to be maintained, but have more benefits than trouble.
 

@@ -7,7 +7,7 @@
 
 - [Compiling manually](#compiling-manually)
 - [Running the server](#running-the-server)
-- [Run the Server with SSL](#run-the-server-with-ssl)
+- [Run the Server with SSL](#running-the-server-with-ssl)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -17,7 +17,7 @@ The Maven project build requires version 3.3 or later. It can be downloaded from
 <http://maven.apache.org> or from the package management system of your distro.
 
 To build the trace-server manually using Maven, simply run the following command
-from the git progect top-level directory:
+from the git project top-level directory:
 
     cd org.eclipse.tracecompass.incubator/
     mvn clean install
@@ -36,10 +36,8 @@ contain the executable for each OS.
 
 ## Running the server
 
-```shell
-cd trace-server/org.eclipse.tracecompass.incubator.trace.server.product/target/products/traceserver/linux/gtk/x86_64/trace-compass-server/
-./tracecompass-server`
-```
+    cd trace-server/org.eclipse.tracecompass.incubator.trace.server.product/target/products/traceserver/linux/gtk/x86_64/trace-compass-server/
+    ./tracecompass-server
 
 This server is an implementation of the [Trace Server Protocol](https://github.com/theia-ide/trace-server-protocol),
 whose [API is documented](https://theia-ide.github.io/trace-server-protocol/) using the OpenAPI REST specification.
@@ -59,13 +57,11 @@ Follow the instructions to [configure SSL on jetty](https://www.eclipse.org/jett
 Then, you can edit the `tracecompass-server.ini` file to pass the keystore data and SSL port as parameters after the `-vmargs` line.
 For example, here is an excerpt of the file:
 
-```shell
-[...]
--vmargs
-[...]
--Dtraceserver.port=8443
--Dtraceserver.keystore=/path/to/keystore
-```
+    [...]
+    -vmargs
+    [...]
+    -Dtraceserver.port=8443
+    -Dtraceserver.keystore=/path/to/keystore
 
 The following properties are supported:
 
