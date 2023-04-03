@@ -110,7 +110,7 @@ public class FilterBoxService implements TextDocumentService {
                 Position end = new Position(0, input.length());
                 CompletionItem item = new CompletionItem();
                 TextEdit textEdit = new TextEdit(new Range(start, end), suggestions.get(i));
-                item.setTextEdit(textEdit);
+                item.setTextEdit(Either.forLeft(textEdit));
                 completions.add(item);
             }
         } catch (IOException error) {

@@ -11,14 +11,9 @@
 
 package org.eclipse.tracecompass.incubator.internal.filters.core.server;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
-import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.WorkspaceSymbolParams;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
 /**
@@ -30,12 +25,6 @@ import org.eclipse.lsp4j.services.WorkspaceService;
  *
  */
 public class FilterWorkspaceService implements WorkspaceService {
-
-    @Override
-    public CompletableFuture<List<? extends SymbolInformation>> symbol(WorkspaceSymbolParams params) {
-        // Does not apply to filter box
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public void didChangeConfiguration(@Nullable DidChangeConfigurationParams params) {
