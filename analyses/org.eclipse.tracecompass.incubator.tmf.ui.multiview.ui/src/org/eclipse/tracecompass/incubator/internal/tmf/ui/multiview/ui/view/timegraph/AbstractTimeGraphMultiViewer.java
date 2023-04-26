@@ -375,14 +375,14 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
         timeGraphViewer.setMarkerAxisControlVisible(false);
         timeGraphViewer.setHorizontalScrollBarVisible(false);
         fTimeGraphViewer = timeGraphViewer;
-        setFilterColumns(new String[] { "Name" });
+        setFilterColumns(new String[] { "Name" }); //$NON-NLS-1$
         setFilterLabelProvider(new TreeLabelProvider() {
             @Override
             public String getColumnText(Object element, int columnIndex) {
                 if (columnIndex == 0) {
                     return this.getText(element);
                 }
-                return "";
+                return ""; //$NON-NLS-1$
             }
         });
     }
@@ -2106,11 +2106,11 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
     @NonNullByDefault
     protected Map<Integer, Predicate<Multimap<String, Object>>> generateRegexPredicate() {
         Multimap<Integer, String> regexes = getRegexes();
-        Map<@NonNull Integer, @NonNull Predicate<@NonNull Multimap<@NonNull String, @NonNull Object>>> predicates = new HashMap<>();
+        Map<Integer, Predicate<Multimap<String, Object>>> predicates = new HashMap<>();
         for (Entry<Integer, Collection<String>> entry : regexes.asMap().entrySet()) {
             String regex = IFilterStrings.mergeFilters(entry.getValue());
             FilterCu cu = FilterCu.compile(regex);
-            Predicate<@NonNull Multimap<@NonNull String, @NonNull Object>> predicate = cu != null ? cu.generate() : null;
+            Predicate<Multimap<String, Object>> predicate = cu != null ? cu.generate() : null;
             if (predicate != null) {
                 predicates.put(entry.getKey(), predicate);
             }
@@ -2156,7 +2156,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
             if (columnIndex == 0) {
                 return entry.getName();
             }
-            return new String();
+            return ""; //$NON-NLS-1$
         }
 
         @Override
