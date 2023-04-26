@@ -11,7 +11,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.kernel.core.swslatency;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.OsStrings;
 import org.eclipse.tracecompass.datastore.core.interval.IHTIntervalReader;
 import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferWriter;
@@ -35,7 +34,7 @@ public final class SchedWS implements INamedSegment, IElementResolver {
     /**
      * The reader for this segment class
      */
-    public static final IHTIntervalReader<@NonNull ISegment> READER = buffer -> new SchedWS(buffer.getLong(), buffer.getLong(), buffer.getString(), buffer.getInt(), buffer.getInt());
+    public static final IHTIntervalReader<ISegment> READER = buffer -> new SchedWS(buffer.getLong(), buffer.getLong(), buffer.getString(), buffer.getInt(), buffer.getInt());
 
     /**
      * The subset of information that is available from the sched wakeup/switch
@@ -141,7 +140,7 @@ public final class SchedWS implements INamedSegment, IElementResolver {
     }
 
     @Override
-    public void writeSegment(@NonNull ISafeByteBufferWriter buffer) {
+    public void writeSegment(ISafeByteBufferWriter buffer) {
         buffer.putLong(fStartTime);
         buffer.putLong(fEndTime);
         buffer.putString(fName);
@@ -150,7 +149,7 @@ public final class SchedWS implements INamedSegment, IElementResolver {
     }
 
     @Override
-    public int compareTo(@NonNull ISegment o) {
+    public int compareTo(ISegment o) {
         int ret = INamedSegment.super.compareTo(o);
         if (ret != 0) {
             return ret;

@@ -59,7 +59,6 @@ public class IoByProcessView extends AbstractMultiView {
      */
     public static final String VIEW_ID = "org.eclipse.tracecompass.kernel.ui.view.iobyprocess"; //$NON-NLS-1$
 
-
     private @Nullable Integer fSelectedTid = null;
     private Set<Integer> fCheckedTids = new HashSet<>();
 
@@ -116,7 +115,7 @@ public class IoByProcessView extends AbstractMultiView {
         }
 
         @Override
-        protected @NonNull Map<@NonNull String, @NonNull Object> getFetchTreeParameters() {
+        protected @NonNull Map<String, Object> getFetchTreeParameters() {
             Integer tid = fSelectedTid;
             Set<Integer> tids = new HashSet<>(fCheckedTids);
             if (tid != null) {
@@ -172,7 +171,7 @@ public class IoByProcessView extends AbstractMultiView {
 
         tgViewer.init();
         addLane(tgViewer);
-        fTgViewer  = tgViewer;
+        fTgViewer = tgViewer;
     }
 
 }
