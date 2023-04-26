@@ -188,8 +188,8 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
                 if (entryModel instanceof FlameChartEntryModel) {
                     FlameChartEntryModel model = (FlameChartEntryModel) entryModel;
                     if (model.getEntryType() == EntryType.LEVEL) {
-                        // Is this the symbol key image? then show the symbol key image, otherwise, just
-                        // the group image
+                        // Is this the symbol key image? then show the symbol
+                        // key image, otherwise, just the group image
                         return GROUP_IMAGE;
                     }
                     if (model.getEntryType() == EntryType.FUNCTION && fFunctions.containsKey(entryModel.getId())) {
@@ -421,7 +421,8 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
                     return true;
                 });
                 Map<Long, TimeGraphEntry> map = Maps.uniqueIndex(filtered, e -> e.getEntryModel().getId());
-                // use time -1 as a lower bound for the end of Time events to be included.
+                // use time -1 as a lower bound for the end of Time events to be
+                // included.
                 SelectionTimeQueryFilter filter = new SelectionTimeQueryFilter(Math.max(traceEntry.getStartTime(), time - 1), time, 2, map.keySet());
                 TmfModelResponse<@NonNull TimeGraphModel> response = traceEntry.getProvider().fetchRowModel(FetchParametersUtils.selectionTimeQueryToMap(filter), null);
                 TimeGraphModel model = response.getModel();
@@ -445,8 +446,9 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
             ITimeGraphState event = list.get(0);
             if (event.getStartTime() + event.getDuration() <= time && list.size() > 1) {
                 /*
-                 * get the second time graph state as passing time - 1 as a first argument to
-                 * the filter will get the previous state, if time is the beginning of an event
+                 * get the second time graph state as passing time - 1 as a
+                 * first argument to the filter will get the previous state, if
+                 * time is the beginning of an event
                  */
                 event = list.get(1);
             }
@@ -558,7 +560,8 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
                         TimeGraphEntry callStackEntry = (TimeGraphEntry) entry;
                         ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider = getProvider(callStackEntry);
                         long selectionBegin = viewer.getSelectionBegin();
-                        Map<@NonNull String, @NonNull Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, selectionBegin), Collections.singleton(callStackEntry.getEntryModel().getId())));
+                        Map<@NonNull String, @NonNull Object> parameters = FetchParametersUtils
+                                .selectionTimeQueryToMap(new SelectionTimeQueryFilter(Lists.newArrayList(Long.MIN_VALUE, selectionBegin), Collections.singleton(callStackEntry.getEntryModel().getId())));
                         TmfModelResponse<@NonNull TimeGraphModel> response = provider.fetchRowModel(parameters, null);
                         TimeGraphModel model = response.getModel();
                         if (model == null || model.getRows().size() != 1) {
@@ -654,9 +657,9 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
         fConfigureSymbolsAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(IMPORT_BINARY_ICON_PATH));
 
         /*
-         * The updateConfigureSymbolsAction() method (called by refresh()) will set the
-         * action to true if applicable after the symbol provider has been properly
-         * loaded.
+         * The updateConfigureSymbolsAction() method (called by refresh()) will
+         * set the action to true if applicable after the symbol provider has
+         * been properly loaded.
          */
         fConfigureSymbolsAction.setEnabled(false);
 
@@ -664,8 +667,8 @@ public class FlameChartView extends BaseDataProviderTimeGraphView {
     }
 
     /**
-     * @return an array of {@link ISymbolProviderPreferencePage} that will configure
-     *         the current traces
+     * @return an array of {@link ISymbolProviderPreferencePage} that will
+     *         configure the current traces
      */
     private ISymbolProviderPreferencePage[] getProviderPages() {
         List<ISymbolProviderPreferencePage> pages = new ArrayList<>();
