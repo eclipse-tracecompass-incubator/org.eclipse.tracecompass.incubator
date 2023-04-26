@@ -90,7 +90,7 @@ import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filter.parse
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TraceCompassFilter;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.util.TimeGraphStyleUtil;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.IElementResolver;
+import org.eclipse.tracecompass.tmf.core.model.ICoreElementResolver;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.IFilterProperty;
 import org.eclipse.tracecompass.tmf.core.resources.ITmfMarker;
 import org.eclipse.tracecompass.tmf.core.signal.TmfDataModelSelectedSignal;
@@ -341,8 +341,8 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
     /** Listener that handles a click on an entry in the FusedVM View */
     private final ITimeGraphSelectionListener fMetadataSelectionListener = event -> {
         ITimeGraphEntry entry = event.getSelection();
-        if (entry instanceof IElementResolver) {
-            Multimap<@NonNull String, @NonNull Object> metadata = ((IElementResolver) entry).getMetadata();
+        if (entry instanceof ICoreElementResolver) {
+            Multimap<@NonNull String, @NonNull Object> metadata = ((ICoreElementResolver) entry).getMetadata();
             if (!metadata.isEmpty()) {
                 TmfSignalManager.dispatchSignal(new TmfDataModelSelectedSignal(AbstractTimeGraphMultiViewer.this, metadata));
             }

@@ -41,12 +41,12 @@ import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataType;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
+import org.eclipse.tracecompass.tmf.core.model.ICoreElementResolver;
 import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.core.model.YModel;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.IElementResolver;
 import org.eclipse.tracecompass.tmf.core.model.tree.AbstractTreeDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
@@ -110,7 +110,7 @@ public class IoPerProcessDataProvider extends AbstractTreeDataProvider<IoAnalysi
     private final Map<Integer, String> fQuarkToString = new HashMap<>();
 
     // Data model class that has metadata
-    private static final class IoTreeDataModel extends TmfTreeDataModel implements IElementResolver {
+    private static final class IoTreeDataModel extends TmfTreeDataModel implements ICoreElementResolver {
 
         private Multimap<String, Object> fMetadata;
 

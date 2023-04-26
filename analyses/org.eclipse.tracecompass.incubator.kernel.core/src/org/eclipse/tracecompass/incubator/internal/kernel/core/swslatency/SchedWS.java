@@ -17,7 +17,8 @@ import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferWrit
 import org.eclipse.tracecompass.datastore.core.serialization.SafeByteBufferFactory;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.segment.interfaces.INamedSegment;
-import org.eclipse.tracecompass.tmf.core.model.timegraph.IElementResolver;
+import org.eclipse.tracecompass.tmf.core.model.ICoreElementResolver;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -27,7 +28,7 @@ import com.google.common.collect.Multimap;
  *
  * @author Abdellah Rahmani
  */
-public final class SchedWS implements INamedSegment, IElementResolver {
+public final class SchedWS implements INamedSegment, ICoreElementResolver {
 
     private static final long serialVersionUID = 4183872871733170072L;
 
