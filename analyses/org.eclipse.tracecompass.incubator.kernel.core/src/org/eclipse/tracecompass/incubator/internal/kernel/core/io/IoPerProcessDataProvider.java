@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.OsStrings;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
@@ -83,15 +82,15 @@ public class IoPerProcessDataProvider extends AbstractTreeDataProvider<IoAnalysi
      * Provider unique ID.
      */
     public static final String ID = "org.eclipse.tracecompass.incubator.kernel.core.io.per.process"; //$NON-NLS-1$
-    private static final String READ_TITLE = "Read";
-    private static final String WRITE_TITLE = "Write";
+    private static final String READ_TITLE = "Read"; //$NON-NLS-1$
+    private static final String WRITE_TITLE = "Write"; //$NON-NLS-1$
     private static final double SECONDS_PER_NANOSECOND = 1E-9;
 
     private static final String BASE_STYLE = "base"; //$NON-NLS-1$
     private static final Map<String, OutputElementStyle> STATE_MAP;
     private static final List<Pair<String, String>> COLOR_LIST = IODataPalette.getColors();
     private static final String BINARY_SPEED_UNIT = "B/s"; //$NON-NLS-1$
-    private static final TmfXYAxisDescription Y_AXIS_DESCRIPTION = new TmfXYAxisDescription(Objects.requireNonNull("File throughput"), BINARY_SPEED_UNIT, DataType.BINARY_NUMBER);
+    private static final TmfXYAxisDescription Y_AXIS_DESCRIPTION = new TmfXYAxisDescription(Objects.requireNonNull("File throughput"), BINARY_SPEED_UNIT, DataType.BINARY_NUMBER); //$NON-NLS-1$
     private static final List<String> SUPPORTED_STYLES = ImmutableList.of(
             StyleProperties.SeriesStyle.SOLID,
             StyleProperties.SeriesStyle.DASH,
@@ -101,7 +100,7 @@ public class IoPerProcessDataProvider extends AbstractTreeDataProvider<IoAnalysi
 
     static {
         // Create the base style
-        ImmutableMap.Builder<@NonNull String, @NonNull OutputElementStyle> builder = new ImmutableMap.Builder<>();
+        ImmutableMap.Builder<String, OutputElementStyle> builder = new ImmutableMap.Builder<>();
         builder.put(BASE_STYLE, new OutputElementStyle(null, ImmutableMap.of(StyleProperties.SERIES_TYPE, StyleProperties.SeriesType.LINE, StyleProperties.WIDTH, 1.0f, StyleProperties.OPACITY, 1.0f)));
         STATE_MAP = builder.build();
     }
@@ -490,7 +489,7 @@ public class IoPerProcessDataProvider extends AbstractTreeDataProvider<IoAnalysi
         if (list == null) {
             return Collections.emptyList();
         }
-        List<@NonNull Long> times = new ArrayList<>();
+        List<Long> times = new ArrayList<>();
         for (long t : list) {
             if (key.getStartTime() <= t && t <= key.getCurrentEndTime()) {
                 times.add(t);
