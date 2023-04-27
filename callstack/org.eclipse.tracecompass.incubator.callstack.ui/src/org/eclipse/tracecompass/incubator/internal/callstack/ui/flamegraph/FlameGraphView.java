@@ -189,7 +189,7 @@ public class FlameGraphView extends TmfView {
      */
     private final Semaphore fLock = new Semaphore(1);
 
-    // Variable used to specify when the graph is dirty, ie waiting for data refresh
+    // Variable to specify when the graph is dirty, ie waiting for data refresh
     private final AtomicInteger fDirty = new AtomicInteger();
 
     /** The trace to build thread hash map */
@@ -209,7 +209,6 @@ public class FlameGraphView extends TmfView {
     private int fDisplayWidth;
     private @Nullable ZoomThread fZoomThread;
     private final Object fZoomThreadResultLock = new Object();
-
 
     /**
      * Constructor
@@ -277,11 +276,12 @@ public class FlameGraphView extends TmfView {
         timeGraphControl.addPaintListener(new PaintListener() {
 
             /**
-             * This paint control allows the virtual time graph refresh to occur on paint
-             * events instead of just scrolling the time axis or zooming. To avoid
-             * refreshing the model on every paint event, we use a TmfUiRefreshHandler to
-             * coalesce requests and only execute the last one, we also check if the entries
-             * have changed to avoid useless model refresh.
+             * This paint control allows the virtual time graph refresh to occur
+             * on paint events instead of just scrolling the time axis or
+             * zooming. To avoid refreshing the model on every paint event, we
+             * use a TmfUiRefreshHandler to coalesce requests and only execute
+             * the last one, we also check if the entries have changed to avoid
+             * useless model refresh.
              *
              * @param e
              *            paint event on the visible area
@@ -295,9 +295,11 @@ public class FlameGraphView extends TmfView {
                     Set<@NonNull TimeGraphEntry> newSet = getVisibleItems(DEFAULT_BUFFER_SIZE);
                     if (!fVisibleEntries.equals(newSet)) {
                         /*
-                         * Start a zoom thread if the set of visible entries has changed. We do not use
-                         * lists as the order is not important. We cannot use the start index / size of
-                         * the visible entries as we can collapse / reorder events.
+                         * Start a zoom thread if the set of visible entries has
+                         * changed. We do not use lists as the order is not
+                         * important. We cannot use the start index / size of
+                         * the visible entries as we can collapse / reorder
+                         * events.
                          */
                         fVisibleEntries = newSet;
                         startZoomThread(getTimeGraphViewer().getTime0(), getTimeGraphViewer().getTime1(), false);
@@ -379,7 +381,7 @@ public class FlameGraphView extends TmfView {
         // should be replace with a real ':' and this is the complete
         // providerId. This kind of secondary ID may come from external sources
         // of data provider, such as scripting
-        return (secondaryId == null) ? FlameGraphDataProvider.ID : (secondaryId.contains("[COLON]")) ? secondaryId.replace("[COLON]", ":") : FlameGraphDataProvider.ID + ':' + secondaryId;
+        return (secondaryId == null) ? FlameGraphDataProvider.ID : (secondaryId.contains("[COLON]")) ? secondaryId.replace("[COLON]", ":") : FlameGraphDataProvider.ID + ':' + secondaryId; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 
     private class BuildRunnable {
@@ -435,7 +437,6 @@ public class FlameGraphView extends TmfView {
                 return;
             }
             complete = response.getStatus() == ITmfResponse.Status.COMPLETED;
-
 
             TmfTreeModel<@NonNull TimeGraphEntryModel> model = response.getModel();
             long endTime = Long.MIN_VALUE;
@@ -574,7 +575,6 @@ public class FlameGraphView extends TmfView {
         private @NonNull Collection<@NonNull TimeGraphEntry> fCurrentEntries;
         private boolean fForce;
 
-
         /**
          * Constructor
          *
@@ -654,8 +654,9 @@ public class FlameGraphView extends TmfView {
         }
 
         /**
-         * Set the ID of the calling flow scope. This data will allow to determine the
-         * causality between the zoom thread and its caller if tracing is enabled.
+         * Set the ID of the calling flow scope. This data will allow to
+         * determine the causality between the zoom thread and its caller if
+         * tracing is enabled.
          *
          * @param scopeId
          *            The ID of the calling flow scope
@@ -687,7 +688,7 @@ public class FlameGraphView extends TmfView {
         try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:ZoomThreadCreated").setCategory(getViewId()).build()) { //$NON-NLS-1$
             long clampedStartTime = Math.max(0, Math.min(startTime, getEndTime()));
             long clampedEndTime = Math.min(getEndTime(), Math.max(endTime, 0));
-            // Ignore if end time < start time, data has not been set correctly [yet]
+            // Ignore if end time < start time, data is not set correctly [yet]
             if (clampedEndTime < clampedStartTime) {
                 return;
             }
@@ -706,9 +707,9 @@ public class FlameGraphView extends TmfView {
             if (zoomThread != null) {
                 zoomThread.setScopeId(log.getId());
                 /*
-                 * Don't start a new thread right away if results are being applied from an old
-                 * ZoomThread. Otherwise, the old results might overwrite the new results if it
-                 * finishes after.
+                 * Don't start a new thread right away if results are being
+                 * applied from an old ZoomThread. Otherwise, the old results
+                 * might overwrite the new results if it finishes after.
                  */
                 synchronized (fZoomThreadResultLock) {
                     zoomThread.start();
@@ -750,7 +751,7 @@ public class FlameGraphView extends TmfView {
 
     private void zoomEntries(@NonNull Iterable<@NonNull TimeGraphEntry> entries, long zoomStartTime, long zoomEndTime, long resolution, @NonNull IProgressMonitor monitor) {
         if (resolution < 0) {
-            // StateSystemUtils.getTimes would throw an illegal argument exception.
+            // StateSystemUtils.getTimes would throw an IllegalArgumentException
             return;
         }
 
@@ -781,8 +782,8 @@ public class FlameGraphView extends TmfView {
     }
 
     /**
-     * This method build the multimap of regexes by property that will be used to
-     * filter the timegraph states
+     * This method build the multimap of regexes by property that will be used
+     * to filter the timegraph states
      *
      * Override this method to add other regexes with their properties. The data
      * provider should handle everything after.
@@ -806,7 +807,8 @@ public class FlameGraphView extends TmfView {
     }
 
     private void zoomEntries(Map<Long, TimeGraphEntry> map, List<ITimeGraphRowModel> model, boolean completed, Sampling sampling) {
-        boolean isZoomThread = false; // Thread.currentThread() instanceof ZoomThread;
+        boolean isZoomThread = false; // Thread.currentThread() instanceof
+                                      // ZoomThread;
         for (ITimeGraphRowModel rowModel : model) {
             TimeGraphEntry entry = map.get(rowModel.getEntryID());
 
@@ -880,8 +882,8 @@ public class FlameGraphView extends TmfView {
     }
 
     /**
-     * Filter the entries to return only the Non Null {@link TimeGraphEntry} which
-     * intersect the time range.
+     * Filter the entries to return only the Non Null {@link TimeGraphEntry}
+     * which intersect the time range.
      *
      * @param visible
      *            the input list of visible entries
@@ -1485,9 +1487,9 @@ public class FlameGraphView extends TmfView {
         setSortOption(SortOption.fromName(sortOption));
     }
 
-    //--------------------------------
+    // --------------------------------
     // Symbol related methods
-    //--------------------------------
+    // --------------------------------
 
     private Action getConfigureSymbolsAction() {
         if (fConfigureSymbolsAction != null) {
@@ -1564,7 +1566,7 @@ public class FlameGraphView extends TmfView {
     public void restartZoomThread() {
         ZoomThread zoomThread = fZoomThread;
         if (zoomThread != null) {
-            // Make sure that the zoom thread is not a restart (resume of the previous)
+            // Make sure zoom thread is not a restart (resume of the previous)
             zoomThread.cancel();
             fZoomThread = null;
         }
@@ -1575,7 +1577,7 @@ public class FlameGraphView extends TmfView {
      * Set or remove the global regex filter value
      *
      * @param signal
-     *                   the signal carrying the regex value
+     *            the signal carrying the regex value
      */
     @TmfSignalHandler
     public void regexFilterApplied(TmfFilterAppliedSignal signal) {
