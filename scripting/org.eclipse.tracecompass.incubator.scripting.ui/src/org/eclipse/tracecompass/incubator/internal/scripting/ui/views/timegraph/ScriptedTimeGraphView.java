@@ -87,7 +87,7 @@ public class ScriptedTimeGraphView extends BaseDataProviderTimeGraphView {
     public void refreshIfNeeded() {
         ITmfTrace trace = getTrace();
         ITimeGraphDataProvider<@NonNull TimeGraphEntryModel> dataProvider = DataProviderManager
-                .getInstance().getDataProvider(trace, getProviderId(), ITimeGraphDataProvider.class);
+                .getInstance().getOrCreateDataProvider(trace, getProviderId(), ITimeGraphDataProvider.class);
         if (dataProvider != fProvider) {
             rebuild();
         }
@@ -96,7 +96,7 @@ public class ScriptedTimeGraphView extends BaseDataProviderTimeGraphView {
     @Override
     protected void buildEntryList(@NonNull ITmfTrace trace, @NonNull ITmfTrace parentTrace, @NonNull IProgressMonitor monitor) {
         ITimeGraphDataProvider<@NonNull TimeGraphEntryModel> dataProvider = DataProviderManager
-                .getInstance().getDataProvider(trace, getProviderId(), ITimeGraphDataProvider.class);
+                .getInstance().getOrCreateDataProvider(trace, getProviderId(), ITimeGraphDataProvider.class);
         fProvider = dataProvider;
         super.buildEntryList(trace, parentTrace, monitor);
     }

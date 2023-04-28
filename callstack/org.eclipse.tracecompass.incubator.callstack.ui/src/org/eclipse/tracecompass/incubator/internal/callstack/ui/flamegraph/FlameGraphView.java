@@ -413,7 +413,7 @@ public class FlameGraphView extends TmfView {
 
     private void buildEntryList(@NonNull ITmfTrace trace, @NonNull ITmfTrace parentTrace, @NonNull Map<String, Object> additionalParams, @NonNull IProgressMonitor monitor) {
         ITimeGraphDataProvider<@NonNull TimeGraphEntryModel> dataProvider = DataProviderManager
-                .getInstance().getDataProvider(trace, getProviderId(), ITimeGraphDataProvider.class);
+                .getInstance().getOrCreateDataProvider(trace, getProviderId(), ITimeGraphDataProvider.class);
         if (dataProvider == null) {
             return;
         }

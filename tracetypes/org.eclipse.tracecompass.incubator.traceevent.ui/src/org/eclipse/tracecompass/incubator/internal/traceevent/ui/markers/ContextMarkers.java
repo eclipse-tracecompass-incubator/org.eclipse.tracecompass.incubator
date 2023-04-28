@@ -69,7 +69,7 @@ public class ContextMarkers implements IMarkerEventSource {
             return Collections.emptyList();
         }
 
-        ContextDataProvider dataProvider = DataProviderManager.getInstance().getDataProvider(activeTrace, ContextDataProvider.ID, ContextDataProvider.class);
+        ContextDataProvider dataProvider = DataProviderManager.getInstance().getOrCreateDataProvider(activeTrace, ContextDataProvider.ID, ContextDataProvider.class);
         if (dataProvider == null) {
             return Collections.emptyList();
         }
@@ -94,7 +94,7 @@ public class ContextMarkers implements IMarkerEventSource {
         if (activeTrace == null) {
             return Collections.emptyList();
         }
-        ContextDataProvider dataProvider = DataProviderManager.getInstance().getDataProvider(activeTrace, ContextDataProvider.ID, ContextDataProvider.class);
+        ContextDataProvider dataProvider = DataProviderManager.getInstance().getOrCreateDataProvider(activeTrace, ContextDataProvider.ID, ContextDataProvider.class);
         if (dataProvider == null) {
             return Collections.emptyList();
         }

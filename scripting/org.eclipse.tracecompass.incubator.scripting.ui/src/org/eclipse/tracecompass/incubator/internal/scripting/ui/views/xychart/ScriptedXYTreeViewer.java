@@ -80,7 +80,7 @@ public class ScriptedXYTreeViewer extends AbstractSelectTreeViewer2 {
             return null;
         }
         return DataProviderManager
-                .getInstance().getDataProvider(trace, fProviderId, ITmfTreeDataProvider.class);
+                .getInstance().getOrCreateDataProvider(trace, fProviderId, ITmfTreeDataProvider.class);
     }
 
 }

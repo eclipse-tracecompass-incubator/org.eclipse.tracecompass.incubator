@@ -389,7 +389,7 @@ public class DataProviderService {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfTreeXYDataProvider<@NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
+            ITmfTreeXYDataProvider<@NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
                     outputId, ITmfTreeXYDataProvider.class);
 
             if (provider == null) {
@@ -658,7 +658,7 @@ public class DataProviderService {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
                     outputId, ITmfTreeDataProvider.class);
 
             if (provider == null) {
@@ -742,7 +742,7 @@ public class DataProviderService {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
                     outputId, ITmfTreeDataProvider.class);
 
             if (provider == null) {
@@ -854,7 +854,7 @@ public class DataProviderService {
     }
 
     private ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> getTimeGraphProvider(@NonNull ITmfTrace trace, String outputId) {
-        ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = manager.getDataProvider(trace,
+        ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = manager.getOrCreateDataProvider(trace,
                 outputId, ITimeGraphDataProvider.class);
 
         if (provider == null && outputId != null) {
@@ -957,7 +957,7 @@ public class DataProviderService {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfVirtualTableDataProvider<? extends IVirtualTableLine, ? extends ITmfTreeDataModel> provider = manager.getDataProvider(experiment, outputId, ITmfVirtualTableDataProvider.class);
+            ITmfVirtualTableDataProvider<? extends IVirtualTableLine, ? extends ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment, outputId, ITmfVirtualTableDataProvider.class);
             if (provider == null) {
                 return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
             }
@@ -1054,7 +1054,7 @@ public class DataProviderService {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
                     outputId, ITmfTreeDataProvider.class);
 
             if (provider == null) {
@@ -1121,7 +1121,7 @@ public class DataProviderService {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
             }
 
-            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getDataProvider(experiment,
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
                     outputId, ITmfTreeDataProvider.class);
 
             if (provider == null) {

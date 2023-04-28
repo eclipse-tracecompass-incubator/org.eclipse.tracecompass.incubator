@@ -123,7 +123,7 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
             }
             if (columnIndex == 2) {
                 FileAccessDataProvider dp = DataProviderManager
-                        .getInstance().getDataProvider(getTrace(), getProviderId(), FileAccessDataProvider.class);
+                        .getInstance().getOrCreateDataProvider(getTrace(), getProviderId(), FileAccessDataProvider.class);
                 ITmfTrace activeTrace = TmfTraceManager.getInstance().getActiveTrace();
                 if (activeTrace != null && dp != null) {
                     TmfTimeRange tr = activeTrace.getTimeRange();
@@ -132,7 +132,7 @@ public class FileAccessByFileView extends BaseDataProviderTimeGraphView {
             }
             if (columnIndex == 3) {
                 FileAccessDataProvider dp = DataProviderManager
-                        .getInstance().getDataProvider(getTrace(), getProviderId(), FileAccessDataProvider.class);
+                        .getInstance().getOrCreateDataProvider(getTrace(), getProviderId(), FileAccessDataProvider.class);
                 ITmfTrace activeTrace = TmfTraceManager.getInstance().getActiveTrace();
                 if (activeTrace != null && dp != null) {
                     TmfTimeRange tr = activeTrace.getTimeRange();
