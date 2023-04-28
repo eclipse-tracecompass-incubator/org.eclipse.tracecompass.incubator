@@ -28,7 +28,6 @@ import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEventStyleStrings;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.NullTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 
@@ -98,10 +97,10 @@ public class VirtualMachinePresentationProvider extends TimeGraphPresentationPro
 
         /**
          * Get a map of the values corresponding to the fields in
-         * {@link ITimeEventStyleStrings}
+         * {@link StyleProperties}
          *
          * @return the map corresponding to the api defined in
-         *         {@link ITimeEventStyleStrings}
+         *         {@link StyleProperties}
          */
         public Map<String, Object> toMap() {
             return fMap;
