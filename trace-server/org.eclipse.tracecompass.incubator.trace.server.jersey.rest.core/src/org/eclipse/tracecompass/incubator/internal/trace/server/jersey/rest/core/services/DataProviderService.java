@@ -530,6 +530,11 @@ public class DataProviderService {
                 return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
             }
 
+            errorMessage = QueryParametersUtil.validateFilterQueryParameters(params);
+            if (errorMessage != null) {
+                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+            }
+
             TmfModelResponse<TimeGraphModel> response = provider.fetchRowModel(params, null);
             return Response.ok(response).build();
         }

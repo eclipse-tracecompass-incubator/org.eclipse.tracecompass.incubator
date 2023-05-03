@@ -14,12 +14,17 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_PARAMETERS;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.FilterQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.FilterQueryParameters.FilterQueryStrategy;
 import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
@@ -45,11 +50,14 @@ public class QueryParametersUtil {
     private static final String ELEMENT_TYPE = "elementType"; //$NON-NLS-1$
     private static final String END = "end"; //$NON-NLS-1$
     private static final String ENTRY_ID = "entryId"; //$NON-NLS-1$
+    private static final String FILTER_QUERY_PARAMETERS = "filter_query_parameters";  //$NON-NLS-1$
+    private static final String FILTER_EXPRESSIONS_MAP = "filter_expressions_map";  //$NON-NLS-1$
     private static final String NAME = "name"; //$NON-NLS-1$
     private static final String NBTIMES = "nbTimes"; //$NON-NLS-1$
     private static final String REQUESTED_TIMERANGE_KEY = "requested_timerange"; //$NON-NLS-1$
     private static final String SEP = ": "; //$NON-NLS-1$
     private static final String START = "start"; //$NON-NLS-1$
+    private static final String STRATEGY = "strategy"; //$NON-NLS-1$
     private static final String TIME = "time"; //$NON-NLS-1$
     private static final String TRACES = "traces"; //$NON-NLS-1$
     private static final String URI = "uri"; //$NON-NLS-1$
@@ -189,6 +197,61 @@ public class QueryParametersUtil {
         if ((errorMessage = validateRequestedTimes(params, false)) != null) {
             return errorMessage;
         }
+        return null;
+    }
+
+    /**
+     * Validate and convert the filter_query_parameters query parameter
+     *
+     * @param params
+     *            the mutable map of query parameters
+     * @return an error message if validation fails, or null otherwise
+     */
+    public static String validateFilterQueryParameters(Map<String, Object> params) {
+        Object value = params.get(FILTER_QUERY_PARAMETERS);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Map) {
+            Object filterExpressionsMapObj = ((Map<String, Object>) value).get(FILTER_EXPRESSIONS_MAP);
+            if (filterExpressionsMapObj instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) filterExpressionsMapObj;
+                if (map.size() > 0) {
+                    Map<Integer, Collection<String>> filterExpressionsMap = new HashMap<>();
+                    for (Map.Entry<?, ?> entry : map.entrySet()) {
+                        try {
+                            if (entry.getKey() instanceof String && entry.getValue() instanceof Collection<?>) {
+                                if (((Collection<?>) entry.getValue()).stream().allMatch(item -> item instanceof String)) {
+                                    filterExpressionsMap.put(Integer.parseInt((String) entry.getKey()), new ArrayList<>((Collection<String>) entry.getValue()));
+                                }
+                            }
+                        } catch (NumberFormatException e) {
+                            return INVALID_PARAMETERS + SEP + FILTER_EXPRESSIONS_MAP;
+                        }
+                    }
+
+                    if (filterExpressionsMap.size() > 0) {
+                        FilterQueryParameters filterQueryParameters = new FilterQueryParameters();
+                        filterQueryParameters.setFilterExpressionsMap(filterExpressionsMap);
+
+                        Object filterExpressionsStrategyObject = ((Map<String, Object>) value).get(STRATEGY);
+                        if (FilterQueryStrategy.DEEP.name().equals(filterExpressionsStrategyObject)) {
+                            filterQueryParameters.setStrategy(FilterQueryStrategy.DEEP);
+                        }
+
+                        params.put(DataProviderParameterUtils.REGEX_MAP_FILTERS_KEY, filterExpressionsMap);
+
+                        Boolean isDeepSearch = filterQueryParameters.isDeepSearch();
+                        if (isDeepSearch) {
+                            params.put(DataProviderParameterUtils.FULL_SEARCH_KEY, isDeepSearch);
+                        }
+                    }
+                }
+            }
+        }
+        params.remove(FILTER_QUERY_PARAMETERS);
         return null;
     }
 

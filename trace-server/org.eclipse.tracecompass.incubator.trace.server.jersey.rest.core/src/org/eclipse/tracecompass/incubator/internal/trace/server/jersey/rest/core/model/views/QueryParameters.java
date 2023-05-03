@@ -65,4 +65,10 @@ public class QueryParameters {
     public @Nullable List<Filter> getFilters() {
         return filters;
     }
+
+    @SuppressWarnings("nls")
+    @Override
+    public String toString() {
+        return "QueryParameters [parameters=" + parameters + ", filters=" + filters + "]";
+    }
 }

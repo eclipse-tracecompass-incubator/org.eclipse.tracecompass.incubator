@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -106,6 +107,12 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final String NB_TIMES = "nbTimes";
     private static final long TABLE_INDEX = 0L;
     private static final long TABLE_COUNT = 100L;
+    private static final String FILTER_EXPRESSIONS_MAP = "filter_expressions_map";
+    private static final String FILTER_QUERY_PARAMETERS = "filter_query_parameters";
+    private static final String STRATEGY = "strategy";
+    private static final String DEEP_SEARCH = "DEEP";
+    private static final String FILTER_QUERY = "test";
+    private static final int DIMMED_FILTER_TAG = 1;
 
     private static final  List<EntryHeaderStub> EXPECTED_XY_TREE_HEADERS = ImmutableList.of(new EntryHeaderStub("Process", "", null), new EntryHeaderStub("TID", "", null), new EntryHeaderStub("%", "", null), new EntryHeaderStub("Time", "", null));
 
@@ -399,6 +406,13 @@ public class DataProviderServiceTest extends RestServerTest {
             parameters.remove(REQUESTED_TIMES_KEY);
             parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, 1450193697034689597L, END, 1450193697118480368L, NB_TIMES, 10));
             parameters.put(REQUESTED_ITEMS_KEY, items);
+            parameters.put(FILTER_QUERY_PARAMETERS, ImmutableMap.of(
+                    STRATEGY, DEEP_SEARCH,
+                    FILTER_EXPRESSIONS_MAP,
+                    ImmutableMap.of(
+                        Integer.toString(DIMMED_FILTER_TAG), Arrays.asList(FILTER_QUERY)
+                    )
+                ));
             Response statesResponse = tgStatesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, statesResponse.getStatus());
 
@@ -468,6 +482,9 @@ public class DataProviderServiceTest extends RestServerTest {
             assertNotNull(timegraphTooltipResponse);
             assertEquals(Collections.emptyMap(), timegraphTooltipResponse.getModel());
             tooltipResponse.close();
+
+            // Test the tags of the state
+            assertEquals(DIMMED_FILTER_TAG, state.getTags());
 
         } catch (ProcessingException e) {
             // The failure from this exception alone is not helpful. Use the

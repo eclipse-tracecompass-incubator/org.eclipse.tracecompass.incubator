@@ -55,6 +55,15 @@ public class QueryParametersUtilTest {
     private static final String URI = "uri";
     private static final String MISSING_URI = "Missing query parameters: uri";
     private static final String INVALID_URI = "Invalid query parameters: uri";
+    private static final String REGEX_MAP_FILTERS = "regex_map_filters";
+    private static final String FILTER_EXPRESSIONS_MAP = "filter_expressions_map";
+    private static final String FILTER_QUERY_PARAMETERS = "filter_query_parameters";
+    private static final String STRATEGY = "strategy";
+    private static final String FULL_SEARCH = "full_search";
+    private static final String DEEP_SEARCH = "DEEP";
+    private static final String INVALID_FILTER_EXPRESSIONS_MAP = "Invalid query parameters: filter_expressions_map";
+    private static final String INVALID_INTEGER_KEY = "b2";
+    private static final String VALID_INTEGER_KEY = "1";
 
     private static final String DESTINATION_ID = "destinationId";
     private static final String DURATION = "duration";
@@ -399,5 +408,48 @@ public class QueryParametersUtilTest {
         assertNull(
                 QueryParametersUtil.validateLinesQueryParameters(Maps.newHashMap(ImmutableMap.of(
                         REQUESTED_TIMES, Arrays.asList(0L)))));
+    }
+
+    /**
+     * Test the validateFilterQueryParameters method.
+     */
+    @Test
+    public void testValidateFilterQueryParameters() {
+        assertNull(
+                QueryParametersUtil.validateFilterQueryParameters(Maps.newHashMap()));
+
+        /* Test conversion of filter_query_parameters to regex_map_filters*/
+        Map<String, Object> params;
+
+        params = Maps.newHashMap(ImmutableMap.of(FILTER_QUERY_PARAMETERS,
+                ImmutableMap.of(
+                    STRATEGY, DEEP_SEARCH,
+                    FILTER_EXPRESSIONS_MAP,
+                    ImmutableMap.of(
+                        INVALID_INTEGER_KEY, Arrays.asList(REQUESTED_ELEMENT)
+                    )
+                )));
+      assertEquals(INVALID_FILTER_EXPRESSIONS_MAP,
+              QueryParametersUtil.validateFilterQueryParameters(params));
+
+        params = Maps.newHashMap(ImmutableMap.of(FILTER_QUERY_PARAMETERS,
+        ImmutableMap.of(
+            STRATEGY, DEEP_SEARCH,
+            FILTER_EXPRESSIONS_MAP,
+            ImmutableMap.of(
+                VALID_INTEGER_KEY, Arrays.asList(REQUESTED_ELEMENT)
+            )
+        )));
+        assertNull(QueryParametersUtil.validateFilterQueryParameters(params));
+        assertEquals(ImmutableMap.of(
+                Integer.parseInt(VALID_INTEGER_KEY), Arrays.asList(REQUESTED_ELEMENT)
+            ), params.get(REGEX_MAP_FILTERS));
+        assertEquals(true, params.get(FULL_SEARCH));
+        assertNull(params.get(FILTER_QUERY_PARAMETERS));
+
+        params = Maps.newHashMap(ImmutableMap.of(FILTER_QUERY_PARAMETERS, ImmutableMap.of()));
+        assertNull(QueryParametersUtil.validateFilterQueryParameters(params));
+        assertNull(params.get(FILTER_QUERY_PARAMETERS));
+        assertNull(params.get(REGEX_MAP_FILTERS));
     }
 }
