@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="tracecompass-incubator-master" sequenceNumber="67">
+<target name="tracecompass-incubator-master" sequenceNumber="68">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.cdt.gnu.dsf.feature.group" version="0.0.0"/>
@@ -20,7 +20,6 @@
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.xml.serializer" version="0.0.0"/>
 <unit id="org.apache.commons.math3" version="0.0.0"/>
-<unit id="org.apache.felix.scr" version="0.0.0"/>
 <unit id="com.fasterxml.jackson.core.jackson-annotations" version="0.0.0"/>
 <unit id="com.fasterxml.jackson.core.jackson-annotations.source" version="0.0.0"/>
 <unit id="com.fasterxml.jackson.core.jackson-core" version="0.0.0"/>
@@ -125,7 +124,7 @@
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.swtchart.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.swtchart.feature.source.feature.group" version="0.0.0"/>
-<repository location="https://download.eclipse.org/swtchart/releases/0.12.0/repository/"/>
+<repository location="https://download.eclipse.org/swtchart/releases/0.14.0/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.tracecompass.ctf.feature.group" version="0.0.0"/>
