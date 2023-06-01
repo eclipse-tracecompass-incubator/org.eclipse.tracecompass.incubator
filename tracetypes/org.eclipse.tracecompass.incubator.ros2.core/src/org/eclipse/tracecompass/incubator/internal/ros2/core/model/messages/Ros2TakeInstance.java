@@ -144,7 +144,7 @@ public class Ros2TakeInstance extends Ros2Instance<@NonNull Ros2ObjectHandle> {
     protected void serializeValue(ISafeByteBufferWriter buffer) {
         super.serializeValue(buffer);
         buffer.putLong(fTid);
-        fMessage.serialize(buffer);
+        fMessage.serializeValue(buffer);
         buffer.putLong(fSourceTimestamp);
         buffer.putLong(fStartTime);
         buffer.putLong(fEndTime);

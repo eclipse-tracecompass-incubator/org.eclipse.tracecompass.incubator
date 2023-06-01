@@ -12,6 +12,8 @@
 package org.eclipse.tracecompass.incubator.internal.ros2.core.model;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferReader;
+import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferWriter;
 
 import com.google.common.base.Objects;
 
@@ -75,5 +77,41 @@ public class HostThread {
     @Override
     public @NonNull String toString() {
         return String.format("HostThread: tid=%d, hostId=[%s]", fTid, fHostId.toString()); //$NON-NLS-1$
+    }
+
+    /**
+     * Serialize the value.
+     *
+     * @param buffer
+     *            the buffer
+     */
+    public void serializeValue(@NonNull ISafeByteBufferWriter buffer) {
+        fHostId.serializeValue(buffer);
+        buffer.putLong(fTid);
+    }
+
+    /**
+     * Get the serialized size of this value.
+     *
+     * @return the serialized size
+     */
+    public int getSerializedValueSize() {
+        int size = 0;
+        size += fHostId.getSerializedValueSize();
+        size += Long.BYTES;
+        return size;
+    }
+
+    /**
+     * Read value from buffer.
+     *
+     * @param buffer
+     *            the buffer
+     * @return the value
+     */
+    public static @NonNull HostThread read(ISafeByteBufferReader buffer) {
+        HostInfo hostId = HostInfo.read(buffer);
+        long tid = buffer.getLong();
+        return new HostThread(hostId, tid);
     }
 }

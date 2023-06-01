@@ -126,8 +126,8 @@ public class Ros2MessageTransportInstance extends CustomStateValue {
 
     @Override
     protected void serializeValue(@NonNull ISafeByteBufferWriter buffer) {
-        fPublisherHandle.serialize(buffer);
-        fSubscriptionHandle.serialize(buffer);
+        fPublisherHandle.serializeValue(buffer);
+        fSubscriptionHandle.serializeValue(buffer);
         buffer.putLong(fSourceTimestamp);
         buffer.putLong(fDestinationTimestamp);
     }

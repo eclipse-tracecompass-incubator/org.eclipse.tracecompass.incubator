@@ -130,8 +130,8 @@ public class Ros2SubscriptionObject extends Ros2PubSubObject {
     @Override
     protected void serializeValue(@NonNull ISafeByteBufferWriter buffer) {
         super.serializeValue(buffer);
-        fSubscription.serialize(buffer);
-        fCallback.serialize(buffer);
+        fSubscription.serializeValue(buffer);
+        fCallback.serializeValue(buffer);
     }
 
     @Override

@@ -125,11 +125,11 @@ public abstract class Ros2PubSubObject extends Ros2Object<@NonNull Ros2ObjectHan
     @Override
     protected void serializeValue(ISafeByteBufferWriter buffer) {
         super.serializeValue(buffer);
-        fRmwHandle.serialize(buffer);
+        fRmwHandle.serializeValue(buffer);
         buffer.putString(fTopicName);
-        fNodeHandle.serialize(buffer);
+        fNodeHandle.serializeValue(buffer);
         fGid.serialize(buffer);
-        fDdsHandle.serialize(buffer);
+        fDdsHandle.serializeValue(buffer);
     }
 
     @Override

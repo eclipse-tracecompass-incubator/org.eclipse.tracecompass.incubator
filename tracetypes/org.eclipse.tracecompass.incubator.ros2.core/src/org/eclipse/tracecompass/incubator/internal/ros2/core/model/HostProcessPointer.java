@@ -116,8 +116,8 @@ public class HostProcessPointer {
      * @param buffer
      *            the buffer
      */
-    public void serialize(@NonNull ISafeByteBufferWriter buffer) {
-        fHostProcess.serialize(buffer);
+    public void serializeValue(@NonNull ISafeByteBufferWriter buffer) {
+        fHostProcess.serializeValue(buffer);
         buffer.putLong(fPointer);
     }
 

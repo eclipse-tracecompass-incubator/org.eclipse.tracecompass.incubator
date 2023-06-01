@@ -114,8 +114,8 @@ public class Ros2TimerObject extends Ros2Object<@NonNull Ros2ObjectHandle> {
     protected void serializeValue(ISafeByteBufferWriter buffer) {
         super.serializeValue(buffer);
         buffer.putLong(fPeriod);
-        fCallback.serialize(buffer);
-        fNodeHandle.serialize(buffer);
+        fCallback.serializeValue(buffer);
+        fNodeHandle.serializeValue(buffer);
     }
 
     @Override

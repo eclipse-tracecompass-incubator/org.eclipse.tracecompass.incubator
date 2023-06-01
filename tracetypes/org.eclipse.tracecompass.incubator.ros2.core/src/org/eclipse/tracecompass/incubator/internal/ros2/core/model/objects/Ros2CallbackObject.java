@@ -129,7 +129,7 @@ public class Ros2CallbackObject extends Ros2Object<@NonNull HostProcessPointer> 
     @Override
     protected void serializeValue(@NonNull ISafeByteBufferWriter buffer) {
         super.serializeValue(buffer);
-        fOwnerHandle.serialize(buffer);
+        fOwnerHandle.serializeValue(buffer);
         buffer.putString(fSymbol);
         buffer.putInt(fType.ordinal());
     }

@@ -38,7 +38,4 @@ Automatic-Module-Name: org.eclipse.tracecompass.incubator.ros2.core
 Import-Package: com.google.common.base,
  com.google.common.collect,
  com.google.common.hash,
- org.apache.commons.lang3,
- org.eclipse.tracecompass.internal.lttng2.kernel.core,
- org.eclipse.tracecompass.internal.lttng2.kernel.core.event.matching,
- org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout
+ org.apache.commons.lang3

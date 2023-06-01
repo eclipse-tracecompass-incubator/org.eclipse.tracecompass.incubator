@@ -126,8 +126,8 @@ public class Ros2CallbackPublicationInstance extends CustomStateValue {
 
     @Override
     protected void serializeValue(@NonNull ISafeByteBufferWriter buffer) {
-        fCallbackOwnerHandle.serialize(buffer);
-        fPublisherHandle.serialize(buffer);
+        fCallbackOwnerHandle.serializeValue(buffer);
+        fPublisherHandle.serializeValue(buffer);
         buffer.putLong(fPublicationTimestamp);
         buffer.putInt(fCallbackType.ordinal());
     }

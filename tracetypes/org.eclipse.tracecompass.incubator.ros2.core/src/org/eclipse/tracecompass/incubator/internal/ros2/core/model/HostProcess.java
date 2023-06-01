@@ -91,9 +91,16 @@ public class HostProcess {
      * @param buffer
      *            the buffer
      */
-    public void serialize(@NonNull ISafeByteBufferWriter buffer) {
-        fHostId.serialize(buffer);
+    public void serializeValue(@NonNull ISafeByteBufferWriter buffer) {
+        fHostId.serializeValue(buffer);
         buffer.putLong(fPid);
+    }
+
+    /**
+     * @return the serialized size
+     */
+    public int getSerializedValueSize() {
+        return fSerializedValueSize;
     }
 
     /**
@@ -105,12 +112,5 @@ public class HostProcess {
         HostInfo hostId = HostInfo.read(buffer);
         Long pid = buffer.getLong();
         return new HostProcess(hostId, pid);
-    }
-
-    /**
-     * @return the serialized size
-     */
-    public int getSerializedValueSize() {
-        return fSerializedValueSize;
     }
 }

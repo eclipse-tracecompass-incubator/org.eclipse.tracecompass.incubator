@@ -93,9 +93,16 @@ public class HostInfo {
      * @param buffer
      *            the buffer
      */
-    public void serialize(@NonNull ISafeByteBufferWriter buffer) {
+    public void serializeValue(@NonNull ISafeByteBufferWriter buffer) {
         buffer.putString(fHostId);
         buffer.putString(fHostname);
+    }
+
+    /**
+     * @return the serialized size
+     */
+    public int getSerializedValueSize() {
+        return fSerializedValueSize;
     }
 
     /**
@@ -107,12 +114,5 @@ public class HostInfo {
         String hostId = buffer.getString();
         String hostname = buffer.getString();
         return new HostInfo(hostId, hostname);
-    }
-
-    /**
-     * @return the serialized size
-     */
-    public int getSerializedValueSize() {
-        return fSerializedValueSize;
     }
 }

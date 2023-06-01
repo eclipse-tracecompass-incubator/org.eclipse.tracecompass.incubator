@@ -81,7 +81,7 @@ public abstract class Ros2Instance<@NonNull T extends HostProcessPointer> extend
 
     @Override
     protected void serializeValue(ISafeByteBufferWriter buffer) {
-        fOriginHandle.serialize(buffer);
+        fOriginHandle.serializeValue(buffer);
     }
 
     @Override
