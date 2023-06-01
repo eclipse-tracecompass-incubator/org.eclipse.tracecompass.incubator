@@ -47,6 +47,13 @@ public interface IRos2EventLayout {
     }
 
     /**
+     * @return the provider name (ending with a colon)
+     */
+    public default String getProviderName() {
+        return PROVIDER_NAME;
+    }
+
+    /**
      * Get all event names defined here
      *
      * @return the event names
