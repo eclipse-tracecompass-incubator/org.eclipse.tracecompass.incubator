@@ -2,7 +2,7 @@
 <feature
       id="skeleton.tracecompass.rcp"
       label="%featureName"
-      version="0.5.0.qualifier"
+      version="0.6.0.qualifier"
       provider-name="%featureProvider"
       plugin="skeleton.tracecompass.rcp.branding"
       license-feature="org.eclipse.license"
