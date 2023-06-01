@@ -11,6 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros2.core.model;
 
+import java.util.Comparator;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferWriter;
 
@@ -24,12 +26,14 @@ import com.google.common.base.Objects;
  * @param <T>
  *            the type of the wrapped value
  */
-public abstract class HostProcessValue<@NonNull T> {
+public abstract class HostProcessValue<@NonNull T extends Comparable<T>> implements Comparable<HostProcessValue<T>> {
 
+    private static Comparator<HostProcessValue<?>> COMPARATOR = Comparator.comparing((HostProcessValue<?> h) -> h.getHostProcess())
+            .thenComparing((HostProcessValue<?> h) -> h.getValue());
     private static final @NonNull String STRING_ID_SEP = "|"; //$NON-NLS-1$
 
     private final @NonNull HostProcess fHostProcess;
-    private final @NonNull T fValue;
+    private final T fValue;
     private final int fSerializedValueSize;
 
     /**
@@ -40,7 +44,7 @@ public abstract class HostProcessValue<@NonNull T> {
      * @param value
      *            the value
      */
-    public HostProcessValue(@NonNull HostProcess hostProcess, @NonNull T value) {
+    public HostProcessValue(@NonNull HostProcess hostProcess, T value) {
         fHostProcess = hostProcess;
         fValue = value;
 
@@ -68,7 +72,7 @@ public abstract class HostProcessValue<@NonNull T> {
      *
      * @return the value
      */
-    protected @NonNull T getValue() {
+    protected T getValue() {
         return fValue;
     }
 
@@ -76,6 +80,11 @@ public abstract class HostProcessValue<@NonNull T> {
      * @return the value as a string
      */
     protected abstract @NonNull String valueToString();
+
+    @Override
+    public int compareTo(HostProcessValue<T> o) {
+        return COMPARATOR.compare(this, o);
+    }
 
     @Override
     public int hashCode() {
