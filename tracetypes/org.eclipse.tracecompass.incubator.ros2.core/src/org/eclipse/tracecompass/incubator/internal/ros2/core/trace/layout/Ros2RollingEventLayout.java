@@ -110,6 +110,7 @@ public class Ros2RollingEventLayout implements IRos2EventLayout {
     private static final String VPID = "context._vpid";
     private static final String VTID = "context._vtid";
     private static final String PROCNAME = "context._procname";
+    private static final String PERF_THREAD_TASK_CLOCK = "context._perf_thread_task_clock";
 
     /**
      * Constructor
@@ -613,5 +614,10 @@ public class Ros2RollingEventLayout implements IRos2EventLayout {
     @Override
     public String contextProcname() {
         return PROCNAME;
+    }
+
+    @Override
+    public String contextPerfThreadTaskClock() {
+        return PERF_THREAD_TASK_CLOCK;
     }
 }

@@ -309,4 +309,5 @@ public interface IRos2EventLayout {
     String contextVpid();
     String contextVtid();
     String contextProcname();
+    String contextPerfThreadTaskClock();
 }
