@@ -15,11 +15,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
-import java.util.Objects;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
@@ -57,9 +53,6 @@ public class VirtualResourcesViewTest {
     private static final String EXPERIMENT_NAME = "exp";
     private static final String VIEW_ID = VirtualResourcesView.ID;
 
-    /** The Log4j logger instance. */
-    private static final Logger fLogger = Objects.requireNonNull(Logger.getRootLogger());
-
     /**
      * Things to setup
      */
@@ -71,8 +64,6 @@ public class VirtualResourcesViewTest {
         /* set up for swtbot */
         SWTBotPreferences.TIMEOUT = 5000; /* 5 seconds timeout */
         SWTBotPreferences.KEYBOARD_LAYOUT = "EN_US";
-        fLogger.removeAllAppenders();
-        fLogger.addAppender(new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT));
         SWTWorkbenchBot bot = new SWTWorkbenchBot();
         SWTBotUtils.closeView("welcome", bot);
         /* Switch perspectives */
