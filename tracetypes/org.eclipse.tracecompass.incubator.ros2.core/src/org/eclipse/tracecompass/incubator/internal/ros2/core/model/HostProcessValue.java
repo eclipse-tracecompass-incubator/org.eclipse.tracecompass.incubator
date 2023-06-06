@@ -15,6 +15,8 @@ import java.util.Comparator;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferWriter;
+import org.eclipse.tracecompass.internal.provisional.statesystem.core.statevalue.CustomStateValue;
+import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 
 import com.google.common.base.Objects;
 
@@ -26,7 +28,8 @@ import com.google.common.base.Objects;
  * @param <T>
  *            the type of the wrapped value
  */
-public abstract class HostProcessValue<@NonNull T extends Comparable<T>> implements Comparable<HostProcessValue<T>> {
+@SuppressWarnings("restriction")
+public abstract class HostProcessValue<@NonNull T extends Comparable<T>> extends CustomStateValue {
 
     private static Comparator<HostProcessValue<?>> COMPARATOR = Comparator.comparing((HostProcessValue<?> h) -> h.getHostProcess())
             .thenComparing((HostProcessValue<?> h) -> h.getValue());
@@ -82,8 +85,8 @@ public abstract class HostProcessValue<@NonNull T extends Comparable<T>> impleme
     protected abstract @NonNull String valueToString();
 
     @Override
-    public int compareTo(HostProcessValue<T> o) {
-        return COMPARATOR.compare(this, o);
+    public int compareTo(@NonNull ITmfStateValue o) {
+        return COMPARATOR.compare(this, (HostProcessValue<?>) o);
     }
 
     @Override
@@ -124,18 +127,13 @@ public abstract class HostProcessValue<@NonNull T extends Comparable<T>> impleme
                 valueToString(), getPid(), getHostProcess().getHostId().toString());
     }
 
-    /**
-     * @param buffer
-     *            the buffer
-     */
+    @Override
     public void serializeValue(@NonNull ISafeByteBufferWriter buffer) {
         fHostProcess.serializeValue(buffer);
         // Concrete classes will serialize the value properly
     }
 
-    /**
-     * @return the serialized size
-     */
+    @Override
     public int getSerializedValueSize() {
         return fSerializedValueSize;
     }

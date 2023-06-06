@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.ros2.core;
 
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcessPointer;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.executor.Ros2ExecutorStateInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2CallbackInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2CallbackPublicationInstance;
@@ -22,6 +23,7 @@ import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2TimerCallbackInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ObjectHandle;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2SubscriptionObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2TimerObject;
@@ -54,6 +56,9 @@ public class Activator extends TraceCompassActivator {
 
     @Override
     protected void startActions() {
+        // General
+        CustomStateValue.registerCustomFactory(HostProcessPointer.CUSTOM_TYPE_ID_HOST_PROCESS_POINTER, HostProcessPointer.HOST_PROCESS_POINTER_VALUE_FACTORY);
+        CustomStateValue.registerCustomFactory(Ros2ObjectHandle.CUSTOM_TYPE_ID_ROS2_OBJECT_HANDLE, Ros2ObjectHandle.ROS2_OBJECT_HANDLE_VALUE_FACTORY);
         // Objects analysis
         CustomStateValue.registerCustomFactory(Ros2NodeObject.CUSTOM_TYPE_ID, Ros2NodeObject.ROS2_NODE_OBJECT_VALUE_FACTORY);
         CustomStateValue.registerCustomFactory(Ros2PublisherObject.CUSTOM_TYPE_ID, Ros2PublisherObject.ROS2_PUBLISHER_OBJECT_VALUE_FACTORY);

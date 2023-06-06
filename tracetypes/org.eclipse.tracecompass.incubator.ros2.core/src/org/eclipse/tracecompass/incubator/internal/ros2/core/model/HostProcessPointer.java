@@ -26,6 +26,12 @@ import org.eclipse.tracecompass.datastore.core.serialization.ISafeByteBufferWrit
  */
 public class HostProcessPointer extends HostProcessValue<@NonNull Long> {
 
+    /** Custom type value ID for this object */
+    public static final byte CUSTOM_TYPE_ID_HOST_PROCESS_POINTER = 73;
+    /** CustomStateValueFactory for this object */
+    @SuppressWarnings("restriction")
+    public static final @NonNull CustomStateValueFactory HOST_PROCESS_POINTER_VALUE_FACTORY = b -> HostProcessPointer.read(b);
+
     private static final @NonNull String HEX_PREFIX = "0x"; //$NON-NLS-1$
 
     private final int fSerializedValueSize;
@@ -71,19 +77,17 @@ public class HostProcessPointer extends HostProcessValue<@NonNull Long> {
         return String.format("HostProcessPointer: pointer=%s", super.toString()); //$NON-NLS-1$
     }
 
-    /**
-     * @param buffer
-     *            the buffer
-     */
+    @Override
+    protected @NonNull Byte getCustomTypeId() {
+        return CUSTOM_TYPE_ID_HOST_PROCESS_POINTER;
+    }
+
     @Override
     public void serializeValue(@NonNull ISafeByteBufferWriter buffer) {
         super.serializeValue(buffer);
         buffer.putLong(getPointer());
     }
 
-    /**
-     * @return the serialized size
-     */
     @Override
     public int getSerializedValueSize() {
         return fSerializedValueSize;
