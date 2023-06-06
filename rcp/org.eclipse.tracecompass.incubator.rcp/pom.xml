@@ -38,6 +38,7 @@
             </goals>
             <configuration>
               <excludes>
+                <plugin id="jakarta.activation-api"/>
                 <plugin id="javax.ws.rs"/>
                 <plugin id="org.eclipse.lsp4j"/>
                 <plugin id="org.eclipse.lsp4j.jsonrpc"/>

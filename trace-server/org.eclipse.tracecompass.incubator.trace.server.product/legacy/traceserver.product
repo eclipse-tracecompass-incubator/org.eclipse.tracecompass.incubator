@@ -121,8 +121,7 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <plugin id="javax.annotation"/>
       <plugin id="javax.el"/>
       <plugin id="javax.inject"/>
-      <plugin id="javax.servlet"/>
-      <plugin id="javax.servlet.jsp"/>
+      <plugin id="javax.servlet-api"/>
       <plugin id="javax.ws.rs"/>
       <plugin id="javax.xml"/>
       <plugin id="javax.xml.bind"/>
