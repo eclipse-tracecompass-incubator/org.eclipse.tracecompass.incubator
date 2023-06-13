@@ -14,8 +14,8 @@ package org.eclipse.tracecompass.incubator.rocm.core.trace;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmStrings;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.ApiEventHandler;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.ApiEventHandler;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.old.RocmStrings;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 

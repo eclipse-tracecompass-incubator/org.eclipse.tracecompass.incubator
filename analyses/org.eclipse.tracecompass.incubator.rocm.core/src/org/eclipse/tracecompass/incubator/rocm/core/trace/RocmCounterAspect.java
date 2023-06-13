@@ -15,7 +15,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.counters.core.CounterAnalysis;
 import org.eclipse.tracecompass.analysis.counters.core.aspects.CounterAspect;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmStrings;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.old.RocmStrings;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;

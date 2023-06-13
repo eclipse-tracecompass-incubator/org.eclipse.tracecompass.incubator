@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers;
+package org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old;
 
 import java.util.Map;
 
@@ -17,9 +17,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmCallStackStateProvider;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmStrings;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.HostThreadIdentifier.KERNEL_CATEGORY;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.HostThreadIdentifier.KERNEL_CATEGORY;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.old.RocmCallStackStateProvider;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.old.RocmStrings;
 import org.eclipse.tracecompass.incubator.rocm.core.analysis.dependency.IDependencyMaker;
 import org.eclipse.tracecompass.incubator.rocm.core.trace.GpuAspect;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;

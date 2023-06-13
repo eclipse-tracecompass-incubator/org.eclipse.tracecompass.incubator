@@ -22,11 +22,11 @@ import java.util.Queue;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.internal.rocm.core.Activator;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmStrings;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.AbstractGpuEventHandler;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.ApiEventHandler;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.HostThreadIdentifier;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.HostThreadIdentifier.KERNEL_CATEGORY;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.AbstractGpuEventHandler;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.ApiEventHandler;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.HostThreadIdentifier;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.HostThreadIdentifier.KERNEL_CATEGORY;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.old.RocmStrings;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.util.Pair;

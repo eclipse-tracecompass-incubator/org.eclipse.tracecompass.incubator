@@ -16,7 +16,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmStrings;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.old.RocmStrings;
 import org.eclipse.tracecompass.incubator.rocm.core.analysis.dependency.IDependencyMaker;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 

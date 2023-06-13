@@ -9,12 +9,12 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers;
+package org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmCallStackStateProvider;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.old.RocmCallStackStateProvider;
 import org.eclipse.tracecompass.internal.analysis.timing.core.Activator;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;

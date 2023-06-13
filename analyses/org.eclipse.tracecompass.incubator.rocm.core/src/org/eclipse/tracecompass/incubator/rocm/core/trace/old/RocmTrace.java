@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-package org.eclipse.tracecompass.incubator.rocm.core.trace;
+package org.eclipse.tracecompass.incubator.rocm.core.trace.old;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,7 +23,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.rocm.core.Activator;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmStrings;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.old.RocmStrings;
+import org.eclipse.tracecompass.incubator.rocm.core.trace.GpuAspect;
+import org.eclipse.tracecompass.incubator.rocm.core.trace.RocmAspects;
+import org.eclipse.tracecompass.incubator.rocm.core.trace.RocmCounterAspect;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;

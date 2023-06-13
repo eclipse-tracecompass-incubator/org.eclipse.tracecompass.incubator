@@ -20,9 +20,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional,
  org.eclipse.tracecompass.tmf.ctf.core
 Export-Package: org.eclipse.tracecompass.incubator.internal.rocm.core;x-friends:="org.eclipse.tracecompass.incubator.rocm.core.tests",
- org.eclipse.tracecompass.incubator.internal.rocm.core.analysis,
+ org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.old,
  org.eclipse.tracecompass.incubator.rocm.core.analysis.dependency,
- org.eclipse.tracecompass.incubator.rocm.core.trace
+ org.eclipse.tracecompass.incubator.rocm.core.trace,
+ org.eclipse.tracecompass.incubator.rocm.core.trace.old
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.rocm.ctf.core
 Import-Package: com.google.common.annotations,
  com.google.common.base,

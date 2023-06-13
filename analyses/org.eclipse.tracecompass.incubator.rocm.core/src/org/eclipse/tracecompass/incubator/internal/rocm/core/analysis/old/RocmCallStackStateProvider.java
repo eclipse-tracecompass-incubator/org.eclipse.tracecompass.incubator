@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.rocm.core.analysis;
+package org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.old;
 
 import java.util.Map;
 
@@ -17,12 +17,12 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.internal.rocm.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.dependency.HipApiHipActivityDependencyMaker;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.AbstractGpuEventHandler;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.ApiEventHandler;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.HipActivityEventHandler;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.HsaActivityEventHandler;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.HsaKernelEventHandler;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.RoctxEventHandler;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.AbstractGpuEventHandler;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.ApiEventHandler;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.HipActivityEventHandler;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.HsaActivityEventHandler;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.HsaKernelEventHandler;
+import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old.RoctxEventHandler;
 import org.eclipse.tracecompass.incubator.rocm.core.analysis.dependency.IDependencyMaker;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;

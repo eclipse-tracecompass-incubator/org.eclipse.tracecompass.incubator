@@ -9,12 +9,12 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers;
+package org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers.old;
 
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.rocm.core.trace.RocmTrace;
+import org.eclipse.tracecompass.incubator.rocm.core.trace.old.RocmTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 
 /**
