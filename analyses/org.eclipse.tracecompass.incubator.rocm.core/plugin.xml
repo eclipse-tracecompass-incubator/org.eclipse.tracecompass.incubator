@@ -25,6 +25,16 @@
                class="org.eclipse.tracecompass.incubator.rocm.core.trace.old.RocmTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmCallStackAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.rocm.core.analysis.atomic"
+            name="ROCm API Analysis">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.rocm.core.trace.RocmTrace">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.core.tracetype">
@@ -35,6 +45,14 @@
             isDirectory="true"
             name="%trace.rocm.old"
             trace_type="org.eclipse.tracecompass.incubator.rocm.core.trace.old.RocmTrace">
+      </type>
+      <type
+            category="org.eclipse.linuxtools.tmf.ctf.core.category.ctf"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.rocm.core.trace.atomic"
+            isDirectory="true"
+            name="%trace.rocm"
+            trace_type="org.eclipse.tracecompass.incubator.rocm.core.trace.RocmTrace">
       </type>
    </extension>
    <extension
