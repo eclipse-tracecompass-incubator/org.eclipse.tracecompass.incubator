@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableList;
  */
 @org.eclipse.jdt.annotation.NonNullByDefault
 public class RocmAspects {
-    private static final ITmfEventAspect<Integer> PID_ASPECT = new ITmfEventAspect<Integer>() {
+    private static final ITmfEventAspect<Integer> PID_ASPECT = new ITmfEventAspect<>() {
         @Override
         public String getName() {
             return Messages.getMessage(Messages.AspectName_PID);
@@ -45,7 +45,7 @@ public class RocmAspects {
         }
     };
 
-    private static final ITmfEventAspect<Integer> TID_ASPECT = new ITmfEventAspect<Integer>() {
+    private static final ITmfEventAspect<Integer> TID_ASPECT = new ITmfEventAspect<>() {
         @Override
         public String getName() {
             return Messages.getMessage(Messages.AspectName_TID);
@@ -62,7 +62,7 @@ public class RocmAspects {
         }
     };
 
-    private static final ITmfEventAspect<Integer> QUEUE_ID_ASPECT = new ITmfEventAspect<Integer>() {
+    private static final ITmfEventAspect<Integer> QUEUE_ID_ASPECT = new ITmfEventAspect<>() {
         @Override
         public String getName() {
             return Messages.getMessage(Messages.AspectName_QueueID);
@@ -79,7 +79,7 @@ public class RocmAspects {
         }
     };
 
-    private static final ITmfEventAspect<Integer> STREAM_ID_ASPECT = new ITmfEventAspect<Integer>() {
+    private static final ITmfEventAspect<Integer> STREAM_ID_ASPECT = new ITmfEventAspect<>() {
         @Override
         public String getName() {
             return Messages.getMessage(Messages.AspectName_StreamID);
@@ -96,7 +96,7 @@ public class RocmAspects {
         }
     };
 
-    private static final ITmfEventAspect<Integer> QUEUE_INDEX_ASPECT = new ITmfEventAspect<Integer>() {
+    private static final ITmfEventAspect<Integer> QUEUE_INDEX_ASPECT = new ITmfEventAspect<>() {
         @Override
         public String getName() {
             return Messages.getMessage(Messages.AspectName_QueueIndex);
@@ -113,7 +113,7 @@ public class RocmAspects {
         }
     };
 
-    private static final ITmfEventAspect<String> FUNCTION_NAME_ASPECT = new ITmfEventAspect<String>() {
+    private static final ITmfEventAspect<String> FUNCTION_NAME_ASPECT = new ITmfEventAspect<>() {
         @Override
         public String getName() {
             return Messages.getMessage(Messages.AspectName_FunctionName);
