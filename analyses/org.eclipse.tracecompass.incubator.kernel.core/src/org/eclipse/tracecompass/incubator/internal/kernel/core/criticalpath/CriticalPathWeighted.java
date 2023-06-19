@@ -18,11 +18,11 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.graph.core.base.IGraphWorker;
-import org.eclipse.tracecompass.analysis.graph.core.base.ITmfGraphVisitor;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfEdge;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfEdge.EdgeType;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfGraph;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfVertex;
+import org.eclipse.tracecompass.analysis.graph.core.graph.ITmfEdge;
+import org.eclipse.tracecompass.analysis.graph.core.graph.ITmfGraph;
+import org.eclipse.tracecompass.analysis.graph.core.graph.ITmfGraphVisitor;
+import org.eclipse.tracecompass.analysis.graph.core.graph.ITmfVertex;
+import org.eclipse.tracecompass.analysis.graph.core.graph.TmfEdgeState;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsWorker;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
@@ -64,27 +64,27 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
 
     private class GraphToCallGraphConverter implements ITmfGraphVisitor {
 
-        private final TmfGraph fGraph;
+        private final ITmfGraph fGraph;
         private final IGraphWorker fMainWorker;
 
-        public GraphToCallGraphConverter(IGraphWorker mainWorker, TmfGraph graph) {
+        public GraphToCallGraphConverter(IGraphWorker mainWorker, ITmfGraph graph) {
             fGraph = graph;
             fMainWorker = mainWorker;
         }
 
         @Override
-        public void visitHead(TmfVertex vertex) {
+        public void visitHead(ITmfVertex vertex) {
             // Nothing to do
 
         }
 
         @Override
-        public void visit(TmfVertex vertex) {
+        public void visit(ITmfVertex vertex) {
             // Nothing to do
         }
 
         @Override
-        public void visit(TmfEdge edge, boolean horizontal) {
+        public void visit(ITmfEdge edge, boolean horizontal) {
             if (edge.getDuration() == 0) {
                 return;
             }
@@ -93,7 +93,7 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
             addEdgeToProcessElement(edge);
         }
 
-        private void addEdgeToAggregatedElement(TmfEdge edge) {
+        private void addEdgeToAggregatedElement(ITmfEdge edge) {
             // Get the worker to which to attribute this edge, whether vertical
             // or horizontal
             IGraphWorker worker = fGraph.getParentOf(edge.getVertexTo());
@@ -103,7 +103,7 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
 
             // If it's another worker that is running, add a other process
             // running state
-            if (worker != fMainWorker && edge.getType().equals(EdgeType.RUNNING)) {
+            if (worker != fMainWorker && edge.getEdgeContextState().getEdgeState().equals(TmfEdgeState.PASS)) {
                 WeightedTree<Object> callSite = new WeightedTree<>(String.valueOf(Messages.CriticalPathWeighted_OtherRunningProcess));
                 callSite.addToWeight(edge.getDuration());
                 fAggregatedTree.addChild(callSite);
@@ -111,13 +111,13 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
             }
 
             // Otherwise, add a first level call that corresponds to the worker
-            WeightedTree<Object> callSite = new WeightedTree<>(edge.getType());
+            WeightedTree<Object> callSite = new WeightedTree<>(edge.getEdgeContextState().getContextEnum());
             callSite.addToWeight(edge.getDuration());
             fAggregatedTree.addChild(callSite);
 
         }
 
-        private void addEdgeToElement(TmfEdge edge) {
+        private void addEdgeToElement(ITmfEdge edge) {
             // Get the worker to which to attribute this edge, whether vertical
             // or horizontal
             IGraphWorker worker = fGraph.getParentOf(edge.getVertexTo());
@@ -137,15 +137,15 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
             }
 
             // Then, add a second level for the edge type if it is not running
-            if (!edge.getType().equals(EdgeType.RUNNING)) {
-                WeightedTree<Object> childType = new WeightedTree<>(edge.getType());
+            if (!edge.getEdgeContextState().getEdgeState().equals(TmfEdgeState.PASS)) {
+                WeightedTree<Object> childType = new WeightedTree<>(edge.getEdgeContextState().getContextEnum());
                 childType.addToWeight(edge.getDuration());
                 workerTree.addChild(childType);
             }
             fTree.addChild(workerTree);
         }
 
-        private void addEdgeToProcessElement(TmfEdge edge) {
+        private void addEdgeToProcessElement(ITmfEdge edge) {
             // Get the worker to which to attribute this edge, whether vertical
             // or horizontal
             IGraphWorker worker = fGraph.getParentOf(edge.getVertexTo());
@@ -165,8 +165,8 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
             }
 
             // Then add a state for the non-running states
-            if (!edge.getType().equals(EdgeType.RUNNING)) {
-                WeightedTree<Object> typeTree = new WeightedTree<>(edge.getType());
+            if (!edge.getEdgeContextState().getEdgeState().equals(TmfEdgeState.PASS)) {
+                WeightedTree<Object> typeTree = new WeightedTree<>(edge.getEdgeContextState().getContextEnum());
                 typeTree.addToWeight(edge.getDuration());
                 workerTree.addChild(typeTree);
             }
@@ -193,11 +193,11 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
      *            The graph to transform into an aggregated weighted tree set.
      * @return The critical path weighted treeset
      */
-    public static CriticalPathWeighted create(@Nullable TmfGraph graph) {
+    public static CriticalPathWeighted create(@Nullable ITmfGraph graph) {
         if (graph == null) {
             return EMPTY_CRIT_PATH_CG;
         }
-        TmfVertex head = graph.getHead();
+        ITmfVertex head = graph.getHead();
         if (head == null) {
             return EMPTY_CRIT_PATH_CG;
         }
@@ -211,8 +211,8 @@ public class CriticalPathWeighted implements IWeightedTreeSet<Object, String, We
      * @param graph
      *            The graph to flatten as a weighted tree
      */
-    private CriticalPathWeighted(TmfGraph graph) {
-        TmfVertex head = graph.getHead();
+    private CriticalPathWeighted(ITmfGraph graph) {
+        ITmfVertex head = graph.getHead();
         if (head == null) {
             throw new NullPointerException("Empty graph"); //$NON-NLS-1$
         }

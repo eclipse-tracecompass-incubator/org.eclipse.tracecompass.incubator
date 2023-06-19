@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxPidAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
@@ -73,7 +72,7 @@ public class ContextCallStackAnalysis extends ProfilingCallGraphAnalysisModule {
     }
 
     @Override
-    protected @Nullable Pair<ICallStackElement, AggregatedCallSite> getProfiledStackTrace(@NonNull ITmfEvent event) {
+    protected @Nullable Pair<ICallStackElement, AggregatedCallSite> getProfiledStackTrace(ITmfEvent event) {
         Map<String, Collection<Object>> callStack = getCallStack(event);
         if (callStack.isEmpty()) {
             return null;
