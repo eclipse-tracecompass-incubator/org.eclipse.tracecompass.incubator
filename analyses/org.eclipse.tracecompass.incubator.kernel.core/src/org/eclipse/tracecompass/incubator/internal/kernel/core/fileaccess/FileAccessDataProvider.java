@@ -81,13 +81,13 @@ import com.google.common.collect.TreeMultimap;
  * @author Matthew Khouzam
  */
 @SuppressWarnings("restriction")
-public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNull IoAnalysis, @NonNull TimeGraphEntryModel>
+public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<IoAnalysis, TimeGraphEntryModel>
         implements IOutputStyleProvider {
 
     /**
      * Suffix for dataprovider ID
      */
-    public static final String ID = "org.eclipse.tracecompass.incubator.kernel.core.file.access.dataprovider"; //$NON-NLS-1$ ;
+    public static final String ID = "org.eclipse.tracecompass.incubator.kernel.core.file.access.dataprovider"; //$NON-NLS-1$
     /**
      * String for the tid parameter of this view
      */
@@ -152,54 +152,67 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         }
         TreeMultimap<Integer, ITmfStateInterval> intervals = TreeMultimap.create(Comparator.naturalOrder(),
                 Comparator.comparing(ITmfStateInterval::getStartTime));
-        Map<@NonNull Long, @NonNull Integer> entries = getSelectedEntries(filter);
+        Map<Long, Integer> entries = getSelectedEntries(filter);
+        Map<Long, List<Integer>> selectedQuarks = new HashMap<>();
+        // Get the access quarks from the file and thread entries
+        for (Entry<Long, Integer> entry : entries.entrySet()) {
+            List<Integer> threadQuarks = ss.getSubAttributes(entry.getValue(), false);
+            // It has one operation attribute below
+            if (threadQuarks.size() == 1 && ss.getAttributeName(threadQuarks.get(0)).equals(IoStateProvider.ATTRIBUTE_OPERATION)) {
+                selectedQuarks.put(entry.getKey(), List.of(threadQuarks.get(0)));
+                continue;
+            }
+            // Or it has multiple attributes which have one operation attribute below
+            for (Integer threadQuark : threadQuarks) {
+                for (Integer operationQuark: ss.getSubAttributes(threadQuark, false)) {
+                    if (ss.getAttributeName(operationQuark).equals(IoStateProvider.ATTRIBUTE_OPERATION)) {
+                        selectedQuarks.computeIfAbsent(entry.getKey(), k -> new ArrayList<>()).add(operationQuark);
+                    }
+                }
+            }
+        }
+
         Collection<Long> times = getTimes(filter, ss.getStartTime(), ss.getCurrentEndTime());
-        /* Do the actual query */
-        for (ITmfStateInterval interval : ss.query2D(entries.values(), times)) {
+        // Do the query with all of the access quarks
+        for (ITmfStateInterval interval : ss.query2D(selectedQuarks.values().stream().flatMap(List::stream).collect(Collectors.toList()), times)) {
             if (monitor != null && monitor.isCanceled()) {
                 return new TimeGraphModel(Collections.emptyList());
             }
             intervals.put(interval.getAttribute(), interval);
         }
-        Map<@NonNull Integer, @NonNull Predicate<@NonNull Multimap<@NonNull String, @NonNull Object>>> predicates = new HashMap<>();
-        Multimap<@NonNull Integer, @NonNull String> regexesMap = DataProviderParameterUtils.extractRegexFilter(parameters);
+
+        Map<Integer, Predicate<Multimap<String, Object>>> predicates = new HashMap<>();
+        Multimap<Integer, String> regexesMap = DataProviderParameterUtils.extractRegexFilter(parameters);
         if (regexesMap != null) {
             predicates.putAll(computeRegexPredicate(regexesMap));
         }
-        List<@NonNull ITimeGraphRowModel> rows = new ArrayList<>();
-        for (Map.Entry<@NonNull Long, @NonNull Integer> entry : entries.entrySet()) {
+        List<ITimeGraphRowModel> rows = new ArrayList<>();
+
+        for (Map.Entry<Long, Integer> entry: entries.entrySet()) {
             if (monitor != null && monitor.isCanceled()) {
                 return new TimeGraphModel(Collections.emptyList());
             }
-
             List<ITimeGraphState> eventList = new ArrayList<>();
-            for (ITmfStateInterval interval : intervals.get(entry.getValue())) {
-                long startTime = interval.getStartTime();
-                long duration = interval.getEndTime() - startTime + 1;
-                Object state = interval.getValue();
-                String label = null;
-                TimeGraphState value = null;
-                if (Integer.valueOf(1).equals(state)) {
-                    ITmfTrace trace = getTrace();
-                    List<Integer> sub = ss.getSubAttributes(interval.getAttribute(), false);
-                    for (ITmfStateInterval threadInterval : ss.query2D(sub, Collections.singleton(startTime))) {
-                        Object sv = threadInterval.getValue();
-                        if (sv != null) {
-                            int tid = getTid(ss, threadInterval.getAttribute());
-                            label = getThreadName(tid, interval.getStartTime(), trace) + " (" + tid + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-                            value = new TimeGraphState(startTime, duration, label,
-                                    STYLE_MAP.computeIfAbsent(META_IO_NAME, n -> new OutputElementStyle(n)));
-                            break;
-                        }
+            List<Integer> quarks = selectedQuarks.get(entry.getKey());
+            if (quarks == null) {
+                rows.add(new TimeGraphRowModel(entry.getKey(), eventList));
+                continue;
+            }
+            for (Integer quark : quarks) {
+                for (ITmfStateInterval interval : intervals.get(quark)) {
+                    long startTime = interval.getStartTime();
+                    long duration = interval.getEndTime() - startTime + 1;
+                    String label = interval.getValueString();
+                    TimeGraphState value;
+                    if (label == null) {
+                        value = new TimeGraphState(startTime, duration, Integer.MIN_VALUE);
+                    } else {
+                        value = new TimeGraphState(startTime, duration, label,
+                                STYLE_MAP.computeIfAbsent(META_IO_NAME, OutputElementStyle::new));
                     }
+                    Long entryId = Objects.requireNonNull(entry.getKey());
+                    applyFilterAndAddState(eventList, value, entryId, predicates, monitor);
                 }
-                if (state != null && value == null) {
-                    value = new TimeGraphState(startTime, duration, null, STYLE_MAP.computeIfAbsent(IO_NAME, n -> new OutputElementStyle(n)));
-                }
-                if (value == null) {
-                    value = new TimeGraphState(startTime, duration, Integer.MIN_VALUE);
-                }
-                applyFilterAndAddState(eventList, value, entry.getKey(), predicates, monitor);
             }
             rows.add(new TimeGraphRowModel(entry.getKey(), eventList));
         }
@@ -218,7 +231,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         if (filter == null) {
             return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.INCORRECT_QUERY_PARAMETERS);
         }
-        Collection<@NonNull Integer> quarks = getSelectedEntries(filter).values();
+        Collection<Integer> quarks = getSelectedEntries(filter).values();
         Map<String, String> retMap = new LinkedHashMap<>();
 
         if (quarks.size() != 1) {
@@ -276,11 +289,10 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
 
     @Override
     protected TmfTreeModel<TimeGraphEntryModel> getTree(ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
-
         Object tidParam = parameters.get(TID_PARAM);
         Integer selectedTids = (tidParam instanceof Integer) ? (Integer) tidParam : -1;
 
-        Builder<@NonNull TimeGraphEntryModel> builder = new Builder<>();
+        Builder<TimeGraphEntryModel> builder = new Builder<>();
         long rootId = getId(ITmfStateSystem.ROOT_ATTRIBUTE);
         ITmfTrace trace = getTrace();
         builder.add(new TimeGraphEntryModel(rootId, -1, String.valueOf(trace.getName()), ss.getStartTime(), ss.getCurrentEndTime()));
@@ -292,8 +304,8 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
         return new TmfTreeModel<>(Collections.emptyList(), builder.build());
     }
 
-    private void addResources(ITmfStateSystem ss, Builder<@NonNull TimeGraphEntryModel> builder, int quark, long parentId, Integer filter) {
-        List<@NonNull Integer> fileQuarks = ss.getSubAttributes(quark, false);
+    private void addResources(ITmfStateSystem ss, Builder<TimeGraphEntryModel> builder, int quark, long parentId, Integer filter) {
+        List<Integer> fileQuarks = ss.getSubAttributes(quark, false);
 
         String ramFiles = "in memory"; //$NON-NLS-1$
         boolean hasMemfile = false;
@@ -315,7 +327,6 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
                     String[] segments = name.split(File.separator);
                     StringBuilder sb = new StringBuilder();
                     long parent = parentId;
-                    builder.add(new FileEntryModel(getStringEntryId(fFileIds.computeIfAbsent(File.separator, a -> STRING_VALUE.incrementAndGet())), parentId, File.separator, ss.getStartTime(), ss.getCurrentEndTime(), false, Type.Directory));
                     for (int i = 0; i < segments.length - 1; i++) {
                         sb.append('/').append(segments[i]);
                         String fileName = sb.toString();
@@ -332,7 +343,7 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
                     }
                     builder.add(new FileEntryModel(id, ramId, name, ss.getStartTime(), ss.getCurrentEndTime(), true, FileEntryModel.Type.InRam));
                 }
-                List<@NonNull Integer> threadQuarks = ss.getSubAttributes(fileQuark, false);
+                List<Integer> threadQuarks = ss.getSubAttributes(fileQuark, false);
                 if (threadQuarks.size() == 1) {
                     continue;
                 }
@@ -416,14 +427,14 @@ public class FileAccessDataProvider extends AbstractTimeGraphDataProvider<@NonNu
     }
 
     @Override
-    public @NonNull Multimap<@NonNull String, @NonNull Object> getFilterData(long entryId, long time, @Nullable IProgressMonitor monitor) {
-        Multimap<@NonNull String, @NonNull Object> data = HashMultimap.create();
+    public @NonNull Multimap<String, Object> getFilterData(long entryId, long time, @Nullable IProgressMonitor monitor) {
+        Multimap<String, Object> data = HashMultimap.create();
         data.putAll(super.getFilterData(entryId, time, monitor));
 
-        Map<@NonNull String, @NonNull Object> parameters = ImmutableMap.of(DataProviderParameterUtils.REQUESTED_TIME_KEY, Collections.singletonList(time),
-                                DataProviderParameterUtils.REQUESTED_ELEMENT_KEY, Collections.singleton(Objects.requireNonNull(entryId)));
+        Map<String, Object> parameters = ImmutableMap.of(DataProviderParameterUtils.REQUESTED_TIME_KEY, Collections.singletonList(time),
+                DataProviderParameterUtils.REQUESTED_ELEMENT_KEY, Collections.singleton(Objects.requireNonNull(entryId)));
         TmfModelResponse<Map<String, String>> response = fetchTooltip(parameters, monitor);
-        Map<@NonNull String, @NonNull String> model = response.getModel();
+        Map<String, String> model = response.getModel();
         if (model != null) {
             for (Entry<String, String> entry : model.entrySet()) {
                 data.put(entry.getKey(), entry.getValue());
