@@ -50,6 +50,18 @@ public final class EndpointConstants {
     private static final String REQUESTED_TIMERANGE_KEY = "requested_timerange"; //$NON-NLS-1$
 
     /**
+     * Query filter parameter key that enables the full search (deep search) or
+     * not
+     */
+    private static final String FILTER_QUERY_STRATEGY = "strategy"; //$NON-NLS-1$
+
+    /** Query filter parameter key for filter expressions map */
+    private static final String FILTER_EXPRESSIONS_MAP = "filter_expressions_map"; //$NON-NLS-1$
+
+    /** Filter query parameters key */
+    private static final String FILTER_QUERY_PARAMETERS_KEY = "filter_query_parameters"; //$NON-NLS-1$
+
+    /**
      * Swagger OpenAPI definitions used in the related annotations from
      * {@link DataProviderService}, in order of appearance.
      */
@@ -100,6 +112,12 @@ public final class EndpointConstants {
     static final String EXPRESSIONS = "Use '" + TABLE_SEARCH_EXPRESSIONS_KEY + "' for search providing a map of <columnId, regular expression>. Returned lines that match the search expression will be tagged. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String INDEX = "If '" + REQUESTED_TABLE_INDEX_KEY + "' is used it is the starting index of the lines to be returned. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ITEMS = "The array '" + REQUESTED_ITEMS_KEY + "' is the list of entryId being requested."; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String FILTER_QUERY_PARAMETERS = "The object '" + FILTER_QUERY_PARAMETERS_KEY + "' contains requests for search/filter queries. The object '" + FILTER_EXPRESSIONS_MAP + //$NON-NLS-1$ //$NON-NLS-2$
+            "' is the list of query requests, where the key 1 is DIMMED and 4 is EXCLUDED, and the value is an array of the desired search query ('thread=1' or 'process=ls' or 'duration>10ms'). The '" + //$NON-NLS-1$
+            FILTER_QUERY_STRATEGY + "' flag is an optional parameter within '" + FILTER_QUERY_PARAMETERS_KEY + "', and if omitted then 'SAMPLED' search would be the default value. If 'strategy' is set to " + //$NON-NLS-1$ //$NON-NLS-2$
+            "'DEEP' then the full time range between the first and last requested timestamp should be searched for filter matches. For timegraphs, only one matching state per gap in requested timestamps " + //$NON-NLS-1$
+            "needs to be returned in the response. If matches to the queries from the '" + FILTER_EXPRESSIONS_MAP + "' are found there'll be a field 'tags' in 'states'. The TimeGraphState class has a " + //$NON-NLS-1$ //$NON-NLS-2$
+            "bit-mask called tags. If a state is supposed to be dimmed the tag will be the corresponding bit set."; //$NON-NLS-1$
     static final String ITEMS_TT = "The array '" + REQUESTED_ITEMS_KEY + "' is an array with a single entryId being requested. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ITEMS_XY = "The array '" + REQUESTED_ITEMS_KEY + "' is the list of entryId or seriesId being requested."; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_CATEGORIES = "The array '" + REQUESTED_MARKER_CATEGORIES_KEY + "' is the list of requested annotation categories; if absent, all annotations are returned."; //$NON-NLS-1$ //$NON-NLS-2$
@@ -125,6 +143,7 @@ public final class EndpointConstants {
     static final String MARKER_CATEGORIES_EX = "\"" + REQUESTED_MARKER_CATEGORIES_KEY + "\": [\"category1\", \"category2\"]"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_SET_EX = "\"" + REQUESTED_MARKER_SET_KEY + "\": \"markerSetId\","; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMERANGE_EX = "\"" + REQUESTED_TIMERANGE_KEY + "\": {\"start\": 111111111, \"end\": 222222222, \"nbTimes\": 1920}"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String FILTER_QUERY_PARAMETERS_EX = "\"" + FILTER_QUERY_PARAMETERS_KEY + "\": {\"" + FILTER_QUERY_STRATEGY + "\": \"SAMPLED\", \"" + FILTER_EXPRESSIONS_MAP + "\": {\"1\":[\"openat\", \"duration>10ms\"]}}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     static final String TIMERANGE_EX_TREE = "\"" + REQUESTED_TIMERANGE_KEY + "\": {\"start\": 111111111, \"end\": 222222222}"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_EX_TT = "\"" + REQUESTED_TIME_KEY + "\": [111200000],"; //$NON-NLS-1$ //$NON-NLS-2$
 

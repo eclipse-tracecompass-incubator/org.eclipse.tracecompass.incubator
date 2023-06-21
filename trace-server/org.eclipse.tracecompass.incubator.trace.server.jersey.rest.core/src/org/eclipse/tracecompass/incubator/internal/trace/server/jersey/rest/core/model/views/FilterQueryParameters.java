@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.Hidden;
+
 /**
  * Support search and filter expressions for timegraph views
  *
@@ -82,6 +84,7 @@ public class FilterQueryParameters {
     /**
      * @return A boolean value isDeepSearch
      */
+    @Hidden
     public Boolean isDeepSearch() {
         return strategy != null && strategy.equals(FilterQueryStrategy.DEEP);
     }
