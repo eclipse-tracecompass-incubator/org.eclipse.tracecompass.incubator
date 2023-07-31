@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="tracecompass-incubator-master" sequenceNumber="71">
+<target name="tracecompass-incubator-master" sequenceNumber="72">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.cdt.gnu.dsf.feature.group" version="0.0.0"/>
@@ -61,6 +61,7 @@
 <unit id="org.glassfish.jersey.containers.servlet.core.source" version="0.0.0"/>
 <unit id="org.glassfish.jersey.ext.entityfiltering" version="0.0.0"/>
 <unit id="org.glassfish.jersey.ext.entityfiltering.source" version="0.0.0"/>
+<unit id="com.google.gson" version="0.0.0"/>
 <unit id="com.google.guava" version="30.1.0.v20221112-0806"/>
 <unit id="jakarta.xml.bind" version="2.3.3.v20221203-1659"/>
 <unit id="org.antlr.runtime" version="3.2.0.v20220404-1927"/>
