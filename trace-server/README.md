@@ -65,6 +65,7 @@ For example, here is an excerpt of the file:
 
 The following properties are supported:
 
+- `traceserver.host`: Host to use. If not specified, the default http host is 0.0.0.0.
 - `traceserver.port`: Port to use. If not specified, the default http port is 8080 and SSL is 8443.
 - `traceserver.useSSL`: Should be `true` or `false`. If `true`, the `traceserver.keystore` property must be set. If left unset, it will be inferred from the other properties. If `false`, the `traceserver.keystore` and `traceserver.keystorepass` will be ignored.
 - `traceserver.keystore`: Path to the keystore file.

@@ -176,6 +176,7 @@ public class WebApplication {
         } else {
             serverConnector = new ServerConnector(server);
         }
+        serverConnector.setHost(config.getHost());
         serverConnector.setPort(config.getPort());
         return serverConnector;
     }
@@ -192,9 +193,6 @@ public class WebApplication {
 
     /**
      * Method to stop the web application
-     *
-     * @throws Exception
-     *             if server cannot be stopped
      */
     public void stop() {
         try {

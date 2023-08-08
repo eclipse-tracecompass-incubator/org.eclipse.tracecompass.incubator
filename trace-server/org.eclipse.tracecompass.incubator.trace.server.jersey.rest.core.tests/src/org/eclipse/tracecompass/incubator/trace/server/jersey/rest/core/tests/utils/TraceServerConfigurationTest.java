@@ -24,6 +24,7 @@ import org.junit.Test;
  */
 public class TraceServerConfigurationTest {
 
+    private static final String PROPERTY_HOST = "traceserver.host"; //$NON-NLS-1$
     private static final String PROPERTY_PORT = "traceserver.port"; //$NON-NLS-1$
     private static final String PROPERTY_USESSL = "traceserver.useSSL"; //$NON-NLS-1$
     private static final String PROPERTY_KEYSTORE = "traceserver.keystore"; //$NON-NLS-1$
@@ -34,6 +35,7 @@ public class TraceServerConfigurationTest {
      */
     @Before
     public void initializeProperties() {
+        System.setProperty(PROPERTY_HOST, "");
         System.setProperty(PROPERTY_PORT, "");
         System.setProperty(PROPERTY_USESSL, "");
         System.setProperty(PROPERTY_KEYSTORE, "");
@@ -45,10 +47,7 @@ public class TraceServerConfigurationTest {
      */
     @After
     public void cleanUpProperties() {
-        System.setProperty(PROPERTY_PORT, "");
-        System.setProperty(PROPERTY_USESSL, "");
-        System.setProperty(PROPERTY_KEYSTORE, "");
-        System.setProperty(PROPERTY_KEYSTORE_PASS, "");
+        initializeProperties();
     }
 
     /**
@@ -60,13 +59,17 @@ public class TraceServerConfigurationTest {
     }
 
     /**
-     * Test setting the http port
+     * Test setting the http host and port
      */
     @Test
     public void testHttp() {
+        String host = "127.0.0.1"; // versus 0.0.0.0 or wild-card (null host)
+        System.setProperty(PROPERTY_HOST, host);
+
         int port = 8088;
         System.setProperty(PROPERTY_PORT, String.valueOf(port));
-        assertConfiguration(new TraceServerConfiguration(port, false, null, null), TraceServerConfiguration.create());
+
+        assertConfiguration(new TraceServerConfiguration(host, port, false, null, null), TraceServerConfiguration.create());
     }
 
     /**
@@ -128,11 +131,10 @@ public class TraceServerConfigurationTest {
     }
 
     private static void assertConfiguration(TraceServerConfiguration expected, TraceServerConfiguration actual) {
+        assertEquals(expected.getHost(), actual.getHost());
         assertEquals(expected.getPort(), actual.getPort());
         assertEquals(expected.getKeystore(), actual.getKeystore());
         assertEquals(expected.getKeystorePass(), actual.getKeystorePass());
         assertEquals(expected.useSSL(), actual.useSSL());
-
     }
-
 }
