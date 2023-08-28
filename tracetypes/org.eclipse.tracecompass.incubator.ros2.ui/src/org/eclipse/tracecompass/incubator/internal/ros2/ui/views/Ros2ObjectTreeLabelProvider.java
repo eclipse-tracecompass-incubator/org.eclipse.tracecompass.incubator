@@ -19,10 +19,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.Ros2ObjectTimeGraphEntryModel;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.Ros2ObjectTimeGraphEntryModelType;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
-import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ObjectHandle;
-import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
-import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2SubscriptionObject;
-import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2TimerObject;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 
@@ -35,7 +31,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 public class Ros2ObjectTreeLabelProvider {
 
     /** Tree columns for this provider */
-    public static final String[] TREE_COLUMNS = new String[] { StringUtils.EMPTY, "Handle", "PID", "Hostname", "Host ID" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    public static final String[] TREE_COLUMNS = new String[] { StringUtils.EMPTY, "PID", "Hostname" }; //$NON-NLS-1$ //$NON-NLS-2$
 
     private static final String COLUMN_TEXT_PREFIX_MACHINE = "🤖 "; //$NON-NLS-1$
     private static final String COLUMN_TEXT_PREFIX_NODE = "🔲 "; //$NON-NLS-1$
@@ -45,10 +41,6 @@ public class Ros2ObjectTreeLabelProvider {
 
     private Ros2ObjectTreeLabelProvider() {
         // Do nothing
-    }
-
-    private static String handleToHex(Ros2ObjectHandle handle) {
-        return "0x" + Long.toHexString(handle.getHandle()); //$NON-NLS-1$
     }
 
     /**
@@ -76,27 +68,15 @@ public class Ros2ObjectTreeLabelProvider {
                     }
                 } else if (1 == columnIndex) {
                     @Nullable
-                    String handle = getHandle(entryModel, type);
-                    if (null != handle) {
-                        return handle;
-                    }
-                } else if (2 == columnIndex) {
-                    @Nullable
                     String pid = getPid(entryModel, type);
                     if (null != pid) {
                         return pid;
                     }
-                } else if (3 == columnIndex) {
+                } else if (2 == columnIndex) {
                     @Nullable
-                    String hostId = getHostId(entryModel, type);
+                    String hostId = getHostname(entryModel, type);
                     if (null != hostId) {
                         return hostId;
-                    }
-                } else if (4 == columnIndex) {
-                    @Nullable
-                    String hostname = getHostname(entryModel, type);
-                    if (null != hostname) {
-                        return hostname;
                     }
                 }
             }
@@ -123,24 +103,6 @@ public class Ros2ObjectTreeLabelProvider {
         return null;
     }
 
-    private static @Nullable String getHandle(Ros2ObjectTimeGraphEntryModel entryModel, Ros2ObjectTimeGraphEntryModelType type) {
-        // Get handle
-        if (Ros2ObjectTimeGraphEntryModelType.NODE == type) {
-            Ros2NodeObject nodeObject = (Ros2NodeObject) entryModel.getObject();
-            return handleToHex(nodeObject.getHandle());
-        } else if (Ros2ObjectTimeGraphEntryModelType.PUBLISHER == type) {
-            Ros2PublisherObject publisherObject = (Ros2PublisherObject) entryModel.getObject();
-            return handleToHex(publisherObject.getHandle());
-        } else if (Ros2ObjectTimeGraphEntryModelType.SUBSCRIPTION == type) {
-            Ros2SubscriptionObject subscriptionObject = (Ros2SubscriptionObject) entryModel.getObject();
-            return handleToHex(subscriptionObject.getHandle());
-        } else if (Ros2ObjectTimeGraphEntryModelType.TIMER == type) {
-            Ros2TimerObject timerObject = (Ros2TimerObject) entryModel.getObject();
-            return handleToHex(timerObject.getHandle());
-        }
-        return null;
-    }
-
     private static @Nullable String getPid(Ros2ObjectTimeGraphEntryModel entryModel, Ros2ObjectTimeGraphEntryModelType type) {
         // Get PID only for nodes, just to keep it simple
         if (Ros2ObjectTimeGraphEntryModelType.NODE == type) {
@@ -150,20 +112,11 @@ public class Ros2ObjectTreeLabelProvider {
         return null;
     }
 
-    private static @Nullable String getHostId(Ros2ObjectTimeGraphEntryModel entryModel, Ros2ObjectTimeGraphEntryModelType type) {
-        // Get host ID only for traces, just to keep it simple
-        if (Ros2ObjectTimeGraphEntryModelType.TRACE == type) {
-            Ros2NodeObject nodeObject = (Ros2NodeObject) entryModel.getObject();
-            return hostnameToString(nodeObject.getHandle().getHostProcess().getHostId().getHostname());
-        }
-        return null;
-    }
-
     private static @Nullable String getHostname(Ros2ObjectTimeGraphEntryModel entryModel, Ros2ObjectTimeGraphEntryModelType type) {
         // Get hostname only for traces, just to keep it simple
         if (Ros2ObjectTimeGraphEntryModelType.TRACE == type) {
             Ros2NodeObject nodeObject = (Ros2NodeObject) entryModel.getObject();
-            return hostIdToString(nodeObject.getHandle().getHostProcess().getHostId().getId());
+            return hostnameToString(nodeObject.getHandle().getHostProcess().getHostId().getHostname());
         }
         return null;
     }

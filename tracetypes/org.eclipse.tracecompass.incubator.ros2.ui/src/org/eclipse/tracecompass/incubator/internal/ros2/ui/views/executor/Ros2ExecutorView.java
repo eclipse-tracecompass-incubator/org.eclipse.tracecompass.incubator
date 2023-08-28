@@ -29,7 +29,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 public class Ros2ExecutorView extends AbstractRos2DataProviderTimeGraphView {
 
     /** Tree columns for this provider */
-    private static final String[] TREE_COLUMNS = new String[] { StringUtils.EMPTY, "Hostname", "Host ID" }; //$NON-NLS-1$ //$NON-NLS-2$
+    private static final String[] TREE_COLUMNS = new String[] { StringUtils.EMPTY, "Hostname" }; //$NON-NLS-1$
 
     private static final String ID_SUFFIX = ".executor"; //$NON-NLS-1$
     private static final String COLUMN_TEXT_PREFIX_MACHINE = "🤖 "; //$NON-NLS-1$
@@ -51,9 +51,6 @@ public class Ros2ExecutorView extends AbstractRos2DataProviderTimeGraphView {
                 } else if (1 == columnIndex) {
                     // Host name
                     return Ros2ObjectTreeLabelProvider.hostnameToString(labels.get(1));
-                } else if (2 == columnIndex) {
-                    // Host ID
-                    return Ros2ObjectTreeLabelProvider.hostIdToString(labels.get(2));
                 }
             } else if (0 == columnIndex) {
                 return entry.getName();
