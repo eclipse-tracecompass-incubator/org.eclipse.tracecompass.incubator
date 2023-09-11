@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ANN;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COLUMNS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COLUMNS_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CONSISTENT_PARENT;
@@ -197,6 +198,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
         @Server(url = SERVER)
 }, tags = {
         @Tag(name = ANN, description = "Retrieve annotations for different outputs."),
+        @Tag(name = CFG, description = "How to manage configuration source types and configurations."),
         @Tag(name = DIA, description = "Refer to the server's status."),
         @Tag(name = EXP, description = "How to manage experiments on your server; an experiment represents a collection of traces, which can produce output models."),
         @Tag(name = STY, description = "Retrieve styles for different outputs."),

@@ -79,6 +79,7 @@ public final class EndpointConstants {
      * 3-letters so they align in {@link DataProviderService}; readability.
      */
     static final String ANN = "Annotations"; //$NON-NLS-1$
+    static final String CFG = "Configurations"; //$NON-NLS-1$
     static final String DIA = "Diagnostic"; //$NON-NLS-1$
     static final String DT = "Data Tree"; //$NON-NLS-1$
     static final String EXP = "Experiments"; //$NON-NLS-1$
@@ -92,6 +93,8 @@ public final class EndpointConstants {
      * Swagger @Parameter description constants, named after their parameter
      * name; alphabetical order.
      */
+    static final String CFG_TYPE_ID = "The configuration source type ID"; //$NON-NLS-1$
+    static final String CFG_CONFIG_ID = "The configuration instance ID"; //$NON-NLS-1$
     static final String EXP_UUID = "UUID of the experiment to query"; //$NON-NLS-1$
     static final String MARKER_SET_ID = "The optional requested marker set's id"; //$NON-NLS-1$
     static final String OUTPUT_ID = "ID of the output provider to query"; //$NON-NLS-1$
@@ -101,6 +104,9 @@ public final class EndpointConstants {
      * Swagger @RequestBody description constants, named after their parameter
      * name, without the common 'requested' prefix; alphabetical order.
      */
+    static final String CFG_CREATE_DESC = "Query parameters to create a configuration instance."; //$NON-NLS-1$
+    static final String CFG_UPDATE_DESC = "Query parameters to update a configuration instance."; //$NON-NLS-1$
+    static final String CFG_KEYS_DESC = "Provide all query parameter keys and values as specified in the corresponding configuration source type."; //$NON-NLS-1$
     static final String COLUMNS = "When '" + REQUESTED_COLUMN_IDS_KEY + "' is absent all columns are returned. When present it is the array of requested columnIds. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String COUNT = "The '" + REQUESTED_TABLE_COUNT_KEY + "' is the number of lines that should be returned. "; //$NON-NLS-1$ //$NON-NLS-2$
     static final String DIRECTION = "Use '" + TABLE_SEARCH_DIRECTION_KEY + "' to specify search direction [NEXT, PREVIOUS]. "; //$NON-NLS-1$ //$NON-NLS-2$
@@ -132,6 +138,7 @@ public final class EndpointConstants {
      * Swagger @RequestBody example constants, named after their parameter name,
      * without the common 'requested' prefix; alphabetical order.
      */
+    static final String CFG_PATH_EX = "\"path\": \"/home/user/test.xml\""; //$NON-NLS-1$
     static final String COLUMNS_EX = "\"" + REQUESTED_COLUMN_IDS_KEY + "\": [0, 1, 2],"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String COUNT_EX = "\"" + REQUESTED_TABLE_COUNT_KEY + "\": 100,"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String DIRECTION_EX = "\"" + TABLE_SEARCH_DIRECTION_KEY + "\": \"NEXT\""; //$NON-NLS-1$ //$NON-NLS-2$
@@ -156,6 +163,7 @@ public final class EndpointConstants {
     static final String PROVIDER_NOT_FOUND = "Experiment or output provider not found"; //$NON-NLS-1$
     static final String TRACE_CREATION_FAILED = "Trace resource creation failed"; //$NON-NLS-1$
     static final String TREE_ENTRIES = "Unique entry point for output providers, to get the tree of visible entries"; //$NON-NLS-1$
+    static final String NO_SUCH_CONFIGURATION = "No such configuration source type or configuration instance"; //$NON-NLS-1$
 
     private EndpointConstants() {
         // private constructor
