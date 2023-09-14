@@ -19,7 +19,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_UPDATE_DESC;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
 
-import java.util.Collections;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -33,10 +33,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
+import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
+import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSource;
+import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceManager;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -52,10 +56,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  *
  * @author Bernd Hufmann
  */
-@Hidden
 @Path("/config")
 @Tag(name = EndpointConstants.CFG)
 public class ConfigurationManagerService {
+
+    private final TmfConfigurationSourceManager fConfigSourceManager = TmfConfigurationSourceManager.getInstance();
 
     /**
      * GET a list of available configuration source types
@@ -69,7 +74,7 @@ public class ConfigurationManagerService {
             @ApiResponse(responseCode = "200", description = "Returns a list of configuration source types", content = @Content(array = @ArraySchema(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationSourceType.class))))
     })
     public Response getConfigurationTypes() {
-        return Response.ok(Collections.emptyList()).build();
+        return Response.ok(fConfigSourceManager.getConfigurationSourceTypes()).build();
     }
 
     /**
@@ -87,7 +92,11 @@ public class ConfigurationManagerService {
             @ApiResponse(responseCode = "200", description = "Returns a single configuration source type", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationSourceType.class)))
     })
     public Response getConfigurationType(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("Not Implemented").build(); //$NON-NLS-1$
+        ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
+        if (configurationSource == null) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+        }
+        return Response.ok(configurationSource.getConfigurationSourceType()).build();
     }
 
     /**
@@ -107,7 +116,11 @@ public class ConfigurationManagerService {
             @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getConfigurations(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId) {
-        return Response.ok(Collections.emptyList()).build();
+        ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
+        if (configurationSource == null) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+        }
+        return Response.ok(configurationSource.getConfigurations()).build();
     }
 
     /**
@@ -134,7 +147,23 @@ public class ConfigurationManagerService {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + CFG_PATH_EX +
                             "}}"), schema = @Schema(implementation = ConfigurationQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("Not Implemented").build(); //$NON-NLS-1$
+        ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
+        if (configurationSource == null) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+        }
+        if (queryParameters == null) {
+            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+        }
+
+        @SuppressWarnings("null")
+        @NonNull Map<@NonNull String, @NonNull Object> params = queryParameters.getParameters();
+
+        try {
+            ITmfConfiguration config = configurationSource.create(params);
+            return Response.ok(config).build();
+        } catch (TmfConfigurationException e) {
+            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
     }
 
     /**
@@ -155,7 +184,18 @@ public class ConfigurationManagerService {
     })
     public Response getConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
             @Parameter(description = CFG_CONFIG_ID) @PathParam("configId") String configId) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("Not Implemented").build(); //$NON-NLS-1$
+        ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
+        if (configurationSource == null) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+        }
+        if (configId == null || !configurationSource.contains(configId)) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration instance doesn't exist for type " + typeId).build(); //$NON-NLS-1$
+        }
+        ITmfConfiguration config = configurationSource.get(configId);
+        if (config == null) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration instance doesn't exist for type " + typeId).build(); //$NON-NLS-1$
+        }
+        return Response.ok(config).build();
     }
 
     /**
@@ -185,7 +225,26 @@ public class ConfigurationManagerService {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + CFG_PATH_EX +
                             "}}"), schema = @Schema(implementation = ConfigurationQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("Not Implemented").build(); //$NON-NLS-1$
+        ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
+        if (configurationSource == null) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+        }
+        if (queryParameters == null) {
+            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+        }
+
+        if (configId == null || !configurationSource.contains(configId)) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration instance doesn't exist for type " + typeId).build(); //$NON-NLS-1$
+        }
+
+        @SuppressWarnings("null")
+        @NonNull Map<@NonNull String, @NonNull Object> params = queryParameters.getParameters();
+        try {
+            ITmfConfiguration config = configurationSource.update(configId, params);
+            return Response.ok(config).build();
+        } catch (TmfConfigurationException e) {
+            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
     }
 
     /**
@@ -207,6 +266,19 @@ public class ConfigurationManagerService {
     })
     public Response deleteConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
             @Parameter(description = CFG_CONFIG_ID) @PathParam("configId") String configId) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("Not Implemented").build(); //$NON-NLS-1$
+        ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
+        if (configurationSource == null) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+        }
+
+        if (configId == null || !configurationSource.contains(configId)) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration instance doesn't exist for type " + typeId).build(); //$NON-NLS-1$
+        }
+
+        ITmfConfiguration config = configurationSource.remove(configId);
+        if (config == null) {
+            return Response.status(Status.BAD_REQUEST).entity("Failed removing configuration instance").build(); //$NON-NLS-1$
+        }
+        return Response.ok(config).build();
     }
 }

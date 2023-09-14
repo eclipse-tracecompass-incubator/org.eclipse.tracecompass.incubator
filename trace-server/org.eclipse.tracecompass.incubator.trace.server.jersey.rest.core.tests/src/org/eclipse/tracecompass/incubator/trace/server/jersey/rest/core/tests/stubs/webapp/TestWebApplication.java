@@ -11,11 +11,11 @@
 
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp;
 
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ConfigurationManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.FilterService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.HealthService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.XmlManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.CORSFilter;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.JacksonObjectMapperProvider;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.TraceServerConfiguration;
@@ -46,7 +46,7 @@ public class TestWebApplication extends WebApplication {
         rc.register(TestDataProviderService.class);
         rc.register(FilterService.class);
         rc.register(HealthService.class);
-        rc.register(XmlManagerService.class);
+        rc.register(ConfigurationManagerService.class);
         rc.register(CORSFilter.class);
         rc.register(JacksonObjectMapperProvider.class);
         rc.register(OpenApiResource.class);

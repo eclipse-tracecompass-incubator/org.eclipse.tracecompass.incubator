@@ -39,7 +39,9 @@ import io.swagger.v3.oas.annotations.Hidden;
  * XML analysis and provider management
  *
  * @author Loic Prieur-Drevon
+ * @deprecated use {@link ConfigurationManagerService} instead
  */
+@Deprecated
 @Hidden
 @Path("/xml")
 @SuppressWarnings("restriction")

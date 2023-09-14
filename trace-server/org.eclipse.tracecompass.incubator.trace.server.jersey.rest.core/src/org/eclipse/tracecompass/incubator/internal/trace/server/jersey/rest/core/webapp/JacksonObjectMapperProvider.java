@@ -20,6 +20,9 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.VirtualTableCell;
 import org.eclipse.tracecompass.internal.tmf.core.markers.MarkerSet;
+import org.eclipse.tracecompass.tmf.core.config.ITmfConfigParamDescriptor;
+import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
+import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.annotations.Annotation;
@@ -70,6 +73,9 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
             module.addSerializer(IVirtualTableLine.class, new VirtualTableLineSerializer());
             module.addSerializer(VirtualTableCell.class, new VirtualTableCellSerializer());
             module.addSerializer(MarkerSet.class, new MarkerSetSerializer());
+            module.addSerializer(ITmfConfiguration.class, new TmfConfigurationSerializer());
+            module.addSerializer(ITmfConfigurationSourceType.class, new TmfConfigurationSourceTypeSerializer());
+            module.addSerializer(ITmfConfigParamDescriptor.class, new TmfConfigParamDescriptorSerializer());
 
             // create JsonProvider to provide custom ObjectMapper
             JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();

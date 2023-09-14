@@ -129,6 +129,21 @@ public abstract class RestServerTest {
      */
     public static final String URI = "uri";
 
+    /**
+     * Configuration service root path
+     */
+    public static final String CONFIG_PATH = "config";
+
+    /**
+     * Configuration types path segment
+     */
+    public static final String TYPES_PATH = "types";
+
+    /**
+     * Configuration instances path segment
+     */
+    public static final String CONFIG_INSTANCES_PATH = "configs";
+
     private static final GenericType<Set<TraceModelStub>> TRACE_MODEL_SET_TYPE = new GenericType<Set<TraceModelStub>>() {
     };
     private static final GenericType<Set<ExperimentModelStub>> EXPERIMENT_MODEL_SET_TYPE = new GenericType<Set<ExperimentModelStub>>() {
