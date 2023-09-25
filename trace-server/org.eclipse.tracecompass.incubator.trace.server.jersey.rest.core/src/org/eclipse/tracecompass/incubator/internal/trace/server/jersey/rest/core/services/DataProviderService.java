@@ -76,11 +76,13 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -166,6 +168,7 @@ import org.eclipse.tracecompass.tmf.core.model.xy.ITmfXyModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.w3c.dom.Element;
 
@@ -236,6 +239,7 @@ public class DataProviderService {
         List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(experiment);
         list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
         list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.XY)));
+        list.sort(Comparator.comparing(IDataProviderDescriptor::getName));
 
         /*
          * Bug 576402:
@@ -1019,26 +1023,31 @@ public class DataProviderService {
          *  This should be part of the XmlDataProviderManager.
          */
         List<IDataProviderDescriptor> descriptors = new ArrayList<>();
-        Map<String, IAnalysisModuleHelper> modules = TmfAnalysisManager.getAnalysisModules(trace.getClass());
-        for (OutputType viewType : types) {
-            for (XmlOutputElement element : Iterables.filter(XmlUtils.getXmlOutputElements().values(), element -> element.getXmlElem().equals(viewType.getXmlElem()))) {
-                DataProviderDescriptor.Builder builder = new DataProviderDescriptor.Builder();
-                String label = String.valueOf(element.getLabel());
-                String elemId = element.getId();
-                if (elemId == null) {
-                    // Ignore element
-                    continue;
-                }
-                builder.setId(elemId).setName(label).setDescription(label);
-                if (viewType == OutputType.XY) {
-                    builder.setProviderType(ProviderType.TREE_TIME_XY);
-                } else if (viewType == OutputType.TIME_GRAPH) {
-                    builder.setProviderType(ProviderType.TIME_GRAPH);
-                }
-                for (String id : element.getAnalyses()) {
-                    if (modules.containsKey(id)) {
-                        descriptors.add(builder.build());
-                        break;
+        for (ITmfTrace tr : TmfTraceManager.getTraceSetWithExperiment(trace)) {
+            Map<String, IAnalysisModuleHelper> modules = TmfAnalysisManager.getAnalysisModules(tr.getClass());
+            for (OutputType viewType : types) {
+                for (XmlOutputElement element : Iterables.filter(XmlUtils.getXmlOutputElements().values(), element -> element.getXmlElem().equals(viewType.getXmlElem()))) {
+                    DataProviderDescriptor.Builder builder = new DataProviderDescriptor.Builder();
+                    String label = String.valueOf(element.getLabel());
+                    String elemId = element.getId();
+                    if (elemId == null) {
+                        // Ignore element
+                        continue;
+                    }
+                    builder.setId(elemId);
+                    if (viewType == OutputType.XY) {
+                        builder.setProviderType(ProviderType.TREE_TIME_XY);
+                    } else if (viewType == OutputType.TIME_GRAPH) {
+                        builder.setProviderType(ProviderType.TIME_GRAPH);
+                    }
+                    for (String id : element.getAnalyses()) {
+                        if (modules.containsKey(id)) {
+                            String analysisName = Objects.requireNonNull(modules.get(id)).getName();
+                            builder.setName(analysisName + ": " + label); //$NON-NLS-1$
+                            builder.setDescription(label + " provided by Analysis module: " + analysisName); //$NON-NLS-1$
+                            descriptors.add(builder.build());
+                            break;
+                        }
                     }
                 }
             }
