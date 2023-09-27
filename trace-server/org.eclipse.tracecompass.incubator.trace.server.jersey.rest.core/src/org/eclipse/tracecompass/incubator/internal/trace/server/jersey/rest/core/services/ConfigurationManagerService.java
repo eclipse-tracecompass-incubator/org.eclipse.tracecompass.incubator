@@ -84,7 +84,7 @@ public class ConfigurationManagerService {
     @Path("/types/{typeId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get a single configuration source type defined on the server", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns a single configuration source type", content = @Content(array = @ArraySchema(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationSourceType.class))))
+            @ApiResponse(responseCode = "200", description = "Returns a single configuration source type", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationSourceType.class)))
     })
     public Response getConfigurationType(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId) {
         return Response.status(Status.NOT_IMPLEMENTED).entity("Not Implemented").build(); //$NON-NLS-1$

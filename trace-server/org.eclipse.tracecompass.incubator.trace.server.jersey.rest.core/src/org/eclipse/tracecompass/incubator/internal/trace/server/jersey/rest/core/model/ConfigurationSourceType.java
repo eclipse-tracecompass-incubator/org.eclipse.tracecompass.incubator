@@ -42,10 +42,10 @@ public interface ConfigurationSourceType {
     String getDescription();
 
     /**
-     * @returns a list of query parameter keys to be passed when creating
+     * @return a list of query parameter keys to be passed when creating
      *          configuration instance of this type. Use 'path' key for file
      *          URIs.
      */
-    @Schema(description = "A list of query parameter keys to be passed when creating configuration instance of this type. Use 'path' key for file URIs")
-    List<String> getQueryParameterKeys();
+    @Schema(description = "A list of configuration parameter descriptors to be passed when creating or updating a configuration instance of this type.")
+    List<ConfigurationParameterDescriptor> getParameterDescriptors();
 }
