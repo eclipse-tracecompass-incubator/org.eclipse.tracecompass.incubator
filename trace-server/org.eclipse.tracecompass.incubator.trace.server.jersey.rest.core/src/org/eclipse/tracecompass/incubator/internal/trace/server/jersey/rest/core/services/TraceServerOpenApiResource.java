@@ -46,15 +46,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
         @Server(url = SERVER)
 }, tags = {
         @Tag(name = ANN, description = "Retrieve annotations for different outputs."),
-        @Tag(name = CFG, description = "How to manage configuration source types and configurations."),
-        @Tag(name = DIA, description = "Refer to the server's status."),
-        @Tag(name = DT,  description = "Learn about querying data tree models (e.g. for statistics)."),
-        @Tag(name = EXP, description = "How to manage experiments on your server; an experiment represents a collection of traces, which can produce output models."),
+        @Tag(name = CFG, description = "Manage configuration source types and configurations."),
+        @Tag(name = DIA, description = "Retrieve the server's status."),
+        @Tag(name = DT,  description = "Query data tree models (e.g. for statistics)."),
+        @Tag(name = EXP, description = "Manage experiments on your server; an experiment represents a collection of traces, which can produce output models."),
         @Tag(name = STY, description = "Retrieve styles for different outputs."),
-        @Tag(name = TGR, description = "Learn about querying Time Graph models."),
-        @Tag(name = TRA, description = "How to manage physical traces on your server."),
-        @Tag(name = VTB, description = "Learn about querying virtual table models (e.g. Events Table)."),
-        @Tag(name = X_Y, description = "Learn about querying XY models.")
+        @Tag(name = TGR, description = "Query Time Graph models."),
+        @Tag(name = TRA, description = "Manage physical traces on your server."),
+        @Tag(name = VTB, description = "Query virtual table models (e.g. Events Table)."),
+        @Tag(name = X_Y, description = "Query XY chart models.")
 })
 public class TraceServerOpenApiResource extends OpenApiResource {
 }
