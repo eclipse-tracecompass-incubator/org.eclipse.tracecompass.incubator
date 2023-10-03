@@ -203,6 +203,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
         @Tag(name = ANN, description = "Retrieve annotations for different outputs."),
         @Tag(name = CFG, description = "How to manage configuration source types and configurations."),
         @Tag(name = DIA, description = "Refer to the server's status."),
+        @Tag(name = DT,  description = "Learn about querying data tree models (e.g. for statistics)."),
         @Tag(name = EXP, description = "How to manage experiments on your server; an experiment represents a collection of traces, which can produce output models."),
         @Tag(name = STY, description = "Retrieve styles for different outputs."),
         @Tag(name = TGR, description = "Learn about querying Time Graph models."),
