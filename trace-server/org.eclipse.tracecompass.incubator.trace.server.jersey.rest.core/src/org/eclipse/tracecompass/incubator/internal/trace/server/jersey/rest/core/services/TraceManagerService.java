@@ -87,8 +87,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = EndpointConstants.TRA)
 public class TraceManagerService {
 
-    private static final boolean IS_WINDOWS = System.getProperty("os.name").contains("Windows"); //$NON-NLS-1$ //$NON-NLS-2$
-
     private static final Map<UUID, IResource> TRACES = Collections.synchronizedMap(initTraces());
 
     private static final String TRACES_FOLDER = "Traces"; //$NON-NLS-1$
@@ -169,16 +167,6 @@ public class TraceManagerService {
         }
         String name = (String) parameters.get("name"); //$NON-NLS-1$
         String path = (String) parameters.get("uri"); //$NON-NLS-1$
-        if (IS_WINDOWS && path != null && path.startsWith("/")) { //$NON-NLS-1$
-            /*
-             * Workaround for path created by the theia-trace-extension, see
-             * https://github.com/theia-ide/theia-trace-extension/issues/545.
-             * This is caused by
-             * https://github.com/eclipse-theia/theia/issues/8098. Once issue
-             * #8098 is resolved this workaround can be removed.
-             */
-             path = path.substring(1);
-        }
         Object typeIDObject = parameters.get("typeID"); //$NON-NLS-1$
         String typeID = typeIDObject != null ? (String) typeIDObject : ""; //$NON-NLS-1$
 
