@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2022 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -9,11 +9,9 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.opentracing.core;
+package org.eclipse.tracecompass.incubator.internal.executioncomparision.core;
 
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
-import org.eclipse.tracecompass.incubator.concurrentstatesystem.core.SpanCustomValue;
-import org.eclipse.tracecompass.internal.provisional.statesystem.core.statevalue.CustomStateValue;
 
 /**
  * Activator
@@ -21,7 +19,7 @@ import org.eclipse.tracecompass.internal.provisional.statesystem.core.statevalue
 public class Activator extends TraceCompassActivator {
 
     /** The plug-in ID */
-    public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.opentracing.core"; //$NON-NLS-1$
+    public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.executioncomparision.core"; //$NON-NLS-1$
 
     /**
      * The constructor
@@ -41,7 +39,6 @@ public class Activator extends TraceCompassActivator {
 
     @Override
     protected void startActions() {
-        CustomStateValue.registerCustomFactory(SpanCustomValue.CUSTOM_TYPE_ID, SpanCustomValue.FACTORY);
     }
 
     @Override

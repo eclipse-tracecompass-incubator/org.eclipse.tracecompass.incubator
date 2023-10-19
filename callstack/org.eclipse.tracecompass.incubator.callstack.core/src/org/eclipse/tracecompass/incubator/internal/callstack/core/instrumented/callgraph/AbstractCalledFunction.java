@@ -11,7 +11,9 @@
 
 package org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -19,8 +21,10 @@ import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.SymbolAspect;
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.ICalledFunction;
+import org.eclipse.tracecompass.internal.tmf.core.timestamp.TmfNanoTimestamp;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.SegmentComparators;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 
 import com.google.common.collect.Ordering;
 
@@ -31,7 +35,7 @@ import com.google.common.collect.Ordering;
  * @author Matthew Khouzam
  * @author Sonia Farrah
  */
-abstract class AbstractCalledFunction implements ICalledFunction {
+abstract public class AbstractCalledFunction implements ICalledFunction {
 
     static final Comparator<ISegment> COMPARATOR;
     static {
@@ -54,6 +58,8 @@ abstract class AbstractCalledFunction implements ICalledFunction {
     protected long fSelfTime = 0;
     private final int fProcessId;
     private final int fThreadId;
+    private List<TmfTimeRange> fChildrenIntervals;
+
 
     private final transient IHostModel fModel;
     private transient long fCpuTime = Long.MIN_VALUE;
@@ -73,6 +79,8 @@ abstract class AbstractCalledFunction implements ICalledFunction {
             ((AbstractCalledFunction) parent).addChild(this);
         }
         fModel = model;
+        fChildrenIntervals = new ArrayList<TmfTimeRange>();
+
     }
 
     @Override
@@ -103,11 +111,19 @@ abstract class AbstractCalledFunction implements ICalledFunction {
      * @param child
      *            The child to add to the segment's children
      */
-    protected void addChild(ICalledFunction child) {
+    public void addChild(ICalledFunction child) {
         if (child.getParent() != this) {
             throw new IllegalArgumentException("Child parent not the same as child being added to."); //$NON-NLS-1$
         }
-        substractChildDuration(child.getEnd() - child.getStart());
+        //substractChildDuration(child.getEnd() - child.getStart());
+        TmfNanoTimestamp start = new TmfNanoTimestamp(child.getEnd() - child.getLength());
+        TmfNanoTimestamp end = new TmfNanoTimestamp(child.getEnd());
+
+        TmfTimeRange childRange = new TmfTimeRange(start,end);
+        long intersection = getChildIntersection(childRange);
+        substractChildDuration(child.getEnd() - child.getStart()-intersection);
+        fChildrenIntervals.add(childRange);
+
     }
 
     /**
@@ -180,6 +196,16 @@ abstract class AbstractCalledFunction implements ICalledFunction {
                 fStart == other.fStart &&
                 Objects.equals(fParent, other.getParent()) &&
                 Objects.equals(getSymbol(), other.getSymbol()));
+    }
+    private long getChildIntersection(TmfTimeRange chlInt) {
+        long intersection = 0;
+        for (TmfTimeRange childInterval:fChildrenIntervals ) {
+            TmfTimeRange intersect = chlInt.getIntersection(childInterval);
+            if (intersect!=null) {
+                intersection += (intersect.getEndTime().getValue())-(intersect.getStartTime().getValue());
+            }
+        }
+        return intersection;
     }
 
 }
