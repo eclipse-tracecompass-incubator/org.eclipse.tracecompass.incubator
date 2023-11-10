@@ -173,7 +173,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
     }
 
     @Override
-    protected @Nullable TimeGraphModel getRowModel(@NonNull ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
+    protected @Nullable TimeGraphModel getRowModel(ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
         TreeMultimap<Integer, ITmfStateInterval> intervals = TreeMultimap.create(Comparator.naturalOrder(),
                 Comparator.comparing(ITmfStateInterval::getStartTime));
         SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(parameters);
@@ -217,7 +217,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
     }
 
     @Override
-    protected @NonNull TmfTreeModel<@NonNull TimeGraphEntryModel> getTree(@NonNull ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
+    protected @NonNull TmfTreeModel<@NonNull TimeGraphEntryModel> getTree(ITmfStateSystem ss, Map<String, Object> parameters, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
         Builder<@NonNull TimeGraphEntryModel> builder = new Builder<>();
         long rootId = getId(ITmfStateSystem.ROOT_ATTRIBUTE);
         builder.add(new TimeGraphEntryModel(rootId, -1, Collections.singletonList(String.valueOf(getTrace().getName())), ss.getStartTime(), ss.getCurrentEndTime()));
@@ -237,25 +237,19 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
         } catch (AttributeNotFoundException e) {
             logsQuarks = new ArrayList<>();
         }
-
-        int openTracingSpansQuark;
-        try {
-            openTracingSpansQuark = ss.getQuarkRelative(quark, SpanLifeStateProvider.OPEN_TRACING_ATTRIBUTE);
-        } catch (AttributeNotFoundException e) {
-            return;
-        }
-
         long traceQuarkId = getId(quark);
-        builder.add(new TimeGraphEntryModel(traceQuarkId, parentId, Collections.singletonList(ss.getAttributeName(quark)), ss.getStartTime(), ss.getCurrentEndTime()));
 
+        int openTracingSpansQuark = ss.optQuarkRelative(quark, SpanLifeStateProvider.OPEN_TRACING_ATTRIBUTE);
+        builder.add(new TimeGraphEntryModel(traceQuarkId, parentId, Collections.singletonList(ss.getAttributeName(quark)), ss.getStartTime(), ss.getCurrentEndTime()));
         int ustSpansQuark;
         try {
             ustSpansQuark = ss.getQuarkRelative(quark, SpanLifeStateProvider.UST_ATTRIBUTE);
+            logsQuarks = ss.getSubAttributes(ustSpansQuark, false);
         } catch (AttributeNotFoundException e) {
             addChildren(ss, builder, openTracingSpansQuark, traceQuarkId, logsQuarks);
             return;
         }
-        addUstChildren(ss, builder, openTracingSpansQuark, ustSpansQuark, traceQuarkId, logsQuarks);
+        addUstChildren(ss, builder, ustSpansQuark, traceQuarkId, logsQuarks);
     }
 
     private void addChildren(ITmfStateSystem ss, Builder<@NonNull TimeGraphEntryModel> builder, int quark, long parentId, List<Integer> logsQuarks) {
@@ -280,8 +274,8 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
         }
     }
 
-    private void addUstChildren(ITmfStateSystem ss, Builder<@NonNull TimeGraphEntryModel> builder, int openTracingQuark, int ustQuark, long parentId, List<Integer> logsQuarks) {
-        for (Integer child : ss.getSubAttributes(openTracingQuark, false)) {
+    private void addUstChildren(ITmfStateSystem ss, Builder<@NonNull TimeGraphEntryModel> builder, int ustQuark, long parentId, List<Integer> logsQuarks) {
+        for (Integer child : ss.getSubAttributes(ustQuark, false)) {
             String childName = ss.getAttributeName(child);
 
             List<LogEvent> logs = new ArrayList<>();
@@ -293,6 +287,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
                     }
                 }
             } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
+                // do nothing. It will fail later
             }
 
             String spanId = getSpanId(childName);
@@ -305,7 +300,6 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
             }
             long childId = getId(ustSpan);
             builder.add(new SpanLifeEntryModel(childId, parentId, Collections.singletonList(getSpanName(childName)), ss.getStartTime(), ss.getCurrentEndTime(), logs, getErrorTag(childName), getProcessName(childName)));
-            addUstChildren(ss, builder, child, ustQuark, childId, logsQuarks);
         }
     }
 
@@ -327,12 +321,21 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
 
     private static String getSpanId(String attributeName) {
         String[] attributeInfo = attributeName.split("/"); //$NON-NLS-1$
-        return attributeInfo[attributeInfo.length - 3];
+        int length = attributeInfo.length;
+        if (length == 1) {
+            return attributeInfo[0];
+        }
+        return attributeInfo[length - 3];
     }
 
     private static Boolean getErrorTag(String attributeName) {
         String[] attributeInfo = attributeName.split("/"); //$NON-NLS-1$
-        return attributeInfo[attributeInfo.length - 2].equals("true"); //$NON-NLS-1$
+        int length = attributeInfo.length;
+        String attribute = attributeInfo[0];
+        if (length >= 3) {
+            attribute = attributeInfo[length - 2];
+        }
+        return attribute.equals("true");//$NON-NLS-1$
     }
 
     private static String getProcessName(String attributeName) {

@@ -45,6 +45,7 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
     public static final String UST_ATTRIBUTE = "ustSpans"; //$NON-NLS-1$
 
     private final Map<String, Integer> fSpanMap;
+    private final Map<String, Integer> fSpanQuarkMap;
 
     private final Map<String, BiConsumer<ITmfEvent, ITmfStateSystemBuilder>> fHandlers;
 
@@ -58,6 +59,7 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
         super(trace, SpanLifeAnalysis.ID);
         fSpanMap = new HashMap<>();
         fHandlers = new HashMap<>();
+        fSpanQuarkMap = new HashMap<>();
         fHandlers.put("OpenTracingSpan", this::handleSpan); //$NON-NLS-1$
         fHandlers.put("jaeger_ust:start_span", this::handleStart); //$NON-NLS-1$
         fHandlers.put("jaeger_ust:end_span", this::handleEnd); //$NON-NLS-1$
@@ -152,7 +154,7 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
         String spanId = event.getContent().getFieldValue(String.class, "span_id"); //$NON-NLS-1$
         spanId = Long.toHexString(Long.decode(spanId));
         int spanQuark = ss.getQuarkRelativeAndAdd(ustSpansQuark, spanId);
-
+        fSpanQuarkMap.put(spanId, spanQuark);
         long timestamp = event.getTimestamp().toNanos();
         String name = event.getContent().getFieldValue(String.class, "op_name"); //$NON-NLS-1$
         ss.modifyAttribute(timestamp, name, spanQuark);
@@ -160,14 +162,21 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
 
     private void handleEnd(ITmfEvent event, ITmfStateSystemBuilder ss) {
         String traceId = event.getContent().getFieldValue(String.class, "trace_id_low"); //$NON-NLS-1$
-        traceId = Long.toHexString(Long.decode(traceId));
-        int traceQuark = ss.getQuarkAbsoluteAndAdd(traceId);
-
-        int ustSpansQuark = ss.getQuarkRelativeAndAdd(traceQuark, UST_ATTRIBUTE);
-
         String spanId = event.getContent().getFieldValue(String.class, "span_id"); //$NON-NLS-1$
+        if (spanId == null) {
+            return;
+        }
         spanId = Long.toHexString(Long.decode(spanId));
-        int spanQuark = ss.getQuarkRelativeAndAdd(ustSpansQuark, spanId);
+        Integer spanQuark = fSpanQuarkMap.remove(spanId);
+        if (spanQuark == null) {
+            if (traceId == null) {
+               return;
+            }
+            traceId = Long.toHexString(Long.decode(traceId));
+            int traceQuark = ss.getQuarkAbsoluteAndAdd(traceId);
+            int ustSpansQuark = ss.getQuarkRelativeAndAdd(traceQuark, UST_ATTRIBUTE);
+            spanQuark = ss.getQuarkRelativeAndAdd(ustSpansQuark, spanId);
+        }
 
         long timestamp = event.getTimestamp().toNanos();
         ss.modifyAttribute(timestamp, (Object) null, spanQuark);
