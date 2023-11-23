@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -110,6 +111,7 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
      * Provider ID.
      */
     public static final String ID = "org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.flamechart"; //$NON-NLS-1$
+    private static final Pattern REGEX = Pattern.compile("[0-9a-fA-F]+"); //$NON-NLS-1$
     private static final AtomicLong ENTRY_ID = new AtomicLong();
     /**
      * Logger for Abstract Tree Data Providers.
@@ -201,10 +203,13 @@ public class FlameChartDataProvider extends AbstractTmfTraceDataProvider impleme
                     String name = null;
                     if (nameValue instanceof String) {
                         name = (String) nameValue;
-                        try {
-                            address = Long.parseLong(name, 16);
-                        } catch (NumberFormatException e) {
-                            // leave name as null
+
+                        if (REGEX.matcher(name).matches()) {
+                            try {
+                                address = Long.parseLong(name, 16);
+                            } catch (NumberFormatException e) {
+                                // leave address as null
+                            }
                         }
                     } else if (nameValue instanceof Integer) {
                         Integer intValue = (Integer) nameValue;
