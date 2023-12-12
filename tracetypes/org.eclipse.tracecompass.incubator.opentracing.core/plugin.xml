@@ -40,6 +40,18 @@
                class="org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.OpenTracingExperiment">
          </tracetype>
       </module>
+            <module
+            analysis_module="org.eclipse.tracecompass.incubator.opentracing.core.analysis.callstack.OpenTracingCallstackAnalysis"
+            automatic="false"
+            icon="icons/callstack_view.gif"
+            id="org.eclipse.tracecompass.incubator.opentracing.analysis.callstack"
+            name="Open Tracing Callstack">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.opentracing.core.trace.OpenTracingTrace">
+         </tracetype>
+      </module>
+      
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
