@@ -244,7 +244,9 @@ public class BaseDataProviderTimeGraphMultiViewer extends AbstractTimeGraphMulti
                     // Find missing parents
                     for (TimeGraphEntry orphanedEntry : orphaned) {
                         TimeGraphEntry parent = fScopedEntries.get(scope, orphanedEntry.getEntryModel().getParentId());
-                        parent.addChild(orphanedEntry);
+                        if (parent != null) {
+                            parent.addChild(orphanedEntry);
+                        }
                     }
                 }
 

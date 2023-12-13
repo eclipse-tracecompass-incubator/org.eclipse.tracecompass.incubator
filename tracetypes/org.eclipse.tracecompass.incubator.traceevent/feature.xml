@@ -36,7 +36,7 @@
       <import plugin="com.google.gson"/>
       <import plugin="org.apache.commons.lang3"/>
       <import plugin="org.eclipse.tracecompass.datastore.core"/>
-      <import plugin="org.json"/>
+      <import plugin="json"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.tracecompass.tmf.ui"/>
       <import plugin="org.eclipse.swt"/>

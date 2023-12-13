@@ -32,8 +32,8 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.tracecompass.tmf.ui"/>
       <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="org.apache.commons.compress"/>
-      <import plugin="javax.ws.rs"/>
+      <import plugin="org.apache.commons.commons-compress"/>
+      <import plugin="jakarta.ws.rs-api"/>
       <import plugin="org.eclipse.help"/>
    </requires>
 

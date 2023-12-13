@@ -62,6 +62,9 @@
     <!-- Disable GTK3 because it's not quite usable yet and it can make the tests hang (bug in IcedTea http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=1736) -->
     <SWT_GTK3>0</SWT_GTK3>
 
+    <slf4j-bundle>slf4j.simple</slf4j-bundle>
+    <slf4j-version>2.0.9</slf4j-version>
+
     <!-- Sonar rule configuration -->
     <sonar-version>3.9.1.2184</sonar-version>
     <jacoco-version>0.8.10</jacoco-version>
@@ -245,6 +248,18 @@
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>tycho-surefire-plugin</artifactId>
             <configuration>
+              <bundleStartLevel>
+                <bundle>
+                  <id>org.apache.aries.spifly.dynamic.bundle</id>
+                  <level>2</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>${slf4j-bundle}</id>
+                  <level>2</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+              </bundleStartLevel>
               <useUIHarness>true</useUIHarness>
               <useUIThread>false</useUIThread>
               <environmentVariables>
@@ -261,8 +276,8 @@
                 <extraRequirements>
                   <requirement>
                     <type>eclipse-plugin</type>
-                    <id>org.slf4j.binding.simple</id>
-                    <versionRange>1.7.30</versionRange>
+                    <id>${slf4j-bundle}</id>
+                    <versionRange>${slf4j-version}</versionRange>
                   </requirement>
                   <requirement>
                     <type>eclipse-plugin</type>

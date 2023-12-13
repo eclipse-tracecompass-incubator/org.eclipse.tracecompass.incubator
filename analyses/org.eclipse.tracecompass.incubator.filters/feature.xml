@@ -28,7 +28,7 @@
       <import plugin="com.google.gson"/>
       <import plugin="com.google.guava"/>
       <import plugin="org.antlr.runtime"/>
-      <import plugin="org.apache.commons.compress"/>
+      <import plugin="org.apache.commons.commons-compress"/>
       <import plugin="org.eclipse.tracecompass.tmf.core"/>
       <import plugin="org.eclipse.tracecompass.tmf.filter.parser"/>
       <import plugin="org.eclipse.ui"/>

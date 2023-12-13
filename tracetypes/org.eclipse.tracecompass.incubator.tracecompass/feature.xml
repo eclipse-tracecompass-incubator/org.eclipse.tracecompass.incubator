@@ -33,7 +33,7 @@
       <import plugin="org.eclipse.tracecompass.analysis.timing.core"/>
       <import plugin="org.eclipse.tracecompass.tmf.analysis.xml.core"/>
       <import plugin="org.eclipse.tracecompass.incubator.traceevent.core"/>
-      <import plugin="org.json"/>
+      <import plugin="json"/>
       <import plugin="com.google.guava"/>
       <import plugin="org.apache.commons.lang3"/>
    </requires>

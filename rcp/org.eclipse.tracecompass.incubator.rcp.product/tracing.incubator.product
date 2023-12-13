@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Trace Compass (Incubator)" uid="org.eclipse.tracecompass.incubator.rcp" id="org.eclipse.tracecompass.incubator.rcp.branding.product" application="org.eclipse.tracecompass.rcp.ui.application" version="0.8.0.qualifier" useFeatures="true" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="Trace Compass (Incubator)" uid="org.eclipse.tracecompass.incubator.rcp" id="org.eclipse.tracecompass.incubator.rcp.branding.product" application="org.eclipse.tracecompass.rcp.ui.application" version="0.8.0.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="/org.eclipse.tracecompass.incubator.rcp.branding/icons/tc_about.png"/>
@@ -161,6 +161,7 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <feature id="org.eclipse.tracecompass.incubator.uftrace"/>
       <feature id="org.eclipse.tracecompass.incubator.tmf.ui.multiview"/>
       <feature id="org.eclipse.ecf.filetransfer.httpclient5.feature"/>
+      <feature id="org.eclipse.ecf.filetransfer.httpclientjava.feature"/>
       <feature id="org.eclipse.tracecompass.jsontrace" installMode="root"/>
       <feature id="org.eclipse.tracecompass.rcp" installMode="root"/>
       <feature id="org.eclipse.tracecompass.incubator.rcp" installMode="root"/>

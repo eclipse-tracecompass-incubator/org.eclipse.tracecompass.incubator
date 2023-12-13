@@ -75,7 +75,7 @@
    <bundle id="org.eclipse.tracecompass.incubator.tmf.ui.multiview.ui" version="0.0.0">
       <category name="analyses"/>
    </bundle>
-   <bundle id="javax.ws.rs"/>
+   <bundle id="jakarta.ws.rs-api"/>
    <bundle id="org.eclipse.lsp4j"/>
    <bundle id="org.eclipse.lsp4j.jsonrpc"/>
    <bundle id="org.eclipse.xtext.xbase.lib"/>
@@ -86,7 +86,6 @@
    <bundle id="org.eclipse.wst.jsdt.debug.core"/>
    <bundle id="org.eclipse.wst.jsdt.debug.ui"/>
    <bundle id="com.google.javascript"/>
-   <bundle id="com.google.protobuf"/>
    <bundle id="org.eclipse.wst.jsdt.manipulation"/>
    <bundle id="org.eclipse.nebula.widgets.opal.commons"/>
    <bundle id="org.eclipse.nebula.widgets.opal.duallist"/>
