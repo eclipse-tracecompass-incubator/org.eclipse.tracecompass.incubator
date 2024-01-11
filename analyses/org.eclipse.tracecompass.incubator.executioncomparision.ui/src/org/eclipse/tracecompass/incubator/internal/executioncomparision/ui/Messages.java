@@ -53,15 +53,6 @@ public class Messages extends NLS {
     public static String AbstractMultipleDensityView_title;
 
 
-    /**
-     * Label for the count axis of the density chart.
-     */
-    public static String ExecutionComparisionDurationViewer_TimeAxisLabel;
-
-    /**
-     * Label for the time axis of the density chart.
-     */
-    public static String ExecutionComparisionSelfTimeViewer_TimeAxisLabel;
 
     /** The action name for grouping */
     public static String FlameGraphView_GroupByName;
