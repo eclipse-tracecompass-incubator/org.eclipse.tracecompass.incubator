@@ -106,13 +106,6 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
         try (ScopeLog sl = new ScopeLog(LOGGER, Level.CONFIG, "DifferentialSequenceCGA::refresh()")) { //$NON-NLS-1$
             Collection<WeightedTree<ICallStackSymbol>> originalTree = new ArrayList<>();
             Collection<WeightedTree<ICallStackSymbol>> diffTree = new ArrayList<>();
-            /*
-             * if (fEndA == null || fStartA == null) { fEndA =
-             * TmfTimestamp.BIG_CRUNCH; } if (fStartA == null) { fStartA =
-             * TmfTimestamp.BIG_BANG; } if (fEndB == null) { fEndB =
-             * TmfTimestamp.BIG_CRUNCH; } if (fStartB == null) { fStartB =
-             * TmfTimestamp.BIG_BANG; }
-             */
             WeightedTreeSet<ICallStackSymbol, Object> callGraphA = mergeCallGraph(fStartA, fEndA, fTraceListA);
             Collection<@NonNull ?> processes = callGraphA.getTreesForNamed(MERGE);
             for (Object process : processes) {
@@ -126,11 +119,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
             }
 
             Collection<DifferentialWeightedTree<ICallStackSymbol>> trees;
-            if (diffTree.isEmpty()) {
-                trees = ParametricWeightedTreeUtils.diffTrees(diffTree, originalTree, fStatistic);
-            } else {
                 trees = ParametricWeightedTreeUtils.diffTrees(originalTree, diffTree, fStatistic);
-            }
 
             IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, AggregatedCallSite> instrumentedCallStackAnalysis = Iterables.get(fTraceCallGraphRegistry.values(), 0);
             setDifferentialCallGraphProvider(new DifferentialCallGraphProvider(instrumentedCallStackAnalysis, trees));
@@ -192,7 +181,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
      *            the monitor, can be null
      * @return the differential weighted provider or null
      */
-    public @Nullable DifferentialWeightedTreeProvider<?> getDiffProvider(@Nullable IProgressMonitor monitor) {
+   public @Nullable DifferentialWeightedTreeProvider<?> getDiffProvider(@Nullable IProgressMonitor monitor) {
         if (fTraceCallGraphRegistry.isEmpty()) {
             InstrumentedCallStackAnalysis callGraphModule;
             ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
@@ -209,8 +198,9 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
                     }
                 }
             }
-            refreshDiffCG(monitor);
         }
+
+        refreshDiffCG(monitor);
         return getDifferentialCallGraphProvider();
 
     }
@@ -304,23 +294,21 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
         // tuning fTraceList
         List<String> traceListA = signal.getTraceListA();
         if (traceListA != null) {
-            for (String name : traceListA) {
-                if (fTraceListA.contains(name)) {
-                    fTraceListA.remove(name);
-                } else {
-                    fTraceListA.add(name);
-                }
+            fTraceListA.clear();
+            for (String name : signal.getTraceListA()) {
+                fTraceListA.add(name);
+
             }
+
         }
         List<String> traceListB = signal.getTraceListB();
         if (traceListB != null) {
-            for (String name : traceListB) {
-                if (fTraceListB.contains(name)) {
-                    fTraceListB.remove(name);
-                } else {
-                    fTraceListB.add(name);
-                }
+            fTraceListB.clear();
+            for (String name : signal.getTraceListB()) {
+                fTraceListB.add(name);
+
             }
+
         }
         if (!fTraceCallGraphRegistry.isEmpty()) {
             try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "MakeDiffCallGraph")) { //$NON-NLS-1$
@@ -370,8 +358,9 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
      * @param differentialCallGraphProvider
      *            the differentialCallGraphProvider to set
      */
-    private void setDifferentialCallGraphProvider(@Nullable DifferentialCallGraphProvider differentialCallGraphProvider) {
+    private void setDifferentialCallGraphProvider(DifferentialCallGraphProvider differentialCallGraphProvider) {
         fDifferentialCallGraphProvider = Objects.requireNonNull(differentialCallGraphProvider);
+
     }
 
 }
