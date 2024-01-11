@@ -16,10 +16,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
+import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.Activator;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfContentFieldAspect;
+import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
@@ -29,11 +33,18 @@ import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
-public class ThreadXTrace extends TmfTrace {
+public class ThreadXTrace extends TmfTrace implements IKernelTrace {
 
     public static final String ID = "org.eclipse.tracecompass.incubator.tracex.core.trace"; //$NON-NLS-1$
 
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
+    private static final TmfCpuAspect NULL_CORE_ASPECT = new TmfCpuAspect() {
+
+        @Override
+        public @Nullable Integer resolve(@NonNull ITmfEvent event) {
+            return 0;
+        }
+    };
 
     private ThreadXControlHeader fHeader = null;
     private List<ThreadXObjectRegistryEntry> fTraceObjects = new ArrayList<>();
@@ -92,11 +103,12 @@ public class ThreadXTrace extends TmfTrace {
     }
 
     @Override
-    public @NonNull Iterable<ITmfEventAspect<?>> getEventAspects() {
+    public Iterable<ITmfEventAspect<?>> getEventAspects() {
         List<ITmfEventAspect<?>> aspects = new ArrayList<>();
         for (ITmfEventAspect<?> aspect : super.getEventAspects()) {
             aspects.add(aspect);
         }
+        aspects.add(NULL_CORE_ASPECT);
         aspects.addAll(fAspects);
         return aspects;
     }
@@ -199,6 +211,11 @@ public class ThreadXTrace extends TmfTrace {
             Activator.getInstance().logError("Cannot read trace.", e); //$NON-NLS-1$
         }
         return null;
+    }
+
+    @Override
+    public @NonNull IKernelAnalysisEventLayout getKernelEventLayout() {
+        return ThreadXKernelLayout.getInstance();
     }
 
 }
