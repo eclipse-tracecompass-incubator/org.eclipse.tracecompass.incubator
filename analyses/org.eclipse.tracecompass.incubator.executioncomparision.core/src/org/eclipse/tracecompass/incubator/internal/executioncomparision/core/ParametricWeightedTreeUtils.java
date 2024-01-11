@@ -23,19 +23,11 @@ import org.eclipse.tracecompass.analysis.profiling.core.callgraph.ICallGraphProv
 import org.eclipse.tracecompass.analysis.profiling.core.tree.ITree;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
-//import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbol;
-//import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
-//import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
-//import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
-//import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
-//import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTree;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeSet;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.WeightedTreeUtils;
 import org.eclipse.tracecompass.internal.analysis.profiling.core.callgraph2.AggregatedCalledFunction;
-//import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
-//import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph.AggregatedCalledFunction;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
 
 import com.google.common.collect.ImmutableList;
