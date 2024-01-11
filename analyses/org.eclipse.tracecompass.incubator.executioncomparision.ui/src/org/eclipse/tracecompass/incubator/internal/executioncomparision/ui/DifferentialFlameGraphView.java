@@ -746,18 +746,7 @@ public class DifferentialFlameGraphView extends TmfView {
         }
         TmfModelResponse<TimeGraphModel> response = dataProvider.fetchRowModel(parameters, monitor);
         TimeGraphModel model = response.getModel();
-        // if (model == null) {
-        // Activator.getDefault().getLog().warn("The base execution's model is
-        // null"); //$NON-NLS-1$
-        // return;
-        // }
         if ((model != null) && (fEntries.get(dataProvider)) != null) {
-            System.out.println(
-                    "zommEntries: Current Thread Name: "
-                            + Thread.currentThread().getName());
-
-            // zoomEntries(Objects.requireNonNull(fEntries.get(dataProvider)),
-            // model.getRows());
             zoomEntries(fEntries.get(dataProvider), model.getRows(), response.getStatus() == ITmfResponse.Status.COMPLETED, sampling);
 
         }
