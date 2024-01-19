@@ -38,8 +38,10 @@ Once the Trace Compass environment set, import the projects from this repository
 
 ## Compiling manually
 
-The Maven project build requires version 3.3 or later. It can be downloaded from
+The Maven project build requires version 3.9 or later. It can be downloaded from
 <http://maven.apache.org> or from the package management system of your distro.
+
+It also requires Java version 11 or later.
 
 To build the project manually using Maven, simply run the following command from
 the top-level directory:
@@ -116,7 +118,7 @@ You can open the kernel trace (or any mounted one) inside the container using th
 
     curl -X POST 'http://localhost:8080/tsp/api/traces' --header 'Content-Type: application/json' --data-raw '{ "parameters": { "uri": "/traces/kernel" } }'
 
-You can create an experiment with the kernel trace (or any opened trace) using the following command:
+You can create an experiment with the kernel trace (or any opened trace) using the command below. Replace the UUID with the UUID returned by the command above:
 
     curl -X POST 'http://localhost:8080/tsp/api/experiments' --header 'Content-Type: application/json' --data-raw '{ "parameters": { "name": "Experiment Name", "traces": ["d49d04f5-9db5-3773-ace4-1594b87db661"] } }'
 
