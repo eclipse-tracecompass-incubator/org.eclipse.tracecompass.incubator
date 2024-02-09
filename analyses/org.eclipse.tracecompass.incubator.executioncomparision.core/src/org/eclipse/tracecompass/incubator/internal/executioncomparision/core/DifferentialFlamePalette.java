@@ -86,7 +86,7 @@ public final class DifferentialFlamePalette implements IDataPalette {
                 StyleProperties.BACKGROUND_COLOR, WHITE_COLOR,
                 StyleProperties.OPACITY, 1,
                 StyleProperties.BORDER_STYLE, StyleProperties.BorderStyle.SOLID)));
-        // Add Blue tenses for Shorter duration
+        // Add Blue color palette for Shorter duration
         for (i = MIN_HUE; i <= MAX_HUE; i++) {
             j = (i-50)>0 ? i-50:0;
             String blueKey = generateBlue(i);
@@ -96,7 +96,7 @@ public final class DifferentialFlamePalette implements IDataPalette {
                     StyleProperties.OPACITY, 1,
                     StyleProperties.BORDER_STYLE, StyleProperties.BorderStyle.SOLID)));
         }
-        // Add Red tenses for Longer duration
+        // Add Red color palette for Longer duration
         for (i = MIN_HUE; i <= MAX_HUE; i++) {
             String redKey = generateRed(i);
             builder.put(redKey, new OutputElementStyle(null, ImmutableMap.of(
