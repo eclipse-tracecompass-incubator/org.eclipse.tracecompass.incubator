@@ -38,11 +38,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -52,17 +48,14 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.tracecompass.analysis.profiling.core.callgraph.ICallGraphProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.callgraph.ICallGraphProvider2;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.ScopeLog;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeProvider;
-import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.DataProviderActionUtils;
-import org.eclipse.tracecompass.incubator.internal.executioncomparision.core.DifferentialSeqCallGraphAnalysis;
-import org.eclipse.tracecompass.internal.analysis.profiling.core.flamegraph.DataProviderUtils;
 import org.eclipse.tracecompass.internal.analysis.profiling.core.flamegraph.FlameGraphDataProvider;
+import org.eclipse.tracecompass.incubator.internal.executioncomparision.core.DifferentialSeqCallGraphAnalysis;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TmfFilterAppliedSignal;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TraceCompassFilter;
 import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
@@ -106,7 +99,6 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry.Sa
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.TimeFormat;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 
@@ -116,7 +108,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 
 /**
- * the flame graph part of the differential flame graph.
+ * the differential flame graph used in execution comparison view. Its mostly based on FlameGraphView
  *
  * @author Fateme Faraji Daneshgar
  *
@@ -143,7 +135,6 @@ public class DifferentialFlameGraphView extends TmfView {
 
     private @Nullable ITmfTrace fTrace = null;
 
-    private final MenuManager fEventMenuManager = new MenuManager();
     /**
      * A plain old semaphore is used since different threads will be competing
      * for the same resource.
@@ -210,7 +201,6 @@ public class DifferentialFlameGraphView extends TmfView {
         }
         TmfSignalManager.register(this);
         getSite().setSelectionProvider(getTimeGraphViewer().getSelectionProvider());
-        createTimeEventContextMenu();
         getTimeGraphViewer().getTimeGraphControl().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(@Nullable MouseEvent e) {
@@ -319,13 +309,13 @@ public class DifferentialFlameGraphView extends TmfView {
      *
      * @return The call graph provider modules
      */
-    protected Iterable<ICallGraphProvider> getCallgraphModules() {
+    protected Iterable<ICallGraphProvider2> getCallgraphModules() {
         ITmfTrace trace = fTrace;
         if (trace == null) {
             return Collections.emptyList();
         }
         String analysisId = NonNullUtils.nullToEmptyString(getViewSite().getSecondaryId());
-        Iterable<ICallGraphProvider> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, ICallGraphProvider.class);
+        Iterable<ICallGraphProvider2> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, ICallGraphProvider2.class);
         return StreamSupport.stream(modules.spliterator(), false)
                 .filter(m -> {
                     if (m instanceof IAnalysisModule) {
@@ -464,6 +454,9 @@ public class DifferentialFlameGraphView extends TmfView {
                 }
 
                 if (monitor.isCanceled()) {
+                    if (trace==null) {
+                        return;
+                    }
                     resetEntries(trace);
                     return;
                 }
@@ -733,7 +726,10 @@ public class DifferentialFlameGraphView extends TmfView {
         List<Long> times = StateSystemUtils.getTimes(start, end, resolution);
         Sampling sampling = new Sampling(start, end, resolution);
 
+
         Multimap<ITimeGraphDataProvider<? extends TimeGraphEntryModel>, Long> providersToModelIds = filterGroupEntries(normalEntries, zoomStartTime, zoomEndTime);
+        if (providersToModelIds!=null) {
+
         SubMonitor subMonitor = SubMonitor.convert(monitor, getClass().getSimpleName() + "#zoomEntries", providersToModelIds.size()); //$NON-NLS-1$
 
         Entry<ITimeGraphDataProvider<? extends TimeGraphEntryModel>, Collection<Long>> entry = providersToModelIds.asMap().entrySet().iterator().next();
@@ -746,16 +742,14 @@ public class DifferentialFlameGraphView extends TmfView {
         }
         TmfModelResponse<TimeGraphModel> response = dataProvider.fetchRowModel(parameters, monitor);
         TimeGraphModel model = response.getModel();
-        if ((model != null) && (fEntries.get(dataProvider)) != null) {
-            System.out.println(
-                    "zommEntries: Current Thread Name: "
-                            + Thread.currentThread().getName());
-
-            zoomEntries(fEntries.get(dataProvider), model.getRows(), response.getStatus() == ITmfResponse.Status.COMPLETED, sampling);
+        Map<Long,TimeGraphEntry> entries = fEntries.get(dataProvider);
+        if ((model != null) && (entries) != null) {
+            zoomEntries(entries, model.getRows(), response.getStatus() == ITmfResponse.Status.COMPLETED, sampling);
 
         }
         subMonitor.worked(1);
         redraw();
+        }
     }
 
     /**
@@ -767,6 +761,7 @@ public class DifferentialFlameGraphView extends TmfView {
      *
      * @return The multimap of regexes by property
      */
+    @SuppressWarnings("null")
     private Multimap<Integer, String> getRegexes() {
         Multimap<Integer, String> regexes = HashMultimap.create();
 
@@ -784,8 +779,7 @@ public class DifferentialFlameGraphView extends TmfView {
     }
 
     private void zoomEntries(Map<Long, TimeGraphEntry> map, List<ITimeGraphRowModel> model, boolean completed, Sampling sampling) {
-        boolean isZoomThread = false; // Thread.currentThread() instanceof
-        // ZoomThread;
+        boolean isZoomThread = false;
         for (ITimeGraphRowModel rowModel : model) {
             TimeGraphEntry entry = map.get(rowModel.getEntryID());
 
@@ -871,7 +865,7 @@ public class DifferentialFlameGraphView extends TmfView {
      *            the rightmost time bound of the view
      * @return A Multimap of data providers to their visible entries' model IDs.
      */
-    private static Multimap<ITimeGraphDataProvider<? extends TimeGraphEntryModel>, Long> filterGroupEntries(Iterable<TimeGraphEntry> visible,
+    private static @Nullable Multimap<ITimeGraphDataProvider<? extends TimeGraphEntryModel>, Long> filterGroupEntries(Iterable<TimeGraphEntry> visible,
             long zoomStartTime, long zoomEndTime) {
         Multimap<ITimeGraphDataProvider<? extends TimeGraphEntryModel>, Long> providersToModelIds = HashMultimap.create();
         for (TimeGraphEntry entry : visible) {
@@ -1169,75 +1163,6 @@ public class DifferentialFlameGraphView extends TmfView {
     public void setFocus() {
         getTimeGraphViewer().setFocus();
     }
-
-    // ------------------------------------------------------------------------
-    // Helper methods
-    // ------------------------------------------------------------------------
-
-    private void createTimeEventContextMenu() {
-        fEventMenuManager.setRemoveAllWhenShown(true);
-        TimeGraphControl timeGraphControl = getTimeGraphViewer().getTimeGraphControl();
-        final Menu timeEventMenu = fEventMenuManager.createContextMenu(timeGraphControl);
-
-        timeGraphControl.addTimeGraphEntryMenuListener(event -> {
-            /*
-             * The TimeGraphControl will call the TimeGraphEntryMenuListener
-             * before the TimeEventMenuListener. We need to clear the menu for
-             * the case the selection was done on the namespace where the time
-             * event listener below won't be called afterwards.
-             */
-            timeGraphControl.setMenu(null);
-            event.doit = false;
-        });
-        timeGraphControl.addTimeEventMenuListener(event -> {
-            Menu menu = timeEventMenu;
-            if (event.data instanceof TimeEvent && !(event.data instanceof NullTimeEvent)) {
-                timeGraphControl.setMenu(menu);
-                return;
-            }
-            timeGraphControl.setMenu(null);
-            event.doit = false;
-        });
-
-        fEventMenuManager.addMenuListener(manager -> {
-            fillTimeEventContextMenu(fEventMenuManager);
-            fEventMenuManager.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
-        });
-        getSite().registerContextMenu(fEventMenuManager, getTimeGraphViewer().getSelectionProvider());
-    }
-
-    /**
-     * Fill context menu
-     *
-     * @param menuManager
-     *            a menuManager to fill
-     */
-    protected void fillTimeEventContextMenu(IMenuManager menuManager) {
-        ISelection selection = getSite().getSelectionProvider().getSelection();
-        if (selection instanceof IStructuredSelection) {
-            for (Object object : ((IStructuredSelection) selection).toList()) {
-                if (object instanceof ITimeEvent) {
-                    ITimeEvent event = (ITimeEvent) object;
-                    ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider = getProvider(Objects.requireNonNull(event.getEntry()));
-                    Map<String, String> tooltip = getTooltip(event, event.getTime(), provider, true);
-                    for (Entry<String, String> entry : tooltip.entrySet()) {
-                        String tooltipKey = Objects.requireNonNull((entry.getKey()));
-                        if (tooltipKey.startsWith(DataProviderUtils.ACTION_PREFIX)) {
-                            // It's an action, add it to the menu
-                            menuManager.add(new Action(tooltipKey.substring(DataProviderUtils.ACTION_PREFIX.length())) {
-                                @Override
-                                public void run() {
-                                    DataProviderActionUtils.executeAction(entry.getValue());
-
-                                }
-                            });
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     // --------------------------------
     // Sorting related methods
     // --------------------------------
