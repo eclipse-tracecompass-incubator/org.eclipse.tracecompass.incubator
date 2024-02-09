@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2020 Ericsson
+ * Copyright (c) 2023 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -15,49 +15,72 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * @author Marc-Andre Laperle
- * @since 4.1
+ * @author Fateme Faraji Daneshgar
  */
 @NonNullByDefault({})
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.executioncomparision.ui.messages"; //$NON-NLS-1$
 
-
     /**
      * The label of GroupA
      */
-    public static String AbstractMultipleDensityView_GroupA;
-
-
-    /**
-     *The label of GroupB
-     */
-    public static String AbstractMultipleDensityView_GroupB;
-
+    public static String MultipleDensityView_GroupA;
 
     /**
-     *The Duration statistics
+     * The label of GroupB
      */
-    public static String AbstractMultipleDensityView_Duration;
+    public static String MultipleDensityView_GroupB;
 
+    /**
+     * The label of Query Group
+     */
+    public static String MultipleDensityView_QueryGroup;
+
+    /**
+     * The label of Query expandable item
+     */
+    public static String MultipleDensityView_QueryExpandable;
+
+    /**
+     * The label for time range selection (from)
+     */
+    public static String MultipleDensityView_From;
+
+    /**
+     * The label for time range selection (to)
+     */
+    public static String MultipleDensityView_To;
+
+    /**
+     * The label for "compare to" in query
+     */
+    public static String MultipleDensityView_QueryCompare;
+
+    /**
+     * The Duration statistics
+     */
+    public static String MultipleDensityView_Duration;
 
     /**
      * The selfTime statistic
      */
-    public static String AbstractMultipleDensityView_SelfTime;
-
+    public static String MultipleDensityView_SelfTime;
 
     /**
-     *The title of execution comparison view
+     * The title of execution comparison view
      */
-    public static String AbstractMultipleDensityView_title;
+    public static String MultipleDensityView_title;
 
-
-
-    /** The action name for grouping */
+    /**
+     * The action name for grouping
+     */
     public static String FlameGraphView_GroupByName;
-    /** The action tooltip for selecting between Duration and SelfTime */
+
+    /**
+     * The action tooltip for selecting between Duration and SelfTime
+     */
     public static String FlameGraphView_StatisticTooltip;
+
     /**
      * Execution of the callGraph Analysis
      */

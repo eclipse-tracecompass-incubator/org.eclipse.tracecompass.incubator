@@ -6,7 +6,7 @@
 
       <view
             category="org.eclipse.linuxtools.tmf.ui.views.category"
-            class="org.eclipse.tracecompass.incubator.internal.executioncomparision.ui.MultipleDensityView"
+            class="org.eclipse.tracecompass.incubator.internal.executioncomparision.ui.ExecutionComparisonView"
             id="org.eclipse.tracecompass.incubator.internal.entexecutioncomparison.ui.execComparison"
             name="Execution Comparision"
             restorable="true">

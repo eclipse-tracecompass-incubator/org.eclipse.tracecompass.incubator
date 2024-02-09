@@ -93,7 +93,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
         super();
         // TODO: Make a way to register tracetype->callstack IDs.
         fcallStackAnalysisMap.put("org.eclipse.tracecompass.incubator.traceevent.core.trace", "org.eclipse.tracecompass.incubator.traceevent.analysis.callstack"); //$NON-NLS-1$ //$NON-NLS-2$
-        fcallStackAnalysisMap.put("org.eclipse.linuxtools.lttng2.ust.tracetype", "org.eclipse.tracecompass.incubator.callstack.core.lttng.ust"); //$NON-NLS-1$ //$NON-NLS-2$
+        fcallStackAnalysisMap.put("org.eclipse.linuxtools.lttng2.ust.tracetype", "org.eclipse.tracecompass.lttng2.ust.core.analysis.callstack"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     /**
@@ -119,7 +119,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
             }
 
             Collection<DifferentialWeightedTree<ICallStackSymbol>> trees;
-                trees = ParametricWeightedTreeUtils.diffTrees(originalTree, diffTree, fStatistic);
+            trees = ParametricWeightedTreeUtils.diffTrees(originalTree, diffTree, fStatistic);
 
             IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, AggregatedCallSite> instrumentedCallStackAnalysis = Iterables.get(fTraceCallGraphRegistry.values(), 0);
             setDifferentialCallGraphProvider(new DifferentialCallGraphProvider(instrumentedCallStackAnalysis, trees));
@@ -147,7 +147,18 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
             for (String traceName : traceList) {
                 ICallGraphProvider2 instrumentedCallStackAnalysis = fTraceCallGraphRegistry.get(traceName);
                 if (instrumentedCallStackAnalysis != null) {
-                    cGList.add(instrumentedCallStackAnalysis.getCallGraph(start, end));
+                    ITmfTrace trace = getTrace(traceName);
+                    ITmfTimestamp traceStart = start;
+                    ITmfTimestamp traceEnd = end;
+
+                    if (traceStart.getValue()< trace.getStartTime().getValue()) {
+                        traceStart = trace.getStartTime();
+                    }
+                    if (traceEnd.getValue()> trace.getEndTime().getValue()) {
+                        traceEnd = trace.getEndTime();
+                    }
+                    cGList.add(instrumentedCallStackAnalysis.getCallGraph(traceStart, traceEnd));
+
                 }
             }
 
@@ -314,7 +325,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
             try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "MakeDiffCallGraph")) { //$NON-NLS-1$
                 synchronized (this) {
                     if (fDiffJob != null) {
-                        fDiffJob.join();
+                        fDiffJob.cancel();
                     }
                     fDiffJob = new Job("Make differential Callgraph") { //$NON-NLS-1$
                         @Override
@@ -328,11 +339,8 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
                     };
                     fDiffJob.schedule();
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
             }
         }
-
     }
 
     @Override
@@ -360,7 +368,16 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
      */
     private void setDifferentialCallGraphProvider(DifferentialCallGraphProvider differentialCallGraphProvider) {
         fDifferentialCallGraphProvider = Objects.requireNonNull(differentialCallGraphProvider);
-
+    }
+    private static ITmfTrace getTrace(String traceName) {
+        ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
+        Collection<ITmfTrace> traceSet = TmfTraceManager.getTraceSet(trace);
+        for (ITmfTrace traceMember : traceSet) {
+            if (traceMember.getName().equals(traceName)) {
+                return  traceMember;
+                }
+            }
+        return null;
     }
 
 }
