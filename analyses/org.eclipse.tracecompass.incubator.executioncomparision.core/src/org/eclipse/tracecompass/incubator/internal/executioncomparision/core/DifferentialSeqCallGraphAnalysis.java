@@ -158,7 +158,18 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
             for (String traceName : traceList) {
                 ICallGraphProvider instrumentedCallStackAnalysis = fTraceCallGraphRegistry.get(traceName);
                 if (instrumentedCallStackAnalysis != null) {
-                    cGList.add(instrumentedCallStackAnalysis.getCallGraph(start, end));
+                    ITmfTrace trace = getTrace(traceName);
+                    ITmfTimestamp traceStart = start;
+                    ITmfTimestamp traceEnd = end;
+
+                    if (traceStart.getValue()< trace.getStartTime().getValue()) {
+                        traceStart = trace.getStartTime();
+                    }
+                    if (traceEnd.getValue()> trace.getEndTime().getValue()) {
+                        traceEnd = trace.getEndTime();
+                    }
+                    cGList.add(instrumentedCallStackAnalysis.getCallGraph(traceStart, traceEnd));
+
                 }
             }
 
@@ -385,6 +396,20 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
      */
     private void setDifferentialCallGraphProvider(DifferentialCallGraphProvider differentialCallGraphProvider) {
         fDifferentialCallGraphProvider = Objects.requireNonNull(differentialCallGraphProvider);
+
+    }
+    private static ITmfTrace getTrace(String traceName) {
+        ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
+        Collection<ITmfTrace> traceSet = TmfTraceManager.getTraceSet(trace);
+        for (ITmfTrace traceMember : traceSet) {
+            if (traceMember.getName().equals(traceName)) {
+                return  traceMember;
+                }
+            }
+
+        return null;
+
+
 
     }
 

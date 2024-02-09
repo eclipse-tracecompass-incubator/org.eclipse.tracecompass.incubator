@@ -47,10 +47,10 @@ public class MultipleEventDensityViewer extends EventDensityViewer {
    @Override
     @TmfSignalHandler
     public void selectionRangeUpdated(TmfSelectionRangeUpdatedSignal signal) {
-        if (signal == null) {
+       //super.selectionRangeUpdated(signal);
+       if (signal == null) {
             return;
         }
-
         final ITmfTrace trace = getTrace();
         if (trace != null) {
             TmfTraceContext ctx = TmfTraceManager.getInstance().getTraceContext(trace);

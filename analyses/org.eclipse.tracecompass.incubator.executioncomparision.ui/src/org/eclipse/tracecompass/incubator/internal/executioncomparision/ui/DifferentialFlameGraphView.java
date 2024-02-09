@@ -38,10 +38,10 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.GroupMarker;
+//import org.eclipse.jface.action.Action;
+//import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuManager;
+//import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -52,16 +52,16 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Menu;
+//import org.eclipse.swt.widgets.Menu;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.ScopeLog;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.callstack.core.callgraph.ICallGraphProvider;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.DataProviderUtils;
+//import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.DataProviderUtils;
 import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.FlameGraphDataProvider;
-import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.DataProviderActionUtils;
+//import org.eclipse.tracecompass.incubator.internal.callstack.ui.flamegraph.DataProviderActionUtils;
 import org.eclipse.tracecompass.incubator.internal.executioncomparision.core.DifferentialSeqCallGraphAnalysis;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TmfFilterAppliedSignal;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TraceCompassFilter;
@@ -106,7 +106,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry.Sa
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.TimeFormat;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchActionConstants;
+//import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 
@@ -210,7 +210,7 @@ public class DifferentialFlameGraphView extends TmfView {
         }
         TmfSignalManager.register(this);
         getSite().setSelectionProvider(getTimeGraphViewer().getSelectionProvider());
-        createTimeEventContextMenu();
+        //createTimeEventContextMenu();
         getTimeGraphViewer().getTimeGraphControl().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(@Nullable MouseEvent e) {
@@ -1170,7 +1170,7 @@ public class DifferentialFlameGraphView extends TmfView {
     // Helper methods
     // ------------------------------------------------------------------------
 
-    private void createTimeEventContextMenu() {
+ /*   private void createTimeEventContextMenu() {
         fEventMenuManager.setRemoveAllWhenShown(true);
         TimeGraphControl timeGraphControl = getTimeGraphViewer().getTimeGraphControl();
         final Menu timeEventMenu = fEventMenuManager.createContextMenu(timeGraphControl);
@@ -1182,7 +1182,7 @@ public class DifferentialFlameGraphView extends TmfView {
              * the case the selection was done on the namespace where the time
              * event listener below won't be called afterwards.
              */
-            timeGraphControl.setMenu(null);
+ /*           timeGraphControl.setMenu(null);
             event.doit = false;
         });
         timeGraphControl.addTimeEventMenuListener(event -> {
@@ -1208,7 +1208,7 @@ public class DifferentialFlameGraphView extends TmfView {
      * @param menuManager
      *            a menuManager to fill
      */
-    protected void fillTimeEventContextMenu(IMenuManager menuManager) {
+ /*   protected void fillTimeEventContextMenu(IMenuManager menuManager) {
         ISelection selection = getSite().getSelectionProvider().getSelection();
         if (selection instanceof IStructuredSelection) {
             for (Object object : ((IStructuredSelection) selection).toList()) {
@@ -1233,7 +1233,7 @@ public class DifferentialFlameGraphView extends TmfView {
             }
         }
     }
-
+*/
     // --------------------------------
     // Sorting related methods
     // --------------------------------
