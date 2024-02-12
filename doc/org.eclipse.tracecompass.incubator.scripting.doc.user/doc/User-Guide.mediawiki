@@ -319,7 +319,7 @@ Chat with the Trace Compass community on [irc://irc.oftc.net/tracecompass the IR
 
 * Think of something that should be available through a helper method?
 
-[https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Tracecompass.Incubator Request a feature for it] or [https://wiki.eclipse.org/Trace_Compass/Development_Environment_Setup develop it in the Trace Compass Incubator project] (org.eclipse.tracecompass.incubator.scripting.*) and contribute it [https://wiki.eclipse.org/Trace_Compass/Incubator_Guidelines through gerrit].
+[https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Tracecompass.Incubator Request a feature for it] or [https://github.com/eclipse-tracecompass/org.eclipse.tracecompass/blob/master/DEVELOPMENT_ENV_SETUP.md develop it in the Trace Compass Incubator project] (org.eclipse.tracecompass.incubator.scripting.*) and contribute it [https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator/blob/master/CONTRIBUTING.md through GitHub].
 
 * Find bugs?
 
