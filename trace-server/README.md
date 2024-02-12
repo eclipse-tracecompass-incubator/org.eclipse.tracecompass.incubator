@@ -13,22 +13,9 @@
 
 ## Compiling manually
 
-The Maven project build requires version 3.3 or later. It can be downloaded from
-<http://maven.apache.org> or from the package management system of your distro.
+To build the project manually follow the instructions in [BUILDING](#compiling-manually).
 
-To build the trace-server manually using Maven, simply run the following command
-from the git project top-level directory:
-
-    cd org.eclipse.tracecompass.incubator/
-    mvn clean install
-
-The default command will compile and run the unit tests. Running the tests can
-take some time, to skip them you can append `-DskipTests` to the
-`mvn` command:
-
-    mvn clean install -DskipTests
-
-The resulting executables will be in the
+The resulting trace server executables will be in the
 `trace-server/org.eclipse.tracecompass.incubator.trace.server.product/target/products`.
 There are the archives for linux, macos and Windows. The sub-directories
 `trace-server/org.eclipse.tracecompass.incubator.trace.server.product/target/products/traceserver/<os>/...`
