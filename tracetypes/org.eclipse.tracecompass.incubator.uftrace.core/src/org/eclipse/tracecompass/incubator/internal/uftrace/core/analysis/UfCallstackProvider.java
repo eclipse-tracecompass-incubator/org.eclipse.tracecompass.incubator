@@ -17,7 +17,6 @@ import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspe
 import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.DatEvent;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.UfEventType;
-import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.Uftrace.ExecAspect;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.Uftrace.PidAspect;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
@@ -34,7 +33,6 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 public class UfCallstackProvider extends CallStackStateProvider {
 
 
-    private final ITmfEventAspect<String> fExecAspect;
     private final ITmfEventAspect<Integer> fTidAspect;
     private final ITmfEventAspect<Integer> fPidAspect;
 
@@ -46,14 +44,13 @@ public class UfCallstackProvider extends CallStackStateProvider {
      */
     public UfCallstackProvider(@NonNull ITmfTrace trace) {
         super(trace);
-        fExecAspect = (ITmfEventAspect<String>) MultiAspect.<String>create(TmfTraceUtils.getEventAspects(trace, ExecAspect.class), ExecAspect.class);
         fTidAspect = (ITmfEventAspect<Integer>) MultiAspect.<Integer>create(TmfTraceUtils.getEventAspects(trace, LinuxTidAspect.class), LinuxTidAspect.class);
         fPidAspect = (ITmfEventAspect<Integer>) MultiAspect.<Integer>create(TmfTraceUtils.getEventAspects(trace, PidAspect.class), PidAspect.class);
     }
 
     @Override
     public int getVersion() {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -90,11 +87,6 @@ public class UfCallstackProvider extends CallStackStateProvider {
             }
         }
         return null;
-    }
-
-    @Override
-    protected @Nullable String getProcessName(@NonNull ITmfEvent event) {
-        return fExecAspect.resolve(event);
     }
 
     @Override

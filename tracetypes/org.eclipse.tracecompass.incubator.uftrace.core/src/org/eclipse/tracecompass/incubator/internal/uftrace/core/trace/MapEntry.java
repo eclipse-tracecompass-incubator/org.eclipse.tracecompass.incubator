@@ -34,6 +34,8 @@ public class MapEntry {
 
     private final Perms fPerms;
 
+    private final String fExtra;
+
     /**
      * A map entry
      *
@@ -53,10 +55,12 @@ public class MapEntry {
      *            inode location of the device
      * @param pathName
      *            file path that backs this mapping (there may be pseudo-paths
-     *            in brackes [])
+     *            in brackets [])
+     * @param extra
+     *            anything extra, e.g. build info
      */
     public MapEntry(long addrLow, long addrHigh, Perms perms, long offset, char deviceMinor, char deviceMajor, long iNode,
-            String pathName) {
+            String pathName, String extra) {
         fAddrLow = addrLow;
         fAddrHigh = addrHigh;
         fPerms = perms;
@@ -65,6 +69,7 @@ public class MapEntry {
         fDeviceMinor = deviceMinor;
         fINode = iNode;
         fPathName = pathName;
+        fExtra = extra;
     }
 
     /**
@@ -140,6 +145,13 @@ public class MapEntry {
      */
     public Perms getPerms() {
         return fPerms;
+    }
+
+    /**
+     * @return the extra
+     */
+    public String getExtra() {
+        return fExtra;
     }
 
 }

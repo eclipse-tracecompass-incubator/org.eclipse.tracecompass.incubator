@@ -34,7 +34,7 @@ import org.apache.commons.io.LineIterator;
  *
  */
 public class SymParser {
-    private static final Pattern REGEX = Pattern.compile("^([a-fA-F\\d]+)\\s+([ABbCcDdGgiNPpRrSsTtUuVvWw\\-\\?])\\s*(.*)$"); //$NON-NLS-1$
+    private static final Pattern REGEX = Pattern.compile("^([a-fA-F\\d]+)\\s+([a-fA-F\\d]*)\\s*([ABbCcDdGgiNPpRrSsTtUuVvWw\\-\\?])\\s*(.*)$"); //$NON-NLS-1$
 
     /**
      * Symbol for
@@ -79,24 +79,26 @@ public class SymParser {
      *             the file is not able to be read.
      */
     public static SymParser parse(File file) throws IOException {
-        LineIterator iter = FileUtils.lineIterator(file);
-        SymParser sp = new SymParser();
-        while (iter.hasNext()) {
-            String line = iter.next();
-            if (line.startsWith("#")) {
-                continue;
+
+        try (LineIterator iter = FileUtils.lineIterator(file)) {
+            SymParser sp = new SymParser();
+            while (iter.hasNext()) {
+                String line = iter.next();
+                if (line.startsWith("#")) { //$NON-NLS-1$
+                    continue;
+                }
+                Matcher match = REGEX.matcher(line);
+                if (!match.matches()) {
+                    throw new IllegalArgumentException("Symbol Parser: invalid line: " + line); //$NON-NLS-1$
+                }
+                long range = Long.parseUnsignedLong(match.group(1), 16);
+                char c = match.group(3).charAt(0);
+                String name = (match.groupCount() < 4) ? "Anonymous" : match.group(4); //$NON-NLS-1$
+                Symbol sym = new Symbol(c, name);
+                sp.fMap.put(range, sym);
             }
-            Matcher match = REGEX.matcher(line);
-            if (!match.matches()) {
-                throw new IllegalArgumentException("invalid " + line); //$NON-NLS-1$
-            }
-            long range = Long.parseUnsignedLong(match.group(1), 16);
-            char c = match.group(2).charAt(0);
-            String name = (match.groupCount() < 3) ? "Anonymous" : match.group(3); //$NON-NLS-1$
-            Symbol sym = new Symbol(c, name);
-            sp.fMap.put(range, sym);
+            return sp;
         }
-        return sp;
     }
 
     /**
