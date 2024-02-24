@@ -37,7 +37,7 @@ public class MapParser {
     private static final String SESSION_PATTERN_STRING = "sid\\-([a-fA-F0-9]+)\\.map"; //$NON-NLS-1$
     private static final Pattern SESSION_PATTERN = Pattern.compile(SESSION_PATTERN_STRING);
     private static final Pattern MAPFILE_PATTERN = Pattern.compile(
-            "^\\s*([a-fA-F0-9]+)\\-([a-fA-F0-9]+)\\s+([rxwps-]+)\\s+([a-fA-F0-9]+)\\s+([a-fA-F0-9]+)\\:([a-fA-F0-9]+)\\s+([a-fA-F0-9]+)\\s*(\\S+)?$"); //$NON-NLS-1$
+            "^\\s*([a-fA-F0-9]+)\\-([a-fA-F0-9]+)\\s+([rxwps-]+)\\s+([a-fA-F0-9]+)\\s+([a-fA-F0-9]+)\\:([a-fA-F0-9]+)\\s+([a-fA-F0-9]+)\\s*(\\S*)\\s*(\\S*)"); //$NON-NLS-1$
     private final long fSessionId;
     private final NavigableMap<Long, MapEntry> fData;
 
@@ -62,18 +62,19 @@ public class MapParser {
         while (iter.hasNext()) {
             String line = iter.next();
             Matcher matcher = MAPFILE_PATTERN.matcher(line);
-            matcher.matches();
-            long addrLow = Long.parseUnsignedLong(matcher.group(1), 16);
-            long addrHigh = Long.parseUnsignedLong(matcher.group(2), 16);
-            Perms perms = Perms.create(matcher.group(3));
-            long offset = Long.parseLong(matcher.group(4), 16);
-            char deviceHigh = (char) Integer.parseInt(matcher.group(5), 16);
-            char deviceLow = (char) Integer.parseInt(matcher.group(6), 16);
-            long iNode = Long.parseLong(matcher.group(7), 16);
-            String pathName = matcher.group(8);
-
-            entries.put(addrLow,
-                    new MapEntry(addrLow, addrHigh, perms, offset, deviceLow, deviceHigh, iNode, pathName));
+            if (matcher.matches()) {
+                long addrLow = Long.parseUnsignedLong(matcher.group(1), 16);
+                long addrHigh = Long.parseUnsignedLong(matcher.group(2), 16);
+                Perms perms = Perms.create(matcher.group(3));
+                long offset = Long.parseLong(matcher.group(4), 16);
+                char deviceHigh = (char) Integer.parseInt(matcher.group(5), 16);
+                char deviceLow = (char) Integer.parseInt(matcher.group(6), 16);
+                long iNode = Long.parseLong(matcher.group(7), 16);
+                String pathName = matcher.group(8);
+                String extra = matcher.group(9);
+                entries.put(addrLow,
+                        new MapEntry(addrLow, addrHigh, perms, offset, deviceLow, deviceHigh, iNode, pathName, extra));
+            }
         }
         return new MapParser(sessionId, entries);
     }
