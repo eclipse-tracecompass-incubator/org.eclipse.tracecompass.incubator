@@ -1,0 +1,15 @@
+563ce6a8b000-563ce6a90000 r-xp 00000000 00:00 0                          /home/matthew/work/src/uftrace/foobar build-id:516f6190db510f47e9608d9cfd554300d2d61b6e
+7fef98a00000-7fef9904d000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libcapstone.so.4 build-id:76438bd5ddf41d4c8df226a98e655d3ed2056720
+7fef99115000-7fef99200000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libm.so.6 build-id:2d81a912e7c85129e41e4c65b6c5bb8180977a17
+7fef99200000-7fef99468000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.32 build-id:102661775a59c09123f226bc3021556fd42bc563
+7fef99487000-7fef9949a000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libbz2.so.1.0.4 build-id:e56b62c27bcc7ace8f9be36b255bd7b31bfde405
+7fef9949a000-7fef99551000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5 build-id:e0b4fac4f8025115ca095ea829e89f16756203bd
+7fef99551000-7fef99600000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libdw-0.189.so build-id:005fcc33d15ff31aeb89844655a673d5b5525515
+7fef99600000-7fef99800000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libc.so.6 build-id:6a981b07a3731293c24c10a21397416d3c3d52ed
+7fef9981b000-7fef9984d000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/liblzma.so.5.4.1 build-id:5160d65025173b93e542c0d6a362a0ba4d79dfa1
+7fef9984f000-7fef9986e000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libz.so.1.2.13 build-id:622a20ffd045816c9b5b50dd8967803026b40cc8
+7fef9986e000-7fef99892000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libgcc_s.so.1 build-id:56a40db58fdb8a2ab280771a135196ced0285012
+7fef99894000-7fef998b1000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libelf-0.189.so build-id:983a2a33967bfac7ffc8e6b92d0e80014ad83a6a
+7fef998db000-7fef99920000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/uftrace/libmcount-fast.so build-id:ed0da888d448f2b43e88f98054e715d299a701e4
+7fef99923000-7fef9995c000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 build-id:78ffe99ed77a37ae9416f1530f9110188897cf80
+7ffd247c4000-7ffd247e6000 rw-p 00000000 00:00 0                          [stack]
