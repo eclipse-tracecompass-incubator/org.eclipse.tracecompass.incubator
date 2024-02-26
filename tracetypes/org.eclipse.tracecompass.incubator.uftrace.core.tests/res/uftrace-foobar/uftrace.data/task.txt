@@ -1,0 +1,3 @@
+SESS timestamp=63939.298992299 pid=44929 sid=6a273f4055a0c335 exename="/home/matthew/work/src/uftrace/foobar"
+TASK timestamp=63939.299067482 tid=44929 pid=44929
+TASK timestamp=63939.299303577 tid=44934 pid=44929
