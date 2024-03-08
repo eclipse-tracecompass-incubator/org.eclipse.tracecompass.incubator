@@ -18,26 +18,13 @@
    <license url="%licenseURL">
       %license
    </license>
-   
-   <plugin
-         id="org.eclipse.tracecompass.incubator.gpu.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
    <plugin
-         id="org.eclipse.tracecompass.incubator.gpu.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         id="org.eclipse.tracecompass.incubator.gpu.core"
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.tracecompass.incubator.gpu.doc.user"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>

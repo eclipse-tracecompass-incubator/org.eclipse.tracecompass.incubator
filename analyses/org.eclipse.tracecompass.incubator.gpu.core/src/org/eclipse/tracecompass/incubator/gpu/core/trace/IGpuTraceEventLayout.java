@@ -83,7 +83,7 @@ public interface IGpuTraceEventLayout {
          *            the event object
          * @return whether the event timestamp is the beginning
          */
-        public abstract boolean isBeginEvent();
+        public abstract boolean isBeginEvent(ITmfEvent event);
 
         /**
          * This function extracts the name of the event.
