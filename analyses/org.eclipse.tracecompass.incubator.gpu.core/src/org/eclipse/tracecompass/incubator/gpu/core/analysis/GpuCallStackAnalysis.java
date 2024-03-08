@@ -43,7 +43,7 @@ public class GpuCallStackAnalysis extends InstrumentedCallStackAnalysis {
     /** Name of the sub-attribute where the correlation id is stored */
     public static final String CORRELATION_ID = "correlation_id"; //$NON-NLS-1$
     /** Name of the sub-attribute where the operations are stored */
-    public static final String HIP_OPERATION_QUEUES = "hip_operation_queues"; //$NON-NLS-1$
+    public static final String OPERATION_QUEUES = "operation_queues"; //$NON-NLS-1$
 
     @Override
     protected Collection<Integer> getEdgeQuarks() {
