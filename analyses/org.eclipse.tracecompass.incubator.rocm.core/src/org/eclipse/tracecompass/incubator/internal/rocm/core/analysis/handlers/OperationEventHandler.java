@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.handlers;
 
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
+import org.eclipse.tracecompass.analysis.profiling.core.instrumented.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.rocm.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmCallStackStateProvider;
 import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmEventLayout;

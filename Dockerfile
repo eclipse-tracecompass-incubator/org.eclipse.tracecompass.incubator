@@ -27,7 +27,7 @@ WORKDIR /app/
 
 RUN mvn clean install -DskipTests
 
-FROM alpine:3.16.0
+FROM alpine:3.18.0
 
 ENV JAVA_HOME=/opt/java-minimal
 ENV PATH="$PATH:$JAVA_HOME/bin"
