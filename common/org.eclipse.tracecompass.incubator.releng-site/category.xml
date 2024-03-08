@@ -72,6 +72,9 @@
    <feature url="features/org.eclipse.tracecompass.incubator.executioncomparison_0.0.0.jar" id="org.eclipse.tracecompass.incubator.executioncomparison" version="0.0.0">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.gpu_0.0.0.jar" id="org.eclipse.tracecompass.incubator.gpu" version="0.0.0">
+      <category name="analyses"/>
+   </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.0">
       <category name="analyses"/>
    </bundle>

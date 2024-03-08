@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.internal.provisional.analysis.profiling.core.instrumented.InstrumentedCallStackAnalysis;
+import org.eclipse.tracecompass.analysis.profiling.core.instrumented.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 
@@ -29,7 +29,6 @@ import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
  *
  * @author Arnaud Fiorini
  */
-@SuppressWarnings("restriction")
 public class RocmCallStackAnalysis extends InstrumentedCallStackAnalysis {
 
     private static final String EDGES = "EDGES"; //$NON-NLS-1$

@@ -30,7 +30,7 @@ public class ApiEventHandler implements IGpuEventHandler {
 
     @Override
     public void handleEvent(ITmfEvent event, ITmfStateSystemBuilder ssb, IGpuTraceEventLayout layout, ITmfStateProvider stateProvider) {
-        Integer tid = event.getContent().getFieldValue(Integer.class, layout.fieldThreadId());
+        Long tid = event.getContent().getFieldValue(Long.class, layout.fieldThreadId());
         if (tid == null) {
             return;
         }
@@ -41,7 +41,7 @@ public class ApiEventHandler implements IGpuEventHandler {
         int apiQuark = ssb.getQuarkRelativeAndAdd(processQuark, apiLayout.getApiName());
         int callStackQuark = ssb.getQuarkRelativeAndAdd(apiQuark, CallStackAnalysis.CALL_STACK);
 
-        if (apiLayout.isBeginEvent()) {
+        if (apiLayout.isBeginEvent(event)) {
             ssb.pushAttribute(event.getTimestamp().getValue(), apiLayout.getEventName(event), callStackQuark);
         } else {
             ssb.popAttribute(event.getTimestamp().getValue(), callStackQuark);
