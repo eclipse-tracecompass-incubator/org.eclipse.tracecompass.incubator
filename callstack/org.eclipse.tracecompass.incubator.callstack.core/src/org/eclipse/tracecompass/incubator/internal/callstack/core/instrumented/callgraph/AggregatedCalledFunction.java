@@ -73,7 +73,8 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
     /**
      * copy constructor
      *
-     * @param toCopy Object to copy
+     * @param toCopy
+     *            Object to copy
      */
     public AggregatedCalledFunction(AggregatedCalledFunction toCopy) {
         super(toCopy);
@@ -97,7 +98,7 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
     }
 
     @Override
-    protected void mergeData(@NonNull WeightedTree<ICallStackSymbol> other) {
+    protected void mergeData(WeightedTree<ICallStackSymbol> other) {
         if (!(other instanceof AggregatedCalledFunction)) {
             return;
         }
@@ -110,7 +111,7 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
         mergeProcessStatuses(otherFct);
     }
 
-    private void mergeProcessStatuses(AggregatedCalledFunction other) {
+    protected void mergeProcessStatuses(AggregatedCalledFunction other) {
         Map<ProcessStatus, AggregatedThreadStatus> processStatuses = other.fProcessStatuses;
         for (Entry<ProcessStatus, AggregatedThreadStatus> entry : processStatuses.entrySet()) {
             AggregatedThreadStatus status = fProcessStatuses.get(entry.getKey());
@@ -176,54 +177,6 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
     private void addToDuration(long duration) {
         fDuration += duration;
     }
-
-    // /**
-    // * Merge the callees of two functions.
-    // *
-    // * @param firstNode
-    // * The first parent secondNode The second parent
-    // */
-    // private static void mergeChildren(AggregatedCalledFunction firstNode,
-    // AggregatedCalledFunction secondNode) {
-    // for (Map.Entry<Object, AggregatedCalledFunction> FunctionEntry :
-    // secondNode.fChildren.entrySet()) {
-    // Object childSymbol = Objects.requireNonNull(FunctionEntry.getKey());
-    // AggregatedCalledFunction secondNodeChild =
-    // Objects.requireNonNull(FunctionEntry.getValue());
-    // AggregatedCalledFunction aggregatedCalledFunction =
-    // firstNode.fChildren.get(childSymbol);
-    // if (aggregatedCalledFunction == null) {
-    // firstNode.fChildren.put(secondNodeChild.getSymbol(), secondNodeChild);
-    // } else {
-    // // combine children
-    // AggregatedCalledFunction firstNodeChild = aggregatedCalledFunction;
-    // merge(firstNodeChild, secondNodeChild, true);
-    // firstNode.fChildren.replace(firstNodeChild.getSymbol(), firstNodeChild);
-    // }
-    // }
-    // }
-    //
-    // /**
-    // * Merge two functions, add durations, self times, increment the calls,
-    // * update statistics and merge children.
-    // *
-    // * @param destination
-    // * the node to merge to
-    // * @param source
-    // * the node to merge
-    // */
-    // private static void merge(AggregatedCalledFunction destination,
-    // AggregatedCalledFunction source, boolean isGroup) {
-    // long sourceDuration = source.getDuration();
-    // long sourceSelfTime = source.getSelfTime();
-    // destination.addToDuration(sourceDuration);
-    // destination.addToSelfTime(sourceSelfTime);
-    // destination.addToCpuTime(source.getCpuTime());
-    // destination.getFunctionStatistics().merge(source.getFunctionStatistics(),
-    // isGroup);
-    // // merge the children callees.
-    // mergeChildren(destination, source);
-    // }
 
     private void addToCpuTime(long cpuTime) {
         if (cpuTime != IHostModel.TIME_UNKNOWN) {
@@ -291,7 +244,7 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
     }
 
     /**
-     * Add a process status interval tot his called function
+     * Add a process status interval to this called function
      *
      * @param interval
      *            The process status interval
@@ -307,7 +260,7 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
     }
 
     @Override
-    public @NonNull Collection<@NonNull WeightedTree<@NonNull ICallStackSymbol>> getExtraDataTrees(int index) {
+    public @NonNull Collection<WeightedTree<ICallStackSymbol>> getExtraDataTrees(int index) {
         if (index == 0) {
             return ImmutableList.copyOf(fProcessStatuses.values());
         }
@@ -341,5 +294,57 @@ public class AggregatedCalledFunction extends AggregatedCallSite {
     public String toString() {
         return "Aggregate Function: " + getObject() + ", Duration: " + getDuration() + ", Self Time: " + fSelfTime + " on " + getNbCalls() + " calls"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
     }
+
+    /**
+     * Get the weight, be it self time, the duration, or other.
+     *
+     * @param name
+     *            the name of the weight
+     * @return the weight
+     */
+    public long getWeight(String name) {
+        if (name.equals("Self Time")) { //$NON-NLS-1$
+            return fSelfTime;
+        }
+        return fDuration;
+    }
+
+    /**
+     * Update mean data
+     *
+     * @param other
+     *            the other weighted tree
+     */
+    public void meanData(WeightedTree<ICallStackSymbol> other) {
+        if (!(other instanceof AggregatedCalledFunction)) {
+            return;
+        }
+        AggregatedCalledFunction otherFct = (AggregatedCalledFunction) other;
+        fDuration = fDuration / 2 + otherFct.getDuration() / 2;
+        fSelfTime = fSelfTime / 2 + otherFct.getDuration() / 2;
+        fCpuTime = fCpuTime / 2 + otherFct.getDuration() / 2;
+        fDuration = fDuration / 2 + otherFct.getDuration() / 2;
+
+        getFunctionStatistics().merge(otherFct.getFunctionStatistics(), true);
+        mergeProcessStatuses(otherFct);
+    }
+
+  /*  public void tuneValues(WeightedTree<ICallStackSymbol> other){
+        fDuration = fDuration/2;
+        fSelfTime = fSelfTime/2;
+        fCpuTime = fCpuTime/2;
+        for(WeightedTree<ICallStackSymbol> child:getChildren()) {
+            for(WeightedTree<ICallStackSymbol> otherchild:other.getChildren()) {
+                if(child.getObject().equals(otherchild.getObject())){
+                if (child.getWeight()!= otherchild.getWeight()) {
+                    ((AggregatedCalledFunction) child).tuneValues(otherchild);
+                }
+
+            }
+
+        }
+        }
+    }*/
+
 
 }
