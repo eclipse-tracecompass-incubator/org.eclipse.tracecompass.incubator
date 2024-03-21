@@ -603,7 +603,6 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testTimeGraphMetaDataSerializer() {
-        @SuppressWarnings("resource")
         Response treeResponse = null;
         try {
             ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_STUB.getName(), CONTEXT_SWITCHES_UST_STUB);
