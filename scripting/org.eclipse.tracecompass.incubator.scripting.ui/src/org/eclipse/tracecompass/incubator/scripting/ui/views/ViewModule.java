@@ -89,10 +89,10 @@ public class ViewModule {
      * that will be the source of the view and looking in the 'Properties' view
      * for the ID property.
      *
-     * For example, to open a table view for the LTTng-UST CallStack (Incubator) analysis, the follow call can be make
+     * For example, to open a table view for the LTTng-UST CallStack analysis, the follow call can be made
      *
      * <pre>
-     * showView(org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.table.SegmentStoreTableView.ID, "org.eclipse.tracecompass.incubator.callstack.core.lttng.ust");
+     * showView(org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore.table.SegmentStoreTableView.ID, "org.eclipse.tracecompass.lttng2.ust.core.analysis.callstack");
      * </pre>
      *
      * @param viewId

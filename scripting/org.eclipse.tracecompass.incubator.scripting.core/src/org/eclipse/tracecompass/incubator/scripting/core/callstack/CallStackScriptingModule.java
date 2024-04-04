@@ -15,16 +15,16 @@ import org.eclipse.ease.modules.ScriptParameter;
 import org.eclipse.ease.modules.WrapToScript;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.AllGroupDescriptor;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeGroupBy;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeGroupDescriptor;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTreeGroupBy;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeProvider;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.flamegraph.FlameGraphDataProvider;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.data.provider.ScriptingDataProviderManager;
+import org.eclipse.tracecompass.internal.analysis.profiling.core.flamegraph.FlameGraphDataProvider;
+import org.eclipse.tracecompass.internal.analysis.profiling.core.tree.AllGroupDescriptor;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
@@ -33,14 +33,14 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  * trace by requesting an analysis that implements the interface.
  * <p>
  * For example, the following scriptlet would get the LTTng-UST CallStack
- * (Incubator) analysis, which implements the weighted tree provider, for the
- * active LTTng UST trace. The object can then be used as parameter for the
- * methods of this module.
+ * analysis, which implements the weighted tree provider, for the active LTTng
+ * UST trace. The object can then be used as parameter for the methods of this
+ * module.
  * </p>
  *
  * <pre>
  * trace = getActiveTrace()
- * wtProvider = getTraceAnalysis(trace, "org.eclipse.tracecompass.incubator.callstack.core.lttng.ust");
+ * wtProvider = getTraceAnalysis(trace, "org.eclipse.tracecompass.lttng2.ust.core.analysis.callstack");
  * </pre>
  *
  * @author Geneviève Bastien
