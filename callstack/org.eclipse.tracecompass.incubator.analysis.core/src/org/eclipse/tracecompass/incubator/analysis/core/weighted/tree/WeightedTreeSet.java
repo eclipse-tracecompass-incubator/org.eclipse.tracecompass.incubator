@@ -32,6 +32,7 @@ import com.google.common.collect.Multimap;
  *            {@link ITree}, then the elements and their associated weighted
  *            trees will be grouped in a hierarchical style
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public class WeightedTreeSet<@NonNull N, E> implements IWeightedTreeSet<N, E, WeightedTree<N>> {
 
     private final Set<E> fRootElements = new HashSet<>();

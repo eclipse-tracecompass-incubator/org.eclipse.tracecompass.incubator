@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
  * @author Bernd Hufmann
  *
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 @SuppressWarnings("restriction")
 public class LttngUstCallStackAnalysisRequirement extends TmfCompositeAnalysisRequirement {
 

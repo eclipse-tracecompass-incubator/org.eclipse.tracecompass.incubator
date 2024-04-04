@@ -32,6 +32,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public final class CallStackHostUtils {
 
     private CallStackHostUtils() {

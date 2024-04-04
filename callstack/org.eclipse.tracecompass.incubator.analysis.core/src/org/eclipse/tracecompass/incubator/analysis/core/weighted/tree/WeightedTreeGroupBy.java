@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public final class WeightedTreeGroupBy {
 
     private WeightedTreeGroupBy() {

@@ -48,6 +48,7 @@ import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public class CallStack {
 
     private final @Nullable ICallStackElement fSymbolKeyElement;

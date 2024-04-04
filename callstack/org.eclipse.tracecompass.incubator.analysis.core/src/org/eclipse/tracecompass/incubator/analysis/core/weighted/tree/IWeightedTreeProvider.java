@@ -48,6 +48,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
  * @param <T>
  *            The type of the tree provided
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public interface IWeightedTreeProvider<@NonNull N, E, @NonNull T extends WeightedTree<N>> {
 
     /**

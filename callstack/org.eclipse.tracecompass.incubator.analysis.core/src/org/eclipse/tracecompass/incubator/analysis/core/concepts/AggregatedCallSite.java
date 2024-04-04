@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableMap;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public class AggregatedCallSite extends WeightedTree<ICallStackSymbol> {
 
     /**

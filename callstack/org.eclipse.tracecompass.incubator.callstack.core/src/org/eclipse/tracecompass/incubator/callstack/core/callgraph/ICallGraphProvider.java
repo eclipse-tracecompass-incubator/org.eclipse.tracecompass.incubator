@@ -32,6 +32,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public interface ICallGraphProvider extends IWeightedTreeProvider<@NonNull ICallStackSymbol, ICallStackElement, AggregatedCallSite> {
 
     /**
