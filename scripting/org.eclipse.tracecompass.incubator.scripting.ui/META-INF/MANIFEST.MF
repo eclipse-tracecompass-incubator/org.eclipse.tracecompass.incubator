@@ -24,9 +24,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ease.ui,
  org.eclipse.core.expressions,
  org.eclipse.tracecompass.rcp.ui;resolution:=optional,
- org.eclipse.tracecompass.incubator.analysis.core;resolution:=optional,
- org.eclipse.tracecompass.incubator.callstack.core;resolution:=optional,
- org.eclipse.tracecompass.incubator.callstack.ui;resolution:=optional
+ org.eclipse.tracecompass.analysis.profiling.core,
+ org.eclipse.tracecompass.analysis.profiling.ui
 Export-Package: org.eclipse.tracecompass.incubator.internal.scripting.ui;x-friends:="org.eclipse.tracecompass.incubator.scripting.ui.tests",
  org.eclipse.tracecompass.incubator.internal.scripting.ui.project.handlers;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.scripting.ui.tracemarker;x-internal:=true,
