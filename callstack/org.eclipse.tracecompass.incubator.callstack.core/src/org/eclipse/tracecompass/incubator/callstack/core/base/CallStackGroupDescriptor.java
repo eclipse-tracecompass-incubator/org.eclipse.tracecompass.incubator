@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public class CallStackGroupDescriptor implements ICallStackGroupDescriptor {
 
     private final String fName;

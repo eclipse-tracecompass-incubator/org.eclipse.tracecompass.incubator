@@ -84,6 +84,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  *
  * @author Patrick Tasse
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
 
     /**

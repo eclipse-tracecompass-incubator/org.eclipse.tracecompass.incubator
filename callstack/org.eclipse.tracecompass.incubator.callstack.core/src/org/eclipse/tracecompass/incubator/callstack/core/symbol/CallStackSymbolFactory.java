@@ -23,6 +23,7 @@ import org.eclipse.tracecompass.incubator.internal.callstack.core.symbol.StringS
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public final class CallStackSymbolFactory {
 
     private static final Pattern IS_NUMBER = Pattern.compile("[0-9A-Fa-f]+");

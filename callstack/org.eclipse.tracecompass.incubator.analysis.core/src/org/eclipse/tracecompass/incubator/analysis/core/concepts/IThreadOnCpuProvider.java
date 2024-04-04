@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * NOTE to developers: this interface is used with the composite host model but
  * won't be necessary anymore once the analyses populate the model directly.
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public interface IThreadOnCpuProvider {
 
     /**

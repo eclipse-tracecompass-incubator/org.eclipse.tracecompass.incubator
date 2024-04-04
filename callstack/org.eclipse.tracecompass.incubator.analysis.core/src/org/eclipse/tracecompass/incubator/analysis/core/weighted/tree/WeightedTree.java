@@ -37,6 +37,7 @@ import org.eclipse.tracecompass.analysis.timing.core.statistics.IStatistics;
  * @param <T>
  *            The type of objects in this tree
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public class WeightedTree<@NonNull T> implements Comparable<WeightedTree<T>> {
 
     private final T fObject;

@@ -58,6 +58,7 @@ import com.google.common.collect.ImmutableList;
  * @author Matthew Khouzam
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public abstract class InstrumentedCallStackAnalysis extends TmfStateSystemAnalysisModule implements IFlameChartProvider, ICallGraphProvider {
 
     /** CallStack stack-attribute */

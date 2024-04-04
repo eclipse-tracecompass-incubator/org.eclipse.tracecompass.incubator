@@ -39,6 +39,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 @SuppressWarnings("restriction")
 public class LttngUstCallStackAnalysis extends InstrumentedCallStackAnalysis {
 

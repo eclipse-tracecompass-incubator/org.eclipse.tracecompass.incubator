@@ -21,6 +21,7 @@ import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICallStackSymbo
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public class AggregatedStackTraces extends AggregatedCallSite {
 
     /**

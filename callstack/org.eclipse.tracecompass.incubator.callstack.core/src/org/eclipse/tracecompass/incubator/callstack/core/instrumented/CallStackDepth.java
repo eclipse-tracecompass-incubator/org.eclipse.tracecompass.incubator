@@ -22,6 +22,7 @@ import com.google.common.base.Objects;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public class CallStackDepth {
 
     private final CallStack fCallstack;

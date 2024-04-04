@@ -19,6 +19,7 @@ import org.eclipse.tracecompass.segmentstore.core.ISegment;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public class ProcessStatusInterval implements ISegment {
 
     /**
