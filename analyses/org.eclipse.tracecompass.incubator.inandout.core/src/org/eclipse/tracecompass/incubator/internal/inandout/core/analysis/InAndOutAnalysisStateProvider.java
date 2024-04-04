@@ -19,8 +19,10 @@ import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.internal.inandout.core.analysis.SegmentSpecifier.SegmentContext;
+import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
+import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
@@ -96,16 +98,16 @@ public class InAndOutAnalysisStateProvider extends CallStackStateProvider {
     }
 
     @Override
-    protected @Nullable String functionEntry(ITmfEvent event) {
+    protected @Nullable ITmfStateValue functionEntry(ITmfEvent event) {
         SegmentContext segmentContext = fFirst;
         if (segmentContext == null) {
             return null;
         }
-        return segmentContext.getLabel();
+        return TmfStateValue.newValueString(segmentContext.getLabel());
     }
 
     @Override
-    protected @Nullable String functionExit(ITmfEvent event) {
+    protected @Nullable ITmfStateValue functionExit(ITmfEvent event) {
         if (fLast == null) {
             return null;
         }
@@ -116,7 +118,7 @@ public class InAndOutAnalysisStateProvider extends CallStackStateProvider {
                 map.remove(fLast.getContext(), victim.get());
             }
         }
-        return fLast.getLabel();
+        return TmfStateValue.newValueString(fLast.getLabel());
     }
 
     @Override
