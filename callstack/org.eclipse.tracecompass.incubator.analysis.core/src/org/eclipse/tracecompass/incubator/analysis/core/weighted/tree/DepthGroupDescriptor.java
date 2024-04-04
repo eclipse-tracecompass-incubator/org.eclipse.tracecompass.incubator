@@ -22,6 +22,7 @@ import org.eclipse.tracecompass.incubator.internal.analysis.core.weighted.tree.M
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public class DepthGroupDescriptor implements IWeightedTreeGroupDescriptor {
 
     private final int fDepth;

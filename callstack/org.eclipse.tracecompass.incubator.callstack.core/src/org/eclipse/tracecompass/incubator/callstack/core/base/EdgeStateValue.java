@@ -30,6 +30,7 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
  *
  * @author Loic Prieur-Drevon
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public class EdgeStateValue extends CustomStateValue {
 
     /**

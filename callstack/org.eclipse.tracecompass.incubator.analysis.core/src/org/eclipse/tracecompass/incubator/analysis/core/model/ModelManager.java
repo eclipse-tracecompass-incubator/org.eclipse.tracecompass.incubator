@@ -21,6 +21,7 @@ import org.eclipse.tracecompass.incubator.internal.analysis.core.model.Composite
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public final class ModelManager {
 
     private static final Map<String, IHostModel> MODELS_FOR_HOST = new HashMap<>();

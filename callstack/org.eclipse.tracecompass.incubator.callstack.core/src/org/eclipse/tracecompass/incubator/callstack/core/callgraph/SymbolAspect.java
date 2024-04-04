@@ -31,6 +31,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
  *
  * @author Sonia Farrah
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public final class SymbolAspect implements ISegmentAspect {
     /**
      * A symbol aspect

@@ -18,6 +18,7 @@ import java.util.Collection;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public interface ISamplingDataProvider {
 
     /**

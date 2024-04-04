@@ -18,6 +18,7 @@ import org.eclipse.tracecompass.tmf.core.symbols.ISymbolProvider;
 /**
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public interface ICallStackSymbol {
 
     /**
