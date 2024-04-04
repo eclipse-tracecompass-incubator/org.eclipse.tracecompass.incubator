@@ -20,7 +20,6 @@
    </license>
 
    <requires>
-      <import plugin="org.eclipse.tracecompass.incubator.analysis.core"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.tracecompass.common.core"/>
@@ -37,23 +36,14 @@
 
    <plugin
          id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.doc.user"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>
