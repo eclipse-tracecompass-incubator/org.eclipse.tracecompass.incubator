@@ -17,10 +17,10 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackStateProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack2.CallStackSeries;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack2.CallStackSeries.IThreadIdResolver;
+import org.eclipse.tracecompass.analysis.profiling.core.instrumented.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.AbstractOtf2Analysis;
 import org.eclipse.tracecompass.incubator.internal.otf2.core.analysis.IOtf2Constants;
 import org.eclipse.tracecompass.incubator.otf2.core.trace.Otf2Trace;
