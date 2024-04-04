@@ -20,8 +20,8 @@ import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeProvid
 import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTreeGroupBy;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeUtils;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeProvider;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.WeightedTreeUtils;
 import org.eclipse.tracecompass.incubator.internal.scripting.core.data.provider.ScriptingDataProviderManager;
 import org.eclipse.tracecompass.internal.analysis.profiling.core.flamegraph.FlameGraphDataProvider;
 import org.eclipse.tracecompass.internal.analysis.profiling.core.tree.AllGroupDescriptor;
