@@ -36,6 +36,7 @@ import org.eclipse.jdt.annotation.NonNull;
  * @param <T>
  *            The type of the tree provided
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public interface IWeightedTreeSet<@NonNull N, E, @NonNull T extends WeightedTree<N>> {
 
     /**

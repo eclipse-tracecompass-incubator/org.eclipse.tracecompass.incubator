@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public final class AllGroupDescriptor implements IWeightedTreeGroupDescriptor {
 
     private static final String ALL_NAME = "all"; //$NON-NLS-1$

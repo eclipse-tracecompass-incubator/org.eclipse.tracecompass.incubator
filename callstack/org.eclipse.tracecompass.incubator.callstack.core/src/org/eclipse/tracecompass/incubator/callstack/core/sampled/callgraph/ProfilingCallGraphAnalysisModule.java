@@ -47,6 +47,7 @@ import org.eclipse.tracecompass.tmf.core.util.Pair;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public abstract class ProfilingCallGraphAnalysisModule extends TmfAbstractAnalysisModule implements ICallGraphProvider, IEventCallStackProvider {
 
     private static final MetricType WEIGHT_METRIC = new MetricType(Objects.requireNonNull(Messages.CallGraphStats_NbCalls), DataType.NUMBER, null);

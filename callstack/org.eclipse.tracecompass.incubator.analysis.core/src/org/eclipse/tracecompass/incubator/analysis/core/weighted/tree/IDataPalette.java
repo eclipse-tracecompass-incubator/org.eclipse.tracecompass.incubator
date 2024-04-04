@@ -21,6 +21,7 @@ import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
  *
  * @author Geneviève Bastien
  */
+@Deprecated(since="0.10.0", forRemoval=true)
 public interface IDataPalette {
 
     /**
