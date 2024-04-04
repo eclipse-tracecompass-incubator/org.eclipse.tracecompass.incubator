@@ -17,19 +17,20 @@ import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
-import org.eclipse.tracecompass.incubator.callstack.core.base.ICallStackElement;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.IHostIdProvider;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils.TraceHostIdResolver;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdProvider;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackSeries.IThreadIdResolver;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackHostUtils;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
-import org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.InstrumentedCallStackElement;
+import org.eclipse.tracecompass.analysis.profiling.core.base.ICallStackElement;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack2.CallStackHostUtils;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack2.CallStackHostUtils.IHostIdProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack2.CallStackHostUtils.IHostIdResolver;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack2.CallStackHostUtils.TraceHostIdResolver;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack2.CallStackSeries.IThreadIdProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack2.CallStackSeries.IThreadIdResolver;
+import org.eclipse.tracecompass.analysis.profiling.core.instrumented.InstrumentedCallStackAnalysis;
+import org.eclipse.tracecompass.analysis.profiling.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVMInformationProvider;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.fused.FusedVirtualMachineAnalysis;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.model.analysis.VirtualMachineModelAnalysis;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.virtual.resources.VirtualResourcesAnalysis;
+import org.eclipse.tracecompass.internal.analysis.profiling.core.instrumented.InstrumentedCallStackElement;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
@@ -202,30 +203,30 @@ public class VmOverheadAnalysis extends InstrumentedCallStackAnalysis {
     }
 
     @Override
-    public @NonNull String getHostId() {
+    public IHostIdResolver getHostIdResolver() {
         // The host ID is the one from the host
         ITmfTrace trace = getTrace();
         if (trace == null) {
-            return super.getHostId();
+            return super.getHostIdResolver();
         }
         // FIXME: There should be a better way to get the host ID
         FusedVirtualMachineAnalysis analysisModule = TmfTraceUtils.getAnalysisModuleOfClass(trace, FusedVirtualMachineAnalysis.class, FusedVirtualMachineAnalysis.ID);
         if (analysisModule == null) {
-            return super.getHostId();
+            return super.getHostIdResolver();
         }
         analysisModule.schedule();
         analysisModule.waitForCompletion();
         ITmfStateSystem stateSystem = analysisModule.getStateSystem();
         if (stateSystem == null) {
-            return super.getHostId();
+            return super.getHostIdResolver();
         }
         Optional<ITmfTrace> hostTrace = TmfTraceManager.getTraceSet(trace).stream()
                 .filter(t -> FusedVMInformationProvider.getParentMachineHostId(stateSystem, t.getHostId()).isEmpty())
                 .findFirst();
         if (hostTrace.isPresent()) {
-            return hostTrace.get().getHostId();
+            return new CallStackHostUtils.TraceHostIdResolver(hostTrace.get());
         }
-        return super.getHostId();
+        return super.getHostIdResolver();
     }
 
     /**
