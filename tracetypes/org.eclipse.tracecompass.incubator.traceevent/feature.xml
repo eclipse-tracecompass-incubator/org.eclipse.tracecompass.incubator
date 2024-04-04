@@ -25,7 +25,6 @@
       <import plugin="org.eclipse.tracecompass.common.core"/>
       <import plugin="org.eclipse.tracecompass.tmf.core"/>
       <import plugin="org.eclipse.tracecompass.segmentstore.core"/>
-      <import plugin="org.eclipse.tracecompass.incubator.callstack.core"/>
       <import plugin="org.eclipse.tracecompass.analysis.os.linux.core"/>
       <import plugin="org.eclipse.tracecompass.incubator.analysis.core"/>
       <import plugin="org.eclipse.tracecompass.analysis.counters.core"/>
@@ -40,22 +39,15 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.tracecompass.tmf.ui"/>
       <import plugin="org.eclipse.swt"/>
-      <import feature="org.eclipse.tracecompass.incubator.callstack"/>
       <import plugin="org.eclipse.tracecompass.jsontrace.core"/>
    </requires>
 
    <plugin
          id="org.eclipse.tracecompass.incubator.traceevent.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.tracecompass.incubator.traceevent.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>

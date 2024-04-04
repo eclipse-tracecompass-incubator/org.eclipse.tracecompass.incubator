@@ -21,7 +21,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
-import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
+import org.eclipse.tracecompass.analysis.profiling.core.instrumented.EdgeStateValue;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.callstack.TraceEventCallstackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
