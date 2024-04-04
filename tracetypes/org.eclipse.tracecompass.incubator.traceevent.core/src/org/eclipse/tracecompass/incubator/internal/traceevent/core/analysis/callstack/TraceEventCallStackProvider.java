@@ -28,10 +28,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxPidAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
-import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
-import org.eclipse.tracecompass.incubator.callstack.core.base.EdgeStateValue;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.InstrumentedCallStackAnalysis;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackStateProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.instrumented.EdgeStateValue;
+import org.eclipse.tracecompass.analysis.profiling.core.instrumented.InstrumentedCallStackAnalysis;
+import org.eclipse.tracecompass.analysis.profiling.core.model.IHostModel;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.ITraceEventConstants;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventAspects;
 import org.eclipse.tracecompass.incubator.internal.traceevent.core.event.TraceEventField;
@@ -41,6 +41,8 @@ import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
+import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfAttributePool;
@@ -223,9 +225,9 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
     }
 
     @Override
-    protected @Nullable Object functionEntry(@NonNull ITmfEvent event) {
+    protected @Nullable ITmfStateValue functionEntry(@NonNull ITmfEvent event) {
         if (isEntry(event)) {
-            return event.getName();
+            return TmfStateValue.newValueString(event.getName());
         }
         return null;
     }
@@ -236,9 +238,9 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
     }
 
     @Override
-    protected @Nullable Object functionExit(@NonNull ITmfEvent event) {
+    protected @Nullable ITmfStateValue functionExit(@NonNull ITmfEvent event) {
         if (isExit(event)) {
-            return event.getName();
+            return TmfStateValue.newValueString(event.getName());
         }
         return null;
     }
@@ -477,7 +479,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
     }
 
     private void handleStart(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp, String processName) {
-        Object functionBeginName = functionEntry(event);
+        ITmfStateValue functionBeginName = functionEntry(event);
         if (functionBeginName != null) {
             int processQuark = ss.getQuarkAbsoluteAndAdd(PROCESSES, processName);
             int pid = getProcessId(event);
@@ -492,7 +494,7 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             ss.modifyAttribute(timestamp, threadId, threadQuark);
 
             int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.CALL_STACK);
-            ss.pushAttribute(timestamp, functionBeginName, callStackQuark);
+            ss.pushAttribute(timestamp, functionBeginName.unboxValue(), callStackQuark);
             prepareNextSlice(ss, callStackQuark, timestamp);
         }
     }
@@ -505,8 +507,9 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     private void handleEnd(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp, String processName) {
         /* Check if the event is a function exit */
-        Object functionExitName = functionExit(event);
-        if (functionExitName != null) {
+        ITmfStateValue functionExitState = functionExit(event);
+        if (functionExitState != null) {
+            String functionExitName = functionExitState.unboxStr();
             String pName = processName;
 
             if (pName == null) {
