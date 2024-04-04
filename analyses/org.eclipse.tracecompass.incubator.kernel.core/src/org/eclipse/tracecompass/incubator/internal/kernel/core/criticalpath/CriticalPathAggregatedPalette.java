@@ -16,10 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfEdge.EdgeType;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IDataPalette;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
-import org.eclipse.tracecompass.internal.analysis.graph.core.base.CriticalPathPalette;
+import org.eclipse.tracecompass.analysis.profiling.core.base.IDataPalette;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
+import org.eclipse.tracecompass.internal.analysis.graph.core.base.OSCriticalPathPalette;
+import org.eclipse.tracecompass.internal.analysis.graph.core.graph.legacy.OSEdgeContextState.OSEdgeContextEnum;
 import org.eclipse.tracecompass.tmf.core.dataprovider.X11ColorUtils;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableMap;
 
 /**
  * The palette for the critical path aggregated. The critical path states will
- * use the {@link CriticalPathPalette} and threads and processes will use a qualitative palette.
+ * use the {@link OSCriticalPathPalette} and threads and processes will use a qualitative palette.
  *
  * @author gbastien
  */
@@ -47,7 +47,7 @@ public class CriticalPathAggregatedPalette implements IDataPalette {
 
     static {
         ImmutableMap.Builder<String, OutputElementStyle> builder = new ImmutableMap.Builder<>();
-        builder.putAll(CriticalPathPalette.getStyles());
+        builder.putAll(OSCriticalPathPalette.getStyles());
         IPaletteProvider palette = new QualitativePaletteProvider.Builder().setNbColors(NUM_COLORS).build();
         int i = 0;
         for (RGBAColor color : palette.get()) {
@@ -85,12 +85,12 @@ public class CriticalPathAggregatedPalette implements IDataPalette {
         if (object instanceof WeightedTree) {
             WeightedTree<?> tree = (WeightedTree<?>) object;
             Object treeObject = tree.getObject();
-            if (treeObject instanceof EdgeType) {
-                return STYLE_MAP.computeIfAbsent(((EdgeType) treeObject).name(), style -> new OutputElementStyle(style));
+            if (treeObject instanceof OSEdgeContextEnum) {
+                return STYLE_MAP.computeIfAbsent(((OSEdgeContextEnum) treeObject).name(), OutputElementStyle::new);
             }
-            return STYLE_MAP.computeIfAbsent(DEFAULT_PREFIX + String.valueOf(Math.floorMod(treeObject.hashCode(), NUM_COLORS)), style -> new OutputElementStyle(style));
+            return STYLE_MAP.computeIfAbsent(DEFAULT_PREFIX + String.valueOf(Math.floorMod(treeObject.hashCode(), NUM_COLORS)), OutputElementStyle::new);
         }
-        return STYLE_MAP.computeIfAbsent(DEFAULT_PREFIX + String.valueOf(Math.floorMod(object.hashCode(), NUM_COLORS)), style -> new OutputElementStyle(style));
+        return STYLE_MAP.computeIfAbsent(DEFAULT_PREFIX + String.valueOf(Math.floorMod(object.hashCode(), NUM_COLORS)), OutputElementStyle::new);
     }
 
     @Override
