@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.analysis.core.weighted.tree;
+package org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,9 +18,10 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTree;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeProvider;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeSet;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.ITree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
 
 import com.google.common.collect.ImmutableList;

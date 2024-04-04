@@ -17,8 +17,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.ITree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;

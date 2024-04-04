@@ -22,10 +22,10 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IDataPalette;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
+import org.eclipse.tracecompass.analysis.profiling.core.base.IDataPalette;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
 import org.eclipse.tracecompass.incubator.internal.analysis.core.weighted.tree.DifferentialPalette;
 
 /**
