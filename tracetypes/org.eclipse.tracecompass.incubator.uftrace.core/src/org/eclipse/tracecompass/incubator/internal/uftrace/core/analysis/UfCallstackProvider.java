@@ -14,10 +14,12 @@ package org.eclipse.tracecompass.incubator.internal.uftrace.core.analysis;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
-import org.eclipse.tracecompass.incubator.callstack.core.instrumented.statesystem.CallStackStateProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackStateProvider;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.DatEvent;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.UfEventType;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.Uftrace.PidAspect;
+import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
+import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
@@ -64,26 +66,26 @@ public class UfCallstackProvider extends CallStackStateProvider {
     }
 
     @Override
-    protected @Nullable Object functionEntry(@NonNull ITmfEvent event) {
+    protected @Nullable ITmfStateValue functionEntry(@NonNull ITmfEvent event) {
         ITmfEventField content = event.getContent();
         Object payload = content.getValue();
         if (payload instanceof DatEvent) {
             DatEvent ev = (DatEvent) payload;
             if (event.getType().equals(UfEventType.ENTRY)) {
-                return ev.getAddress();
+                return TmfStateValue.newValueLong(ev.getAddress());
             }
         }
         return null;
     }
 
     @Override
-    protected @Nullable Object functionExit(@NonNull ITmfEvent event) {
+    protected @Nullable ITmfStateValue functionExit(@NonNull ITmfEvent event) {
         ITmfEventField content = event.getContent();
         Object payload = content.getValue();
         if (payload instanceof DatEvent) {
             DatEvent ev = (DatEvent) payload;
             if (event.getType().equals(UfEventType.EXIT)) {
-                return ev.getAddress();
+                return TmfStateValue.newValueLong(ev.getAddress());
             }
         }
         return null;

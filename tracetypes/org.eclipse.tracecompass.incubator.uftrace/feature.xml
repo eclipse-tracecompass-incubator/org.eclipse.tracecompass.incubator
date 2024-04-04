@@ -23,26 +23,20 @@
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.tracecompass.common.core"/>
-      <import plugin="org.eclipse.tracecompass.incubator.callstack.core"/>
       <import plugin="com.google.guava"/>
       <import plugin="org.apache.commons.commons-io"/>
       <import plugin="org.eclipse.help"/>
       <import plugin="org.eclipse.tracecompass.tmf.core" version="3.2.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.tracecompass.incubator.analysis.core"/>
       <import plugin="org.eclipse.tracecompass.analysis.os.linux.core"/>
+      <import plugin="org.eclipse.tracecompass.analysis.profiling.core"/>
    </requires>
 
    <plugin
          id="org.eclipse.tracecompass.incubator.uftrace.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.tracecompass.incubator.uftrace.doc.user"
-         download-size="0"
-         install-size="0"
          version="0.0.0"/>
 
 </feature>
