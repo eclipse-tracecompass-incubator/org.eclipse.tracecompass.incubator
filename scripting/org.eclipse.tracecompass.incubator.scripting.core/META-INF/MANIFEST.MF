@@ -22,7 +22,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.incubator.filters.core;resolution:=optional,
  org.eclipse.tracecompass.tmf.cli.core,
  org.eclipse.tracecompass.incubator.analysis.core;resolution:=optional,
- org.eclipse.tracecompass.incubator.callstack.core;resolution:=optional,
+ org.eclipse.tracecompass.analysis.profiling.core,
  org.eclipse.tracecompass.analysis.timing.core;resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.internal.scripting.core;x-friends:="org.eclipse.tracecompass.incubator.scripting.core.tests,org.eclipse.tracecompass.incubator.scripting.ui.tests",
  org.eclipse.tracecompass.incubator.internal.scripting.core.analysis;x-friends:="org.eclipse.tracecompass.incubator.scripting.core.tests,org.eclipse.tracecompass.incubator.scripting.ui",
