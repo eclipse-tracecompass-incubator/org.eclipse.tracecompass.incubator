@@ -24,8 +24,8 @@ import org.eclipse.tracecompass.analysis.graph.core.graph.ITmfGraphVisitor;
 import org.eclipse.tracecompass.analysis.graph.core.graph.ITmfVertex;
 import org.eclipse.tracecompass.analysis.graph.core.graph.TmfEdgeState;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsWorker;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
 
 import com.google.common.collect.ImmutableList;
 
