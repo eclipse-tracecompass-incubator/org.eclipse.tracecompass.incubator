@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IDataPalette;
+import org.eclipse.tracecompass.analysis.profiling.core.base.IDataPalette;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTree;
 import org.eclipse.tracecompass.incubator.internal.analysis.core.Activator;
 import org.eclipse.tracecompass.tmf.core.dataprovider.X11ColorUtils;

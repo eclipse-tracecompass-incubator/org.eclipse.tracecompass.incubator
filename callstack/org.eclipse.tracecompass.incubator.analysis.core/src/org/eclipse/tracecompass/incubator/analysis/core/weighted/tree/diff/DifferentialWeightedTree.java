@@ -12,7 +12,7 @@
 package org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
 
 /**
  * A class that represents a differential weighted tree. The weight is the base
