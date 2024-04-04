@@ -22,8 +22,8 @@ import java.util.Collections;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.tracecompass.incubator.analysis.core.concepts.AggregatedCallSite;
-import org.eclipse.tracecompass.incubator.analysis.core.concepts.ISamplingDataProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.analysis.profiling.core.model.ISamplingDataProvider;
 import org.eclipse.tracecompass.incubator.internal.perf.profiling.core.callgraph.PerfCallchainAnalysisModule;
 import org.eclipse.tracecompass.incubator.perf.profiling.core.tests.ActivatorTest;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
