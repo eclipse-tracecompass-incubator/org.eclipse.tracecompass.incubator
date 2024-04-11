@@ -98,7 +98,7 @@
 				<stateChange>
 					<stateAttribute type="constant" value="#CurrentScenario" />
 					<stateAttribute type="constant" value="component" />
-					<stateValue type="script" value="cat == null ? 'UNKNOWN' : cat" scriptEngine="nashorn" >
+					<stateValue type="script" value="cat == null ? 'UNKNOWN' : cat" >
 						<stateValue id="cat" type="eventField" value="cat" />
 					</stateValue>
 				</stateChange>
