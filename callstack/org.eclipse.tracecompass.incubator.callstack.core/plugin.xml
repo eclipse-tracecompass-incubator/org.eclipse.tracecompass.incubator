@@ -3,12 +3,6 @@
 <plugin>
    <extension
          point="org.eclipse.tracecompass.tmf.analysis.xml.core.xsd">
-      <xsdfile
-            file="xsd_files/xmlCallstack.xsd">
-      </xsdfile>
-      <schemaParser
-            class="org.eclipse.tracecompass.incubator.internal.callstack.core.xml.callstack.CallstackXmlSchemaParser">
-      </schemaParser>
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
