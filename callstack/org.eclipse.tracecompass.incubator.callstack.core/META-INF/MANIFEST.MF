@@ -39,8 +39,7 @@ Export-Package: org.eclipse.tracecompass.incubator.callstack.core.base,
  org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.callgraph;x-friends:="org.eclipse.tracecompass.incubator.callstack.core.tests,org.eclipse.tracecompass.incubator.callstack.ui",
  org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider,
  org.eclipse.tracecompass.incubator.internal.callstack.core.palette,
- org.eclipse.tracecompass.incubator.internal.callstack.core.symbol;x-internal:=true,
- org.eclipse.tracecompass.incubator.internal.callstack.core.xml.callstack;x-friends:="org.eclipse.tracecompass.incubator.callstack.core.tests,org.eclipse.tracecompass.incubator.callstack.ui"
+ org.eclipse.tracecompass.incubator.internal.callstack.core.symbol;x-internal:=true
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.cache,

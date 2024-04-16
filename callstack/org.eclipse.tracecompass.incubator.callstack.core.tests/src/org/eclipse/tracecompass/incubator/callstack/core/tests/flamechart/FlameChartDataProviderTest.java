@@ -77,7 +77,7 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
     public void testGetDescriptors() {
         FlameChartDataProviderFactory dataProviderFactory = new FlameChartDataProviderFactory();
         Collection<IDataProviderDescriptor> descriptors = dataProviderFactory.getDescriptors(getTrace());
-        assertEquals(descriptors.size(), 2);
+        assertEquals(1, descriptors.size());
 
         for (IDataProviderDescriptor descriptor : descriptors) {
             switch(descriptor.getId()) {
@@ -85,11 +85,6 @@ public class FlameChartDataProviderTest extends CallStackTestBase {
                 assertEquals("FlameChart Test Callstack", descriptor.getName());
                 assertEquals(IDataProviderDescriptor.ProviderType.TIME_GRAPH, descriptor.getType());
                 assertEquals("Show FlameChart provided by Analysis module: Test Callstack", descriptor.getDescription());
-                break;
-            case "org.eclipse.tracecompass.incubator.internal.callstack.core.instrumented.provider.flamechart:callstack.analysis":
-                assertEquals("FlameChart Test XML callstack", descriptor.getName());
-                assertEquals(IDataProviderDescriptor.ProviderType.TIME_GRAPH, descriptor.getType());
-                assertEquals("Show FlameChart provided by Analysis module: Test XML callstack", descriptor.getDescription());
                 break;
             default:
                 fail("Unknown Entry" + descriptor.getId());
