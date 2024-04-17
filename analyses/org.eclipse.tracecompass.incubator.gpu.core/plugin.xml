@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.gpu.core.analysis.GpuCallStackAnalysis"
+            id="org.eclipse.tracecompass.incubator.gpu.core.analysis.callstack"
+            name="GPU Timeline">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.gpu.core.trace.IGpuTrace">
+         </tracetype>
+      </module>
+   </extension>
+
+</plugin>

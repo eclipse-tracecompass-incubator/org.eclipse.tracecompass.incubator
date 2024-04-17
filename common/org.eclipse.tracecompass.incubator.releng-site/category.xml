@@ -69,6 +69,9 @@
    <feature url="features/org.eclipse.tracecompass.incubator.ros2_0.0.0.jar" id="org.eclipse.tracecompass.incubator.ros2" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.gpu_0.0.0.jar" id="org.eclipse.tracecompass.incubator.gpu" version="0.0.0">
+      <category name="analyses"/>
+   </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.0">
       <category name="analyses"/>
    </bundle>

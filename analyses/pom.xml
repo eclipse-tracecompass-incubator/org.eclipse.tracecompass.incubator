@@ -52,6 +52,9 @@
     <module>org.eclipse.tracecompass.incubator.inandout.core</module>
     <module>org.eclipse.tracecompass.incubator.inandout.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.inandout.ui</module>
+    <module>org.eclipse.tracecompass.incubator.gpu</module>
+    <module>org.eclipse.tracecompass.incubator.gpu.core</module>
+    <module>org.eclipse.tracecompass.incubator.gpu.core.tests</module>
     <!-- insert modules here -->
   </modules>
 

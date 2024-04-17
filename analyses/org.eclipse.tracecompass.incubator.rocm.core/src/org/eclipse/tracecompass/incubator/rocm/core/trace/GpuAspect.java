@@ -12,9 +12,7 @@
 package org.eclipse.tracecompass.incubator.rocm.core.trace;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.old.RocmStrings;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfDeviceAspect;
 import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent;
 
@@ -54,14 +52,6 @@ public final class GpuAspect extends TmfDeviceAspect {
     public @Nullable Integer resolve(ITmfEvent event) {
         if (!(event instanceof CtfTmfEvent)) {
             return null;
-        }
-        ITmfEventField content = event.getContent();
-        if (content != null) {
-            Integer fieldValue = content.getFieldValue(Integer.class, RocmStrings.DEVICE_ID);
-            if (fieldValue == null) {
-                fieldValue = content.getFieldValue(Integer.class, RocmStrings.GPU_ID);
-            }
-            return fieldValue == null ? null : fieldValue.intValue();
         }
         return null;
     }
