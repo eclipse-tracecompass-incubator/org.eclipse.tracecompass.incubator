@@ -93,7 +93,6 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
         ITmfStateSystemBuilder ss = Objects.requireNonNull(getStateSystemBuilder());
         long timestamp = event.getTimestamp().toNanos();
 
-        // TODO(christophebedard) handle rcl_init?
         eventHandleNode(event, ss, timestamp);
         eventHandlePublisher(event, ss);
         eventHandleSubscription(event, ss);
@@ -118,10 +117,11 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
     }
 
     private void eventHandlePublisher(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss) {
-        eventHandlePublisherDdsCreate(event);
+        if (!isPubSourceTimestampAvailableFromRmw()) {
+            eventHandlePublisherDdsCreate(event);
+        }
         eventHandlePublisherInit(event, ss);
     }
-
 
     private void eventHandlePublisherDdsCreate(@NonNull ITmfEvent event) {
         // dds:create_writer
@@ -141,7 +141,6 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
             fDdsCreateWriterEvents.put(new Gid(gid), event);
         }
     }
-
 
     private void eventHandlePublisherInit(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss) {
         // rmw_publisher_init
@@ -180,29 +179,34 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
             long[] rmwGid = (long[]) getField(rmwPublisherInit, LAYOUT.fieldGid());
             Gid gid = getDdsGidFromRmwGidArray(rmwGid);
 
-            // Get corresponding dds:create_writer event
-            ITmfEvent ddsCreateWriter = fDdsCreateWriterEvents.remove(gid);
-            if (null == ddsCreateWriter) {
-                Activator.getInstance().logError("could find corresponding dds:dds_create writer for gid=" + gid.toString()); //$NON-NLS-1$
-                return;
+            long publisherTimestamp = rmwPublisherInit.getTimestamp().toNanos();
+            HostProcessPointer ddsWriter = hostProcessPointerFrom(rmwPublisherInit, 0L);
+            if (!isPubSourceTimestampAvailableFromRmw()) {
+                // Get corresponding dds:create_writer event
+                ITmfEvent ddsCreateWriter = fDdsCreateWriterEvents.remove(gid);
+                if (null == ddsCreateWriter) {
+                    Activator.getInstance().logError("could find corresponding dds:dds_create writer for gid=" + gid.toString()); //$NON-NLS-1$
+                    return;
+                }
+                ddsWriter = hostProcessPointerFrom(ddsCreateWriter, (long) getField(ddsCreateWriter, LAYOUT.fieldWriter()));
+                // Use timestamp from dds:create_writer event
+                publisherTimestamp = ddsCreateWriter.getTimestamp().toNanos();
             }
-            HostProcessPointer ddsWriter = hostProcessPointerFrom(ddsCreateWriter, (long) getField(ddsCreateWriter, LAYOUT.fieldWriter()));
 
             // Add to pubs list
             Ros2PublisherObject pubObject = new Ros2PublisherObject(publisherHandle, rmwPublisherHandle, topicName, nodeHandle, gid, ddsWriter);
             int pubQuark = Ros2ObjectsUtil.getPublisherQuarkAndAdd(ss, pubObject.getHandle());
-            // Use timestamp from dds:create_writer event
-            long ddsTimestamp = ddsCreateWriter.getTimestamp().toNanos();
-            ss.modifyAttribute(ddsTimestamp, pubObject, pubQuark);
+            ss.modifyAttribute(publisherTimestamp, pubObject, pubQuark);
         }
     }
 
     private void eventHandleSubscription(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss) {
-        eventHandleSubscriptionDdsCreate(event);
+        if (!isPubSourceTimestampAvailableFromRmw()) {
+            eventHandleSubscriptionDdsCreate(event);
+        }
         eventHandleSubscriptionInit(event);
         eventHandleSubscriptionCallbackAdded(event, ss);
     }
-
 
     private void eventHandleSubscriptionDdsCreate(@NonNull ITmfEvent event) {
         // dds:create_reader
@@ -286,13 +290,19 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
             long[] gidRmw = (long[]) getField(rmwSubscriptionInit, LAYOUT.fieldGid());
             Gid gid = getDdsGidFromRmwGidArray(gidRmw);
 
-            // Get corresponding dds:create_reader event
-            ITmfEvent ddsCreateReader = fDdsCreateReaderEvents.remove(gid);
-            if (null == ddsCreateReader) {
-                Activator.getInstance().logError("could not find corresponding dds:create_reader event for gid=" + gid.toString()); //$NON-NLS-1$
-                return;
+            long subscriptionTimestamp = rmwSubscriptionInit.getTimestamp().toNanos();
+            HostProcessPointer ddsReader = hostProcessPointerFrom(rmwSubscriptionInit, 0L);
+            if (!isPubSourceTimestampAvailableFromRmw()) {
+                // Get corresponding dds:create_reader event
+                ITmfEvent ddsCreateReader = fDdsCreateReaderEvents.remove(gid);
+                if (null == ddsCreateReader) {
+                    Activator.getInstance().logError("could not find corresponding dds:create_reader event for gid=" + gid.toString()); //$NON-NLS-1$
+                    return;
+                }
+                // Use timestamp from dds:create_reader event
+                subscriptionTimestamp = ddsCreateReader.getTimestamp().toNanos();
+                ddsReader = hostProcessPointerFrom(ddsCreateReader, (long) getField(ddsCreateReader, LAYOUT.fieldReader()));
             }
-            HostProcessPointer ddsReader = hostProcessPointerFrom(ddsCreateReader, (long) getField(ddsCreateReader, LAYOUT.fieldReader()));
 
             // Add callback owner info to map
             fCallbackOwners.put(callback, new Pair<>(Ros2CallbackType.SUBSCRIPTION, subscriptionHandle));
@@ -301,9 +311,7 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
             Ros2SubscriptionObject subscriptionObject = new Ros2SubscriptionObject(
                     subscriptionHandle, rmwSubscriptionHandle, topicName, nodeHandle, gid, ddsReader, subscription, callback);
             int subQuark = Ros2ObjectsUtil.getSubscriptionQuarkAndAdd(ss, subscriptionObject.getHandle());
-            // Use timestamp from dds:create_reader event
-            long ddsTimestamp = ddsCreateReader.getTimestamp().toNanos();
-            ss.modifyAttribute(ddsTimestamp, subscriptionObject, subQuark);
+            ss.modifyAttribute(subscriptionTimestamp, subscriptionObject, subQuark);
         }
     }
 
