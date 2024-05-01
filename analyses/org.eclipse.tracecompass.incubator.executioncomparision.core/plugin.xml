@@ -4,10 +4,10 @@
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
-            analysis_module="org.eclipse.tracecompass.incubator.internal.executioncomparision.core.DifferentialSeqCallGraphAnalysis"
+            analysis_module="org.eclipse.tracecompass.incubator.internal.executioncomparison.core.DifferentialSeqCallGraphAnalysis"
             applies_experiment="false"
             automatic="false"
-            id="org.eclipse.tracecompass.incubator.executioncomparision.diffcallgraph"
+            id="org.eclipse.tracecompass.incubator.executioncomparison.diffcallgraph"
             name="Execution Comparison">
                      <tracetype
                            applies="true"

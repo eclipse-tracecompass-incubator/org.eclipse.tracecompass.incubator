@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.executioncomparision.core;
+package org.eclipse.tracecompass.incubator.internal.executioncomparison.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,11 +74,25 @@ public final class ParametricWeightedTreeUtils {
                 diffTree = new DifferentialWeightedTree<>(base, object, base.getWeight(), diffWeight);
 
             } else {
-                long baseWeight;
-                long otherWeight;
+                long baseWeight = 0;
+                long otherWeight = 0;
                 if (base instanceof AggregatedCalledFunction) {
-                    baseWeight = ((AggregatedCalledFunction) base).getWeight(statisticType);
-                    otherWeight = other == null ? 0 : ((AggregatedCalledFunction) other).getWeight(statisticType);
+                    switch(statisticType) {
+                    case "Self Time": //$NON-NLS-1$
+                    {
+                        baseWeight = ((AggregatedCalledFunction) base).getSelfTime();
+                        otherWeight = other == null ? 0 : ((AggregatedCalledFunction) other).getSelfTime();
+                        break;
+                    }
+                    case "Duration": //$NON-NLS-1$
+                    {
+                        baseWeight = ((AggregatedCalledFunction) base).getWeight();
+                        otherWeight = other == null ? 0 : ((AggregatedCalledFunction) other).getWeight();
+                        break;
+                    }
+                    default:
+                        break;
+                    }
 
                 } else {
                     baseWeight = base.getWeight();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.executioncomparision.ui;
+package org.eclipse.tracecompass.incubator.internal.executioncomparison.ui;
 
 import java.util.Objects;
 
@@ -23,7 +23,7 @@ import org.osgi.framework.BundleContext;
 public class Activator extends AbstractUIPlugin {
 
     /** The plugin ID */
-    public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.executioncomparision.ui"; //$NON-NLS-1$
+    public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.executioncomparison.ui"; //$NON-NLS-1$
 
     // The shared instance
     private static @Nullable Activator plugin;

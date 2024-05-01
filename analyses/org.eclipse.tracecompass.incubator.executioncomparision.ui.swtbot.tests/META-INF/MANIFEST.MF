@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
-Bundle-SymbolicName: org.eclipse.tracecompass.incubator.executioncomparision.ui.swtbot.tests;singleton:=true
+Bundle-SymbolicName: org.eclipse.tracecompass.incubator.executioncomparison.ui.swtbot.tests;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Localization: plugin
 Bundle-ActivationPolicy: lazy
