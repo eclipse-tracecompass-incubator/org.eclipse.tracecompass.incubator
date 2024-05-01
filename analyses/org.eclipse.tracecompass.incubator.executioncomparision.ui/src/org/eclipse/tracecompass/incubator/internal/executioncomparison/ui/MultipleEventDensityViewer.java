@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.executioncomparision.ui;
+package org.eclipse.tracecompass.incubator.internal.executioncomparison.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,13 +17,16 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.tracecompass.incubator.internal.executioncomparision.core.TmfCheckboxChangedSignal;
+import org.eclipse.tracecompass.incubator.internal.executioncomparison.core.TmfCheckboxChangedSignal;
 import org.eclipse.tracecompass.internal.tmf.ui.viewers.eventdensity.EventDensityViewer;
 import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.ITmfTreeViewerEntry;
 import org.eclipse.tracecompass.tmf.ui.viewers.tree.TmfGenericTreeEntry;
 import org.eclipse.tracecompass.tmf.ui.viewers.xychart.linechart.TmfXYChartSettings;
@@ -54,14 +57,26 @@ public class MultipleEventDensityViewer extends EventDensityViewer {
        if (signal == null) {
             return;
         }
-       if (signal.getSource()==this) {
-        final ITmfTrace trace = getTrace();
-        if (trace != null) {
-            long selectedTime = signal.getBeginTime().toNanos();
-            long selectedEndTime = signal.getEndTime().toNanos();
-            setSelectionRange(selectedTime, selectedEndTime);
-        }
+
+       if (!(signal.getSource() instanceof MultipleEventDensityViewer)) {
+           final ITmfTrace trace = getTrace();
+           if (trace != null) {
+               ITmfTimestamp selectedTime = signal.getBeginTime();
+               ITmfTimestamp selectedEndTime = signal.getEndTime();
+               TmfTraceManager.getInstance().updateTraceContext(trace,
+                       builder -> builder.setSelection(new TmfTimeRange(selectedTime, selectedEndTime)));
+
+           }
+           super.selectionRangeUpdated(signal);
        }
+       if (signal.getSource()==this) {
+           final ITmfTrace trace = getTrace();
+           if (trace != null) {
+               long selectedTime = signal.getBeginTime().toNanos();
+               long selectedEndTime = signal.getEndTime().toNanos();
+               setSelectionRange(selectedTime, selectedEndTime);
+           }
+          }
     }
    /**
     * handles check state of tree viewer and keeps the list of whole trace list

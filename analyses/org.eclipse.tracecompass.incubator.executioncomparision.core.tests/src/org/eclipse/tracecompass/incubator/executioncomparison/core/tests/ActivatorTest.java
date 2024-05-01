@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.executioncomparision.core.tests;
+package org.eclipse.tracecompass.incubator.executioncomparison.core.tests;
 
 import static org.junit.Assert.assertEquals;
 
@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
-import org.eclipse.tracecompass.incubator.internal.executioncomparision.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.executioncomparison.core.Activator;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
@@ -39,7 +39,7 @@ public class ActivatorTest extends Plugin {
     /**
      * The plug-in ID
      */
-    public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.executioncomparision.core.tests"; //$NON-NLS-1$
+    public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.executioncomparison.core.tests"; //$NON-NLS-1$
 
     /**
      * The shared instance
@@ -91,7 +91,7 @@ public class ActivatorTest extends Plugin {
     @Test
     public void testActivator() {
         TraceCompassActivator instance = Activator.getInstance();
-        assertEquals("org.eclipse.tracecompass.incubator.executioncomparision.core", instance.getPluginId());
+        assertEquals("org.eclipse.tracecompass.incubator.executioncomparison.core", instance.getPluginId());
     }
 
     /**
