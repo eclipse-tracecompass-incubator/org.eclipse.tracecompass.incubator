@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.executioncomparision.ui;
+package org.eclipse.tracecompass.incubator.internal.executioncomparison.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,8 +54,8 @@ import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLo
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.ScopeLog;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeProvider;
+import org.eclipse.tracecompass.incubator.internal.executioncomparison.core.DifferentialSeqCallGraphAnalysis;
 import org.eclipse.tracecompass.internal.analysis.profiling.core.flamegraph.FlameGraphDataProvider;
-import org.eclipse.tracecompass.incubator.internal.executioncomparision.core.DifferentialSeqCallGraphAnalysis;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TmfFilterAppliedSignal;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TraceCompassFilter;
 import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
@@ -1221,7 +1221,7 @@ public class DifferentialFlameGraphView extends TmfView {
     private static @Nullable DifferentialWeightedTreeProvider<?> getDataProvider() {
         ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
         if (trace != null) {
-            DifferentialSeqCallGraphAnalysis analysis = (DifferentialSeqCallGraphAnalysis) trace.getAnalysisModule("org.eclipse.tracecompass.incubator.executioncomparision.diffcallgraph"); //$NON-NLS-1$
+            DifferentialSeqCallGraphAnalysis analysis = (DifferentialSeqCallGraphAnalysis) trace.getAnalysisModule("org.eclipse.tracecompass.incubator.executioncomparison.diffcallgraph"); //$NON-NLS-1$
             if (analysis != null) {
                 return analysis.getDiffProvider(null);
             }

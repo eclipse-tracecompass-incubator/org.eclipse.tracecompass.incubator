@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.executioncomparision.core;
+package org.eclipse.tracecompass.incubator.internal.executioncomparison.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,7 +70,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
     /**
      * The ID
      */
-    public static final String ID = "org.eclipse.tracecompass.incubator.executioncomparision.diffcallgraph"; //$NON-NLS-1$
+    public static final String ID = "org.eclipse.tracecompass.incubator.executioncomparison.diffcallgraph"; //$NON-NLS-1$
     private static final Logger LOGGER = TraceCompassLog.getLogger(DifferentialSeqCallGraphAnalysis.class);
 
     private static final String MERGE = "Merge"; //$NON-NLS-1$
@@ -106,13 +106,13 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
         try (ScopeLog sl = new ScopeLog(LOGGER, Level.CONFIG, "DifferentialSequenceCGA::refresh()")) { //$NON-NLS-1$
             Collection<WeightedTree<ICallStackSymbol>> originalTree = new ArrayList<>();
             Collection<WeightedTree<ICallStackSymbol>> diffTree = new ArrayList<>();
-            WeightedTreeSet<ICallStackSymbol, Object> callGraphA = mergeCallGraph(fStartA, fEndA, fTraceListA);
+            WeightedTreeSet<ICallStackSymbol, Object> callGraphA = mergeCallGraph(fStartA, fEndA, getTraceListA());
             Collection<@NonNull ?> processes = callGraphA.getTreesForNamed(MERGE);
             for (Object process : processes) {
                 originalTree.add((AggregatedCalledFunction) process);
             }
 
-            WeightedTreeSet<ICallStackSymbol, Object> callGraphB = mergeCallGraph(fStartB, fEndB, fTraceListB);
+            WeightedTreeSet<ICallStackSymbol, Object> callGraphB = mergeCallGraph(fStartB, fEndB, getTraceListB());
             processes = callGraphB.getTreesForNamed(MERGE);
             for (Object process : processes) {
                 diffTree.add((AggregatedCalledFunction) process);
@@ -228,7 +228,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
     public AggregatedCalledFunction mergeCG(AggregatedCalledFunction cg1, AggregatedCalledFunction cg2) {
         AggregatedCalledFunction merged = cg1.copyOf();
         merged.meanData(cg2);
-        /// As the merge function in Weighted tree adds the values og two trees,
+        /// As the merge function in Weighted tree adds the values of two trees,
         /// we need to divide them by 2.
         return merged;
 
@@ -305,19 +305,21 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
         // tuning fTraceList
         List<String> traceListA = signal.getTraceListA();
         if (traceListA != null) {
-            fTraceListA.clear();
-            for (String name : signal.getTraceListA()) {
-                fTraceListA.add(name);
-
+            List<String> synchronizedListA = Collections.synchronizedList(fTraceListA);
+            synchronized (synchronizedListA) {
+            	synchronizedListA.clear();
+            	for (String name : traceListA) {
+            		synchronizedListA.add(name);
+            	}
             }
 
         }
         List<String> traceListB = signal.getTraceListB();
         if (traceListB != null) {
-            fTraceListB.clear();
-            for (String name : signal.getTraceListB()) {
-                fTraceListB.add(name);
-
+            List<String> synchronizedListB = Collections.synchronizedList(fTraceListB);
+            synchronizedListB.clear();
+            for (String name : traceListB) {
+            	synchronizedListB.add(name);
             }
 
         }
@@ -378,6 +380,13 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
                 }
             }
         return null;
+    }
+    private List<String> getTraceListA() {
+        return new ArrayList<>(fTraceListA);
+    }
+
+    private List<String> getTraceListB() {
+        return new ArrayList<>(fTraceListB);
     }
 
 }

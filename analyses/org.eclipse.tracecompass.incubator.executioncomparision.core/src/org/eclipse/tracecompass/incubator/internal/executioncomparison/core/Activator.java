@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.executioncomparision.core;
+package org.eclipse.tracecompass.incubator.internal.executioncomparison.core;
 
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
 
@@ -19,7 +19,7 @@ import org.eclipse.tracecompass.common.core.TraceCompassActivator;
 public class Activator extends TraceCompassActivator {
 
     /** The plug-in ID */
-    public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.executioncomparision.core"; //$NON-NLS-1$
+    public static final String PLUGIN_ID = "org.eclipse.tracecompass.incubator.executioncomparison.core"; //$NON-NLS-1$
 
     /**
      * The constructor
