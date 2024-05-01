@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.executioncomparision.ui;
+package org.eclipse.tracecompass.incubator.internal.executioncomparison.ui;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -57,8 +57,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Sash;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.ScopeLog;
-import org.eclipse.tracecompass.incubator.internal.executioncomparision.core.TmfCheckboxChangedSignal;
-import org.eclipse.tracecompass.incubator.internal.executioncomparision.core.TmfComparisonFilteringUpdatedSignal;
+import org.eclipse.tracecompass.incubator.internal.executioncomparison.core.TmfCheckboxChangedSignal;
+import org.eclipse.tracecompass.incubator.internal.executioncomparison.core.TmfComparisonFilteringUpdatedSignal;
 import org.eclipse.tracecompass.internal.tmf.ui.viewers.eventdensity.EventDensityTreeViewer;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
@@ -102,7 +102,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
     /**
      * the id of the view
      */
-    public static final String id = "org.eclipse.tracecompass.incubator.internal.entexecutioncomparison.ui.execComparison"; //$NON-NLS-1$
+    public static final String id = "org.eclipse.tracecompass.incubator.internal.executioncomparison.ui.execComparison"; //$NON-NLS-1$
     /**
      * Default weights for organizing the view
      */
@@ -139,7 +139,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
     private ITmfTimestamp fStartTimeB = TmfTimestamp.BIG_BANG;
     private ITmfTimestamp fEndTimeA = TmfTimestamp.BIG_CRUNCH;
     private ITmfTimestamp fEndTimeB = TmfTimestamp.BIG_CRUNCH;
-    private String fStatistic = "duration"; //$NON-NLS-1$
+    private String fStatistic = Messages.MultipleDensityView_Duration;
     private JFormattedTextField ftextAFrom = new JFormattedTextField();
     private JFormattedTextField ftextBFrom = new JFormattedTextField();
     private JFormattedTextField ftextATo = new JFormattedTextField();
@@ -246,8 +246,6 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
 
                     //dispatch signal to rebuild differential flame graph
                     TmfSignalManager.dispatchSignal(new TmfSelectionRangeUpdatedSignal(getChartViewerA(), fStartTimeA, fEndTimeA, getTrace()));
-                    //Reset the selection blue lines in density chart viewer
-                    getChartViewerA().refreshMouseSelectionProvider();
                 }
             }
         });
@@ -282,8 +280,8 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                         fStartTimeA = fromTime;
                         textAFrom.setText(fStartTimeA.toString(fFormat));
 
-                        TmfSelectionRangeUpdatedSignal signal = new TmfSelectionRangeUpdatedSignal(getChartViewerA(), fStartTimeA, fEndTimeA, getTrace());
-                        TmfSignalManager.dispatchSignal(signal);
+                        updateSelectedRange();
+                        getChartViewerA().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
 
                     } catch (ParseException e1) {
                         textAFrom.setText(oldVal);
@@ -325,17 +323,13 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                         fEndTimeA = fromTime;
                         textATo.setText(fEndTimeA.toString(fFormat));
 
-                        TmfSignalManager.dispatchSignal(new TmfSelectionRangeUpdatedSignal(getChartViewerA(), fStartTimeA, fEndTimeA, getTrace()));
+                        updateSelectedRange();
+                        getChartViewerA().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
 
                     } catch (ParseException e1) {
                         textATo.setText(oldVal);
                         e1.printStackTrace();
                     }
-                    ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
-                    fEndTimeA = fromTime;
-
-                    TmfSelectionRangeUpdatedSignal signal = new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace());
-                    broadcast(signal);
                 }
             }
         });
@@ -380,8 +374,6 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
 
                     //dispatch signal to rebuild differential flame graph
                     TmfSignalManager.dispatchSignal(new TmfSelectionRangeUpdatedSignal(getChartViewerB(), fStartTimeB, fEndTimeB, getTrace()));
-                    //Reset the selection blue lines in density chart viewer
-                    getChartViewerB().refreshMouseSelectionProvider();
                 }
             }
         });
@@ -415,16 +407,14 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                         ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
                         fStartTimeB = fromTime;
                         textBFrom.setText(fStartTimeB.toString(fFormat));
-                        TmfSignalManager.dispatchSignal(new TmfSelectionRangeUpdatedSignal(getChartViewerB(), fStartTimeB, fEndTimeB, getTrace()));
+
+                        updateSelectedRange();
+                        getChartViewerB().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeB, fEndTimeB, getTrace()));
+
                     } catch (ParseException e1) {
                         textBFrom.setText(oldVal);
                         e1.printStackTrace();
                     }
-                    ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
-                    fStartTimeB = fromTime;
-
-                    TmfSelectionRangeUpdatedSignal signal = new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace());
-                    broadcast(signal);
 
                 }
             }
@@ -461,16 +451,13 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                         ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
                         fEndTimeB = fromTime;
                         textBTo.setText(fEndTimeB.toString(fFormat));
-                        TmfSignalManager.dispatchSignal(new TmfSelectionRangeUpdatedSignal(getChartViewerB(), fStartTimeB, fEndTimeB, getTrace()));
+                        updateSelectedRange();
+                        getChartViewerB().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
+
                     } catch (ParseException e1) {
                         textBTo.setText(oldVal);
                         e1.printStackTrace();
                     }
-                    ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
-                    fEndTimeB = fromTime;
-
-                    TmfSelectionRangeUpdatedSignal signal = new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace());
-                    broadcast(signal);
                 }
             }
         });
@@ -620,10 +607,8 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                 boolean parsed = parseQuery(query);
                 if (parsed) {
                     ///updating blue lines in density chats
-                    getChartViewerA().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(getChartViewerA(), fStartTimeA, fEndTimeA, getTrace()));
-                    getChartViewerB().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(getChartViewerB(), fStartTimeB, fEndTimeB, getTrace()));
-                    getChartViewerA().refreshMouseSelectionProvider();
-                    getChartViewerB().refreshMouseSelectionProvider();
+                    getChartViewerA().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
+                    getChartViewerB().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeB, fEndTimeB, getTrace()));
 
                     //updates checked elements in treeviewers
                     //treeViewerA
@@ -761,6 +746,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                     return;
                 }
                 fStatistic = name;
+                System.out.println(name+"\n");
                 TmfComparisonFilteringUpdatedSignal rangUpdateSignal = new TmfComparisonFilteringUpdatedSignal(this, fStatistic, null, null);
                 TmfSignalManager.dispatchSignal(rangUpdateSignal);
                 if (ftextQuery!=null) {
@@ -858,14 +844,9 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
      *            determines which chart to reset start and end times
      */
     public void resetStartFinishTime(boolean notify, TmfXYChartViewer chart) {
-        TmfWindowRangeUpdatedSignal signal = new TmfWindowRangeUpdatedSignal(this, TmfTimeRange.ETERNITY, getTrace());
         if (notify) {
+            TmfWindowRangeUpdatedSignal signal = new TmfWindowRangeUpdatedSignal(this, TmfTimeRange.ETERNITY, getTrace());
             broadcast(signal);
-
-        } else {
-            chart.windowRangeUpdated(signal);
-            TmfSignalManager.dispatchSignal(new TmfSelectionRangeUpdatedSignal(chart, TmfTimestamp.fromNanos(chart.getWindowStartTime()), TmfTimestamp.fromNanos(chart.getWindowEndTime())));
-            chart.refreshMouseSelectionProvider();
 
         }
     }
@@ -894,6 +875,8 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         }
     }
 
+
+
     /**
      * @param signal
      *            TmfSelectionRangeUpdatedSignal signal raised when time ranges
@@ -901,20 +884,28 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
      */
     @TmfSignalHandler
     public void selectionRangeUpdated(TmfSelectionRangeUpdatedSignal signal) {
-        try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "MultiDensityView::SelectionRangeUpdated")) { //$NON-NLS-1$
-            Object source = signal.getSource();
-            if (source == getChartViewerA()) {
-                fStartTimeA = signal.getBeginTime();
-                fEndTimeA = signal.getEndTime();
-                ftextAFrom.setText(fStartTimeA.toString(fFormat));
-                ftextATo.setText(fEndTimeA.toString(fFormat));
+        Object source = signal.getSource();
+        if (source == getChartViewerA()) {
+        fStartTimeA = signal.getBeginTime();
+        fEndTimeA = signal.getEndTime();
+        ftextAFrom.setText(fStartTimeA.toString(fFormat));
+        ftextATo.setText(fEndTimeA.toString(fFormat));
 
-            } else if (source == getChartViewerB()) {
-                fStartTimeB = signal.getBeginTime();
-                fEndTimeB = signal.getEndTime();
-                ftextBFrom.setText(fStartTimeB.toString(fFormat));
-                ftextBTo.setText(fEndTimeB.toString(fFormat));
-            }
+    } else if (source == getChartViewerB()) {
+        fStartTimeB = signal.getBeginTime();
+        fEndTimeB = signal.getEndTime();
+        ftextBFrom.setText(fStartTimeB.toString(fFormat));
+        ftextBTo.setText(fEndTimeB.toString(fFormat));
+    }
+        updateSelectedRange();
+
+    }
+
+    /**
+     * updates the filtering parameters and query and builds flamegraph
+     */
+    public void updateSelectedRange(){
+        try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "MultiDensityView::SelectionRangeUpdated")) { //$NON-NLS-1$
             TmfComparisonFilteringUpdatedSignal rangUpdateSignal = new TmfComparisonFilteringUpdatedSignal(this, fStartTimeA, fEndTimeA, fStartTimeB, fEndTimeB, null, null, null);
             TmfSignalManager.dispatchSignal(rangUpdateSignal);
             Display.getDefault().syncExec(new Runnable() {
@@ -925,14 +916,12 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                     }
                 }
             });
-            getChartViewerA().refreshMouseSelectionProvider();
-            getChartViewerB().refreshMouseSelectionProvider();
             buildDifferetialFlameGraph();
         }
     }
 
     /**
-     * @return fStatistic (Duration or Selftime) which will be represented in
+     * @return fStatistic (Duration or Self time) which will be represented in
      *         the flame graph
      */
     public String getStatisticType() {

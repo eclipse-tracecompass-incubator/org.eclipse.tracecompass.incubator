@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.executioncomparision.core;
+package org.eclipse.tracecompass.incubator.internal.executioncomparison.core;
 
 import java.util.Collections;
 import java.util.HashMap;
