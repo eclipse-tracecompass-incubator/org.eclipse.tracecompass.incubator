@@ -6,9 +6,9 @@
 
       <view
             category="org.eclipse.linuxtools.tmf.ui.views.category"
-            class="org.eclipse.tracecompass.incubator.internal.executioncomparision.ui.ExecutionComparisonView"
-            id="org.eclipse.tracecompass.incubator.internal.entexecutioncomparison.ui.execComparison"
-            name="Execution Comparision"
+            class="org.eclipse.tracecompass.incubator.internal.executioncomparison.ui.ExecutionComparisonView"
+            id="org.eclipse.tracecompass.incubator.internal.executioncomparison.ui.execComparison"
+            name="Execution Comparison"
             restorable="true">
       </view>
    </extension>
@@ -17,9 +17,9 @@
 
       <output
             class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
-            id="org.eclipse.tracecompass.incubator.internal.entexecutioncomparison.ui.execComparison">
+            id="org.eclipse.tracecompass.incubator.internal.executioncomparison.ui.execComparison">
          <analysisModuleClass
-               class="org.eclipse.tracecompass.incubator.internal.executioncomparision.core.DifferentialSeqCallGraphAnalysis">
+               class="org.eclipse.tracecompass.incubator.internal.executioncomparison.core.DifferentialSeqCallGraphAnalysis">
          </analysisModuleClass>
       </output>
     </extension>
