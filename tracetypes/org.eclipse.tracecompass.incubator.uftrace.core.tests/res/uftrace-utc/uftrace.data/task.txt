@@ -1,0 +1,4 @@
+SESS timestamp=685.128541799 pid=5117 sid=6daf565b5650d9de exename="/home/matthew/omp-hello-world/openmp-hello-world.out"
+TASK timestamp=685.128673146 tid=5117 pid=5117
+TASK timestamp=685.132379273 tid=5119 pid=5117
+TASK timestamp=685.132429470 tid=5120 pid=5117
