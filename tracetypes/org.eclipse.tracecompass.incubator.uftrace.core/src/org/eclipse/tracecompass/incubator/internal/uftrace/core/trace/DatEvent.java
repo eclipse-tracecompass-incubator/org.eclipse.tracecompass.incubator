@@ -92,11 +92,13 @@ public class DatEvent {
      *            byte buffer containing the event
      * @param tid
      *            the thread id of the stream
+     * @param offset
+     *            The time offset
      * @return an event
      */
-    public static @Nullable DatEvent create(ByteBuffer bb, int tid) {
+    public static @Nullable DatEvent create(ByteBuffer bb, int tid, long offset) {
         bb.order(ByteOrder.LITTLE_ENDIAN);
-        long time = bb.getLong();
+        long time = bb.getLong() + offset;
         long payload = bb.getLong();
         return create(time, payload, tid);
     }
