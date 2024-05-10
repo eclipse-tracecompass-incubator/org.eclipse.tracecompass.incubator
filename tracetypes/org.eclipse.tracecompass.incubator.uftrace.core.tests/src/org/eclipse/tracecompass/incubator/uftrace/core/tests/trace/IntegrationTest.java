@@ -20,6 +20,9 @@ import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.Uftrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampFormat;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.junit.After;
@@ -33,14 +36,14 @@ import org.junit.Test;
  */
 public class IntegrationTest {
 
-    private Uftrace uft;
+    private Uftrace fUft;
 
     /**
      * Before
      */
     @Before
     public void before() {
-        uft = new Uftrace();
+        fUft = new Uftrace();
     }
 
     /**
@@ -48,8 +51,8 @@ public class IntegrationTest {
      */
     @After
     public void after() {
-        uft.dispose();
-        uft = null;
+        fUft.dispose();
+        fUft = null;
     }
 
     /**
@@ -60,11 +63,11 @@ public class IntegrationTest {
      */
     @Test
     public void readTrace() throws TmfTraceException {
-        assertNotNull(uft);
-        uft.initTrace(null, "res/uftrace-ls", TmfEvent.class);
-        ITmfContext ctx = uft.seekEvent(0);
+        assertNotNull(fUft);
+        fUft.initTrace(null, "res/uftrace-ls", TmfEvent.class);
+        ITmfContext ctx = fUft.seekEvent(0);
         int cnt = 0;
-        while (uft.getNext(ctx) != null) {
+        while (fUft.getNext(ctx) != null) {
             cnt++;
         }
         assertEquals("event count", 113751, cnt);
@@ -78,20 +81,45 @@ public class IntegrationTest {
      */
     @Test
     public void readFoobarTrace() throws TmfTraceException {
-        assertNotNull(uft);
-        uft.initTrace(null, "res/uftrace-foobar/uftrace.data", TmfEvent.class);
-        ITmfContext ctx = uft.seekEvent(0);
+        Uftrace uftrace = fUft;
+        assertNotNull(uftrace);
+        uftrace.initTrace(null, "res/uftrace-foobar/uftrace.data", TmfEvent.class);
+        ITmfContext ctx = uftrace.seekEvent(0);
         int cnt = 0;
         ITmfEvent event = null;
         HashSet<Object> tids = new HashSet<>();
-        while ((event = uft.getNext(ctx)) != null) {
+        while ((event = uftrace.getNext(ctx)) != null) {
             cnt++;
-            Object tid = TmfTraceUtils.resolveAspectOfNameForEvent(uft, "TID", event);
+            Object tid = TmfTraceUtils.resolveAspectOfNameForEvent(uftrace, "TID", event);
             tids.add(tid);
 
         }
         assertEquals("event count", 14, cnt);
         assertEquals("Tid count", 2, tids.size());
+    }
+
+    /**
+     * Read the trace and check the events count as well as the timestamp for
+     * UTCness
+     *
+     * @throws TmfTraceException
+     *             something went wrong
+     */
+    @Test
+    public void readUtcOffsetTrace() throws TmfTraceException {
+        assertNotNull(fUft);
+        fUft.initTrace(null, "res/uftrace-utc/uftrace.data", TmfEvent.class);
+        ITmfContext ctx = fUft.seekEvent(0);
+        int cnt = 0;
+        ITmfEvent event = null;
+        ITmfTimestamp ts = TmfTimestamp.BIG_BANG;
+        while ((event = fUft.getNext(ctx)) != null) {
+            cnt++;
+            ts = event.getTimestamp();
+        }
+        assertEquals("event count", 12038, cnt);
+        assertNotNull(ts);
+        assertEquals("Timestamp", "2024", ts.toString(new TmfTimestampFormat("yyyy")));
     }
 
 }
