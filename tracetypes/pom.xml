@@ -72,6 +72,10 @@
     <module>org.eclipse.tracecompass.incubator.system</module>
     <module>org.eclipse.tracecompass.incubator.system.core</module>
     <module>org.eclipse.tracecompass.incubator.system.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.shinro.tracetype</module>
+    <module>org.eclipse.tracecompass.incubator.shinro.tracetype.core</module>
+    <module>org.eclipse.tracecompass.incubator.shinro.tracetype.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.shinro.tracetype.ui</module>
     <!-- insert modules here -->
   </modules>
 
