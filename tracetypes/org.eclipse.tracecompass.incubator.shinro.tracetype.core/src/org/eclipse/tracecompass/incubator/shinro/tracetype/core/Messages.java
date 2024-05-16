@@ -10,3 +10,20 @@
  *******************************************************************************/
 
 package org.eclipse.tracecompass.incubator.shinro.tracetype.core;
+
+import org.eclipse.osgi.util.NLS;
+
+public class Messages extends NLS {
+    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.shinro.tracetype.core.messages"; //$NON-NLS-1$
+
+    /**
+     * The domain is not "ust"
+     */
+    public static String ShinroTrace_DomainError;
+
+    static {
+        // initialize resource bundle
+        NLS.initializeMessages(BUNDLE_NAME, Messages.class);
+    }
+
+}
