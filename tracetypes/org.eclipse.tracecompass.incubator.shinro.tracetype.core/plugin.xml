@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            category="org.eclipse.linuxtools.tmf.ctf.core.category.ctf"
+            event_type="org.eclipse.tracecompass.incubator.shinro.tracetype.core.ShinroEvent"
+            id="org.eclipse.tracecompass.incubator.shinro.tracetype"
+            isDirectory="true"
+            name="Shinro Trace"
+            trace_type="org.eclipse.tracecompass.incubator.shinro.tracetype.core.ShinroTrace">
+      </type>
+   </extension>
+
+</plugin>
