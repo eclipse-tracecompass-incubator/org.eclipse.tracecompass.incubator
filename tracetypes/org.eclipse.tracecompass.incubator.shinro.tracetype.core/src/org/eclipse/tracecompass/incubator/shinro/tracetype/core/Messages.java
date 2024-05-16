@@ -17,7 +17,7 @@ public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.shinro.tracetype.core.messages"; //$NON-NLS-1$
 
     /**
-     * The domain is not "ust"
+     * The domain is not "bare"
      */
     public static String ShinroTrace_DomainError;
 

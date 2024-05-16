@@ -30,7 +30,7 @@ public class ShinroTrace extends CtfTmfTrace {
         IStatus status = super.validate(project, path);
         if (status instanceof CtfTraceValidationStatus) {
             Map<String, String> environment = ((CtfTraceValidationStatus) status).getEnvironment();
-            /* Make sure the domain is "ust" in the trace's env vars */
+            /* Make sure the domain is "bare" in the trace's env vars */
             String domain = environment.get("domain"); //$NON-NLS-1$
             if (domain == null || !domain.equals("\"bare\"")) { //$NON-NLS-1$
                 return new Status(IStatus.ERROR, Activator.PLUGIN_ID, Messages.ShinroTrace_DomainError);
