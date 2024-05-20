@@ -12,5 +12,17 @@
             trace_type="org.eclipse.tracecompass.incubator.shinro.tracetype.core.ShinroTrace">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.shinro.tracetype.core.callstack.ShinroCallStackAnalysis"
+            id="org.eclipse.tracecompass.incubator.shinro.tracetype.core.analysis.callstack"
+            name="%analysis.callstack">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.shinro.tracetype.core.ShinroTrace">
+         </tracetype>
+      </module>
+   </extension>
 
 </plugin>
