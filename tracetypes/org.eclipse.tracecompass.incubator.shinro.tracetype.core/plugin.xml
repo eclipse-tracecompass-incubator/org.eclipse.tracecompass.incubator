@@ -23,6 +23,15 @@
                class="org.eclipse.tracecompass.incubator.shinro.tracetype.core.ShinroTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.shinro.tracetype.core.counters.ShinroCountersAnalysis"
+            id="org.eclipse.tracecompass.incubator.shinro.tracetype.core.analysis.counters"
+            name="%analysis.counters">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.shinro.tracetype.core.ShinroTrace">
+         </tracetype>
+      </module>
    </extension>
 
 </plugin>
