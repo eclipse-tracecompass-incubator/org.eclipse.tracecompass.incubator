@@ -19,12 +19,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.analysis.counters.core.aspects.CounterAspect;
 import org.eclipse.tracecompass.analysis.counters.core.aspects.ITmfCounterAspect;
 import org.eclipse.tracecompass.incubator.internal.shinro.tracetype.core.Activator;
 import org.eclipse.tracecompass.lttng2.ust.core.analysis.debuginfo.UstDebugInfoBinaryAspect;
 import org.eclipse.tracecompass.lttng2.ust.core.analysis.debuginfo.UstDebugInfoFunctionAspect;
 import org.eclipse.tracecompass.lttng2.ust.core.analysis.debuginfo.UstDebugInfoSourceAspect;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceWithPreDefinedEvents;
@@ -86,25 +88,15 @@ public class ShinroTrace extends CtfTmfTrace {
 
     Collection<ITmfCounterAspect> createCounterAspects(ITmfTraceWithPreDefinedEvents trace) {
         ImmutableSet.Builder<ITmfCounterAspect> perfBuilder = new ImmutableSet.Builder<>();
-        // This next if statement is dead code, just here to avoid unused parameter error
-        if (trace == null) {
-
-        }
-        /*  For reference, this is from LttngUstTrace, we might need something analogous:
         for (ITmfEventType eventType : trace.getContainedEventTypes()) {
+            // TODO: Implement some appropriate logic here; this is currently is stub logic that treats
+            // as counters *all* event fields in the trace.  which is too indiscriminate
             for (String fieldName : eventType.getFieldNames()) {
                 if (fieldName != null) {
-                    if (CONTEXT_PERF_CPU.matcher(fieldName).matches()) {
-                        perfBuilder.add(new CounterAspect(fieldName, fieldName.substring(CONTEXT_PERF_PREFIX.length()), TmfCpuAspect.class));
-                    } else if (CONTEXT_PERF_THREAD.matcher(fieldName).matches()) {
-                        perfBuilder.add(new CounterAspect(fieldName, fieldName.substring(CONTEXT_PERF_PREFIX.length()), LinuxTidAspect.class));
-                    } else if (CONTEXT_PERF_UNKNOWN.matcher(fieldName).matches()) {
-                        perfBuilder.add(new CounterAspect(fieldName, fieldName.substring(CONTEXT_PERF_PREFIX.length())));
-                    }
+                    perfBuilder.add(new CounterAspect(fieldName, fieldName));
                 }
             }
         }
-        */
         return perfBuilder.build();
     }
 
