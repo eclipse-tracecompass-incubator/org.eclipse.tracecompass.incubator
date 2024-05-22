@@ -19,9 +19,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.analysis.counters.core.aspects.CounterAspect;
 import org.eclipse.tracecompass.analysis.counters.core.aspects.ITmfCounterAspect;
 import org.eclipse.tracecompass.incubator.internal.shinro.tracetype.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.shinro.tracetype.core.counters.ShinroCounterAspect;
 import org.eclipse.tracecompass.lttng2.ust.core.analysis.debuginfo.UstDebugInfoBinaryAspect;
 import org.eclipse.tracecompass.lttng2.ust.core.analysis.debuginfo.UstDebugInfoFunctionAspect;
 import org.eclipse.tracecompass.lttng2.ust.core.analysis.debuginfo.UstDebugInfoSourceAspect;
@@ -88,14 +88,11 @@ public class ShinroTrace extends CtfTmfTrace {
 
     Collection<ITmfCounterAspect> createCounterAspects(ITmfTraceWithPreDefinedEvents trace) {
         ImmutableSet.Builder<ITmfCounterAspect> perfBuilder = new ImmutableSet.Builder<>();
+
+        // one counter aspect per event type, keyed on the "value" field
         for (ITmfEventType eventType : trace.getContainedEventTypes()) {
-            // TODO: Implement some appropriate logic here; this is currently is stub logic that treats
-            // as counters *all* event fields in the trace.  which is too indiscriminate
-            for (String fieldName : eventType.getFieldNames()) {
-                if (fieldName != null) {
-                    perfBuilder.add(new CounterAspect(fieldName, fieldName));
-                }
-            }
+            String eventName = eventType.getName();
+            perfBuilder.add(new ShinroCounterAspect("value", eventName));
         }
         return perfBuilder.build();
     }
