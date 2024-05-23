@@ -89,6 +89,9 @@
    <bundle id="org.eclipse.wst.jsdt.manipulation"/>
    <bundle id="org.eclipse.nebula.widgets.opal.commons"/>
    <bundle id="org.eclipse.nebula.widgets.opal.duallist"/>
+   <bundle id="jakarta.activation-api" version="1.2.2"/>
+   <bundle id="jakarta.xml.bind-api" version="2.3.3"/>
+   <bundle id="javax.inject"/>
    <category-def name="trace-types" label="Trace Types"/>
    <category-def name="virtualization" label="Virtualization"/>
    <category-def name="analyses" label="Analyses"/>
@@ -102,6 +105,6 @@
          Additional functionalities for Trace Compass
       </description>
    </category-def>
-   <repository-reference location="https://download.eclipse.org/ease/release/0.8.0" enabled="true" />
-   <repository-reference location="https://eclipse.py4j.org" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/ease/release/0.8.0" name="" enabled="true" />
+   <repository-reference location="https://eclipse.py4j.org" name="" enabled="true" />
 </site>

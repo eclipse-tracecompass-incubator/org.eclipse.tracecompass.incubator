@@ -131,7 +131,7 @@
 <unit id="org.eclipse.tracecompass.lttng2.control.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.tracecompass.jsontrace.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.tracecompass.tmf.cli.feature.group" version="0.0.0"/>
-<repository location="https://download.eclipse.org/tracecompass/master/repository/"/>
+<repository location="https://download.eclipse.org/tracecompass/releases/9.3.0/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <repository location="https://download.eclipse.org/tracecompass/master/rcp-repository/"/>
