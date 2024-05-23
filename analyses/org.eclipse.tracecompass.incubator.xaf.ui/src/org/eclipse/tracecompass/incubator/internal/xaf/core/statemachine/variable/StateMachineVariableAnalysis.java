@@ -31,10 +31,10 @@ import java.util.TreeSet;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.graph.core.base.IGraphWorker;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfEdge;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfGraph;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfVertex;
 import org.eclipse.tracecompass.analysis.graph.core.criticalpath.CriticalPathAlgorithmException;
+import org.eclipse.tracecompass.analysis.graph.core.graph.ITmfGraph;
+import org.eclipse.tracecompass.analysis.graph.core.graph.ITmfGraphVisitor;
+import org.eclipse.tracecompass.analysis.graph.core.graph.ITmfVertex;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsExecutionGraph;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsWorker;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
@@ -69,8 +69,9 @@ import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMach
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineReport;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineSegment;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine.StateMachineUtils.TimestampInterval;
+import org.eclipse.tracecompass.internal.analysis.graph.core.base.TmfEdge;
 import org.eclipse.tracecompass.internal.analysis.graph.core.base.TmfGraphVisitor;
-import org.eclipse.tracecompass.internal.analysis.graph.core.criticalpath.CriticalPathAlgorithmBounded;
+import org.eclipse.tracecompass.internal.analysis.graph.core.criticalpath.OSCriticalPathAlgorithm;
 import org.eclipse.tracecompass.internal.segmentstore.core.treemap.TreeMapStore;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
@@ -1284,7 +1285,7 @@ public class StateMachineVariableAnalysis {
             g.waitForCompletion();
 
             // Get the general graph for the trace
-            TmfGraph graph = g.getGraph();
+            ITmfGraph graph = g.getCriticalPathGraph();
             if (graph == null) {
                 Activator.getInstance().logWarning("graph == null"); //$NON-NLS-1$
                 continue;
@@ -1310,12 +1311,18 @@ public class StateMachineVariableAnalysis {
             workerFound = true;
 
             // Compute the path for the period we're interested into
-            TmfVertex vstart = graph.getVertexAt(Objects.requireNonNull(ti.getStartTime()), lw);
-            TmfVertex vend = graph.getVertexAt(Objects.requireNonNull(ti.getEndTime()), lw);
-            TmfGraph path = new CriticalPathAlgorithmBounded(graph).compute(Objects.requireNonNull(vstart), Objects.requireNonNull(vend));
+            ITmfVertex vstart = graph.getVertexAt(Objects.requireNonNull(ti.getStartTime()), lw);
+            ITmfVertex vend = graph.getVertexAt(Objects.requireNonNull(ti.getEndTime()), lw);
+
+            // Note: compute() method was removed because it was deprecated. More over when it was deprecated the method implementation
+            // was changed to throw an UnsupportedOperationException().
+            // See https://git.eclipse.org/r/c/tracecompass/org.eclipse.tracecompass/+/182723
+            // So, the implementation was broken and this change just makes it compile
+
+            ITmfGraph path = new OSCriticalPathAlgorithm(graph).computeCriticalPath(graph, Objects.requireNonNull(vstart), Objects.requireNonNull(vend));
 
             // Then traverse that path to get the data for what happened in there
-            path.scanLineTraverse(path.getHead(lw), new TmfGraphVisitor() {
+            path.scanLineTraverse(path.getHead(lw), (ITmfGraphVisitor) new TmfGraphVisitor() {
                 @Override
                 public void visit(TmfEdge link, boolean horizontal) {
                     if (!horizontal) {
