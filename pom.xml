@@ -350,7 +350,7 @@
     <module>tracetypes</module>
     <module>trace-server</module>
     <module>doc</module>
-    <module>rcp</module>
+    <!--module>rcp</module-->
   </modules>
 
   <build>

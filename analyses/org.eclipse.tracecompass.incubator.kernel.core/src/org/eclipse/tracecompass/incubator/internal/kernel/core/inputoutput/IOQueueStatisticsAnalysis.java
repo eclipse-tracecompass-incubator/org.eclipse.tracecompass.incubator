@@ -52,7 +52,7 @@ public class IOQueueStatisticsAnalysis extends AbstractSegmentStatisticsAnalysis
     }
 
     @Override
-    protected @Nullable ISegmentStoreProvider getSegmentProviderAnalysis(@NonNull ITmfTrace trace) {
+    protected @Nullable ISegmentStoreProvider getSegmentStoreProvider(ITmfTrace trace) {
         return fSegmentStoreProvider;
     }
 
