@@ -43,7 +43,7 @@ class ShinroCallStackProvider extends CallStackStateProvider {
 
     @Override
     public int getVersion() {
-        // TODO Auto-generated method stub
+        // TODO: figure out what's best; 0 is probably OK to start
         return 0;
     }
 
@@ -55,31 +55,33 @@ class ShinroCallStackProvider extends CallStackStateProvider {
 
     @Override
     protected boolean considerEvent(@NonNull ITmfEvent event) {
-        // TODO Auto-generated method stub
-        return false;
+        // TODO: if possible, make the return value more discriminating (for performance)
+        return true;
     }
 
     @Override
     protected @Nullable ITmfStateValue functionEntry(@NonNull ITmfEvent event) {
-        // TODO Auto-generated method stub
+        // TODO: Does the event parameter represent a function entry? If so, return a Long state
+        // value representing an address
         return null;
     }
 
     @Override
     protected @Nullable ITmfStateValue functionExit(@NonNull ITmfEvent event) {
-        // TODO Auto-generated method stub
+        // TODO: Does the event parameter represent a function entry? If so, return a Long state
+        // value representing an address
         return null;
     }
 
     @Override
     protected int getProcessId(@NonNull ITmfEvent event) {
-        // TODO Auto-generated method stub
+        // TODO: this probably isn't relevant for Shinro traces; 0 is probably fine
         return 0;
     }
 
     @Override
     protected long getThreadId(@NonNull ITmfEvent event) {
-        // TODO Auto-generated method stub
+        // TODO: this probably isn't relevant for Shinro traces; 0 is probably fine
         return 0;
     }
 
