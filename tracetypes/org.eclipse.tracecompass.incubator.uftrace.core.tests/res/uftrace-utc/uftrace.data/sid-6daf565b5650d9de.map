@@ -1,0 +1,12 @@
+5a95df42c000-5a95df431000 r-xp 00000000 00:00 0                          /home/matthew/omp-hello-world/openmp-hello-world.out build-id:04885ec7dfc62dd5b10e2984e9fbf82731f599a9
+72f240349000-72f240400000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5 build-id:e0b4fac4f8025115ca095ea829e89f16756203bd
+72f240400000-72f240668000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.32 build-id:102661775a59c09123f226bc3021556fd42bc563
+72f240715000-72f240800000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libm.so.6 build-id:f99d75c617708d34917cbb8c09320a008497ffc3
+72f240800000-72f240a00000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libc.so.6 build-id:b20cbdb62d7717c13dc61a48b7b2e673a7edf233
+72f240a26000-72f240a45000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libz.so.1.2.13 build-id:622a20ffd045816c9b5b50dd8967803026b40cc8
+72f240a45000-72f240a69000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libgcc_s.so.1 build-id:56a40db58fdb8a2ab280771a135196ced0285012
+72f240a6b000-72f240a88000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libelf-0.189.so build-id:983a2a33967bfac7ffc8e6b92d0e80014ad83a6a
+72f240a88000-72f240adb000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0 build-id:f2ed6527e708cfca29485dae956780aadd69c812
+72f240af0000-72f240b2d000 r-xp 00000000 00:00 0                          /usr/local/lib/uftrace/libmcount-fast.so build-id:3a20aba5b59b7ae06188906c83681739a079cdef
+72f240b31000-72f240b6a000 r-xp 00000000 00:00 0                          /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 build-id:2a8cae7d0d0330d889df3265f8908abb8f19255f
+7ffd4fd54000-7ffd4fd75000 rw-p 00000000 00:00 0                          [stack]

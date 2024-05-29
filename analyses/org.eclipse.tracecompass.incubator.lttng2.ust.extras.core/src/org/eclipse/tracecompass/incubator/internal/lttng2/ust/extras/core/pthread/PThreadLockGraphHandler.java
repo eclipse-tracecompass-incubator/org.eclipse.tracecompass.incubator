@@ -17,17 +17,18 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfEdge.EdgeType;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfGraph;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfVertex;
 import org.eclipse.tracecompass.analysis.graph.core.building.AbstractTraceEventHandler;
 import org.eclipse.tracecompass.analysis.graph.core.building.ITraceEventHandler;
+import org.eclipse.tracecompass.analysis.graph.core.graph.ITmfGraph;
+import org.eclipse.tracecompass.analysis.graph.core.graph.ITmfVertex;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.IOsExecutionGraphHandlerBuilder;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsExecutionGraphProvider;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsWorker;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.HostThread;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.ProcessStatus;
+import org.eclipse.tracecompass.internal.analysis.graph.core.graph.legacy.OSEdgeContextState;
+import org.eclipse.tracecompass.internal.analysis.graph.core.graph.legacy.OSEdgeContextState.OSEdgeContextEnum;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
@@ -49,7 +50,7 @@ public class PThreadLockGraphHandler extends AbstractTraceEventHandler {
 
     private static class LastLockOwner {
         public final Integer fTid;
-        public final TmfVertex fVertex;
+        public final ITmfVertex fVertex;
 
         /**
          * @param tid
@@ -57,7 +58,7 @@ public class PThreadLockGraphHandler extends AbstractTraceEventHandler {
          * @param vertex
          *            The vertex at which the lock was removed by the worker
          */
-        public LastLockOwner(Integer tid, TmfVertex vertex) {
+        public LastLockOwner(Integer tid, ITmfVertex vertex) {
             fTid = tid;
             fVertex = vertex;
         }
@@ -65,7 +66,7 @@ public class PThreadLockGraphHandler extends AbstractTraceEventHandler {
 
     private final OsExecutionGraphProvider fProvider;
     /** tid, mutex ID, vertex of the last lock request */
-    private final Table<Integer, Long, TmfVertex> fLastRequest;
+    private final Table<Integer, Long, ITmfVertex> fLastRequest;
     /** mutex ID, last lock owner */
     private final Map<Long, LastLockOwner> fLastLockOwner = new HashMap<>();
 
@@ -97,13 +98,13 @@ public class PThreadLockGraphHandler extends AbstractTraceEventHandler {
 
     private OsWorker getOrCreateKernelWorker(ITmfEvent event, Integer tid) {
         HostThread ht = new HostThread(event.getTrace().getHostId(), tid);
-        OsWorker worker = fProvider.getSystem().findWorker(ht);
+        OsWorker worker = fProvider.getSystem().findWorker(ht, null);
         if (worker != null) {
             return worker;
         }
         worker = new OsWorker(ht, "kernel/" + tid, event.getTimestamp().getValue()); //$NON-NLS-1$
         worker.setStatus(ProcessStatus.RUN);
-        fProvider.getSystem().addWorker(worker);
+        fProvider.getSystem().addWorker(worker, null);
         return worker;
     }
 
@@ -131,23 +132,26 @@ public class PThreadLockGraphHandler extends AbstractTraceEventHandler {
         OsWorker worker = getOrCreateKernelWorker(event, tid);
 
         // Get the vertex for the last request
-        TmfVertex lastReqVertex = fLastRequest.get(tid, fieldValue);
+        ITmfVertex lastReqVertex = fLastRequest.get(tid, fieldValue);
         if (lastReqVertex == null) {
             return;
         }
 
         // Get the last lock owner
         LastLockOwner lastOwner = fLastLockOwner.get(fieldValue);
-        if (lastOwner != null && lastOwner.fTid != tid && lastOwner.fVertex.getTs() > lastReqVertex.getTs()) {
+        if (lastOwner != null && lastOwner.fTid != tid && lastOwner.fVertex.getTimestamp() > lastReqVertex.getTimestamp()) {
             // This thread has been blocked, add the proper vertices and links
-            TmfGraph graph = Objects.requireNonNull(fProvider.getAssignedGraph());
+            ITmfGraph graph = Objects.requireNonNull(fProvider.getGraph());
+
             // First add a vertex at the time of lock request
-            graph.append(worker, lastReqVertex, EdgeType.RUNNING);
+            graph.append(lastReqVertex, new OSEdgeContextState(OSEdgeContextEnum.RUNNING));
             // Then add the blocked transition for the current worker
-            TmfVertex unblockVertex = new TmfVertex(event.getTimestamp().toNanos());
-            graph.append(worker, unblockVertex, EdgeType.BLOCKED);
+            ITmfVertex unblockVertex = graph.createVertex(worker, event.getTimestamp().toNanos());
+            graph.append(unblockVertex, new OSEdgeContextState(OSEdgeContextEnum.BLOCKED));
             // And add the vertical link between the unlock and the acquisition
-            lastOwner.fVertex.linkVertical(unblockVertex);
+            // TODO: check if it's the correct replacement
+//            lastOwner.fVertex.linkVertical(unblockVertex);
+            graph.edgeVertical(lastOwner.fVertex, unblockVertex, new OSEdgeContextState(OSEdgeContextEnum.DEFAULT), MUTEX_FIELD);
         }
     }
 
@@ -161,8 +165,11 @@ public class PThreadLockGraphHandler extends AbstractTraceEventHandler {
             return;
         }
 
+        ITmfGraph graph = Objects.requireNonNull(fProvider.getGraph());
+        OsWorker worker = getOrCreateKernelWorker(event, tid);
+
         // Don't add a state change to the worker just yet, let's keep the previous state until we know it's being blocked
-        TmfVertex vertex = new TmfVertex(event.getTimestamp().toNanos());
+        ITmfVertex vertex = graph.createVertex(worker, event.getTimestamp().toNanos());
         //TmfVertex stateChange = stateChange(worker, event.getTimestamp().toNanos(), EdgeType.RUNNING);
         fLastRequest.put(tid, fieldValue, vertex);
     }
@@ -179,9 +186,9 @@ public class PThreadLockGraphHandler extends AbstractTraceEventHandler {
         OsWorker worker = getOrCreateKernelWorker(event, tid);
         // Set the previous state to running for the worker and add a vertex at this
         // event, so it can be used by any thread that was blocked
-        TmfGraph graph = Objects.requireNonNull(fProvider.getAssignedGraph());
-        TmfVertex vertex = new TmfVertex(event.getTimestamp().toNanos());
-        graph.append(worker, vertex, EdgeType.RUNNING);
+        ITmfGraph graph = Objects.requireNonNull(fProvider.getGraph());
+        ITmfVertex vertex = graph.createVertex(worker, event.getTimestamp().toNanos());
+        graph.append(vertex, new OSEdgeContextState(OSEdgeContextEnum.RUNNING));
         fLastLockOwner.put(fieldValue, new LastLockOwner(tid, vertex));
     }
 

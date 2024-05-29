@@ -45,6 +45,7 @@ import com.google.common.collect.PeekingIterator;
  */
 public class DatParser implements Iterable<DatEvent> {
 
+    private long fUtcOffset;
     private final File fFile;
     private final long fStart;
 
@@ -55,7 +56,7 @@ public class DatParser implements Iterable<DatEvent> {
      *            file to read
      */
     public DatParser(File file) {
-        this(file, 0);
+        this(file, 0, 0);
     }
 
     /**
@@ -65,10 +66,13 @@ public class DatParser implements Iterable<DatEvent> {
      *            file to read
      * @param start
      *            offset in the file
+     * @param utcOffset
+     *            The offset to UTC time
      */
-    public DatParser(File file, long start) {
+    public DatParser(File file, long start, long utcOffset) {
         fFile = file;
         fStart = start;
+        fUtcOffset = utcOffset;
     }
 
     @Override
@@ -89,7 +93,7 @@ public class DatParser implements Iterable<DatEvent> {
                         throw new NoSuchElementException("no more data"); //$NON-NLS-1$
                     }
                     fCurrent = DatEvent.create(bb,
-                            NumberUtils.toInt(fFile.getName().substring(0, fFile.getName().length() - 4)));
+                            NumberUtils.toInt(fFile.getName().substring(0, fFile.getName().length() - 4)), fUtcOffset);
                     return fCurrent;
                 }
 
@@ -114,5 +118,15 @@ public class DatParser implements Iterable<DatEvent> {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Set new utc offset
+     *
+     * @param utcOffset
+     *            the offset in ns
+     */
+    public void setUtcOffset(long utcOffset) {
+        fUtcOffset = utcOffset;
     }
 }

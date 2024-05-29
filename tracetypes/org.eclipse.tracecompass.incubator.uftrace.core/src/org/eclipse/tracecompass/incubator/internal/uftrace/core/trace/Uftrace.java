@@ -57,7 +57,6 @@ import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 /**
@@ -97,7 +96,7 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
 
     @Override
     public Iterable<ITmfEventAspect<?>> getEventAspects() {
-        return ImmutableList.of(TmfBaseAspects.getTimestampAspect(), TmfBaseAspects.getEventTypeAspect(),
+        return java.util.List.of(TmfBaseAspects.getTimestampAspect(), TmfBaseAspects.getEventTypeAspect(),
                 new ITmfEventAspect<Integer>() {
 
                     @Override
@@ -208,6 +207,7 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
             throw new TmfTraceException("trace is not a directory"); //$NON-NLS-1$
         }
         super.initTrace(resource, path, type);
+        long utcOffset = 0;
         for (File child : dir.listFiles()) {
             String name = child.getName();
             try {
@@ -218,7 +218,7 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
                         continue;
                     }
                     fSize += child.length();
-                    fDats.add(new DatParser(child));
+                    fDats.add(new DatParser(child, 0, utcOffset));
                 } else if (name.endsWith(".map")) { //$NON-NLS-1$
                     MapParser create = MapParser.create(child);
                     if (create != null) {
@@ -230,6 +230,13 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
                     fTasks = new TaskParser(child);
                 } else if (name.equals("info")) { //$NON-NLS-1$
                     fInfo = InfoParser.parse(child);
+                    String offset = fInfo.getData().getOrDefault("utc_offset", "0"); //$NON-NLS-1$ //$NON-NLS-2$
+                    if (!offset.equals("0")) { //$NON-NLS-1$
+                        utcOffset = Long.parseLong(offset) * 1000000000L;
+                        for (DatParser dat : fDats) {
+                            dat.setUtcOffset(utcOffset);
+                        }
+                    }
                 } else if (name.equals("hostid")) { //$NON-NLS-1$
                     /*
                      * A 'hostid' file can be added which contains only one line
@@ -408,7 +415,7 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
 
     @Override
     public @NonNull Map<@NonNull String, @NonNull String> getProperties() {
-        if(fInfo == null) {
+        if (fInfo == null) {
             return Collections.emptyMap();
         }
         Map<@NonNull String, @NonNull String> properties = new LinkedHashMap<>();

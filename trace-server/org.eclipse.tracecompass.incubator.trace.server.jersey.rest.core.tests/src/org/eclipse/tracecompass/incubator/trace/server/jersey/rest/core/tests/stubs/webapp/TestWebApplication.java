@@ -15,6 +15,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.FilterService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.HealthService;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.IdentifierService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.CORSFilter;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.JacksonObjectMapperProvider;
@@ -46,6 +47,7 @@ public class TestWebApplication extends WebApplication {
         rc.register(TestDataProviderService.class);
         rc.register(FilterService.class);
         rc.register(HealthService.class);
+        rc.register(IdentifierService.class);
         rc.register(ConfigurationManagerService.class);
         rc.register(CORSFilter.class);
         rc.register(JacksonObjectMapperProvider.class);
