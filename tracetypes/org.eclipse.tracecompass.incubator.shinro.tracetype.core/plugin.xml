@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            category="org.eclipse.linuxtools.tmf.ctf.core.category.ctf"
+            event_type="org.eclipse.tracecompass.incubator.shinro.tracetype.core.ShinroEvent"
+            id="org.eclipse.tracecompass.incubator.shinro.tracetype"
+            isDirectory="true"
+            name="Shinro Trace"
+            trace_type="org.eclipse.tracecompass.incubator.shinro.tracetype.core.ShinroTrace">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.shinro.tracetype.core.callstack.ShinroCallStackAnalysis"
+            id="org.eclipse.tracecompass.incubator.shinro.tracetype.core.analysis.callstack"
+            name="%analysis.callstack">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.shinro.tracetype.core.ShinroTrace">
+         </tracetype>
+      </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.shinro.tracetype.core.counters.ShinroCountersAnalysis"
+            id="org.eclipse.tracecompass.incubator.shinro.tracetype.core.analysis.counters"
+            name="%analysis.counters">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.shinro.tracetype.core.ShinroTrace">
+         </tracetype>
+      </module>
+   </extension>
+
+</plugin>
