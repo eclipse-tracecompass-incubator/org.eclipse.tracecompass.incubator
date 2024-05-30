@@ -28,7 +28,7 @@
 
   <modules>
     <module>org.eclipse.tracecompass.incubator.target</module>
-    <module>org.eclipse.tracecompass.incubator.releng-site</module>
+    <!--module>org.eclipse.tracecompass.incubator.releng-site</module-->
   </modules>
 
 </project>

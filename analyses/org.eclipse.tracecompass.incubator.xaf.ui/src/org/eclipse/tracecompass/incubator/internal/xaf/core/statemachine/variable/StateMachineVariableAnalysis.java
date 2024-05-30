@@ -31,9 +31,9 @@ import java.util.TreeSet;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.graph.core.base.IGraphWorker;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfEdge;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfGraph;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfVertex;
+import org.eclipse.tracecompass.internal.analysis.graph.core.base.TmfEdge;
+import org.eclipse.tracecompass.internal.analysis.graph.core.base.TmfGraph;
+import org.eclipse.tracecompass.internal.analysis.graph.core.base.TmfVertex;
 import org.eclipse.tracecompass.analysis.graph.core.criticalpath.CriticalPathAlgorithmException;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsExecutionGraph;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsWorker;

@@ -17,9 +17,9 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfEdge.EdgeType;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfGraph;
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfVertex;
+import org.eclipse.tracecompass.internal.analysis.graph.core.base.TmfEdge.EdgeType;
+import org.eclipse.tracecompass.internal.analysis.graph.core.base.TmfGraph;
+import org.eclipse.tracecompass.internal.analysis.graph.core.base.TmfVertex;
 import org.eclipse.tracecompass.analysis.graph.core.building.AbstractTraceEventHandler;
 import org.eclipse.tracecompass.analysis.graph.core.building.ITraceEventHandler;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;

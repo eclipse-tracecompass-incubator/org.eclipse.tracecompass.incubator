@@ -13,7 +13,7 @@ package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.variab
 
 import java.util.Objects;
 
-import org.eclipse.tracecompass.analysis.graph.core.base.TmfEdge;
+import org.eclipse.tracecompass.internal.analysis.graph.core.base.TmfEdge;
 import org.eclipse.tracecompass.analysis.os.linux.core.execution.graph.OsWorker;
 
 /**
