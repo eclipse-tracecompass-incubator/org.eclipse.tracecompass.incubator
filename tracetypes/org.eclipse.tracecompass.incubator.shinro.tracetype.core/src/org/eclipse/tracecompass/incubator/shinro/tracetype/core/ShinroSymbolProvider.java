@@ -20,13 +20,13 @@ public class ShinroSymbolProvider extends DefaultSymbolProvider {
 
     @Override
     public @Nullable TmfResolvedSymbol getSymbol(int pid, long timestamp, long address) {
-        // we'll probably need to override this
-        return super.getSymbol(pid, timestamp, address);
+        return getSymbol(address);
     }
 
     @Override
     public @NonNull TmfResolvedSymbol getSymbol(long address) {
-        // we'll probably need to override this
-        return super.getSymbol(address);
+        // dummy implementation; temporary
+        String name = "function_" + Long.toHexString(address);
+        return new TmfResolvedSymbol(address, name);
     }
 }
