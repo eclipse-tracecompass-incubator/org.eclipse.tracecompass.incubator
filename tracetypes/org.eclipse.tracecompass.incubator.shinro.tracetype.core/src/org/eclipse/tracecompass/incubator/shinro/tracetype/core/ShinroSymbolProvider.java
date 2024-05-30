@@ -26,7 +26,8 @@ public class ShinroSymbolProvider extends DefaultSymbolProvider {
     @Override
     public @NonNull TmfResolvedSymbol getSymbol(long address) {
         // dummy implementation; temporary
-        String name = "function_" + Long.toHexString(address);
+        String resourceName = getTrace().getResource().getName();
+        String name = resourceName + " " + Long.toHexString(address);
         return new TmfResolvedSymbol(address, name);
     }
 }
