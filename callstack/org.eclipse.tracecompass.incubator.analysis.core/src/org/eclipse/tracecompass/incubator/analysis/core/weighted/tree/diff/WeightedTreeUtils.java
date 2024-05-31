@@ -22,6 +22,7 @@ import org.eclipse.tracecompass.analysis.profiling.core.tree.ITree;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
+import org.eclipse.tracecompass.internal.analysis.profiling.core.callgraph2.AggregatedCalledFunction;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
 
 import com.google.common.collect.ImmutableList;
@@ -31,6 +32,7 @@ import com.google.common.collect.ImmutableList;
  *
  * @author Geneviève Bastien
  */
+@SuppressWarnings("restriction")
 public final class WeightedTreeUtils {
 
     private WeightedTreeUtils() {
@@ -48,24 +50,81 @@ public final class WeightedTreeUtils {
      *            The tree that will be differentiated.
      * @param second
      *            The tree to use as the base
+     * @param statisticType
+     *            Determines the statistic (duration or self time) that the
+     *            flame graph will represent
      * @return The differential weighted tree
      */
-    public static <@NonNull T> Collection<DifferentialWeightedTree<T>> diffTrees(Collection<WeightedTree<T>> first, Collection<WeightedTree<T>> second) {
+    public static <@NonNull T> Collection<DifferentialWeightedTree<T>> diffTrees(Collection<WeightedTree<T>> first, Collection<WeightedTree<T>> second, @Nullable String statisticType) {
         List<DifferentialWeightedTree<T>> diffTrees = new ArrayList<>();
         for (WeightedTree<T> base : second) {
             T object = base.getObject();
             // Find the equivalent tree in the first collection
             WeightedTree<T> other = findObject(first, object);
-            double diffWeight = other == null ? Double.NaN : (double) (base.getWeight() - other.getWeight()) / other.getWeight();
-            DifferentialWeightedTree<@NonNull T> diffTree = new DifferentialWeightedTree<>(base, object, base.getWeight(), diffWeight);
+            DifferentialWeightedTree<@NonNull T> diffTree = calculateDiffTree(object, base, other, statisticType);
             diffTrees.add(diffTree);
 
             // Make the differential of the children
-            for (DifferentialWeightedTree<T> childTree : diffTrees(other == null ? Collections.emptyList() : other.getChildren(), base.getChildren())) {
+            for (DifferentialWeightedTree<T> childTree : diffTrees(other == null ? Collections.<WeightedTree<T>> emptyList() : other.getChildren(), base.getChildren(), null)) {
                 diffTree.addChild(childTree);
             }
         }
         return diffTrees;
+    }
+
+    private static <T> DifferentialWeightedTree<@NonNull T> calculateDiffTree(@NonNull T object, WeightedTree<@NonNull T> base, @Nullable WeightedTree<@NonNull T> other, @Nullable String statisticType) {
+        double diffWeight;
+        double nullDiff = Double.NaN;
+        DifferentialWeightedTree<@NonNull T> diffTree;
+        if (statisticType == null) {
+            diffWeight = other == null ? nullDiff : (double) (base.getWeight() - other.getWeight()) / other.getWeight();
+            diffTree = new DifferentialWeightedTree<>(base, object, base.getWeight(), diffWeight);
+
+        } else {
+            long baseWeight = 0;
+            long otherWeight = 0;
+            if (base instanceof AggregatedCalledFunction) {
+                long[] weightsArray = calculateWeights(base, other, statisticType);
+                baseWeight = weightsArray[0];
+                otherWeight = weightsArray[1];
+            } else {
+                baseWeight = base.getWeight();
+                otherWeight = other == null ? 0 : other.getWeight();
+            }
+            if (other == null || otherWeight == 0) {
+                diffWeight = nullDiff;
+            } else {
+                diffWeight = (double) (baseWeight - otherWeight) / otherWeight;
+            }
+            diffTree = new DifferentialWeightedTree<>(base, object, base.getWeight(), diffWeight);
+
+        }
+        return diffTree;
+    }
+
+    private static <T> long[] calculateWeights(WeightedTree<@NonNull T> base, @Nullable WeightedTree<@NonNull T> other, String statisticType) {
+        long baseWeight = 0;
+        long otherWeight = 0;
+        long[] weightsArray = new long[2];
+        switch (statisticType) {
+        case "Self Time": //$NON-NLS-1$
+        {
+            baseWeight = ((AggregatedCalledFunction) base).getSelfTime();
+            otherWeight = other == null ? 0 : ((AggregatedCalledFunction) other).getSelfTime();
+            break;
+        }
+        case "Duration": //$NON-NLS-1$
+        {
+            baseWeight = ((AggregatedCalledFunction) base).getWeight();
+            otherWeight = other == null ? 0 : ((AggregatedCalledFunction) other).getWeight();
+            break;
+        }
+        default:
+            break;
+        }
+        weightsArray[0] = baseWeight;
+        weightsArray[1] = otherWeight;
+        return weightsArray;
     }
 
     /**
@@ -124,8 +183,8 @@ public final class WeightedTreeUtils {
         for (Pair<@NonNull ?, @NonNull ?> pair : pairedElements) {
             Collection<WeightedTree<N>> trees1 = first.getTreesFor(pair.getFirst());
             Collection<WeightedTree<N>> trees2 = second.getTreesFor(pair.getSecond());
-            Collection<DifferentialWeightedTree<N>> diffTrees = WeightedTreeUtils.diffTrees(trees1, trees2);
-            for (DifferentialWeightedTree<N> tree: diffTrees) {
+            Collection<DifferentialWeightedTree<N>> diffTrees = WeightedTreeUtils.diffTrees(trees1, trees2, null);
+            for (DifferentialWeightedTree<N> tree : diffTrees) {
                 treeSet.addWeightedTree(pair.getFirst(), tree);
             }
         }
@@ -138,8 +197,10 @@ public final class WeightedTreeUtils {
         Collection<@NonNull ?> elements2 = second.getElements();
         // If there is only one element and it is not a tree, pair it
         if (elements1.size() == 1 && elements2.size() == 1) {
-            @NonNull Object element1 = elements1.iterator().next();
-            @NonNull Object element2 = elements2.iterator().next();
+            @NonNull
+            Object element1 = elements1.iterator().next();
+            @NonNull
+            Object element2 = elements2.iterator().next();
             if (!(element1 instanceof ITree) && !(element2 instanceof ITree)) {
                 return ImmutableList.of(new Pair(element1, element2));
             }
@@ -158,8 +219,10 @@ public final class WeightedTreeUtils {
 
     private static Collection<Pair<@NonNull ?, @NonNull ?>> pairEqualElements(Collection<@NonNull ?> elements1, Collection<@NonNull ?> elements2) {
         List<Pair<@NonNull ?, @NonNull ?>> pairedElements = new ArrayList<>();
-        for (@NonNull Object element1 : elements1) {
-            for (@NonNull Object element2 : elements2) {
+        for (@NonNull
+        Object element1 : elements1) {
+            for (@NonNull
+            Object element2 : elements2) {
                 if (element1.equals(element2)) {
                     pairedElements.add(new Pair<>(element1, element1));
                     if (element1 instanceof ITree && element2 instanceof ITree) {
@@ -174,11 +237,13 @@ public final class WeightedTreeUtils {
 
     private static Collection<Pair<@NonNull ?, @NonNull ?>> pairSameNameElements(Collection<@NonNull ?> elements1, Collection<?> elements2) {
         List<Pair<@NonNull ?, @NonNull ?>> pairedElements = new ArrayList<>();
-        for (@NonNull Object element1 : elements1) {
+        for (@NonNull
+        Object element1 : elements1) {
             if (!(element1 instanceof ITree)) {
                 continue;
             }
-            for (@NonNull Object element2 : elements2) {
+            for (@NonNull
+            Object element2 : elements2) {
                 if (!(element2 instanceof ITree)) {
                     continue;
                 }

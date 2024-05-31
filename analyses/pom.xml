@@ -39,6 +39,10 @@
     <module>org.eclipse.tracecompass.incubator.eventfieldcount</module>
     <module>org.eclipse.tracecompass.incubator.eventfieldcount.core</module>
     <module>org.eclipse.tracecompass.incubator.eventfieldcount.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.executioncomparison</module>
+    <module>org.eclipse.tracecompass.incubator.executioncomparison.core</module>
+    <module>org.eclipse.tracecompass.incubator.executioncomparison.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.executioncomparison.ui</module>
     <module>org.eclipse.tracecompass.incubator.filters</module>
     <module>org.eclipse.tracecompass.incubator.filters.core</module>
     <module>org.eclipse.tracecompass.incubator.filters.core.tests</module>
