@@ -18,7 +18,6 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfSignal;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 
-
 /**
  *
  */
@@ -34,21 +33,21 @@ public class TmfComparisonFilteringUpdatedSignal extends TmfSignal {
 
     /**
      * @param source
-     *               the class that has generated the signal
+     *            the class that has generated the signal
      * @param beginA
-     *               the start time in event density chartA
+     *            the start time in event density chartA
      * @param endA
-     *               the end time in event density chartA
+     *            the end time in event density chartA
      * @param beginB
-     *               the start time in event density chartB
+     *            the start time in event density chartB
      * @param endB
-     *               the end time in event density chartA
+     *            the end time in event density chartA
      * @param statistic
-     *               the statistic that will be represented in the flame graph
+     *            the statistic that will be represented in the flame graph
      * @param traceListA
-     *               the list of traces in group A
+     *            the list of traces in group A
      * @param traceListB
-     *               the list of traces in group B
+     *            the list of traces in group B
      */
     public TmfComparisonFilteringUpdatedSignal(Object source, ITmfTimestamp beginA, ITmfTimestamp endA, ITmfTimestamp beginB, ITmfTimestamp endB, @Nullable String statistic, @Nullable List<String> traceListA, @Nullable List<String> traceListB) {
         super(source);
@@ -63,14 +62,14 @@ public class TmfComparisonFilteringUpdatedSignal extends TmfSignal {
 
     /**
      * @param source
-     *               the class that has generated the signal
-
+     *            the class that has generated the signal
+     *
      * @param statistic
-     *               the statistic that will be represented in the flame graph
+     *            the statistic that will be represented in the flame graph
      * @param traceListA
-     *               the list of traces in group A
+     *            the list of traces in group A
      * @param traceListB
-     *               the list of traces in group B
+     *            the list of traces in group B
      */
     public TmfComparisonFilteringUpdatedSignal(Object source, @Nullable String statistic, @Nullable List<String> traceListA, @Nullable List<String> traceListB) {
         this(source, TmfTimestamp.BIG_BANG, TmfTimestamp.BIG_CRUNCH, TmfTimestamp.BIG_BANG, TmfTimestamp.BIG_CRUNCH, statistic, traceListA, traceListB);
@@ -105,7 +104,7 @@ public class TmfComparisonFilteringUpdatedSignal extends TmfSignal {
     }
 
     /**
-     * @return the type of statistic that will be  represented in flame graph
+     * @return the type of statistic that will be represented in flame graph
      */
     public @Nullable String getStatistic() {
         return fStatistic;

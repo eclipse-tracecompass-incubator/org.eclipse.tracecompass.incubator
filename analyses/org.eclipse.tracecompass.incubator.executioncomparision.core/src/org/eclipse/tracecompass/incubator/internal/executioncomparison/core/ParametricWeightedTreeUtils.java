@@ -56,7 +56,8 @@ public final class ParametricWeightedTreeUtils {
      * @param second
      *            The tree to use as the base
      * @param statisticType
-     *            it determine the statistic (duration or self time) that flame graph will represent
+     *            it determine the statistic (duration or self time) that flame
+     *            graph will represent
      * @return The differential weighted tree
      */
     public static <@NonNull T> Collection<DifferentialWeightedTree<T>> diffTrees(Collection<WeightedTree<T>> first, Collection<WeightedTree<T>> second, @Nullable String statisticType) {
@@ -77,7 +78,7 @@ public final class ParametricWeightedTreeUtils {
                 long baseWeight = 0;
                 long otherWeight = 0;
                 if (base instanceof AggregatedCalledFunction) {
-                    switch(statisticType) {
+                    switch (statisticType) {
                     case "Self Time": //$NON-NLS-1$
                     {
                         baseWeight = ((AggregatedCalledFunction) base).getSelfTime();

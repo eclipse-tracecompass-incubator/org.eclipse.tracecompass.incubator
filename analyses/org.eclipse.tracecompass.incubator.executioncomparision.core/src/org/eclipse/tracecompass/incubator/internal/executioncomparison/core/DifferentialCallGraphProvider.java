@@ -25,8 +25,10 @@ import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.Diffe
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeSet;
 
 /**
- * DifferentialCallGraphProvider which provide a callgraphProvider. Inherited from DifferentialWeightedTreeProvider
- * to edit naming and color ICallGraphProviderpalette to provide a differential flame graph
+ * DifferentialCallGraphProvider which provide a callgraphProvider. Inherited
+ * from DifferentialWeightedTreeProvider to edit naming and color
+ * ICallGraphProviderpalette to provide a differential flame graph
+ *
  * @author Fateme Faraji Daneshgar
  */
 public class DifferentialCallGraphProvider extends DifferentialWeightedTreeProvider<ICallStackSymbol> {
@@ -59,7 +61,7 @@ public class DifferentialCallGraphProvider extends DifferentialWeightedTreeProvi
     public DifferentialCallGraphProvider(
             IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, ? extends WeightedTree<ICallStackSymbol>> originalTree,
             DifferentialWeightedTreeSet<ICallStackSymbol> treeSet) {
-        super((IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, WeightedTree<ICallStackSymbol>>)originalTree, treeSet);
+        super((IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, WeightedTree<ICallStackSymbol>>) originalTree, treeSet);
         fOriginalTree = (ICallGraphProvider2) originalTree;
     }
 
@@ -76,8 +78,7 @@ public class DifferentialCallGraphProvider extends DifferentialWeightedTreeProvi
         String label = ""; //$NON-NLS-1$
         if (originalTree instanceof AggregatedCallSite) {
             label = fOriginalTree.toDisplayString((AggregatedCallSite) originalTree);
-        }
-        else {
+        } else {
             label = String.valueOf(originalTree.getObject().resolve(null));
         }
         if (Double.isFinite(difference)) {

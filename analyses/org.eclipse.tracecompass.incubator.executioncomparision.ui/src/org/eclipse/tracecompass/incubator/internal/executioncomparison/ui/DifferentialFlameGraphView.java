@@ -108,7 +108,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 
 /**
- * the differential flame graph used in execution comparison view. Its mostly based on FlameGraphView
+ * the differential flame graph used in execution comparison view. Its mostly
+ * based on FlameGraphView
  *
  * @author Fateme Faraji Daneshgar
  *
@@ -454,7 +455,7 @@ public class DifferentialFlameGraphView extends TmfView {
                 }
 
                 if (monitor.isCanceled()) {
-                    if (trace==null) {
+                    if (trace == null) {
                         return;
                     }
                     resetEntries(trace);
@@ -476,8 +477,7 @@ public class DifferentialFlameGraphView extends TmfView {
                 }
 
             }
-        }
-        catch (InterruptedException e1) {
+        } catch (InterruptedException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         } finally {
@@ -726,29 +726,28 @@ public class DifferentialFlameGraphView extends TmfView {
         List<Long> times = StateSystemUtils.getTimes(start, end, resolution);
         Sampling sampling = new Sampling(start, end, resolution);
 
-
         Multimap<ITimeGraphDataProvider<? extends TimeGraphEntryModel>, Long> providersToModelIds = filterGroupEntries(normalEntries, zoomStartTime, zoomEndTime);
-        if (providersToModelIds!=null) {
+        if (providersToModelIds != null) {
 
-        SubMonitor subMonitor = SubMonitor.convert(monitor, getClass().getSimpleName() + "#zoomEntries", providersToModelIds.size()); //$NON-NLS-1$
+            SubMonitor subMonitor = SubMonitor.convert(monitor, getClass().getSimpleName() + "#zoomEntries", providersToModelIds.size()); //$NON-NLS-1$
 
-        Entry<ITimeGraphDataProvider<? extends TimeGraphEntryModel>, Collection<Long>> entry = providersToModelIds.asMap().entrySet().iterator().next();
-        ITimeGraphDataProvider<? extends TimeGraphEntryModel> dataProvider = Objects.requireNonNull(entry.getKey());
-        SelectionTimeQueryFilter filter = new SelectionTimeQueryFilter(times, entry.getValue());
-        Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
-        Multimap<Integer, String> regexesMap = getRegexes();
-        if (!regexesMap.isEmpty()) {
-            parameters.put(DataProviderParameterUtils.REGEX_MAP_FILTERS_KEY, Objects.requireNonNull(regexesMap.asMap()));
-        }
-        TmfModelResponse<TimeGraphModel> response = dataProvider.fetchRowModel(parameters, monitor);
-        TimeGraphModel model = response.getModel();
-        Map<Long,TimeGraphEntry> entries = fEntries.get(dataProvider);
-        if ((model != null) && (entries) != null) {
-            zoomEntries(entries, model.getRows(), response.getStatus() == ITmfResponse.Status.COMPLETED, sampling);
+            Entry<ITimeGraphDataProvider<? extends TimeGraphEntryModel>, Collection<Long>> entry = providersToModelIds.asMap().entrySet().iterator().next();
+            ITimeGraphDataProvider<? extends TimeGraphEntryModel> dataProvider = Objects.requireNonNull(entry.getKey());
+            SelectionTimeQueryFilter filter = new SelectionTimeQueryFilter(times, entry.getValue());
+            Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
+            Multimap<Integer, String> regexesMap = getRegexes();
+            if (!regexesMap.isEmpty()) {
+                parameters.put(DataProviderParameterUtils.REGEX_MAP_FILTERS_KEY, Objects.requireNonNull(regexesMap.asMap()));
+            }
+            TmfModelResponse<TimeGraphModel> response = dataProvider.fetchRowModel(parameters, monitor);
+            TimeGraphModel model = response.getModel();
+            Map<Long, TimeGraphEntry> entries = fEntries.get(dataProvider);
+            if ((model != null) && (entries) != null) {
+                zoomEntries(entries, model.getRows(), response.getStatus() == ITmfResponse.Status.COMPLETED, sampling);
 
-        }
-        subMonitor.worked(1);
-        redraw();
+            }
+            subMonitor.worked(1);
+            redraw();
         }
     }
 

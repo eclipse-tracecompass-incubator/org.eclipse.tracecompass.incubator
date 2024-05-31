@@ -151,10 +151,10 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
                     ITmfTimestamp traceStart = start;
                     ITmfTimestamp traceEnd = end;
 
-                    if (traceStart.getValue()< trace.getStartTime().getValue()) {
+                    if (traceStart.getValue() < trace.getStartTime().getValue()) {
                         traceStart = trace.getStartTime();
                     }
-                    if (traceEnd.getValue()> trace.getEndTime().getValue()) {
+                    if (traceEnd.getValue() > trace.getEndTime().getValue()) {
                         traceEnd = trace.getEndTime();
                     }
                     cGList.add(instrumentedCallStackAnalysis.getCallGraph(traceStart, traceEnd));
@@ -192,7 +192,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
      *            the monitor, can be null
      * @return the differential weighted provider or null
      */
-   public @Nullable DifferentialWeightedTreeProvider<?> getDiffProvider(@Nullable IProgressMonitor monitor) {
+    public @Nullable DifferentialWeightedTreeProvider<?> getDiffProvider(@Nullable IProgressMonitor monitor) {
         if (fTraceCallGraphRegistry.isEmpty()) {
             InstrumentedCallStackAnalysis callGraphModule;
             ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
@@ -213,24 +213,6 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
 
         refreshDiffCG(monitor);
         return getDifferentialCallGraphProvider();
-
-    }
-
-    /**
-     * mergeCG merge two aggregated called functions
-     *
-     * @param cg1
-     *            first aggregated called function
-     * @param cg2
-     *            second aggregated called function
-     * @return AggregatedCalledFunction the resulting aggregated called function
-     */
-    public AggregatedCalledFunction mergeCG(AggregatedCalledFunction cg1, AggregatedCalledFunction cg2) {
-        AggregatedCalledFunction merged = cg1.copyOf();
-        merged.meanData(cg2);
-        /// As the merge function in Weighted tree adds the values of two trees,
-        /// we need to divide them by 2.
-        return merged;
 
     }
 
@@ -307,10 +289,10 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
         if (traceListA != null) {
             List<String> synchronizedListA = Collections.synchronizedList(fTraceListA);
             synchronized (synchronizedListA) {
-            	synchronizedListA.clear();
-            	for (String name : traceListA) {
-            		synchronizedListA.add(name);
-            	}
+                synchronizedListA.clear();
+                for (String name : traceListA) {
+                    synchronizedListA.add(name);
+                }
             }
 
         }
@@ -319,7 +301,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
             List<String> synchronizedListB = Collections.synchronizedList(fTraceListB);
             synchronizedListB.clear();
             for (String name : traceListB) {
-            	synchronizedListB.add(name);
+                synchronizedListB.add(name);
             }
 
         }
@@ -371,16 +353,18 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
     private void setDifferentialCallGraphProvider(DifferentialCallGraphProvider differentialCallGraphProvider) {
         fDifferentialCallGraphProvider = Objects.requireNonNull(differentialCallGraphProvider);
     }
+
     private static ITmfTrace getTrace(String traceName) {
         ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
         Collection<ITmfTrace> traceSet = TmfTraceManager.getTraceSet(trace);
         for (ITmfTrace traceMember : traceSet) {
             if (traceMember.getName().equals(traceName)) {
-                return  traceMember;
-                }
+                return traceMember;
             }
+        }
         return null;
     }
+
     private List<String> getTraceListA() {
         return new ArrayList<>(fTraceListA);
     }

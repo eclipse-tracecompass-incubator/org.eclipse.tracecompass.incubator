@@ -37,6 +37,7 @@ public final class DifferentialFlamePalette implements IDataPalette {
 
     private static final String NAN = Objects.requireNonNull(Objects.toString(Double.NaN));
     private static final String NO_DIFFERENCE = "NO-Difference"; //$NON-NLS-1$
+
     private static String generateRed(int i) {
         return "RED" + i; //$NON-NLS-1$
     }
@@ -55,7 +56,6 @@ public final class DifferentialFlamePalette implements IDataPalette {
     private static final String RED_COLOR = Objects.requireNonNull(X11ColorUtils.toHexColor(255, 0, 0));
     private static final String WHITE_COLOR = Objects.requireNonNull(X11ColorUtils.toHexColor(255, 255, 255));
 
-
     private static final Map<String, OutputElementStyle> STYLES;
     // Map of styles with the parent
     private static final Map<String, OutputElementStyle> STYLE_MAP = Collections.synchronizedMap(new HashMap<>());
@@ -72,7 +72,7 @@ public final class DifferentialFlamePalette implements IDataPalette {
                     StyleProperties.BORDER_STYLE, StyleProperties.BorderStyle.SOLID)));
             i++;
         }
-        int j=0;
+        int j = 0;
         // Add dark red color for Nan
         builder.put(NAN, new OutputElementStyle(null, ImmutableMap.of(
                 StyleProperties.STYLE_NAME, NAN,
@@ -88,7 +88,7 @@ public final class DifferentialFlamePalette implements IDataPalette {
                 StyleProperties.BORDER_STYLE, StyleProperties.BorderStyle.SOLID)));
         // Add Blue color palette for Shorter duration
         for (i = MIN_HUE; i <= MAX_HUE; i++) {
-            j = (i-50)>0 ? i-50:0;
+            j = (i - 50) > 0 ? i - 50 : 0;
             String blueKey = generateBlue(i);
             builder.put(blueKey, new OutputElementStyle(null, ImmutableMap.of(
                     StyleProperties.STYLE_NAME, blueKey,
@@ -108,7 +108,6 @@ public final class DifferentialFlamePalette implements IDataPalette {
         STYLES = builder.build();
         STYLE_MAP.putAll(STYLES);
     }
-
 
     private static @Nullable DifferentialFlamePalette fInstance = null;
 
@@ -157,7 +156,7 @@ public final class DifferentialFlamePalette implements IDataPalette {
             if (Double.isNaN(difference)) {
                 return STYLE_MAP.computeIfAbsent(NAN, OutputElementStyle::new);
             }
-            if ((difference <= 0.05) &&(difference >= -0.05)) {
+            if ((difference <= 0.05) && (difference >= -0.05)) {
                 return STYLE_MAP.computeIfAbsent(NO_DIFFERENCE, OutputElementStyle::new);
             }
             if (difference < 0) {
@@ -175,7 +174,8 @@ public final class DifferentialFlamePalette implements IDataPalette {
     }
 
     /**
-     * @param min the minimum threshold for coloring.
+     * @param min
+     *            the minimum threshold for coloring.
      */
     public static void setMinThreshold(double min) {
         fMinThreshold = Math.round(min);

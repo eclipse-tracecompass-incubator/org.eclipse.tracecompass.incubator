@@ -46,4 +46,3 @@ public class Activator extends TraceCompassActivator {
     }
 
 }
-

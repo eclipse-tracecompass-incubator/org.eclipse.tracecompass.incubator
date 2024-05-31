@@ -11,7 +11,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.executioncomparison.core;
 
-
 import java.util.List;
 
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignal;
@@ -19,7 +18,7 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfSignal;
 /**
  * TmfCheckboxChangedSignal for handling check box change events
  *
- *  * @author Fateme Faraji Daneshgar
+ * * @author Fateme Faraji Daneshgar
  */
 public class TmfCheckboxChangedSignal extends TmfSignal {
 
@@ -27,9 +26,9 @@ public class TmfCheckboxChangedSignal extends TmfSignal {
 
     /**
      * @param source
-     *          the source class of signal
+     *            the source class of signal
      * @param traceList
-     *          the list of traces remains checked in the check box
+     *            the list of traces remains checked in the check box
      */
     public TmfCheckboxChangedSignal(Object source, List<String> traceList) {
         super(source);
@@ -42,7 +41,5 @@ public class TmfCheckboxChangedSignal extends TmfSignal {
     public List<String> getTraceList() {
         return fTraceList;
     }
-
-
 
 }
