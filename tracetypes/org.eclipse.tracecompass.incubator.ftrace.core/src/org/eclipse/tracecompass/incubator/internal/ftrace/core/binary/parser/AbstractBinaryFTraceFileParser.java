@@ -23,7 +23,6 @@ import static org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.eve
 import static org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.event.BinaryFTraceConstants.HEADER_EVENT_TYPE_LENGTH_VALUE_SEPARATOR;
 import static org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.event.BinaryFTraceConstants.NEW_LINE;
 
-import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,7 +78,7 @@ public abstract class AbstractBinaryFTraceFileParser {
             BinaryFTraceVersion ftraceVersionEnum = BinaryFTraceVersion.getVersionAsEnum(ftraceVersionInt);
             return new BinaryFTraceVersionHeader(magicValues, ftraceVersionEnum);
         } catch (NumberFormatException e) {
-            throw new TmfTraceException("Cannot parse the magic values and FTrace version. Make sure you use trace-cmd v.2.9 and above.", e); //$NON-NLS-1$
+            throw new TmfTraceException("Cannot parse the magic values and FTrace version. Make sure you use trace-cmd v.2.9 and above. strVersion=" + strVersion, e); //$NON-NLS-1$
         }
     }
 
@@ -90,16 +89,13 @@ public abstract class AbstractBinaryFTraceFileParser {
      *            The buffer that is currently pointing to the endianess value
      *            of the trace file
      * @return The endianess of the file as a {@link ByteOrder} value
-     * @throws IOException
-     *             If an error occur while reading the file
      */
-    protected static ByteOrder getFileEndianess(BinaryFTraceByteBuffer buffer) throws IOException {
+    protected static ByteOrder getFileEndianess(BinaryFTraceByteBuffer buffer) {
         int endianess = buffer.getNextBytes(1)[0];
         ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
         if (endianess == 0) {
             byteOrder = ByteOrder.LITTLE_ENDIAN;
         }
-        buffer.setByteOrder(byteOrder);
 
         return byteOrder;
     }
@@ -113,15 +109,12 @@ public abstract class AbstractBinaryFTraceFileParser {
      * @return The long value size of the trace file (either 4 or 8)
      * @throws TmfTraceException
      *             If an error occur while validating the long value size
-     * @throws IOException
-     *             If an error occur while reading the long value size from the
-     *             trace
      */
-    protected static int getLongValueSize(BinaryFTraceByteBuffer buffer) throws TmfTraceException, IOException {
+    protected static int getLongValueSize(BinaryFTraceByteBuffer buffer) throws TmfTraceException {
         int longValueSize = buffer.getNextBytes(1)[0];
 
         if (longValueSize != 4 && longValueSize != 8) {
-            throw new TmfTraceException("Invalid size for long value, must be either 4 or 8 bytes"); //$NON-NLS-1$
+            throw new TmfTraceException("Invalid size for long value, must be either 4 or 8 bytes, got " + longValueSize); //$NON-NLS-1$
         }
 
         return longValueSize;
@@ -134,10 +127,8 @@ public abstract class AbstractBinaryFTraceFileParser {
      *            The buffer that is currently pointing to the host page size
      *            value in the trace file
      * @return The host page size value of the trace file
-     * @throws IOException
-     *             If an error occurred while reading the host page size value
      */
-    protected static int getHostPageSize(BinaryFTraceByteBuffer buffer) throws IOException {
+    protected static int getHostPageSize(BinaryFTraceByteBuffer buffer) {
         return buffer.getNextInt();
     }
 

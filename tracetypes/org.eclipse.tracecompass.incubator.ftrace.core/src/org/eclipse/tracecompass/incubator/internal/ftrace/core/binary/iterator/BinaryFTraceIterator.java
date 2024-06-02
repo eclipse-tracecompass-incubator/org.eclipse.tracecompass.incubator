@@ -69,7 +69,7 @@ public class BinaryFTraceIterator extends BinaryFTraceReader implements ITmfCont
      *            The {@link BinaryFTraceHeaderInfo} linked to the trace. It
      *            should be provided by the corresponding 'ctfTmfTrace'.
      * @param ftrace
-     *            The {@link BinaryFTraceDirectImp} to iterate over
+     *            The {@link BinaryFTrace} to iterate over
      * @throws IOException
      *             If the iterator couldn't not be instantiated, probably due to
      *             a read error.
@@ -95,12 +95,8 @@ public class BinaryFTraceIterator extends BinaryFTraceReader implements ITmfCont
      *
      * @return GenericFtraceEvent The current event that the iterator currently
      *         points to; null if there are no more events in the trace.
-     * @throws IOException
-     *             If reading the next event fails, most likely because of
-     *             buffer overflow.
      */
-    @SuppressWarnings("resource")
-    public synchronized GenericFtraceEvent getCurrentEvent() throws IOException {
+    public synchronized GenericFtraceEvent getCurrentEvent() {
         final BinaryFTraceCPUSectionIterator top = super.getPrio().peek();
         if (top != null) {
             if (!fCurLocation.equals(fPreviousLocation)) {
@@ -175,10 +171,8 @@ public class BinaryFTraceIterator extends BinaryFTraceReader implements ITmfCont
      *            The LocationData representing the position to seek to
      * @return True if the seek was successful, false if there was an error
      *         seeking.
-     * @throws IOException
-     *             If an error occurred while seeking the event
      */
-    public synchronized boolean seek(BinaryFTraceLocationInfo ctfLocationData) throws IOException {
+    public synchronized boolean seek(BinaryFTraceLocationInfo ctfLocationData) {
         if (ctfLocationData.equals(BinaryFTraceLocation.INVALID_LOCATION)) {
             fCurLocation = NULL_LOCATION;
             return false;
@@ -238,7 +232,7 @@ public class BinaryFTraceIterator extends BinaryFTraceReader implements ITmfCont
         return seekSuccess;
     }
 
-    private long positionIteratorByIndex(long timestamp, long indexToSeek) throws IOException {
+    private long positionIteratorByIndex(long timestamp, long indexToSeek) {
         boolean success = true;
         long currentIndex = 0;
 
@@ -269,12 +263,12 @@ public class BinaryFTraceIterator extends BinaryFTraceReader implements ITmfCont
     }
 
     @Override
-    public boolean advance() throws IOException {
+    public boolean advance() {
         boolean readNextEventSuccess = readNextEvent();
         return readNextEventSuccess && skipRawSystemEvents();
     }
 
-    private boolean readNextEvent() throws IOException {
+    private boolean readNextEvent() {
         boolean hasMoreEvents = false;
         try {
             hasMoreEvents = super.advance();
@@ -297,7 +291,7 @@ public class BinaryFTraceIterator extends BinaryFTraceReader implements ITmfCont
         return hasMoreEvents;
     }
 
-    private boolean skipRawSystemEvents() throws IOException {
+    private boolean skipRawSystemEvents() {
         // Position the trace at the first non raw event
         GenericFtraceEvent event = getCurrentEvent();
 
@@ -310,7 +304,7 @@ public class BinaryFTraceIterator extends BinaryFTraceReader implements ITmfCont
         return ret;
     }
 
-    private boolean skipToFirstValidEvent() throws IOException {
+    private boolean skipToFirstValidEvent() {
         // This means we are initializing the trace
         boolean initTrace = false;
         if (fCurLocation == null) {
@@ -373,11 +367,9 @@ public class BinaryFTraceIterator extends BinaryFTraceReader implements ITmfCont
      *
      * @return 0 if there is no more event to read; else return the current
      *         timestamp location.
-     * @throws IOException
-     *             if an error occurred while getting the event
      */
     @SuppressWarnings("resource")
-    public synchronized long getCurrentTimestamp() throws IOException {
+    public synchronized long getCurrentTimestamp() {
         final BinaryFTraceCPUSectionIterator top = super.getPrio().peek();
 
         if (top != null) {

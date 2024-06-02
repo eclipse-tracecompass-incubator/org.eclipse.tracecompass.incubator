@@ -304,10 +304,8 @@ public class BinaryFTraceReader implements AutoCloseable {
      * Go to the next event.
      *
      * @return True if an event was read.
-     * @throws IOException
-     *             if an error occurs
      */
-    public boolean advance() throws IOException {
+    public boolean advance() {
         /*
          * Remove the reader from the top of the priority queue.
          */

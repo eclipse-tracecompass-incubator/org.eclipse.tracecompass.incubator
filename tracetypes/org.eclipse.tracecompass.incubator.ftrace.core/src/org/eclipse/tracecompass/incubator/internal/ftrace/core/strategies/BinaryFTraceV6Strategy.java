@@ -141,4 +141,11 @@ public class BinaryFTraceV6Strategy implements IBinaryFTraceStrategy {
     public ITmfContext createIterator() throws IOException {
         return new BinaryFTraceIterator(fTraceHeaderData, fFTrace);
     }
+
+    @Override
+    public void dispose() {
+        // release (indirect) references to mem-mapped file buffers so that tracecompass
+        // can garbage-collect them and unlock the file (e.g. if the user wants to delete it)
+        fTraceHeaderData = null;
+    }
 }

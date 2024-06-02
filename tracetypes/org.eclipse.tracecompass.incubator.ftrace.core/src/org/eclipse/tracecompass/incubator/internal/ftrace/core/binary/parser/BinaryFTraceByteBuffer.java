@@ -11,88 +11,46 @@
 
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.parser;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 
 import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.header.BinaryFTraceDataType;
 
 /**
- * A reader for Ftrace files that utilizes ByteBuffer
+ * A reader for Ftrace files using a ByteBuffer obtained mem-mapping the .dat file.
  *
  * @author Hoang Thuan Pham
  */
-public class BinaryFTraceByteBuffer implements AutoCloseable {
-    private static final int BUFFER_SIZE = 4096;
-
-    private final RandomAccessFile fTraceFile;
-    private FileChannel fFileChannel;
-    private ByteBuffer fByteBuffer;
-    private ByteOrder fByteOrder = ByteOrder.BIG_ENDIAN;
-    private long fCurrentOffset;
+public class BinaryFTraceByteBuffer {
+    private BinaryFTraceFileMapping fMappedBuffer;
+    private long fCurrentOffset = 0;
 
     /**
-     * Constructor
+     * Create a buffer mapping of the given file.
      *
-     * @param path
-     *            The path to the file
-     * @throws FileNotFoundException
-     *             Exception thrown when a file is not found
+     * @param filePath the file to map
+     * @throws IOException if the file can't be opened or mapped
      */
-    public BinaryFTraceByteBuffer(String path) throws FileNotFoundException {
-        fTraceFile = new RandomAccessFile(path, "r"); //$NON-NLS-1$
-        fFileChannel = fTraceFile.getChannel();
-        fByteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-        fCurrentOffset = 0;
+    public BinaryFTraceByteBuffer(String filePath) throws IOException {
+        this(new BinaryFTraceFileMapping(filePath));
     }
 
     /**
-     * Get the byte order of the byte buffer
+     * Create a (usually temporary) buffer that uses the given mapping.
      *
-     * @return The current byte order of the buffer
+     * @param mappedBuffer the mem-mapped .dat file
      */
-    public ByteOrder getByteOrder() {
-        return fByteOrder;
+    public BinaryFTraceByteBuffer(BinaryFTraceFileMapping mappedBuffer) {
+        fMappedBuffer = mappedBuffer;
     }
 
     /**
-     * Set the byte order of the byte buffer
+     * Move the byte buffer pointer to a specific offset in the file
      *
-     * @param byteOrder
-     *            The new byte order for the buffer
+     * @param offset
+     *            The new offset of the file
      */
-    public void setByteOrder(ByteOrder byteOrder) {
-        this.fByteOrder = byteOrder;
-    }
-
-    /**
-     * Close the file
-     *
-     * @throws IOException
-     *             Cannot close the file
-     */
-    @Override
-    public void close() throws IOException {
-        fFileChannel.close();
-        fTraceFile.close();
-    }
-
-    /**
-     * Read into the byte buffer
-     *
-     * @return The number of bytes read into the buffer
-     * @throws IOException
-     *             Cannot read data into the buffer
-     */
-    public int read() throws IOException {
-        fByteBuffer.compact(); // Write mode
-        int numOfBytesRead = fFileChannel.read(fByteBuffer);
-        fByteBuffer.flip(); // Enable reading
-
-        return numOfBytesRead;
+    public void movePointerToOffset(long offset) {
+        fCurrentOffset = offset;
     }
 
     /**
@@ -101,23 +59,11 @@ public class BinaryFTraceByteBuffer implements AutoCloseable {
      * @param byteCount
      *            The number of byte to read from the buffer
      * @return A byte array containing the data read from the buffer
-     * @throws IOException
-     *             An error occur while reading data from the buffer
      */
-    public byte[] getNextBytes(int byteCount) throws IOException {
+    public byte[] getNextBytes(int byteCount) {
         byte[] bytesArray = new byte[byteCount];
-
-        fByteBuffer.flip(); // To switch to read mode
-
-        // Buffer will overflow
-        if (fByteBuffer.remaining() < byteCount) {
-            read(); // Get more data
-        }
-
-        fByteBuffer.get(bytesArray);
-        fByteBuffer.compact(); // Compact the size of the buffer
+        fMappedBuffer.get(fCurrentOffset, bytesArray);
         fCurrentOffset += byteCount;
-
         return bytesArray;
     }
 
@@ -126,29 +72,17 @@ public class BinaryFTraceByteBuffer implements AutoCloseable {
      * encounter a null terminating character (\0)
      *
      * @return The string read from the file
-     * @throws IOException
-     *             Cannot read data from the buffer
      */
-    public String getNextString() throws IOException {
+    public String getNextString() {
+        long pos = fCurrentOffset;
         StringBuilder strBuilder = new StringBuilder();
 
-        fByteBuffer.flip();
-
-        // Make sure that there are some value to be read
-        if (fByteBuffer.remaining() == 0) {
-            read(); // Get more data
-        }
-        int value = fByteBuffer.get();
+        byte value = fMappedBuffer.getByte(pos++);
 
         while (value > 0) {
             strBuilder.append((char) value);
-            if (fByteBuffer.remaining() == 0) { // If we run out of data
-                read(); // Get more data
-            }
-            value = fByteBuffer.get();
+            value = fMappedBuffer.getByte(pos++);
         }
-
-        fByteBuffer.compact(); // Compact the size of the buffer
 
         String returnString = strBuilder.toString();
         fCurrentOffset += (returnString.length() + BinaryFTraceHeaderElementSize.STRING_TERMINATOR);
@@ -162,93 +96,56 @@ public class BinaryFTraceByteBuffer implements AutoCloseable {
      * @param byteCount
      *            Number of bytes to read
      * @return The string obtained by parsing n number of bytes
-     * @throws IOException
-     *             Cannot read data from the buffer
      */
-    public String getNextBytesAsString(long byteCount) throws IOException {
-        StringBuilder strBuilder = new StringBuilder();
-        long remainingByte = byteCount;
-        String str;
-
-        while (remainingByte >= BUFFER_SIZE) {
-            str = new String(getNextBytes(BUFFER_SIZE));
-            strBuilder.append(str);
-            remainingByte = remainingByte - BUFFER_SIZE;
+    public String getNextBytesAsString(long byteCount) {
+        if (byteCount > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("FTrace Binary buffer: byteCount too large: " + byteCount); //$NON-NLS-1$
         }
-
-        str = new String(getNextBytes((int) remainingByte)); // we are sure that
-                                                             // the value is
-                                                             // less than 1024
-        strBuilder.append(str);
-
-        return strBuilder.toString();
+        return new String(getNextBytes((int) byteCount));
     }
 
     /**
      * Get the next integer in the buffer stream
      *
      * @return The next integer in the buffer
-     * @throws IOException
-     *             Cannot read data from the buffer
      */
-    public int getNextInt() throws IOException {
-        byte[] byteArray = getNextBytes(BinaryFTraceDataType.INT.getSize());
-
-        ByteBuffer wrapped = ByteBuffer.wrap(byteArray).order(fByteOrder);
-        return wrapped.getInt();
+    public int getNextInt() {
+        int value = fMappedBuffer.getInt(fCurrentOffset);
+        fCurrentOffset += BinaryFTraceDataType.INT.getSize();
+        return value;
     }
 
     /**
      * Get the next double in the buffer stream
      *
      * @return The next double in the buffer
-     * @throws IOException
-     *             Cannot read data from the buffer
      */
-    public double getNextDouble() throws IOException {
-        byte[] byteArray = getNextBytes(8);
-        ByteBuffer wrapped = ByteBuffer.wrap(byteArray).order(fByteOrder);
-        return wrapped.getDouble();
+    public double getNextDouble() {
+        double value = fMappedBuffer.getDouble(fCurrentOffset);
+        fCurrentOffset += 8;
+        return value;
     }
 
     /**
      * Get the next long in the buffer stream
      *
      * @return The next long in the buffer stream
-     * @throws IOException
-     *             Cannot read data from the buffer
      */
-    public long getNextLong() throws IOException {
-        byte[] byteArray = getNextBytes(8);
-        ByteBuffer wrapped = ByteBuffer.wrap(byteArray).order(fByteOrder);
-        return wrapped.getLong();
+    public long getNextLong() {
+        long value = fMappedBuffer.getLong(fCurrentOffset);
+        fCurrentOffset += 8;
+        return value;
     }
 
     /**
      * Get the next short in the buffer stream
      *
      * @return The next short in the buffer stream
-     * @throws IOException
-     *             Cannot read data from the buffer
      */
-    public short getNextShort() throws IOException {
-        byte[] byteArray = getNextBytes(2);
-        ByteBuffer wrapped = ByteBuffer.wrap(byteArray).order(fByteOrder);
-        return wrapped.getShort();
-    }
-
-    /**
-     * Move the byte buffer pointer to a specific offset in the file
-     *
-     * @param offset
-     *            The new offset of the file
-     * @throws IOException
-     *             Cannot move the pointer to the value of the offset parameter
-     */
-    public void movePointerToOffset(long offset) throws IOException {
-        fByteBuffer.clear();
-        fTraceFile.seek(offset);
-        fCurrentOffset = offset;
+    public short getNextShort() {
+        short value = fMappedBuffer.getShort(fCurrentOffset);
+        fCurrentOffset += 2;
+        return value;
     }
 
     /**
@@ -264,10 +161,8 @@ public class BinaryFTraceByteBuffer implements AutoCloseable {
      * Get the size of the file that is currently being read
      *
      * @return The file size
-     * @throws IOException
-     *             If an error occurred while reading the file size
      */
-    public long getFileSize() throws IOException {
-        return fTraceFile.length();
+    public long getFileSize() {
+        return fMappedBuffer.length();
     }
 }

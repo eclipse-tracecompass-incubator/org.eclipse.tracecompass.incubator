@@ -64,10 +64,8 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
      *            The CPU data page to read
      * @param fileHeader
      *            The FTrace header information object
-     * @throws IOException
-     *             When there is an error without opening/reading from the file
      */
-    public BinaryFTraceCPUPageIterator(@NonNull BinaryFTraceCPUDataPage page, @NonNull BinaryFTraceHeaderInfo fileHeader) throws IOException {
+    public BinaryFTraceCPUPageIterator(@NonNull BinaryFTraceCPUDataPage page, @NonNull BinaryFTraceHeaderInfo fileHeader) {
         // Initialize buffer data
         fFileHeader = fileHeader;
         this.fPage = page;
@@ -103,11 +101,7 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
      */
     @Override
     public void close() throws IOException {
-        BinaryFTraceByteBuffer buffer = fBuffer;
-        if (buffer != null) {
-            buffer.close();
-            fBuffer = null;
-        }
+        fBuffer = null;
     }
 
     /**
@@ -152,10 +146,8 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
     /**
      * Read the time stamp of the next event only (without reading the actual
      * event)
-     *
-     * @throws IOException
      */
-    private void readNextEventTimeStamp() throws IOException {
+    private void readNextEventTimeStamp() {
         boolean readSuccess = readNextEventHeader();
 
         /**
@@ -205,9 +197,8 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
      * increment the offset
      *
      * @return true if the event is read sucessfully
-     * @throws IOException
      */
-    private boolean readNextEventHeader() throws IOException {
+    private boolean readNextEventHeader() {
         if (!hasNext()) {
             return false;
         }
@@ -232,11 +223,8 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
      *
      * @return -1 if the there is no next event, else return the event type
      *         length.
-     * @throws IOException
-     *             if there is an error reading the next event, likely because
-     *             of buffer overflow caused a logical error during reading.
      */
-    private int peekNextEventType() throws IOException {
+    private int peekNextEventType() {
         if (!hasNext()) {
             return -1;
         }
@@ -254,13 +242,8 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
     /**
      * Update the time stamp based on the state of the current event header and
      * increment the offset if needed
-     *
-     * @throws IOException
-     *             IOException if there is an error reading the next event,
-     *             likely because of buffer overflow caused a logical error
-     *             during reading.
      */
-    private void updateTimeStamp() throws IOException {
+    private void updateTimeStamp() {
         if (fCurrentTypeLen <= fFileHeader.getHeaderEventInfo().getDataMaxTypeLen()) {
             fCurrentTimeStamp += fCurrentTimeDelta;
         } else {
@@ -289,11 +272,8 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
      * Get the pay load size of the event according to its type length
      *
      * @return The size of the payload of the event
-     * @throws IOException
-     *             if there is an error reading the next event, likely because
-     *             of buffer overflow caused a logical error during reading.
      */
-    private int getCurrentEventPayloadSize() throws IOException {
+    private int getCurrentEventPayloadSize() {
 
         int payloadSize = 0;
         if (fCurrentTypeLen == fFileHeader.getHeaderEventInfo().getCustomLengthEventTypeLen()) {
@@ -326,39 +306,34 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
      * Lazily read the next event using the event definition information.
      *
      * @return A BinaryFTraceEvent at the current event definition.
-     * @throws IOException
-     *             if there is an error reading the next event, likely because
-     *             of buffer overflow caused a logical error during reading.
      */
-    public @Nullable BinaryFTraceEvent getCurrentEvent() throws IOException {
+    public @Nullable BinaryFTraceEvent getCurrentEvent() {
         // Make a local copy to prevent multithreading null check
         BinaryFTraceEventDefinition eventDef = fEventDef;
 
         if (eventDef != null) {
             // We use a new buffer to read the current event
-            try (BinaryFTraceByteBuffer tempBuffer = new BinaryFTraceByteBuffer(fFileHeader.getFilePath());) {
-                tempBuffer.setByteOrder(fFileHeader.getEndianess());
-                tempBuffer.movePointerToOffset(eventDef.getPayloadOffset());
+            BinaryFTraceByteBuffer tempBuffer = fFileHeader.getMappedBuffer();
+            tempBuffer.movePointerToOffset(eventDef.getPayloadOffset());
 
-                byte[] data = tempBuffer.getNextBytes(eventDef.getPayloadSize());
-                BinaryFTraceEventFormat eventFormat = fDataParser.getEventFormat(data);
-                if (eventFormat == null) {
-                    return null;
-                }
-
-                Map<String, Object> properties;
-                if (eventDef.getPayloadSize() > 0) {
-                    properties = fDataParser.parseEventData(eventFormat, data);
-                } else {
-                    properties = new HashMap<>();
-                }
-
-                BinaryFTraceEvent event = new BinaryFTraceEvent(fCurrentTimeStamp,
-                        properties,
-                        eventFormat.getEventName(),
-                        fPage.getCpu());
-                return event;
+            byte[] data = tempBuffer.getNextBytes(eventDef.getPayloadSize());
+            BinaryFTraceEventFormat eventFormat = fDataParser.getEventFormat(data);
+            if (eventFormat == null) {
+                return null;
             }
+
+            Map<String, Object> properties;
+            if (eventDef.getPayloadSize() > 0) {
+                properties = fDataParser.parseEventData(eventFormat, data);
+            } else {
+                properties = new HashMap<>();
+            }
+
+            BinaryFTraceEvent event = new BinaryFTraceEvent(fCurrentTimeStamp,
+                    properties,
+                    eventFormat.getEventName(),
+                    fPage.getCpu());
+            return event;
         }
 
         return null;
@@ -370,11 +345,8 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
      * @param timeStampToSeekTo
      *            The timestamp to seek to
      * @return true if the seek was successful
-     * @throws IOException
-     *             if there is an error reading the next event, likely because
-     *             that the iterator has reached the end.
      */
-    public boolean seek(long timeStampToSeekTo) throws IOException {
+    public boolean seek(long timeStampToSeekTo) {
         // Reset the iterator
         initializeIterator();
 
@@ -403,12 +375,8 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
      * Check if there are more stuff to read in this iterator
      *
      * @return true if there are more events to read in this page
-     *
-     * @throws IOException
-     *             if there is an error reading the next event, likely because
-     *             that the iterator has reached the end.
      */
-    public boolean hasNext() throws IOException {
+    public boolean hasNext() {
         boolean ret = true;
 
         BinaryFTraceByteBuffer buffer = fBuffer;
@@ -454,7 +422,7 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
         return ret;
     }
 
-    private void initializeIterator() throws IOException {
+    private void initializeIterator() {
         fCurrentOffset = fPage.getDataStartingOffset();
         fCurrentTimeStamp = fPage.getTimeStamp();
         fCurrentTypeLen = -1;
@@ -466,8 +434,7 @@ public class BinaryFTraceCPUPageIterator implements Closeable {
             fBuffer.movePointerToOffset(fPage.getDataStartingOffset());
         } else {
             // Prepare the buffer
-            BinaryFTraceByteBuffer newBuffer = new BinaryFTraceByteBuffer(fFileHeader.getFilePath());
-            newBuffer.setByteOrder(fFileHeader.getEndianess());
+            BinaryFTraceByteBuffer newBuffer = fFileHeader.getMappedBuffer();
             newBuffer.movePointerToOffset(fPage.getDataStartingOffset());
 
             fBuffer = newBuffer;
