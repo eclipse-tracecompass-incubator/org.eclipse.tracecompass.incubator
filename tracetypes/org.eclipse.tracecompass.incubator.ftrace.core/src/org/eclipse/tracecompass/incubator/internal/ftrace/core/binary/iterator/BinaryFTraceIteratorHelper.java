@@ -11,7 +11,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.iterator;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -102,10 +101,8 @@ public class BinaryFTraceIteratorHelper {
      * @param headerInfo
      *            The trace header
      * @return The iterator to get events from this page
-     * @throws IOException
-     *             if an error occurs while creating the page iterator
      */
-    public static @Nullable BinaryFTraceCPUPageIterator getPageIterator(BinaryFTraceCPUDataPage page, BinaryFTraceHeaderInfo headerInfo) throws IOException {
+    public static @Nullable BinaryFTraceCPUPageIterator getPageIterator(BinaryFTraceCPUDataPage page, BinaryFTraceHeaderInfo headerInfo) {
         if (headerInfo != null && page != null) {
             return new BinaryFTraceCPUPageIterator(page, headerInfo);
         }

@@ -68,4 +68,11 @@ public interface IBinaryFTraceStrategy {
      *         provided by the parameter.
      */
     public ITmfContext seekEvent(ITmfLocation location);
+
+    /**
+     * Dispose of the strategy.
+     *
+     * Can be used to release system resources.
+     */
+    public void dispose();
 }

@@ -45,38 +45,37 @@ public class BinaryFTraceByteBufferTest {
         String traceLocation = FTraceUtils.getTraceAbsolutePath(FtraceTestTrace.TEST_2_6_MULTIPLE_CPUS);
         long currentOffset = 0;
 
-        try (BinaryFTraceByteBuffer buffer = new BinaryFTraceByteBuffer(traceLocation)) {
-            // Read the magic values
-            buffer.getNextBytes(BinaryFTraceHeaderElementSize.MAGIC_VALUE);
-            currentOffset += BinaryFTraceHeaderElementSize.MAGIC_VALUE;
-            assertEquals(buffer.getCurrentOffset(), currentOffset);
+        BinaryFTraceByteBuffer buffer = new BinaryFTraceByteBuffer(traceLocation);
+        // Read the magic values
+        buffer.getNextBytes(BinaryFTraceHeaderElementSize.MAGIC_VALUE);
+        currentOffset += BinaryFTraceHeaderElementSize.MAGIC_VALUE;
+        assertEquals(buffer.getCurrentOffset(), currentOffset);
 
-            String tracingString = buffer.getNextBytesAsString(BinaryFTraceHeaderElementSize.TRACING_STRING);
-            currentOffset += BinaryFTraceHeaderElementSize.TRACING_STRING;
-            assertEquals(tracingString, TRACING);
-            assertEquals(buffer.getCurrentOffset(), currentOffset);
+        String tracingString = buffer.getNextBytesAsString(BinaryFTraceHeaderElementSize.TRACING_STRING);
+        currentOffset += BinaryFTraceHeaderElementSize.TRACING_STRING;
+        assertEquals(tracingString, TRACING);
+        assertEquals(buffer.getCurrentOffset(), currentOffset);
 
-            String versionString = buffer.getNextString();
-            currentOffset += (BinaryFTraceHeaderElementSize.FTRACE_VERSION + BinaryFTraceHeaderElementSize.STRING_TERMINATOR);
-            assertEquals(versionString, VERSION);
-            assertEquals(buffer.getCurrentOffset(), currentOffset);
+        String versionString = buffer.getNextString();
+        currentOffset += (BinaryFTraceHeaderElementSize.FTRACE_VERSION + BinaryFTraceHeaderElementSize.STRING_TERMINATOR);
+        assertEquals(versionString, VERSION);
+        assertEquals(buffer.getCurrentOffset(), currentOffset);
 
-            // Read various data types and validate offset changes
-            buffer.getNextShort();
-            currentOffset += BinaryFTraceDataType.SHORT.getSize();
-            assertEquals(buffer.getCurrentOffset(), currentOffset);
+        // Read various data types and validate offset changes
+        buffer.getNextShort();
+        currentOffset += BinaryFTraceDataType.SHORT.getSize();
+        assertEquals(buffer.getCurrentOffset(), currentOffset);
 
-            buffer.getNextInt();
-            currentOffset += BinaryFTraceDataType.INT.getSize();
-            assertEquals(buffer.getCurrentOffset(), currentOffset);
+        buffer.getNextInt();
+        currentOffset += BinaryFTraceDataType.INT.getSize();
+        assertEquals(buffer.getCurrentOffset(), currentOffset);
 
-            buffer.getNextLong();
-            currentOffset += BinaryFTraceDataType.LONG.getSize();
-            assertEquals(buffer.getCurrentOffset(), currentOffset);
+        buffer.getNextLong();
+        currentOffset += BinaryFTraceDataType.LONG.getSize();
+        assertEquals(buffer.getCurrentOffset(), currentOffset);
 
-            buffer.movePointerToOffset(RANDOM_OFFSET);
-            currentOffset = RANDOM_OFFSET;
-            assertEquals(buffer.getCurrentOffset(), currentOffset);
-        }
+        buffer.movePointerToOffset(RANDOM_OFFSET);
+        currentOffset = RANDOM_OFFSET;
+        assertEquals(buffer.getCurrentOffset(), currentOffset);
     }
 }

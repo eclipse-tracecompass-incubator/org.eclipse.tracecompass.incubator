@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.parser.BinaryFTraceByteBuffer;
+import org.eclipse.tracecompass.incubator.internal.ftrace.core.binary.parser.BinaryFTraceFileMapping;
+
 /**
  * A representation of all header information required for parsing the events in
  * the FTrace file.
@@ -46,12 +49,15 @@ public class BinaryFTraceHeaderInfo {
 
     private List<BinaryFTraceFileCPU> cpus;
 
+    private BinaryFTraceFileMapping fTraceMapping;
+
     /**
      * Constructor
      *
      * @param builder The builder used to construct the trace header
+     * @param traceMapping the file memory mapping used to read data from the file
      */
-    private BinaryFTraceHeaderInfo(BinaryFTraceHeaderInfoBuilder builder) {
+    private BinaryFTraceHeaderInfo(BinaryFTraceHeaderInfoBuilder builder, BinaryFTraceFileMapping traceMapping) {
         fFilePath = builder.fBuilderFilePath;
         fVersion = builder.fBuilderVersion;
         fEndianess = builder.fBuilderEndianess; // Because Java by default is
@@ -72,6 +78,17 @@ public class BinaryFTraceHeaderInfo {
         fOptions = builder.fBuilderOptions;
         fEventCommonFields = builder.fBuilderEventCommonFields;
         cpus = builder.fBuilderCpus;
+        fTraceMapping = traceMapping;
+        fTraceMapping.order(fEndianess);
+    }
+
+    /**
+     * Get the trace contents as a ByteBuffer.
+     *
+     * @return the trace contents as a ByteBuffer
+     */
+    public BinaryFTraceByteBuffer getMappedBuffer() {
+        return new BinaryFTraceByteBuffer(fTraceMapping);
     }
 
     /**
@@ -81,16 +98,6 @@ public class BinaryFTraceHeaderInfo {
      */
     public String getFilePath() {
         return fFilePath;
-    }
-
-    /**
-     * Set the file path to the trace file.
-     *
-     * @param filePath
-     *            The file path of the trace file.
-     */
-    public void setFilePath(String filePath) {
-        this.fFilePath = filePath;
     }
 
     /**
@@ -612,11 +619,12 @@ public class BinaryFTraceHeaderInfo {
          * Build an immutable {@link BinaryFTraceHeaderInfo} using the current
          * state of the builder.
          *
+         * @param traceMapping the memory mapped file buffer to be used for reading data
          * @return A {@link BinaryFTraceHeaderInfo} object.
          */
-        public BinaryFTraceHeaderInfo build() {
+        public BinaryFTraceHeaderInfo build(BinaryFTraceFileMapping traceMapping) {
             fBuilderEventCommonFields = getCommonFields();
-            return new BinaryFTraceHeaderInfo(this);
+            return new BinaryFTraceHeaderInfo(this, traceMapping);
         }
 
         private Map<String, BinaryFTraceFormatField> getCommonFields() {

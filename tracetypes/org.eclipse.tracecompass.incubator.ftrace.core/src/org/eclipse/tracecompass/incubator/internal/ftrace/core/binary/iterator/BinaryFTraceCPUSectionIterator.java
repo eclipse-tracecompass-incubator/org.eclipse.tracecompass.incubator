@@ -140,11 +140,8 @@ public class BinaryFTraceCPUSectionIterator implements AutoCloseable {
      * Get the current event of this iterator lazily.
      *
      * @return The current event as a BinaryFTrace event.
-     * @throws IOException
-     *             if there is an error reading the event, likely because of
-     *             byte buffer failure.
      */
-    public @Nullable BinaryFTraceEvent getCurrentEvent() throws IOException {
+    public @Nullable BinaryFTraceEvent getCurrentEvent() {
         BinaryFTraceCPUPageIterator iter = fCurrPageIterator;
         if (iter != null) {
             return iter.getCurrentEvent();

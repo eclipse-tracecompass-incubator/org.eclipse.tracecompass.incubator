@@ -115,6 +115,14 @@ public class BinaryFTrace extends GenericFtrace implements ITmfPropertiesProvide
         setFile(file);
     }
 
+    @Override
+    public synchronized void dispose() {
+        super.dispose();
+        if (fStrategy != null) {
+            fStrategy.dispose();
+        }
+    }
+
     private static File initTraceAsText(File file) throws TmfTraceException {
         if (!file.exists()) {
             ProcessBuilder pb = new ProcessBuilder(TRACE_CMD, REPORT, "-i", file.getAbsolutePath(), "-R"); //$NON-NLS-1$ //$NON-NLS-2$
