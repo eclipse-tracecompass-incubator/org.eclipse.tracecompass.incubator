@@ -290,6 +290,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                 }
             }
         });
+        textAFrom.setText(fStartTimeA.toString(fFormat));
         panelAFrom.add(labelAFrom);
         panelAFrom.add(textAFrom);
         ftextAFrom = textAFrom;
@@ -333,7 +334,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                 }
             }
         });
-
+        textATo.setText(fEndTimeA.toString(fFormat));
         panelATo.add(labelATo);
         panelATo.add(textATo);
         ftextATo = textATo;
@@ -419,6 +420,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
             }
         });
 
+        textBFrom.setText(fStartTimeB.toString(fFormat));
         panelBFrom.add(labelBFrom);
         panelBFrom.add(textBFrom);
         ftextBFrom = textBFrom;
@@ -460,7 +462,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                 }
             }
         });
-
+        textBTo.setText(fEndTimeB.toString(fFormat));
         panelBTo.add(labelBTo);
         panelBTo.add(textBTo);
         ftextBTo = textBTo;
