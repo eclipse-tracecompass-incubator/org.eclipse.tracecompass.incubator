@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal, Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -16,7 +16,7 @@ import java.util.List;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignal;
 
 /**
- * TmfCheckboxChangedSignal for handling check box change events
+ * Handles check-box change events
  *
  * * @author Fateme Faraji Daneshgar
  */
@@ -25,6 +25,8 @@ public class TmfCheckboxChangedSignal extends TmfSignal {
     private List<String> fTraceList;
 
     /**
+     * Constructor
+     *
      * @param source
      *            the source class of signal
      * @param traceList
@@ -36,6 +38,8 @@ public class TmfCheckboxChangedSignal extends TmfSignal {
     }
 
     /**
+     * Getter for the trace list
+     *
      * @return the list of traces remains checked in the check box
      */
     public List<String> getTraceList() {

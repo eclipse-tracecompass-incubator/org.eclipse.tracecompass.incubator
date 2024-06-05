@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal, Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -33,7 +33,8 @@ import org.eclipse.tracecompass.tmf.ui.viewers.xychart.linechart.TmfXYChartSetti
 
 /**
  * MultipleEventDensityViewer extends EventDensityViewer to override
- * handleCheckStateChangedEvent and reflect changes to differential flame graph
+ * handleCheckStateChangedEvent in order to reflect changes to the differential
+ * flame graph
  *
  * @author Fateme Faraji Daneshgar
  *
@@ -43,6 +44,8 @@ public class MultipleEventDensityViewer extends EventDensityViewer {
     List<ITmfTreeViewerEntry> fWholeTraceList = new ArrayList<>();
 
     /**
+     * Constructor
+     *
      * @param parent
      *            Composite
      * @param settings
@@ -81,25 +84,29 @@ public class MultipleEventDensityViewer extends EventDensityViewer {
     }
 
     /**
-     * handles check state of tree viewer and keeps the list of whole trace list
-     * and dispatch TmfCheckboxChangedSignal signal to update the differential
-     * flame graph
+     * Handles check state of tree viewer and keeps the list of whole trace
+     * list. Dispatches TmfCheckboxChangedSignal signal to update the
+     * differential flame graph
      *
      * @param entries
      *            list of entries that should be checked
      */
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void handleCheckStateChangedEvent(Collection<ITmfTreeViewerEntry> entries) {
+    public void handleCheckStateChangedEvent(@SuppressWarnings("null") Collection<ITmfTreeViewerEntry> entries) {
         super.handleCheckStateChangedEvent(entries);
         updateTraceList(entries);
         List<String> traceNames = new ArrayList<>();
         for (ITmfTreeViewerEntry entry : entries) {
             if (entry instanceof TmfGenericTreeEntry) {
-                TmfGenericTreeEntry<TmfTreeDataModel> genericEntry = (TmfGenericTreeEntry<TmfTreeDataModel>) entry;
-                String name = genericEntry.getModel().getName();
-                traceNames.add(name);
+                TmfGenericTreeEntry<?> genericEntry = (TmfGenericTreeEntry<?>) entry;
+                if (genericEntry.getModel() instanceof TmfTreeDataModel) {
+                    TmfTreeDataModel model = (TmfTreeDataModel) genericEntry.getModel();
+                    if (model != null) {
+                        String name = model.getName();
+                        traceNames.add(name);
+                    }
+                }
             }
         }
         TmfSignalManager.dispatchSignal(new TmfCheckboxChangedSignal(this, traceNames));
@@ -107,7 +114,7 @@ public class MultipleEventDensityViewer extends EventDensityViewer {
 
     /*
      * Keeps fWholeTraceList updated to include all entries for experiment. it
-     * will be used when checkedboxtree is reset.
+     * will be used when the checkedboxtree is reset.
      */
     private void updateTraceList(Collection<ITmfTreeViewerEntry> entries) {
         for (ITmfTreeViewerEntry entry : entries) {
@@ -119,7 +126,7 @@ public class MultipleEventDensityViewer extends EventDensityViewer {
     }
 
     /**
-     * get WholeCheckedItems which is the checked item in the tree viewer
+     * Get WholeCheckedItems which is the checked item in the tree viewer
      *
      * @return fWholeTraceList list of checked Items in tree viewer
      */
@@ -128,13 +135,13 @@ public class MultipleEventDensityViewer extends EventDensityViewer {
     }
 
     /**
-     * just handles check state of the treeviewer, used in updating tree viewers
-     * with query updating
+     * Handles check state of the treeviewer, used in updating tree viewers with
+     * query updating
      *
      * @param entries
      *            list of entries that should be checked
      */
-    public void UpdateCheckStateChangedEvent(Collection<ITmfTreeViewerEntry> entries) {
+    public void updateCheckStateChangedEvent(Collection<ITmfTreeViewerEntry> entries) {
         super.handleCheckStateChangedEvent(entries);
     }
 

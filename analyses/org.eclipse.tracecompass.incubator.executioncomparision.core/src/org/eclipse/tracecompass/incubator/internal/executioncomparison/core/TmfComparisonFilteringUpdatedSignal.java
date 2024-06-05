@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal, Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -32,6 +32,8 @@ public class TmfComparisonFilteringUpdatedSignal extends TmfSignal {
     private @Nullable List<String> fTraceListB;
 
     /**
+     * Constructor
+     *
      * @param source
      *            the class that has generated the signal
      * @param beginA
@@ -61,9 +63,10 @@ public class TmfComparisonFilteringUpdatedSignal extends TmfSignal {
     }
 
     /**
+     * Constructor
+     *
      * @param source
      *            the class that has generated the signal
-     *
      * @param statistic
      *            the statistic that will be represented in the flame graph
      * @param traceListA
@@ -76,34 +79,44 @@ public class TmfComparisonFilteringUpdatedSignal extends TmfSignal {
     }
 
     /**
-     * @return The begin timestamp of selection in GroupA
+     * Get beginning of the timestamp in Group A
+     *
+     * @return The beginning of the timestamp of the selection in GroupA
      */
     public ITmfTimestamp getBeginTimeA() {
         return fBeginTimeA;
     }
 
     /**
-     * @return The end timestamp of selection in GroupA
+     * Get the end of the timestamp in Group A
+     *
+     * @return The end of the timestamp of the selection in GroupA
      */
     public ITmfTimestamp getEndTimeA() {
         return fEndTimeA;
     }
 
     /**
-     * @return The begin timestamp of selection in GroupB
+     * Get beginning of the timestamp in Group B
+     *
+     * @return The beginning of the timestamp of the selection in GroupB
      */
     public ITmfTimestamp getBeginTimeB() {
         return fBeginTimeB;
     }
 
     /**
-     * @return The end timestamp of selection in GroupB
+     * Get the end of the timestamp in Group B
+     *
+     * @return The end of the timestamp of the selection in GroupB
      */
     public ITmfTimestamp getEndTimeB() {
         return fEndTimeB;
     }
 
     /**
+     * Get the statistic type
+     *
      * @return the type of statistic that will be represented in flame graph
      */
     public @Nullable String getStatistic() {
@@ -111,14 +124,18 @@ public class TmfComparisonFilteringUpdatedSignal extends TmfSignal {
     }
 
     /**
-     * @return the list of traces in groupA
+     * Get the list of traces in Group A
+     *
+     * @return the list of traces in Group A
      */
     public @Nullable List<String> getTraceListA() {
         return fTraceListA;
     }
 
     /**
-     * @return the list of traces in groupB
+     * Get the list of traces in Group B
+     *
+     * @return the list of traces in Group B
      */
     public @Nullable List<String> getTraceListB() {
         return fTraceListB;

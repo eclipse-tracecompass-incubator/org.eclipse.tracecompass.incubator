@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal, Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -18,7 +18,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 /**
- * The activator class controls the plug-in life cycle
+ * Activator class to controls the plug-in life cycle
  */
 public class Activator extends AbstractUIPlugin {
 
@@ -32,17 +32,18 @@ public class Activator extends AbstractUIPlugin {
      * The constructor
      */
     public Activator() {
+        // Do nothing
     }
 
     @Override
     public void start(@Nullable BundleContext context) throws Exception {
         super.start(context);
-        plugin = this;
+        setDefault(this);
     }
 
     @Override
     public void stop(@Nullable BundleContext context) throws Exception {
-        plugin = null;
+        setDefault(null);
         super.stop(context);
     }
 
@@ -53,6 +54,10 @@ public class Activator extends AbstractUIPlugin {
      */
     public static Activator getDefault() {
         return Objects.requireNonNull(plugin);
+    }
+
+    private static void setDefault(@Nullable Activator activator) {
+        plugin = activator;
     }
 
 }

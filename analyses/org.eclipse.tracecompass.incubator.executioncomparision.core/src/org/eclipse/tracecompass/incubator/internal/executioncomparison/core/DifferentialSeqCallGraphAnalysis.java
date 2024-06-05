@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal, Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -58,9 +58,8 @@ import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import com.google.common.collect.Iterables;
 
 /**
- * build a differential call graph using the differentialWeightedTreeSet from
+ * Builds a differential call graph using the differentialWeightedTreeSet from
  * two sets of call graphs.
- *
  *
  * @author Fateme Faraji Daneshgar
  */
@@ -127,10 +126,10 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
     }
 
     /**
-     * Merge callgraph
+     * Merges call graph
      *
      * @param start
-     *            the start time
+     *            the start time stamp
      * @param end
      *            the end time stamp
      * @param traceList
@@ -140,27 +139,10 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
      */
     public WeightedTreeSet<ICallStackSymbol, Object> mergeCallGraph(ITmfTimestamp start, ITmfTimestamp end, List<String> traceList) {
         try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "DifferenentialSequenceCGA::MergeCallGraph")) { //$NON-NLS-1$
-            List<CallGraph> cGList = new ArrayList<>();
             WeightedTreeSet<ICallStackSymbol, Object> newTreeSet = new WeightedTreeSet<>();
             String mainGroup = MERGE;
 
-            for (String traceName : traceList) {
-                ICallGraphProvider2 instrumentedCallStackAnalysis = fTraceCallGraphRegistry.get(traceName);
-                if (instrumentedCallStackAnalysis != null) {
-                    ITmfTrace trace = getTrace(traceName);
-                    ITmfTimestamp traceStart = start;
-                    ITmfTimestamp traceEnd = end;
-
-                    if (traceStart.getValue() < trace.getStartTime().getValue()) {
-                        traceStart = trace.getStartTime();
-                    }
-                    if (traceEnd.getValue() > trace.getEndTime().getValue()) {
-                        traceEnd = trace.getEndTime();
-                    }
-                    cGList.add(instrumentedCallStackAnalysis.getCallGraph(traceStart, traceEnd));
-
-                }
-            }
+            List<CallGraph> cGList = addToCallGraph(start, end, traceList);
 
             for (CallGraph callGraph : cGList) {
                 Collection<ICallStackElement> elements = getLeafElements(callGraph);
@@ -173,7 +155,42 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
     }
 
     /**
-     * get CallGraph
+     * Helper function that adds the call graphs for the specified time range
+     * and trace list to the call graph list.
+     *
+     * @param start
+     *            the start time of the time range
+     * @param end
+     *            the end time of the time range
+     * @param traceList
+     *            the list of trace names
+     * @return the list of call graphs
+     */
+    private static List<CallGraph> addToCallGraph(ITmfTimestamp start, ITmfTimestamp end, List<String> traceList) {
+        List<CallGraph> cGList = new ArrayList<>();
+        for (String traceName : traceList) {
+            ICallGraphProvider2 instrumentedCallStackAnalysis = fTraceCallGraphRegistry.get(traceName);
+            if (instrumentedCallStackAnalysis != null) {
+                ITmfTrace trace = getTrace(traceName);
+                if (trace != null) {
+                    ITmfTimestamp traceStart = start;
+                    ITmfTimestamp traceEnd = end;
+
+                    if (traceStart.getValue() < trace.getStartTime().getValue()) {
+                        traceStart = trace.getStartTime();
+                    }
+                    if (traceEnd.getValue() > trace.getEndTime().getValue()) {
+                        traceEnd = trace.getEndTime();
+                    }
+                    cGList.add(instrumentedCallStackAnalysis.getCallGraph(traceStart, traceEnd));
+                }
+            }
+        }
+        return cGList;
+    }
+
+    /**
+     * Gets the differential call graph
      *
      * @return DifferentialCallGraph
      */
@@ -186,10 +203,10 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
     }
 
     /**
-     * Get the differential weighted tree provider
+     * Gets the differential weighted tree provider
      *
      * @param monitor
-     *            the monitor, can be null
+     *            the progress monitor, can be null
      * @return the differential weighted provider or null
      */
     public @Nullable DifferentialWeightedTreeProvider<?> getDiffProvider(@Nullable IProgressMonitor monitor) {
@@ -236,7 +253,6 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
     }
 
     private static void recurseAddElementData(ICallStackElement element, String group, CallGraph callGraph, WeightedTreeSet<ICallStackSymbol, Object> newTreeSet) {
-
         // Add the current level of trees to the new tree set
         for (AggregatedCallSite tree : callGraph.getCallingContextTree(element)) {
             newTreeSet.addWeightedTree(group, tree.copyOf());
@@ -265,10 +281,12 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
 
     @Override
     protected void canceling() {
-
+        // Does nothing
     }
 
     /**
+     * Update the selection range
+     *
      * @param signal
      *            TmfComparisonFilteringUpdatedSignal raised when filtering
      *            parameter are changed
@@ -287,22 +305,12 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
         // tuning fTraceList
         List<String> traceListA = signal.getTraceListA();
         if (traceListA != null) {
-            List<String> synchronizedListA = Collections.synchronizedList(fTraceListA);
-            synchronized (synchronizedListA) {
-                synchronizedListA.clear();
-                for (String name : traceListA) {
-                    synchronizedListA.add(name);
-                }
-            }
+            synchronizedListAdd(traceListA, fTraceListA);
 
         }
         List<String> traceListB = signal.getTraceListB();
         if (traceListB != null) {
-            List<String> synchronizedListB = Collections.synchronizedList(fTraceListB);
-            synchronizedListB.clear();
-            for (String name : traceListB) {
-                synchronizedListB.add(name);
-            }
+            synchronizedListAdd(traceListB, fTraceListB);
 
         }
         if (!fTraceCallGraphRegistry.isEmpty()) {
@@ -327,6 +335,27 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
         }
     }
 
+    /**
+     * Helper function that adds all elements from the given traceList to the
+     * given fTraceList in a thread-safe manner.
+     *
+     * @param traceList
+     *            the list of strings to be added
+     * @param fTraceList
+     *            the list to which the strings will be added
+     * @return the synchronized list after adding the elements
+     */
+    private static List<String> synchronizedListAdd(List<String> traceList, List<String> fTraceList) {
+        List<String> synchronizedList = Collections.synchronizedList(fTraceList);
+        synchronized (synchronizedList) {
+            synchronizedList.clear();
+            for (String name : traceList) {
+                synchronizedList.add(name);
+            }
+        }
+        return synchronizedList;
+    }
+
     @Override
     public boolean canExecute(ITmfTrace trace) {
         return (trace instanceof TmfExperiment);
@@ -340,6 +369,8 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
     }
 
     /**
+     * Getter for the differentialCallGraphProvider
+     *
      * @return the differentialCallGraphProvider
      */
     private @Nullable DifferentialCallGraphProvider getDifferentialCallGraphProvider() {
@@ -347,6 +378,8 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
     }
 
     /**
+     * Setter for the differentialCallGraphProvider
+     *
      * @param differentialCallGraphProvider
      *            the differentialCallGraphProvider to set
      */
@@ -354,7 +387,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
         fDifferentialCallGraphProvider = Objects.requireNonNull(differentialCallGraphProvider);
     }
 
-    private static ITmfTrace getTrace(String traceName) {
+    private static @Nullable ITmfTrace getTrace(String traceName) {
         ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
         Collection<ITmfTrace> traceSet = TmfTraceManager.getTraceSet(trace);
         for (ITmfTrace traceMember : traceSet) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal, Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -14,7 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.executioncomparison.core;
 import org.eclipse.tracecompass.common.core.TraceCompassActivator;
 
 /**
- * Activator
+ * Plug-in activator
  */
 public class Activator extends TraceCompassActivator {
 
@@ -39,10 +39,12 @@ public class Activator extends TraceCompassActivator {
 
     @Override
     protected void startActions() {
+        // Do nothing
     }
 
     @Override
     protected void stopActions() {
+        // Do nothing
     }
 
 }

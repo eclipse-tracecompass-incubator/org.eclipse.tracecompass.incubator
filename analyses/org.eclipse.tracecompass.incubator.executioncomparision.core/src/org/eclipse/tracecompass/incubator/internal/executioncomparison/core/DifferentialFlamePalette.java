@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal, Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -29,7 +29,7 @@ import org.eclipse.tracecompass.tmf.core.presentation.RotatingPaletteProvider;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * Class to manage the colors of the differential flame graph views
+ * Manages the colors of the differential flame graph view
  *
  * @author Fateme Faraji Daneshgar
  */
@@ -59,6 +59,8 @@ public final class DifferentialFlamePalette implements IDataPalette {
     private static final Map<String, OutputElementStyle> STYLES;
     // Map of styles with the parent
     private static final Map<String, OutputElementStyle> STYLE_MAP = Collections.synchronizedMap(new HashMap<>());
+
+    private static @Nullable DifferentialFlamePalette fInstance = null;
 
     static {
         IPaletteProvider palette = new RotatingPaletteProvider.Builder().setNbColors(NUM_COLORS).build();
@@ -109,8 +111,6 @@ public final class DifferentialFlamePalette implements IDataPalette {
         STYLE_MAP.putAll(STYLES);
     }
 
-    private static @Nullable DifferentialFlamePalette fInstance = null;
-
     private DifferentialFlamePalette() {
         // Do nothing
     }
@@ -152,7 +152,7 @@ public final class DifferentialFlamePalette implements IDataPalette {
         if (object instanceof DifferentialWeightedTree) {
             DifferentialWeightedTree<?> tree = (DifferentialWeightedTree<?>) object;
             double difference = tree.getDifference();
-            double step = MAX_HUE - MIN_HUE;
+            double step = (double) MAX_HUE - (double) MIN_HUE;
             if (Double.isNaN(difference)) {
                 return STYLE_MAP.computeIfAbsent(NAN, OutputElementStyle::new);
             }
@@ -174,6 +174,8 @@ public final class DifferentialFlamePalette implements IDataPalette {
     }
 
     /**
+     * Sets the minimum threshold for coloring
+     *
      * @param min
      *            the minimum threshold for coloring.
      */

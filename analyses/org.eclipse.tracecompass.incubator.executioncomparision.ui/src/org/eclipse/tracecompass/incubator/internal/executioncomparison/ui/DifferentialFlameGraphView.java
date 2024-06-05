@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal, Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -108,8 +108,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 
 /**
- * the differential flame graph used in execution comparison view. Its mostly
- * based on FlameGraphView
+ * The differential flame graph used in the execution comparison view. It is
+ * based on the flame graph view and is used to compare two different
+ * executions.
  *
  * @author Fateme Faraji Daneshgar
  *
@@ -122,6 +123,7 @@ public class DifferentialFlameGraphView extends TmfView {
      */
     public static final String ID = DifferentialFlameGraphView.class.getPackage().getName() + ".diffflamegraphView"; //$NON-NLS-1$
     private static final int DEFAULT_BUFFER_SIZE = 3;
+    private static final String DIRTY_UNDERFLOW = "Dirty underflow"; //$NON-NLS-1$
     /**
      * the Logger that is used in multipleDensityView class
      */
@@ -190,13 +192,7 @@ public class DifferentialFlameGraphView extends TmfView {
         getTimeGraphViewer().setTimeGraphProvider(fPresentationProvider);
         getTimeGraphViewer().setTimeFormat(TimeFormat.NUMBER);
         IEditorPart editor = getSite().getPage().getActiveEditor();
-        ITmfTrace trace = null;
-        if (editor instanceof ITmfTraceEditor) {
-            trace = ((ITmfTraceEditor) editor).getTrace();
-        } else {
-            // Get the active trace, the editor might be opened on a script
-            trace = TmfTraceManager.getInstance().getActiveTrace();
-        }
+        ITmfTrace trace = getCurrentTrace(editor);
         if (trace != null) {
             traceSelected(new TmfTraceSelectedSignal(this, trace));
         }
@@ -205,19 +201,7 @@ public class DifferentialFlameGraphView extends TmfView {
         getTimeGraphViewer().getTimeGraphControl().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(@Nullable MouseEvent e) {
-                TimeGraphControl timeGraphControl = getTimeGraphViewer().getTimeGraphControl();
-                ISelection selection = timeGraphControl.getSelection();
-                if (selection instanceof IStructuredSelection) {
-                    for (Object object : ((IStructuredSelection) selection).toList()) {
-                        if (object instanceof TimeEvent) {
-                            TimeEvent event = (TimeEvent) object;
-                            long startTime = event.getTime();
-                            long endTime = startTime + event.getDuration();
-                            getTimeGraphViewer().setStartFinishTime(startTime, endTime);
-                            break;
-                        }
-                    }
-                }
+                handleDoubleClick();
             }
         });
         getTimeGraphViewer().addRangeListener(event -> startZoomThread(event.getStartTime(), event.getEndTime(), false));
@@ -257,6 +241,32 @@ public class DifferentialFlameGraphView extends TmfView {
             }
         });
 
+    }
+
+    private void handleDoubleClick() {
+        TimeGraphControl timeGraphControl = getTimeGraphViewer().getTimeGraphControl();
+        ISelection selection = timeGraphControl.getSelection();
+        if (selection instanceof IStructuredSelection structuredSelection) {
+            for (Object object : (structuredSelection).toList()) {
+                if (object instanceof TimeEvent event) {
+                    long startTime = event.getTime();
+                    long endTime = startTime + event.getDuration();
+                    getTimeGraphViewer().setStartFinishTime(startTime, endTime);
+                    break;
+                }
+            }
+        }
+    }
+
+    private static @Nullable ITmfTrace getCurrentTrace(@Nullable IEditorPart editor) {
+        ITmfTrace trace = null;
+        if (editor instanceof ITmfTraceEditor tmfTraceEditor) {
+            trace = tmfTraceEditor.getTrace();
+        } else {
+            // Get the active trace, the editor might be opened on a script
+            trace = TmfTraceManager.getInstance().getActiveTrace();
+        }
+        return trace;
     }
 
     /**
@@ -319,8 +329,8 @@ public class DifferentialFlameGraphView extends TmfView {
         Iterable<ICallGraphProvider2> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, ICallGraphProvider2.class);
         return StreamSupport.stream(modules.spliterator(), false)
                 .filter(m -> {
-                    if (m instanceof IAnalysisModule) {
-                        return ((IAnalysisModule) m).getId().equals(analysisId);
+                    if (m instanceof IAnalysisModule analysisModule) {
+                        return analysisModule.getId().equals(analysisId);
                     }
                     return true;
                 })
@@ -352,144 +362,185 @@ public class DifferentialFlameGraphView extends TmfView {
                 }
             }
         }
-    }
 
-    private void buildEntryList(@Nullable ITmfTrace trace, ITmfTrace parentTrace, Map<String, Object> additionalParams, IProgressMonitor monitor) {
+        private void buildEntryList(@Nullable ITmfTrace trace, ITmfTrace parentTrace, Map<String, Object> additionalParams, IProgressMonitor monitor) {
 
-        if (trace != null) {
-            DifferentialWeightedTreeProvider<?> dataProvider = getDataProvider();
-            if (dataProvider == null) {
-                return;
+            if (trace != null) {
+                DifferentialWeightedTreeProvider<?> dataProvider = getDataProvider();
+                if (dataProvider == null) {
+                    return;
+                }
+                fDataProvider = dataProvider;
+                setFdataProviderGroup(new FlameGraphDataProvider(trace, fDataProvider, FlameGraphDataProvider.ID + ':' + DifferentialSeqCallGraphAnalysis.ID));
             }
-            fDataProvider = dataProvider;
-            setFdataProviderGroup(new FlameGraphDataProvider(trace, fDataProvider, FlameGraphDataProvider.ID + ':' + DifferentialSeqCallGraphAnalysis.ID));
-        }
 
-        BaseDataProviderTimeGraphPresentationProvider presentationProvider = fPresentationProvider;
-        if (presentationProvider != null) {
-            presentationProvider.addProvider(getFdataProviderGroup(), getTooltipResolver(getFdataProviderGroup()));
-        }
-        try {
-            fBuildEntryLock.acquire();
-            boolean complete = false;
-            while (!complete && !monitor.isCanceled()) {
-                Map<String, Object> parameters = new HashMap<>(additionalParams);
-                parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, ImmutableList.of(0, Long.MAX_VALUE));
-                TmfModelResponse<TmfTreeModel<TimeGraphEntryModel>> responseGroupA = getFdataProviderGroup().fetchTree(parameters, monitor);
+            BaseDataProviderTimeGraphPresentationProvider presentationProvider = fPresentationProvider;
+            if (presentationProvider != null) {
+                presentationProvider.addProvider(getFdataProviderGroup(), getTooltipResolver(getFdataProviderGroup()));
+            }
+            try {
+                fBuildEntryLock.acquire();
+                boolean complete = false;
+                while (!complete && !monitor.isCanceled()) {
+                    Map<String, Object> parameters = new HashMap<>(additionalParams);
+                    parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, ImmutableList.of(0, Long.MAX_VALUE));
+                    TmfModelResponse<TmfTreeModel<TimeGraphEntryModel>> responseGroupA = getFdataProviderGroup().fetchTree(parameters, monitor);
 
-                if (responseGroupA.getStatus() == ITmfResponse.Status.FAILED) {
-                    Activator.getDefault().getLog().error(getClass().getSimpleName() + " Data Provider failed: " + responseGroupA.getStatusMessage()); //$NON-NLS-1$
-                    return;
-                } else if (responseGroupA.getStatus() == ITmfResponse.Status.CANCELLED) {
-                    return;
-                }
-
-                complete = responseGroupA.getStatus() == ITmfResponse.Status.COMPLETED;
-                TmfTreeModel<TimeGraphEntryModel> groupAModel = responseGroupA.getModel();
-                long endTimeN = Long.MIN_VALUE;
-
-                if ((groupAModel != null)) {
-                    Map<Long, TimeGraphEntry> entries;
-                    synchronized (fEntries) {
-                        entries = fEntries.computeIfAbsent(getFdataProviderGroup(), dp -> new HashMap<>());
-                        /*
-                         * The provider may send entries unordered and parents
-                         * may not exist when child is constructor, we'll
-                         * re-unite families at the end
-                         */
-                        List<TimeGraphEntry> orphaned = new ArrayList<>();
-                        for (TimeGraphEntryModel entry : groupAModel.getEntries()) {
-                            TimeGraphEntry uiEntry = entries.get(entry.getId());
-                            if (entry.getParentId() != -1) {
-                                if (uiEntry == null) {
-                                    uiEntry = new TimeGraphEntry(entry);
-                                    TimeGraphEntry parent = entries.get(entry.getParentId());
-                                    if (parent != null) {
-                                        parent.addChild(uiEntry);
-                                    } else {
-                                        orphaned.add(uiEntry);
-                                    }
-                                    entries.put(entry.getId(), uiEntry);
-                                } else {
-                                    if (!monitor.isCanceled()) {
-                                        uiEntry.updateModel(entry);
-                                    }
-                                }
-                            } else {
-                                endTimeN = Long.max(endTimeN, entry.getEndTime() + 1);
-                                List<String> lables = new ArrayList<>();
-                                lables.add("GroupB-GroupA"); //$NON-NLS-1$
-
-                                TimeGraphEntryModel newEntry = new TimeGraphEntryModel(0, -1, lables, entry.getStartTime(), entry.getEndTime(), entry.hasRowModel());
-
-                                if (uiEntry != null) {
-                                    if (!monitor.isCanceled()) {
-                                        uiEntry.updateModel(newEntry);
-                                    }
-                                } else {
-                                    // Do not assume that parentless entries are
-                                    // trace entries
-                                    uiEntry = new ParentEntry(newEntry, getFdataProviderGroup());
-                                    entries.put(entry.getId(), uiEntry);
-                                    addToEntryList(parentTrace, Collections.singletonList(uiEntry));
-
-                                }
-                            }
-                        }
-                        setEndTime(endTimeN);
-                        // Find missing parents
-                        for (TimeGraphEntry orphanedEntry : orphaned) {
-                            TimeGraphEntry parent = entries.get(orphanedEntry.getEntryModel().getParentId());
-                            if (parent != null) {
-                                parent.addChild(orphanedEntry);
-                            }
-                        }
-                    }
-                    long start = 0;
-                    final long resolutionN = Long.max(1, (endTimeN - start) / getDisplayWidth());
-
-                    if (!monitor.isCanceled()) {
-                        zoomEntries(ImmutableList.copyOf(entries.values()), start, endTimeN, resolutionN, monitor);
-                    }
-
-                }
-
-                if (monitor.isCanceled()) {
-                    if (trace == null) {
+                    if (responseGroupA.getStatus() == ITmfResponse.Status.FAILED) {
+                        Activator.getDefault().getLog().error(getClass().getSimpleName() + " Data Provider failed: " + responseGroupA.getStatusMessage()); //$NON-NLS-1$
+                        return;
+                    } else if (responseGroupA.getStatus() == ITmfResponse.Status.CANCELLED) {
                         return;
                     }
-                    resetEntries(trace);
-                    return;
-                }
 
-                if (parentTrace.equals(getTrace())) {
-                    refresh();
-                }
-                monitor.worked(1);
+                    complete = responseGroupA.getStatus() == ITmfResponse.Status.COMPLETED;
+                    TmfTreeModel<TimeGraphEntryModel> groupAModel = responseGroupA.getModel();
+                    long endTimeN = Long.MIN_VALUE;
 
-                if (!complete && !monitor.isCanceled()) {
-                    try {
-                        Thread.sleep(100);
+                    if ((groupAModel != null)) {
+                        Map<Long, TimeGraphEntry> entries;
+                        synchronized (fEntries) {
+                            entries = fEntries.computeIfAbsent(getFdataProviderGroup(), dp -> new HashMap<>());
+                            /*
+                             * The provider may send entries unordered and
+                             * parents may not exist when child is constructor,
+                             * we'll re-unite families at the end
+                             */
+                            List<TimeGraphEntry> orphaned = new ArrayList<>();
+                            for (TimeGraphEntryModel entry : groupAModel.getEntries()) {
+                                TimeGraphEntry uiEntry = entries.get(entry.getId());
+                                if (entry.getParentId() != -1) {
+                                    if (uiEntry == null) {
+                                        uiEntry = new TimeGraphEntry(entry);
+                                        TimeGraphEntry parent = entries.get(entry.getParentId());
+                                        if (parent != null) {
+                                            parent.addChild(uiEntry);
+                                        } else {
+                                            orphaned.add(uiEntry);
+                                        }
+                                        entries.put(entry.getId(), uiEntry);
+                                    } else {
+                                        if (!monitor.isCanceled()) {
+                                            uiEntry.updateModel(entry);
+                                        }
+                                    }
+                                } else {
+                                    endTimeN = Long.max(endTimeN, entry.getEndTime() + 1);
+                                    List<String> lables = new ArrayList<>();
+                                    lables.add("GroupB-GroupA"); //$NON-NLS-1$
 
-                    } catch (InterruptedException e) {
-                        Activator.getDefault().getLog().error("Failed to wait for data provider", e); //$NON-NLS-1$
+                                    TimeGraphEntryModel newEntry = new TimeGraphEntryModel(0, -1, lables, entry.getStartTime(), entry.getEndTime(), entry.hasRowModel());
+
+                                    if (uiEntry != null) {
+                                        if (!monitor.isCanceled()) {
+                                            uiEntry.updateModel(newEntry);
+                                        }
+                                    } else {
+                                        // Do not assume that parentless entries
+                                        // are
+                                        // trace entries
+                                        uiEntry = new ParentEntry(newEntry, getFdataProviderGroup());
+                                        entries.put(entry.getId(), uiEntry);
+                                        addToEntryList(parentTrace, Collections.singletonList(uiEntry));
+
+                                    }
+                                }
+                            }
+                            setEndTime(endTimeN);
+                            // Find missing parents
+                            for (TimeGraphEntry orphanedEntry : orphaned) {
+                                TimeGraphEntry parent = entries.get(orphanedEntry.getEntryModel().getParentId());
+                                if (parent != null) {
+                                    parent.addChild(orphanedEntry);
+                                }
+                            }
+                        }
+                        long start = 0;
+                        final long resolutionN = Long.max(1, (endTimeN - start) / getDisplayWidth());
+
+                        if (!monitor.isCanceled()) {
+                            zoomEntries(ImmutableList.copyOf(entries.values()), start, endTimeN, resolutionN, monitor);
+                        }
+
                     }
-                }
 
+                    if (monitor.isCanceled()) {
+                        if (trace == null) {
+                            return;
+                        }
+                        resetEntries(trace);
+                        return;
+                    }
+
+                    if (parentTrace.equals(getTrace())) {
+                        refresh();
+                    }
+                    monitor.worked(1);
+
+                    if (!complete && !monitor.isCanceled()) {
+                        waitForDataProvider();
+                    }
+
+                }
+            } catch (InterruptedException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            } finally {
+                fBuildEntryLock.release();
             }
-        } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        } finally {
-            fBuildEntryLock.release();
+
         }
 
+        private void waitForDataProvider() throws InterruptedException {
+            try {
+                Thread.sleep(100);
+
+            } catch (InterruptedException e) {
+                Activator.getDefault().getLog().error("Failed to wait for data provider", e); //$NON-NLS-1$
+                throw e;
+            }
+        }
+
+        private int getDisplayWidth() {
+            int displayWidth = fDisplayWidth;
+            return displayWidth <= 0 ? 1 : displayWidth;
+        }
+
+        private ITimeGraphDataProvider<TimeGraphEntryModel> getFdataProviderGroup() {
+            Objects.requireNonNull(fdataProviderGroup);
+            return fdataProviderGroup;
+        }
+
+        private void setFdataProviderGroup(@Nullable ITimeGraphDataProvider<TimeGraphEntryModel> dataProviderGroup) {
+            fdataProviderGroup = dataProviderGroup;
+        }
+
+        /**
+         * Adds a list of entries to a trace's entry list
+         *
+         * @param trace
+         *            the trace
+         * @param list
+         *            the list of time graph entries to add
+         */
+        private void addToEntryList(ITmfTrace trace, List<TimeGraphEntry> list) {
+            synchronized (fEntryListMap) {
+                List<TimeGraphEntry> entryList = fEntryListMap.get(trace);
+                if (entryList == null) {
+                    fEntryListMap.put(trace, new CopyOnWriteArrayList<>(list));
+                } else {
+                    for (TimeGraphEntry entry : list) {
+                        if (!entryList.contains(entry)) {
+                            entryList.add(entry);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static BiFunction<ITimeEvent, Long, Map<String, String>> getTooltipResolver(ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider) {
-        return (event, time) -> {
-            return getTooltip(event, time, provider, false);
-        };
+        return (event, time) -> getTooltip(event, time, provider, false);
 
     }
 
@@ -501,8 +552,8 @@ public class DifferentialFlameGraphView extends TmfView {
         }
         long entryId = ((TimeGraphEntry) entry).getEntryModel().getId();
         IOutputElement element = null;
-        if (event instanceof TimeEvent) {
-            element = ((TimeEvent) event).getModel();
+        if (event instanceof TimeEvent timeEvent) {
+            element = timeEvent.getModel();
         }
         Map<String, Object> parameters = getFetchTooltipParameters(time, entryId, element);
         if (getActions) {
@@ -564,6 +615,8 @@ public class DifferentialFlameGraphView extends TmfView {
         }
 
         /**
+         * Get the zoom start time
+         *
          * @return the zoom start time
          */
         public long getZoomStartTime() {
@@ -571,6 +624,8 @@ public class DifferentialFlameGraphView extends TmfView {
         }
 
         /**
+         * Get the zoom end time
+         *
          * @return the zoom end time
          */
         public long getZoomEndTime() {
@@ -578,6 +633,8 @@ public class DifferentialFlameGraphView extends TmfView {
         }
 
         /**
+         * Get the resolution
+         *
          * @return the resolution
          */
         public long getResolution() {
@@ -585,6 +642,8 @@ public class DifferentialFlameGraphView extends TmfView {
         }
 
         /**
+         * Get the monitor
+         *
          * @return the monitor
          */
         public IProgressMonitor getMonitor() {
@@ -612,7 +671,7 @@ public class DifferentialFlameGraphView extends TmfView {
             } finally {
 
                 if (fDirty.decrementAndGet() < 0) {
-                    Activator.getDefault().getLog().error("Dirty underflow", new Throwable()); //$NON-NLS-1$
+                    Activator.getDefault().getLog().error(DIRTY_UNDERFLOW, new Throwable());
                 }
             }
         }
@@ -684,7 +743,7 @@ public class DifferentialFlameGraphView extends TmfView {
             }
         } finally {
             if (fDirty.decrementAndGet() < 0) {
-                Activator.getDefault().getLog().error("Dirty underflow", new Throwable()); //$NON-NLS-1$
+                Activator.getDefault().getLog().error(DIRTY_UNDERFLOW, new Throwable());
             }
         }
     }
@@ -736,7 +795,7 @@ public class DifferentialFlameGraphView extends TmfView {
             SelectionTimeQueryFilter filter = new SelectionTimeQueryFilter(times, entry.getValue());
             Map<String, Object> parameters = FetchParametersUtils.selectionTimeQueryToMap(filter);
             Multimap<Integer, String> regexesMap = getRegexes();
-            if (!regexesMap.isEmpty()) {
+            if (regexesMap != null && !regexesMap.isEmpty()) {
                 parameters.put(DataProviderParameterUtils.REGEX_MAP_FILTERS_KEY, Objects.requireNonNull(regexesMap.asMap()));
             }
             TmfModelResponse<TimeGraphModel> response = dataProvider.fetchRowModel(parameters, monitor);
@@ -752,28 +811,27 @@ public class DifferentialFlameGraphView extends TmfView {
     }
 
     /**
-     * This method build the multimap of regexes by property that will be used
-     * to filter the timegraph states
+     * Builds the multimap of regexes by the property that will be used to
+     * filter the timegraph states
      *
      * Override this method to add other regexes with their properties. The data
      * provider should handle everything after.
      *
      * @return The multimap of regexes by property
      */
-    @SuppressWarnings("null")
-    private Multimap<Integer, String> getRegexes() {
+    private @Nullable Multimap<Integer, String> getRegexes() {
         Multimap<Integer, String> regexes = HashMultimap.create();
-
-        ITmfTrace trace = getTrace();
-        if (trace == null) {
-            return regexes;
+        if (regexes != null) {
+            ITmfTrace trace = getTrace();
+            if (trace == null) {
+                return regexes;
+            }
+            TraceCompassFilter globalFilter = TraceCompassFilter.getFilterForTrace(trace);
+            if (globalFilter == null) {
+                return regexes;
+            }
+            regexes.putAll(CoreFilterProperty.DIMMED, globalFilter.getRegexes());
         }
-        TraceCompassFilter globalFilter = TraceCompassFilter.getFilterForTrace(trace);
-        if (globalFilter == null) {
-            return regexes;
-        }
-        regexes.putAll(CoreFilterProperty.DIMMED, globalFilter.getRegexes());
-
         return regexes;
     }
 
@@ -888,8 +946,8 @@ public class DifferentialFlameGraphView extends TmfView {
     public static ITimeGraphDataProvider<? extends TimeGraphEntryModel> getProvider(ITimeGraphEntry entry) {
         ITimeGraphEntry parent = entry;
         while (parent != null) {
-            if (parent instanceof ParentEntry) {
-                return ((ParentEntry) parent).getProvider();
+            if (parent instanceof ParentEntry parentEntry) {
+                return parentEntry.getProvider();
             }
             parent = parent.getParent();
         }
@@ -940,7 +998,7 @@ public class DifferentialFlameGraphView extends TmfView {
 
                 } finally {
                     if (fDirty.decrementAndGet() < 0) {
-                        Activator.getDefault().getLog().error("Dirty underflow", new Throwable()); //$NON-NLS-1$
+                        Activator.getDefault().getLog().error(DIRTY_UNDERFLOW, new Throwable());
                     }
                 }
             });
@@ -960,11 +1018,6 @@ public class DifferentialFlameGraphView extends TmfView {
                 }
             });
         }
-    }
-
-    private int getDisplayWidth() {
-        int displayWidth = fDisplayWidth;
-        return displayWidth <= 0 ? 1 : displayWidth;
     }
 
     /**
@@ -1007,29 +1060,6 @@ public class DifferentialFlameGraphView extends TmfView {
         return fEndTime;
     }
 
-    /**
-     * Adds a list of entries to a trace's entry list
-     *
-     * @param trace
-     *            the trace
-     * @param list
-     *            the list of time graph entries to add
-     */
-    private void addToEntryList(ITmfTrace trace, List<TimeGraphEntry> list) {
-        synchronized (fEntryListMap) {
-            List<TimeGraphEntry> entryList = fEntryListMap.get(trace);
-            if (entryList == null) {
-                fEntryListMap.put(trace, new CopyOnWriteArrayList<>(list));
-            } else {
-                for (TimeGraphEntry entry : list) {
-                    if (!entryList.contains(entry)) {
-                        entryList.add(entry);
-                    }
-                }
-            }
-        }
-    }
-
     private void resetEntries(ITmfTrace trace) {
         synchronized (fEntries) {
             synchronized (fEntryListMap) {
@@ -1040,8 +1070,8 @@ public class DifferentialFlameGraphView extends TmfView {
                     return;
                 }
                 for (TimeGraphEntry entry : entries) {
-                    if (entry instanceof ParentEntry) {
-                        fEntries.remove(((ParentEntry) entry).getProvider());
+                    if (entry instanceof ParentEntry parentEntry) {
+                        fEntries.remove((parentEntry).getProvider());
                     }
                 }
                 refresh();
@@ -1096,7 +1126,7 @@ public class DifferentialFlameGraphView extends TmfView {
             resetEntries(viewTrace);
             // Build job will decrement
 
-            buildJob = new Job(getTitle() + Messages.FlameGraphView_RetrievingData) {
+            buildJob = new Job(getTitle() + Messages.flameGraphViewRetrievingData) {
                 @Override
                 protected IStatus run(@Nullable IProgressMonitor monitor) {
                     Objects.requireNonNull(monitor);
@@ -1228,12 +1258,4 @@ public class DifferentialFlameGraphView extends TmfView {
         return null;
     }
 
-    private ITimeGraphDataProvider<TimeGraphEntryModel> getFdataProviderGroup() {
-        Objects.requireNonNull(fdataProviderGroup);
-        return fdataProviderGroup;
-    }
-
-    private void setFdataProviderGroup(@Nullable ITimeGraphDataProvider<TimeGraphEntryModel> fdataProviderGroup) {
-        this.fdataProviderGroup = fdataProviderGroup;
-    }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal, Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.profiling.core.base.ICallStackSymbol;
 import org.eclipse.tracecompass.analysis.profiling.core.callgraph.ICallGraphProvider2;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.ITree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTree;
@@ -33,91 +34,128 @@ import org.eclipse.tracecompass.tmf.core.util.Pair;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Utility methods to operate on {@link WeightedTree} objects
+ * Utility class to operate on {@link WeightedTree} objects
  *
  * @author Fateme Faraji Daneshgar
  */
 @SuppressWarnings("restriction")
 public final class ParametricWeightedTreeUtils {
 
+    /*
+     * Constructor
+     */
     private ParametricWeightedTreeUtils() {
         // Nothing to do
     }
 
     /**
-     * Does the differential between 2 weighted trees, ie what happened in tree2
-     * differently than in tree1. The base weight come from the second tree and
-     * the differential value will show the difference with the first tree.
+     * Does the differential between 2 weighted trees, i.e what happened in
+     * tree2 that is different compared to tree1. The base weight comes from the
+     * second tree and the differential value will show the difference with the
+     * first tree.
      *
      * @param <T>
      *            The type of element in the tree
-     * @param first
+     * @param firstTree
      *            The tree that will be differentiated.
-     * @param second
+     * @param secondTree
      *            The tree to use as the base
      * @param statisticType
-     *            it determine the statistic (duration or self time) that flame
-     *            graph will represent
+     *            Determines the statistic (duration or self time) that the
+     *            flame graph will represent
      * @return The differential weighted tree
      */
-    public static <@NonNull T> Collection<DifferentialWeightedTree<T>> diffTrees(Collection<WeightedTree<T>> first, Collection<WeightedTree<T>> second, @Nullable String statisticType) {
+    public static <@NonNull T> Collection<DifferentialWeightedTree<T>> diffTrees(Collection<WeightedTree<T>> firstTree, Collection<WeightedTree<T>> secondTree, @Nullable String statisticType) {
         List<DifferentialWeightedTree<T>> diffTrees = new ArrayList<>();
-        double nullDiff = Double.NaN;
-
-        for (WeightedTree<T> base : second) {
+        for (WeightedTree<T> base : secondTree) {
             T object = base.getObject();
             // Find the equivalent tree in the first collection
-            WeightedTree<T> other = findObject(first, object);
-            double diffWeight;
-            DifferentialWeightedTree<@NonNull T> diffTree;
-            if (statisticType == null) {
-                diffWeight = other == null ? nullDiff : (double) (base.getWeight() - other.getWeight()) / other.getWeight();
-                diffTree = new DifferentialWeightedTree<>(base, object, base.getWeight(), diffWeight);
-
-            } else {
-                long baseWeight = 0;
-                long otherWeight = 0;
-                if (base instanceof AggregatedCalledFunction) {
-                    switch (statisticType) {
-                    case "Self Time": //$NON-NLS-1$
-                    {
-                        baseWeight = ((AggregatedCalledFunction) base).getSelfTime();
-                        otherWeight = other == null ? 0 : ((AggregatedCalledFunction) other).getSelfTime();
-                        break;
-                    }
-                    case "Duration": //$NON-NLS-1$
-                    {
-                        baseWeight = ((AggregatedCalledFunction) base).getWeight();
-                        otherWeight = other == null ? 0 : ((AggregatedCalledFunction) other).getWeight();
-                        break;
-                    }
-                    default:
-                        break;
-                    }
-
-                } else {
-                    baseWeight = base.getWeight();
-                    otherWeight = other == null ? 0 : other.getWeight();
-                }
-                diffWeight = other == null ? nullDiff : (double) (baseWeight - otherWeight) / otherWeight;
-                diffTree = new DifferentialWeightedTree<>(base, object, base.getWeight(), diffWeight);
-
-            }
+            WeightedTree<T> other = findObject(firstTree, object);
+            DifferentialWeightedTree<T> diffTree = calculateDiffTree(object, base, other, statisticType);
             diffTrees.add(diffTree);
 
             // Make the differential of the children
-            for (WeightedTree<T> childTree : diffTrees(other == null ? Collections.emptyList() : other.getChildren(), base.getChildren(), statisticType)) {
+            for (WeightedTree<T> childTree : diffTrees(other == null ? Collections.<WeightedTree<T>> emptyList() : other.getChildren(), base.getChildren(), statisticType)) {
                 diffTree.addChild(childTree);
             }
         }
         return diffTrees;
     }
 
+    private static <T> DifferentialWeightedTree<@NonNull T> calculateDiffTree(@NonNull T object, WeightedTree<@NonNull T> base, @Nullable WeightedTree<@NonNull T> other, @Nullable String statisticType) {
+        double diffWeight;
+        double nullDiff = Double.NaN;
+        DifferentialWeightedTree<@NonNull T> diffTree;
+        if (statisticType == null) {
+            diffWeight = other == null ? nullDiff : (double) (base.getWeight() - other.getWeight()) / other.getWeight();
+            diffTree = new DifferentialWeightedTree<>(base, object, base.getWeight(), diffWeight);
+
+        } else {
+            long baseWeight = 0;
+            long otherWeight = 0;
+            if (base instanceof AggregatedCalledFunction) {
+                long[] weightsArray = calculateWeights(base, other, statisticType);
+                baseWeight = weightsArray[0];
+                otherWeight = weightsArray[1];
+            } else {
+                baseWeight = base.getWeight();
+                otherWeight = other == null ? 0 : other.getWeight();
+            }
+            if (other == null) {
+                diffWeight = nullDiff;
+            } else {
+                diffWeight = calculateDiffWeight(baseWeight, otherWeight);
+            }
+            diffTree = new DifferentialWeightedTree<>(base, object, base.getWeight(), diffWeight);
+
+        }
+        return diffTree;
+    }
+
+    private static double calculateDiffWeight(long baseWeight, long otherWeight) {
+        double diffWeight;
+        double nullDiff = Double.NaN;
+        if (otherWeight != 0) {
+            diffWeight = (double) (baseWeight - otherWeight) / otherWeight;
+        } else {
+            diffWeight = nullDiff;
+        }
+        return diffWeight;
+
+    }
+
+    private static <T> long[] calculateWeights(WeightedTree<@NonNull T> base, @Nullable WeightedTree<@NonNull T> other, String statisticType) {
+        long baseWeight = 0;
+        long otherWeight = 0;
+        long[] weightsArray = new long[2];
+        switch (statisticType) {
+        case "Self Time": //$NON-NLS-1$
+        {
+            baseWeight = ((AggregatedCalledFunction) base).getSelfTime();
+            otherWeight = other == null ? 0 : ((AggregatedCalledFunction) other).getSelfTime();
+            break;
+        }
+        case "Duration": //$NON-NLS-1$
+        {
+            baseWeight = ((AggregatedCalledFunction) base).getWeight();
+            otherWeight = other == null ? 0 : ((AggregatedCalledFunction) other).getWeight();
+            break;
+        }
+        default:
+            break;
+        }
+        weightsArray[0] = baseWeight;
+        weightsArray[1] = otherWeight;
+        return weightsArray;
+
+    }
+
     /**
      * Does the differential between 2 weighted tree sets, ie for each
-     * comparable elements, what happened in tree set 2 differently than in tree
-     * set 1. The base weight come from the second tree set and the differential
-     * value will show the difference with the first tree.
+     * comparable elements, what happened in tree set 2 that is different
+     * compared to tree set 1. The base weight comes from the second tree set
+     * and the differential value will show the difference with the first tree.
+     *
      * <p>
      * Calling this method assumes the tree sets are comparable. It is the
      * caller's responsibility to make sure the parameters make sense. If the 2
@@ -145,20 +183,21 @@ public final class ParametricWeightedTreeUtils {
      *
      * @param provider
      *            The base provider of one of the trees, it will be used by the
-     *            differential weighted tree provider to display the metrics and
+     *            differential weighted tree provider to display the metrics,
      *            titles, etc.. It could be the provider of the second tree set,
      *            as it serves as the base values.
      * @param first
-     *            The first treeset to compare to
+     *            The first tree set to compare to
      * @param second
-     *            The second treeset to compare.
+     *            The second tree set to compare.
      * @return A differential weighted tree provider wrapping the resulting tree
-     *         set, or <code>null</code> if the 2 treesets have no elements in
+     *         set, or <code>null</code> if the 2 tree sets have no elements in
      *         common
      */
     public static @Nullable DifferentialWeightedTreeProvider<ICallStackSymbol> diffTreeSets(ICallGraphProvider2 provider,
             IWeightedTreeSet<ICallStackSymbol, @NonNull ?, WeightedTree<ICallStackSymbol>> first,
             IWeightedTreeSet<ICallStackSymbol, @NonNull ?, WeightedTree<ICallStackSymbol>> second) {
+        // TO REMOVE ? DOESN'T SEEM TO BE USED
         Collection<Pair<@NonNull ?, @NonNull ?>> pairedElements = pairElementsFromTrees(first, second);
         if (pairedElements.isEmpty()) {
             return null;
@@ -186,7 +225,7 @@ public final class ParametricWeightedTreeUtils {
             @NonNull
             Object element2 = elements2.iterator().next();
             if (!(element1 instanceof ITree) && !(element2 instanceof ITree)) {
-                return ImmutableList.of(new Pair(element1, element2));
+                return ImmutableList.of(new Pair<>(element1, element2));
             }
         }
 
@@ -228,10 +267,7 @@ public final class ParametricWeightedTreeUtils {
             }
             for (@NonNull
             Object element2 : elements2) {
-                if (!(element2 instanceof ITree)) {
-                    continue;
-                }
-                if (((ITree) element1).getName().equals(((ITree) element2).getName())) {
+                if (element2 instanceof ITree && ((ITree) element1).getName().equals(((ITree) element2).getName())) {
                     pairedElements.add(new Pair<>(element1, element2));
                     pairedElements.addAll(pairSameNameElements(((ITree) element1).getChildren(), ((ITree) element2).getChildren()));
                     break;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 École Polytechnique de Montréal
+ * Copyright (c) 2024 École Polytechnique de Montréal, Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.executioncomparison.core;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.tracecompass.analysis.profiling.core.callgraph.AggregatedCallSite;
@@ -25,9 +26,8 @@ import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.Diffe
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeSet;
 
 /**
- * DifferentialCallGraphProvider which provide a callgraphProvider. Inherited
- * from DifferentialWeightedTreeProvider to edit naming and color
- * ICallGraphProviderpalette to provide a differential flame graph
+ * DifferentialCallGraphProvider provides a callgraphProvider. It is inherited
+ * from DifferentialWeightedTreeProvider to edit the naming and color.
  *
  * @author Fateme Faraji Daneshgar
  */
@@ -41,7 +41,7 @@ public class DifferentialCallGraphProvider extends DifferentialWeightedTreeProvi
      * @param instrumentedCallStackAnalysis
      *            the original tree
      * @param trees
-     *            the other trees to compare
+     *            the other trees to compare to
      */
     public DifferentialCallGraphProvider(IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, AggregatedCallSite> instrumentedCallStackAnalysis,
             Collection<DifferentialWeightedTree<ICallStackSymbol>> trees) {
@@ -57,7 +57,6 @@ public class DifferentialCallGraphProvider extends DifferentialWeightedTreeProvi
      * @param treeSet
      *            The differential tree set
      */
-    @SuppressWarnings("unchecked")
     public DifferentialCallGraphProvider(
             IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, ? extends WeightedTree<ICallStackSymbol>> originalTree,
             DifferentialWeightedTreeSet<ICallStackSymbol> treeSet) {
@@ -70,7 +69,6 @@ public class DifferentialCallGraphProvider extends DifferentialWeightedTreeProvi
         return DifferentialFlamePalette.getInstance();
     }
 
-    @SuppressWarnings("null")
     @Override
     public String toDisplayString(DifferentialWeightedTree<ICallStackSymbol> tree) {
         double difference = tree.getDifference();
@@ -79,7 +77,7 @@ public class DifferentialCallGraphProvider extends DifferentialWeightedTreeProvi
         if (originalTree instanceof AggregatedCallSite) {
             label = fOriginalTree.toDisplayString((AggregatedCallSite) originalTree);
         } else {
-            label = String.valueOf(originalTree.getObject().resolve(null));
+            label = String.valueOf(originalTree.getObject().resolve(new ArrayList<>()));
         }
         if (Double.isFinite(difference)) {
             return String.format("(%#.02f %% ) %s", difference * 100, label); //$NON-NLS-1$
