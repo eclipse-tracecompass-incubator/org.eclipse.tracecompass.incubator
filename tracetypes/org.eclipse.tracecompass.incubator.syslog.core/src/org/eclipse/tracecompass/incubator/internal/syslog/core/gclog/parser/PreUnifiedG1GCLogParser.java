@@ -226,24 +226,24 @@ public class PreUnifiedG1GCLogParser extends AbstractPreUnifiedGCLogParser {
      * I don't feel like importing apache commons.
      */
     private static String strip(String msg, String chars) {
-        if(msg.isBlank()) {
+        if (msg.isBlank()) {
             return ""; //$NON-NLS-1$
         }
         boolean[] toStrip = new boolean[256];
         toStrip[' '] = true;
-        for( int character : chars.toCharArray()) {
+        for (int character : chars.toCharArray()) {
             toStrip[character] = true;
         }
         int start = 0;
         int end = msg.length();
         for (int i = 0; i < end; i++) {
-            if(!toStrip[msg.charAt(i)]) {
+            if (!toStrip[msg.charAt(i)]) {
+                start = i;
                 break;
             }
-            start = i;
         }
-        for (int i = end; i >= 0; i++) {
-            if(!toStrip[msg.charAt(i)]) {
+        for (int i = end - 1; i >= 0; i--) {
+            if (!toStrip[msg.charAt(i)]) {
                 break;
             }
             end = i;

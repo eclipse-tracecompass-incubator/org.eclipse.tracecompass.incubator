@@ -180,6 +180,7 @@ public class UnifiedG1GCLogParser extends UnifiedG1OrGenerationalGCLogParser {
 
     /**
      * @param context
+     * @param prefix
      */
     private static void parseHeapRegionSize(AbstractGCLogParser parser, ParseRuleContext context, String prefix, String value) {
         G1GCModel model = (G1GCModel) parser.getModel();
@@ -187,6 +188,9 @@ public class UnifiedG1GCLogParser extends UnifiedG1OrGenerationalGCLogParser {
         model.setRegionSizeExact(true);
     }
 
+    /**
+     * @param context
+     */
     private static void parseToSpaceExhausted(AbstractGCLogParser parser, ParseRuleContext context) {
         GCModel model = parser.getModel();
         GCEvent event = model.getLastEventOfType(YOUNG_MIXED);

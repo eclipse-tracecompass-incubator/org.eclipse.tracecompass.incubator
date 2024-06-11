@@ -43,8 +43,8 @@ public class GCLogUtil {
             }
         }
 
-        double size = Double.parseDouble(sizeString.substring(0, mid));
-        String unit = sizeString.substring(mid).trim();
+        double size = Double.parseDouble(sizeStringFixed.substring(0, mid));
+        String unit = sizeStringFixed.substring(mid).trim();
         switch (unit) {
         case "b":
             return (long) size;

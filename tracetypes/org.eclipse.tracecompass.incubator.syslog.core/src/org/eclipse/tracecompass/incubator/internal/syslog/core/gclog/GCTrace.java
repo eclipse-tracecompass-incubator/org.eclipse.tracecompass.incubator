@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event.GCEvent;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event.eventInfo.GCMemoryItem;
+import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event.eventInfo.MemoryArea;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.model.GCModel;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.parser.GCLogParser;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.parser.GCLogParserFactory;
@@ -39,6 +40,7 @@ public class GCTrace extends TmfTrace {
 
     private GCModel fModel;
     private TmfLongLocation fLocation = new TmfLongLocation(0L);
+    private List<ITmfEventAspect<?>> fAspects = new ArrayList();
 
     @Override
     public IStatus validate(IProject project, String path) {
@@ -146,24 +148,32 @@ public class GCTrace extends TmfTrace {
 
     @Override
     public @NonNull Iterable<ITmfEventAspect<?>> getEventAspects() {
-        List<ITmfEventAspect<?>> aspects = new ArrayList<>();
-        aspects.addAll((Collection<? extends ITmfEventAspect<?>>) super.getEventAspects());
-        aspects.add(2, simpleAspect("Allocation")); //$NON-NLS-1$
-        aspects.add(3, simpleAspect("Reclamation")); //$NON-NLS-1$
-        aspects.add(3, simpleAspect("Promotion")); //$NON-NLS-1$
-        aspects.add(4, simpleAspect("GC Id")); //$NON-NLS-1$
-        aspects.add(5, simpleAspect("Cause")); //$NON-NLS-1$
-        aspects.add(6, simpleAspect("Cause Interval")); //$NON-NLS-1$
-        aspects.add(7, simpleAspect("Cpu time")); //$NON-NLS-1$
-        aspects.add(8, simpleAspect("Duration")); //$NON-NLS-1$
-        aspects.add(9, simpleAspect("Pause")); //$NON-NLS-1$
-        aspects.add(10, simpleAspect("Level")); //$NON-NLS-1$
-
-        return aspects;
+        if (fAspects.isEmpty()) {
+            List<ITmfEventAspect<?>> aspects = fAspects;
+            aspects.addAll((Collection<? extends ITmfEventAspect<?>>) super.getEventAspects());
+            aspects.add(2, simpleAspect("Allocation")); //$NON-NLS-1$
+            aspects.add(3, simpleAspect("Reclamation")); //$NON-NLS-1$
+            aspects.add(3, simpleAspect("Promotion")); //$NON-NLS-1$
+            aspects.add(4, simpleAspect("GC Id")); //$NON-NLS-1$
+            aspects.add(5, simpleAspect("Cause")); //$NON-NLS-1$
+            aspects.add(6, simpleAspect("Cause Interval")); //$NON-NLS-1$
+            aspects.add(7, simpleAspect("Cpu time")); //$NON-NLS-1$
+            aspects.add(8, simpleAspect("Duration")); //$NON-NLS-1$
+            aspects.add(9, simpleAspect("Pause")); //$NON-NLS-1$
+            aspects.add(10, simpleAspect("Level")); //$NON-NLS-1$
+            int i = 10;
+            for (MemoryArea mi : MemoryArea.values()) {
+                aspects.add(i++, new TmfEventFieldAspect(mi.getName() + " pre", "mem" + mi.getName() + "-pre", ITmfEvent::getContent));
+                aspects.add(i++, new TmfEventFieldAspect(mi.getName() + " post", "mem" + mi.getName() + "-post", ITmfEvent::getContent));
+                aspects.add(i++, new TmfEventFieldAspect(mi.getName() + " capacity", "mem" + mi.getName() + "-capacity", ITmfEvent::getContent));
+            }
+            return aspects;
+        }
+        return fAspects;
     }
 
     private static TmfEventFieldAspect simpleAspect(String field) {
-        return new TmfEventFieldAspect(field, field, event -> event.getContent());
+        return new TmfEventFieldAspect(field, field, ITmfEvent::getContent);
     }
 
 }

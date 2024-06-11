@@ -13,9 +13,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event;
 
-import static org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event.eventInfo.GCEventLevel.EVENT;
-import static org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event.eventInfo.GCEventLevel.PHASE;
-import static org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event.eventInfo.GCEventLevel.values;
 import static org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.util.Constant.KB2MB;
 
 import java.text.SimpleDateFormat;
@@ -96,7 +93,7 @@ public class GCEvent extends TimedEvent {
             return;
         }
         if (memory == null) {
-            memory = new GCMemoryItem[values().length];
+            memory = new GCMemoryItem[MemoryArea.values().length];
         }
         if (force || getMemoryItem(item.getArea()) == null) {
             memory[item.getArea().ordinal()] = item;
@@ -320,7 +317,7 @@ public class GCEvent extends TimedEvent {
                     pause = 0;
                     if (phases != null) {
                         for (GCEvent phase : phases) {
-                            if (phase.getEventType().getPause() == GCPause.PAUSE && phase.getEventLevel() == PHASE) {
+                            if (phase.getEventType().getPause() == GCPause.PAUSE && phase.getEventLevel() == GCEventLevel.PHASE) {
                                 pause += phase.getPause();
                             }
                         }
@@ -397,7 +394,7 @@ public class GCEvent extends TimedEvent {
 
         memoryItemDo(item -> sb.append("[").append(item).append("] "));
 
-        boolean moreInfoAvailable = getEventLevel() == EVENT
+        boolean moreInfoAvailable = getEventLevel() == GCEventLevel.EVENT
                 && (getPromotion() != Constant.UNKNOWN_INT || getInterval() != Constant.UNKNOWN_DOUBLE);
         if (moreInfoAvailable) {
             boolean first = true;
@@ -446,7 +443,7 @@ public class GCEvent extends TimedEvent {
     }
 
     public void pauseEventOrPhasesDo(Consumer<GCEvent> consumer) {
-        if (getEventLevel() != EVENT || isTrue(GCEventBooleanType.IGNORE_PAUSE)) {
+        if (getEventLevel() != GCEventLevel.EVENT || isTrue(GCEventBooleanType.IGNORE_PAUSE)) {
             return;
         }
         switch (getEventType().getPause()) {
@@ -455,7 +452,7 @@ public class GCEvent extends TimedEvent {
                 break;
             case PARTIAL:
                 phasesDoDFS(phase -> {
-                    if (phase.getEventType().getPause() == GCPause.PAUSE && phase.getEventType().getLevel() == PHASE) {
+                    if (phase.getEventType().getPause() == GCPause.PAUSE && phase.getEventType().getLevel() == GCEventLevel.PHASE) {
                         consumer.accept(phase);
                     }
                 });
