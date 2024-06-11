@@ -13,6 +13,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.analysis.counters.core.aspects.CounterAspect;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event.GCEvent;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event.eventInfo.GCMemoryItem;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event.eventInfo.MemoryArea;
@@ -163,9 +164,11 @@ public class GCTrace extends TmfTrace {
             aspects.add(10, simpleAspect("Level")); //$NON-NLS-1$
             int i = 10;
             for (MemoryArea mi : MemoryArea.values()) {
-                aspects.add(i++, new TmfEventFieldAspect(mi.getName() + " pre", "mem" + mi.getName() + "-pre", ITmfEvent::getContent));
-                aspects.add(i++, new TmfEventFieldAspect(mi.getName() + " post", "mem" + mi.getName() + "-post", ITmfEvent::getContent));
-                aspects.add(i++, new TmfEventFieldAspect(mi.getName() + " capacity", "mem" + mi.getName() + "-capacity", ITmfEvent::getContent));
+
+                aspects.add(i++, new CounterAspect("mem" + mi.getName() + "-pre", mi.getName() + " pre"));
+                aspects.add(i++, new CounterAspect("mem" + mi.getName() + "-post", mi.getName() + " post"));
+                aspects.add(i++, new CounterAspect("mem" + mi.getName() + "-capacity", mi.getName() + " capacity"));
+
             }
             return aspects;
         }

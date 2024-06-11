@@ -13,5 +13,19 @@
             trace_type="org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.GCTrace">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.analysis.counters.core.CounterAnalysis"
+            applies_experiment="true"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.syslog.mem"
+            name="GC Memory">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.GCTrace">
+         </tracetype>
+      </module>
+   </extension>
 
 </plugin>

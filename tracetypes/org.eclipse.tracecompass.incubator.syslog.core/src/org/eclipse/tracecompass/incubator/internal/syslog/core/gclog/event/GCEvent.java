@@ -327,7 +327,7 @@ public class GCEvent extends TimedEvent {
                     throw new IllegalStateException();
             }
         }
-        return pause;
+        return pause*1e6;
     }
 
     public long getPromotion() {
