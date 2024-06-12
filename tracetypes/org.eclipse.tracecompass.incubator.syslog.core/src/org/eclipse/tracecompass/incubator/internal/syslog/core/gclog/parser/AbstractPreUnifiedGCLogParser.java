@@ -361,7 +361,7 @@ public abstract class AbstractPreUnifiedGCLogParser extends AbstractGCLogParser 
     private double lastUptime = UNKNOWN_DOUBLE;
 
     private boolean doBeforeParsingGCTraceTime(GCEvent event, String datestampString) {
-        double timestamp = UNKNOWN_DOUBLE;
+        long timestamp = Constant.UNKNOWN_LONG;
         double uptime = event.getStartTime();
         GCModel model = getModel();
         // set model reference timestamp

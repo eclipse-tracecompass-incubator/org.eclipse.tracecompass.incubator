@@ -113,12 +113,13 @@ public class GCTrace extends TmfTrace {
     private TmfEvent convert(GCEvent event) {
 
         TmfEventType type = new TmfEventType(event.getEventType().getName(), null);
-        ITmfTimestamp time = TmfTimestamp.fromNanos((long) (event.getStartTime() * 1e6));
+        ITmfTimestamp time = TmfTimestamp.fromNanos((long) ((event.getStartTime() + fModel.getReferenceTimestamp()) * 1e6));
         List<TmfEventField> fields = new ArrayList<>();
         fields.add(new TmfEventField("Allocation", event.getAllocation(), null)); //$NON-NLS-1$
         fields.add(new TmfEventField("GC Id", event.getGcid(), null)); //$NON-NLS-1$
         fields.add(new TmfEventField("Cause", event.getCause(), null)); //$NON-NLS-1$
-        fields.add(new TmfEventField("Pause", event.getPause(), null)); //$NON-NLS-1$
+        long pause = (long) (event.getPause() * 1e6);
+        fields.add(new TmfEventField("Pause", pause != 0 ? pause : null, null)); //$NON-NLS-1$
         fields.add(new TmfEventField("Cause Interval", event.getCauseInterval(), null)); //$NON-NLS-1$
         fields.add(new TmfEventField("Reclamation", event.getReclamation(), null)); //$NON-NLS-1$
         fields.add(new TmfEventField("Cpu time", event.getCpuTime(), null)); //$NON-NLS-1$
