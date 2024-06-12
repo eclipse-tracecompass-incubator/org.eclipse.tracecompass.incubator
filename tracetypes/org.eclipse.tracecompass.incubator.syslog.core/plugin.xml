@@ -27,5 +27,11 @@
          </tracetype>
       </module>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.analysis.xml.core.files">
+      <xmlfile
+            file="src/org/eclipse/tracecompass/incubator/internal/syslog/core/gclog/xmlanalysis/gc_analysis.xml">
+      </xmlfile>
+   </extension>
 
 </plugin>
