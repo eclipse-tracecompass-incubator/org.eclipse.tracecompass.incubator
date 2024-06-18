@@ -44,27 +44,55 @@ import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.model.modeI
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.util.LongData;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.vo.TimeRange;
 
+/**
+ * Gen1 gc model
+ */
 public class G1GCModel extends GCModel {
     private long heapRegionSize = UNKNOWN_INT; // in b
     private boolean regionSizeExact = false;
     private static GCCollectorType collector = GCCollectorType.G1;
 
+    /**
+     * Sets if this is an "exact" size.
+     *
+     * @param b
+     *            true if exact
+     */
     public void setRegionSizeExact(boolean b) {
         regionSizeExact = b;
     }
 
+    /**
+     * is this region size exact?
+     *
+     * @return true if size exact
+     */
     public boolean isRegionSizeExact() {
         return regionSizeExact;
     }
 
+    /**
+     * set the heap region size, in bytes
+     *
+     * @param heapRegionSize
+     *            the heap region size
+     */
     public void setHeapRegionSize(long heapRegionSize) {
         this.heapRegionSize = heapRegionSize;
     }
 
+    /**
+     * Get the heap region size in bytes
+     *
+     * @return the heap region size
+     */
     public long getHeapRegionSize() {
         return heapRegionSize;
     }
 
+    /**
+     * Default constructor
+     */
     public G1GCModel() {
         super(collector);
     }

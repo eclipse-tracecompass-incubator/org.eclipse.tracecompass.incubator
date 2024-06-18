@@ -7,12 +7,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.counters.core.aspects.CounterAspect;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event.GCEvent;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.event.eventInfo.GCMemoryItem;
@@ -37,19 +39,22 @@ import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
+/**
+ * GC Trace, encapsulates the GC model and makes it a {@link TmfTrace}
+ */
 public class GCTrace extends TmfTrace {
 
-    private GCModel fModel;
+    private @Nullable GCModel fModel;
     private TmfLongLocation fLocation = new TmfLongLocation(0L);
-    private List<ITmfEventAspect<?>> fAspects = new ArrayList();
+    private final @NonNull List<ITmfEventAspect<?>> fAspects = new ArrayList<>();
 
     @Override
-    public IStatus validate(IProject project, String path) {
+    public IStatus validate(@Nullable IProject project, @Nullable String path) {
         return new File(path).canRead() ? new TraceValidationStatus(10, "syslog") : new Status(IStatus.INFO, getClass(), "not a gc log"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
-    public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
+    public void initTrace(@Nullable IResource resource, @Nullable String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
         super.initTrace(resource, path, type);
         GCLogParserFactory factory = new GCLogParserFactory();
         try (BufferedReader br = new BufferedReader(new FileReader(new File(path)))) {
@@ -61,7 +66,7 @@ public class GCTrace extends TmfTrace {
     }
 
     @Override
-    public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type, String name, String traceTypeId) throws TmfTraceException {
+    public void initTrace(@Nullable IResource resource, @Nullable String path, @Nullable Class<? extends ITmfEvent> type, @Nullable String name, @Nullable String traceTypeId) throws TmfTraceException {
         super.initTrace(resource, path, type, name, traceTypeId);
         GCLogParserFactory factory = new GCLogParserFactory();
         try (BufferedReader br = new BufferedReader(new FileReader(new File(path)))) {
@@ -78,13 +83,16 @@ public class GCTrace extends TmfTrace {
     }
 
     @Override
-    public double getLocationRatio(ITmfLocation location) {
-        return fLocation.getLocationInfo().doubleValue() / fModel.getAllEvents().size();
+    public double getLocationRatio(@Nullable ITmfLocation location) {
+        GCModel model = fModel;
+        if (location == null || model == null) {
+            return 0.0;
+        }
+        return fLocation.getLocationInfo().doubleValue() / model.getAllEvents().size();
     }
 
     @Override
-    public ITmfContext seekEvent(ITmfLocation location) {
-
+    public ITmfContext seekEvent(@Nullable ITmfLocation location) {
         if (location instanceof TmfLongLocation) {
             fLocation = (TmfLongLocation) location;
         } else {
@@ -94,17 +102,22 @@ public class GCTrace extends TmfTrace {
     }
 
     @Override
-    public ITmfContext seekEvent(double ratio) {
-        return new TmfContext(new TmfLongLocation((long) (fModel.getAllEvents().size() * ratio)));
+    public @Nullable ITmfContext seekEvent(double ratio) {
+        GCModel model = fModel;
+        if (model == null) {
+            return null;
+        }
+        return new TmfContext(new TmfLongLocation((long) (model.getAllEvents().size() * ratio)));
     }
 
     @Override
-    public ITmfEvent parseEvent(ITmfContext context) {
+    public @Nullable ITmfEvent parseEvent(@Nullable ITmfContext context) {
         int index = getIndex(context);
-        if (index < fModel.getAllEvents().size()) {
-            GCEvent event = fModel.getAllEvents().get(index);
+        GCModel model = fModel;
+        if (model != null && index < model.getAllEvents().size()) {
+            GCEvent event = Objects.requireNonNull(model.getAllEvents().get(index));
             TmfEvent tmfEvent = convert(event);
-            fLocation = new TmfLongLocation(index + 1);
+            fLocation = new TmfLongLocation(index + 1L);
             return tmfEvent;
         }
         return null;
@@ -112,8 +125,9 @@ public class GCTrace extends TmfTrace {
 
     private TmfEvent convert(GCEvent event) {
 
-        TmfEventType type = new TmfEventType(event.getEventType().getName(), null);
-        ITmfTimestamp time = TmfTimestamp.fromNanos((long) ((event.getStartTime() + fModel.getReferenceTimestamp()) * 1e6));
+        TmfEventType type = new TmfEventType(Objects.requireNonNull(event.getEventType().getName()), null);
+        GCModel model = Objects.requireNonNull(fModel);
+        ITmfTimestamp time = TmfTimestamp.fromNanos((long) ((event.getStartTime() + model.getReferenceTimestamp()) * 1e6));
         List<TmfEventField> fields = new ArrayList<>();
         fields.add(new TmfEventField("Allocation", event.getAllocation(), null)); //$NON-NLS-1$
         fields.add(new TmfEventField("GC Id", event.getGcid(), null)); //$NON-NLS-1$
@@ -140,16 +154,18 @@ public class GCTrace extends TmfTrace {
         return new TmfEvent(this, -1, time, type, new TmfEventField(ITmfEventField.ROOT_FIELD_ID, null, fields.toArray(new TmfEventField[0])));
     }
 
-    private static int getIndex(ITmfContext context) {
-        Comparable<?> locationInfo = context.getLocation().getLocationInfo();
-        if (locationInfo instanceof Number) {
-            return ((Number) locationInfo).intValue();
+    private static int getIndex(@Nullable ITmfContext context) {
+        if (context != null) {
+            Comparable<?> locationInfo = context.getLocation().getLocationInfo();
+            if (locationInfo instanceof Number) {
+                return ((Number) locationInfo).intValue();
+            }
         }
         return 0;
     }
 
     @Override
-    public @NonNull Iterable<ITmfEventAspect<?>> getEventAspects() {
+    public Iterable<ITmfEventAspect<?>> getEventAspects() {
         if (fAspects.isEmpty()) {
             List<ITmfEventAspect<?>> aspects = fAspects;
             aspects.addAll((Collection<? extends ITmfEventAspect<?>>) super.getEventAspects());
@@ -166,17 +182,20 @@ public class GCTrace extends TmfTrace {
             int i = 10;
             for (MemoryArea mi : MemoryArea.values()) {
 
-                aspects.add(i++, new CounterAspect("mem" + mi.getName() + "-pre", mi.getName() + " pre"));
-                aspects.add(i++, new CounterAspect("mem" + mi.getName() + "-post", mi.getName() + " post"));
-                aspects.add(i++, new CounterAspect("mem" + mi.getName() + "-capacity", mi.getName() + " capacity"));
+                aspects.add(i++, new CounterAspect("mem" + mi.getName() + "-pre", mi.getName() + " pre")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                aspects.add(i++, new CounterAspect("mem" + mi.getName() + "-post", mi.getName() + " post")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                aspects.add(i++, new CounterAspect("mem" + mi.getName() + "-capacity", mi.getName() + " capacity")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
             }
+            fAspects.clear();
+            fAspects.addAll(aspects);
             return aspects;
         }
         return fAspects;
     }
 
     private static TmfEventFieldAspect simpleAspect(String field) {
+        Objects.requireNonNull(field);
         return new TmfEventFieldAspect(field, field, ITmfEvent::getContent);
     }
 

@@ -37,10 +37,13 @@ import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.model.GCMod
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.util.Constant;
 import org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.vo.GCEventVO;
 
+/**
+ * Garbage Collection event. Phases
+ *
+ * All info saved here should not be relevant to AnalysisConfig. Anything
+ * related to the config should be saved in EventDiagnoseInfo
+ */
 public class GCEvent extends TimedEvent {
-    /* All info saved here should not be relevant to AnalysisConfig. Anything related to the config
-       should be saved in EventDiagnoseInfo
-    **/
     private int gcid = Constant.UNKNOWN_INT;
 
     private CpuTime cpuTime;
@@ -109,6 +112,7 @@ public class GCEvent extends TimedEvent {
     }
 
     public GCEvent() {
+        // do nothing
     }
 
     public void setGcid(int gcid) {
@@ -334,85 +338,85 @@ public class GCEvent extends TimedEvent {
         return promotion;
     }
 
-    private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
 
     protected void appendStartTimestamp(StringBuilder sb, double referenceTimestamp) {
         if (referenceTimestamp != Constant.UNKNOWN_DOUBLE && startTime != Constant.UNKNOWN_DOUBLE) {
-            sb.append(TIMESTAMP_FORMAT.format((long) (referenceTimestamp + startTime))).append(" ");
+            sb.append(TIMESTAMP_FORMAT.format((long) (referenceTimestamp + startTime))).append(" "); //$NON-NLS-1$
         }
     }
 
     protected void appendStartTime(StringBuilder sb) {
         if (startTime != Constant.UNKNOWN_DOUBLE) {
-            sb.append(String.format("%.3f: ", getStartTime() / 1000));
+            sb.append(String.format("%.3f: ", getStartTime() / 1000)); //$NON-NLS-1$
         }
     }
 
     private void appendGCSpecialSituation(StringBuilder sb) {
         List<String> parts = new ArrayList<>();
         if (isTrue(GCEventBooleanType.INITIAL_MARK)) {
-            parts.add("Initial Mark");
+            parts.add("Initial Mark"); //$NON-NLS-1$
         }
         if (isTrue(GCEventBooleanType.PREPARE_MIXED)) {
-            parts.add("Prepare Mixed");
+            parts.add("Prepare Mixed"); //$NON-NLS-1$
         }
         if (isTrue(GCEventBooleanType.TO_SPACE_EXHAUSTED)) {
-            parts.add("To-space Exhausted");
+            parts.add("To-space Exhausted"); //$NON-NLS-1$
         }
 
         if (parts.isEmpty()) {
             return;
         }
-        sb.append("(");
+        sb.append("("); //$NON-NLS-1$
         for (int i = 0; i < parts.size(); i++) {
             if (i != 0) {
-                sb.append(", ");
+                sb.append(", "); //$NON-NLS-1$
             }
             sb.append(parts.get(i));
         }
-        sb.append(") ");
+        sb.append(") "); //$NON-NLS-1$
     }
 
     private void appendEventType(StringBuilder sb) {
-        sb.append(eventType).append(" ");
+        sb.append(eventType).append(" "); //$NON-NLS-1$
     }
 
     protected void appendClassSpecificInfo(StringBuilder sb) {
         if (gcid != Constant.UNKNOWN_INT) {
-            sb.append('(').append(gcid).append(") ");
+            sb.append('(').append(gcid).append(") "); //$NON-NLS-1$
         }
 
         if (cause != null) {
-            sb.append("(").append(cause).append(") ");
+            sb.append("(").append(cause).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         appendGCSpecialSituation(sb);
 
         if (getDuration() != Constant.UNKNOWN_DOUBLE) {
-            sb.append(String.format("%.3f", getDuration() / 1000)).append("s ");
+            sb.append(String.format("%.3f", getDuration() / 1000)).append("s "); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
-        memoryItemDo(item -> sb.append("[").append(item).append("] "));
+        memoryItemDo(item -> sb.append("[").append(item).append("] ")); //$NON-NLS-1$ //$NON-NLS-2$
 
         boolean moreInfoAvailable = getEventLevel() == GCEventLevel.EVENT
                 && (getPromotion() != Constant.UNKNOWN_INT || getInterval() != Constant.UNKNOWN_DOUBLE);
         if (moreInfoAvailable) {
             boolean first = true;
-            sb.append("[");
+            sb.append("["); //$NON-NLS-1$
             if (getPromotion() != Constant.UNKNOWN_INT) {
-                sb.append("promotion ").append(getPromotion() / (long) KB2MB).append(" K");
+                sb.append("promotion ").append(getPromotion() / (long) KB2MB).append(" K"); //$NON-NLS-1$ //$NON-NLS-2$
                 first = false;
             }
             if (getInterval() != Constant.UNKNOWN_INT) {
                 if (!first) {
-                    sb.append(", ");
+                    sb.append(", "); //$NON-NLS-1$
                 }
-                sb.append("interval ").append(String.format("%.3f", getInterval() / 1000)).append(" s");
+                sb.append("interval ").append(String.format("%.3f", getInterval() / 1000)).append(" s"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }
-            sb.append("] ");
+            sb.append("] "); //$NON-NLS-1$
         }
         if (cpuTime != null) {
-            sb.append("[").append(cpuTime).append("] ");
+            sb.append("[").append(cpuTime).append("] "); //$NON-NLS-1$ //$NON-NLS-2$
         }
     }
 
@@ -491,26 +495,26 @@ public class GCEvent extends TimedEvent {
     @Override
     protected void fillInfoToVO(GCModel model, GCEventVO vo, GlobalDiagnoseInfo diagnose) {
         super.fillInfoToVO(model, vo, diagnose);
-        vo.saveInfo("eventType", eventType.getName());
-        vo.saveInfo("gcid", gcid);
-        vo.saveInfo("cputime", cpuTime);
-        vo.saveInfo("referenceGC", referenceGC);
-        vo.saveInfo("memory", memoryToVO());
-        vo.saveInfo("pause", pause);
-        vo.saveInfo("interval", interval);
-        vo.saveInfo("causeInterval", causeInterval);
-        vo.saveInfo("promotion", promotion);
-        vo.saveInfo("reclamation", reclamation);
-        vo.saveInfo("allocation", allocation);
+        vo.saveInfo("eventType", eventType.getName()); //$NON-NLS-1$
+        vo.saveInfo("gcid", gcid); //$NON-NLS-1$
+        vo.saveInfo("cputime", cpuTime); //$NON-NLS-1$
+        vo.saveInfo("referenceGC", referenceGC); //$NON-NLS-1$
+        vo.saveInfo("memory", memoryToVO()); //$NON-NLS-1$
+        vo.saveInfo("pause", pause); //$NON-NLS-1$
+        vo.saveInfo("interval", interval); //$NON-NLS-1$
+        vo.saveInfo("causeInterval", causeInterval); //$NON-NLS-1$
+        vo.saveInfo("promotion", promotion); //$NON-NLS-1$
+        vo.saveInfo("reclamation", reclamation); //$NON-NLS-1$
+        vo.saveInfo("allocation", allocation); //$NON-NLS-1$
         phasesDoDFS(phase -> vo.addPhase(phase.toEventVO(model, diagnose)));
-        vo.saveInfo("diagnose", diagnose.getEventDiagnoseVO(this));
+        vo.saveInfo("diagnose", diagnose.getEventDiagnoseVO(this)); //$NON-NLS-1$
         for (GCEventBooleanType type : GCEventBooleanType.values()) {
             if (isTrue(type)) {
                 vo.saveInfo(type.name(), true);
             }
         }
         if (cause != null) {
-            vo.saveInfo("cause", cause.getName());
+            vo.saveInfo("cause", cause.getName()); //$NON-NLS-1$
         }
     }
 }
