@@ -33,5 +33,12 @@
             file="src/org/eclipse/tracecompass/incubator/internal/syslog/core/gclog/xmlanalysis/gc_analysis.xml">
       </xmlfile>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
+      <type
+            icon="ico/gc.png"
+            tracetype="org.eclipse.tracecompass.syslog.gclog">
+      </type>
+   </extension>
 
 </plugin>
