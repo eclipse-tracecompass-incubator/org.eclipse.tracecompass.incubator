@@ -56,6 +56,7 @@ import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.ScopeLog;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.internal.executioncomparison.core.DifferentialSeqCallGraphAnalysis;
 import org.eclipse.tracecompass.internal.analysis.profiling.core.flamegraph.FlameGraphDataProvider;
+import org.eclipse.tracecompass.internal.analysis.profiling.core.instrumented.FlameChartEntryModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TmfFilterAppliedSignal;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.filters.TraceCompassFilter;
 import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
@@ -130,7 +131,7 @@ public class DifferentialFlameGraphView extends TmfView {
     protected static final Logger LOGGER = Logger.getLogger(DifferentialFlameGraphView.class.getName());
 
     private @Nullable DifferentialWeightedTreeProvider<?> fDataProvider;
-    private @Nullable ITimeGraphDataProvider<TimeGraphEntryModel> fdataProviderGroup = null;
+    private @Nullable ITimeGraphDataProvider<FlameChartEntryModel> fdataProviderGroup = null;
 
     private @Nullable TimeGraphViewer fTimeGraphViewer;
 
@@ -371,7 +372,7 @@ public class DifferentialFlameGraphView extends TmfView {
                     return;
                 }
                 fDataProvider = dataProvider;
-                setFdataProviderGroup(new FlameGraphDataProvider(trace, fDataProvider, FlameGraphDataProvider.ID + ':' + DifferentialSeqCallGraphAnalysis.ID));
+                setFdataProviderGroup(new FlameGraphDataProvider<>(trace, fDataProvider, FlameGraphDataProvider.ID + ':' + DifferentialSeqCallGraphAnalysis.ID));
             }
 
             BaseDataProviderTimeGraphPresentationProvider presentationProvider = fPresentationProvider;
@@ -384,7 +385,7 @@ public class DifferentialFlameGraphView extends TmfView {
                 while (!complete && !monitor.isCanceled()) {
                     Map<String, Object> parameters = new HashMap<>(additionalParams);
                     parameters.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, ImmutableList.of(0, Long.MAX_VALUE));
-                    TmfModelResponse<TmfTreeModel<TimeGraphEntryModel>> responseGroupA = getFdataProviderGroup().fetchTree(parameters, monitor);
+                    TmfModelResponse<TmfTreeModel<FlameChartEntryModel>> responseGroupA = getFdataProviderGroup().fetchTree(parameters, monitor);
 
                     if (responseGroupA.getStatus() == ITmfResponse.Status.FAILED) {
                         Activator.getDefault().getLog().error(getClass().getSimpleName() + " Data Provider failed: " + responseGroupA.getStatusMessage()); //$NON-NLS-1$
@@ -394,7 +395,7 @@ public class DifferentialFlameGraphView extends TmfView {
                     }
 
                     complete = responseGroupA.getStatus() == ITmfResponse.Status.COMPLETED;
-                    TmfTreeModel<TimeGraphEntryModel> groupAModel = responseGroupA.getModel();
+                    TmfTreeModel<FlameChartEntryModel> groupAModel = responseGroupA.getModel();
                     long endTimeN = Long.MIN_VALUE;
 
                     if ((groupAModel != null)) {
@@ -483,8 +484,7 @@ public class DifferentialFlameGraphView extends TmfView {
 
                 }
             } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                Activator.getDefault().getLog().error(e1.getMessage());
             } finally {
                 fBuildEntryLock.release();
             }
@@ -506,12 +506,12 @@ public class DifferentialFlameGraphView extends TmfView {
             return displayWidth <= 0 ? 1 : displayWidth;
         }
 
-        private ITimeGraphDataProvider<TimeGraphEntryModel> getFdataProviderGroup() {
+        private ITimeGraphDataProvider<FlameChartEntryModel> getFdataProviderGroup() {
             Objects.requireNonNull(fdataProviderGroup);
             return fdataProviderGroup;
         }
 
-        private void setFdataProviderGroup(@Nullable ITimeGraphDataProvider<TimeGraphEntryModel> dataProviderGroup) {
+        private void setFdataProviderGroup(@Nullable ITimeGraphDataProvider<FlameChartEntryModel> dataProviderGroup) {
             fdataProviderGroup = dataProviderGroup;
         }
 
@@ -541,7 +541,6 @@ public class DifferentialFlameGraphView extends TmfView {
 
     private static BiFunction<ITimeEvent, Long, Map<String, String>> getTooltipResolver(ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider) {
         return (event, time) -> getTooltip(event, time, provider, false);
-
     }
 
     private static Map<String, String> getTooltip(ITimeEvent event, Long time, ITimeGraphDataProvider<? extends TimeGraphEntryModel> provider, boolean getActions) {
@@ -576,9 +575,7 @@ public class DifferentialFlameGraphView extends TmfView {
     }
 
     /**
-     * Zoom thread
-     *
-     * @since 1.1
+     * Zoom thread TODO improve comment
      */
     protected class ZoomThread extends Thread {
         private final long fZoomStartTime;
@@ -749,7 +746,6 @@ public class DifferentialFlameGraphView extends TmfView {
     }
 
     private Set<TimeGraphEntry> getVisibleItems(int buffer) {
-
         TimeGraphControl timeGraphControl = getTimeGraphViewer().getTimeGraphControl();
         if (timeGraphControl.isDisposed()) {
             return Collections.emptySet();
@@ -941,7 +937,6 @@ public class DifferentialFlameGraphView extends TmfView {
      * @param entry
      *            queried {@link TimeGraphEntry}.
      * @return the {@link ITimeGraphDataProvider}
-     * @since 3.3
      */
     public static ITimeGraphDataProvider<? extends TimeGraphEntryModel> getProvider(ITimeGraphEntry entry) {
         ITimeGraphEntry parent = entry;
@@ -1006,7 +1001,6 @@ public class DifferentialFlameGraphView extends TmfView {
     }
 
     private void redraw() {
-
         try (FlowScopeLog flowParent = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:RedrawRequested").setCategory(getViewId()).build()) { //$NON-NLS-1$
             Display.getDefault().asyncExec(() -> {
                 try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:Redraw").setParentScope(flowParent).build()) { //$NON-NLS-1$
