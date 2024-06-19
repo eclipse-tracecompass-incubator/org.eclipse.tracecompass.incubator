@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Trace Compass (Incubator)" uid="org.eclipse.tracecompass.incubator.rcp" id="org.eclipse.tracecompass.incubator.rcp.branding.product" application="org.eclipse.tracecompass.rcp.ui.application" version="0.10.0.qualifier" type="mixed" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="Trace Compass (Incubator)" uid="org.eclipse.tracecompass.incubator.rcp" id="org.eclipse.tracecompass.incubator.rcp.branding.product" application="org.eclipse.tracecompass.rcp.ui.application" version="0.10.0.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="/org.eclipse.tracecompass.incubator.rcp.branding/icons/tc_about.png"/>
@@ -116,8 +116,6 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
    </license>
 
    <plugins>
-      <plugin id="jakarta.activation-api" version="1.2.2"/>
-      <plugin id="jakarta.xml.bind-api" version="2.3.3"/>
    </plugins>
 
    <features>
