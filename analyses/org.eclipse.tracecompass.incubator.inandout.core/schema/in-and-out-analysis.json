@@ -1,0 +1,59 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://org.eclipse.tracecompass/in-and-out-analysis.json",
+    "title": "InAndOut Analysis",
+    "description": "Custom Execution Analysis schema",
+    "type": "object",
+    "properties": {
+        "name" : {
+            "type": "string",
+            "description": "The name of this InAndOut configuration"
+        },
+        "description" : {
+            "type": "string",
+            "description": "The descrition of this InAndOut configuration"
+        },
+        "specifiers": {
+            "description": "array specifiers",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string",
+                        "descritpion": "The label of the identifier"
+                    },
+                    "inRegex": {
+                      "type": "string",
+                      "descritpion": "The IN regular expression"
+                    },
+                    "outRegex": {
+                     "type": "string",
+                     "descritpion": "The OUT regular expression"
+                    },
+                    "contextInRegex": {
+                     "type": "string",
+                     "descritpion": "The context IN regular expression"
+                    },
+                    "contextOutRegex": {
+                     "type": "string",
+                     "descritpion": "The context OUT regular expression"
+                    },
+                    "classifier": {
+                     "type": "string",
+                     "descritpion": "The classifier"
+                    },
+                    "required": [
+                        "label",
+                        "inRegex",
+                        "outRegex",
+                        "contextInRegex",
+                        "contextOutRegex",
+                        "classifier"
+                    ]
+               }
+            }
+        }
+    },
+    "required": ["name", "specifiers"]
+}

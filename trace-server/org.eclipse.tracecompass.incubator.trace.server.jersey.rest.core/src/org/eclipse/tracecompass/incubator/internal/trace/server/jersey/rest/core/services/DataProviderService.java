@@ -205,6 +205,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @SuppressWarnings("restriction")
 @Path("/experiments/{expUUID}/outputs")
 public class DataProviderService {
+
+    // InAndOut analysis ID
+    private static final String INANDOUT_ANALYSIS_ID = "org.eclipse.tracecompass.incubator.inandout.analysis"; //$NON-NLS-1$
+
     private static final @NonNull Logger LOGGER = TraceCompassLog.getLogger(DataProviderService.class);
 
     private final DataProviderManager manager = DataProviderManager.getInstance();
@@ -234,11 +238,18 @@ public class DataProviderService {
         list.sort(Comparator.comparing(IDataProviderDescriptor::getName));
 
         /*
-         * Bug 576402:
-         * Filter out all "Event Matching Analysis" related data providers, e.g. "Latency vs Time",
-         * because are part in every experiment but won't provide any data.
+         * Remove unwanted data providers:
+         *
+         * - Bug 576402:
+         *   Filter out all "Event Matching Analysis" related data providers, e.g. "Latency vs Time",
+         *   because are part in every experiment but won't provide any data.
+         *
+         * - Legacy InAndOut
+         *   Remove default InAndOutAnalysis used in legacy Trace Compass with Eclipse UI
+         *   For trace server, InAndOutAnlaysis is done using the createDataProvider endpoint below.
          */
-        list.removeIf(dp -> dp.getId().endsWith(EventMatchingLatencyAnalysis.ID));
+        list.removeIf(dp -> dp.getId().endsWith(EventMatchingLatencyAnalysis.ID) || dp.getId().endsWith(INANDOUT_ANALYSIS_ID));
+
         return Response.ok(list).build();
     }
 
