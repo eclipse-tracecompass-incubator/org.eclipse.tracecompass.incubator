@@ -20,4 +20,11 @@
          </tracetype>
       </module>
    </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.inandout.core.analysis.InAndOutDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.inandout.core.analysis.inAndOutdataProviderFactory">
+      </dataProviderFactory>
+   </extension>
 </plugin>
