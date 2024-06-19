@@ -34,6 +34,7 @@
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.apache.commons.commons-compress"/>
       <import plugin="jakarta.ws.rs-api"/>
+      <import plugin="jakarta.xml.bind-api"/>
       <import plugin="org.eclipse.help"/>
    </requires>
 
