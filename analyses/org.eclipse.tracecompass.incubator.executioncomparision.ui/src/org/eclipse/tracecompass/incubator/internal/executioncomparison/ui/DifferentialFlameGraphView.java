@@ -371,14 +371,18 @@ public class DifferentialFlameGraphView extends TmfView {
                 if (dataProvider == null) {
                     return;
                 }
-                fDataProvider = dataProvider;
-                setFdataProviderGroup(new FlameGraphDataProvider<>(trace, fDataProvider, FlameGraphDataProvider.ID + ':' + DifferentialSeqCallGraphAnalysis.ID));
+                configureDataProvider(dataProvider, trace);
             }
 
             BaseDataProviderTimeGraphPresentationProvider presentationProvider = fPresentationProvider;
             if (presentationProvider != null) {
                 presentationProvider.addProvider(getFdataProviderGroup(), getTooltipResolver(getFdataProviderGroup()));
             }
+            fetchAndBuildEntries(trace, parentTrace, additionalParams, monitor);
+
+        }
+
+        private void fetchAndBuildEntries(@Nullable ITmfTrace trace, ITmfTrace parentTrace, Map<String, Object> additionalParams, IProgressMonitor monitor) {
             try {
                 fBuildEntryLock.acquire();
                 boolean complete = false;
@@ -396,72 +400,8 @@ public class DifferentialFlameGraphView extends TmfView {
 
                     complete = responseGroupA.getStatus() == ITmfResponse.Status.COMPLETED;
                     TmfTreeModel<FlameChartEntryModel> groupAModel = responseGroupA.getModel();
-                    long endTimeN = Long.MIN_VALUE;
-
                     if ((groupAModel != null)) {
-                        Map<Long, TimeGraphEntry> entries;
-                        synchronized (fEntries) {
-                            entries = fEntries.computeIfAbsent(getFdataProviderGroup(), dp -> new HashMap<>());
-                            /*
-                             * The provider may send entries unordered and
-                             * parents may not exist when child is constructor,
-                             * we'll re-unite families at the end
-                             */
-                            List<TimeGraphEntry> orphaned = new ArrayList<>();
-                            for (TimeGraphEntryModel entry : groupAModel.getEntries()) {
-                                TimeGraphEntry uiEntry = entries.get(entry.getId());
-                                if (entry.getParentId() != -1) {
-                                    if (uiEntry == null) {
-                                        uiEntry = new TimeGraphEntry(entry);
-                                        TimeGraphEntry parent = entries.get(entry.getParentId());
-                                        if (parent != null) {
-                                            parent.addChild(uiEntry);
-                                        } else {
-                                            orphaned.add(uiEntry);
-                                        }
-                                        entries.put(entry.getId(), uiEntry);
-                                    } else {
-                                        if (!monitor.isCanceled()) {
-                                            uiEntry.updateModel(entry);
-                                        }
-                                    }
-                                } else {
-                                    endTimeN = Long.max(endTimeN, entry.getEndTime() + 1);
-                                    List<String> lables = new ArrayList<>();
-                                    lables.add("GroupB-GroupA"); //$NON-NLS-1$
-
-                                    TimeGraphEntryModel newEntry = new TimeGraphEntryModel(0, -1, lables, entry.getStartTime(), entry.getEndTime(), entry.hasRowModel());
-
-                                    if (uiEntry != null) {
-                                        if (!monitor.isCanceled()) {
-                                            uiEntry.updateModel(newEntry);
-                                        }
-                                    } else {
-                                        // Do not assume that parentless entries
-                                        // are
-                                        // trace entries
-                                        uiEntry = new ParentEntry(newEntry, getFdataProviderGroup());
-                                        entries.put(entry.getId(), uiEntry);
-                                        addToEntryList(parentTrace, Collections.singletonList(uiEntry));
-
-                                    }
-                                }
-                            }
-                            setEndTime(endTimeN);
-                            // Find missing parents
-                            for (TimeGraphEntry orphanedEntry : orphaned) {
-                                TimeGraphEntry parent = entries.get(orphanedEntry.getEntryModel().getParentId());
-                                if (parent != null) {
-                                    parent.addChild(orphanedEntry);
-                                }
-                            }
-                        }
-                        long start = 0;
-                        final long resolutionN = Long.max(1, (endTimeN - start) / getDisplayWidth());
-
-                        if (!monitor.isCanceled()) {
-                            zoomEntries(ImmutableList.copyOf(entries.values()), start, endTimeN, resolutionN, monitor);
-                        }
+                        processAndDisplayEntries(groupAModel, parentTrace, monitor);
 
                     }
 
@@ -488,10 +428,91 @@ public class DifferentialFlameGraphView extends TmfView {
             } finally {
                 fBuildEntryLock.release();
             }
-
         }
 
-        private void waitForDataProvider() throws InterruptedException {
+        private void processAndDisplayEntries(TmfTreeModel<FlameChartEntryModel> groupAModel, ITmfTrace parentTrace, IProgressMonitor monitor) {
+            Map<Long, TimeGraphEntry> entries;
+            synchronized (fEntries) {
+                entries = fEntries.computeIfAbsent(getFdataProviderGroup(), dp -> new HashMap<>());
+                /*
+                 * The provider may send entries unordered and parents may not
+                 * exist when child is constructor, we'll re-unite families at
+                 * the end
+                 */
+                List<TimeGraphEntry> orphaned = new ArrayList<>();
+                for (TimeGraphEntryModel entry : groupAModel.getEntries()) {
+                    if (entry.getParentId() != -1) {
+                        updateOrCreateOrphanedEntry(entry, entries, orphaned, monitor);
+                    } else {
+                        updateOrCreateEntry(entry, entries, parentTrace, monitor);
+                    }
+                }
+                setEndTime(getEndTime());
+                findMissingParents(entries, orphaned);
+            }
+            long start = 0;
+            final long resolutionN = Long.max(1, (getEndTime() - start) / getDisplayWidth());
+
+            if (!monitor.isCanceled()) {
+                zoomEntries(ImmutableList.copyOf(entries.values()), start, getEndTime(), resolutionN, monitor);
+            }
+        }
+
+        private void updateOrCreateOrphanedEntry(TimeGraphEntryModel entry, Map<Long, TimeGraphEntry> entries, List<TimeGraphEntry> orphaned, IProgressMonitor monitor) {
+            TimeGraphEntry uiEntry = entries.get(entry.getId());
+            if (uiEntry == null) {
+                uiEntry = new TimeGraphEntry(entry);
+                TimeGraphEntry parent = entries.get(entry.getParentId());
+                if (parent != null) {
+                    parent.addChild(uiEntry);
+                } else {
+                    orphaned.add(uiEntry);
+                }
+                entries.put(entry.getId(), uiEntry);
+            } else {
+                if (!monitor.isCanceled()) {
+                    uiEntry.updateModel(entry);
+                }
+            }
+        }
+
+        private void updateOrCreateEntry(TimeGraphEntryModel entry, Map<Long, TimeGraphEntry> entries, ITmfTrace parentTrace, IProgressMonitor monitor) {
+            long endTimeN = getEndTime();
+            TimeGraphEntry uiEntry = entries.get(entry.getId());
+            setEndTime(Long.max(endTimeN, entry.getEndTime() + 1));
+            List<String> lables = new ArrayList<>();
+            lables.add("GroupB-GroupA"); //$NON-NLS-1$
+
+            TimeGraphEntryModel newEntry = new TimeGraphEntryModel(0, -1, lables, entry.getStartTime(), entry.getEndTime(), entry.hasRowModel());
+
+            if (uiEntry != null) {
+                if (!monitor.isCanceled()) {
+                    uiEntry.updateModel(newEntry);
+                }
+            } else {
+                // Do not assume that parentless entries are trace entries
+                uiEntry = new ParentEntry(newEntry, getFdataProviderGroup());
+                entries.put(entry.getId(), uiEntry);
+                addToEntryList(parentTrace, Collections.singletonList(uiEntry));
+
+            }
+        }
+
+        private static void findMissingParents(Map<Long, TimeGraphEntry> entries, List<TimeGraphEntry> orphaned) {
+            for (TimeGraphEntry orphanedEntry : orphaned) {
+                TimeGraphEntry parent = entries.get(orphanedEntry.getEntryModel().getParentId());
+                if (parent != null) {
+                    parent.addChild(orphanedEntry);
+                }
+            }
+        }
+
+        private void configureDataProvider(DifferentialWeightedTreeProvider<?> dataProvider, ITmfTrace trace) {
+            fDataProvider = dataProvider;
+            setFdataProviderGroup(new FlameGraphDataProvider<>(trace, fDataProvider, FlameGraphDataProvider.ID + ':' + DifferentialSeqCallGraphAnalysis.ID));
+        }
+
+        private static void waitForDataProvider() throws InterruptedException {
             try {
                 Thread.sleep(100);
 
@@ -575,8 +596,11 @@ public class DifferentialFlameGraphView extends TmfView {
     }
 
     /**
-     * Zoom thread TODO improve comment
+     * The ZoomThread class is responsible for performing zoom operations on a
+     * collection of TimeGraphEntry objects. It is a thread that runs in the
+     * background and performs the zoom operation asynchronously.
      */
+
     protected class ZoomThread extends Thread {
         private final long fZoomStartTime;
         private final long fZoomEndTime;
@@ -779,7 +803,6 @@ public class DifferentialFlameGraphView extends TmfView {
         long start = Long.min(zoomStartTime, zoomEndTime);
         long end = Long.max(zoomStartTime, zoomEndTime);
         List<Long> times = StateSystemUtils.getTimes(start, end, resolution);
-        Sampling sampling = new Sampling(start, end, resolution);
 
         Multimap<ITimeGraphDataProvider<? extends TimeGraphEntryModel>, Long> providersToModelIds = filterGroupEntries(normalEntries, zoomStartTime, zoomEndTime);
         if (providersToModelIds != null) {
@@ -798,7 +821,7 @@ public class DifferentialFlameGraphView extends TmfView {
             TimeGraphModel model = response.getModel();
             Map<Long, TimeGraphEntry> entries = fEntries.get(dataProvider);
             if ((model != null) && (entries) != null) {
-                zoomEntries(entries, model.getRows(), response.getStatus() == ITmfResponse.Status.COMPLETED, sampling);
+                zoomEntries(entries, model.getRows());
 
             }
             subMonitor.worked(1);
@@ -831,26 +854,13 @@ public class DifferentialFlameGraphView extends TmfView {
         return regexes;
     }
 
-    private void zoomEntries(Map<Long, TimeGraphEntry> map, List<ITimeGraphRowModel> model, boolean completed, Sampling sampling) {
-        boolean isZoomThread = false;
+    private void zoomEntries(Map<Long, TimeGraphEntry> map, List<ITimeGraphRowModel> model) {
         for (ITimeGraphRowModel rowModel : model) {
             TimeGraphEntry entry = map.get(rowModel.getEntryID());
 
             if (entry != null) {
                 List<ITimeEvent> events = createTimeEvents(entry, rowModel.getStates());
-                if (isZoomThread) {
-                    synchronized (fZoomThreadResultLock) {
-                        Display.getDefault().asyncExec(() -> {
-                            entry.setZoomedEventList(events);
-                            if (completed) {
-                                entry.setSampling(sampling);
-                            }
-                        });
-                    }
-                } else {
-
-                    entry.setEventList(events);
-                }
+                entry.setEventList(events);
             }
         }
     }
