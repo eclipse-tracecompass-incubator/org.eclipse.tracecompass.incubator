@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="org.eclipse.tracecompass.syslog.gclog"
+         name="GC Log"
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.syslog.gclog"
+            isDirectory="false"
+            name="GC Log"
+            trace_type="org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.GCTrace">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.analysis.counters.core.CounterAnalysis"
+            applies_experiment="true"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.syslog.mem"
+            name="GC Memory">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.syslog.core.gclog.GCTrace">
+         </tracetype>
+      </module>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.analysis.xml.core.files">
+      <xmlfile
+            file="src/org/eclipse/tracecompass/incubator/internal/syslog/core/gclog/xmlanalysis/gc_analysis.xml">
+      </xmlfile>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
+      <type
+            icon="ico/gc.png"
+            tracetype="org.eclipse.tracecompass.syslog.gclog">
+      </type>
+   </extension>
+
+</plugin>
