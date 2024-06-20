@@ -83,7 +83,6 @@ public class DifferentialCallGraphProvider extends DifferentialWeightedTreeProvi
             return String.format("(%#.02f %% ) %s", difference * 100, label); //$NON-NLS-1$
         }
         return label;
-
     }
 
 }

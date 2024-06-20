@@ -627,7 +627,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
 
                     TmfComparisonFilteringUpdatedSignal rangUpdateSignal = new TmfComparisonFilteringUpdatedSignal(this, fStartTimeA, fEndTimeA, fStartTimeB, fEndTimeB, fStatistic, fTraceListA, fTraceListB);
                     TmfSignalManager.dispatchSignal(rangUpdateSignal);
-                    buildDifferetialFlameGraph();
+                    buildDifferentialFlameGraph();
                 }
             }
         });
@@ -665,7 +665,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
 
         ITmfTrace activetrace = TmfTraceManager.getInstance().getActiveTrace();
         if (activetrace != null) {
-            buildDifferetialFlameGraph();
+            buildDifferentialFlameGraph();
         }
     }
 
@@ -716,7 +716,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         if (ftextQuery != null) {
             ftextQuery.setText(makeQuery());
         }
-        buildDifferetialFlameGraph();
+        buildDifferentialFlameGraph();
     }
 
     private Action createStatisticAction(String name) {
@@ -733,7 +733,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                 if (ftextQuery != null) {
                     ftextQuery.setText(makeQuery());
                 }
-                buildDifferetialFlameGraph();
+                buildDifferentialFlameGraph();
             }
         };
     }
@@ -751,7 +751,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
 
     }
 
-    private void buildDifferetialFlameGraph() {
+    private void buildDifferentialFlameGraph() {
 
         ITmfTrace activetrace = TmfTraceManager.getInstance().getActiveTrace();
         if (activetrace != null) {
@@ -901,7 +901,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                     ftextQuery.setText(makeQuery());
                 }
             });
-            buildDifferetialFlameGraph();
+            buildDifferentialFlameGraph();
         }
     }
 
@@ -986,7 +986,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
             if (ftextQuery != null) {
                 ftextQuery.setText(makeQuery());
             }
-            buildDifferetialFlameGraph();
+            buildDifferentialFlameGraph();
         }
 
     }

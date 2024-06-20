@@ -295,9 +295,10 @@ public class DifferentialFlameGraphView extends TmfView {
             if (trace == null) {
                 return;
             }
-            // If entries for this trace are already available, just zoom on
-            // them,
-            // otherwise, rebuild
+            /*
+             * If entries for this trace are already available, just zoom on
+             * them, otherwise, rebuild
+             */
             List<TimeGraphEntry> list = fEntryListMap.get(trace);
             if (list == null) {
                 refresh();
@@ -367,7 +368,7 @@ public class DifferentialFlameGraphView extends TmfView {
         private void buildEntryList(@Nullable ITmfTrace trace, ITmfTrace parentTrace, Map<String, Object> additionalParams, IProgressMonitor monitor) {
 
             if (trace != null) {
-                DifferentialWeightedTreeProvider<?> dataProvider = getDataProvider();
+                DifferentialWeightedTreeProvider<?> dataProvider = getDataProvider(monitor);
                 if (dataProvider == null) {
                     return;
                 }
@@ -1247,16 +1248,16 @@ public class DifferentialFlameGraphView extends TmfView {
     /**
      * Listen to see if one of the view's analysis is restarted
      *
-     * @param signal
-     *            The analysis started signal
+     * @param monitor
+     *            The progress monitor
      * @return The data provider or null
      */
-    private static @Nullable DifferentialWeightedTreeProvider<?> getDataProvider() {
+    private static @Nullable DifferentialWeightedTreeProvider<?> getDataProvider(IProgressMonitor monitor) {
         ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
         if (trace != null) {
             DifferentialSeqCallGraphAnalysis analysis = (DifferentialSeqCallGraphAnalysis) trace.getAnalysisModule("org.eclipse.tracecompass.incubator.executioncomparison.diffcallgraph"); //$NON-NLS-1$
             if (analysis != null) {
-                return analysis.getDiffProvider(null);
+                return analysis.getDiffProvider(monitor);
             }
         }
         return null;
