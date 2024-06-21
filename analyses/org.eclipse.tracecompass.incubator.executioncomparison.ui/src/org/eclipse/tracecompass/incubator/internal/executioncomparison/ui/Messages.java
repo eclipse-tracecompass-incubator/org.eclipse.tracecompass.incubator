@@ -71,7 +71,12 @@ public class Messages extends NLS {
     /**
      * The title of execution comparison view
      */
-    public static String multipleDensityViewtitle;
+    public static String multipleDensityViewTitle;
+
+    /**
+     * The id of execution comparison view
+     */
+    public static String multipleDensityViewId;
 
     /**
      * The action name for grouping
@@ -87,6 +92,21 @@ public class Messages extends NLS {
      * Execution of the callGraph Analysis
      */
     public static String flameGraphViewRetrievingData;
+
+    /**
+     * Name of the traces
+     */
+    public static String traceName;
+
+    /**
+     * The context of the TmfView
+     */
+    public static String tmfViewUiContext;
+
+    /**
+     * Name of the statistics
+     */
+    public static String statisticName;
 
     static {
         // initialize resource bundle

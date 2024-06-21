@@ -102,7 +102,16 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
     /**
      * the id of the view
      */
-    public static final String VIEW_ID = "org.eclipse.tracecompass.incubator.internal.executioncomparison.ui.execComparison"; //$NON-NLS-1$
+    public static final String VIEW_ID = Objects.requireNonNull(Messages.multipleDensityViewId);
+    /**
+     * The title of the view
+     */
+    public static final String VIEW_TITLE = Objects.requireNonNull(Messages.multipleDensityViewTitle);
+    private static final String TRACE_NAME = Objects.requireNonNull(Messages.traceName);
+    private static final String STATISTIC_NAME = Objects.requireNonNull(Messages.statisticName);
+    private static final String TMF_VIEW_UI_CONTEXT = Objects.requireNonNull(Messages.tmfViewUiContext);
+    private String fStatistic = Objects.requireNonNull(Messages.multipleDensityViewDuration);
+
     /**
      * Default weights for organizing the view
      */
@@ -111,45 +120,39 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
     private static final int[] DEFAULT_WEIGHTS_FILTERING_H = new int[] { 3, 9 };
     private static final int[] DEFAULT_WEIGHTS_TimeInterval = new int[] { 240, 380, 380 };
 
-    /** A composite that allows us to add margins for part A */
+    /** A composite that allows us to add margins for part A and B */
     private @Nullable TmfXYChartViewer fChartViewerA;
+    private @Nullable TmfXYChartViewer fChartViewerB;
+
     private @Nullable SashForm fXYViewerContainerA;
+    private @Nullable SashForm fXYViewerContainerB;
+
     private @Nullable TmfViewer fTmfViewerA;
+    private @Nullable TmfViewer fTmfViewerB;
+
     private @Nullable SashForm fSashFormLeftChildA;
     private @Nullable SashForm fSashFormLeftChildB;
-    private @Nullable IContextService fContextService;
-    private @Nullable Action fConfigureStatisticAction;
-    private List<IContextActivation> fActiveContexts = new ArrayList<>();
 
-    /** A composite that allows us to add margins for part B */
-    private @Nullable TmfXYChartViewer fChartViewerB;
-    private @Nullable SashForm fXYViewerContainerB;
-    private @Nullable TmfViewer fTmfViewerB;
     private List<String> fTraceListA = new ArrayList<>();
     private List<String> fTraceListB = new ArrayList<>();
-    private String fTraceStr = "Trace(s): ";//$NON-NLS-1$
-    private String fStatisticStr = "Statistic: ";//$NON-NLS-1$
 
-    /**
-     * The title of the view
-     */
-    @SuppressWarnings("null")
-    public static final String VIEW_TITLE = Messages.multipleDensityViewtitle;
     private ITmfTimestamp fStartTimeA = TmfTimestamp.BIG_BANG;
     private ITmfTimestamp fStartTimeB = TmfTimestamp.BIG_BANG;
     private ITmfTimestamp fEndTimeA = TmfTimestamp.BIG_CRUNCH;
     private ITmfTimestamp fEndTimeB = TmfTimestamp.BIG_CRUNCH;
-    @SuppressWarnings("null")
-    private String fStatistic = Messages.multipleDensityViewDuration;
+    private TmfTimestampFormat fFormat = new TmfTimestampFormat("yyyy-MM-dd HH:mm:ss.SSS.SSS.SSS"); //$NON-NLS-1$
+
     private JFormattedTextField ftextAFrom = new JFormattedTextField();
     private JFormattedTextField ftextBFrom = new JFormattedTextField();
     private JFormattedTextField ftextATo = new JFormattedTextField();
     private JFormattedTextField ftextBTo = new JFormattedTextField();
+
+    private @Nullable IContextService fContextService;
+    private @Nullable Action fConfigureStatisticAction;
     private @Nullable Text ftextQuery;
-    private TmfTimestampFormat fFormat = new TmfTimestampFormat("yyyy-MM-dd HH:mm:ss.SSS.SSS.SSS"); //$NON-NLS-1$
     private @Nullable Listener fSashDragListener;
     private @Nullable SashForm fsashForm = null;
-    private static final String TMF_VIEW_UI_CONTEXT = "org.eclipse.tracecompass.tmf.ui.view.context"; //$NON-NLS-1$
+    private List<IContextActivation> fActiveContexts = new ArrayList<>();
 
     /**
      * Constructs two density charts for selecting the desired traces and time
@@ -238,7 +241,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                 ftextAFrom.setText(fStartTimeA.toString(fFormat));
                 ftextATo.setText(fEndTimeA.toString(fFormat));
                 if (ftextQuery != null) {
-                    ftextQuery.setText(makeQuery());
+                    ftextQuery.setText(buildComparisonQuery());
                 }
 
                 // Dispatch signal to rebuild differential flame graph
@@ -364,7 +367,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                 ftextBFrom.setText(fStartTimeB.toString(fFormat));
                 ftextBTo.setText(fEndTimeB.toString(fFormat));
                 if (ftextQuery != null) {
-                    ftextQuery.setText(makeQuery());
+                    ftextQuery.setText(buildComparisonQuery());
                 }
 
                 // Dispatch signal to rebuild differential flame graph
@@ -593,7 +596,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                 if (query == null) {
                     return;
                 }
-                boolean parsed = parseQuery(query);
+                boolean parsed = parseComparisonQuery(query);
                 if (parsed) {
                     /// Updating blue lines in density chats
                     getChartViewerA().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
@@ -714,7 +717,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         TmfComparisonFilteringUpdatedSignal rangUpdateSignal = new TmfComparisonFilteringUpdatedSignal(this, fStartTimeA, fEndTimeA, fStartTimeB, fEndTimeB, fStatistic, fTraceListA, fTraceListB);
         TmfSignalManager.dispatchSignal(rangUpdateSignal);
         if (ftextQuery != null) {
-            ftextQuery.setText(makeQuery());
+            ftextQuery.setText(buildComparisonQuery());
         }
         buildDifferentialFlameGraph();
     }
@@ -731,7 +734,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                 TmfComparisonFilteringUpdatedSignal rangUpdateSignal = new TmfComparisonFilteringUpdatedSignal(this, fStatistic, null, null);
                 TmfSignalManager.dispatchSignal(rangUpdateSignal);
                 if (ftextQuery != null) {
-                    ftextQuery.setText(makeQuery());
+                    ftextQuery.setText(buildComparisonQuery());
                 }
                 buildDifferentialFlameGraph();
             }
@@ -898,7 +901,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
             TmfSignalManager.dispatchSignal(rangUpdateSignal);
             Display.getDefault().syncExec(() -> {
                 if (ftextQuery != null) {
-                    ftextQuery.setText(makeQuery());
+                    ftextQuery.setText(buildComparisonQuery());
                 }
             });
             buildDifferentialFlameGraph();
@@ -984,7 +987,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
 
             }
             if (ftextQuery != null) {
-                ftextQuery.setText(makeQuery());
+                ftextQuery.setText(buildComparisonQuery());
             }
             buildDifferentialFlameGraph();
         }
@@ -1089,10 +1092,13 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         fContextService = contextService;
     }
 
-    private String makeQuery() {
+    /*
+     * Constructs a query string based on the current state of selected traces and time ranges
+     */
+    private String buildComparisonQuery() {
         StringBuilder query = new StringBuilder();
         /// Query PartA
-        query.append(fTraceStr);
+        query.append(TRACE_NAME);
         for (String trace : fTraceListA) {
             if (!trace.equals("Total")) { //$NON-NLS-1$
                 query.append(trace);
@@ -1113,7 +1119,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         query.append(System.lineSeparator());
 
         /// Query PartB
-        query.append(fTraceStr);
+        query.append(TRACE_NAME);
         for (String trace : fTraceListB) {
             if (!trace.equals("Total")) { //$NON-NLS-1$
                 query.append(trace);
@@ -1131,13 +1137,16 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         query.append(System.lineSeparator());
 
         //// Query Statistic Part
-        query.append(fStatisticStr);
+        query.append(STATISTIC_NAME);
         query.append(fStatistic);
 
         return query.toString();
     }
 
-    boolean parseQuery(String query) {
+    /*
+     * Parses a structured text query into trace and time selection parameters
+     */
+    boolean parseComparisonQuery(String query) {
         try {
             String lineSeparator = System.lineSeparator();
             if (lineSeparator != null) {
@@ -1169,22 +1178,22 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                 fEndTimeB = TmfTimestamp.fromNanos(fFormat.parseValue(toStrB));
 
                 // traceListA
-                if (parts[0].indexOf(fTraceStr) == -1) {
+                if (parts[0].indexOf(TRACE_NAME) == -1) {
                     return false;
                 }
-                String traceStrtA = parts[0].substring(parts[0].indexOf(fTraceStr) + fTraceStr.length(), parts[0].length());
+                String traceStrtA = parts[0].substring(parts[0].indexOf(TRACE_NAME) + TRACE_NAME.length(), parts[0].length());
                 String[] traces = traceStrtA.split(","); //$NON-NLS-1$
 
                 parseAndAddTraces(fTraceListA, traces);
 
                 // traceListB
-                String traceStrtB = parts[4].substring(parts[4].indexOf(fTraceStr) + fTraceStr.length(), parts[4].length());
+                String traceStrtB = parts[4].substring(parts[4].indexOf(TRACE_NAME) + TRACE_NAME.length(), parts[4].length());
                 String[] tracesB = traceStrtB.split(","); //$NON-NLS-1$
 
                 parseAndAddTraces(fTraceListB, tracesB);
 
                 //// Statistic
-                fStatistic = parts[7].substring(parts[7].indexOf(fStatisticStr) + fStatisticStr.length(), parts[7].length());
+                fStatistic = parts[7].substring(parts[7].indexOf(STATISTIC_NAME) + STATISTIC_NAME.length(), parts[7].length());
 
                 // Set time range related objects
                 ftextAFrom.setText(fStartTimeA.toString(fFormat));
