@@ -11,6 +11,23 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.tracecompass.common.core,
+ org.eclipse.tracecompass.tmf.core,
+ org.eclipse.tracecompass.analysis.counters.core,
+ org.eclipse.tracecompass.tmf.analysis.xml.core,
+ org.eclipse.tracecompass.tmf.ui,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
-Export-Package: org.eclipse.tracecompass.incubator.internal.jifa.core;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests"
+Export-Package: org.eclipse.tracecompass.incubator.internal.jifa.core;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
+ org.eclipse.tracecompass.incubator.internal.jifa.core.gclog;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
+ org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.diagnoser;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
+ org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.event;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
+ org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.event.eventInfo;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
+ org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.fragment;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
+ org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.model;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
+ org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.model.modeInfo;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
+ org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.parser;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
+ org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.util;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
+ org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.vo;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests"
+Import-Package: com.google.common.cache,
+ com.google.gson,
+ com.google.gson.annotations
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.jifa.core
