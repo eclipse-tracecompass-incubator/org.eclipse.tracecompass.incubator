@@ -77,7 +77,7 @@ public class Metric {
     /**
      * @return the value
      */
-    double getValue() {
+    public double getValue() {
         return value;
     }
 
