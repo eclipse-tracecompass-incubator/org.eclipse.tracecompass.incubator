@@ -39,8 +39,16 @@ public class GCMemoryItem {
         this.postCapacity = postCapacity;
     }
 
-    public GCMemoryItem(MemoryArea area, long ... memories) {
-        this(area, memories[0], memories[1], memories[2], memories[3]);
+    public GCMemoryItem(MemoryArea area, long preUsed, long postUsed, long postCapacity) {
+        this.setArea(area);
+        this.setPreUsed(preUsed);
+        this.setPreCapacity(UNKNOWN_INT);
+        this.postUsed = postUsed;
+        this.postCapacity = postCapacity;
+    }
+
+    public GCMemoryItem(MemoryArea area, long []memories) {
+        this(area, memories[0],memories[1],memories[2], memories[3]);
     }
 
     public long getMemoryReduction() {
