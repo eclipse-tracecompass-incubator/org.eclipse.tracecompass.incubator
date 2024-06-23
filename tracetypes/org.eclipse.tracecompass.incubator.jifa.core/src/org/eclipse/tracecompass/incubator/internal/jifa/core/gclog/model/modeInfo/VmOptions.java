@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -357,6 +358,26 @@ public class VmOptions {
          */
         public void setText(String text) {
             this.text = text;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(text);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            VmOptionVo other = (VmOptionVo) obj;
+            return Objects.equals(text, other.text);
         }
     }
 
