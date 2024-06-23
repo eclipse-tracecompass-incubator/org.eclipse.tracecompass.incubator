@@ -12,6 +12,8 @@
  ********************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.vo;
 
+import java.util.Objects;
+
 public class MemoryStatistics {
     private MemoryStatisticsItem young;
     private MemoryStatisticsItem old;
@@ -25,7 +27,7 @@ public class MemoryStatistics {
         private long usedAvgAfterFullGC;
         private long usedAvgAfterOldGC;
 
-        public MemoryStatisticsItem(long average, long max, long avgPostGC, long avgOldGC) {
+        public MemoryStatisticsItem(long average, long max, long avgOldGC, long avgPostGC) {
             capacityAvg = average;
             usedMax = max;
             usedAvgAfterFullGC = avgPostGC;
@@ -90,6 +92,26 @@ public class MemoryStatistics {
          */
         public void setUsedAvgAfterOldGC(long usedAvgAfterOldGC) {
             this.usedAvgAfterOldGC = usedAvgAfterOldGC;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(capacityAvg, usedAvgAfterFullGC, usedAvgAfterOldGC, usedMax);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            MemoryStatisticsItem other = (MemoryStatisticsItem) obj;
+            return capacityAvg == other.capacityAvg && usedAvgAfterFullGC == other.usedAvgAfterFullGC && usedAvgAfterOldGC == other.usedAvgAfterOldGC && usedMax == other.usedMax;
         }
     }
 

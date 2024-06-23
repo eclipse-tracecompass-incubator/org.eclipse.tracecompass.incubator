@@ -548,7 +548,9 @@ public abstract class GCModel {
 
     public void addPhase(GCEvent parent, GCEvent phase) {
         allEvents.add(phase);
-        parent.addPhase(phase);
+        if (parent != null) {
+            parent.addPhase(phase);
+        }
     }
 
     /**

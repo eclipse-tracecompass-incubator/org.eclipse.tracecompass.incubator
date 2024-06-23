@@ -187,7 +187,7 @@ public class PreUnifiedG1GCLogParser extends AbstractPreUnifiedGCLogParser {
         } else {
             parent = model.getLastEventOfType(G1_CONCURRENT_CYCLE);
         }
-        GCEvent phaseStart = parent.getLastPhaseOfType(phaseType);
+        GCEvent phaseStart = parent == null ? null : parent.getLastPhaseOfType(phaseType);
         if (phaseStart == null) {
             phase.setEventType(phaseType);
             model.addPhase(parent, phase);
