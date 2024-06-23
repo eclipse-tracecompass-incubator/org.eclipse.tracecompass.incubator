@@ -44,6 +44,10 @@ import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
  */
 public class GCTrace extends TmfTrace {
 
+    /**
+     * The Trace ID
+     */
+    public static final String ID = "org.eclipse.tracecompass.jifa.gclog";  //$NON-NLS-1$
     private @Nullable GCModel fModel;
     private TmfLongLocation fLocation = new TmfLongLocation(0L);
     private final @NonNull List<ITmfEventAspect<?>> fAspects = new ArrayList<>();
