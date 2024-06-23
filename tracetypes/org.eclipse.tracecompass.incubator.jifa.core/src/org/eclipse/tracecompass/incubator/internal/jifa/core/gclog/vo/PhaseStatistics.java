@@ -14,22 +14,35 @@
 package org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.vo;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 public class PhaseStatistics {
-    private List<ParentStatisticsInfo> parents;
-
     public static class ParentStatisticsInfo {
+        private List<PhaseStatisticItem> causes;
+
+        private List<PhaseStatisticItem> phases;
+        private PhaseStatisticItem self;
         public ParentStatisticsInfo(PhaseStatisticItem phaseStatisticItem, @NonNull List<PhaseStatisticItem> collect, @NonNull List<PhaseStatisticItem> collect2) {
             self = phaseStatisticItem;
             phases = collect;
             causes = collect2;
         }
 
-        private PhaseStatisticItem self;
-        private List<PhaseStatisticItem> phases;
-        private List<PhaseStatisticItem> causes;
+        /**
+         * @return the causes
+         */
+        public List<PhaseStatisticItem> getCauses() {
+            return causes;
+        }
+
+        /**
+         * @return the phases
+         */
+        public List<PhaseStatisticItem> getPhases() {
+            return phases;
+        }
 
         /**
          * @return the self
@@ -39,18 +52,11 @@ public class PhaseStatistics {
         }
 
         /**
-         * @param self
-         *            the self to set
+         * @param causes
+         *            the causes to set
          */
-        public void setSelf(PhaseStatisticItem self) {
-            this.self = self;
-        }
-
-        /**
-         * @return the phases
-         */
-        public List<PhaseStatisticItem> getPhases() {
-            return phases;
+        public void setCauses(List<PhaseStatisticItem> causes) {
+            this.causes = causes;
         }
 
         /**
@@ -62,30 +68,24 @@ public class PhaseStatistics {
         }
 
         /**
-         * @return the causes
+         * @param self
+         *            the self to set
          */
-        public List<PhaseStatisticItem> getCauses() {
-            return causes;
-        }
-
-        /**
-         * @param causes
-         *            the causes to set
-         */
-        public void setCauses(List<PhaseStatisticItem> causes) {
-            this.causes = causes;
+        public void setSelf(PhaseStatisticItem self) {
+            this.self = self;
         }
     }
 
     public static class PhaseStatisticItem {
-        private String name;
         private int count;
-        private double intervalAvg;
-        private double intervalMin;
+
         private double durationAvg;
+
         private double durationMax;
         private double durationTotal;
-
+        private double intervalAvg;
+        private double intervalMin;
+        private String name;
         public PhaseStatisticItem(String name2, int n, double average, double min, double average2, double max, double sum) {
             name = name2;
             count = n;
@@ -95,6 +95,64 @@ public class PhaseStatistics {
             durationMax = max;
             durationTotal = sum;
         }
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            PhaseStatisticItem other = (PhaseStatisticItem) obj;
+            return count == other.count && Double.doubleToLongBits(durationAvg) == Double.doubleToLongBits(other.durationAvg) && Double.doubleToLongBits(durationMax) == Double.doubleToLongBits(other.durationMax)
+                    && Double.doubleToLongBits(durationTotal) == Double.doubleToLongBits(other.durationTotal) && Double.doubleToLongBits(intervalAvg) == Double.doubleToLongBits(other.intervalAvg)
+                    && Double.doubleToLongBits(intervalMin) == Double.doubleToLongBits(other.intervalMin) && Objects.equals(name, other.name);
+        }
+
+        /**
+         * @return the count
+         */
+        public int getCount() {
+            return count;
+        }
+
+        /**
+         * @return the durationAvg
+         */
+        public double getDurationAvg() {
+            return durationAvg;
+        }
+
+        /**
+         * @return the durationMax
+         */
+        public double getDurationMax() {
+            return durationMax;
+        }
+
+        /**
+         * @return the durationTotal
+         */
+        public double getDurationTotal() {
+            return durationTotal;
+        }
+
+        /**
+         * @return the intervalAvg
+         */
+        public double getIntervalAvg() {
+            return intervalAvg;
+        }
+
+        /**
+         * @return the intervalMin
+         */
+        public double getIntervalMin() {
+            return intervalMin;
+        }
 
         /**
          * @return the name
@@ -103,19 +161,9 @@ public class PhaseStatistics {
             return name;
         }
 
-        /**
-         * @param name
-         *            the name to set
-         */
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        /**
-         * @return the count
-         */
-        public int getCount() {
-            return count;
+        @Override
+        public int hashCode() {
+            return Objects.hash(count, durationAvg, durationMax, durationTotal, intervalAvg, intervalMin, name);
         }
 
         /**
@@ -127,55 +175,11 @@ public class PhaseStatistics {
         }
 
         /**
-         * @return the intervalAvg
-         */
-        public double getIntervalAvg() {
-            return intervalAvg;
-        }
-
-        /**
-         * @param intervalAvg
-         *            the intervalAvg to set
-         */
-        public void setIntervalAvg(double intervalAvg) {
-            this.intervalAvg = intervalAvg;
-        }
-
-        /**
-         * @return the intervalMin
-         */
-        public double getIntervalMin() {
-            return intervalMin;
-        }
-
-        /**
-         * @param intervalMin
-         *            the intervalMin to set
-         */
-        public void setIntervalMin(double intervalMin) {
-            this.intervalMin = intervalMin;
-        }
-
-        /**
-         * @return the durationAvg
-         */
-        public double getDurationAvg() {
-            return durationAvg;
-        }
-
-        /**
          * @param durationAvg
          *            the durationAvg to set
          */
         public void setDurationAvg(double durationAvg) {
             this.durationAvg = durationAvg;
-        }
-
-        /**
-         * @return the durationMax
-         */
-        public double getDurationMax() {
-            return durationMax;
         }
 
         /**
@@ -187,20 +191,39 @@ public class PhaseStatistics {
         }
 
         /**
-         * @return the durationTotal
-         */
-        public double getDurationTotal() {
-            return durationTotal;
-        }
-
-        /**
          * @param durationTotal
          *            the durationTotal to set
          */
         public void setDurationTotal(double durationTotal) {
             this.durationTotal = durationTotal;
         }
+
+        /**
+         * @param intervalAvg
+         *            the intervalAvg to set
+         */
+        public void setIntervalAvg(double intervalAvg) {
+            this.intervalAvg = intervalAvg;
+        }
+
+        /**
+         * @param intervalMin
+         *            the intervalMin to set
+         */
+        public void setIntervalMin(double intervalMin) {
+            this.intervalMin = intervalMin;
+        }
+
+        /**
+         * @param name
+         *            the name to set
+         */
+        public void setName(String name) {
+            this.name = name;
+        }
     }
+
+    private List<ParentStatisticsInfo> parents;
 
     public PhaseStatistics(List<ParentStatisticsInfo> result) {
         parents = result;
