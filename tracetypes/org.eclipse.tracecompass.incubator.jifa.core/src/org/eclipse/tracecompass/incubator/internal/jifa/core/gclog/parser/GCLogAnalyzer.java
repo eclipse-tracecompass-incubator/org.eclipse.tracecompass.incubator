@@ -66,7 +66,7 @@ public class GCLogAnalyzer {
 
             return model;
         } catch (IOException | TmfTraceException e) {
-            Activator.getInstance().logInfo(String.format("fail to parse gclog {}: {}", file.getName(), e.getMessage()));
+            Activator.getInstance().logInfo(String.format("fail to parse gclog {0}: {1}", file.getName(), e.getMessage()));
             throw new TmfTraceException(e.getMessage(), e);
         }
     }
