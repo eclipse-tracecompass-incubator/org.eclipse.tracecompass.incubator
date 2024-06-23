@@ -54,12 +54,12 @@ public abstract class AbstractGCLogParser implements GCLogParser {
                         doParseLine(line);
                     }
                 } catch (Exception e) {
-                    Activator.getInstance().logInfo(String.format("fail to parse \"{}\", {}", line, e.getMessage()));
+                    Activator.getInstance().logInfo(String.format("fail to parse \"%s\", %s", line, e.getMessage()));
                 }
             }
             endParsing();
         } catch (Exception e) {
-            Activator.getInstance().logInfo(String.format("fail to parse \"{}\", {}", line, e.getMessage()));
+            Activator.getInstance().logInfo(String.format("fail to parse \"%s\", %s", line, e.getMessage()));
         }
 
         return model;

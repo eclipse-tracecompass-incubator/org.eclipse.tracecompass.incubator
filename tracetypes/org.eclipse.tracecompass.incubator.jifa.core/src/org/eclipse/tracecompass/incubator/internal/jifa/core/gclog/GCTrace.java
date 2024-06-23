@@ -64,7 +64,12 @@ public class GCTrace extends TmfTrace {
 
     @Override
     public IStatus validate(@Nullable IProject project, @Nullable String path) {
-        return new File(path).canRead() ? new TraceValidationStatus(10, "syslog") : new Status(IStatus.INFO, getClass(), "not a gc log"); //$NON-NLS-1$ //$NON-NLS-2$
+        try (BufferedReader br = new BufferedReader(new FileReader(new File(path)))) {
+            new GCLogParserFactory().getParser(br);
+        } catch (IllegalStateException | IOException e) {
+            return new Status(IStatus.INFO, getClass(), e.getMessage());
+        }
+        return new TraceValidationStatus(10, this.getClass().getName());
     }
 
     @Override
