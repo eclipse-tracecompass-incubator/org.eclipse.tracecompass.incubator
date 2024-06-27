@@ -42,6 +42,7 @@ import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.ScopeLog;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTree;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeSet;
+import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.WeightedTreeUtils;
 import org.eclipse.tracecompass.internal.analysis.profiling.core.callgraph2.AggregatedCalledFunction;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
@@ -118,7 +119,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
             }
 
             Collection<DifferentialWeightedTree<ICallStackSymbol>> trees;
-            trees = ParametricWeightedTreeUtils.diffTrees(originalTree, diffTree, fStatistic);
+            trees = WeightedTreeUtils.diffTrees(originalTree, diffTree, fStatistic);
 
             IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, AggregatedCallSite> instrumentedCallStackAnalysis = Iterables.get(fTraceCallGraphRegistry.values(), 0);
             fDifferentialCallGraphProvider = new DifferentialCallGraphProvider(instrumentedCallStackAnalysis, trees);

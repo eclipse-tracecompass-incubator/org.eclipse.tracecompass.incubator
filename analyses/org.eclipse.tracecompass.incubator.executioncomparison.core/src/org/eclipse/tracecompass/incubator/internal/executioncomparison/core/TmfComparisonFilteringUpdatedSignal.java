@@ -19,7 +19,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 
 /**
- *
+ * Signal to notify that the comparison filtering has been updated.
  */
 public class TmfComparisonFilteringUpdatedSignal extends TmfSignal {
 
