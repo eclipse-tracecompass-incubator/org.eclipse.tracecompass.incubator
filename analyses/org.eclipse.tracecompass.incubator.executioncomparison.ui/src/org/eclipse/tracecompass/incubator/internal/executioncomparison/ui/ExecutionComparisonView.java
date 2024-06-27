@@ -171,45 +171,32 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         sashForm.setLayout(new GridLayout(1, false));
         sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        //// Main organization of the view. there are three main parts in the
-        //// view:filtering, query and differential flame graph
+        /*
+         * Main organization of the view. There are three main parts in the
+         * view: Filtering, Query and Differential Flame Graph
+         */
         Composite sashFormFiltering = new Composite(sashForm, SWT.HORIZONTAL);
         GridLayout layout = new GridLayout(2, false);
         layout.marginHeight = layout.marginWidth = 0;
         sashFormFiltering.setLayout(layout);
         sashFormFiltering.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        //// GroupA
+        // GroupA
         Group groupA = new Group(sashFormFiltering, SWT.NULL);
-        groupA.setText(Messages.multipleDensityViewGroupA);
         GridLayout gridLayoutG = new GridLayout();
-        gridLayoutG.numColumns = 1;
-        groupA.setLayout(gridLayoutG);
         GridData gridDataG = new GridData(GridData.FILL_BOTH);
-        gridDataG.horizontalSpan = 1;
-        groupA.setLayoutData(gridDataG);
-
         SashForm densityA = new SashForm(groupA, SWT.NULL);
         GridData data = new GridData(SWT.FILL, SWT.TOP, true, false);
-        data.heightHint = 200;
-        densityA.setLayoutData(data);
-
         SashForm timeInputA = new SashForm(groupA, SWT.NULL);
-        timeInputA.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        createGroups(groupA, gridLayoutG, gridDataG, densityA, data, timeInputA, true);
 
-        //// GroupB
+        // GroupB
         Group groupB = new Group(sashFormFiltering, SWT.NULL);
-        groupB.setText(Messages.multipleDensityViewGroupB);
-        groupB.setLayout(gridLayoutG);
-        groupB.setLayoutData(gridDataG);
-
         SashForm densityB = new SashForm(groupB, SWT.NULL);
-        densityB.setLayoutData(data);
-
         SashForm timeInputB = new SashForm(groupB, SWT.NULL);
-        timeInputB.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        createGroups(groupB, gridLayoutG, gridDataG, densityB, data, timeInputB, false);
 
-        //// Group A Time Intervals
+        // Group A Time Intervals
         Composite timelableA = new Composite(timeInputA, SWT.NONE);
         Composite timelableAFrom = new Composite(timeInputA, SWT.EMBEDDED);
         Composite timelableATo = new Composite(timeInputA, SWT.EMBEDDED);
@@ -224,122 +211,27 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         timelableAFrom.setLayout(rowLayout);
         timelableATo.setLayout(rowLayout);
 
-        // ButtonA
+        // Reset Button A
         Button resetButtonA = new Button(timelableA, SWT.PUSH);
-        resetButtonA.setText("Reset Time IntervalA"); //$NON-NLS-1$
-        resetButtonA.addListener(SWT.Selection, event -> {
-            ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
-            if (trace != null) {
-                // Reset tree viewer checked items. all items should be
-                // checked
-                List<ITmfTreeViewerEntry> treeCheckedElements = ((MultipleEventDensityViewer) getChartViewerA()).getWholeCheckedItems();
-                setCheckedElements(getChartViewerA(), getTmfViewerA(), treeCheckedElements, false);
+        createResetButtonA(resetButtonA);
 
-                // Reset start time and end time and relating objects
-                fStartTimeA = trace.getStartTime();
-                fEndTimeA = trace.getEndTime();
-                ftextAFrom.setText(fStartTimeA.toString(fFormat));
-                ftextATo.setText(fEndTimeA.toString(fFormat));
-                if (ftextQuery != null) {
-                    ftextQuery.setText(buildComparisonQuery());
-                }
-
-                // Dispatch signal to rebuild differential flame graph
-                TmfSignalManager.dispatchSignal(new TmfSelectionRangeUpdatedSignal(getChartViewerA(), fStartTimeA, fEndTimeA, getTrace()));
-
-            }
-        });
-
-        /// LableAfrom
+        // LabelFromA
         java.awt.Frame frameAFrom = SWT_AWT.new_Frame(timelableAFrom);
         java.awt.Panel panelAFrom = new java.awt.Panel();
-        frameAFrom.add(panelAFrom);
-
-        JLabel labelAFrom = new JLabel();
-        labelAFrom.setText(Messages.multipleDensityViewFrom);
-
         JFormattedTextField textAFrom = new JFormattedTextField(fFormat);
-        textAFrom.addFocusListener(new java.awt.event.FocusListener() {
-            private String oldVal = ""; //$NON-NLS-1$
+        if (frameAFrom != null) {
+            createLabelFromA(frameAFrom, panelAFrom, textAFrom);
+        }
 
-            @Override
-            public void focusGained(java.awt.event.@Nullable FocusEvent e) {
-                String aFrom = textAFrom.getText();
-                if (aFrom != null) {
-                    oldVal = aFrom;
-                }
-            }
-
-            @Override
-            public void focusLost(java.awt.event.@Nullable FocusEvent e) {
-                if (!oldVal.equals(textAFrom.getText())) {
-                    long newTime = 0;
-                    try {
-                        newTime = fFormat.parseValue(textAFrom.getText());
-                        ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
-                        fStartTimeA = fromTime;
-                        textAFrom.setText(fStartTimeA.toString(fFormat));
-
-                        updateSelectedRange();
-                        getChartViewerA().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
-
-                    } catch (ParseException e1) {
-                        textAFrom.setText(oldVal);
-                        e1.printStackTrace();
-                    }
-                }
-            }
-        });
-        textAFrom.setText(fStartTimeA.toString(fFormat));
-        panelAFrom.add(labelAFrom);
-        panelAFrom.add(textAFrom);
-        ftextAFrom = textAFrom;
-
-        //// LableATo
+        // LabelToA
         java.awt.Frame frameATo = SWT_AWT.new_Frame(timelableATo);
         java.awt.Panel panelATo = new java.awt.Panel();
-        frameATo.add(panelATo);
-
-        JLabel labelATo = new JLabel();
-        labelATo.setText(Messages.multipleDensityViewTo);
         JFormattedTextField textATo = new JFormattedTextField(fFormat);
-        textATo.addFocusListener(new java.awt.event.FocusListener() {
-            private String oldVal = ""; //$NON-NLS-1$
+        if (frameATo != null) {
+            createLabelToA(frameATo, panelATo, textATo);
+        }
 
-            @Override
-            public void focusGained(java.awt.event.@Nullable FocusEvent e) {
-                String aTo = textATo.getText();
-                if (aTo != null) {
-                    oldVal = aTo;
-                }
-            }
-
-            @Override
-            public void focusLost(java.awt.event.@Nullable FocusEvent e) {
-                if (!oldVal.equals(textATo.getText())) {
-                    long newTime = 0;
-                    try {
-                        newTime = fFormat.parseValue(textATo.getText());
-                        ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
-                        fEndTimeA = fromTime;
-                        textATo.setText(fEndTimeA.toString(fFormat));
-
-                        updateSelectedRange();
-                        getChartViewerA().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
-
-                    } catch (ParseException e1) {
-                        textATo.setText(oldVal);
-                        e1.printStackTrace();
-                    }
-                }
-            }
-        });
-        textATo.setText(fEndTimeA.toString(fFormat));
-        panelATo.add(labelATo);
-        panelATo.add(textATo);
-        ftextATo = textATo;
-
-        //// Group B Time Intervals
+        // Group B Time Intervals
         Composite timelableB = new Composite(timeInputB, SWT.FILL);
         Composite timelableBFrom = new Composite(timeInputB, SWT.EMBEDDED);
         Composite timelableBTo = new Composite(timeInputB, SWT.EMBEDDED);
@@ -350,117 +242,25 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         timelableBFrom.setLayout(rowLayout);
         timelableBTo.setLayout(rowLayout);
 
-        // Button B
+        // Reset Button B
         Button resetButtonB = new Button(timelableB, SWT.PUSH);
-        resetButtonB.setText("Reset Time IntervalB"); //$NON-NLS-1$
-        resetButtonB.addListener(SWT.Selection, event -> {
-            ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
-            if (trace != null) {
-                // Reset tree viewer checked items. all items should be
-                // checked
-                List<ITmfTreeViewerEntry> treeCheckedElements = ((MultipleEventDensityViewer) getChartViewerB()).getWholeCheckedItems();
-                setCheckedElements(getChartViewerB(), getTmfViewerB(), treeCheckedElements, false);
+        createResetButtonB(resetButtonB);
 
-                // Reset start time and end time and relating objects
-                fStartTimeB = trace.getStartTime();
-                fEndTimeB = trace.getEndTime();
-                ftextBFrom.setText(fStartTimeB.toString(fFormat));
-                ftextBTo.setText(fEndTimeB.toString(fFormat));
-                if (ftextQuery != null) {
-                    ftextQuery.setText(buildComparisonQuery());
-                }
-
-                // Dispatch signal to rebuild differential flame graph
-                TmfSignalManager.dispatchSignal(new TmfSelectionRangeUpdatedSignal(getChartViewerB(), fStartTimeB, fEndTimeB, getTrace()));
-
-            }
-        });
-
-        /// LableBFrom
+        // LabelFromB
         java.awt.Frame frameBFrom = SWT_AWT.new_Frame(timelableBFrom);
         java.awt.Panel panelBFrom = new java.awt.Panel();
-        frameBFrom.add(panelBFrom);
-
-        JLabel labelBFrom = new JLabel();
-        labelBFrom.setText(Messages.multipleDensityViewFrom);
         JFormattedTextField textBFrom = new JFormattedTextField(fFormat);
-        textBFrom.addFocusListener(new java.awt.event.FocusListener() {
-            private String oldVal = ""; //$NON-NLS-1$
+        if (frameBFrom != null) {
+            createLabelFromB(frameBFrom, panelBFrom, textBFrom);
+        }
 
-            @Override
-            public void focusGained(java.awt.event.@Nullable FocusEvent e) {
-                String bFrom = textBFrom.getText();
-                if (bFrom != null) {
-                    oldVal = bFrom;
-                }
-            }
-
-            @Override
-            public void focusLost(java.awt.event.@Nullable FocusEvent e) {
-                if (!oldVal.equals(textBFrom.getText())) {
-                    long newTime = 0;
-                    try {
-                        newTime = fFormat.parseValue(textBFrom.getText());
-                        ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
-                        fStartTimeB = fromTime;
-                        textBFrom.setText(fStartTimeB.toString(fFormat));
-
-                        updateSelectedRange();
-                        getChartViewerB().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeB, fEndTimeB, getTrace()));
-
-                    } catch (ParseException e1) {
-                        textBFrom.setText(oldVal);
-                        e1.printStackTrace();
-                    }
-
-                }
-            }
-        });
-
-        textBFrom.setText(fStartTimeB.toString(fFormat));
-        panelBFrom.add(labelBFrom);
-        panelBFrom.add(textBFrom);
-        ftextBFrom = textBFrom;
-
-        //// LableBTo
+        // LableToB
         java.awt.Frame frameBTo = SWT_AWT.new_Frame(timelableBTo);
         java.awt.Panel panelBTo = new java.awt.Panel();
-        frameBTo.add(panelBTo);
-
-        JLabel labelBTo = new JLabel();
-        labelBTo.setText(Messages.multipleDensityViewTo);
         JFormattedTextField textBTo = new JFormattedTextField(fFormat);
-        textBTo.addFocusListener(new java.awt.event.FocusListener() {
-            public @Nullable String oldVal = null;
-
-            @Override
-            public void focusGained(java.awt.event.@Nullable FocusEvent e) {
-                oldVal = textBTo.getText();
-            }
-
-            @Override
-            public void focusLost(java.awt.event.@Nullable FocusEvent e) {
-                if (oldVal != null && !oldVal.equals(textBTo.getText())) {
-                    long newTime = 0;
-                    try {
-                        newTime = fFormat.parseValue(textBTo.getText());
-                        ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
-                        fEndTimeB = fromTime;
-                        textBTo.setText(fEndTimeB.toString(fFormat));
-                        updateSelectedRange();
-                        getChartViewerB().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
-
-                    } catch (ParseException e1) {
-                        textBTo.setText(oldVal);
-                        e1.printStackTrace();
-                    }
-                }
-            }
-        });
-        textBTo.setText(fEndTimeB.toString(fFormat));
-        panelBTo.add(labelBTo);
-        panelBTo.add(textBTo);
-        ftextBTo = textBTo;
+        if (frameBTo != null) {
+            createLabelToB(frameBTo, panelBTo, textBTo);
+        }
 
         setSashFormLeftChildA(new SashForm(densityA, SWT.None));
 
@@ -474,27 +274,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
 
         setChartViewerA(chartViewerA);
 
-        chartViewerA.getControl().addPaintListener(new PaintListener() {
-            @Override
-            public void paintControl(@Nullable PaintEvent e) {
-                // Sashes in a SashForm are being created on layout so add the
-                // drag listener here
-                Listener sashDragListener = fSashDragListener;
-                if (sashDragListener == null) {
-                    for (Control control : getSashFormLeftChildA().getChildren()) {
-                        if (control instanceof Sash) {
-                            sashDragListener = event -> TmfSignalManager.dispatchSignal(new TmfTimeViewAlignmentSignal(getSashFormLeftChildA(), getTimeViewAlignmentInfo(chartViewerA, getSashFormLeftChildA())));
-                            fSashDragListener = sashDragListener;
-                            control.removePaintListener(this);
-                            control.addListener(SWT.Selection, sashDragListener);
-                            // There should be only one sash
-                            break;
-                        }
-
-                    }
-                }
-            }
-        });
+        createControlPaintListenerA(chartViewerA);
 
         IStatusLineManager statusLineManager = getViewSite().getActionBars().getStatusLineManager();
         chartViewerA.setStatusLineManager(statusLineManager);
@@ -513,22 +293,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         TmfXYChartViewer chartViewerB = createChartViewer(xYViewerContainerB);
         setChartViewerB(chartViewerB);
 
-        chartViewerB.getControl().addPaintListener(new PaintListener() {
-            @Override
-            public void paintControl(@Nullable PaintEvent e) {
-                // Sashes in a SashForm are being created on layout so add the
-                // drag listener here
-                if (fSashDragListener == null) {
-                    for (Control control : getSashFormLeftChildB().getChildren()) {
-                        Objects.requireNonNull(getSashFormLeftChildB());
-
-                        fSashDragListener = event -> TmfSignalManager.dispatchSignal(new TmfTimeViewAlignmentSignal(getSashFormLeftChildB(), getTimeViewAlignmentInfo(chartViewerB, getSashFormLeftChildB())));
-                        control.removePaintListener(this);
-                        control.addListener(SWT.Selection, fSashDragListener);
-                    }
-                }
-            }
-        });
+        createControlPaintListenerB(chartViewerB);
 
         chartViewerB.setStatusLineManager(statusLineManager);
         coupleSelectViewer(getTmfViewerB(), chartViewerB);
@@ -557,7 +322,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         gridDataG.horizontalSpan = 1;
         groupQuery.setLayoutData(gridDataG);
 
-        ///// Organizing sashFormQuery
+        // Organizing sashFormQuery
         ExpandBar bar = new ExpandBar(groupQuery, SWT.NONE);
         bar.setLayout(new GridLayout(1, false));
         GridData data2 = new GridData();
@@ -583,57 +348,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         data.widthHint = 100;
         text.setLayoutData(data);
         ftextQuery = text;
-        text.addFocusListener(new FocusListener() {
-
-            @Override
-            public void focusGained(@Nullable FocusEvent e) {
-                // Does nothing
-            }
-
-            @Override
-            public void focusLost(@Nullable FocusEvent e) {
-                String query = ftextQuery.getText();
-                if (query == null) {
-                    return;
-                }
-                boolean parsed = parseComparisonQuery(query);
-                if (parsed) {
-                    /// Updating blue lines in density chats
-                    getChartViewerA().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
-                    getChartViewerB().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeB, fEndTimeB, getTrace()));
-
-                    // Updates checked elements in treeviewers
-                    // treeViewerA
-                    List<ITmfTreeViewerEntry> treeWholeElements = ((MultipleEventDensityViewer) getChartViewerA()).getWholeCheckedItems();
-                    List<ITmfTreeViewerEntry> treeCheckedElements = new ArrayList<>();
-
-                    for (ITmfTreeViewerEntry trace : treeWholeElements) {
-                        if (fTraceListA.contains(trace.getName())) {
-                            treeCheckedElements.add(trace);
-                            treeCheckedElements.addAll(trace.getChildren());
-                        }
-                    }
-
-                    setCheckedElements(getChartViewerA(), getTmfViewerA(), treeCheckedElements, true);
-                    // treeViewerB
-                    treeWholeElements = ((MultipleEventDensityViewer) getChartViewerB()).getWholeCheckedItems();
-                    treeCheckedElements = new ArrayList<>();
-
-                    for (ITmfTreeViewerEntry trace : treeWholeElements) {
-                        if (fTraceListB.contains(trace.getName())) {
-                            treeCheckedElements.add(trace);
-                            treeCheckedElements.addAll(trace.getChildren());
-                        }
-                    }
-
-                    setCheckedElements(getChartViewerB(), getTmfViewerB(), treeCheckedElements, true);
-
-                    TmfComparisonFilteringUpdatedSignal rangUpdateSignal = new TmfComparisonFilteringUpdatedSignal(this, fStartTimeA, fEndTimeA, fStartTimeB, fEndTimeB, fStatistic, fTraceListA, fTraceListB);
-                    TmfSignalManager.dispatchSignal(rangUpdateSignal);
-                    buildDifferentialFlameGraph();
-                }
-            }
-        });
+        addTextFocusListener(text);
 
         ExpandItem item0 = new ExpandItem(bar, SWT.NONE, 0);
         item0.setText(Messages.multipleDensityViewQueryExpandable);
@@ -643,6 +358,367 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
         item0.setExpanded(false);
 
         bar.setSpacing(5);
+        createExpandBarListener(bar, queryText, sashForm);
+
+        super.createPartControl(sashForm);
+        sashForm.setWeights(DEFAULT_WEIGHTS_HideQuery);
+
+        ITmfTrace activetrace = TmfTraceManager.getInstance().getActiveTrace();
+        if (activetrace != null) {
+            buildDifferentialFlameGraph();
+        }
+    }
+
+    private static void createGroups(Group group, GridLayout gridLayoutG, GridData gridDataG, SashForm density, GridData data, SashForm timeInput, boolean isA) {
+        if (isA) {
+            group.setText(Messages.multipleDensityViewGroupA);
+        } else {
+            group.setText(Messages.multipleDensityViewGroupB);
+        }
+        gridLayoutG.numColumns = 1;
+        group.setLayout(gridLayoutG);
+        gridDataG.horizontalSpan = 1;
+        group.setLayoutData(gridDataG);
+        data.heightHint = 200;
+        density.setLayoutData(data);
+        timeInput.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    }
+
+    private void createResetButtonA(Button resetButton) {
+        resetButton.setText("Reset Time IntervalA"); //$NON-NLS-1$
+        resetButton.addListener(SWT.Selection, event -> {
+            ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
+            if (trace != null) {
+                /*
+                 * Resets tree viewer checked items. All items should be
+                 * checked.
+                 */
+                List<ITmfTreeViewerEntry> treeCheckedElements = ((MultipleEventDensityViewer) getChartViewerA()).getWholeCheckedItems();
+                setCheckedElements(getChartViewerA(), getTmfViewerA(), treeCheckedElements, false);
+
+                // Reset start time and end time and relating objects
+                fStartTimeA = trace.getStartTime();
+                fEndTimeA = trace.getEndTime();
+                ftextAFrom.setText(fStartTimeA.toString(fFormat));
+                ftextATo.setText(fEndTimeA.toString(fFormat));
+                if (ftextQuery != null) {
+                    ftextQuery.setText(buildComparisonQuery());
+                }
+
+                // Dispatch signal to rebuild differential flame graph
+                TmfSignalManager.dispatchSignal(new TmfSelectionRangeUpdatedSignal(getChartViewerA(), fStartTimeA, fEndTimeA, getTrace()));
+
+            }
+        });
+    }
+
+    private void createResetButtonB(Button resetButton) {
+        resetButton.setText("Reset Time IntervalB"); //$NON-NLS-1$
+        resetButton.addListener(SWT.Selection, event -> {
+            ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
+            if (trace != null) {
+                /*
+                 * Resets tree viewer checked items. All items should be checked
+                 */
+                List<ITmfTreeViewerEntry> treeCheckedElements = ((MultipleEventDensityViewer) getChartViewerB()).getWholeCheckedItems();
+                setCheckedElements(getChartViewerB(), getTmfViewerB(), treeCheckedElements, false);
+
+                // Reset start time and end time and relating objects
+                fStartTimeB = trace.getStartTime();
+                fEndTimeB = trace.getEndTime();
+                ftextBFrom.setText(fStartTimeB.toString(fFormat));
+                ftextBTo.setText(fEndTimeB.toString(fFormat));
+                if (ftextQuery != null) {
+                    ftextQuery.setText(buildComparisonQuery());
+                }
+
+                // Dispatch signal to rebuild differential flame graph
+                TmfSignalManager.dispatchSignal(new TmfSelectionRangeUpdatedSignal(getChartViewerB(), fStartTimeB, fEndTimeB, getTrace()));
+
+            }
+        });
+    }
+
+    private void createLabelFromA(java.awt.Frame frameFrom, java.awt.Panel panelFrom, JFormattedTextField textFrom) {
+        frameFrom.add(panelFrom);
+        JLabel labelAFrom = new JLabel();
+        labelAFrom.setText(Messages.multipleDensityViewFrom);
+
+        textFrom.addFocusListener(new java.awt.event.FocusListener() {
+            private String oldVal = ""; //$NON-NLS-1$
+
+            @Override
+            public void focusGained(java.awt.event.@Nullable FocusEvent e) {
+                String aFrom = textFrom.getText();
+                if (aFrom != null) {
+                    oldVal = aFrom;
+                }
+            }
+
+            @Override
+            public void focusLost(java.awt.event.@Nullable FocusEvent e) {
+                if (!oldVal.equals(textFrom.getText())) {
+                    long newTime = 0;
+                    try {
+                        newTime = fFormat.parseValue(textFrom.getText());
+                        ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
+                        fStartTimeA = fromTime;
+                        textFrom.setText(fStartTimeA.toString(fFormat));
+
+                        updateSelectedRange();
+                        getChartViewerA().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
+
+                    } catch (ParseException e1) {
+                        textFrom.setText(oldVal);
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        });
+        textFrom.setText(fStartTimeA.toString(fFormat));
+        panelFrom.add(labelAFrom);
+        panelFrom.add(textFrom);
+        ftextAFrom = textFrom;
+
+    }
+
+    private void createLabelFromB(java.awt.Frame frameFrom, java.awt.Panel panelFrom, JFormattedTextField textFrom) {
+        frameFrom.add(panelFrom);
+        JLabel labelBFrom = new JLabel();
+        labelBFrom.setText(Messages.multipleDensityViewFrom);
+        textFrom.addFocusListener(new java.awt.event.FocusListener() {
+            private String oldVal = ""; //$NON-NLS-1$
+
+            @Override
+            public void focusGained(java.awt.event.@Nullable FocusEvent e) {
+                String bFrom = textFrom.getText();
+                if (bFrom != null) {
+                    oldVal = bFrom;
+                }
+            }
+
+            @Override
+            public void focusLost(java.awt.event.@Nullable FocusEvent e) {
+                if (!oldVal.equals(textFrom.getText())) {
+                    long newTime = 0;
+                    try {
+                        newTime = fFormat.parseValue(textFrom.getText());
+                        ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
+                        fStartTimeB = fromTime;
+                        textFrom.setText(fStartTimeB.toString(fFormat));
+
+                        updateSelectedRange();
+                        getChartViewerB().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeB, fEndTimeB, getTrace()));
+
+                    } catch (ParseException e1) {
+                        textFrom.setText(oldVal);
+                        e1.printStackTrace();
+                    }
+
+                }
+            }
+        });
+
+        textFrom.setText(fStartTimeB.toString(fFormat));
+        panelFrom.add(labelBFrom);
+        panelFrom.add(textFrom);
+        ftextBFrom = textFrom;
+    }
+
+    private void createLabelToA(java.awt.Frame frameTo, java.awt.Panel panelTo, JFormattedTextField textTo) {
+        frameTo.add(panelTo);
+        JLabel labelATo = new JLabel();
+        labelATo.setText(Messages.multipleDensityViewTo);
+        textTo.addFocusListener(new java.awt.event.FocusListener() {
+            private String oldVal = ""; //$NON-NLS-1$
+
+            @Override
+            public void focusGained(java.awt.event.@Nullable FocusEvent e) {
+                String aTo = textTo.getText();
+                if (aTo != null) {
+                    oldVal = aTo;
+                }
+            }
+
+            @Override
+            public void focusLost(java.awt.event.@Nullable FocusEvent e) {
+                if (!oldVal.equals(textTo.getText())) {
+                    long newTime = 0;
+                    try {
+                        newTime = fFormat.parseValue(textTo.getText());
+                        ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
+                        fEndTimeA = fromTime;
+                        textTo.setText(fEndTimeA.toString(fFormat));
+
+                        updateSelectedRange();
+                        getChartViewerA().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
+
+                    } catch (ParseException e1) {
+                        textTo.setText(oldVal);
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        });
+        textTo.setText(fEndTimeA.toString(fFormat));
+        panelTo.add(labelATo);
+        panelTo.add(textTo);
+        ftextATo = textTo;
+    }
+
+    private void createLabelToB(java.awt.Frame frameTo, java.awt.Panel panelTo, JFormattedTextField textTo) {
+        frameTo.add(panelTo);
+        JLabel labelBTo = new JLabel();
+        labelBTo.setText(Messages.multipleDensityViewTo);
+        textTo.addFocusListener(new java.awt.event.FocusListener() {
+
+            public @Nullable String oldVal = null;
+
+            @Override
+            public void focusGained(java.awt.event.@Nullable FocusEvent e) {
+                oldVal = textTo.getText();
+            }
+
+            @Override
+            public void focusLost(java.awt.event.@Nullable FocusEvent e) {
+                if (oldVal != null && !oldVal.equals(textTo.getText())) {
+                    long newTime = 0;
+                    try {
+                        newTime = fFormat.parseValue(textTo.getText());
+                        ITmfTimestamp fromTime = TmfTimestamp.fromNanos(newTime);
+                        fEndTimeB = fromTime;
+                        textTo.setText(fEndTimeB.toString(fFormat));
+                        updateSelectedRange();
+                        getChartViewerB().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
+
+                    } catch (ParseException e1) {
+                        textTo.setText(oldVal);
+                        e1.printStackTrace();
+                    }
+                }
+            }
+
+        });
+        textTo.setText(fEndTimeB.toString(fFormat));
+        panelTo.add(labelBTo);
+        panelTo.add(textTo);
+        ftextBTo = textTo;
+    }
+
+    private void createControlPaintListenerA(TmfXYChartViewer chartViewer) {
+        chartViewer.getControl().addPaintListener(new PaintListener() {
+            @Override
+            public void paintControl(@Nullable PaintEvent e) {
+                /*
+                 * Sashes in a SashForm are being created on layout so we need
+                 * to add the drag listener here.
+                 */
+                Listener sashDragListener = fSashDragListener;
+                if (sashDragListener == null) {
+                    for (Control control : getSashFormLeftChildA().getChildren()) {
+                        if (control instanceof Sash) {
+                            sashDragListener = event -> TmfSignalManager.dispatchSignal(new TmfTimeViewAlignmentSignal(getSashFormLeftChildA(), getTimeViewAlignmentInfo(chartViewer, getSashFormLeftChildA())));
+                            fSashDragListener = sashDragListener;
+                            control.removePaintListener(this);
+                            control.addListener(SWT.Selection, sashDragListener);
+                            // There should be only one sash
+                            break;
+                        }
+
+                    }
+                }
+            }
+        });
+    }
+
+    private void createControlPaintListenerB(TmfXYChartViewer chartViewer) {
+        chartViewer.getControl().addPaintListener(new PaintListener() {
+            @Override
+            public void paintControl(@Nullable PaintEvent e) {
+                /*
+                 * Sashes in a SashForm are being created on layout so we need
+                 * to add the drag listener here.
+                 */
+                Listener sashDragListener = fSashDragListener;
+                if (sashDragListener == null) {
+                    for (Control control : getSashFormLeftChildA().getChildren()) {
+                        if (control instanceof Sash) {
+                            sashDragListener = event -> TmfSignalManager.dispatchSignal(new TmfTimeViewAlignmentSignal(getSashFormLeftChildA(), getTimeViewAlignmentInfo(chartViewer, getSashFormLeftChildA())));
+                            fSashDragListener = sashDragListener;
+                            control.removePaintListener(this);
+                            control.addListener(SWT.Selection, sashDragListener);
+                            // There should be only one sash
+                            break;
+                        }
+
+                    }
+                }
+            }
+        });
+    }
+
+    private void addTextFocusListener(Text text) {
+        text.addFocusListener(new FocusListener() {
+
+            @Override
+            public void focusGained(@Nullable FocusEvent e) {
+                // Does nothing
+            }
+
+            @Override
+            public void focusLost(@Nullable FocusEvent e) {
+                if (ftextQuery != null) {
+                    String query = ftextQuery.getText();
+                    if (query == null) {
+                        return;
+                    }
+                    boolean parsed = parseComparisonQuery(query);
+                    if (parsed) {
+                        /// Updating blue lines in density chats
+                        getChartViewerA().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeA, fEndTimeA, getTrace()));
+                        getChartViewerB().selectionRangeUpdated(new TmfSelectionRangeUpdatedSignal(this, fStartTimeB, fEndTimeB, getTrace()));
+
+                        // treeViewerA
+                        List<ITmfTreeViewerEntry> treeWholeElements = ((MultipleEventDensityViewer) getChartViewerA()).getWholeCheckedItems();
+                        List<ITmfTreeViewerEntry> treeCheckedElements = updateCheckedElements(treeWholeElements, true);
+
+                        setCheckedElements(getChartViewerA(), getTmfViewerA(), treeCheckedElements, true);
+                        // treeViewerB
+                        treeWholeElements = ((MultipleEventDensityViewer) getChartViewerB()).getWholeCheckedItems();
+                        treeCheckedElements = updateCheckedElements(treeWholeElements, false);
+
+                        setCheckedElements(getChartViewerB(), getTmfViewerB(), treeCheckedElements, true);
+
+                        TmfComparisonFilteringUpdatedSignal rangUpdateSignal = new TmfComparisonFilteringUpdatedSignal(this, fStartTimeA, fEndTimeA, fStartTimeB, fEndTimeB, fStatistic, fTraceListA, fTraceListB);
+                        TmfSignalManager.dispatchSignal(rangUpdateSignal);
+                        buildDifferentialFlameGraph();
+                    }
+                }
+            }
+        });
+    }
+
+    private List<ITmfTreeViewerEntry> updateCheckedElements(List<ITmfTreeViewerEntry> treeWholeElements, boolean isGroupA) {
+        List<ITmfTreeViewerEntry> treeCheckedElements = new ArrayList<>();
+        if (isGroupA) {
+            for (ITmfTreeViewerEntry trace : treeWholeElements) {
+                if (fTraceListA.contains(trace.getName())) {
+                    treeCheckedElements.add(trace);
+                    treeCheckedElements.addAll(trace.getChildren());
+                }
+            }
+        } else {
+            for (ITmfTreeViewerEntry trace : treeWholeElements) {
+                if (fTraceListB.contains(trace.getName())) {
+                    treeCheckedElements.add(trace);
+                    treeCheckedElements.addAll(trace.getChildren());
+                }
+            }
+        }
+        return treeCheckedElements;
+    }
+
+    private static void createExpandBarListener(ExpandBar bar, Composite queryText, SashForm sashForm) {
         bar.addExpandListener(new ExpandListener() {
 
             @Override
@@ -662,14 +738,6 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
                 });
             }
         });
-
-        super.createPartControl(sashForm);
-        sashForm.setWeights(DEFAULT_WEIGHTS_HideQuery);
-
-        ITmfTrace activetrace = TmfTraceManager.getInstance().getActiveTrace();
-        if (activetrace != null) {
-            buildDifferentialFlameGraph();
-        }
     }
 
     /**
@@ -1093,7 +1161,8 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
     }
 
     /*
-     * Constructs a query string based on the current state of selected traces and time ranges
+     * Constructs a query string based on the current state of selected traces
+     * and time ranges
      */
     private String buildComparisonQuery() {
         StringBuilder query = new StringBuilder();
