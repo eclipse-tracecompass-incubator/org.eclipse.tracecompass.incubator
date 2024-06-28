@@ -7,7 +7,7 @@ Bundle-Version: 0.1.0.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.eclipse.tracecompass.incubator.internal.jifa.core.Activator
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.tracecompass.common.core,
@@ -26,8 +26,17 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.jifa.core;x-friends:
  org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.model.modeInfo;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
  org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.parser;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
  org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.util;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
- org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.vo;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests"
+ org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.vo;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests",
+ org.eclipse.tracecompass.incubator.internal.jifa.core.jfr;x-friends:="org.eclipse.tracecompass.incubator.jifa.core.tests"
 Import-Package: com.google.common.cache,
  com.google.gson,
- com.google.gson.annotations
+ com.google.gson.annotations,
+ org.openjdk.jmc.common,
+ org.openjdk.jmc.common.item,
+ org.openjdk.jmc.common.unit,
+ org.openjdk.jmc.common.util,
+ org.openjdk.jmc.flightrecorder,
+ org.openjdk.jmc.flightrecorder.jdk,
+ org.openjdk.jmc.flightrecorder.parser,
+ org.openjdk.jmc.flightrecorder.util
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.jifa.core
