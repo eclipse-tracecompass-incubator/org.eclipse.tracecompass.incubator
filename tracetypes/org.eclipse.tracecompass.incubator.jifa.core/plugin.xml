@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.analysis.xml.core.files">
+      <xmlfile
+            file="src/org/eclipse/tracecompass/incubator/internal/jifa/core/gclog/xmlanalysis/gc_analysis.xml">
+      </xmlfile>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.jifa.gclog"
+            isDirectory="false"
+            name="Java GC Log"
+            trace_type="org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.GCTrace">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
+      <type
+            icon="ico/gc.png"
+            tracetype="org.eclipse.tracecompass.jifa.gclog">
+      </type>
+   </extension>
+
+</plugin>

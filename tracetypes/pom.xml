@@ -72,6 +72,9 @@
     <module>org.eclipse.tracecompass.incubator.system</module>
     <module>org.eclipse.tracecompass.incubator.system.core</module>
     <module>org.eclipse.tracecompass.incubator.system.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.jifa</module>
+    <module>org.eclipse.tracecompass.incubator.jifa.core</module>
+    <module>org.eclipse.tracecompass.incubator.jifa.core.tests</module>
     <!-- insert modules here -->
   </modules>
 
