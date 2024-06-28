@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.dpdk.core.lcore.analysis.DpdkLogicalCoreAnalysisModule"
+            id="org.eclipse.tracecompass.incubator.dpdk.lcore.analysis"
+            name="DPDK Logical Core Analysis">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace">
+         </tracetype>
+      </module>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.lcore.analysis.DpdkLogicalCoreDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.dpdk.lcore.dataprovider">
+      </dataProviderFactory>
+   </extension>
+
+</plugin>

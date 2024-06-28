@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.dpdk.lcore.view">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.dpdk.core.lcore.analysis.DpdkLogicalCoreAnalysisModule">
+         </analysisModuleClass>
+      </output>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="org.eclipse.tracecompass.incubator.internal.dpdk.ui.views.category"
+            name="%category.dpdk"
+            parentCategory="org.eclipse.linuxtools.tmf.ui.views.category">
+      </category>
+      <view
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.ui.lcore.LogicalCoreView"
+            id="org.eclipse.tracecompass.incubator.dpdk.lcore.view"
+            name="Logical Core View"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>
