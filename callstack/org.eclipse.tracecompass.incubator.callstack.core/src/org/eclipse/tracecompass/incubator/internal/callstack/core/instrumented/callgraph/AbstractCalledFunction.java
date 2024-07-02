@@ -181,5 +181,16 @@ abstract class AbstractCalledFunction implements ICalledFunction {
                 Objects.equals(fParent, other.getParent()) &&
                 Objects.equals(getSymbol(), other.getSymbol()));
     }
-
+    
+    private long getChildIntersection(TmfTimeRange chlInt) {
+        long intersection = 0;
+        for (TmfTimeRange childInterval:fChildrenIntervals ) {
+            TmfTimeRange intersect = chlInt.getIntersection(childInterval);
+            if (intersect!=null) {
+                intersection += (intersect.getEndTime().getValue())-(intersect.getStartTime().getValue());
+            }
+        }
+        return intersection;
+    }
 }
+
