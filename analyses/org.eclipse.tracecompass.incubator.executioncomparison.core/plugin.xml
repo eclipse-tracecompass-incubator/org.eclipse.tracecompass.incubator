@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension
+		point="org.eclipse.linuxtools.tmf.core.analysis">
+		<module
+			analysis_module="org.eclipse.tracecompass.incubator.internal.executioncomparison.core.DifferentialSeqCallGraphAnalysis"
+			applies_experiment="false"
+			automatic="false"
+			id="org.eclipse.tracecompass.incubator.executioncomparison.diffcallgraph"
+			name="Execution Comparison">
+			<tracetype
+				applies="true"
+				class="org.eclipse.tracecompass.tmf.core.trace.TmfTrace">
+			</tracetype>
+			<tracetype
+				applies="true"
+				class="org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment">
+			</tracetype>
+
+		</module>
+	</extension>
+</plugin>

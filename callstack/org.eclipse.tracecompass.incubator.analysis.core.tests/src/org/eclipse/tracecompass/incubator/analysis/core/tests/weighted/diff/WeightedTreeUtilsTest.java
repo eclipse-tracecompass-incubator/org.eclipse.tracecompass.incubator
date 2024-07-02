@@ -115,7 +115,7 @@ public class WeightedTreeUtilsTest {
     }
 
     /**
-     * Test the {@link WeightedTreeUtils#diffTrees(Collection, Collection)}
+     * Test the {@link WeightedTreeUtils#diffTrees(Collection, Collection, String)}
      * method with simple trees
      */
     @Test
@@ -126,11 +126,11 @@ public class WeightedTreeUtilsTest {
         assertNotNull(tree2);
 
         // Differentiate tree1 and tree2
-        Collection<DifferentialWeightedTree<Integer>> diffTrees = WeightedTreeUtils.diffTrees(tree1, tree2);
+        Collection<DifferentialWeightedTree<Integer>> diffTrees = WeightedTreeUtils.diffTrees(tree1, tree2, null);
         verifyDiffTrees12(diffTrees);
 
         // Reverse: Differentiate tree2 and tree1
-        diffTrees = WeightedTreeUtils.diffTrees(tree2, tree1);
+        diffTrees = WeightedTreeUtils.diffTrees(tree2, tree1, null);
         verifyDiffTrees21(diffTrees);
 
     }
