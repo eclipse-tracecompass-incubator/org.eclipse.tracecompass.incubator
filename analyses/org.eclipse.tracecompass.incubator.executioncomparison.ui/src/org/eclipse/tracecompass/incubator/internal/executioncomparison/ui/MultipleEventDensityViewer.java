@@ -55,6 +55,11 @@ public class MultipleEventDensityViewer extends EventDensityViewer {
         super(parent, settings);
     }
 
+    /*
+     * We override this method to avoid raising a signal for the second group of
+     * the MultipleEventDensityViewer, when a signal is raised from the first
+     * group.
+     */
     @Override
     @TmfSignalHandler
     public void selectionRangeUpdated(@Nullable TmfSelectionRangeUpdatedSignal signal) {
@@ -62,6 +67,10 @@ public class MultipleEventDensityViewer extends EventDensityViewer {
             return;
         }
 
+        /*
+         * Signal sent when changing the text boxes or changing the query from
+         * the ExecutionComparisonView. The trace context gets updated.
+         */
         if (!(signal.getSource() instanceof MultipleEventDensityViewer)) {
             final ITmfTrace trace = getTrace();
             if (trace != null) {
@@ -73,6 +82,10 @@ public class MultipleEventDensityViewer extends EventDensityViewer {
             }
             super.selectionRangeUpdated(signal);
         }
+        /*
+         * Signal being updated is itself, we set the selection range for the
+         * MultipleEventDensityViewer.
+         */
         if (signal.getSource() == this) {
             final ITmfTrace trace = getTrace();
             if (trace != null) {
