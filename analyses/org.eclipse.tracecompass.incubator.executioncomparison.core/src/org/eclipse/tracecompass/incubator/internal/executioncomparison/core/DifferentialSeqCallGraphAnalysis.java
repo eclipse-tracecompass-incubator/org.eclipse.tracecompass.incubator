@@ -140,7 +140,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
      *
      */
     public WeightedTreeSet<ICallStackSymbol, Object> mergeCallGraph(ITmfTimestamp start, ITmfTimestamp end, List<String> traceList) {
-        try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "DifferenentialSequenceCGA::MergeCallGraph")) { //$NON-NLS-1$
+        try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "DifferentialSequenceCGA::MergeCallGraph")) { //$NON-NLS-1$
             WeightedTreeSet<ICallStackSymbol, Object> newTreeSet = new WeightedTreeSet<>();
             String mainGroup = MERGE;
 
