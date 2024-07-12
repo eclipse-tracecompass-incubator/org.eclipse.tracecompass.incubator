@@ -12,23 +12,17 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * Experiment model for TSP
@@ -88,11 +82,8 @@ public final class Experiment implements Serializable {
      * @return the experiment model
      */
     public static Experiment from(TmfExperiment experiment, UUID expUUID) {
-        Iterator<UUID> iter = ExperimentManagerService.getTraceUUIDs(expUUID).iterator();
-        // Get all the leaf traces from experiment
-        @NonNull List<@NonNull ITmfTrace> children = new ArrayList<>(TmfTraceManager.getTraceSet(experiment));
-        Set<Trace> traces = Sets.newLinkedHashSet(Lists.transform(children,
-                t -> Trace.from(t, iter.next())));
+        List<UUID> traceUUIDs = ExperimentManagerService.getTraceUUIDs(expUUID);
+        Set<Trace> traces = new LinkedHashSet<>(Lists.transform(traceUUIDs, uuid -> Trace.from(TraceManagerService.getTraceResource(uuid), uuid)));
         return new Experiment(experiment.getName(),
                 expUUID,
                 experiment.getNbEvents(),
