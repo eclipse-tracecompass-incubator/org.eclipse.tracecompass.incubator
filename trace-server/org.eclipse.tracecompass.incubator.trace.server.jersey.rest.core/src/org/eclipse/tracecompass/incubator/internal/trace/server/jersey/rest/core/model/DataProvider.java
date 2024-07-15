@@ -51,4 +51,16 @@ public interface DataProvider {
      */
     @Schema(description = "Describes the output provider's features")
     String getDescription();
+
+    /**
+     * @return optional parent Id
+     */
+    @Schema(required = false, description = "Optional parent Id for grouping purposes for example of derived data providers.")
+    String getParentId();
+
+    /**
+     * @return the input configuration used to create this data provider.
+     */
+    @Schema(required = false, description = "Optional input configuration used to create this derived data provider.")
+    Configuration getConfiguration();
 }

@@ -21,6 +21,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.IDF;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.LICENSE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.LICENSE_URL;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.OCG;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.SERVER;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.STY;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TERMS;
@@ -52,6 +53,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
         @Tag(name = DT,  description = "Query data tree models (e.g. for statistics)."),
         @Tag(name = EXP, description = "Manage experiments on your server; an experiment represents a collection of traces, which can produce output models."),
         @Tag(name = IDF, description = "Retrieve information about the server and the system it is running on."),
+        @Tag(name = OCG, description = "Manage configuration source types and configurations for given outputs."),
         @Tag(name = STY, description = "Retrieve styles for different outputs."),
         @Tag(name = TGR, description = "Query Time Graph models."),
         @Tag(name = TRA, description = "Manage physical traces on your server."),
