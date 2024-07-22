@@ -47,6 +47,7 @@
     <module>org.eclipse.tracecompass.incubator.ros.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.ros2.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.eventfieldcount.doc.user</module>
+    <module>org.eclipse.tracecompass.incubator.executioncomparison.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.filters.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.scripting.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.otf2.doc.user</module>
