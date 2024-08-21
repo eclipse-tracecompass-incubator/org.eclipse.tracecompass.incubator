@@ -1,0 +1,25 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://org.eclipse.tracecompass/custom-execution-analysis.json",
+    "title": "Custom Execution Analysis",
+    "description": "Custom Execution Analysis schema",
+    "type": "object",
+    "properties": {  
+        "cpus": {
+            "description": "array of integer",
+            "type": "array",
+            "items": {    
+                "type": "number"  
+            }
+        },
+        "thread": {
+            "description": "Thread regular expression pattern",
+            "type": "string"
+        },
+        "label": {
+            "description": "Optional label text",
+            "type": "string"
+        }
+    },
+    "required": ["thread"]
+}

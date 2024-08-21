@@ -16,8 +16,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
@@ -49,6 +51,8 @@ import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
 import org.junit.After;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Basic test for the {@link ConfigurationManagerService}.
@@ -274,6 +278,30 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
         }
     }
 
+    /**
+     * @throws IOException
+     *          if an error occurred
+     */
+    @Test
+    public void testGetSchema() throws IOException {
+        try (Response response = getSchema()) {
+            assertEquals(200, response.getStatus());
+            if (response.getEntity() != null) {
+                InputStream inputStream = (InputStream) response.getEntity();
+
+                ByteArrayOutputStream result = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                for (int length; (length = inputStream.read(buffer)) != -1; ) {
+                    result.write(buffer, 0, length);
+                }
+                String schemaString = result.toString("UTF-8");
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.readTree(schemaString);
+                System.out.println(schemaString);
+            }
+        }
+    }
+
     private static @NonNull String getPath(String bundlePath) {
         assertNotNull(XML_CORE_TESTS);
         URL location = FileLocator.find(XML_CORE_TESTS, new Path(bundlePath), null);
@@ -378,4 +406,16 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
         assertEquals(EXPECTED_CONFIG_DESCRIPTION, config.getDescription());
         assertTrue(config.getParameters().isEmpty());
     }
+
+    private static Response getSchema() {
+        String typeId = XML_ANALYSIS_TYPE_ID;
+        WebTarget endpoint = getApplicationEndpoint()
+                .path(CONFIG_PATH)
+                .path(TYPES_PATH)
+                .path(typeId)
+                .path("schema");
+
+        return endpoint.request(MediaType.APPLICATION_OCTET_STREAM_TYPE).get();
+    }
+
 }

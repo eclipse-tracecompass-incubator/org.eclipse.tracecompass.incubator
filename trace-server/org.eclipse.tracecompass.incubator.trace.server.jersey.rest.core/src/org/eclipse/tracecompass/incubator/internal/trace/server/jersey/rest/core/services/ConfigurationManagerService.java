@@ -19,6 +19,10 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_UPDATE_DESC;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
@@ -31,15 +35,21 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSource;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceManager;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
+import org.osgi.framework.Bundle;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -97,6 +107,35 @@ public class ConfigurationManagerService {
             return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
         }
         return Response.ok(configurationSource.getConfigurationSourceType()).build();
+    }
+
+    /**
+     * GET a schema for a given configuration source type
+     *
+     * @param typeId
+     *            the configuration source type ID
+     *
+     * @return octect-stream of schema file content
+     */
+    @GET
+    @Path("/types/{typeId}/schema")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadSchema(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId) {
+        ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
+        if (configurationSource == null) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+        }
+        Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
+        IPath defaultPath = new org.eclipse.core.runtime.Path("schema/custom-execution-analysis.json");  //$NON-NLS-1$
+        URL url = FileLocator.find(bundle, defaultPath, null);
+        try {
+            File fileToDownload = new File(FileLocator.toFileURL(url).toURI());
+            ResponseBuilder response = Response.ok(fileToDownload);
+            response.header("Content-Disposition", "attachment;filename=" + fileToDownload.getName());  //$NON-NLS-1$//$NON-NLS-2$
+            return response.build();
+        } catch (URISyntaxException | IOException e) {
+            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
     }
 
     /**
