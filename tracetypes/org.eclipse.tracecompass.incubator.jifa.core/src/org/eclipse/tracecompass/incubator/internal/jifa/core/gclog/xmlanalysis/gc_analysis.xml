@@ -9,9 +9,11 @@
 		EPL-2.0 *************************************************************************** -->
 	<pattern version="1" id="system.gc.duration">
 		<head>
+			<traceType id="org.eclipse.tracecompass.jifa.gclog" />
 			<label value="GC Segments" />
 		</head>
 		<patternHandler>
+		
 			<action id="segment_create">
 				<segment>
 					<segType>
