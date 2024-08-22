@@ -34,7 +34,6 @@ import org.eclipse.tracecompass.analysis.profiling.core.callgraph.CallGraph;
 import org.eclipse.tracecompass.analysis.profiling.core.callgraph.ICallGraphProvider2;
 import org.eclipse.tracecompass.analysis.profiling.core.instrumented.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.ITree;
-import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTreeSet;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLog;
@@ -53,8 +52,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
-
-import com.google.common.collect.Iterables;
 
 /**
  * Builds a differential call graph using the differentialWeightedTreeSet from
@@ -92,6 +89,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
         // TODO: Make a way to register tracetype->callstack IDs.
         fCallStackAnalysisMap.put("org.eclipse.tracecompass.incubator.traceevent.core.trace", "org.eclipse.tracecompass.incubator.traceevent.analysis.callstack"); //$NON-NLS-1$ //$NON-NLS-2$
         fCallStackAnalysisMap.put("org.eclipse.linuxtools.lttng2.ust.tracetype", "org.eclipse.tracecompass.lttng2.ust.core.analysis.callstack"); //$NON-NLS-1$ //$NON-NLS-2$
+        fCallStackAnalysisMap.put("org.eclipse.tracecompass.incubator.uftrace.trace", "org.eclipse.tracecompass.incubator.uftrace.analysis.callstack"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     /**
@@ -103,6 +101,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
      */
     public DifferentialCallGraphProvider refreshDiffCG(@Nullable IProgressMonitor monitor) {
         try (ScopeLog sl = new ScopeLog(LOGGER, Level.CONFIG, "DifferentialSequenceCGA::refresh()")) { //$NON-NLS-1$
+
             Collection<WeightedTree<ICallStackSymbol>> originalTree = new ArrayList<>();
             Collection<WeightedTree<ICallStackSymbol>> diffTree = new ArrayList<>();
             WeightedTreeSet<ICallStackSymbol, Object> callGraphA = mergeCallGraph(fStartA, fEndA, getTraceListA());
@@ -120,8 +119,8 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
             Collection<DifferentialWeightedTree<ICallStackSymbol>> trees;
             trees = WeightedTreeUtils.diffTrees(originalTree, diffTree, fStatistic);
 
-            IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, AggregatedCallSite> instrumentedCallStackAnalysis = Iterables.get(fTraceCallGraphRegistry.values(), 0);
-            fDifferentialCallGraphProvider = new DifferentialCallGraphProvider(instrumentedCallStackAnalysis, trees);
+            Collection<ICallGraphProvider2> instrumentedCallStackAnalyses = fTraceCallGraphRegistry.values();
+            fDifferentialCallGraphProvider = new DifferentialCallGraphProvider(instrumentedCallStackAnalyses, trees);
             return fDifferentialCallGraphProvider;
         }
     }
@@ -220,7 +219,6 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
                 }
             }
         }
-
         refreshDiffCG(monitor);
         return fDifferentialCallGraphProvider;
 
