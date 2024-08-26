@@ -104,16 +104,41 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
 
             Collection<WeightedTree<ICallStackSymbol>> originalTree = new ArrayList<>();
             Collection<WeightedTree<ICallStackSymbol>> diffTree = new ArrayList<>();
-            WeightedTreeSet<ICallStackSymbol, Object> callGraphA = mergeCallGraph(fStartA, fEndA, getTraceListA());
+            List<String> tla = getTraceListA();
+            WeightedTreeSet<ICallStackSymbol, Object> callGraphA = mergeCallGraph(fStartA, fEndA, tla);
+
             Collection<@NonNull ?> processes = callGraphA.getTreesForNamed(MERGE);
             for (Object process : processes) {
-                originalTree.add((AggregatedCalledFunction) process);
+                String label = ""; //$NON-NLS-1$
+                for(String trace : tla) {
+                    ICallGraphProvider2 reg = fTraceCallGraphRegistry.get(trace);
+                    if (reg != null) {
+                        label = reg.toDisplayString((AggregatedCallSite) process);
+                        if (!label.startsWith("0x")) { //$NON-NLS-1$
+                            break;
+                        }
+                    }
+                }
+                AggregatedCalledFunction p = new ResolvedFunction(label, (AggregatedCalledFunction)process);
+                originalTree.add(p);
             }
 
-            WeightedTreeSet<ICallStackSymbol, Object> callGraphB = mergeCallGraph(fStartB, fEndB, getTraceListB());
+            List<String> tlb = getTraceListB();
+            WeightedTreeSet<ICallStackSymbol, Object> callGraphB = mergeCallGraph(fStartB, fEndB, tlb);
             processes = callGraphB.getTreesForNamed(MERGE);
             for (Object process : processes) {
-                diffTree.add((AggregatedCalledFunction) process);
+                String label = ""; //$NON-NLS-1$
+                for(String trace : tlb) {
+                    ICallGraphProvider2 reg = fTraceCallGraphRegistry.get(trace);
+                    if (reg != null) {
+                        label = reg.toDisplayString((AggregatedCallSite) process);
+                        if (!label.startsWith("0x")) { //$NON-NLS-1$
+                            break;
+                        }
+                    }
+                }
+                AggregatedCalledFunction p = new ResolvedFunction(label, (AggregatedCalledFunction)process);
+                diffTree.add(p);
             }
 
             Collection<DifferentialWeightedTree<ICallStackSymbol>> trees;
