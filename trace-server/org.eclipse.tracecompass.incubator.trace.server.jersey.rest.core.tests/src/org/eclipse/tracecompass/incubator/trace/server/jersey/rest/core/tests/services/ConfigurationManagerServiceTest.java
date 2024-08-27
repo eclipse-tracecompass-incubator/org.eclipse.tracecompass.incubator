@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Ericsson
+ * Copyright (c) 2023, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -49,6 +49,8 @@ import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
 import org.junit.After;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Basic test for the {@link ConfigurationManagerService}.
@@ -142,6 +144,14 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
         assertEquals(EXPECTED_DATA_TYPE, desc.getDataType());
         assertEquals(EXPECTED_PARAM_DESCRIPTION, desc.getDescription());
         assertTrue(desc.isRequired());
+
+        // Verify configuration source type with schema
+        Optional<TmfConfigurationSourceTypeStub> optional2 = configurations.stream().filter(config -> config.getId().equals("org.eclipse.tracecompass.tmf.core.config.testschemasourcetype")).findAny();
+        assertTrue(optional2.isPresent());
+        TmfConfigurationSourceTypeStub type2 = optional2.get();
+        JsonNode schema = type2.getSchema();
+        // Verify that schema exists
+        assertNotNull(schema);
     }
 
     /**
