@@ -87,7 +87,7 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
 
     private long fSize;
 
-    private final ISymbolProvider fSymbolProvider = new UfTraceSymbolProvider();
+    private final ISymbolProvider fSymbolProvider = new UfTraceSymbolProvider(this);
 
     private final @NonNull TidAspect fTidAspect = new TidAspect();
     private final @NonNull PidAspect fPidAspect = new PidAspect();
@@ -222,10 +222,10 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
                 } else if (name.endsWith(".map")) { //$NON-NLS-1$
                     MapParser create = MapParser.create(child);
                     if (create != null) {
-                        fMap.put(create.getSessionId(), create);
+                        getMap().put(create.getSessionId(), create);
                     }
                 } else if (name.endsWith(".sym")) { //$NON-NLS-1$
-                    fSyms.put(name.substring(0, name.length() - 4), SymParser.parse(child));
+                    getSyms().put(name.substring(0, name.length() - 4), SymParser.parse(child));
                 } else if (name.equals("task.txt")) { //$NON-NLS-1$
                     fTasks = new TaskParser(child);
                 } else if (name.equals("info")) { //$NON-NLS-1$
@@ -372,7 +372,7 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
             if (event.getContent().getValue() instanceof DatEvent) {
                 DatEvent datEvent = (DatEvent) event.getContent().getValue();
                 int tid = datEvent.getTid();
-                return fTasks.getPid(tid);
+                return getTasks().getPid(tid);
             }
             return null;
         }
@@ -390,7 +390,7 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
             if (event.getContent().getValue() instanceof DatEvent) {
                 DatEvent datEvent = (DatEvent) event.getContent().getValue();
                 int tid = datEvent.getTid();
-                return fTasks.getExecName(tid);
+                return getTasks().getExecName(tid);
             }
             return null;
         }
@@ -469,36 +469,57 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
     }
 
     /**
+     * @return the syms
+     */
+    private Map<String, SymParser> getSyms() {
+        return fSyms;
+    }
+
+    /**
+     * @return the map
+     */
+    private Map<Long, MapParser> getMap() {
+        return fMap;
+    }
+
+    /**
      * overly complicated, should clean up
      *
      * @author Matthew Khouzam
      *
      */
-    private class UfTraceSymbolProvider implements ISymbolProvider {
+    private static class UfTraceSymbolProvider implements ISymbolProvider {
+
+        private Uftrace fTrace;
+
+        public UfTraceSymbolProvider(Uftrace trace) {
+            fTrace = trace;
+        }
+
         @Override
         public TmfResolvedSymbol getSymbol(int tid, long timestamp, long address) {
-            String execName = fTasks.getExecName(tid);
+            String execName = fTrace.getTasks().getExecName(tid);
             if (execName == null) {
-                return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
+                return null;
             }
-            Long session = fTasks.getSessName(tid);
+            Long session = fTrace.getTasks().getSessName(tid);
             if (session == null) {
-                return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
+                return null;
             }
-            MapParser mapParser = fMap.get(session);
+            MapParser mapParser = fTrace.getMap().get(session);
             if (mapParser == null) {
-                return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
+                return null;
             }
             Entry<Long, MapEntry> key = mapParser.getData().floorEntry(address);
             if (key == null) {
-                return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
+                return null;
             }
             long offset = address - key.getValue().getAddrLow();
             String pathName = key.getValue().getPathName();
             String substring = pathName.substring(pathName.lastIndexOf(File.separator) + 1);
-            SymParser sym = fSyms.get(substring);
+            SymParser sym = fTrace.getSyms().get(substring);
             if (sym == null) {
-                return new TmfResolvedSymbol(address, pathName + ":0x" + Long.toHexString(address)); //$NON-NLS-1$
+                return null;
             }
             Entry<Long, Symbol> floorEntry = sym.getMap().floorEntry(offset);
             if (floorEntry != null) {
@@ -508,13 +529,13 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
                     return new TmfResolvedSymbol(address, name);
                 }
             }
-            return new TmfResolvedSymbol(address, "0x" + Long.toHexString(address)); //$NON-NLS-1$
+            return null;
         }
 
         /* needed for ISymbolProvider */
         @Override
         public @NonNull ITmfTrace getTrace() {
-            return (ITmfTrace) this;
+            return fTrace;
         }
 
         @Override
@@ -524,7 +545,7 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
 
         @Override
         public @Nullable TmfResolvedSymbol getSymbol(long address) {
-            return getSymbol(Iterables.getFirst(fTasks.getTids(), -1), 0, address);
+            return getSymbol(Iterables.getFirst(fTrace.getTasks().getTids(), -1), 0, address);
         }
 
     }
