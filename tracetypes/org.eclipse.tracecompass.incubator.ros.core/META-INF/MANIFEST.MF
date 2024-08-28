@@ -15,7 +15,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.tracecompass.lttng2.ust.core,
  org.eclipse.tracecompass.tmf.ctf.core,
  org.eclipse.tracecompass.ctf.core,
- org.eclipse.tracecompass.tmf.ui,
  org.eclipse.tracecompass.statesystem.core,
  org.eclipse.tracecompass.analysis.os.linux.core,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
