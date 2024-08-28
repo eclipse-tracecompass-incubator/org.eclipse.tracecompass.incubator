@@ -20,5 +20,4 @@ Export-Package: org.eclipse.tracecompass.incubator.filters.core.tests,
  org.eclipse.tracecompass.incubator.filters.core.tests.server,
  org.eclipse.tracecompass.incubator.filters.core.tests.stubs
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.lsp.core.tests
-Import-Package: org.antlr.runtime,
- org.eclipse.tracecompass.incubator.internal.filters.ui.lspFilterTextbox
+Import-Package: org.antlr.runtime
