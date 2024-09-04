@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.profiling.core.callgraph.ICallGraphProvider2;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.ITree;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
@@ -172,7 +173,7 @@ public final class WeightedTreeUtils {
      *         set, or <code>null</code> if the 2 treesets have no elements in
      *         common
      */
-    public static <@NonNull N> @Nullable DifferentialWeightedTreeProvider<N> diffTreeSets(IWeightedTreeProvider<N, ?, WeightedTree<N>> provider,
+    public static <@NonNull N> @Nullable DifferentialWeightedTreeProvider<N> diffTreeSets(Collection<ICallGraphProvider2> provider,
             IWeightedTreeSet<N, @NonNull ?, WeightedTree<N>> first,
             IWeightedTreeSet<N, @NonNull ?, WeightedTree<N>> second) {
         Collection<Pair<@NonNull ?, @NonNull ?>> pairedElements = pairElementsFromTrees(first, second);
