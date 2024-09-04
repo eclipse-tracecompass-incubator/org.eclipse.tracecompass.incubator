@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.tracecompass.incubator.rcp"
       label="%featureName"
-      version="0.10.0.qualifier"
+      version="0.11.0.qualifier"
       provider-name="%featureProvider"
       plugin="org.eclipse.tracecompass.incubator.rcp.branding"
       license-feature="org.eclipse.license"
