@@ -19,6 +19,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_UPDATE_DESC;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
@@ -34,12 +35,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.ConfigurationQueryParameters;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSource;
+import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceManager;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -132,6 +136,7 @@ public class ConfigurationManagerService {
      *            the query parameters
      * @return status and collection of configuration descriptor, if successful
      */
+    @SuppressWarnings("null")
     @POST
     @Path("/types/{typeId}/configs")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -145,8 +150,8 @@ public class ConfigurationManagerService {
     public Response postConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
             @RequestBody(description = CFG_CREATE_DESC + " " + CFG_KEYS_DESC, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + CFG_PATH_EX +
-                            "}}"), schema = @Schema(implementation = ConfigurationQueryParameters.class))
-            }, required = true) QueryParameters queryParameters) {
+                            "}}"), schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters.class))
+            }, required = true) ConfigurationQueryParameters queryParameters) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
             return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
@@ -155,9 +160,15 @@ public class ConfigurationManagerService {
             return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
         }
 
-        @SuppressWarnings("null")
-        @NonNull Map<@NonNull String, @NonNull Object> params = queryParameters.getParameters();
-
+        @NonNull Map<@NonNull String, @NonNull Object> params = new HashMap<>();
+        if (configurationSource.getConfigurationSourceType().getSchemaFile() != null) {
+            // Pass JSON object as json string
+            params.put(TmfConfiguration.JSON_STRING_KEY, queryParameters.getParameters().toString());
+        } else {
+            // Convert it to a Map<String, Object>
+            ObjectMapper mapper = new ObjectMapper();
+            params = mapper.convertValue(queryParameters.getParameters(), new TypeReference<Map<String,Object>>(){});
+        }
         try {
             ITmfConfiguration config = configurationSource.create(params);
             return Response.ok(config).build();
@@ -219,12 +230,13 @@ public class ConfigurationManagerService {
             @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to update configuration instance", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @SuppressWarnings("null")
     public Response putConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
             @Parameter(description = CFG_CONFIG_ID) @PathParam("configId") String configId,
             @RequestBody(description = CFG_UPDATE_DESC + " " + CFG_KEYS_DESC, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + CFG_PATH_EX +
-                            "}}"), schema = @Schema(implementation = ConfigurationQueryParameters.class))
-            }, required = true) QueryParameters queryParameters) {
+                            "}}"), schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters.class))
+            }, required = true) ConfigurationQueryParameters queryParameters) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
             return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
@@ -237,8 +249,15 @@ public class ConfigurationManagerService {
             return Response.status(Status.NOT_FOUND).entity("Configuration instance doesn't exist for type " + typeId).build(); //$NON-NLS-1$
         }
 
-        @SuppressWarnings("null")
-        @NonNull Map<@NonNull String, @NonNull Object> params = queryParameters.getParameters();
+        @NonNull Map<@NonNull String, @NonNull Object> params = new HashMap<>();
+        if (configurationSource.getConfigurationSourceType().getSchemaFile() != null) {
+            // Pass JSON object as json string
+            params.put(TmfConfiguration.JSON_STRING_KEY, queryParameters.getParameters().toString());
+        } else {
+            // Convert it to a Map<String, Object>
+            ObjectMapper mapper = new ObjectMapper();
+            params = mapper.convertValue(queryParameters.getParameters(), new TypeReference<Map<String,Object>>(){});
+        }
         try {
             ITmfConfiguration config = configurationSource.update(configId, params);
             return Response.ok(config).build();

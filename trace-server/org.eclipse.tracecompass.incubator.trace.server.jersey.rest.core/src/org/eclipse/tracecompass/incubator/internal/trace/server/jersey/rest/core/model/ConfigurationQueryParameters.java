@@ -11,8 +11,6 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNull;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,9 +21,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public interface ConfigurationQueryParameters {
 
     /**
-     * @return The query parameter map.
+     * @return The query parameters.
      */
     @NonNull
-    @Schema(required = true, description = "Parameters as specified in corresponding ConfigurationTypeDescriptor. Use key `path` for file URI string values.")
-    Map<String, Object> getParameters();
+    @Schema(required = true, description = "Parameters as JSON object as specified in the schema of the corresponding ConfigurationTypeDescriptor or as a Map<String, Object>. Use key `path` for file URI string values.")
+    Object getParameters();
 }
