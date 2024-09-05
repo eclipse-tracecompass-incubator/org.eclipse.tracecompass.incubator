@@ -138,7 +138,7 @@ public class TraceEventTrace extends JsonTrace {
             goToCorrectStart(rafile);
             int lineCount = 0;
             int matches = 0;
-            String line = readNextEventString(() -> rafile.read());
+            String line = readNextEventString(rafile::read);
             while ((line != null) && (lineCount++ < MAX_LINES)) {
                 try {
                     TraceEventField field = TraceEventField.parseJson(line);
@@ -150,10 +150,10 @@ public class TraceEventTrace extends JsonTrace {
                 }
 
                 confidence = MAX_CONFIDENCE * matches / lineCount;
-                line = readNextEventString(() -> rafile.read());
+                line = readNextEventString(rafile::read);
             }
             if (matches == 0) {
-                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Most assuredly NOT a Trace-Event trace"); //$NON-NLS-1$
+                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "No Trace Event events found in the first " + lineCount + " lines. File appears to still be a JSON formatted file though."); //$NON-NLS-1$ //$NON-NLS-2$
             }
         } catch (IOException e) {
             Activator.getInstance().logError("Error validating file: " + path, e); //$NON-NLS-1$
