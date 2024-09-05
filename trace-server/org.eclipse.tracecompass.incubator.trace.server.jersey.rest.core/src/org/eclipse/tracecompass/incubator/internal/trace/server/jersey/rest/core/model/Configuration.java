@@ -50,6 +50,9 @@ public interface Configuration {
      * @return parameters to return. Can be used to show
      *         more details to users of the configuration instance
      */
-    @Schema(description = "Optional informational parameters to return. Can be used to show more details to users of the configuration instance.")
+    @Schema(description = "Optional parameters representing the configuration parameters used to create this configuration. This is intended to be used instead of getJsonParameters() when not using a JSON schema in the configuration source type.")
     Map<String, Object> getParameters();
+
+    @Schema(description = "Optional JSON string representing the configuration parameters used to create this configuration. This is intended to be used instead of getParameters() when using a JSON schema in the configuration source type.")
+    String getJsonString();
 }
