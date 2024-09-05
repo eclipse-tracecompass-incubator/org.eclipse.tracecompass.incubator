@@ -20,4 +20,16 @@
             trace_type="org.eclipse.tracecompass.incubator.rocm.core.ctfplugin.trace.RocmCtfPluginTrace">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.rocm.core.analysis.RocmCallStackAnalysis"
+            id="org.eclipse.tracecompass.incubator.rocm.core.stateprovider.atomic"
+            name="ROCm Analysis">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.rocm.core.ctfplugin.trace.RocmCtfPluginTrace">
+         </tracetype>
+      </module>
+   </extension>
 </plugin>
