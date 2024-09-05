@@ -28,9 +28,14 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSource;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
+import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
 import org.osgi.framework.Bundle;
+
+import com.google.common.collect.ImmutableList;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Test class
@@ -42,6 +47,12 @@ public class TestSchemaConfigurationSource implements ITmfConfigurationSource {
     private static final @NonNull String TEST_ANALYSIS_TYPE_ID = "org.eclipse.tracecompass.tmf.core.config.testschemasourcetype"; //$NON-NLS-1$
     private static final @NonNull String NAME = nullToEmptyString("Test Schema Type"); //$NON-NLS-1$
     private static final @NonNull String DESCRIPTION = nullToEmptyString("Test Type with schema"); //$NON-NLS-1$
+
+    private static final @NonNull String TEST_CONFIG_ID = "My Config Id"; //$NON-NLS-1$
+    private static final @NonNull String TEST_CONFIG_NAME = "My Config Name"; //$NON-NLS-1$
+    private static final @NonNull String TEST_CONFIG_DESCRIPTION = "My Config Description"; //$NON-NLS-1$
+
+    private ITmfConfiguration fConfiguration;
 
     static {
         Bundle bundle = Platform.getBundle("org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests");
@@ -74,7 +85,16 @@ public class TestSchemaConfigurationSource implements ITmfConfigurationSource {
 
     @Override
     public @NonNull ITmfConfiguration create(@NonNull Map<@NonNull String, @NonNull Object> parameters) throws TmfConfigurationException {
-        throw new TmfConfigurationException("Not implemented yet"); //$NON-NLS-1$
+        TmfConfiguration.Builder builder = new TmfConfiguration.Builder();
+        ITmfConfiguration configuration = builder.setId(TEST_CONFIG_ID)
+                .setSourceTypeId(TEST_ANALYSIS_TYPE_ID)
+                .setDescription(TEST_CONFIG_DESCRIPTION) // should be taken from json string
+                .setName(TEST_CONFIG_NAME) // should be taken from json string
+                .setParameters(parameters)
+                .build();
+        fConfiguration = configuration;
+        return configuration;
+
     }
 
     @Override
@@ -84,25 +104,100 @@ public class TestSchemaConfigurationSource implements ITmfConfigurationSource {
 
     @Override
     public @Nullable ITmfConfiguration get(@NonNull String id) {
-        return null;
+        return fConfiguration;
     }
 
     @Override
     public @Nullable ITmfConfiguration remove(@NonNull String id) {
-        return null;
+        ITmfConfiguration configuration = fConfiguration;
+        fConfiguration = null;
+        return configuration;
     }
 
     @Override
     public boolean contains(@NonNull String id) {
-        return false;
+        ITmfConfiguration configuration = fConfiguration;
+        return configuration != null;
     }
 
     @Override
     public @NonNull List<@NonNull ITmfConfiguration> getConfigurations() {
-        return Collections.emptyList();
+        ITmfConfiguration configuration = fConfiguration;
+        if (configuration == null) {
+            return Collections.emptyList();
+        }
+        return ImmutableList.of(configuration);
     }
 
     @Override
     public void dispose() {
     }
+
+    /**
+     * Class to deserialize json string
+     */
+    public class Parameters {
+        @Expose
+        @SerializedName(value = "label")
+        private String fLabel;
+        @Expose
+        @SerializedName(value = "thread")
+        private String fThread;
+        @Expose
+        @SerializedName(value = "phone")
+        private String fPhone;
+        @Expose
+        @SerializedName(value = "cpus")
+        private List<Integer> fCpus;
+
+        /**
+         * Default constructor for GSON
+         */
+        public Parameters() {
+            fLabel = ""; //$NON-NLS-1$
+            fThread = ""; //$NON-NLS-1$
+            fPhone = ""; //$NON-NLS-1$
+            fCpus = Collections.emptyList(); //$NON-NLS-1$
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            return builder.append("[label=").append(fLabel)
+                   .append(", thread=").append(fThread)
+                   .append(", phone=").append("phone")
+                   .append(", fCpus=").append(fCpus)
+                   .append("]")
+                   .toString();
+        }
+
+        /**
+         * @return list of cpus
+         */
+        public List<Integer> getCpus() {
+            return fCpus;
+        }
+
+        /**
+         * @return phone number string
+         */
+        public String getPhone() {
+            return fPhone;
+        }
+
+        /**
+         * @return label
+         */
+        public String getLabel() {
+            return fLabel;
+        }
+
+        /**
+         * @return thread name
+         */
+        public String getThread() {
+            return fThread;
+        }
+    }
+
 }
