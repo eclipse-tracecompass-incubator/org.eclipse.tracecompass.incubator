@@ -11,6 +11,7 @@
 package org.eclipse.tracecompass.incubator.rocm.core.exatracer.trace;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -75,12 +76,19 @@ public class RocmExatracerTrace extends RocmTrace implements IGpuTrace {
     public @Nullable IStatus validate(@Nullable IProject project, @Nullable String path) {
         IStatus status = super.validate(project, path);
         if (status instanceof CtfTraceValidationStatus) {
+            Collection<String> eventNames = ((CtfTraceValidationStatus) status).getEventNames();
+            /**
+             * Make sure the trace contains an event from either HSA or HIP provider
+             */
+            if (eventNames.stream().noneMatch(event -> event.startsWith(RocmExatracerTraceEventLayout.HSA)) &&
+                    eventNames.stream().noneMatch(event -> event.startsWith(RocmExatracerTraceEventLayout.HIP))) {
+                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "This trace was not recognized as a ROCm trace."); //$NON-NLS-1$
+            }
             Map<String, String> environment = ((CtfTraceValidationStatus) status).getEnvironment();
-            /* Make sure the domain is "kernel" in the trace's env vars */
             String domain = environment.get("tracer_name"); //$NON-NLS-1$
             if (domain == null || !domain.equals("\"lttng-ust\"")) { //$NON-NLS-1$
                 return new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-                        "This trace was not recognized as a ROCm trace. You can update your rocprofiler version or you can change manually the tracer name to \"rocprof\" in the metadata file to force the validation."); //$NON-NLS-1$
+                        "This trace was not recognized as a ROCm trace."); //$NON-NLS-1$
             }
             return new TraceValidationStatus(CONFIDENCE, Activator.PLUGIN_ID);
         }
