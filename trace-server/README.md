@@ -13,7 +13,7 @@
 
 ## Compiling manually
 
-To build the project manually follow the instructions in [BUILDING](#compiling-manually).
+To build the project manually follow the instructions in [BUILDING](../BUILDING).
 
 The resulting trace server executables will be in the
 `trace-server/org.eclipse.tracecompass.incubator.trace.server.product/target/products`.
