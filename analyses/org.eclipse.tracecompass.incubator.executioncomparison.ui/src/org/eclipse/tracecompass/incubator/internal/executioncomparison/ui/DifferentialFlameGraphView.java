@@ -246,9 +246,11 @@ public class DifferentialFlameGraphView extends TmfView {
     private static void handleDoubleClick(TimeGraphViewer timeGraphViewer) {
         TimeGraphControl timeGraphControl = timeGraphViewer.getTimeGraphControl();
         ISelection selection = timeGraphControl.getSelection();
-        if (selection instanceof IStructuredSelection structuredSelection) {
+        if (selection instanceof IStructuredSelection) {
+            IStructuredSelection structuredSelection = (IStructuredSelection) selection;
             for (Object object : (structuredSelection).toList()) {
-                if (object instanceof TimeEvent event) {
+                if (object instanceof TimeEvent) {
+                    TimeEvent event = (TimeEvent) object;
                     long startTime = event.getTime();
                     long endTime = startTime + event.getDuration();
                     timeGraphViewer.setStartFinishTime(startTime, endTime);
@@ -260,8 +262,8 @@ public class DifferentialFlameGraphView extends TmfView {
 
     private static @Nullable ITmfTrace getCurrentTrace(@Nullable IEditorPart editor) {
         ITmfTrace trace = null;
-        if (editor instanceof ITmfTraceEditor tmfTraceEditor) {
-            trace = tmfTraceEditor.getTrace();
+        if (editor instanceof ITmfTraceEditor) {
+            trace = ((ITmfTraceEditor) editor).getTrace();
         } else {
             // Get the active trace, the editor might be opened on a script
             trace = TmfTraceManager.getInstance().getActiveTrace();
@@ -322,8 +324,8 @@ public class DifferentialFlameGraphView extends TmfView {
         Iterable<ICallGraphProvider2> modules = TmfTraceUtils.getAnalysisModulesOfClass(trace, ICallGraphProvider2.class);
         return StreamSupport.stream(modules.spliterator(), false)
                 .filter(m -> {
-                    if (m instanceof IAnalysisModule analysisModule) {
-                        return analysisModule.getId().equals(analysisId);
+                    if (m instanceof IAnalysisModule) {
+                        return ((IAnalysisModule) m).getId().equals(analysisId);
                     }
                     return true;
                 })
@@ -489,7 +491,7 @@ public class DifferentialFlameGraphView extends TmfView {
             }
         }
 
-        private static void findMissingParents(Map<Long, TimeGraphEntry> entries, List<TimeGraphEntry> orphaned) {
+        private void findMissingParents(Map<Long, TimeGraphEntry> entries, List<TimeGraphEntry> orphaned) {
             for (TimeGraphEntry orphanedEntry : orphaned) {
                 TimeGraphEntry parent = entries.get(orphanedEntry.getEntryModel().getParentId());
                 if (parent != null) {
@@ -498,7 +500,7 @@ public class DifferentialFlameGraphView extends TmfView {
             }
         }
 
-        private static void waitForDataProvider() throws InterruptedException {
+        private void waitForDataProvider() throws InterruptedException {
             try {
                 Thread.sleep(100);
 
@@ -549,8 +551,8 @@ public class DifferentialFlameGraphView extends TmfView {
         }
         long entryId = ((TimeGraphEntry) entry).getEntryModel().getId();
         IOutputElement element = null;
-        if (event instanceof TimeEvent timeEvent) {
-            element = timeEvent.getModel();
+        if (event instanceof TimeEvent) {
+            element = ((TimeEvent) event).getModel();
         }
         Map<String, Object> parameters = getFetchTooltipParameters(time, entryId, element);
         if (getActions) {
@@ -627,7 +629,7 @@ public class DifferentialFlameGraphView extends TmfView {
                     return;
                 }
                 Sampling sampling = new Sampling(fZoomStartTime, fZoomEndTime, fResolution);
-                Iterable<TimeGraphEntry> incorrectSample = fForce ? fCurrentEntries : fCurrentEntries.stream().filter(entry -> !sampling.equals(entry.getSampling())).toList();
+                Iterable<TimeGraphEntry> incorrectSample = fForce ? fCurrentEntries : fCurrentEntries.stream().filter(entry -> !sampling.equals(entry.getSampling())).collect(Collectors.toList());
                 Objects.requireNonNull(incorrectSample);
                 zoomEntries(incorrectSample, fZoomStartTime, fZoomEndTime, fResolution, fMonitor);
             } finally {
@@ -894,8 +896,8 @@ public class DifferentialFlameGraphView extends TmfView {
     public static ITimeGraphDataProvider<? extends TimeGraphEntryModel> getProvider(ITimeGraphEntry entry) {
         ITimeGraphEntry parent = entry;
         while (parent != null) {
-            if (parent instanceof ParentEntry parentEntry) {
-                return parentEntry.getProvider();
+            if (parent instanceof ParentEntry) {
+                return ((ParentEntry) parent).getProvider();
             }
             parent = parent.getParent();
         }
@@ -1018,8 +1020,8 @@ public class DifferentialFlameGraphView extends TmfView {
                     return;
                 }
                 for (TimeGraphEntry entry : entries) {
-                    if (entry instanceof ParentEntry parentEntry) {
-                        fEntries.remove((parentEntry).getProvider());
+                    if (entry instanceof ParentEntry) {
+                        fEntries.remove(((ParentEntry) entry).getProvider());
                     }
                 }
                 refresh();
