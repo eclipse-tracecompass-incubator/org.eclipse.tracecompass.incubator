@@ -835,15 +835,15 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
     @TmfSignalHandler
     public void traceSelected(final TmfTraceSelectedSignal signal) {
         super.traceSelected(signal);
-        if (fTmfViewerA instanceof TmfTimeViewer tmfViewerA) {
-            tmfViewerA.traceSelected(signal);
+        if (fTmfViewerA instanceof TmfTimeViewer) {
+            ((TmfTimeViewer) fTmfViewerA).traceSelected(signal);
         }
         if (fChartViewerA != null) {
             fChartViewerA.traceSelected(signal);
         }
 
-        if (fTmfViewerB instanceof TmfTimeViewer tmfViewerB) {
-            tmfViewerB.traceSelected(signal);
+        if (fTmfViewerB instanceof TmfTimeViewer) {
+            ((TmfTimeViewer) fTmfViewerB).traceSelected(signal);
         }
 
         if (fChartViewerB != null) {
@@ -1011,9 +1011,10 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
     }
 
     private static void coupleSelectViewer(TmfViewer tree, TmfXYChartViewer chart) {
-        if (tree instanceof AbstractSelectTreeViewer2 selectTree && chart instanceof TmfFilteredXYChartViewer chartViewer) {
+        if (tree instanceof AbstractSelectTreeViewer2 && chart instanceof TmfFilteredXYChartViewer) {
+            AbstractSelectTreeViewer2 selectTree = (AbstractSelectTreeViewer2) tree;
             ILegendImageProvider2 legendImageProvider = new XYChartLegendImageProvider((TmfCommonXAxisChartViewer) chart);
-            selectTree.addTreeListener(chartViewer);
+            selectTree.addTreeListener((TmfFilteredXYChartViewer) chart);
             selectTree.setLegendImageProvider(legendImageProvider);
             TriStateFilteredCheckboxTree checkboxTree = selectTree.getTriStateFilteredCheckboxTree();
             checkboxTree.addPreCheckStateListener(new ManyEntriesSelectedDialogPreCheckedListener(checkboxTree));
