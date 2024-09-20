@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Ericsson
+ * Copyright (c) 2020, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -12,11 +12,14 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.tracecompass.tmf.core.io.ResourceUtil;
+import org.eclipse.tracecompass.tmf.core.project.model.ITmfPropertiesProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -33,6 +36,7 @@ public final class Trace implements Serializable {
     private final long fNbEvents;
     private final long fStart;
     private final long fEnd;
+    private final Map<String, String> fProperties;
     private final String fIndexingStatus;
 
     /**
@@ -50,6 +54,8 @@ public final class Trace implements Serializable {
      *            start time
      * @param end
      *            end time
+     * @param properties
+     *            the properties of the trace
      * @param indexingStatus
      *            indexing status
      */
@@ -60,6 +66,7 @@ public final class Trace implements Serializable {
             @JsonProperty("nbEvents") long nbEvents,
             @JsonProperty("start") long start,
             @JsonProperty("end") long end,
+            @JsonProperty("properties") Map<String, String> properties,
             @JsonProperty("indexingStatus") String indexingStatus) {
         fName = name;
         fUUID = uuid;
@@ -67,6 +74,7 @@ public final class Trace implements Serializable {
         fNbEvents = nbEvents;
         fStart = start;
         fEnd = end;
+        fProperties = properties;
         fIndexingStatus = indexingStatus;
     }
 
@@ -86,6 +94,7 @@ public final class Trace implements Serializable {
                 trace.getNbEvents(),
                 trace.getStartTime().toNanos(),
                 trace.getEndTime().toNanos(),
+                trace instanceof ITmfPropertiesProvider ? ((ITmfPropertiesProvider) trace).getProperties() : new HashMap<>(),
                 trace.isIndexing() ? "RUNNING" : "COMPLETED"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
@@ -110,6 +119,7 @@ public final class Trace implements Serializable {
                 0L,
                 0L,
                 0L,
+                new HashMap<>(),
                 "CLOSED"); //$NON-NLS-1$
     }
 
@@ -162,6 +172,14 @@ public final class Trace implements Serializable {
     }
 
     /**
+     * Returns the properties
+     * @return the properties
+     */
+    public Map<String, String> getProperties() {
+        return fProperties;
+    }
+
+    /**
      * Returns the indexing status
      * @return the indexing status
      */
@@ -171,6 +189,6 @@ public final class Trace implements Serializable {
 
     @Override
     public String toString() {
-        return "Trace [fName=" + fName + ", fUUID=" + fUUID + ", fPath=" + fPath + ", fNbEvents=" + fNbEvents + ", fStart=" + fStart + ", fEnd=" + fEnd + ", fIndexingStatus=" + fIndexingStatus + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+        return "Trace [fName=" + fName + ", fUUID=" + fUUID + ", fPath=" + fPath + ", fNbEvents=" + fNbEvents + ", fStart=" + fStart + ", fEnd=" + fEnd + ", fIndexingStatus=" + fIndexingStatus + ", fProperties" + fProperties.toString() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
     }
 }

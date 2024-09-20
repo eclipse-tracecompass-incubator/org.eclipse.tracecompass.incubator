@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Ericsson
+ * Copyright (c) 2018, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp;
 
 import java.io.IOException;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.Trace;
@@ -48,6 +49,11 @@ public class TraceSerializer extends StdSerializer<@NonNull Trace> {
         gen.writeNumberField("nbEvents", value.getNbEvents()); //$NON-NLS-1$
         gen.writeNumberField("start", value.getStart()); //$NON-NLS-1$
         gen.writeNumberField("end", value.getEnd()); //$NON-NLS-1$
+        gen.writeObjectFieldStart("properties"); //$NON-NLS-1$
+        for (Entry<String, String> entry : value.getProperties().entrySet()) {
+            gen.writeStringField(entry.getKey(), entry.getValue());
+        }
+        gen.writeEndObject();
         gen.writeStringField("indexingStatus", value.getIndexingStatus()); //$NON-NLS-1$
         gen.writeEndObject();
     }

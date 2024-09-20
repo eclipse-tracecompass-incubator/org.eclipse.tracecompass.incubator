@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Ericsson
+ * Copyright (c) 2017, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -88,6 +88,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class TraceManagerService {
 
     private static final Map<UUID, IResource> TRACES = Collections.synchronizedMap(initTraces());
+
+    /**
+     * The trace instance is created lazily, meaning it is only instantiated when its UUID is queried.
+     */
+    private static final Map<UUID, ITmfTrace> TRACE_INSTANCES = Collections.synchronizedMap(new HashMap<>());
 
     private static final String TRACES_FOLDER = "Traces"; //$NON-NLS-1$
 
@@ -214,7 +219,8 @@ public class TraceManagerService {
         }
         UUID uuid = getTraceUUID(resource);
         TRACES.put(uuid, resource);
-        return Response.ok(createTraceModel(uuid)).build();
+        Trace traceModel = createTraceModel(uuid);
+        return Response.ok(traceModel).build();
     }
 
     /**
@@ -239,6 +245,23 @@ public class TraceManagerService {
      */
     public static @Nullable IResource getTraceResource(UUID uuid) {
         return TRACES.get(uuid);
+    }
+
+    /**
+     * Get or create an instance of a trace by its UUID. This trace instance lives
+     * as long as the trace is opened in the trace server.
+     *
+     * @param uuid
+     *            the trace UUID
+     * @return the trace instance, or null if it could not be created
+     */
+    public static @Nullable ITmfTrace getOrCreateTraceInstance(UUID uuid) {
+        if (TRACE_INSTANCES.containsKey(uuid)) {
+            return TRACE_INSTANCES.get(uuid);
+        }
+        ITmfTrace trace = createTraceInstance(uuid);
+        TRACE_INSTANCES.put(uuid, trace);
+        return trace;
     }
 
     /**
@@ -278,11 +301,8 @@ public class TraceManagerService {
     }
 
     private static Trace createTraceModel(UUID uuid) {
-        IResource resource = TRACES.get(uuid);
-        if (resource == null) {
-            return null;
-        }
-        return Trace.from(resource, uuid);
+        ITmfTrace trace = getOrCreateTraceInstance(uuid);
+        return Trace.from(trace, uuid);
     }
 
     /**
@@ -390,6 +410,10 @@ public class TraceManagerService {
         }
         if (ExperimentManagerService.isTraceInUse(uuid)) {
             return Response.status(Status.CONFLICT).entity(trace).build();
+        }
+        ITmfTrace traceInstance = TRACE_INSTANCES.remove(uuid);
+        if (traceInstance != null) {
+            traceInstance.dispose();
         }
         IResource resource = TRACES.remove(uuid);
         if (resource == null) {

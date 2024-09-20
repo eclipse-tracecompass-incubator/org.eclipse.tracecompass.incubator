@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 Ericsson
+ * Copyright (c) 2018, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -210,8 +210,8 @@ public class ExperimentManagerService {
         if (resource == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
-        Experiment experimentModel = Experiment.from(resource, expUUID);
         TmfExperiment experiment = EXPERIMENTS.remove(expUUID);
+        Experiment experimentModel = experiment != null ? Experiment.from(experiment, expUUID) : Experiment.from(resource, expUUID);
         if (experiment != null) {
             TmfSignalManager.dispatchSignal(new TmfTraceClosedSignal(this, experiment));
             experiment.dispose();
