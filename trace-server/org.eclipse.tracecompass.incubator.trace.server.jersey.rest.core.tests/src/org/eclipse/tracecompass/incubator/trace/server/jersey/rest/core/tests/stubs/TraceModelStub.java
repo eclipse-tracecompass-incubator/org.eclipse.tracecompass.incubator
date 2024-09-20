@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 Ericsson
+ * Copyright (c) 2018, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs;
 
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -37,6 +38,7 @@ public class TraceModelStub extends AbstractModelStub {
     private static final long serialVersionUID = -1030854786688167776L;
 
     private final String fPath;
+    private final Map<String, String> fProperties;
 
     /**
      * {@link JsonCreator} Constructor for final fields
@@ -53,6 +55,8 @@ public class TraceModelStub extends AbstractModelStub {
      *            start time
      * @param end
      *            end time
+     * @param properties
+     *            the properties of the trace
      * @param indexingStatus
      *            indexing status
      */
@@ -64,9 +68,11 @@ public class TraceModelStub extends AbstractModelStub {
             @JsonProperty("nbEvents") long nbEvents,
             @JsonProperty("start") long start,
             @JsonProperty("end") long end,
+            @JsonProperty("properties") Map<String, String> properties,
             @JsonProperty("indexingStatus") String indexingStatus) {
         super(name, uuid, nbEvents, start, end, indexingStatus);
         fPath = path;
+        fProperties = properties;
     }
 
     /**
@@ -76,9 +82,11 @@ public class TraceModelStub extends AbstractModelStub {
      *            trace name
      * @param path
      *            path to trace on server file system
+     * @param properties
+     *            properties of the trace
      */
-    public TraceModelStub(String name, String path) {
-        this(name, path, getUUID(path, name), 0, 0L, 0L, "RUNNING");
+    public TraceModelStub(String name, String path, Map<String, String> properties) {
+        this(name, path, getUUID(path, name), 0, 0L, 0L, properties, "RUNNING");
     }
 
     private static UUID getUUID(String path, String name) {
@@ -93,6 +101,14 @@ public class TraceModelStub extends AbstractModelStub {
      */
     public String getPath() {
         return fPath;
+    }
+
+    /**
+     * Returns the trace's properties
+     * @return the trace's properties
+     */
+    public Map<String, String> getProperties() {
+        return fProperties;
     }
 
     @Override
@@ -111,7 +127,7 @@ public class TraceModelStub extends AbstractModelStub {
             return false;
         } else if (obj instanceof TraceModelStub) {
             TraceModelStub other = (TraceModelStub) obj;
-            return Objects.equals(fPath, other.fPath);
+            return Objects.equals(fPath, other.fPath) && Objects.equals(fProperties, other.fProperties);
         }
         return false;
     }
