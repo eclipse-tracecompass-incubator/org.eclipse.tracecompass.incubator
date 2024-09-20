@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2021, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
+import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -58,6 +59,12 @@ public interface Trace {
      */
     @Schema(description = "The trace's end time")
     long getEnd();
+
+    /**
+     * @return The properties.
+     */
+    @Schema(description = "The trace's properties")
+    Map<String, String> getProperties();
 
     /**
      * @return The indexing status.

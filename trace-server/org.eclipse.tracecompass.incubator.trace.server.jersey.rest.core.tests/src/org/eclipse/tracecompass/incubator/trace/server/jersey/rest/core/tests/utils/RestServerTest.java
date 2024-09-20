@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 Ericsson
+ * Copyright (c) 2018, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -163,6 +163,19 @@ public abstract class RestServerTest {
     protected static final String CONTEXT_SWITCHES_UST_NAME = "ust";
 
     /**
+     * The properties of the trace.
+     */
+    public static final Map<String, String> CONTEXT_SWITCHES_UST_PROPERTIES = new HashMap<>(Map.ofEntries(
+            Map.entry("hostname", "\"qemu1\""),
+            Map.entry("clock_offset", "1450192743562703624"),
+            Map.entry("domain", "\"ust\""),
+            Map.entry("host ID", "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
+            Map.entry("tracer_name", "\"lttng-ust\""),
+            Map.entry("tracer_major", "2"),
+            Map.entry("tracer_minor", "6")
+        ));
+
+    /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL}.
      */
@@ -174,6 +187,23 @@ public abstract class RestServerTest {
     protected static final String CONTEXT_SWITCHES_KERNEL_NAME = "kernel";
 
     /**
+     * The properties of the trace.
+     */
+    public static final Map<String, String> CONTEXT_SWITCHES_KERNEL_PROPERTIES = new HashMap<>(Map.ofEntries(
+            Map.entry("hostname", "\"qemu1\""),
+            Map.entry("kernel_version", "\"#1 SMP PREEMPT Sat Dec 12 14:52:43 CET 2015\""),
+            Map.entry("tracer_patchlevel", "3"),
+            Map.entry("clock_offset", "1450192747804379176"),
+            Map.entry("domain", "\"kernel\""),
+            Map.entry("sysname", "\"Linux\""),
+            Map.entry("host ID", "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
+            Map.entry("kernel_release", "\"4.1.13-WR8.0.0.0_standard\""),
+            Map.entry("tracer_name", "\"lttng-modules\""),
+            Map.entry("tracer_major", "2"),
+            Map.entry("tracer_minor", "6")
+        ));
+
+    /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#ARM_64_BIT_HEADER}, with the same name as {@link #CONTEXT_SWITCHES_KERNEL_STUB}
      */
@@ -183,6 +213,23 @@ public abstract class RestServerTest {
      * The name used when posting the trace.
      */
     protected static final String ARM_64_KERNEL_NAME = "kernel";
+
+    /**
+     * The properties of the trace.
+     */
+    public static final Map<String, String> ARM_64_KERNEL_PROPERTIES = new HashMap<>(Map.ofEntries(
+            Map.entry("hostname", "\"lager\""),
+            Map.entry("kernel_version", "\"#6 SMP PREEMPT Wed Oct 1 17:07:11 CEST 2014\""),
+            Map.entry("tracer_patchlevel", "0"),
+            Map.entry("clock_offset", "1412663327522716450"),
+            Map.entry("domain", "\"kernel\""),
+            Map.entry("sysname", "\"Linux\""),
+            Map.entry("host ID", "\"5a71a43c-1390-4365-9baf-111c565e78c3\""),
+            Map.entry("kernel_release", "\"3.10.31-ltsi\""),
+            Map.entry("tracer_name", "\"lttng-modules\""),
+            Map.entry("tracer_major", "2"),
+            Map.entry("tracer_minor", "5")
+        ));
 
     /**
      * Expected toString() of all data providers for this experiment
@@ -198,13 +245,13 @@ public abstract class RestServerTest {
     @BeforeClass
     public static void beforeTest() throws IOException {
         String contextSwitchesUstPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath().replaceAll("/$", "");
-        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath);
+        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, CONTEXT_SWITCHES_UST_PROPERTIES);
 
         String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath().replaceAll("/$", "");
-        CONTEXT_SWITCHES_KERNEL_STUB = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath);
+        CONTEXT_SWITCHES_KERNEL_STUB = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_PROPERTIES);
 
         String arm64Path = FileLocator.toFileURL(CtfTestTrace.ARM_64_BIT_HEADER.getTraceURL()).getPath().replaceAll("/$", "");
-        ARM_64_KERNEL_STUB = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path);
+        ARM_64_KERNEL_STUB = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, ARM_64_KERNEL_PROPERTIES);
 
         ImmutableList.Builder<DataProviderDescriptorStub> b = ImmutableList.builder();
         b.add(new DataProviderDescriptorStub("org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack",
