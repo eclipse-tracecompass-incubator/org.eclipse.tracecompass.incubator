@@ -24,5 +24,19 @@
             tracetype="org.eclipse.tracecompass.jifa.gclog">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.analysis.counters.core.CounterAnalysis"
+            applies_experiment="true"
+            icon="ico/gc.png"
+            id="org.eclipse.tracecompass.incubator.jifa.core.Counter"
+            name="%org.eclipse.tracecompass.incubator.gc.counter">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.jifa.core.gclog.GCTrace">
+         </tracetype>
+      </module>
+   </extension>
 
 </plugin>
