@@ -45,7 +45,7 @@ public class TreeColumnHeaderSerializer extends StdSerializer<@NonNull TreeColum
         gen.writeStringField("name", value.getName()); //$NON-NLS-1$
         gen.writeStringField("tooltip", value.getTooltip()); //$NON-NLS-1$
         if (value.getDataType() != null) {
-            gen.writeStringField("dataType", value.getDataType()); //$NON-NLS-1$
+            gen.writeStringField("dataType", value.getDataType().name()); //$NON-NLS-1$
         }
         gen.writeEndObject();
     }
