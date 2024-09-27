@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataType;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 
 /**
@@ -27,7 +28,7 @@ public class TableColumnHeader {
     private final long fId;
     private final String fName;
     private final @Nullable String fDescription;
-    private final @Nullable String fType;
+    private final DataType fType;
 
     /**
      * Constructor
@@ -40,7 +41,7 @@ public class TableColumnHeader {
         List<@NonNull String> labels = dataModel.getLabels();
         fName = dataModel.getLabels().get(0);
         fDescription = labels.size() >= 2 ? dataModel.getLabels().get(1) : null;
-        fType = null;
+        fType = dataModel.getDataType();
     }
 
     /**
@@ -75,7 +76,7 @@ public class TableColumnHeader {
      *
      * @return The type of the column
      */
-    public String getType() {
+    public DataType getType() {
         return fType;
     }
 
