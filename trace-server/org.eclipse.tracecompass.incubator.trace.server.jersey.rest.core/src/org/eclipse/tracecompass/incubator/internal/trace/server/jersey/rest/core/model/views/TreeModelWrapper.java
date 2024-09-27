@@ -14,7 +14,6 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataType;
 import org.eclipse.tracecompass.tmf.core.model.ITableColumnDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
@@ -40,7 +39,7 @@ public class TreeModelWrapper {
     public static class TreeColumnHeader {
         private final String fName;
         private final String fTooltip;
-        private final @Nullable String fDataType;
+        private final DataType fDataType;
 
         /**
          * Constructor with only the name
@@ -55,12 +54,7 @@ public class TreeModelWrapper {
         public TreeColumnHeader(String name, String tooltip, DataType dataType) {
             fName = name;
             fTooltip = tooltip;
-            if (dataType.equals(DataType.STRING)) {
-                // Default case
-                fDataType = null;
-            } else {
-                fDataType = dataType.name();
-            }
+            fDataType = dataType;
         }
 
         /**
@@ -85,7 +79,7 @@ public class TreeModelWrapper {
          *
          * @return data type.
          */
-        public @Nullable String getDataType() {
+        public DataType getDataType() {
             return fDataType;
         }
     }
