@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.core.resources.IFolder;
@@ -64,12 +65,17 @@ public class TraceManagerServiceTest extends RestServerTest {
         assertEquals("Expected set of traces to contain trace2 stub",
                 Collections.singleton(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB), getTraces(traces));
 
-        Response deleteResponse = traces.path(kernelStub.getUUID().toString()).request().delete();
-        int deleteCode = deleteResponse.getStatus();
-        assertEquals("Failed to DELETE trace2, error code=" + deleteCode, 200, deleteCode);
-        assertEquals(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB, deleteResponse.readEntity(TraceModelStub.class));
+        String kernelStubUUUID = kernelStub.getUUID().toString();
 
-        assertEquals("Trace should have been deleted", Collections.emptySet(), getTraces(traces));
+        try (Response deleteResponse = traces.path(kernelStub.getUUID().toString()).request().delete()) {
+            int deleteCode = deleteResponse.getStatus();
+            assertEquals("Failed to DELETE trace2, error code=" + deleteCode, 200, deleteCode);
+            assertEquals(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB, deleteResponse.readEntity(TraceModelStub.class));
+        }
+        try (Response response = traces.path(kernelStubUUUID).request(MediaType.APPLICATION_JSON).get()) {
+            assertEquals("Trace should have been deleted", 404, response.getStatus());
+        }
+        assertEquals("Trace should have been deleted and trace set should be empty", Collections.emptySet(), getTraces(traces));
     }
 
     /**
