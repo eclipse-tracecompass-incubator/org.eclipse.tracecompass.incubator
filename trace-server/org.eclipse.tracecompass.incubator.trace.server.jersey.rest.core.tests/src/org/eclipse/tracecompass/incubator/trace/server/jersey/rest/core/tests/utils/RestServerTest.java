@@ -171,6 +171,7 @@ public abstract class RestServerTest {
             Map.entry("domain", "\"ust\""),
             Map.entry("host ID", "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
             Map.entry("tracer_name", "\"lttng-ust\""),
+            Map.entry("clock_scale", "1.0"),
             Map.entry("tracer_major", "2"),
             Map.entry("tracer_minor", "6")
         ));
@@ -199,6 +200,7 @@ public abstract class RestServerTest {
             Map.entry("host ID", "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
             Map.entry("kernel_release", "\"4.1.13-WR8.0.0.0_standard\""),
             Map.entry("tracer_name", "\"lttng-modules\""),
+            Map.entry("clock_scale", "1.0"),
             Map.entry("tracer_major", "2"),
             Map.entry("tracer_minor", "6")
         ));
@@ -226,6 +228,7 @@ public abstract class RestServerTest {
             Map.entry("sysname", "\"Linux\""),
             Map.entry("host ID", "\"5a71a43c-1390-4365-9baf-111c565e78c3\""),
             Map.entry("kernel_release", "\"3.10.31-ltsi\""),
+            Map.entry("clock_scale", "1.0"),
             Map.entry("tracer_name", "\"lttng-modules\""),
             Map.entry("tracer_major", "2"),
             Map.entry("tracer_minor", "5")
