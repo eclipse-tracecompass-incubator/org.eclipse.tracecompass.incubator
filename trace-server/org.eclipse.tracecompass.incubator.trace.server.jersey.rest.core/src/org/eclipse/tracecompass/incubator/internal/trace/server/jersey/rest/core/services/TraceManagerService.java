@@ -260,7 +260,9 @@ public class TraceManagerService {
             return TRACE_INSTANCES.get(uuid);
         }
         ITmfTrace trace = createTraceInstance(uuid);
-        TRACE_INSTANCES.put(uuid, trace);
+        if (trace != null) {
+            TRACE_INSTANCES.put(uuid, trace);
+        }
         return trace;
     }
 
@@ -300,8 +302,11 @@ public class TraceManagerService {
         }
     }
 
-    private static Trace createTraceModel(UUID uuid) {
+    private static @Nullable Trace createTraceModel(UUID uuid) {
         ITmfTrace trace = getOrCreateTraceInstance(uuid);
+        if (trace == null) {
+            return null;
+        }
         return Trace.from(trace, uuid);
     }
 
