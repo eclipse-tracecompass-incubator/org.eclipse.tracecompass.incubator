@@ -60,6 +60,7 @@ public class ExperimentManagerServiceTest extends RestServerTest {
 
     private static final String TEST = "test";
     private static final @NonNull ImmutableSet<TraceModelStub> CONTEXT_SWITCH_SET = ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_STUB, CONTEXT_SWITCHES_UST_STUB);
+    private static final @NonNull ImmutableSet<TraceModelStub> CONTEXT_SWITCH_NOT_INITIALIZED_SET = ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
     private static final @NonNull ExperimentModelStub EXPECTED = new ExperimentModelStub(TEST, CONTEXT_SWITCH_SET);
 
     /**
@@ -71,9 +72,9 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         WebTarget traces = application.path(TRACES);
         WebTarget expTarget = application.path(EXPERIMENTS);
 
-        TraceModelStub ustStub = assertPost(traces, CONTEXT_SWITCHES_UST_STUB);
-        TraceModelStub kernelStub = assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
-        assertEquals(CONTEXT_SWITCH_SET, getTraces(traces));
+        TraceModelStub ustStub = assertPost(traces, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        TraceModelStub kernelStub = assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
+        assertEquals(CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
 
         assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
 
@@ -89,12 +90,12 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         ExperimentModelStub expStub = response.readEntity(ExperimentModelStub.class);
         assertEquals("Failed to POST the experiment", EXPECTED, expStub);
         assertEquals("Failed to add experiment to set of experiments", Collections.singleton(EXPECTED), getExperiments(expTarget));
-        assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_SET, getTraces(traces));
+        assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
         assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
 
         assertEquals("Failed to DELETE the experiment", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().delete().readEntity(ExperimentModelStub.class));
         assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
-        assertEquals("Deleting an experiment should not change the trace set", CONTEXT_SWITCH_SET, getTraces(traces));
+        assertEquals("Deleting an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
         response.close();
     }
 
@@ -107,9 +108,9 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         WebTarget traces = application.path(TRACES);
         WebTarget expTarget = application.path(EXPERIMENTS);
 
-        TraceModelStub ustStub = assertPost(traces, CONTEXT_SWITCHES_UST_STUB);
-        TraceModelStub kernelStub = assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
-        assertEquals(null, CONTEXT_SWITCH_SET, getTraces(traces));
+        TraceModelStub ustStub = assertPost(traces, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        TraceModelStub kernelStub = assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
+        assertEquals(CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
 
         assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
 
@@ -125,7 +126,7 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         ExperimentModelStub expStub = response.readEntity(ExperimentModelStub.class);
         assertEquals("Failed to POST the experiment", EXPECTED, expStub);
         assertEquals("Failed to add experiment to set of experiments", Collections.singleton(EXPECTED), getExperiments(expTarget));
-        assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_SET, getTraces(traces));
+        assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
         assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
         response.close();
 
@@ -135,13 +136,13 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         assertEquals("Status of second post", Status.OK.getStatusCode(), response2.getStatus());
         assertEquals("Failed to POST the experiment a second time", EXPECTED, expStub2);
         assertEquals("There should still be only one experiment", Collections.singleton(EXPECTED), getExperiments(expTarget));
-        assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_SET, getTraces(traces));
+        assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
         assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub2.getUUID().toString()).request().get(ExperimentModelStub.class));
         response2.close();
 
         assertEquals("Failed to DELETE the experiment", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().delete().readEntity(ExperimentModelStub.class));
         assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
-        assertEquals("Deleting an experiment should not change the trace set", CONTEXT_SWITCH_SET, getTraces(traces));
+        assertEquals("Deleting an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
 
     }
 
@@ -154,10 +155,10 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         WebTarget traces = application.path(TRACES);
         WebTarget expTarget = application.path(EXPERIMENTS);
 
-        TraceModelStub ustStub = assertPost(traces, CONTEXT_SWITCHES_UST_STUB);
-        TraceModelStub kernelStub = assertPost(traces, CONTEXT_SWITCHES_KERNEL_STUB);
-        TraceModelStub arm64Stub = assertPost(traces, ARM_64_KERNEL_STUB);
-        ImmutableSet<TraceModelStub> traceSet = ImmutableSet.of(CONTEXT_SWITCHES_UST_STUB, CONTEXT_SWITCHES_KERNEL_STUB, ARM_64_KERNEL_STUB);
+        TraceModelStub ustStub = assertPost(traces, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        TraceModelStub kernelStub = assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
+        TraceModelStub arm64Stub = assertPost(traces, ARM_64_KERNEL_NOT_INITIALIZED_STUB);
+        ImmutableSet<TraceModelStub> traceSet = ImmutableSet.of(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB, ARM_64_KERNEL_NOT_INITIALIZED_STUB);
         assertEquals(null, traceSet, getTraces(traces));
 
         assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
@@ -226,8 +227,8 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         WebTarget tracesTarget = applicationTarget.path(TRACES);
         WebTarget experimentsTarget = applicationTarget.path(EXPERIMENTS);
 
-        TraceModelStub ustStub = assertPost(tracesTarget, CONTEXT_SWITCHES_UST_STUB);
-        TraceModelStub kernelStub = assertPost(tracesTarget, CONTEXT_SWITCHES_KERNEL_STUB);
+        TraceModelStub ustStub = assertPost(tracesTarget, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        TraceModelStub kernelStub = assertPost(tracesTarget, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
 
         List<String> traceUUIDs = new ArrayList<>();
         traceUUIDs.add(ustStub.getUUID().toString());

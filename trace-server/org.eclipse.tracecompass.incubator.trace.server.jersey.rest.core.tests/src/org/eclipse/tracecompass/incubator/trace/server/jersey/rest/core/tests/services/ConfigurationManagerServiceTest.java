@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Ericsson
+ * Copyright (c) 2023, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -256,7 +256,7 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
             TmfConfigurationStub config = response.readEntity(CONFIGURATION);
             validateConfig(config);
         }
-        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_KERNEL_STUB.getName(), CONTEXT_SWITCHES_KERNEL_STUB);
+        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
         WebTarget xmlProviderPath = getXYTreeEndpoint(exp.getUUID().toString(), "org.eclipse.linuxtools.tmf.analysis.xml.core.tests.xy");
         Map<String, Object> parameters = new HashMap<>();
         try (Response xmlTree = xmlProviderPath.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
