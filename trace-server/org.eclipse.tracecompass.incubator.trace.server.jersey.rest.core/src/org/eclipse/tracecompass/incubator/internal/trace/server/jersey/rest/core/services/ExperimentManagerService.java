@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -94,6 +95,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ExperimentManagerService {
 
     private static final Map<UUID, List<UUID>> TRACE_UUIDS = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<UUID, Map<UUID, ITmfTrace>> TRACE_INSTANCES = Collections.synchronizedMap(new HashMap<>());
     private static final Map<UUID, IResource> EXPERIMENT_RESOURCES = Collections.synchronizedMap(initExperimentResources());
     private static final Map<UUID, TmfExperiment> EXPERIMENTS = Collections.synchronizedMap(new HashMap<>());
     private static final Map<UUID, TraceAnnotationProvider> TRACE_ANNOTATION_PROVIDERS = Collections.synchronizedMap(new HashMap<>());
@@ -218,6 +220,7 @@ public class ExperimentManagerService {
         }
         TRACE_ANNOTATION_PROVIDERS.remove(expUUID);
         TRACE_UUIDS.remove(expUUID);
+        TRACE_INSTANCES.remove(expUUID);
         boolean deleteResources = true;
         synchronized (EXPERIMENTS) {
             for (TmfExperiment e : EXPERIMENTS.values()) {
@@ -348,14 +351,19 @@ public class ExperimentManagerService {
         createSupplementaryFolder(resource);
 
         // Instantiate the experiment and return it
-        ITmfTrace[] traces = Lists.transform(traceUUIDs, uuid -> TraceManagerService.createTraceInstance(uuid)).toArray(new ITmfTrace[0]);
+        Map<UUID, ITmfTrace> uuidToTraceInstances = new LinkedHashMap<>();
+        for (UUID uuid : traceUUIDs) {
+            ITmfTrace trace = TraceManagerService.createTraceInstance(uuid);
+            uuidToTraceInstances.put(uuid, trace);
+        }
         // Determine cache size for experiments
         int cacheSize = Integer.MAX_VALUE;
-        for (ITmfTrace trace : traces) {
+        for (ITmfTrace trace : uuidToTraceInstances.values()) {
             cacheSize = Math.min(cacheSize, trace.getCacheSize());
         }
         TmfExperiment experiment = null;
         try {
+            ITmfTrace[] traces = uuidToTraceInstances.values().toArray(new ITmfTrace[0]);
             String experimentTypeId = getOrDetectExerimentType(resource, traces);
             experiment = TmfTraceType.instantiateExperiment(experimentTypeId);
             if (experiment != null) {
@@ -369,6 +377,7 @@ public class ExperimentManagerService {
                 TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(ExperimentManagerService.class, experiment, null));
 
                 EXPERIMENTS.put(expUUID, experiment);
+                TRACE_INSTANCES.put(expUUID, uuidToTraceInstances);
                 TRACE_ANNOTATION_PROVIDERS.put(expUUID, new TraceAnnotationProvider(experiment));
                 return experiment;
             }
@@ -523,6 +532,17 @@ public class ExperimentManagerService {
     }
 
     /**
+     * Get the list of trace instances of an experiment from the experiment manager.
+     *
+     * @param expUUID
+     *            queried {@link UUID}
+     * @return the map from of trace UUID to trace instance.
+     */
+    public static Map<UUID, ITmfTrace> getTraceInstances(UUID expUUID) {
+        return TRACE_INSTANCES.getOrDefault(expUUID, Collections.emptyMap());
+    }
+
+    /**
      * Returns true if the given trace is in use by any experiment
      *
      * @param uuid
@@ -559,6 +579,7 @@ public class ExperimentManagerService {
         }
         EXPERIMENTS.clear();
         TRACE_UUIDS.clear();
+        TRACE_INSTANCES.clear();
         EXPERIMENT_RESOURCES.clear();
         TRACE_ANNOTATION_PROVIDERS.clear();
     }

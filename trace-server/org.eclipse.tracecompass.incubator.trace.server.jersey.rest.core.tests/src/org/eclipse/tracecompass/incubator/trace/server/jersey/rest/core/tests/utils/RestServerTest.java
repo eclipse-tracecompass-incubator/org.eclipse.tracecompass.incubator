@@ -158,6 +158,12 @@ public abstract class RestServerTest {
     protected static TraceModelStub CONTEXT_SWITCHES_UST_STUB;
 
     /**
+     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link CtfTestTrace#CONTEXT_SWITCHES_UST} without metadata initialized.
+     */
+    protected static TraceModelStub CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB;
+
+    /**
      * The name used when posting the trace.
      */
     protected static final String CONTEXT_SWITCHES_UST_NAME = "ust";
@@ -181,6 +187,12 @@ public abstract class RestServerTest {
      * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL}.
      */
     protected static TraceModelStub CONTEXT_SWITCHES_KERNEL_STUB;
+
+    /**
+     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL} without metadata initialized.
+     */
+    protected static TraceModelStub CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB;
 
     /**
      * The name used when posting the trace.
@@ -210,6 +222,12 @@ public abstract class RestServerTest {
      * {@link CtfTestTrace#ARM_64_BIT_HEADER}, with the same name as {@link #CONTEXT_SWITCHES_KERNEL_STUB}
      */
     protected static TraceModelStub ARM_64_KERNEL_STUB;
+
+    /**
+     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link CtfTestTrace#ARM_64_BIT_HEADER} without metadata initialized.
+     */
+    protected static TraceModelStub ARM_64_KERNEL_NOT_INITIALIZED_STUB;
 
     /**
      * The name used when posting the trace.
@@ -248,12 +266,15 @@ public abstract class RestServerTest {
     @BeforeClass
     public static void beforeTest() throws IOException {
         String contextSwitchesUstPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath().replaceAll("/$", "");
+        CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, Collections.EMPTY_MAP);
         CONTEXT_SWITCHES_UST_STUB = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, CONTEXT_SWITCHES_UST_PROPERTIES);
 
         String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath().replaceAll("/$", "");
+        CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, Collections.EMPTY_MAP);
         CONTEXT_SWITCHES_KERNEL_STUB = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_PROPERTIES);
 
         String arm64Path = FileLocator.toFileURL(CtfTestTrace.ARM_64_BIT_HEADER.getTraceURL()).getPath().replaceAll("/$", "");
+        ARM_64_KERNEL_NOT_INITIALIZED_STUB = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, Collections.EMPTY_MAP);
         ARM_64_KERNEL_STUB = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, ARM_64_KERNEL_PROPERTIES);
 
         ImmutableList.Builder<DataProviderDescriptorStub> b = ImmutableList.builder();
