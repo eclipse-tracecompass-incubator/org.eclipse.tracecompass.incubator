@@ -89,11 +89,6 @@ public class TraceManagerService {
 
     private static final Map<UUID, IResource> TRACES = Collections.synchronizedMap(initTraces());
 
-    /**
-     * The trace instance is created lazily, meaning it is only instantiated when its UUID is queried.
-     */
-    private static final Map<UUID, ITmfTrace> TRACE_INSTANCES = Collections.synchronizedMap(new HashMap<>());
-
     private static final String TRACES_FOLDER = "Traces"; //$NON-NLS-1$
 
     /**
@@ -248,23 +243,6 @@ public class TraceManagerService {
     }
 
     /**
-     * Get or create an instance of a trace by its UUID. This trace instance lives
-     * as long as the trace is opened in the trace server.
-     *
-     * @param uuid
-     *            the trace UUID
-     * @return the trace instance, or null if it could not be created
-     */
-    public static @Nullable ITmfTrace getOrCreateTraceInstance(UUID uuid) {
-        if (TRACE_INSTANCES.containsKey(uuid)) {
-            return TRACE_INSTANCES.get(uuid);
-        }
-        ITmfTrace trace = createTraceInstance(uuid);
-        TRACE_INSTANCES.put(uuid, trace);
-        return trace;
-    }
-
-    /**
      * Create an instance of a trace by its UUID. The caller is responsible to
      * dispose the instance when it is no longer needed.
      *
@@ -301,8 +279,11 @@ public class TraceManagerService {
     }
 
     private static Trace createTraceModel(UUID uuid) {
-        ITmfTrace trace = getOrCreateTraceInstance(uuid);
-        return Trace.from(trace, uuid);
+        IResource resource = TRACES.get(uuid);
+        if (resource == null) {
+            return null;
+        }
+        return Trace.from(resource, uuid);
     }
 
     /**
@@ -410,10 +391,6 @@ public class TraceManagerService {
         }
         if (ExperimentManagerService.isTraceInUse(uuid)) {
             return Response.status(Status.CONFLICT).entity(trace).build();
-        }
-        ITmfTrace traceInstance = TRACE_INSTANCES.remove(uuid);
-        if (traceInstance != null) {
-            traceInstance.dispose();
         }
         IResource resource = TRACES.remove(uuid);
         if (resource == null) {
