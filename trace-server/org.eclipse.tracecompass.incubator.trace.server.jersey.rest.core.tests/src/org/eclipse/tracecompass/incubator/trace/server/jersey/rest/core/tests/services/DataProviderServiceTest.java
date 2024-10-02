@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 Ericsson and others
+ * Copyright (c) 2018, 2024 Ericsson and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -125,7 +125,7 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testProviders() {
-        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_STUB.getName(), CONTEXT_SWITCHES_UST_STUB);
+        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
 
         WebTarget experiments = getApplicationEndpoint().path(EXPERIMENTS);
         WebTarget providers = experiments.path(exp.getUUID().toString())
@@ -142,7 +142,7 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testCallStackDataProvider() {
-        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_STUB.getName(), CONTEXT_SWITCHES_UST_STUB);
+        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
 
         WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
 
@@ -168,7 +168,7 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1412670961211260539L;
         long end = 1412670967217750839L;
         try {
-            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_STUB.getName(), ARM_64_KERNEL_STUB);
+            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_NOT_INITIALIZED_STUB.getName(), ARM_64_KERNEL_NOT_INITIALIZED_STUB);
 
             // Test getting the tree endpoint for an XY chart
             WebTarget xyTree = getXYTreeEndpoint(exp.getUUID().toString(), XY_DATAPROVIDER_ID);
@@ -250,7 +250,7 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1412670961211260539L;
         long end = 1412670967217750839L;
         try {
-            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_STUB.getName(), ARM_64_KERNEL_STUB);
+            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_NOT_INITIALIZED_STUB.getName(), ARM_64_KERNEL_NOT_INITIALIZED_STUB);
 
             // Test getting the tree endpoint for an XY chart
             WebTarget xyTree = getXYTreeEndpoint(exp.getUUID().toString(), XY_HISTOGRAM_DATAPROVIDER_ID);
@@ -312,7 +312,7 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1450193697034689597L;
         long end = 1450193745774189602L;
         try {
-            ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_STUB.getName(), CONTEXT_SWITCHES_UST_STUB);
+            ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
 
             // Test getting the time graph tree
             WebTarget dataTree = getDataTreeEndpoint(exp.getUUID().toString(), STATISTICS_DATAPROVIDER_ID);
@@ -363,7 +363,7 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1450193697034689597L;
         long end = 1450193745774189602L;
         try {
-            ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_STUB.getName(), CONTEXT_SWITCHES_UST_STUB);
+            ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
 
             // Test getting the time graph tree
             WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
@@ -534,7 +534,7 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1412670961211260539L;
         long end = 1412670967217750839L;
         try {
-            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_STUB.getName(), ARM_64_KERNEL_STUB);
+            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_NOT_INITIALIZED_STUB.getName(), ARM_64_KERNEL_NOT_INITIALIZED_STUB);
 
             // Test getting the tree endpoint for an XY chart
             WebTarget tableColumns = getTableColumnsEndpoint(exp.getUUID().toString(), EVENTS_TABLE_DATAPROVIDER_ID);
@@ -606,7 +606,7 @@ public class DataProviderServiceTest extends RestServerTest {
         @SuppressWarnings("resource")
         Response treeResponse = null;
         try {
-            ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_STUB.getName(), CONTEXT_SWITCHES_UST_STUB);
+            ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
 
             // Test getting the time graph tree
             WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), TestDataProviderService.INVALID_ENTRY_METADATA);
