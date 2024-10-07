@@ -23,6 +23,7 @@ import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Basic Implementation of the serialized {@link ITmfConfigurationSourceType} model used by clients.
@@ -36,6 +37,7 @@ public class TmfConfigurationSourceTypeStub implements Serializable, ITmfConfigu
      */
     private static final long serialVersionUID = 6934234848155424428L;
     private final ITmfConfigurationSourceType fConfig;
+    private final JsonNode fSchema;
 
     /**
      * {@link JsonCreator} Constructor for final fields
@@ -46,7 +48,9 @@ public class TmfConfigurationSourceTypeStub implements Serializable, ITmfConfigu
      *            the name
      * @param description
      *            the help text
-     * @param queryParamKeys
+     * @param schema
+     *            the JSON schema JsonNode
+     * @param parameterDescriptors
      *            the list of keys
      *
      */
@@ -55,6 +59,7 @@ public class TmfConfigurationSourceTypeStub implements Serializable, ITmfConfigu
     public TmfConfigurationSourceTypeStub(@JsonProperty("id") String id,
             @JsonProperty("name") String name,
             @JsonProperty("description") String description,
+            @JsonProperty("schema") JsonNode schema,
             @JsonProperty("parameterDescriptors") List<ConfigParamDescriptorStub> parameterDescriptors) {
         super();
 
@@ -66,8 +71,15 @@ public class TmfConfigurationSourceTypeStub implements Serializable, ITmfConfigu
             builder.setConfigParamDescriptors(parameterDescriptors.stream().map(stub -> stub.getConfig()).collect(Collectors.toList()));
         }
         fConfig = builder.build();
+        fSchema = schema;
     }
 
+    /**
+     * @return the JSON schema string
+     */
+    public JsonNode getSchema() {
+        return fSchema;
+    }
 
     ITmfConfigurationSourceType getConfig() {
         return fConfig;
@@ -75,24 +87,16 @@ public class TmfConfigurationSourceTypeStub implements Serializable, ITmfConfigu
 
     @Override
     public int hashCode() {
-        return fConfig.hashCode();
+        return Objects.hash(fConfig, fSchema == null ? "null" : fSchema);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
+        if (!(obj instanceof TmfConfigurationSourceTypeStub)) {
             return false;
         }
-        if (obj instanceof TmfConfigurationSourceTypeStub) {
-            return Objects.equals(this.getConfig(), ((TmfConfigurationSourceTypeStub) obj).getConfig());
-        }
-        if (obj instanceof TmfConfigurationSourceType) {
-            return Objects.equals(this.getConfig(), obj);
-        }
-        return false;
+        TmfConfigurationSourceTypeStub other = (TmfConfigurationSourceTypeStub) obj;
+        return Objects.equals(fConfig, other.fConfig) && Objects.equals(fSchema, other.fSchema);
     }
 
     @Override
