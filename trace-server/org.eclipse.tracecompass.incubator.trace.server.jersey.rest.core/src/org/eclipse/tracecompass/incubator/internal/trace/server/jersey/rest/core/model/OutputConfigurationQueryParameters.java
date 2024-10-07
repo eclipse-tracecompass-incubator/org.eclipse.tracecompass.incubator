@@ -18,12 +18,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
-public interface ConfigurationQueryParameters {
+@Schema(allOf = ConfigurationQueryParameters.class)
+public interface OutputConfigurationQueryParameters extends ConfigurationQueryParameters {
 
     /**
-     * @return The query parameters.
+     * @return The configuration type ID
      */
-    @NonNull
-    @Schema(required = true, description = "Parameters as JSON object as specified in the schema of the corresponding ConfigurationTypeDescriptor or as a Map<String, Object>. Use key `path` for file URI string values.")
-    Object getParameters();
+    @Schema(required = true, description = "The configuration source type ID.")
+    @NonNull String getTypeId();
 }
