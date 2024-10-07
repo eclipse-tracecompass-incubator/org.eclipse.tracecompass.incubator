@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
-Bundle-SymbolicName: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests
+Bundle-SymbolicName: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests;singleton:=true
 Bundle-Version: 0.1.9.qualifier
 Bundle-Localization: plugin
 Bundle-ActivationPolicy: lazy
@@ -29,6 +29,7 @@ Export-Package: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core
  org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp,
  org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils
 Import-Package: com.fasterxml.jackson.annotation,
+ com.fasterxml.jackson.core,
  com.fasterxml.jackson.jaxrs.base,
  com.fasterxml.jackson.jaxrs.json,
  com.google.common.base,
