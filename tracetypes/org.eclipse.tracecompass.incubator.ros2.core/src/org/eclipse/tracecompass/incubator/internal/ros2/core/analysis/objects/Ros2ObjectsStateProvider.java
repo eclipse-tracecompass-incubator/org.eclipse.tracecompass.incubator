@@ -48,6 +48,8 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
 
     private static final int VERSION_NUMBER = 0;
     private static final @NonNull String ROS_2_NAMESPACE_SEP = "/"; //$NON-NLS-1$
+    /** Size of an rmw GID, in practice */
+    private static final int RMW_GID_STORAGE_SIZE = 16;
 
     // Publishers
     private Map<@NonNull Gid, ITmfEvent> fDdsCreateWriterEvents = Maps.newHashMap();
@@ -219,7 +221,7 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
                 // Fast DDS
                 long[] gidPrefix = (long[]) getField(event, LAYOUT.fieldGidPrefix());
                 long[] gidEntityId = (long[]) getField(event, LAYOUT.fieldGidEntity());
-                gid = ArrayUtils.addAll(gidPrefix, gidEntityId);
+                gid = combineFastDdsGid(gidPrefix, gidEntityId);
             }
 
             // Add to temporary map
@@ -435,11 +437,15 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
 
     private static @NonNull Gid getDdsGidFromRmwGidArray(long[] rmwGid) {
         /**
-         * The GID at the rmw level is 8 elements longer than the one at the DDS
-         * level; the difference is just all zeros. See RMW_GID_STORAGE_SIZE in
-         * rmw.
+         * The GID at the rmw level may be longer than underlying DDS GID from
+         * which it was constructed, depending on the version of ROS 2. The
+         * difference is just all zeros. Therefore, just truncate (if needed)
+         * the rmw GID to its "practical" size, i.e., the DDS GID size.
+         *
+         * See RMW_GID_STORAGE_SIZE in the rmw interface and
+         * https://github.com/ros2/ros2_tracing/pull/138.
          */
-        long[] ddsGid = Arrays.copyOfRange(rmwGid, 0, rmwGid.length - 8);
+        long[] ddsGid = Arrays.copyOfRange(rmwGid, 0, RMW_GID_STORAGE_SIZE);
         return new Gid(ddsGid);
     }
 }
