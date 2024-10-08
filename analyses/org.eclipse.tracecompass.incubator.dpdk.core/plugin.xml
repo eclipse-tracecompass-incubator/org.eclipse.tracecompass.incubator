@@ -12,6 +12,35 @@
                class="org.eclipse.tracecompass.incubator.dpdk.core.trace.DpdkTrace">
          </tracetype>
       </module>
+            <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.rate.analysis.DpdkEthdevRateAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.rate.analysis"
+            name="DPDK Ethernet Rate Analysis">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.dpdk.core.trace.DpdkTrace">
+         </tracetype>
+      </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.analysis.DpdkEthdevSpinAnalysisModule"
+            id="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.analysis"
+            name="DPDK Ethernet Spin Analysis">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.dpdk.core.trace.DpdkTrace">
+         </tracetype>
+      </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis.DpdkEthdevAnalysisModule"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.throughput.analysis"
+            name="DPDK Ethernet Throughput Analysis">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.dpdk.core.trace.DpdkTrace">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
@@ -19,6 +48,33 @@
             class="org.eclipse.tracecompass.incubator.internal.dpdk.core.lcore.analysis.DpdkLogicalCoreDataProviderFactory"
             id="org.eclipse.tracecompass.incubator.dpdk.lcore.dataprovider">
       </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.rate.analysis.DpdkEtherRateDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.rate.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.analysis.DpdkEtherSpinDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis.DpdkEtherThroughputBpsDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.throughput.bps.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis.DpdkEtherThroughputPpsDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.throughput.pps.dataprovider">
+      </dataProviderFactory>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.analysis.ondemand">
+      <analysis
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.poll.stats.analysis.PollStatsAnalysis"
+            id="org.eclipse.tracecompass.incubator.dpdk.core.ethdev.poll.stats">
+      </analysis>
+      <analysis
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.poll.distribution.analysis.PollDistributionAnalysis"
+            id="org.eclipse.tracecompass.incubator.dpdk.core.ethdev.poll.distribution">
+      </analysis>
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.core.tracetype">
