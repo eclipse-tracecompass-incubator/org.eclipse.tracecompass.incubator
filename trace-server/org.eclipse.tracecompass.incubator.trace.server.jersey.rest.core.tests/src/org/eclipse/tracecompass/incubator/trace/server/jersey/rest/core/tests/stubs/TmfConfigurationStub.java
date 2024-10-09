@@ -17,10 +17,10 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
-import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Basic Implementation of the serialized ITmfConfiguration model used by clients.
@@ -33,7 +33,12 @@ public class TmfConfigurationStub implements Serializable, ITmfConfiguration {
      * Generated Serial Version UID
      */
     private static final long serialVersionUID = 6934234848155424428L;
-    private final ITmfConfiguration fConfig;
+    private final String fId;
+    private final String fName;
+    private final String fDescription;
+    private final String fSourceTypeId;
+    private final Map<String, Object> fParameters;
+    private final JsonNode fJsonParameters;
 
     /**
      * {@link JsonCreator} Constructor for final fields
@@ -50,75 +55,65 @@ public class TmfConfigurationStub implements Serializable, ITmfConfiguration {
      *            the parameters
      *
      */
-    @SuppressWarnings("null")
     @JsonCreator
     public TmfConfigurationStub(@JsonProperty("id") String id,
             @JsonProperty("name") String name,
             @JsonProperty("description") String description,
             @JsonProperty("sourceTypeId") String type,
-            @JsonProperty("parameters") Map<String, Object> parameters) {
+            @JsonProperty("parameters") Map<String, Object> parameters,
+            @JsonProperty("jsonParameters") JsonNode jsonParameters) {
         super();
-
-        TmfConfiguration.Builder builder = new TmfConfiguration.Builder()
-                .setDescription(description)
-                .setName(name)
-                .setId(id)
-                .setSourceTypeId(type);
-        if (parameters != null) {
-            builder.setParameters(parameters);
-        }
-        fConfig = builder.build();
-    }
-
-
-    ITmfConfiguration getConfig() {
-        return fConfig;
+        fId = id;
+        fName = name;
+        fDescription = description;
+        fSourceTypeId = type;
+        fParameters = parameters;
+        fJsonParameters = jsonParameters;
     }
 
     @Override
     public int hashCode() {
-        return fConfig.hashCode();
+        return Objects.hash(fId, fDescription, fSourceTypeId, fJsonParameters);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
+    public boolean equals(Object arg0) {
+        if (!(arg0 instanceof TmfConfigurationStub)) {
             return false;
         }
-        if (obj instanceof TmfConfigurationStub) {
-            return Objects.equals(this.getConfig(), ((TmfConfigurationStub) obj).getConfig());
-        }
-        if (obj instanceof TmfConfiguration) {
-            return Objects.equals(this.getConfig(), obj);
-        }
-        return false;
+        TmfConfigurationStub other = (TmfConfigurationStub) arg0;
+        return Objects.equals(fName, other.fName) && Objects.equals(fId, other.fId)
+                && Objects.equals(fSourceTypeId, other.fSourceTypeId) && Objects.equals(fDescription, other.fDescription)
+                && Objects.equals(fJsonParameters, other.fJsonParameters);
     }
 
     @Override
     public @NonNull String getName() {
-        return fConfig.getName();
+        return fName;
     }
 
     @Override
     public @NonNull String getId() {
-        return fConfig.getId();
+        return fId;
     }
 
     @Override
     public @NonNull String getDescription() {
-        return fConfig.getDescription();
+        return fDescription;
     }
 
     @Override
     public @NonNull String getSourceTypeId() {
-        return fConfig.getSourceTypeId();
+        return fSourceTypeId;
     }
 
     @Override
     public @NonNull Map<@NonNull String, @NonNull Object> getParameters() {
-        return fConfig.getParameters();
+        return fParameters;
+    }
+
+    @Override
+    public @NonNull String getJsonParameters() {
+        return fJsonParameters == null ? "" :fJsonParameters.toString();
     }
 }

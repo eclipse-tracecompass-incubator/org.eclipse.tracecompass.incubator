@@ -16,6 +16,8 @@ import java.io.IOException;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
@@ -46,8 +48,12 @@ public class TmfConfigurationSerializer extends StdSerializer<ITmfConfiguration>
         gen.writeStringField("name", value.getName()); //$NON-NLS-1$
         gen.writeStringField("description", value.getDescription()); //$NON-NLS-1$
         gen.writeStringField("sourceTypeId", value.getSourceTypeId()); //$NON-NLS-1$
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonParameter = mapper.readTree(value.getJsonParameters());
+        gen.writeFieldName("jsonParameters"); //$NON-NLS-1$
+        gen.writeTree(jsonParameter);
 //        if (!value.getParameters().isEmpty()) {
-            gen.writeObjectField("parameters", value.getParameters()); //$NON-NLS-1$
+        gen.writeObjectField("parameters", value.getParameters()); //$NON-NLS-1$
 //        }
         gen.writeEndObject();
     }

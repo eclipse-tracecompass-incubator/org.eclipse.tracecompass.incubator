@@ -34,11 +34,17 @@ public final class EndpointConstants {
     /** Error message returned for a request with missing parameters */
     public static final String MISSING_PARAMETERS = "Missing query parameters"; //$NON-NLS-1$
 
+    /** Error message returned for a request with configuration type ID */
+    public static final String MISSING_TYPE_ID = "Missing configuration type ID"; //$NON-NLS-1$
+
     /** Error message returned for a request with invalid parameters */
     public static final String INVALID_PARAMETERS = "Invalid query parameters"; //$NON-NLS-1$
 
     /** Error message returned for a request for a non-existing data provider */
     public static final String NO_PROVIDER = "Analysis cannot run"; //$NON-NLS-1$
+
+    /** Error message returned for a request for a non-existing data provider */
+    public static final String NO_SUCH_PROVIDER = "Data provider doesn't exist"; //$NON-NLS-1$
 
     /** Error message returned for a request for trace that doesn't exist */
     public static final String NO_SUCH_TRACE = "No such trace"; //$NON-NLS-1$
@@ -84,6 +90,7 @@ public final class EndpointConstants {
     static final String DT = "Data Tree"; //$NON-NLS-1$
     static final String EXP = "Experiments"; //$NON-NLS-1$
     static final String IDF = "Identifier"; //$NON-NLS-1$
+    static final String OCG = "Output Configurations"; //$NON-NLS-1$
     static final String STY = "Styles"; //$NON-NLS-1$
     static final String TGR = "TimeGraph"; //$NON-NLS-1$
     static final String TRA = "Traces"; //$NON-NLS-1$
