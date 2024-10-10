@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
+import org.eclipse.cdt.utils.CPPFilt;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,6 +40,7 @@ import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspe
 import org.eclipse.tracecompass.incubator.analysis.core.aspects.ProcessNameAspect;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.uftrace.core.trace.SymParser.Symbol;
+import org.eclipse.tracecompass.internal.tmf.core.callstack.FunctionNameMapper;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
@@ -491,9 +493,15 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
     private static class UfTraceSymbolProvider implements ISymbolProvider {
 
         private Uftrace fTrace;
+        private CPPFilt fCppFilt;
 
         public UfTraceSymbolProvider(Uftrace trace) {
             fTrace = trace;
+            try {
+                fCppFilt = new CPPFilt();
+            } catch (IOException e) {
+                Activator.getInstance().logError("Could not load CPP Filt, C++ functions will be mangled." , e); //$NON-NLS-1$
+            }
         }
 
         @Override
@@ -526,6 +534,9 @@ public class Uftrace extends TmfTrace implements ITmfPropertiesProvider,
                 Symbol value = floorEntry.getValue();
                 if (value != null) {
                     String name = String.valueOf(value.getName());
+                    if(fCppFilt != null) {
+                        name = FunctionNameMapper.nameFromCppFilt(fCppFilt, name);
+                    }
                     return new TmfResolvedSymbol(address, name);
                 }
             }
