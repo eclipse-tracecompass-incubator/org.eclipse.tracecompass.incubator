@@ -23,9 +23,10 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.profiling.core.base.IDataPalette;
+import org.eclipse.tracecompass.analysis.profiling.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.analysis.profiling.core.callgraph.ICallGraphProvider2;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeProvider;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
-import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
 import org.eclipse.tracecompass.incubator.internal.analysis.core.weighted.tree.DifferentialPalette;
 
 /**
@@ -76,19 +77,21 @@ public class DifferentialWeightedTreeProvider<@NonNull N> implements IWeightedTr
 
     private final IWeightedTreeSet<N, Object, DifferentialWeightedTree<N>> fTreeSet;
 
-    private final IWeightedTreeProvider<N, ?, WeightedTree<N>> fOriginalTree;
     private final List<MetricType> fAdditionalMetrics = new ArrayList<>(WEIGHT_TYPES);
     private @Nullable IDataPalette fPalette = null;
+
+    protected final Collection<ICallGraphProvider2> fOriginalTrees;
 
     /**
      * Constructor
      *
-     * @param originalTree
-     *            The original tree provider, used to get information for texts and metrics.
-     * @param trees
+     * @param instrumentedCallStackAnalyses
+     *            The original tree provider, used to get information for texts
+     *            and metrics.
+     * @param treeSet
      *            The differential tree
      */
-    public DifferentialWeightedTreeProvider(IWeightedTreeProvider<N, ?, WeightedTree<N>> originalTree, Collection<DifferentialWeightedTree<N>> trees) {
+    public DifferentialWeightedTreeProvider(Collection<ICallGraphProvider2> originalTree, Collection<DifferentialWeightedTree<N>> trees) {
         this(originalTree, DifferentialWeightedTreeSet.create(trees));
     }
 
@@ -96,14 +99,17 @@ public class DifferentialWeightedTreeProvider<@NonNull N> implements IWeightedTr
      * Constructor
      *
      * @param originalTree
-     *            The original tree provider, used to get information for texts and metrics.
+     *            The original tree provider, used to get information for texts
+     *            and metrics.
      * @param treeSet
      *            The differential tree set
      */
-    public DifferentialWeightedTreeProvider(IWeightedTreeProvider<N, ?, WeightedTree<N>> originalTree, DifferentialWeightedTreeSet<N> treeSet) {
-        fOriginalTree = originalTree;
+    public DifferentialWeightedTreeProvider(Collection<ICallGraphProvider2> originalTrees, DifferentialWeightedTreeSet<N> treeSet) {
+        fOriginalTrees = originalTrees;
         fTreeSet = treeSet;
-        fAdditionalMetrics.addAll(fOriginalTree.getAdditionalMetrics());
+        for (ICallGraphProvider2 tree : fOriginalTrees) {
+            fAdditionalMetrics.addAll(tree.getAdditionalMetrics());
+        }
     }
 
     /**
@@ -138,12 +144,22 @@ public class DifferentialWeightedTreeProvider<@NonNull N> implements IWeightedTr
 
     @Override
     public @NonNull MetricType getWeightType() {
-        return fOriginalTree.getWeightType();
+        for(ICallGraphProvider2 tree : fOriginalTrees) {
+            return tree.getWeightType();
+        }
+        throw new IllegalStateException();
     }
 
     @Override
     public String toDisplayString(DifferentialWeightedTree<N> tree) {
-        return fOriginalTree.toDisplayString(tree.getOriginalTree());
+        String returnValue = "";
+        for (ICallGraphProvider2 provider: fOriginalTrees) {
+            returnValue = provider.toDisplayString((AggregatedCallSite) tree.getOriginalTree());
+            if (!returnValue.startsWith("0x")) {
+                break;
+            }
+        }
+        return returnValue;
     }
 
     @Override
@@ -156,7 +172,10 @@ public class DifferentialWeightedTreeProvider<@NonNull N> implements IWeightedTr
         if (metricIndex == 0) {
             return object.getDifference();
         }
-        return fOriginalTree.getAdditionalMetric(object.getOriginalTree(), metricIndex - 1);
+        for (ICallGraphProvider2 tree : fOriginalTrees) {
+            return tree.getAdditionalMetric((AggregatedCallSite) object.getOriginalTree(), metricIndex - 1);
+        }
+        throw new IllegalStateException();
     }
 
     @Override

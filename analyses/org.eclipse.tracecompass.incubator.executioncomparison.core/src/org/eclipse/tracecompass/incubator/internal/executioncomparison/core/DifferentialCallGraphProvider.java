@@ -14,13 +14,11 @@ package org.eclipse.tracecompass.incubator.internal.executioncomparison.core;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.eclipse.tracecompass.analysis.profiling.core.callgraph.AggregatedCallSite;
-import org.eclipse.tracecompass.analysis.profiling.core.callgraph.ICallGraphProvider2;
 import org.eclipse.tracecompass.analysis.profiling.core.base.ICallStackSymbol;
 import org.eclipse.tracecompass.analysis.profiling.core.base.IDataPalette;
-import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.callgraph.AggregatedCallSite;
+import org.eclipse.tracecompass.analysis.profiling.core.callgraph.ICallGraphProvider2;
 import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
-import org.eclipse.tracecompass.analysis.profiling.core.base.ICallStackElement;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTree;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.DifferentialWeightedTreeSet;
@@ -33,35 +31,32 @@ import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff.Diffe
  */
 public class DifferentialCallGraphProvider extends DifferentialWeightedTreeProvider<ICallStackSymbol> {
 
-    private final ICallGraphProvider2 fOriginalTree;
-
     /**
      * Constructor
      *
-     * @param instrumentedCallStackAnalysis
+     * @param instrumentedCallStackAnalyses
      *            the original tree
      * @param trees
      *            the other trees to compare to
      */
-    public DifferentialCallGraphProvider(IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, AggregatedCallSite> instrumentedCallStackAnalysis,
+    public DifferentialCallGraphProvider(Collection<ICallGraphProvider2> instrumentedCallStackAnalyses,
             Collection<DifferentialWeightedTree<ICallStackSymbol>> trees) {
-        this(instrumentedCallStackAnalysis, DifferentialWeightedTreeSet.<ICallStackSymbol> create(trees));
+        this(instrumentedCallStackAnalyses, DifferentialWeightedTreeSet.<ICallStackSymbol> create(trees));
     }
 
     /**
      * Constructor
      *
-     * @param originalTree
+     * @param instrumentedCallStackAnalyses
      *            The original tree provider, used to get information for texts
      *            and metrics.
      * @param treeSet
      *            The differential tree set
      */
     public DifferentialCallGraphProvider(
-            IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, ? extends WeightedTree<ICallStackSymbol>> originalTree,
+            Collection<ICallGraphProvider2> instrumentedCallStackAnalyses,
             DifferentialWeightedTreeSet<ICallStackSymbol> treeSet) {
-        super((IWeightedTreeProvider<ICallStackSymbol, ICallStackElement, WeightedTree<ICallStackSymbol>>) originalTree, treeSet);
-        fOriginalTree = (ICallGraphProvider2) originalTree;
+        super(instrumentedCallStackAnalyses, treeSet);
     }
 
     @Override
@@ -75,7 +70,12 @@ public class DifferentialCallGraphProvider extends DifferentialWeightedTreeProvi
         WeightedTree<ICallStackSymbol> originalTree = tree.getOriginalTree();
         String label = ""; //$NON-NLS-1$
         if (originalTree instanceof AggregatedCallSite) {
-            label = fOriginalTree.toDisplayString((AggregatedCallSite) originalTree);
+            for (ICallGraphProvider2 provider : fOriginalTrees) {
+                label = provider.toDisplayString((AggregatedCallSite) originalTree);
+                if (!label.startsWith("0x")) { //$NON-NLS-1$
+                    break;
+                }
+            }
         } else {
             label = String.valueOf(originalTree.getObject().resolve(new ArrayList<>()));
         }
