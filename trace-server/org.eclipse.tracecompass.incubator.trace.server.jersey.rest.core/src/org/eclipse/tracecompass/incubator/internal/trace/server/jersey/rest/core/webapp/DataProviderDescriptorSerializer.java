@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Ericsson
+ * Copyright (c) 2018, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -13,6 +13,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 
 import java.io.IOException;
 
+import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -42,10 +43,18 @@ public class DataProviderDescriptorSerializer extends StdSerializer<IDataProvide
     @Override
     public void serialize(IDataProviderDescriptor value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         gen.writeStartObject();
+        String parentId = value.getParentId();
+        if (parentId != null) {
+            gen.writeStringField("parentId", value.getParentId()); //$NON-NLS-1$
+        }
         gen.writeStringField("id", value.getId()); //$NON-NLS-1$
         gen.writeStringField("name", value.getName()); //$NON-NLS-1$
         gen.writeStringField("description", value.getDescription()); //$NON-NLS-1$
         gen.writeStringField("type", value.getType().name()); //$NON-NLS-1$
+        ITmfConfiguration config = value.getConfiguration();
+        if (config != null) {
+            gen.writeObjectField("configuration", config); //$NON-NLS-1$
+        }
         gen.writeEndObject();
     }
 
