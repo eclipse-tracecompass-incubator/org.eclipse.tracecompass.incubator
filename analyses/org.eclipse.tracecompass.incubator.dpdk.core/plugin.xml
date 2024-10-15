@@ -37,6 +37,10 @@
             class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.poll.distribution.analysis.DpdkPollDistributionAnalysis"
             id="org.eclipse.tracecompass.incubator.dpdk.core.ethdev.poll.distribution">
       </analysis>
+	  <analysis
+	        class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.poll.stats.analysis.DpdkPollStatsAnalysis"
+	        id="org.eclipse.tracecompass.incubator.dpdk.core.ethdev.poll.stats">
+	  </analysis>
    </extension>   
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
