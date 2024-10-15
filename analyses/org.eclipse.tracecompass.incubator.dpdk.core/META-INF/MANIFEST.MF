@@ -15,8 +15,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.tmf.ctf.core,
  org.eclipse.tracecompass.analysis.os.linux.core,
- org.eclipse.jdt.annotation;bundle-version="2.2.400"
+ org.eclipse.jdt.annotation;bundle-version="2.2.400",
+ com.google.guava
 Export-Package: org.eclipse.tracecompass.incubator.dpdk.core.trace,
+ org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.analysis,
  org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis,
  org.eclipse.tracecompass.incubator.internal.dpdk.core.lcore.analysis;x-friends:="org.eclipse.tracecompass.incubator.dpdk.core.tests"
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.dpdk.core

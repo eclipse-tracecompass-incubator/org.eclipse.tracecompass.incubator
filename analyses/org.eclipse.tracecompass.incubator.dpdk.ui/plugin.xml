@@ -25,6 +25,13 @@
                class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis.DpdkEthdevThroughputAnalysisModule">
          </analysisModuleClass>
       </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.internal.dpdk.ui.ethdev.spin.statistics.view">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.analysis.DpdkEthdevSpinAnalysisModule">
+         </analysisModuleClass>
+      </output>      
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -54,6 +61,13 @@
             name="Ethernet Throughput View (BPS)"
             restorable="true">
       </view>
+      <view
+            category="org.eclipse.tracecompass.incubator.internal.dpdk.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.ui.ethdev.spin.ThreadSpinStatisticsView"
+            id="org.eclipse.tracecompass.incubator.internal.dpdk.ui.ethdev.spin.statistics.view"
+            name="Ethernet PMD Effective Busyness"
+            restorable="true">
+      </view>      
    </extension>
 
 </plugin>
