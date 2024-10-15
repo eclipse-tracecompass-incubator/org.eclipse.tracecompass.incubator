@@ -12,12 +12,29 @@
                class="org.eclipse.tracecompass.incubator.dpdk.core.trace.DpdkTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis.DpdkEthdevThroughputAnalysisModule"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.throughput.analysis"
+            name="DPDK Ethernet Throughput Analysis">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.dpdk.core.trace.DpdkTrace">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
       <dataProviderFactory
             class="org.eclipse.tracecompass.incubator.internal.dpdk.core.lcore.analysis.DpdkLogicalCoreDataProviderFactory"
             id="org.eclipse.tracecompass.incubator.dpdk.lcore.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis.DpdkEthdevThroughputBpsDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.throughput.bps.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis.DpdkEthdevThroughputPpsDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.throughput.pps.dataprovider">
       </dataProviderFactory>
    </extension>
    <extension
@@ -31,5 +48,4 @@
             trace_type="org.eclipse.tracecompass.incubator.dpdk.core.trace.DpdkTrace">
       </type>
    </extension>
-
 </plugin>
