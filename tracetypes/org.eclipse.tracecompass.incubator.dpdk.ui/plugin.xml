@@ -2,12 +2,27 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
+         id="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <output
             class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
             id="org.eclipse.tracecompass.incubator.dpdk.lcore.view">
          <analysisModuleClass
                class="org.eclipse.tracecompass.incubator.internal.dpdk.core.lcore.analysis.DpdkLogicalCoreAnalysisModule">
+         </analysisModuleClass>
+      </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.throughput.pps.view">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis.DpdkEthdevThroughputAnalysisModule">
+         </analysisModuleClass>
+      </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.throughput.bps.view">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis.DpdkEthdevThroughputAnalysisModule">
          </analysisModuleClass>
       </output>
    </extension>
@@ -19,9 +34,24 @@
             parentCategory="org.eclipse.linuxtools.tmf.ui.views.category">
       </category>
       <view
+            category="org.eclipse.tracecompass.incubator.internal.dpdk.ui.views.category"
             class="org.eclipse.tracecompass.incubator.internal.dpdk.ui.lcore.LogicalCoreView"
             id="org.eclipse.tracecompass.incubator.dpdk.lcore.view"
             name="Logical Core View"
+            restorable="true">
+      </view>
+      <view
+            category="org.eclipse.tracecompass.incubator.internal.dpdk.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.ui.ethdev.throughput.pps.NicQueueThroughputPpsView"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.throughput.pps.view"
+            name="Ethernet Throughput View (PPS)"
+            restorable="true">
+      </view>
+      <view
+            category="org.eclipse.tracecompass.incubator.internal.dpdk.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.ui.ethdev.throughput.bps.NicQueueThroughputBpsView"
+            id="org.eclipse.tracecompass.incubator.dpdk.ethdev.throughput.bps.view"
+            name="Ethernet Throughput View (BPS)"
             restorable="true">
       </view>
    </extension>
