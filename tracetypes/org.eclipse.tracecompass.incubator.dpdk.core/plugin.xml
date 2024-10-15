@@ -21,6 +21,15 @@
                class="org.eclipse.tracecompass.incubator.dpdk.core.trace.DpdkTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.analysis.DpdkEthdevSpinAnalysisModule"
+            id="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.analysis"
+            name="DPDK Ethernet Spin Analysis">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.dpdk.core.trace.DpdkTrace">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
@@ -35,6 +44,10 @@
       <dataProviderFactory
             class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis.DpdkEthdevThroughputPpsDataProviderFactory"
             id="org.eclipse.tracecompass.incubator.dpdk.ethdev.throughput.pps.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.analysis.DpdkEthdevSpinDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.dataprovider">
       </dataProviderFactory>
    </extension>
    <extension
