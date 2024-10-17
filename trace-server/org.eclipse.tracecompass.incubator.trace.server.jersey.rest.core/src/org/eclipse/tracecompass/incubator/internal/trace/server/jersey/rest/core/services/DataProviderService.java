@@ -47,8 +47,10 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MARKER_SET_ID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_OUTPUTID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_PARAMETERS;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_TYPE_ID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_PROVIDER;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_CONFIGURATION;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_PROVIDER;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_TRACE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.OCG;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ONE_OF;
@@ -139,10 +141,14 @@ import org.eclipse.tracecompass.internal.tmf.core.markers.MarkerSet;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisManager;
+import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
+import org.eclipse.tracecompass.tmf.core.config.ITmfDataProviderConfigurator;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
@@ -252,16 +258,11 @@ public class DataProviderService {
         if (experiment == null) {
             return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
         }
-        List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(experiment);
-        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
-        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.XY)));
 
-        Optional<IDataProviderDescriptor> provider = list.stream().filter(p -> p.getId().equals(outputId)).findFirst();
-
-        if (provider.isPresent()) {
-            return Response.ok(provider.get()).build();
+        IDataProviderDescriptor provider = getDescriptor(experiment, outputId);
+        if (provider != null) {
+            return Response.ok(provider).build();
         }
-
         return Response.status(Status.NOT_FOUND).build();
     }
 
@@ -1158,17 +1159,27 @@ public class DataProviderService {
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId
             ) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("Get all configuration types for a given output").build(); //$NON-NLS-1$
-    }
 
-    private static Response validateParameters(String outputId, QueryParameters queryParameters) {
+        TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+        if (experiment == null) {
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        }
+
         if (outputId == null) {
             return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
         }
-        if (queryParameters == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+
+        IDataProviderDescriptor sourceDescriptor = getDescriptor(experiment, outputId);
+        IDataProviderFactory factory = manager.getFactory(outputId);
+        if (sourceDescriptor == null || factory == null) {
+            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_SUCH_PROVIDER).build();
         }
-        return null;
+
+        ITmfDataProviderConfigurator configurator = factory.getAdapter(ITmfDataProviderConfigurator.class);
+        if (configurator != null) {
+            return Response.ok(configurator.getConfigurationSourceTypes()).build();
+        }
+        return Response.ok(Collections.emptyList()).build();
     }
 
     /**
@@ -1195,7 +1206,33 @@ public class DataProviderService {
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("Get a configuration type for a given output and typeId").build(); //$NON-NLS-1$
+
+        TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+        if (experiment == null) {
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        }
+
+        if (outputId == null) {
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
+        }
+
+        IDataProviderDescriptor sourceDescriptor = getDescriptor(experiment, outputId);
+        IDataProviderFactory factory = manager.getFactory(outputId);
+        if (sourceDescriptor == null || factory == null) {
+            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_SUCH_PROVIDER).build();
+        }
+
+        ITmfDataProviderConfigurator configurator = factory.getAdapter(ITmfDataProviderConfigurator.class);
+        if (configurator == null) {
+            return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_SUCH_PROVIDER).build();
+        }
+
+        Optional<ITmfConfigurationSourceType> optional = configurator.getConfigurationSourceTypes().stream().filter(type -> type.getId().equals(typeId)).findAny();
+
+        if (!optional.isPresent()) {
+            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+        }
+        return Response.ok(optional.get()).build();
     }
 
     /**
@@ -1210,6 +1247,7 @@ public class DataProviderService {
      *            the query parameters used to create a data provider
      * @return a list of data provider descriptors
      */
+    @SuppressWarnings("null")
     @POST
     @Path("/{outputId}")
     @Tag(name = OCG)
@@ -1227,7 +1265,40 @@ public class DataProviderService {
                 @RequestBody(description = CFG_CREATE_DESC + " " + CFG_KEYS_DESC, content = {
                         @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters.class))
                 }, required = true) ConfigurationQueryParameters queryParameters) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("POST a configuration to a given output to create derived output").build(); //$NON-NLS-1$
+
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#createDataProvider") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
+
+            Response errorResponse = validateOutputConfigParameters(outputId, queryParameters);
+            if (errorResponse != null) {
+                return errorResponse;
+            }
+
+            IDataProviderFactory factory = manager.getFactory(outputId);
+            if (factory == null) {
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_SUCH_PROVIDER).build();
+            }
+
+            ITmfDataProviderConfigurator configurator = factory.getAdapter(ITmfDataProviderConfigurator.class);
+            if (configurator == null) {
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_SUCH_PROVIDER).build();
+            }
+
+            String typeId = (String) queryParameters.getParameters().get(DataProviderParameterUtils.CONFIGURATION_TYPE_ID);
+            Optional<ITmfConfigurationSourceType> optional = configurator.getConfigurationSourceTypes().stream().filter(type -> type.getId().equals(typeId)).findAny();
+            if (!optional.isPresent()) {
+                return Response.status(Status.NOT_FOUND).entity("Configuration type doesn't exist").build(); //$NON-NLS-1$
+            }
+
+            IDataProviderDescriptor returnDescr = configurator.createDataProviderDescriptors(typeId, experiment, queryParameters.getParameters());
+            return Response.ok(returnDescr).build();
+        } catch (TmfConfigurationException e) {
+            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
     }
 
     /**
@@ -1245,7 +1316,7 @@ public class DataProviderService {
     @Path("/{outputId}/{derivedOutputId}")
     @Tag(name = OCG)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Delete a configuration instance of a given configuration source type", responses = {
+    @Operation(summary = "Delete a configuration instance of a given configuration type", responses = {
             @ApiResponse(responseCode = "200", description = "The derived data provider (and it's configuration) was successfully deleted", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Configuration.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class))),
@@ -1255,7 +1326,84 @@ public class DataProviderService {
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
             @Parameter(description = OUTPUT_ID) @PathParam("derivedOutputId") String derivedOutputId) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("DELETE derived output").build(); //$NON-NLS-1$
+
+        if (outputId == null) {
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID + " (parent)").build(); //$NON-NLS-1$
+        }
+
+        if (derivedOutputId == null) {
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID + " (derived)").build(); //$NON-NLS-1$
+        }
+
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#removeDataProvider") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
+
+            IDataProviderDescriptor parentDescriptor = getDescriptor(experiment, outputId);
+            if (parentDescriptor == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER + " (source): " + outputId).build(); //$NON-NLS-1$
+            }
+
+            IDataProviderDescriptor derivedDescriptor = getDescriptor(experiment, derivedOutputId);
+            if (derivedDescriptor == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER + " (derived): " + derivedOutputId).build(); //$NON-NLS-1$
+            }
+
+            IDataProviderFactory factory = manager.getFactory(outputId);
+            if (factory == null) {
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_SUCH_PROVIDER).build();
+            }
+
+            ITmfDataProviderConfigurator configurator = factory.getAdapter(ITmfDataProviderConfigurator.class);
+            if (configurator == null) {
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_SUCH_PROVIDER).build();
+            }
+            configurator.removeDataProviderDescriptor(experiment, derivedDescriptor);
+            return Response.ok().build();
+        } catch (TmfConfigurationException e) {
+            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
     }
+
+    private static Response validateParameters(String outputId, QueryParameters queryParameters) {
+        if (outputId == null) {
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
+        }
+        if (queryParameters == null) {
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+        }
+        return null;
+    }
+
+    private static Response validateOutputConfigParameters(String outputId, ConfigurationQueryParameters queryParameters) {
+        if (outputId == null) {
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
+        }
+        if (queryParameters == null) {
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+        }
+
+        Map<String, Object> parameters = queryParameters.getParameters();
+        if (!(parameters.get(DataProviderParameterUtils.CONFIGURATION_TYPE_ID) instanceof String)){
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_TYPE_ID).build();
+        }
+        return null;
+    }
+
+    private static @Nullable IDataProviderDescriptor getDescriptor(@NonNull ITmfTrace experiment, @NonNull String outputId) {
+        List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(experiment);
+        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
+        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.XY)));
+
+        Optional<IDataProviderDescriptor> provider = list.stream().filter(p -> p.getId().equals(outputId)).findFirst();
+        if (provider.isPresent()) {
+            return provider.get();
+        }
+        return null;
+    }
+
 
 }
