@@ -13,11 +13,14 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.s
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
@@ -33,14 +36,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.ConfigurationQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ConfigurationManagerService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TmfConfigurationSourceTypeStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TmfConfigurationStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.config.TestSchemaConfigurationSource.Parameters;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigParamDescriptor;
@@ -50,6 +57,11 @@ import org.junit.After;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+
 /**
  * Basic test for the {@link ConfigurationManagerService}.
  *
@@ -58,6 +70,7 @@ import org.osgi.framework.Bundle;
 @SuppressWarnings("restriction")
 public class ConfigurationManagerServiceTest extends RestServerTest {
 
+    private static final Bundle TEST_BUNDLE = Platform.getBundle("org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests");
     private static final Bundle XML_CORE_TESTS = Platform.getBundle("org.eclipse.tracecompass.tmf.analysis.xml.core.tests");
 
     private static final String UNKNOWN_TYPE = "test-test-test";
@@ -65,6 +78,7 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
     private static final String PATH_VALID = "test_xml_files/test_valid/";
     private static final String PATH = "path";
     private static final String XML_ANALYSIS_TYPE_ID = "org.eclipse.tracecompass.tmf.core.config.xmlsourcetype";
+    private static final String CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID = "org.eclipse.tracecompass.tmf.core.config.testschemasourcetype";
     private static final String EXPECTED_TYPE_NAME = "XML Data-driven analyses"; //$NON-NLS-1$
     private static final String EXPECTED_TYPE_DESCRIPTION = "Data-driven analyses described in XML"; //$NON-NLS-1$
     private static final String EXPECTED_KEY_NAME = "path";
@@ -78,6 +92,12 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
     private static final String EXPECTED_CONFIG_DESCRIPTION = "XML Data-driven analysis: " + VALID_NAME;
     private static final String PATH_TO_INVALID_PATH = getPath(PATH_INVALID + INVALID_XML_FILE);
     private static final String PATH_TO_VALID_PATH = getPath(PATH_VALID + VALID_XML_FILE);
+    private static final String CONFIG_FOLDER_NAME = "config";
+    private static final String VALID_JSON_FILENAME = "custom-execution-analysis.json";
+
+    private static final String EXPECTED_JSON_CONFIG_NAME = "My Config Name";
+    private static final String EXPECTED_JSON_CONFIG_DESCRIPTION = "My Config Description";
+    private static final String EXPECTED_JSON_CONFIG_ID = "My Config Id";
 
     private static final GenericType<TmfConfigurationStub> CONFIGURATION = new GenericType<>() { };
     private static final GenericType<List<TmfConfigurationStub>> LIST_CONFIGURATION_TYPE = new GenericType<>() { };
@@ -142,6 +162,14 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
         assertEquals(EXPECTED_DATA_TYPE, desc.getDataType());
         assertEquals(EXPECTED_PARAM_DESCRIPTION, desc.getDescription());
         assertTrue(desc.isRequired());
+
+        // Verify configuration source type with schema
+        Optional<TmfConfigurationSourceTypeStub> optional2 = configurations.stream().filter(config -> config.getId().equals("org.eclipse.tracecompass.tmf.core.config.testschemasourcetype")).findAny();
+        assertTrue(optional2.isPresent());
+        TmfConfigurationSourceTypeStub type2 = optional2.get();
+        JsonNode schema = type2.getSchema();
+        // Verify that schema exists
+        assertNotNull(schema);
     }
 
     /**
@@ -191,6 +219,37 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
         try (Response response = deleteConfig(EXPECTED_CONFIG_ID)) {
             assertEquals(200, response.getStatus());
             assertEquals("XML configuration should have been deleted", 0, getConfigurations().size());
+        }
+    }
+
+    /**
+     * Test POST to create configurations using a schema.
+     *
+     * @throws IOException
+     *             if exception occurs
+     * @throws URISyntaxException
+     *             if exception occurs
+     */
+    @Test
+    public void testCreateGetAndDeleteSchema() throws URISyntaxException, IOException {
+        try (Response response = createJsonConfig(VALID_JSON_FILENAME)) {
+            assertEquals(200, response.getStatus());
+            TmfConfigurationStub config = response.readEntity(CONFIGURATION);
+            assertNotNull(config);
+            validateJsonConfig(config);
+        }
+
+        List<TmfConfigurationStub> configurations = getConfigurations(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID);
+        assertEquals("Valid JSON configuration should be added", 1, configurations.size());
+        assertTrue("Valid configuration instance should exist", configurations.stream().anyMatch(conf -> conf.getName().equals(EXPECTED_JSON_CONFIG_NAME)));
+
+        TmfConfigurationStub config = getConfiguration(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID, configurations.get(0).getId());
+        assertNotNull(config);
+        assertTrue("JSON configuration instance should exist", config.getId().equals(EXPECTED_JSON_CONFIG_ID));
+
+        try (Response response = deleteConfig(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID, config.getId())) {
+            assertEquals(200, response.getStatus());
+            assertEquals("JSON configuration should have been deleted", 0, getConfigurations(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID).size());
         }
     }
 
@@ -307,7 +366,26 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
             parameters.put(PATH, path);
         }
         return endpoint.request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+                .post(Entity.json(new ConfigurationQueryParameters(parameters)));
+    }
+
+    private static Response createJsonConfig(String jsonFileName) throws URISyntaxException, IOException {
+        String typeId = CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID;
+        WebTarget endpoint = getApplicationEndpoint()
+                .path(CONFIG_PATH)
+                .path(TYPES_PATH)
+                .path(typeId)
+                .path(CONFIG_INSTANCES_PATH);
+
+        IPath defaultPath = new org.eclipse.core.runtime.Path(CONFIG_FOLDER_NAME).append(jsonFileName);
+        URL url = FileLocator.find(TEST_BUNDLE, defaultPath, null);
+            File jsonFile = new File(FileLocator.toFileURL(url).toURI());
+            try (InputStream inputStream = new FileInputStream(jsonFile)) {
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> params = mapper.readValue(inputStream, new TypeReference<Map<String, Object>>() {});
+                return endpoint.request(MediaType.APPLICATION_JSON)
+                        .post(Entity.json(new ConfigurationQueryParameters(params)));
+            }
     }
 
     private static Response updateConfig(String path, String id) {
@@ -339,32 +417,57 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
             parameters.put(PATH, path);
         }
         return endpoint.request(MediaType.APPLICATION_JSON)
-                .put(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
+                .put(Entity.json(new ConfigurationQueryParameters(parameters)));
     }
 
     private static Response deleteConfig(String id) {
+        return deleteConfig(null, id);
+    }
+
+    private static Response deleteConfig(String type, String id) {
+        String requestType = type;
+        if (requestType == null) {
+            requestType = XML_ANALYSIS_TYPE_ID;
+        }
         WebTarget endpoint = getApplicationEndpoint()
                 .path(CONFIG_PATH)
                 .path(TYPES_PATH)
-                .path(XML_ANALYSIS_TYPE_ID)
+                .path(requestType)
                 .path(CONFIG_INSTANCES_PATH);
         return endpoint.path(id).request().delete();
     }
 
     private static List<TmfConfigurationStub> getConfigurations() {
+        return getConfigurations(null);
+    }
+
+    private static List<TmfConfigurationStub> getConfigurations(@Nullable String type) {
+        String requestType = type;
+        if (requestType == null) {
+            requestType = XML_ANALYSIS_TYPE_ID;
+        }
+
         WebTarget endpoint = getApplicationEndpoint()
                 .path(CONFIG_PATH)
                 .path(TYPES_PATH)
-                .path(XML_ANALYSIS_TYPE_ID)
+                .path(requestType)
                 .path(CONFIG_INSTANCES_PATH);
         return endpoint.request().get(LIST_CONFIGURATION_TYPE);
     }
 
     private static TmfConfigurationStub getConfiguration(String configId) {
+        return getConfiguration(null, configId);
+    }
+
+    private static TmfConfigurationStub getConfiguration(String type, String configId) {
+        String requestType = type;
+        if (requestType == null) {
+            requestType = XML_ANALYSIS_TYPE_ID;
+        }
         WebTarget endpoint = getApplicationEndpoint()
                 .path(CONFIG_PATH)
                 .path(TYPES_PATH)
-                .path(XML_ANALYSIS_TYPE_ID)
+                .path(requestType)
                 .path(CONFIG_INSTANCES_PATH)
                 .path(configId);
         return endpoint.request().get(CONFIGURATION);
@@ -377,5 +480,23 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
         assertEquals(XML_ANALYSIS_TYPE_ID, config.getSourceTypeId());
         assertEquals(EXPECTED_CONFIG_DESCRIPTION, config.getDescription());
         assertTrue(config.getParameters().isEmpty());
+    }
+
+    @SuppressWarnings("null")
+    private static void validateJsonConfig(ITmfConfiguration config) {
+        assertEquals(EXPECTED_JSON_CONFIG_NAME, config.getName());
+        assertEquals(EXPECTED_JSON_CONFIG_ID, config.getId());
+        assertEquals(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID, config.getSourceTypeId());
+        assertEquals(EXPECTED_JSON_CONFIG_DESCRIPTION, config.getDescription());
+        Map<String, Object> parameters = config.getParameters();
+        assertNotNull(parameters);
+        String json = new Gson().toJson(parameters);
+        Parameters paramObj = new Gson().fromJson(json, Parameters.class);
+        assertNotNull(paramObj);
+        assertNotNull(paramObj.getCpus());
+        assertEquals(3, paramObj.getCpus().size());
+        assertEquals("(123)345-567", paramObj.getPhone());
+        assertEquals("my-thread", paramObj.getThread());
+        assertNull(paramObj.getLabel());
     }
 }

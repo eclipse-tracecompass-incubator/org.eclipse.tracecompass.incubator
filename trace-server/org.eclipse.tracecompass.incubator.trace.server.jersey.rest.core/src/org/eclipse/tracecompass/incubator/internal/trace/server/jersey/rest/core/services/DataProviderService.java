@@ -12,6 +12,9 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ANN;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_CREATE_DESC;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_KEYS_DESC;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_TYPE_ID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COLUMNS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COLUMNS_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CONSISTENT_PARENT;
@@ -45,7 +48,9 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_OUTPUTID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_PARAMETERS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_PROVIDER;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_CONFIGURATION;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_TRACE;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.OCG;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ONE_OF;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.OUTPUT_ID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.PROVIDER_NOT_FOUND;
@@ -79,6 +84,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -114,6 +120,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.VirtualTableResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.XYResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.XYTreeResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.ConfigurationQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TableColumnHeader;
@@ -1129,6 +1136,31 @@ public class DataProviderService {
         }
     }
 
+    /**
+     * Query the data provider for a list of available configuration source
+     * types.
+     *
+     * @param expUUID
+     *            desired experiment UUID
+     * @param outputId
+     *            Output ID for the data provider to query
+     * @return list of available configuration source types
+     */
+    @GET
+    @Path("/{outputId}/configTypes/")
+    @Tag(name = OCG)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get the list of configuration types defined on the server for a given output and experiment", responses = {
+            @ApiResponse(responseCode = "200", description = "Returns a list of configuration types that this output supports.", content = @Content(array = @ArraySchema(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationSourceType.class)))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+    })
+    public Response getConfigurationTypes(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId
+            ) {
+        return Response.status(Status.NOT_IMPLEMENTED).entity("Get all configuration types for a given output").build(); //$NON-NLS-1$
+    }
+
     private static Response validateParameters(String outputId, QueryParameters queryParameters) {
         if (outputId == null) {
             return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
@@ -1138,4 +1170,92 @@ public class DataProviderService {
         }
         return null;
     }
+
+    /**
+     * Query the provider to get one selected configuration source type.
+     *
+     * @param expUUID
+     *            desired experiment UUID
+     * @param outputId
+     *            Output ID for the data provider to query
+     * @param typeId
+     *            the configuration source type ID
+     * @return a configuration source type
+     */
+    @GET
+    @Path("/{outputId}/configTypes/{typeId}")
+    @Tag(name = OCG)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get a single configuration source type defined on the server for a given data provider and experiment.", responses = {
+            @ApiResponse(responseCode = "200", description = "Returns a single configuration source type", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationSourceType.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class))),
+    })
+    public Response getConfigurationType(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId) {
+        return Response.status(Status.NOT_IMPLEMENTED).entity("Get a configuration type for a given output and typeId").build(); //$NON-NLS-1$
+    }
+
+    /**
+     * POST a custom configuration to the data provider to create derived data
+     * providers.
+     *
+     * @param expUUID
+     *            desired experiment UUID
+     * @param outputId
+     *            Output ID for the data provider to query
+     * @param queryParameters
+     *            the query parameters used to create a data provider
+     * @return a list of data provider descriptors
+     */
+    @POST
+    @Path("/{outputId}")
+    @Tag(name = OCG)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get the list of outputs for this configuration", responses = {
+            @ApiResponse(responseCode = "200", description = "Returns a list of output provider descriptors", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DataProvider.class)))),
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class))),
+    })
+    public Response createDataProvider(
+                @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+                @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+                @RequestBody(description = CFG_CREATE_DESC + " " + CFG_KEYS_DESC, content = {
+                        @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters.class))
+                }, required = true) ConfigurationQueryParameters queryParameters) {
+        return Response.status(Status.NOT_IMPLEMENTED).entity("POST a configuration to a given output to create derived output").build(); //$NON-NLS-1$
+    }
+
+    /**
+     * DELETE a derived data provider from created by a given data provider
+     *
+     * @param expUUID
+     *            desired experiment UUID
+     * @param outputId
+     *            Output ID for the data provider to query
+     * @param derivedOutputId
+     *            Output ID for the data provider to delete
+     * @return status and the deleted configuration instance, if successful
+     */
+    @DELETE
+    @Path("/{outputId}/{derivedOutputId}")
+    @Tag(name = OCG)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Delete a configuration instance of a given configuration source type", responses = {
+            @ApiResponse(responseCode = "200", description = "The derived data provider (and it's configuration) was successfully deleted", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Configuration.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to delete output", content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response deleteDerivedOutput(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @Parameter(description = OUTPUT_ID) @PathParam("derivedOutputId") String derivedOutputId) {
+        return Response.status(Status.NOT_IMPLEMENTED).entity("DELETE derived output").build(); //$NON-NLS-1$
+    }
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Ericsson
+ * Copyright (c) 2023, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -19,8 +19,6 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_UPDATE_DESC;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
 
-import java.util.Map;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -33,9 +31,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.ConfigurationQueryParameters;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSource;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceManager;
@@ -132,6 +128,7 @@ public class ConfigurationManagerService {
      *            the query parameters
      * @return status and collection of configuration descriptor, if successful
      */
+    @SuppressWarnings("null")
     @POST
     @Path("/types/{typeId}/configs")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -145,8 +142,8 @@ public class ConfigurationManagerService {
     public Response postConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
             @RequestBody(description = CFG_CREATE_DESC + " " + CFG_KEYS_DESC, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + CFG_PATH_EX +
-                            "}}"), schema = @Schema(implementation = ConfigurationQueryParameters.class))
-            }, required = true) QueryParameters queryParameters) {
+                            "}}"), schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters.class))
+            }, required = true) ConfigurationQueryParameters queryParameters) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
             return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
@@ -155,11 +152,8 @@ public class ConfigurationManagerService {
             return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
         }
 
-        @SuppressWarnings("null")
-        @NonNull Map<@NonNull String, @NonNull Object> params = queryParameters.getParameters();
-
         try {
-            ITmfConfiguration config = configurationSource.create(params);
+            ITmfConfiguration config = configurationSource.create(queryParameters.getParameters());
             return Response.ok(config).build();
         } catch (TmfConfigurationException e) {
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -219,12 +213,13 @@ public class ConfigurationManagerService {
             @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to update configuration instance", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @SuppressWarnings("null")
     public Response putConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
             @Parameter(description = CFG_CONFIG_ID) @PathParam("configId") String configId,
             @RequestBody(description = CFG_UPDATE_DESC + " " + CFG_KEYS_DESC, content = {
                     @Content(examples = @ExampleObject("{\"parameters\":{" + CFG_PATH_EX +
-                            "}}"), schema = @Schema(implementation = ConfigurationQueryParameters.class))
-            }, required = true) QueryParameters queryParameters) {
+                            "}}"), schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters.class))
+            }, required = true) ConfigurationQueryParameters queryParameters) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
             return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
@@ -237,10 +232,8 @@ public class ConfigurationManagerService {
             return Response.status(Status.NOT_FOUND).entity("Configuration instance doesn't exist for type " + typeId).build(); //$NON-NLS-1$
         }
 
-        @SuppressWarnings("null")
-        @NonNull Map<@NonNull String, @NonNull Object> params = queryParameters.getParameters();
         try {
-            ITmfConfiguration config = configurationSource.update(configId, params);
+            ITmfConfiguration config = configurationSource.update(configId, queryParameters.getParameters());
             return Response.ok(config).build();
         } catch (TmfConfigurationException e) {
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();

@@ -21,11 +21,13 @@ import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcess;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcessPointer;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ObjectHandle;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.trace.Ros2Trace;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.trace.layout.IRos2EventLayout;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
+import org.osgi.framework.Version;
 
 /**
  * Abstract ROS 2 state provider with some common utilities.
@@ -34,8 +36,17 @@ import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
  */
 public abstract class AbstractRos2StateProvider extends AbstractTmfStateProvider {
 
+    /**
+     * First tracetools version that includes the source_timestamp for a
+     * published message in the rmw_publish tracepoint. See:
+     * https://github.com/ros2/ros2_tracing/pull/74.
+     */
+    private static final @NonNull Version RMW_SOURCE_TIMESTAMP_MINIMUM_VERSION = new Version("8.0.0"); //$NON-NLS-1$
+
     /** The event layout */
     protected static final IRos2EventLayout LAYOUT = IRos2EventLayout.getDefault();
+
+    private final boolean fIsPubSourceTimestampAvailableFromRmw;
 
     /**
      * Constructor
@@ -47,6 +58,16 @@ public abstract class AbstractRos2StateProvider extends AbstractTmfStateProvider
      */
     protected AbstractRos2StateProvider(ITmfTrace trace, String id) {
         super(Objects.requireNonNull(trace), Objects.requireNonNull(id));
+        // Version in trace needs to be >= the minimum version
+        fIsPubSourceTimestampAvailableFromRmw = ((Ros2Trace) getTrace()).getTracetoolsVersion().compareTo(RMW_SOURCE_TIMESTAMP_MINIMUM_VERSION) >= 0;
+    }
+
+    /**
+     * @return whether the source_timestamp value on the publication side is
+     *         available from the rmw layer; if not, it is available from DDS
+     */
+    protected boolean isPubSourceTimestampAvailableFromRmw() {
+        return fIsPubSourceTimestampAvailableFromRmw;
     }
 
     /**
