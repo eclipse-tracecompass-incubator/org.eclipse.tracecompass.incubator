@@ -34,11 +34,23 @@ public final class EndpointConstants {
     /** Error message returned for a request with missing parameters */
     public static final String MISSING_PARAMETERS = "Missing query parameters"; //$NON-NLS-1$
 
+    /** Error message returned for a request with configuration type ID */
+    public static final String MISSING_TYPE_ID = "Missing configuration type ID"; //$NON-NLS-1$
+
     /** Error message returned for a request with invalid parameters */
     public static final String INVALID_PARAMETERS = "Invalid query parameters"; //$NON-NLS-1$
 
     /** Error message returned for a request for a non-existing data provider */
     public static final String NO_PROVIDER = "Analysis cannot run"; //$NON-NLS-1$
+
+    /** Error message returned for a request for trace that doesn't exist */
+    public static final String NO_SUCH_CONFIGURATION_TYPE = "No such configuration type"; //$NON-NLS-1$
+
+    /** Error message returned for a request for a non-existing derived data provider */
+    public static final String NO_SUCH_DERIVED_PROVIDER = "Derived data provider doesn't exist"; //$NON-NLS-1$
+
+    /** Error message returned for a request for a non-existing data provider */
+    public static final String NO_SUCH_PROVIDER = "Data provider doesn't exist"; //$NON-NLS-1$
 
     /** Error message returned for a request for trace that doesn't exist */
     public static final String NO_SUCH_TRACE = "No such trace"; //$NON-NLS-1$
@@ -166,6 +178,7 @@ public final class EndpointConstants {
     static final String TRACE_CREATION_FAILED = "Trace resource creation failed"; //$NON-NLS-1$
     static final String TREE_ENTRIES = "Unique entry point for output providers, to get the tree of visible entries"; //$NON-NLS-1$
     static final String NO_SUCH_CONFIGURATION = "No such configuration source type or configuration instance"; //$NON-NLS-1$
+    static final String PROVIDER_CONFIG_NOT_FOUND = "Experiment, output provider or configuration type not found"; //$NON-NLS-1$
 
     private EndpointConstants() {
         // private constructor
