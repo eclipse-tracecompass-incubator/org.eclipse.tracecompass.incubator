@@ -33,14 +33,18 @@ public class DataProviderDescriptorStub implements Serializable {
      * Generated Serial Version UID
      */
     private static final long serialVersionUID = -6380168132081665386L;
+    private final String fParentId;
     private final String fId;
     private final String fName;
     private final String fDescription;
     private final String fTypeId;
+    private final TmfConfigurationStub fConfiguration;
 
     /**
      * {@link JsonCreator} Constructor for final fields
      *
+     * @param parentId
+     *            the parentId
      * @param id
      *            the id
      * @param name
@@ -49,17 +53,32 @@ public class DataProviderDescriptorStub implements Serializable {
      *            the help text
      * @param type
      *            the type id
+     * @param configuration
+     *            the configuration
      *
      */
     @JsonCreator
-    public DataProviderDescriptorStub(@JsonProperty("id") String id,
+    public DataProviderDescriptorStub(@JsonProperty("parentId") String parentId,
+            @JsonProperty("id") String id,
             @JsonProperty("name") String name,
             @JsonProperty("description") String description,
-            @JsonProperty("type") String type) {
+            @JsonProperty("type") String type,
+            @JsonProperty("configuration") TmfConfigurationStub configuration) {
+        fParentId = parentId;
         fId = id;
         fName = name;
         fDescription = description;
         fTypeId = type;
+        fConfiguration = configuration;
+    }
+
+    /**
+     * Gets the parent ID
+     *
+     * @return the parent ID
+     */
+    public String getParentId() {
+        return fParentId;
     }
 
     /**
@@ -98,15 +117,24 @@ public class DataProviderDescriptorStub implements Serializable {
         return fTypeId;
     }
 
+    /**
+     * Gets the configuration
+     *
+     * @return the type ID
+     */
+    public TmfConfigurationStub getConfiguration() {
+        return fConfiguration;
+    }
+
     @Override
     public String toString() {
-        return "DataProviderDescriptorStub[fId=" + getId() + ", fName=" + fName + ", fDescription=" + fDescription
-                + ", fTypeId=" + fTypeId+ "]";
+        return "DataProviderDescriptorStub[fParentId=" + getParentId() + ", fId=" + getId() + ", fName=" + fName + ", fDescription=" + fDescription
+                + ", fTypeId=" + fTypeId + ", fConfiguration=" + getConfiguration() + "]";
         }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fId, fName, fDescription, fTypeId);
+        return Objects.hash(fParentId, fId, fName, fDescription, fTypeId, fConfiguration);
     }
 
     @Override
@@ -121,6 +149,9 @@ public class DataProviderDescriptorStub implements Serializable {
 
         if (obj instanceof DataProviderDescriptorStub) {
             DataProviderDescriptorStub other = (DataProviderDescriptorStub) obj;
+            if (!Objects.equals(fParentId, other.fParentId)) {
+                return false;
+            }
             if (!Objects.equals(fId, other.fId)) {
                 return false;
             }
@@ -130,7 +161,10 @@ public class DataProviderDescriptorStub implements Serializable {
             if (!Objects.equals(fDescription, other.fDescription)) {
                 return false;
             }
-            if (Objects.equals(fTypeId, other.fTypeId)) {
+            if (!Objects.equals(fTypeId, other.fTypeId)) {
+                return false;
+            }
+            if (Objects.equals(fConfiguration, other.fConfiguration)) {
                 return true;
             }
         }

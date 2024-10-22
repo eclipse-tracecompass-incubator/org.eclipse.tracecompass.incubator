@@ -13,7 +13,12 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.u
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,6 +35,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.ConfigurationQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.TraceServerConfiguration;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
@@ -38,11 +46,15 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp.TestWebApplication;
 import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
+import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.osgi.framework.Bundle;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.common.collect.ImmutableList;
 
@@ -56,6 +68,9 @@ import com.google.common.collect.ImmutableList;
 public abstract class RestServerTest {
     private static final String SERVER = "http://localhost:8378/tsp/api"; //$NON-NLS-1$
     private static final WebApplication fWebApp = new TestWebApplication(new TraceServerConfiguration(TraceServerConfiguration.TEST_PORT, false, null, null));
+    private static final Bundle TEST_BUNDLE = Platform.getBundle("org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests");
+    private static final String CONFIG_FOLDER_NAME = "config";
+
     /**
      * Traces endpoint path (relative to application).
      */
@@ -121,6 +136,11 @@ public abstract class RestServerTest {
     public static final String TABLE_LINE_PATH = "lines";
 
     /**
+     * ConfigTypes path
+     */
+    public static final String DP_CONFIG_TYPES_PATH = "configTypes";
+
+    /**
      * <b>name</b> constant
      */
     public static final String NAME = "name";
@@ -143,6 +163,11 @@ public abstract class RestServerTest {
      * Configuration instances path segment
      */
     public static final String CONFIG_INSTANCES_PATH = "configs";
+
+    /**
+     * Filename with valid json configuration
+     */
+    public static final String VALID_JSON_FILENAME = "custom-execution-analysis.json";
 
     private static final GenericType<Set<TraceModelStub>> TRACE_MODEL_SET_TYPE = new GenericType<Set<TraceModelStub>>() {
     };
@@ -278,18 +303,18 @@ public abstract class RestServerTest {
         ARM_64_KERNEL_STUB = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, ARM_64_KERNEL_PROPERTIES);
 
         ImmutableList.Builder<DataProviderDescriptorStub> b = ImmutableList.builder();
-        b.add(new DataProviderDescriptorStub("org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack",
+        b.add(new DataProviderDescriptorStub(null, "org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack",
                 "LTTng-UST CallStack - Latency vs Time",
                 "Show latencies provided by Analysis module: LTTng-UST CallStack",
-                ProviderType.TREE_TIME_XY.name()));
-        b.add(new DataProviderDescriptorStub("org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider",
+                ProviderType.TREE_TIME_XY.name(), null));
+        b.add(new DataProviderDescriptorStub(null,"org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider",
                 "Flame Chart",
                 "Show a call stack over time",
-                ProviderType.TIME_GRAPH.name()));
-        b.add(new DataProviderDescriptorStub("org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
+                ProviderType.TIME_GRAPH.name(), null));
+        b.add(new DataProviderDescriptorStub(null,"org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
                 "Histogram",
                 "Show a histogram of number of events to time for a trace",
-                ProviderType.TREE_TIME_XY.name()));
+                ProviderType.TREE_TIME_XY.name(), null));
         EXPECTED_DATA_PROVIDER_DESCRIPTOR = b.build();
     }
 
@@ -464,8 +489,7 @@ public abstract class RestServerTest {
     /**
      * Get the {@link WebTarget} for the XY series endpoint.
      *
-     * @param expUUID
-     *            Experiment UUID
+     * @param expUUID     *            Experiment UUID
      * @param dataProviderId
      *            Data provider ID
      * @return The XY series endpoint
@@ -477,6 +501,39 @@ public abstract class RestServerTest {
                 .path(XY_PATH)
                 .path(dataProviderId)
                 .path(XY_SERIES_PATH);
+    }
+
+    /**
+     * Get the {@link WebTarget} for the configTypes endpoint of a given data provider.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree configTypes endpoint
+     */
+    public static WebTarget getConfigEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(dataProviderId)
+                .path(DP_CONFIG_TYPES_PATH);
+    }
+
+    /**
+     * Get the {@link WebTarget} for data provide creation endpoint of a given data provider.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree configTypes endpoint
+     */
+    public static WebTarget getDpCreationEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(dataProviderId);
     }
 
     /**
@@ -558,5 +615,61 @@ public abstract class RestServerTest {
         Response response = application.path(EXPERIMENTS).request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
         assertEquals("Failed to POST experiment " + name + ", error code=" + response.getStatus(), 200, response.getStatus());
         return response.readEntity(ExperimentModelStub.class);
+    }
+
+    /**
+     * @param dpConfigEndpoint
+     *            the dp config endpoint to create a derived data provider
+     * @param configuration
+     *            the configuration with input parameters to post
+     * @return the derived data provider descriptor stub
+     */
+    @SuppressWarnings("null")
+    public static DataProviderDescriptorStub assertDpPost(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
+        try (Response response = dpConfigEndpoint.request().post(Entity.json(
+                new ConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())))) {
+            int code = response.getStatus();
+            assertEquals("Failed to POST " + configuration.getName() + ", error code=" + code, 200, code);
+            DataProviderDescriptorStub result = response.readEntity(DataProviderDescriptorStub.class);
+            assertEquals(configuration.getName(), result.getConfiguration().getName());
+            assertEquals(configuration.getDescription(), result.getConfiguration().getDescription());
+            assertEquals(configuration.getSourceTypeId(), result.getConfiguration().getSourceTypeId());
+            assertEquals(configuration.getParameters(), result.getConfiguration().getParameters());
+            return result;
+        }
+    }
+
+    /**
+     * Request to create a derived DP but will cause errors
+     *
+     * @param dpConfigEndpoint
+     *            the dp config endpoint to create a derived data provider
+     * @param configuration
+     *            the configuration with input parameters to post
+     * @return error code
+     */
+    @SuppressWarnings("null")
+    public static Response assertDpPostWithErrors(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
+        return dpConfigEndpoint.request().post(Entity.json(
+                new ConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())));
+    }
+
+    /**
+     * @param jsonFileName
+     *            the json file to read in config folder
+     * @return json parameters as Map<String, Object>
+     * @throws IOException
+     *             if such exception occurs
+     * @throws URISyntaxException
+     *             if such exception occurs
+     */
+    public static Map<String, Object> readParametersFromJson(String jsonFileName) throws IOException, URISyntaxException {
+        IPath defaultPath = new org.eclipse.core.runtime.Path(CONFIG_FOLDER_NAME).append(jsonFileName);
+        URL url = FileLocator.find(TEST_BUNDLE, defaultPath, null);
+        File jsonFile = new File(FileLocator.toFileURL(url).toURI());
+        try (InputStream inputStream = new FileInputStream(jsonFile)) {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(inputStream, new TypeReference<Map<String, Object>>() {});
+        }
     }
 }

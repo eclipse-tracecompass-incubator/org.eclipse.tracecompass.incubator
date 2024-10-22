@@ -18,6 +18,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,18 +29,24 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ColumnHeaderEntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryHeaderStub;
@@ -48,6 +57,7 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TableColumnsOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TableLinesOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TableModelStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TestDataProviderFactory;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgEntryModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgStatesOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgTooltipOutputResponseStub;
@@ -56,6 +66,7 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphRowStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphStateStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TmfConfigurationSourceTypeStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TreeOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyEntryModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyEntryStub;
@@ -63,9 +74,12 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XySeriesStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyTreeOutputResponseStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.config.TestSchemaConfigurationSource;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp.TestDataProviderService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
+import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
+import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.junit.Test;
 
@@ -113,12 +127,20 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final String DEEP_SEARCH = "DEEP";
     private static final String FILTER_QUERY = "test";
     private static final int DIMMED_FILTER_TAG = 1;
+    private static final String UNKNOWN_EXP_UUID = UUID.nameUUIDFromBytes(Objects.requireNonNull("unknown.experiment.id".toString().getBytes(Charset.defaultCharset()))).toString();
+    private static final String UNKNOWN_DP_ID = "unknown.dp.id";
+    private static final String UNKNOWN_TYPE_ID = "unknown.config.type.id";
+
+    private static final String CONFIG_NAME = "My configuration";
+    private static final String CONFIG_DESCRIPTION = "My description";
 
     private static final  List<EntryHeaderStub> EXPECTED_XY_TREE_HEADERS = ImmutableList.of(new EntryHeaderStub("Process", "", null), new EntryHeaderStub("TID", "", null), new EntryHeaderStub("%", "", null), new EntryHeaderStub("Time", "", null));
 
     private static List<String> STATISTICS_TREE_HEADERS = ImmutableList.of("Label", "Minimum", "Maximum", "Average", "Std Dev", "Count", "Total", "Min Time Range", "Max Time Range");
     private static List<String> SAMPLE_TOTAL_STATS_LABELS = ImmutableList.of("ust", "1 ns", "5.979 s", "10.845 ms", "196.299 ms", "1948", "21.127 s", "[1450193745774189602,1450193745774189603]", "[1450193722283061910,1450193728261604656]");
     private static List<String> SAMPLE_SELECTION_STATS_LABELS = ImmutableList.of("Selection", "49.665 µs", "5.979 s", "11.388 ms", "201.201 ms", "1854", "21.113 s", "[1450193730177271075,1450193730177320740]", "[1450193722283061910,1450193728261604656]");
+
+    private static final GenericType<List<TmfConfigurationSourceTypeStub>> DP_CONFIG_TYPES_SET_TYPE = new GenericType<List<TmfConfigurationSourceTypeStub>>() {};
 
     /**
      * Test getting the data provider descriptors
@@ -633,6 +655,250 @@ public class DataProviderServiceTest extends RestServerTest {
             if (treeResponse != null) {
                 treeResponse.close();
             }
+        }
+    }
+
+    /**
+     * Tests querying the data provider config types
+     */
+    @SuppressWarnings("null")
+    @Test
+    public void testDataProviderConfigTypes() {
+        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        WebTarget configTypesEndpoint = getConfigEndpoint(exp.getUUID().toString(), TestDataProviderFactory.ID);
+
+        // Get all config types
+        List<TmfConfigurationSourceTypeStub> configTypesListModel = configTypesEndpoint.request(MediaType.APPLICATION_JSON).get(DP_CONFIG_TYPES_SET_TYPE);
+        assertNotNull(configTypesListModel);
+        assertTrue(configTypesListModel.size() == 1);
+        Optional<TmfConfigurationSourceTypeStub> optional = configTypesListModel.stream().filter(config -> config.getId().equals(TestSchemaConfigurationSource.TYPE.getId())).findAny();
+        assertTrue(optional.isPresent());
+
+        // Test Valid config type ID
+        WebTarget singleTypeEndpoint = configTypesEndpoint.path(optional.get().getId());
+        TmfConfigurationSourceTypeStub singleConfigType = singleTypeEndpoint.request(MediaType.APPLICATION_JSON).get(TmfConfigurationSourceTypeStub.class);
+        assertNotNull(singleConfigType);
+        assertEquals(optional.get().getId(), singleConfigType.getId());
+
+        // Test config types for data provider that can't be configured
+        WebTarget configTypesEndpoint2 = getConfigEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
+        List<TmfConfigurationSourceTypeStub> emptyConfigTypesListModel = configTypesEndpoint2.request(MediaType.APPLICATION_JSON).get(DP_CONFIG_TYPES_SET_TYPE);
+        assertNotNull(emptyConfigTypesListModel);
+        assertTrue(emptyConfigTypesListModel.isEmpty());
+    }
+
+    /**
+     * Tests error cases when querying data provider config types
+     */
+    @Test
+    public void testDataProviderConfigTypesErrors() {
+        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        WebTarget configTypesEndpoint = getConfigEndpoint(UNKNOWN_EXP_UUID, TestDataProviderFactory.ID);
+
+        // Unknown experiment
+        try (Response response = configTypesEndpoint.request(MediaType.APPLICATION_JSON).get()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+        }
+
+        WebTarget singleTypeEndpoint = configTypesEndpoint.path(TestSchemaConfigurationSource.TYPE.getId());
+        try (Response response = singleTypeEndpoint.request(MediaType.APPLICATION_JSON).get()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+        }
+
+        // Unknown data provider
+        configTypesEndpoint = getConfigEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
+        try (Response response = configTypesEndpoint.request(MediaType.APPLICATION_JSON).get()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+        }
+
+        singleTypeEndpoint = configTypesEndpoint.path(TestSchemaConfigurationSource.TYPE.getId());
+        try (Response response = singleTypeEndpoint.request(MediaType.APPLICATION_JSON).get()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+        }
+
+        // Test config type is not applicable for another data provider
+        configTypesEndpoint = getConfigEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
+        singleTypeEndpoint = configTypesEndpoint.path(TestSchemaConfigurationSource.TYPE.getId());
+        try (Response response = singleTypeEndpoint.request(MediaType.APPLICATION_JSON).get()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+        }
+
+        configTypesEndpoint = getConfigEndpoint(exp.getUUID().toString(), TestDataProviderFactory.ID);
+        singleTypeEndpoint = configTypesEndpoint.path(UNKNOWN_TYPE_ID);
+        try (Response response = singleTypeEndpoint.request(MediaType.APPLICATION_JSON).get()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_CONFIGURATION_TYPE, response.readEntity(String.class));
+        }
+    }
+
+    /**
+     * Tests the creation and deletion of the derived data providers
+     *
+     * @throws URISyntaxException
+     *             if such error occurs
+     * @throws IOException
+     *             if such error occurs
+     */
+    @SuppressWarnings("null")
+    @Test
+    public void testCreationDeletionOfDerivedDataProviders() throws IOException, URISyntaxException {
+        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        WebTarget dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), TestDataProviderFactory.ID);
+        Map<String, Object> params = readParametersFromJson(VALID_JSON_FILENAME);
+        ITmfConfiguration configuration = new TmfConfiguration.Builder()
+                .setName(CONFIG_NAME)
+                .setDescription(CONFIG_DESCRIPTION)
+                .setSourceTypeId(TestSchemaConfigurationSource.TYPE.getId())
+                .setParameters(params)
+                .build();
+
+        // Successful creation
+        DataProviderDescriptorStub derivedDp = assertDpPost(dpCreationEndpoint, configuration);
+        assertNotNull(derivedDp);
+
+        // Successful deletion
+        WebTarget dpDeletionEndpoint = dpCreationEndpoint.path(derivedDp.getId());
+        try (Response response = dpDeletionEndpoint.request().delete()) {
+            assertNotNull(response);
+            assertEquals(Status.OK.getStatusCode(), response.getStatus());
+        }
+    }
+
+    /**
+     * Tests error cases when creating derived data providers
+     *
+     * @throws URISyntaxException
+     *             if such error occurs
+     * @throws IOException
+     *             if such error occurs
+     */
+    @SuppressWarnings("null")
+    @Test
+    public void testCreationOfDerivedDataProvidersErrors() throws IOException, URISyntaxException {
+        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        WebTarget dpCreationEndpoint = getDpCreationEndpoint(UNKNOWN_EXP_UUID, TestDataProviderFactory.ID);
+        Map<String, Object> params = readParametersFromJson(VALID_JSON_FILENAME);
+
+        TmfConfiguration.Builder builder = new TmfConfiguration.Builder()
+                .setName(CONFIG_NAME)
+                .setDescription(CONFIG_DESCRIPTION)
+                .setSourceTypeId(TestSchemaConfigurationSource.TYPE.getId())
+                .setParameters(params);
+        ITmfConfiguration configuration = builder.build();
+
+        // Unknown experiment
+        try (Response response = assertDpPostWithErrors(dpCreationEndpoint, configuration)) {
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+        }
+
+        // Unknown data provider
+        dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
+        try (Response response = assertDpPostWithErrors(dpCreationEndpoint, configuration)) {
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+        }
+
+        // Test config type is not applicable for another data provider
+        dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
+        try (Response response = assertDpPostWithErrors(dpCreationEndpoint, configuration)) {
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+        }
+
+        // Invalid config type ID
+        dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), TestDataProviderFactory.ID);
+        builder = new TmfConfiguration.Builder()
+                .setName(CONFIG_NAME)
+                .setDescription(CONFIG_DESCRIPTION)
+                .setSourceTypeId(UNKNOWN_TYPE_ID)
+                .setParameters(params);
+
+        configuration = builder.build();
+        try (Response response = assertDpPostWithErrors(dpCreationEndpoint, configuration)) {
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_CONFIGURATION_TYPE, response.readEntity(String.class));
+        }
+    }
+
+    /**
+     * Tests error cases when deleting derived data providers
+     *
+     * @throws URISyntaxException
+     *             if such error occurs
+     * @throws IOException
+     *             if such error occurs
+     */
+    @SuppressWarnings("null")
+    @Test
+    public void testDeletionOfDerivedDataProvidersErrors() throws IOException, URISyntaxException {
+        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+
+        // Unknown experiment
+        WebTarget dpCreationEndpoint = getDpCreationEndpoint(UNKNOWN_EXP_UUID, TestDataProviderFactory.ID);
+        WebTarget dpDeletionEndpoint = dpCreationEndpoint.path(UNKNOWN_DP_ID);
+        try (Response response = dpDeletionEndpoint.request().delete()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+        }
+
+        // Unknown input data provider
+        dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
+        dpDeletionEndpoint = dpCreationEndpoint.path(UNKNOWN_DP_ID);
+        try (Response response = dpDeletionEndpoint.request().delete()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER + ": " + UNKNOWN_DP_ID, response.readEntity(String.class));
+        }
+
+        // Unknown derived data provider
+        dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), TestDataProviderFactory.ID);
+        dpDeletionEndpoint = dpCreationEndpoint.path(UNKNOWN_DP_ID);
+        try (Response response = dpDeletionEndpoint.request().delete()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_DERIVED_PROVIDER + ": " + UNKNOWN_DP_ID, response.readEntity(String.class));
+        }
+
+        Map<String, Object> params = readParametersFromJson(VALID_JSON_FILENAME);
+        ITmfConfiguration configuration = new TmfConfiguration.Builder()
+                .setName("My name")
+                .setDescription("My Description")
+                .setSourceTypeId(TestSchemaConfigurationSource.TYPE.getId())
+                .setParameters(params)
+                .build();
+
+        // Successful creation
+        DataProviderDescriptorStub derivedDp = assertDpPost(dpCreationEndpoint, configuration);
+        assertNotNull(derivedDp);
+
+        // Test config type is not applicable for another data provider
+        dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
+        dpDeletionEndpoint = dpCreationEndpoint.path(derivedDp.getId());
+        try (Response response = dpDeletionEndpoint.request().delete()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+        }
+
+        // Successful deletion
+        dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), TestDataProviderFactory.ID);
+        dpDeletionEndpoint = dpCreationEndpoint.path(derivedDp.getId());
+        try (Response response = dpDeletionEndpoint.request().delete()) {
+            assertNotNull(response);
+            assertEquals(Status.OK.getStatusCode(), response.getStatus());
         }
     }
 
