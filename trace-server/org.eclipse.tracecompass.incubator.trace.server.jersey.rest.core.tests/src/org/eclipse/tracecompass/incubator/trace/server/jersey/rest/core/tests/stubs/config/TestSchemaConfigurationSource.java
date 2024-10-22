@@ -42,7 +42,10 @@ import com.google.gson.annotations.SerializedName;
  */
 public class TestSchemaConfigurationSource implements ITmfConfigurationSource {
 
-    private static final @NonNull ITmfConfigurationSourceType fType;
+    /**
+     * The Configuration type
+     */
+    public static final @NonNull ITmfConfigurationSourceType TYPE;
 
     private static final @NonNull String TEST_ANALYSIS_TYPE_ID = "org.eclipse.tracecompass.tmf.core.config.testschemasourcetype"; //$NON-NLS-1$
     private static final @NonNull String NAME = nullToEmptyString("Test Schema Type"); //$NON-NLS-1$
@@ -64,7 +67,7 @@ public class TestSchemaConfigurationSource implements ITmfConfigurationSource {
         } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
         }
-        fType = new TmfConfigurationSourceType.Builder()
+        TYPE = new TmfConfigurationSourceType.Builder()
                 .setId(TEST_ANALYSIS_TYPE_ID)
                 .setDescription(DESCRIPTION)
                 .setName(NAME)
@@ -80,7 +83,7 @@ public class TestSchemaConfigurationSource implements ITmfConfigurationSource {
 
     @Override
     public @NonNull ITmfConfigurationSourceType getConfigurationSourceType() {
-        return fType;
+        return TYPE;
     }
 
     @Override
