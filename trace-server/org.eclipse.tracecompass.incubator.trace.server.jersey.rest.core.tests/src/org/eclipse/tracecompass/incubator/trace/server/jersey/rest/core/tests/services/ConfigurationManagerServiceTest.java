@@ -18,9 +18,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
@@ -36,7 +34,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.annotation.NonNull;
@@ -57,9 +54,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 /**
@@ -70,7 +65,6 @@ import com.google.gson.Gson;
 @SuppressWarnings("restriction")
 public class ConfigurationManagerServiceTest extends RestServerTest {
 
-    private static final Bundle TEST_BUNDLE = Platform.getBundle("org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests");
     private static final Bundle XML_CORE_TESTS = Platform.getBundle("org.eclipse.tracecompass.tmf.analysis.xml.core.tests");
 
     private static final String UNKNOWN_TYPE = "test-test-test";
@@ -92,8 +86,6 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
     private static final String EXPECTED_CONFIG_DESCRIPTION = "XML Data-driven analysis: " + VALID_NAME;
     private static final String PATH_TO_INVALID_PATH = getPath(PATH_INVALID + INVALID_XML_FILE);
     private static final String PATH_TO_VALID_PATH = getPath(PATH_VALID + VALID_XML_FILE);
-    private static final String CONFIG_FOLDER_NAME = "config";
-    private static final String VALID_JSON_FILENAME = "custom-execution-analysis.json";
 
     private static final String EXPECTED_JSON_CONFIG_NAME = "My Config Name";
     private static final String EXPECTED_JSON_CONFIG_DESCRIPTION = "My Config Description";
@@ -377,15 +369,9 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
                 .path(typeId)
                 .path(CONFIG_INSTANCES_PATH);
 
-        IPath defaultPath = new org.eclipse.core.runtime.Path(CONFIG_FOLDER_NAME).append(jsonFileName);
-        URL url = FileLocator.find(TEST_BUNDLE, defaultPath, null);
-            File jsonFile = new File(FileLocator.toFileURL(url).toURI());
-            try (InputStream inputStream = new FileInputStream(jsonFile)) {
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> params = mapper.readValue(inputStream, new TypeReference<Map<String, Object>>() {});
-                return endpoint.request(MediaType.APPLICATION_JSON)
-                        .post(Entity.json(new ConfigurationQueryParameters(null, null, null, params)));
-            }
+        Map<String, Object> params = readParametersFromJson(jsonFileName);
+        return endpoint.request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(new ConfigurationQueryParameters(null, null, null, params)));
     }
 
     private static Response updateConfig(String path, String id) {

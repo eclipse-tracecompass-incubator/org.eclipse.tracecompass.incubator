@@ -8,4 +8,11 @@
             id="org.eclipse.tracecompass.tmf.core.config.xmlsourcetype">
       </source>
    </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TestDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TestDataProviderFactory">
+      </dataProviderFactory>
+   </extension>
 </plugin>
