@@ -34,6 +34,7 @@ import javax.ws.rs.core.Response.Status;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.ConfigurationQueryParameters;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSource;
+import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceManager;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
 
@@ -151,9 +152,14 @@ public class ConfigurationManagerService {
         if (queryParameters == null) {
             return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
         }
-
+        ITmfConfiguration inputConfig = new TmfConfiguration.Builder()
+                    .setName(queryParameters.getName())
+                    .setDescription(queryParameters.getDescription())
+                    .setSourceTypeId(typeId)
+                    .setParameters(queryParameters.getParameters())
+                    .build();
         try {
-            ITmfConfiguration config = configurationSource.create(queryParameters.getParameters());
+            ITmfConfiguration config = configurationSource.create(inputConfig);
             return Response.ok(config).build();
         } catch (TmfConfigurationException e) {
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -232,8 +238,15 @@ public class ConfigurationManagerService {
             return Response.status(Status.NOT_FOUND).entity("Configuration instance doesn't exist for type " + typeId).build(); //$NON-NLS-1$
         }
 
+        ITmfConfiguration inputConfig = new TmfConfiguration.Builder()
+                .setId(configId)
+                .setName(queryParameters.getName())
+                .setDescription(queryParameters.getDescription())
+                .setSourceTypeId(typeId)
+                .setParameters(queryParameters.getParameters())
+                .build();
         try {
-            ITmfConfiguration config = configurationSource.update(configId, queryParameters.getParameters());
+            ITmfConfiguration config = configurationSource.update(configId, inputConfig);
             return Response.ok(config).build();
         } catch (TmfConfigurationException e) {
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
