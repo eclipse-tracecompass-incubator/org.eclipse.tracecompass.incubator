@@ -12,11 +12,5 @@
          </tracetype>
       </module>
    </extension>
-   <extension
-         point="org.eclipse.linuxtools.tmf.analysis.xml.core.files">
-      <xmlfile
-            file="test_xml_files/test_callstack.xml">
-      </xmlfile>
-   </extension>
 
 </plugin>
