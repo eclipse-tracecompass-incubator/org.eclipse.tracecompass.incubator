@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.config">
+      <source
+            class="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.config.TestSchemaConfigurationSource"
+            id="org.eclipse.tracecompass.tmf.core.config.xmlsourcetype">
+      </source>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TestDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TestDataProviderFactory">
+      </dataProviderFactory>
+   </extension>
+</plugin>

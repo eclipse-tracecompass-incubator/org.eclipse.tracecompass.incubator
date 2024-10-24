@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Ericsson
+ * Copyright (c) 2023, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -47,7 +47,7 @@ public class TmfConfigurationSerializer extends StdSerializer<ITmfConfiguration>
         gen.writeStringField("description", value.getDescription()); //$NON-NLS-1$
         gen.writeStringField("sourceTypeId", value.getSourceTypeId()); //$NON-NLS-1$
 //        if (!value.getParameters().isEmpty()) {
-            gen.writeObjectField("parameters", value.getParameters()); //$NON-NLS-1$
+        gen.writeObjectField("parameters", value.getParameters()); //$NON-NLS-1$
 //        }
         gen.writeEndObject();
     }

@@ -46,6 +46,26 @@ public interface ConfigurationSourceType {
      *          configuration instance of this type. Use 'path' key for file
      *          URIs.
      */
-    @Schema(description = "A list of configuration parameter descriptors to be passed when creating or updating a configuration instance of this type.")
+    @Schema(description = "A list of configuration parameter descriptors to be "
+            + "passed when creating or updating a configuration instance of this "
+            + "type. Use this instead of schema. Omit if not used.")
     List<ConfigurationParameterDescriptor> getParameterDescriptors();
+
+    /**
+     * @return a JSON schema that describes the parameters that the front-end
+     *         needs to provide with corresponding values. Use this for complex
+     *         parameter descriptions instead of parameterDescriptors.
+     */
+    @Schema(description = "A JSON object that describes a JSON schema for parameters that "
+            + "the front-end needs to provide with corresponding values. The schema has to "
+            + "adhere to JSON schema specification (see https://json-schema.org/). "
+            + "Use this for complex parameter descriptions instead of parameterDescriptors. "
+            + "Omit if not used.")
+    OptionalSchema getSchema();
+
+    /**
+     * A JSON Object defining a schema.
+     */
+    interface OptionalSchema {
+    }
 }
