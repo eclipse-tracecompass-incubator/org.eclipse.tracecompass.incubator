@@ -75,6 +75,9 @@
     <module>org.eclipse.tracecompass.incubator.jifa</module>
     <module>org.eclipse.tracecompass.incubator.jifa.core</module>
     <module>org.eclipse.tracecompass.incubator.jifa.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.golang</module>
+    <module>org.eclipse.tracecompass.incubator.golang.core</module>
+    <module>org.eclipse.tracecompass.incubator.golang.core.tests</module>
     <!-- insert modules here -->
   </modules>
 

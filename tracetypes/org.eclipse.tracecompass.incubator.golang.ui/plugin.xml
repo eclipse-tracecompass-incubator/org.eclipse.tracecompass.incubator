@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="org.eclipse.tracecompass.incubator.ui.tracetype.golang"
+         name="Golang Trace"
+         point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
+      <type
+            icon="ico/Go-Logo_Aqua.png"
+            tracetype="org.eclipse.tracecompass.golang">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.eclipse.tracecompass.incubator.internal.golang.ui.memory.GolangMemory"
+            id="org.eclipse.tracecompass.incubator.golang.ui.memoryUsage"
+            name="name"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>

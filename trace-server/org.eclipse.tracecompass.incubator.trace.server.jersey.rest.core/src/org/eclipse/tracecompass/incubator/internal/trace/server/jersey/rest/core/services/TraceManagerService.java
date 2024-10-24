@@ -408,6 +408,7 @@ public class TraceManagerService {
                     resource.getProject().getFolder(TRACES_FOLDER).getLocation().toFile());
             // Refresh the workspace
             resource.getProject().refreshLocal(Integer.MAX_VALUE, null);
+            Activator.getInstance().logError("Deleted trace " + resource.getFullPath().toOSString()); //$NON-NLS-1$
         } catch (CoreException | IOException e) {
             Activator.getInstance().logError("Failed to delete trace", e); //$NON-NLS-1$
         }
