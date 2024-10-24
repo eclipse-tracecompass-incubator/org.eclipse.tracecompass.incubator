@@ -2,9 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.eclipse.tracecompass.tmf.analysis.xml.core.xsd">
-   </extension>
-   <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
             analysis_module="org.eclipse.tracecompass.incubator.callstack.core.lttng2.ust.LttngUstCallStackAnalysis"
