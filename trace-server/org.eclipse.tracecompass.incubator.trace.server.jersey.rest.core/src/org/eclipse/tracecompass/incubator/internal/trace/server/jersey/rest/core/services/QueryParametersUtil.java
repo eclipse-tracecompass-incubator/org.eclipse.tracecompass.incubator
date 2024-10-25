@@ -33,6 +33,10 @@ import org.eclipse.tracecompass.tmf.core.model.annotations.IAnnotation.Annotatio
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Utility methods to validate and convert query parameters from the input Trace
  * Server Protocol to the output data provider interfaces.
@@ -61,6 +65,7 @@ public class QueryParametersUtil {
     private static final String TIME = "time"; //$NON-NLS-1$
     private static final String TRACES = "traces"; //$NON-NLS-1$
     private static final String URI = "uri"; //$NON-NLS-1$
+    private static final String PAYLOAD = "payload"; //$NON-NLS-1$
 
     private static final long MAX_NBTIMES = 1 << 16;
     private static final @NonNull OutputElementStyle EMPTY_STYLE = new OutputElementStyle(null, Collections.emptyMap());
@@ -438,6 +443,65 @@ public class QueryParametersUtil {
         if (params.get(DataProviderParameterUtils.REQUESTED_ELEMENT_KEY) == null) {
             return INVALID_PARAMETERS + SEP + DataProviderParameterUtils.REQUESTED_ELEMENT_KEY;
         }
+        return null;
+    }
+
+    /**
+     * Validate bookmark query parameters.
+     *
+     * @param params
+     *            the map of query parameters
+     * @return an error message if validation fails, or null otherwise
+     */
+    public static String validateBookmarkQueryParameters(Map<String, Object> params) {
+        String errorMessage;
+        // Validate name parameter
+        if ((errorMessage = validateString(NAME, params)) != null) {
+            return errorMessage;
+        }
+
+        // Validate start and end times
+        Object startObj = params.get(START);
+        Object endObj = params.get(END);
+
+        if (startObj == null) {
+            return MISSING_PARAMETERS + SEP + START;
+        }
+        if (endObj == null) {
+            return MISSING_PARAMETERS + SEP + END;
+        }
+
+        if (!(startObj instanceof Number)) {
+            return INVALID_PARAMETERS + SEP + START;
+        }
+        if (!(endObj instanceof Number)) {
+            return INVALID_PARAMETERS + SEP + END;
+        }
+
+        long start = ((Number) startObj).longValue();
+        long end = ((Number) endObj).longValue();
+
+        if (start > end) {
+            return INVALID_PARAMETERS + SEP + "Start time cannot be after end time"; //$NON-NLS-1$
+        }
+
+        // Validate payload
+        Object payload = params.get(PAYLOAD);
+        if (payload != null) {
+            // Check if it is a JSON parseable object
+            try {
+                if (payload instanceof String) {
+                    // Try parsing string as JSON
+                    new ObjectMapper().readTree((String) payload);
+                } else if (!(payload instanceof Map) && !(payload instanceof List) && !(payload instanceof JsonNode)) {
+                    // If not a string, should be a Map, List, or already a JsonNode
+                    return INVALID_PARAMETERS + SEP + "Payload must be a valid JSON structure"; //$NON-NLS-1$
+                }
+            } catch (JsonProcessingException e) {
+                return INVALID_PARAMETERS + SEP + "Invalid JSON payload format"; //$NON-NLS-1$
+            }
+        }
+
         return null;
     }
 }
