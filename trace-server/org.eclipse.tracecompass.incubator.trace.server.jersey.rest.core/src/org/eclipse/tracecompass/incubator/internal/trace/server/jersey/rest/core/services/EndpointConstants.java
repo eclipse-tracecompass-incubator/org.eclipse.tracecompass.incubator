@@ -92,6 +92,7 @@ public final class EndpointConstants {
      * 3-letters so they align in {@link DataProviderService}; readability.
      */
     static final String ANN = "Annotations"; //$NON-NLS-1$
+    static final String BKM = "Bookmarks"; //$NON-NLS-1$
     static final String CFG = "Configurations"; //$NON-NLS-1$
     static final String DIA = "Diagnostic"; //$NON-NLS-1$
     static final String DT = "Data Tree"; //$NON-NLS-1$
@@ -184,6 +185,7 @@ public final class EndpointConstants {
     static final String TREE_ENTRIES = "Unique entry point for output providers, to get the tree of visible entries"; //$NON-NLS-1$
     static final String NO_SUCH_CONFIGURATION = "No such configuration source type or configuration instance"; //$NON-NLS-1$
     static final String PROVIDER_CONFIG_NOT_FOUND = "Experiment, output provider or configuration type not found"; //$NON-NLS-1$
+    static final String BOOKMARK_NOT_FOUND = "Bookmark not found"; //$NON-NLS-1$
 
     private EndpointConstants() {
         // private constructor
