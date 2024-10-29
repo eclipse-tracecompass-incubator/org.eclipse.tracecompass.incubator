@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2023 Ericsson
+ * Copyright (c) 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -13,48 +13,25 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 
 import java.util.Map;
 
-import org.eclipse.jdt.annotation.NonNull;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
 public interface ConfigurationQueryParameters {
-
     /**
-     * @return The parameters.
+     * @return the name of the configuration
      */
-    @NonNull
-    @Schema(required = true)
-    ConfigurationParameters getParameters();
-
+    @Schema(required = true, description = "Unique name of the configuration.")
+    String getName();
     /**
-     * Configuration parameters as per current trace-server protocol.
+     * @return the description of the configuration
      */
-    interface ConfigurationParameters {
-        /**
-         * @return the name of the configuration
-         */
-        @Schema(required = true, description = "Unique name of the configuration. If omitted a unique name will be generated.")
-        String getName();
-        /**
-         * @return the description of the configuration
-         */
-        @Schema(required = false, description = "Optional description of the configuration.")
-        String getDescription();
-        /**
-         * @return the typeId of the configuration according to the {@link ConfigurationSourceType}
-         */
-        @Schema(required = false, description = "Optional typeId of the configuration according to the corresponding ConfigurationTypeDescriptor. Omit if it's part of the endpoint URI.")
-        @JsonProperty("typeId")
-        String getTypeId();
-        /**
-         * @return parameters map for custom parameters as defined in the corresponding {@link ConfigurationSourceType}
-         */
-        @Schema(required = true, description = "Parameters as specified in the schema or list of ConfigurationParameterDescriptor of the corresponding ConfigurationTypeDescriptor.")
-        Map<String, Object> getParameters();
-    }
+    @Schema(required = false, description = "Optional description of the configuration.")
+    String getDescription();
+    /**
+     * @return parameters map for custom parameters as defined in the corresponding {@link ConfigurationSourceType}
+     */
+    @Schema(required = true, description = "Parameters as specified in the schema or list of ConfigurationParameterDescriptor of the corresponding ConfigurationTypeDescriptor.")
+    Map<String, Object> getParameters();
 }
