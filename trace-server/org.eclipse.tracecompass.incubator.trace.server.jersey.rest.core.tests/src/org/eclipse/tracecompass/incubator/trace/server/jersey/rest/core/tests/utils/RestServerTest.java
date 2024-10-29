@@ -37,7 +37,7 @@ import javax.ws.rs.core.Response;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.ConfigurationQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.OutputConfigurationQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.TraceServerConfiguration;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
@@ -627,7 +627,7 @@ public abstract class RestServerTest {
     @SuppressWarnings("null")
     public static DataProviderDescriptorStub assertDpPost(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
         try (Response response = dpConfigEndpoint.request().post(Entity.json(
-                new ConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())))) {
+                new OutputConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())))) {
             int code = response.getStatus();
             assertEquals("Failed to POST " + configuration.getName() + ", error code=" + code, 200, code);
             DataProviderDescriptorStub result = response.readEntity(DataProviderDescriptorStub.class);
@@ -651,7 +651,7 @@ public abstract class RestServerTest {
     @SuppressWarnings("null")
     public static Response assertDpPostWithErrors(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
         return dpConfigEndpoint.request().post(Entity.json(
-                new ConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())));
+                new OutputConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())));
     }
 
     /**

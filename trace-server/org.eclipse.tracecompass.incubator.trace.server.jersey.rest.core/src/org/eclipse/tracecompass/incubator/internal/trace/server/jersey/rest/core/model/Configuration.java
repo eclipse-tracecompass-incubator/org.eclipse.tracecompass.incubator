@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Ericsson
+ * Copyright (c) 2023, 2024 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Contributes to the model used for TSP swagger-core annotations.
  */
 @NonNullByDefault
+@Schema(description = "Configuration instance describing user provided configuration parameters.")
 public interface Configuration {
     /**
      * @return the name of configuration instance
