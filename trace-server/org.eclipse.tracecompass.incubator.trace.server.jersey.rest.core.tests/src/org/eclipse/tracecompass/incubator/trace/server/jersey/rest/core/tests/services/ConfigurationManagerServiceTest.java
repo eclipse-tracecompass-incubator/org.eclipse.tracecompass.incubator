@@ -358,7 +358,7 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
             parameters.put(PATH, path);
         }
         return endpoint.request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(new ConfigurationQueryParameters(null, null, null, parameters)));
+                .post(Entity.json(new ConfigurationQueryParameters(null, null, parameters)));
     }
 
     private static Response createJsonConfig(String jsonFileName) throws URISyntaxException, IOException {
@@ -371,7 +371,7 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
 
         Map<String, Object> params = readParametersFromJson(jsonFileName);
         return endpoint.request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(new ConfigurationQueryParameters(null, null, null, params)));
+                .post(Entity.json(new ConfigurationQueryParameters(null, null, params)));
     }
 
     private static Response updateConfig(String path, String id) {
@@ -403,7 +403,7 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
             parameters.put(PATH, path);
         }
         return endpoint.request(MediaType.APPLICATION_JSON)
-                .put(Entity.json(new ConfigurationQueryParameters(null, null, null, parameters)));
+                .put(Entity.json(new ConfigurationQueryParameters(null, null, parameters)));
     }
 
     private static Response deleteConfig(String id) {

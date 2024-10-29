@@ -23,7 +23,6 @@ import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 public class ConfigurationQueryParameters {
     private @NonNull String name;
     private @NonNull String description;
-    private @NonNull String typeId;
     private @NonNull Map<String, Object> parameters;
 
     /**
@@ -35,7 +34,6 @@ public class ConfigurationQueryParameters {
         this.parameters = new HashMap<>();
         this.name = TmfConfiguration.UNKNOWN;
         this.description = TmfConfiguration.UNKNOWN;
-        this.typeId = TmfConfiguration.UNKNOWN;
     }
 
     /**
@@ -51,11 +49,10 @@ public class ConfigurationQueryParameters {
      * @param parameters
      *            Map of parameters
      */
-    public ConfigurationQueryParameters(String name, String description, String typeId, Map<String, Object> parameters) {
+    public ConfigurationQueryParameters(String name, String description, Map<String, Object> parameters) {
         this.parameters = parameters != null ? parameters : new HashMap<>();
         this.name = name == null ? TmfConfiguration.UNKNOWN : name;
         this.description = description == null ? TmfConfiguration.UNKNOWN : description;
-        this.typeId = typeId == null ? TmfConfiguration.UNKNOWN : typeId;
     }
 
     /**
@@ -73,13 +70,6 @@ public class ConfigurationQueryParameters {
     }
 
     /**
-     * @return the type ID of configuration or {@link TmfConfiguration#UNKNOWN} if not provided
-     */
-    @NonNull  public String getTypeId() {
-        return typeId;
-    }
-
-    /**
      * @return Map of parameters or empty map if not provided
      */
     @NonNull public Map<String, Object> getParameters() {
@@ -89,7 +79,6 @@ public class ConfigurationQueryParameters {
     @SuppressWarnings("nls")
     @Override
     public String toString() {
-        return "ConfigurationQueryParameters [name=" + getName() + ", description=" + getDescription()
-           +", typeId=" + getTypeId() + "parameters=" + getParameters() + "]";
+        return "ConfigurationQueryParameters [name=" + getName() + ", description=" + getDescription() + ", parameters=" + getParameters() + "]";
     }
 }
