@@ -11,12 +11,14 @@
 
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.IdentifierService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ServerInfoResponseImpl;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
@@ -37,18 +39,20 @@ public class IdentifierServiceTest extends RestServerTest {
         WebTarget application = getApplicationEndpoint();
         WebTarget identifierEndpoint = application.path("identifier");
 
-        Response response = identifierEndpoint.request(MediaType.APPLICATION_JSON)
-                .get();
-        ServerInfoResponseImpl responseValues = response.readEntity(ServerInfoResponseImpl.class);
+        try (Response response = identifierEndpoint.request(MediaType.APPLICATION_JSON)
+                .get()) {
+            ServerInfoResponseImpl responseValues = response.readEntity(ServerInfoResponseImpl.class);
 
-        assertNotNull("Server version should not be null", responseValues.getVersion());
-        assertNotNull("OS should not be null", responseValues.getOs());
-        assertNotNull("OS Architecture should not be null", responseValues.getOsArch());
-        assertNotNull("OS Version should not be null", responseValues.getOsVersion());
-        assertNotNull("CPU count should not be null", responseValues.getCpuCount());
-        assertNotNull("Max memory should not be null", responseValues.getMaxMemory());
-        assertNotNull("Product ID should not be null", responseValues.getProductId());
-
+            assertNotNull("Server version should not be null", responseValues.getVersion());
+            assertNotNull("OS should not be null", responseValues.getOs());
+            assertNotNull("OS Architecture should not be null", responseValues.getOsArch());
+            assertNotNull("OS Version should not be null", responseValues.getOsVersion());
+            assertNotNull("CPU count should not be null", responseValues.getCpuCount());
+            assertNotNull("Max memory should not be null", responseValues.getMaxMemory());
+            assertNotNull("Product ID should not be null", responseValues.getProductId());
+            assertNotNull("The TSP version should not be null", responseValues.getProductId());
+            assertEquals(EndpointConstants.VERSION, responseValues.getTspVersion());
+        }
     }
 
 }

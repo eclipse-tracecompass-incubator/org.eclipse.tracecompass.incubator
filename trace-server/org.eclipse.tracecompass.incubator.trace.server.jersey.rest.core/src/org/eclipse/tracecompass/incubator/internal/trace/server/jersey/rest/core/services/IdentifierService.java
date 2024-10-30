@@ -80,7 +80,7 @@ public class IdentifierService {
         } else {
             response.setVersion(HARD_CODED_VERSION);
         }
-
+        response.setTspVersion(EndpointConstants.VERSION);
         return Response.ok(response).build();
     }
 
