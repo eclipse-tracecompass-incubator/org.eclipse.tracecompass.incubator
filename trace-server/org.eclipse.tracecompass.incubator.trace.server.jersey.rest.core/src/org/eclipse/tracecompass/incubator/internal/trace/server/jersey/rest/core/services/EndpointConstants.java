@@ -83,7 +83,7 @@ public final class EndpointConstants {
     static final String EMAIL = "tracecompass-dev@eclipse.org"; //$NON-NLS-1$
     static final String LICENSE = "Apache 2"; //$NON-NLS-1$
     static final String LICENSE_URL = "http://www.apache.org/licenses/"; //$NON-NLS-1$
-    static final String VERSION = "0.1.0"; //$NON-NLS-1$
+    static final String VERSION = "0.2.0"; //$NON-NLS-1$
     static final String SERVER = "https://localhost:8080/tsp/api"; //$NON-NLS-1$
 
     /**
