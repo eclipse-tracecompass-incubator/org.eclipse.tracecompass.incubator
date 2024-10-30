@@ -73,4 +73,11 @@ public interface ServerInfoResponse {
      */
     @Schema(required = true, description = "Product identifier for the trace server")
     String getProductId();
+
+    /**
+     * @return supported TSP version
+     */
+    @Schema(required = true, description = "The TSP version that the trace server supports")
+    String getTspVersion();
+
 }
