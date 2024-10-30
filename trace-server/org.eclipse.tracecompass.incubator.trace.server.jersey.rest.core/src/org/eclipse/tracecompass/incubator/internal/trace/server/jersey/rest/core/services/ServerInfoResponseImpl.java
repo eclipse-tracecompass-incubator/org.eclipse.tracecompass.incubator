@@ -30,6 +30,7 @@ public class ServerInfoResponseImpl {
     @JsonInclude(JsonInclude.Include.NON_NULL) // Makes launcher name optional
     private String launcherName;
     private String productId;
+    private String tspVersion;
 
     /**
      * @return Version in the format Major.Minor.Micro
@@ -92,6 +93,13 @@ public class ServerInfoResponseImpl {
      */
     public String getProductId() {
         return productId;
+    }
+
+    /**
+     * @return Version in the format Major.Minor.Micro
+     */
+    public String getTspVersion() {
+        return tspVersion;
     }
 
     /**
@@ -184,4 +192,13 @@ public class ServerInfoResponseImpl {
         this.productId = productId;
     }
 
+    /**
+     * Set the TSP version
+     *
+     * @param version
+     *            the TSP version to set
+     */
+    public void setTspVersion(String version) {
+        tspVersion = version;
+    }
 }
