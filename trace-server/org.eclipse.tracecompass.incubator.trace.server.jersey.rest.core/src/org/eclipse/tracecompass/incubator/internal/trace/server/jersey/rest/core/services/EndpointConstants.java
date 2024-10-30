@@ -152,7 +152,7 @@ public final class EndpointConstants {
      * Swagger @RequestBody example constants, named after their parameter name,
      * without the common 'requested' prefix; alphabetical order.
      */
-    static final String CFG_PATH_EX = "\"path\": \"/home/user/test.xml\""; //$NON-NLS-1$
+    static final String CFG_PATH_EX = "{\"name\": \"test.xml\", \"description\": \"Configuration with test.xml\", \"parameters\":{ \"path\": \"/home/user/test.xml\" }}"; //$NON-NLS-1$
     static final String COLUMNS_EX = "\"" + REQUESTED_COLUMN_IDS_KEY + "\": [0, 1, 2],"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String COUNT_EX = "\"" + REQUESTED_TABLE_COUNT_KEY + "\": 100,"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String DIRECTION_EX = "\"" + TABLE_SEARCH_DIRECTION_KEY + "\": \"NEXT\""; //$NON-NLS-1$ //$NON-NLS-2$
@@ -167,6 +167,7 @@ public final class EndpointConstants {
     static final String FILTER_QUERY_PARAMETERS_EX = "\"" + FILTER_QUERY_PARAMETERS_KEY + "\": {\"" + FILTER_QUERY_STRATEGY + "\": \"SAMPLED\", \"" + FILTER_EXPRESSIONS_MAP + "\": {\"1\":[\"openat\", \"duration>10ms\"]}}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     static final String TIMERANGE_EX_TREE = "\"" + REQUESTED_TIMERANGE_KEY + "\": {\"start\": 111111111, \"end\": 222222222}"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_EX_TT = "\"" + REQUESTED_TIME_KEY + "\": [111200000],"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String DP_CFG_EX = "{\"name\": \"Follow My-thread\", \"description\": \"My-thread on even CPUs\", \"typeId\": \"my.config.source.type.id\", \"parameters\":{ \"threads\": \"My-thread\", \"cpus\": [0,2,4,6] }}"; //$NON-NLS-1$
 
     /** Swagger @ApiResponse description constants reused, or centralized. */
     static final String CANNOT_READ = "Cannot read this trace type"; //$NON-NLS-1$

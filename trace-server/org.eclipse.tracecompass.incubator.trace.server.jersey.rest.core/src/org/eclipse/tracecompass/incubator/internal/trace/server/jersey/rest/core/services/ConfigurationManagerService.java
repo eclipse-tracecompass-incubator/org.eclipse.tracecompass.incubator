@@ -142,8 +142,7 @@ public class ConfigurationManagerService {
     })
     public Response postConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
             @RequestBody(description = CFG_CREATE_DESC + " " + CFG_KEYS_DESC, content = {
-                    @Content(examples = @ExampleObject("{\"parameters\":{" + CFG_PATH_EX +
-                            "}}"), schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters.class))
+                    @Content(examples = @ExampleObject(CFG_PATH_EX), schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters.class))
             }, required = true) ConfigurationQueryParameters queryParameters) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
@@ -223,8 +222,7 @@ public class ConfigurationManagerService {
     public Response putConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
             @Parameter(description = CFG_CONFIG_ID) @PathParam("configId") String configId,
             @RequestBody(description = CFG_UPDATE_DESC + " " + CFG_KEYS_DESC, content = {
-                    @Content(examples = @ExampleObject("{\"parameters\":{" + CFG_PATH_EX +
-                            "}}"), schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters.class))
+                    @Content(examples = @ExampleObject(CFG_PATH_EX), schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationQueryParameters.class))
             }, required = true) ConfigurationQueryParameters queryParameters) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
