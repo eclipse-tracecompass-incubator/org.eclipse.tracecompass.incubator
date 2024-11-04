@@ -773,6 +773,8 @@ public class DataProviderServiceTest extends RestServerTest {
         try (Response response = dpDeletionEndpoint.request().delete()) {
             assertNotNull(response);
             assertEquals(Status.OK.getStatusCode(), response.getStatus());
+            DataProviderDescriptorStub deletedDp = response.readEntity(DataProviderDescriptorStub.class);
+            assertEquals(derivedDp, deletedDp);
         }
     }
 
