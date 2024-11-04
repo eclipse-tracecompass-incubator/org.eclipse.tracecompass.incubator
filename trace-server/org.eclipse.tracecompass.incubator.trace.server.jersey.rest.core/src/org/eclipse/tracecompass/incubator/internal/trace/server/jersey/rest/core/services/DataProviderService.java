@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ANN;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_CREATE_DESC;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_KEYS_DESC;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_OUTPUT_ID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_TYPE_ID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COLUMNS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COLUMNS_EX;
@@ -1249,9 +1250,9 @@ public class DataProviderService {
      * @param expUUID
      *            desired experiment UUID
      * @param outputId
-     *            Output ID for the data provider to query
+     *            ID of the output provider to create a derived output from
      * @param queryParameters
-     *            the query parameters used to create a data provider
+     *            the query parameters used to create a output provider
      * @return a list of data provider descriptors
      */
     @SuppressWarnings("null")
@@ -1261,13 +1262,13 @@ public class DataProviderService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get a derived data provider from a input configuration", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns a list of output provider descriptors", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DataProvider.class)))),
+            @ApiResponse(responseCode = "200", description = "Returns the derived data provider descriptor.", content = @Content(schema = @Schema(implementation = DataProvider.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_CONFIG_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
     })
-    public Response createDataProvider(
+    public Response createProvider(
                 @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
-                @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+                @Parameter(description = CFG_OUTPUT_ID) @PathParam("outputId") String outputId,
                 @RequestBody(description = CFG_CREATE_DESC + " " + CFG_KEYS_DESC, content = {
                         @Content(examples = @ExampleObject(DP_CFG_EX), schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.OutputConfigurationQueryParameters.class))
                 }, required = true) OutputConfigurationQueryParameters queryParameters) {

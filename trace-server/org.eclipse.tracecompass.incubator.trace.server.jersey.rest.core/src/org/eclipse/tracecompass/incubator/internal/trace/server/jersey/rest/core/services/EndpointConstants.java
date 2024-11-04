@@ -108,8 +108,9 @@ public final class EndpointConstants {
      * Swagger @Parameter description constants, named after their parameter
      * name; alphabetical order.
      */
-    static final String CFG_TYPE_ID = "The configuration source type ID"; //$NON-NLS-1$
     static final String CFG_CONFIG_ID = "The configuration instance ID"; //$NON-NLS-1$
+    static final String CFG_OUTPUT_ID = "ID of the output provider to create a derived output from"; //$NON-NLS-1$
+    static final String CFG_TYPE_ID = "The configuration source type ID"; //$NON-NLS-1$
     static final String DERIVED_OUTPUT_ID = "ID of the derived output provider"; //$NON-NLS-1$
     static final String EXP_UUID = "UUID of the experiment to query"; //$NON-NLS-1$
     static final String MARKER_SET_ID = "The optional requested marker set's id"; //$NON-NLS-1$
