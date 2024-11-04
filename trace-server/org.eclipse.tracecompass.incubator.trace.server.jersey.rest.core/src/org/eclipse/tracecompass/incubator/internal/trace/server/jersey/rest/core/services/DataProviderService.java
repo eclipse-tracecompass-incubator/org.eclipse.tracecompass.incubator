@@ -14,16 +14,17 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ANN;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_CREATE_DESC;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_KEYS_DESC;
-import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DP_CFG_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_TYPE_ID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COLUMNS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COLUMNS_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CONSISTENT_PARENT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COUNT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.COUNT_EX;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DERIVED_OUTPUT_ID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DIRECTION;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DIRECTION_COUNT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DIRECTION_EX;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DP_CFG_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ELEMENT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ELEMENT_EX;
@@ -56,6 +57,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.OCG;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ONE_OF;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.OUTPUT_ID;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.PARENT_OUTPUT_ID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.PROVIDER_CONFIG_NOT_FOUND;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.PROVIDER_NOT_FOUND;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.STY;
@@ -1311,29 +1313,29 @@ public class DataProviderService {
     }
 
     /**
-     * DELETE a derived data provider from created by a given data provider
+     * DELETE a derived data provider created from a given data provider
      *
      * @param expUUID
      *            desired experiment UUID
      * @param outputId
-     *            Output ID for the data provider to query
+     *            Output ID of the parent output provider
      * @param derivedOutputId
-     *            Output ID for the data provider to delete
+     *            Output ID for the derived output provider to delete
      * @return status and the deleted configuration instance, if successful
      */
     @DELETE
     @Path("/{outputId}/{derivedOutputId}")
     @Tag(name = OCG)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Delete a configuration instance of a given configuration type", responses = {
-            @ApiResponse(responseCode = "200", description = "The derived data provider (and it's configuration) was successfully deleted", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Configuration.class))),
+    @Operation(summary = "Delete a derived output (and its configuration).", responses = {
+            @ApiResponse(responseCode = "200", description = "Returns the deleted derived data provider descriptor. The derived data provider (and its configuration) was successfully deleted.", content = @Content(schema = @Schema(implementation = DataProvider.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_CONFIG_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
     })
-    public Response deleteDerivedOutput(
+    public Response deleteDerivedProvider(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
-            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
-            @Parameter(description = OUTPUT_ID) @PathParam("derivedOutputId") String derivedOutputId) {
+            @Parameter(description = PARENT_OUTPUT_ID) @PathParam("outputId") String outputId,
+            @Parameter(description = DERIVED_OUTPUT_ID) @PathParam("derivedOutputId") String derivedOutputId) {
 
         if (outputId == null) {
             return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID + " (parent)").build(); //$NON-NLS-1$
@@ -1370,7 +1372,7 @@ public class DataProviderService {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
             }
             configurator.removeDataProviderDescriptor(experiment, derivedDescriptor);
-            return Response.ok().build();
+            return Response.ok(derivedDescriptor).build();
         } catch (TmfConfigurationException e) {
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
