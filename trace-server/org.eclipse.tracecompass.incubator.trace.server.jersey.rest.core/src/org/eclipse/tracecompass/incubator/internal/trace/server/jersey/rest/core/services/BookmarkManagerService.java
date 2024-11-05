@@ -53,14 +53,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.BookmarkQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 import com.google.common.collect.Lists;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -84,8 +82,6 @@ public class BookmarkManagerService {
     private static final Map<UUID, Map<UUID, Bookmark>> EXPERIMENT_BOOKMARKS = Collections.synchronizedMap(initBookmarkResources());
     private static final String BOOKMARKS_FOLDER = "Bookmarks"; //$NON-NLS-1$
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
     private static Map<UUID, Map<UUID, Bookmark>> initBookmarkResources() {
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
         IProject project = root.getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME);
@@ -93,6 +89,10 @@ public class BookmarkManagerService {
         try {
             project.refreshLocal(IResource.DEPTH_INFINITE, null);
             IFolder bookmarksFolder = project.getFolder(BOOKMARKS_FOLDER);
+            // Check if the folder exists. If not, create it
+            if (!bookmarksFolder.exists()) {
+                bookmarksFolder.create(true, true, null);
+            }
             bookmarksFolder.accept((IResourceVisitor) resource -> {
                 if (resource.equals(bookmarksFolder)) {
                     return true;
@@ -205,7 +205,9 @@ public class BookmarkManagerService {
     })
     public Response createBookmark(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
-            @RequestBody(required = true) QueryParameters queryParameters) {
+            @RequestBody(content = {
+                    @Content(schema = @Schema(implementation = BookmarkQueryParameters.class))
+            }, required = true) QueryParameters queryParameters) {
 
         if (queryParameters == null) {
             return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
@@ -226,21 +228,6 @@ public class BookmarkManagerService {
         long start = Objects.requireNonNull((Number) parameters.get("start")).longValue(); //$NON-NLS-1$
         long end = Objects.requireNonNull((Number) parameters.get("end")).longValue(); //$NON-NLS-1$
 
-        // Handle payload, defaulting to empty JSON object if not provided
-        JsonNode payload = null;
-        Object rawPayload = parameters.get("payload");
-        if (rawPayload != null) {
-            try {
-                if (rawPayload instanceof String) {
-                    payload = MAPPER.readTree((String) rawPayload);
-                } else {
-                    payload = MAPPER.valueToTree(rawPayload);
-                }
-            } catch (IOException e) {
-                return Response.status(Status.BAD_REQUEST).entity("Invalid payload format").build();
-            }
-        }
-
         try {
             IFolder bookmarkFolder = getBookmarkFolder(expUUID);
             UUID bookmarkUUID = UUID.nameUUIDFromBytes(Objects.requireNonNull(name.getBytes(Charset.defaultCharset())));
@@ -260,7 +247,7 @@ public class BookmarkManagerService {
 
             createFolder(bookmarkFolder);
 
-            Bookmark bookmark = new Bookmark(bookmarkUUID, name, expUUID.toString(), start, end, payload);
+            Bookmark bookmark = new Bookmark(bookmarkUUID, name, start, end);
 
             // Save to file system
             IFile bookmarkFile = bookmarkFolder.getFile(bookmarkUUID.toString() + ".bookmark"); //$NON-NLS-1$
@@ -314,7 +301,9 @@ public class BookmarkManagerService {
     public Response updateBookmark(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = "Bookmark UUID") @PathParam("bookmarkUUID") UUID bookmarkUUID,
-            @RequestBody(required = true) QueryParameters queryParameters) {
+            @RequestBody(content = {
+                    @Content(schema = @Schema(implementation = BookmarkQueryParameters.class))
+            }, required = true) QueryParameters queryParameters) {
 
         if (queryParameters == null) {
             return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
@@ -340,24 +329,9 @@ public class BookmarkManagerService {
         long start = Objects.requireNonNull((Number) parameters.get("start")).longValue(); //$NON-NLS-1$
         long end = Objects.requireNonNull((Number) parameters.get("end")).longValue(); //$NON-NLS-1$
 
-        // Handle payload, defaulting to empty JSON object if not provided
-        JsonNode payload = null;
-        Object rawPayload = parameters.get("payload");
-        if (rawPayload != null) {
-            try {
-                if (rawPayload instanceof String) {
-                    payload = MAPPER.readTree((String) rawPayload);
-                } else {
-                    payload = MAPPER.valueToTree(rawPayload);
-                }
-            } catch (IOException e) {
-                return Response.status(Status.BAD_REQUEST).entity("Invalid payload format").build();
-            }
-        }
-
         try {
             IFolder bookmarkFolder = getBookmarkFolder(expUUID);
-            Bookmark updatedBookmark = new Bookmark(bookmarkUUID, name, expUUID.toString(), start, end, payload);
+            Bookmark updatedBookmark = new Bookmark(bookmarkUUID, name, start, end);
 
             // Update file system
             IFile bookmarkFile = bookmarkFolder.getFile(bookmarkUUID.toString() + ".bookmark"); //$NON-NLS-1$

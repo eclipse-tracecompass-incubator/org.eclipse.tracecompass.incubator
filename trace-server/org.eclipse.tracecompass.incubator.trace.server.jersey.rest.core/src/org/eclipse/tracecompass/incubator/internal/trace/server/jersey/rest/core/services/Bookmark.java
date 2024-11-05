@@ -1,11 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2024 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import java.io.Serializable;
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Bookmark model for TSP
@@ -14,15 +22,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @since 10.1
  */
 public class Bookmark implements Serializable {
-    private static final long serialVersionUID = -3626414315455912960L;
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private static final long serialVersionUID = 6126770413230064175L;
 
     private final UUID fUUID;
     private final String fName;
-    private final String fExperimentId;
     private final long fStart;
     private final long fEnd;
-    private final JsonNode fPayload;
 
     /**
      * {@link JsonCreator} Constructor for final fields
@@ -31,47 +37,21 @@ public class Bookmark implements Serializable {
      *            the stub's UUID
      * @param name
      *            bookmark name
-     * @param experimentId
-     *            experiment id
      * @param start
      *            start time
      * @param end
      *            end time
-     * @param payload
-     *            additional JSON data associated with the bookmark (optional)
      */
     @JsonCreator
     public Bookmark(
-            @JsonProperty("UUID") UUID uuid,
+            @JsonProperty("uuid") UUID uuid,
             @JsonProperty("name") String name,
-            @JsonProperty("experimentId") String experimentId,
             @JsonProperty("start") long start,
-            @JsonProperty("end") long end,
-            @JsonProperty(value = "payload", required = false) JsonNode payload) {
+            @JsonProperty("end") long end) {
         fUUID = uuid;
         fName = name;
-        fExperimentId = experimentId;
         fStart = start;
         fEnd = end;
-        fPayload = (payload != null) ? payload : MAPPER.createObjectNode();
-    }
-
-    /**
-     * Constructor without payload
-     *
-     * @param uuid
-     *            the stub's UUID
-     * @param name
-     *            bookmark name
-     * @param experimentId
-     *            experiment id
-     * @param start
-     *            start time
-     * @param end
-     *            end time
-     */
-    public Bookmark(UUID uuid, String name, String experimentId, long start, long end) {
-        this(uuid, name, experimentId, start, end, MAPPER.createObjectNode());
     }
 
     /**
@@ -93,15 +73,6 @@ public class Bookmark implements Serializable {
     }
 
     /**
-     * Get the experiment id
-     *
-     * @return the experiment id
-     */
-    public String getExperimentId() {
-        return fExperimentId;
-    }
-
-    /**
      * Get the start time
      *
      * @return the start time
@@ -119,18 +90,9 @@ public class Bookmark implements Serializable {
         return fEnd;
     }
 
-    /**
-     * Get the payload
-     *
-     * @return the JSON payload, empty JSON object if no payload was set
-     */
-    public JsonNode getPayload() {
-        return fPayload;
-    }
-
     @Override
     public String toString() {
-        return "Bookmark [fUUID=" + fUUID + ", fName=" + fName + ", fExperimentId=" + fExperimentId //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-               + ", fStart=" + fStart + ", fEnd=" + fEnd + ", fPayload=" + fPayload + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        return "Bookmark [fUUID=" + fUUID + ", fName=" + fName //$NON-NLS-1$ //$NON-NLS-2$
+               + ", fStart=" + fStart + ", fEnd=" + fEnd + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 }

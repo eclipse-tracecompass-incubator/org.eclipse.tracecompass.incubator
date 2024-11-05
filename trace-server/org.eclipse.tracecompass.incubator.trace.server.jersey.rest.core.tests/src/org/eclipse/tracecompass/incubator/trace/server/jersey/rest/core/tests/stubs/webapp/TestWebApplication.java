@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp;
 
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.BookmarkManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ConfigurationManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.FilterService;
@@ -52,5 +53,6 @@ public class TestWebApplication extends WebApplication {
         rc.register(CORSFilter.class);
         rc.register(JacksonObjectMapperProvider.class);
         rc.register(OpenApiResource.class);
+        rc.register(BookmarkManagerService.class);
     }
 }
