@@ -5,14 +5,6 @@
     "description": "Custom Execution Analysis schema",
     "type": "object",
     "properties": {
-        "name" : {
-            "type": "string",
-            "description": "The name of this InAndOut configuration"
-        },
-        "description" : {
-            "type": "string",
-            "description": "The descrition of this InAndOut configuration"
-        },
         "specifiers": {
             "description": "array specifiers",
             "type": "array",
