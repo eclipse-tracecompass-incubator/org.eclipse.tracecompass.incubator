@@ -30,7 +30,7 @@ public interface Bookmark {
     /**
      * @return The bookmark UUID.
      */
-    @JsonProperty("UUID")
+    @JsonProperty("uuid")
     @Schema(description = "The bookmark's unique identifier")
     UUID getUUID();
 
@@ -40,13 +40,6 @@ public interface Bookmark {
     @NonNull
     @Schema(description = "User defined name for the bookmark")
     String getName();
-
-    /**
-     * @return The experiment ID.
-     */
-    @NonNull
-    @Schema(description = "The experiment's unique identifier this bookmark belongs to")
-    String getExperimentId();
 
     /**
      * @return The start time.
