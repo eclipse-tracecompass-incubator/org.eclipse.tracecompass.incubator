@@ -79,6 +79,10 @@ public abstract class RestServerTest {
      * Experiments endpoint path (relative to application).
      */
     public static final String EXPERIMENTS = "experiments";
+    /**
+     * Bookmarks endpoint path (relative to application).
+     */
+    public static final String BOOKMARKS = "bookmarks";
 
     /**
      * Outputs path segment
