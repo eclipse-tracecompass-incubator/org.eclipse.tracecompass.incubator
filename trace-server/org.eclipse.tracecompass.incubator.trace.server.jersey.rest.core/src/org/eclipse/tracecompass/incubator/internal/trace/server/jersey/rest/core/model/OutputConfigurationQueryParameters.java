@@ -24,7 +24,7 @@ public interface OutputConfigurationQueryParameters {
      * @return the typeId of the configuration according to the
      *         {@link ConfigurationSourceType}
      */
-    @Schema(required = true, description = "TypeId of the configuration according to the corresponding ConfigurationTypeDescriptor.")
-    @JsonProperty("typeId")
-    String getTypeId();
+    @Schema(required = true, description = "The type ID of the corresponding ConfigurationSourceType defined by this output.")
+    @JsonProperty("sourceTypeId")
+    String getSourceTypeId();
 }
