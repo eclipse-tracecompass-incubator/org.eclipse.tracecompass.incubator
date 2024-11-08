@@ -1309,7 +1309,7 @@ public class DataProviderService {
             ITmfConfiguration inputConfig = new TmfConfiguration.Builder()
                     .setName(queryParameters.getName())
                     .setDescription(queryParameters.getDescription())
-                    .setSourceTypeId(queryParameters.getTypeId())
+                    .setSourceTypeId(queryParameters.getSourceTypeId())
                     .setParameters(queryParameters.getParameters())
                     .build();
             String typeId = inputConfig.getSourceTypeId();
