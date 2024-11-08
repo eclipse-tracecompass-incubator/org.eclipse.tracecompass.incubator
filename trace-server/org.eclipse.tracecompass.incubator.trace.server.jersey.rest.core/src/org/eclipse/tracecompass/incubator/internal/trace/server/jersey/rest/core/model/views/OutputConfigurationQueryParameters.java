@@ -20,7 +20,7 @@ import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
  * Definition of a parameters object received by the server from a client for configurations.
  */
 public class OutputConfigurationQueryParameters extends ConfigurationQueryParameters {
-    private @NonNull String typeId;
+    private @NonNull String sourceTypeId;
 
     /**
      * Constructor for Jackson
@@ -28,7 +28,7 @@ public class OutputConfigurationQueryParameters extends ConfigurationQueryParame
     public OutputConfigurationQueryParameters() {
         // Default constructor for Jackson
         super();
-        this.typeId = TmfConfiguration.UNKNOWN;
+        this.sourceTypeId = TmfConfiguration.UNKNOWN;
     }
 
     /**
@@ -38,28 +38,28 @@ public class OutputConfigurationQueryParameters extends ConfigurationQueryParame
      *            the name of the configuration
      * @param description
      *            the description of the configuration
-     * @param typeId
-     *            the typeId of the configuration
+     * @param sourceTypeId
+     *            the typeId of the configuration source
      *
      * @param parameters
      *            Map of parameters
      */
-    public OutputConfigurationQueryParameters(String name, String description, String typeId, Map<String, Object> parameters) {
+    public OutputConfigurationQueryParameters(String name, String description, String sourceTypeId, Map<String, Object> parameters) {
         super(name, description, parameters);
-        this.typeId = typeId == null ? TmfConfiguration.UNKNOWN : typeId;
+        this.sourceTypeId = sourceTypeId == null ? TmfConfiguration.UNKNOWN : sourceTypeId;
     }
 
     /**
      * @return the type ID of configuration or {@link TmfConfiguration#UNKNOWN} if not provided
      */
-    @NonNull public String getTypeId() {
-        return typeId;
+    @NonNull public String getSourceTypeId() {
+        return sourceTypeId;
     }
 
     @SuppressWarnings("nls")
     @Override
     public String toString() {
         return "OutputConfigurationQueryParameters [name=" + getName() + ", description=" + getDescription()
-           +", typeId=" + getTypeId() + ", parameters=" + getParameters() + "]";
+           +", typeId=" + getSourceTypeId() + ", parameters=" + getParameters() + "]";
     }
 }
