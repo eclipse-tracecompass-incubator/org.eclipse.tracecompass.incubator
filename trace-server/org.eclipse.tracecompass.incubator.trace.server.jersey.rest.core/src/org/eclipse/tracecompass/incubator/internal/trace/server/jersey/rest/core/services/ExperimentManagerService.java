@@ -240,6 +240,7 @@ public class ExperimentManagerService {
                 resource.delete(true, null);
                 // Refresh the workspace
                 resource.getProject().refreshLocal(Integer.MAX_VALUE, null);
+                Activator.getInstance().logError("Deleted experiment " + resource.getFullPath().toOSString()); //$NON-NLS-1$
             } catch (CoreException | IOException e) {
                 Activator.getInstance().logError("Failed to delete experiment", e); //$NON-NLS-1$
             }

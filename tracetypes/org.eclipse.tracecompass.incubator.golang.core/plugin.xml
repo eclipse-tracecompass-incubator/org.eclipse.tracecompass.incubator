@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.golang"
+            isDirectory="false"
+            name="Golang Exection Trace"
+            trace_type="org.eclipse.tracecompass.incubator.internal.golang.core.trace.GolangTrace">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.internal.tmf.core.analysis.callsite.CallsiteAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.golang.core.callsite"
+            name="Callsite">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.golang.core.trace.GolangTrace">
+         </tracetype>
+      </module>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.golang.core.callsite">
+         <analysisId
+               id="org.eclipse.tracecompass.incubator.golang.core.callsite">
+         </analysisId>
+      </output>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.golang.core.analysis.memory.GoMemoryAnalysisModule"
+            id="org.eclipse.tracecompass.analysis.golang.memory.analysis"
+            name="Memory Analysis">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.golang.core.trace.GolangTrace">
+         </tracetype>
+      </module>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.golang.ui.memoryUsage">
+         <analysisId
+               id="org.eclipse.tracecompass.analysis.golang.memory.analysis">
+         </analysisId>
+      </output>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.golang.core.analysis.memory.GoMemoryDataProviderFactory"
+            id="org.eclipse.tracecompass.analysis.golang.memory.analysis">
+      </dataProviderFactory>
+   </extension>
+
+</plugin>
