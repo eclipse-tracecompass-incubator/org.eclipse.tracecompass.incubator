@@ -17,15 +17,8 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_EXPERIMENT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.BKM;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,21 +37,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.BookmarkQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
-import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
+import org.eclipse.tracecompass.tmf.core.resources.ITmfMarker;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
-
-import com.google.common.collect.Lists;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -73,60 +62,18 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * Service to manage bookmarks for experiments
  *
  * @author Kaveh Shahedi
- * @since 10.1
  */
 @Path("/experiments/{expUUID}/bookmarks")
 @Tag(name = BKM)
 public class BookmarkManagerService {
 
-    private static final Map<UUID, Map<UUID, Bookmark>> EXPERIMENT_BOOKMARKS = Collections.synchronizedMap(initBookmarkResources());
-    private static final String BOOKMARKS_FOLDER = "Bookmarks"; //$NON-NLS-1$
+    // Bookmark attribute constants
+    private static final String BOOKMARK_UUID = "uuid"; //$NON-NLS-1$
+    private static final String BOOKMARK_NAME = "name"; //$NON-NLS-1$
+    private static final String BOOKMARK_START = "start"; //$NON-NLS-1$
+    private static final String BOOKMARK_END = "end"; //$NON-NLS-1$
 
-    private static Map<UUID, Map<UUID, Bookmark>> initBookmarkResources() {
-        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        IProject project = root.getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME);
-        Map<UUID, Map<UUID, Bookmark>> experimentBookmarks = new HashMap<>();
-        try {
-            project.refreshLocal(IResource.DEPTH_INFINITE, null);
-            IFolder bookmarksFolder = project.getFolder(BOOKMARKS_FOLDER);
-            // Check if the folder exists. If not, create it
-            if (!bookmarksFolder.exists()) {
-                bookmarksFolder.create(true, true, null);
-            }
-            bookmarksFolder.accept((IResourceVisitor) resource -> {
-                if (resource.equals(bookmarksFolder)) {
-                    return true;
-                }
-                if (resource instanceof IFolder) {
-                    UUID expUUID = UUID.fromString(Objects.requireNonNull(resource.getName()));
-                    Map<UUID, Bookmark> bookmarks = loadBookmarks((IFolder) resource);
-                    if (!bookmarks.isEmpty()) {
-                        experimentBookmarks.put(expUUID, bookmarks);
-                    }
-                }
-                return false;
-            }, IResource.DEPTH_ONE, IResource.NONE);
-        } catch (CoreException e) {
-            Activator.getInstance().logError("Failed to load bookmarks", e); //$NON-NLS-1$
-        }
-        return experimentBookmarks;
-    }
-
-    private static Map<UUID, Bookmark> loadBookmarks(IFolder experimentFolder) throws CoreException {
-        Map<UUID, Bookmark> bookmarks = new HashMap<>();
-        experimentFolder.accept(resource -> {
-            if (resource instanceof IFile && resource.getName().endsWith(".bookmark")) { //$NON-NLS-1$
-                try (ObjectInputStream ois = new ObjectInputStream(((IFile) resource).getContents(true))) {
-                    Bookmark bookmark = (Bookmark) ois.readObject();
-                    bookmarks.put(bookmark.getUUID(), bookmark);
-                } catch (Exception e) {
-                    Activator.getInstance().logError("Failed to load bookmark", e); //$NON-NLS-1$
-                }
-            }
-            return true;
-        });
-        return bookmarks;
-    }
+    private static final String BOOKMARK_DEFAULT_COLOR = "RGBA {255, 0, 0, 128}"; //$NON-NLS-1$
 
     /**
      * Retrieve all bookmarks for a specific experiment
@@ -138,7 +85,7 @@ public class BookmarkManagerService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get all bookmarks for an experiment", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns the list of bookmarks", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Bookmark.class)))),
+            @ApiResponse(responseCode = "200", description = "Returns the list of bookmarks", content = @Content(array = @ArraySchema(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Bookmark.class)))),
             @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getBookmarks(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
@@ -147,9 +94,18 @@ public class BookmarkManagerService {
             return Response.status(Status.NOT_FOUND).entity(NO_SUCH_EXPERIMENT).build();
         }
 
-        synchronized (EXPERIMENT_BOOKMARKS) {
-            List<Bookmark> bookmarks = Lists.transform(new ArrayList<>(EXPERIMENT_BOOKMARKS.getOrDefault(expUUID, Collections.emptyMap()).values()), bookmark -> bookmark);
+        IFile editorFile = TmfTraceManager.getInstance().getTraceEditorFile(experiment);
+        if (editorFile == null) {
+            return Response.ok(Collections.emptyList()).build();
+        }
+
+        try {
+            IMarker[] markers = findBookmarkMarkers(editorFile);
+            List<Bookmark> bookmarks = markersToBookmarks(markers);
             return Response.ok(bookmarks).build();
+        } catch (CoreException e) {
+            Activator.getInstance().logError("Failed to get bookmarks", e); //$NON-NLS-1$
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -166,7 +122,7 @@ public class BookmarkManagerService {
     @Path("/{bookmarkUUID}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get a specific bookmark from an experiment", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns the bookmark", content = @Content(schema = @Schema(implementation = Bookmark.class))),
+            @ApiResponse(responseCode = "200", description = "Returns the bookmark", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Bookmark.class))),
             @ApiResponse(responseCode = "404", description = "Experiment or bookmark not found", content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response getBookmark(
@@ -178,12 +134,28 @@ public class BookmarkManagerService {
             return Response.status(Status.NOT_FOUND).entity(NO_SUCH_EXPERIMENT).build();
         }
 
-        Map<UUID, Bookmark> bookmarks = EXPERIMENT_BOOKMARKS.get(expUUID);
-        if (bookmarks == null || !bookmarks.containsKey(bookmarkUUID)) {
+        IFile editorFile = TmfTraceManager.getInstance().getTraceEditorFile(experiment);
+        if (editorFile == null) {
             return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
         }
 
-        return Response.ok(bookmarks.get(bookmarkUUID)).build();
+        try {
+            IMarker[] markers = findBookmarkMarkers(editorFile);
+            IMarker marker = findMarkerByUUID(markers, bookmarkUUID);
+            if (marker == null) {
+                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+            }
+
+            Bookmark bookmark = markerToBookmark(marker);
+            if (bookmark == null) {
+                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+            }
+
+            return Response.ok(bookmark).build();
+        } catch (CoreException e) {
+            Activator.getInstance().logError("Failed to get bookmark", e); //$NON-NLS-1$
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     /**
@@ -199,7 +171,7 @@ public class BookmarkManagerService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Create a new bookmark in an experiment", responses = {
-            @ApiResponse(responseCode = "200", description = "Bookmark created successfully", content = @Content(schema = @Schema(implementation = Bookmark.class))),
+            @ApiResponse(responseCode = "200", description = "Bookmark created successfully", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Bookmark.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = String.class)))
     })
@@ -224,53 +196,21 @@ public class BookmarkManagerService {
             return Response.status(Status.NOT_FOUND).entity(NO_SUCH_EXPERIMENT).build();
         }
 
-        String name = Objects.requireNonNull((String) parameters.get("name")); //$NON-NLS-1$
-        long start = Objects.requireNonNull((Number) parameters.get("start")).longValue(); //$NON-NLS-1$
-        long end = Objects.requireNonNull((Number) parameters.get("end")).longValue(); //$NON-NLS-1$
+        IFile editorFile = TmfTraceManager.getInstance().getTraceEditorFile(experiment);
+        if (editorFile == null) {
+            return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+        }
 
         try {
-            IFolder bookmarkFolder = getBookmarkFolder(expUUID);
-            UUID bookmarkUUID = UUID.nameUUIDFromBytes(Objects.requireNonNull(name.getBytes(Charset.defaultCharset())));
+            String name = Objects.requireNonNull((String) parameters.get(BOOKMARK_NAME));
+            long start = Objects.requireNonNull((Number) parameters.get(BOOKMARK_START)).longValue();
+            long end = Objects.requireNonNull((Number) parameters.get(BOOKMARK_END)).longValue();
+            UUID uuid = generateUUID(editorFile);
 
-            // Check if bookmark already exists
-            Map<UUID, Bookmark> existingBookmarks = EXPERIMENT_BOOKMARKS.get(expUUID);
-            if (existingBookmarks != null && existingBookmarks.containsKey(bookmarkUUID)) {
-                Bookmark existingBookmark = Objects.requireNonNull(existingBookmarks.get(bookmarkUUID));
-                // Check if it's the same bookmark (same start and end times)
-                if (existingBookmark.getStart() != start || existingBookmark.getEnd() != end) {
-                    // It's a different bookmark with the same name, return conflict
-                    return Response.status(Status.CONFLICT).entity(existingBookmark).build();
-                }
-                // It's the same bookmark, return it
-                return Response.ok(existingBookmark).build();
-            }
+            Bookmark bookmark = new Bookmark(uuid, name, start, end);
 
-            createFolder(bookmarkFolder);
-
-            Bookmark bookmark = new Bookmark(bookmarkUUID, name, start, end);
-
-            // Save to file system
-            IFile bookmarkFile = bookmarkFolder.getFile(bookmarkUUID.toString() + ".bookmark"); //$NON-NLS-1$
-            try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                 ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-
-                oos.writeObject(bookmark);
-                oos.flush();
-
-                if (bookmarkFile.exists()) {
-                    bookmarkFile.setContents(new ByteArrayInputStream(baos.toByteArray()), IResource.FORCE, null);
-                } else {
-                    bookmarkFile.create(new ByteArrayInputStream(baos.toByteArray()), true, null);
-                }
-            } catch (IOException e) {
-                Activator.getInstance().logError("Failed to create bookmark", e); //$NON-NLS-1$
-                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-            }
-
-            // Add to memory
-            Map<UUID, Bookmark> bookmarks = EXPERIMENT_BOOKMARKS.computeIfAbsent(expUUID, k -> new HashMap<>());
-            bookmarks.put(bookmarkUUID, bookmark);
-
+            IMarker marker = editorFile.createMarker(IMarker.BOOKMARK);
+            setMarkerAttributes(marker, bookmark);
             return Response.ok(bookmark).build();
         } catch (CoreException e) {
             Activator.getInstance().logError("Failed to create bookmark", e); //$NON-NLS-1$
@@ -294,7 +234,7 @@ public class BookmarkManagerService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update an existing bookmark in an experiment", responses = {
-            @ApiResponse(responseCode = "200", description = "Bookmark updated successfully", content = @Content(schema = @Schema(implementation = Bookmark.class))),
+            @ApiResponse(responseCode = "200", description = "Bookmark updated successfully", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Bookmark.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "Experiment or bookmark not found", content = @Content(schema = @Schema(implementation = String.class)))
     })
@@ -320,40 +260,27 @@ public class BookmarkManagerService {
             return Response.status(Status.NOT_FOUND).entity(NO_SUCH_EXPERIMENT).build();
         }
 
-        Map<UUID, Bookmark> bookmarks = EXPERIMENT_BOOKMARKS.get(expUUID);
-        if (bookmarks == null || !bookmarks.containsKey(bookmarkUUID)) {
+        IFile editorFile = TmfTraceManager.getInstance().getTraceEditorFile(experiment);
+        if (editorFile == null) {
             return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
         }
 
-        String name = Objects.requireNonNull((String) parameters.get("name")); //$NON-NLS-1$
-        long start = Objects.requireNonNull((Number) parameters.get("start")).longValue(); //$NON-NLS-1$
-        long end = Objects.requireNonNull((Number) parameters.get("end")).longValue(); //$NON-NLS-1$
+        String name = Objects.requireNonNull((String) parameters.get(BOOKMARK_NAME));
+        long start = Objects.requireNonNull((Number) parameters.get(BOOKMARK_START)).longValue();
+        long end = Objects.requireNonNull((Number) parameters.get(BOOKMARK_END)).longValue();
+
+        Bookmark bookmark = new Bookmark(bookmarkUUID, name, start, end);
 
         try {
-            IFolder bookmarkFolder = getBookmarkFolder(expUUID);
-            Bookmark updatedBookmark = new Bookmark(bookmarkUUID, name, start, end);
-
-            // Update file system
-            IFile bookmarkFile = bookmarkFolder.getFile(bookmarkUUID.toString() + ".bookmark"); //$NON-NLS-1$
-            if (bookmarkFile.exists()) {
-                try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                     ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-
-                    oos.writeObject(updatedBookmark);
-                    oos.flush();
-
-                    bookmarkFile.setContents(new ByteArrayInputStream(baos.toByteArray()), IResource.FORCE, null);
-                    // Update memory
-                    bookmarks.put(bookmarkUUID, updatedBookmark);
-                    return Response.ok(updatedBookmark).build();
-                }
+            IMarker[] markers = findBookmarkMarkers(editorFile);
+            IMarker marker = findMarkerByUUID(markers, bookmarkUUID);
+            if (marker == null) {
+                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
             }
 
-            return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+            setMarkerAttributes(marker, bookmark);
+            return Response.ok(bookmark).build();
         } catch (CoreException e) {
-            Activator.getInstance().logError("Failed to update bookmark", e); //$NON-NLS-1$
-            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-        } catch (IOException e) {
             Activator.getInstance().logError("Failed to update bookmark", e); //$NON-NLS-1$
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
@@ -372,7 +299,7 @@ public class BookmarkManagerService {
     @Path("/{bookmarkUUID}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Delete a bookmark from an experiment", responses = {
-            @ApiResponse(responseCode = "200", description = "Bookmark deleted successfully", content = @Content(schema = @Schema(implementation = Bookmark.class))),
+            @ApiResponse(responseCode = "200", description = "Bookmark deleted successfully", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Bookmark.class))),
             @ApiResponse(responseCode = "404", description = "Experiment or bookmark not found", content = @Content(schema = @Schema(implementation = String.class)))
     })
     public Response deleteBookmark(
@@ -384,28 +311,25 @@ public class BookmarkManagerService {
             return Response.status(Status.NOT_FOUND).entity(NO_SUCH_EXPERIMENT).build();
         }
 
-        Map<UUID, Bookmark> bookmarks = EXPERIMENT_BOOKMARKS.get(expUUID);
-        if (bookmarks == null || !bookmarks.containsKey(bookmarkUUID)) {
+        IFile editorFile = TmfTraceManager.getInstance().getTraceEditorFile(experiment);
+        if (editorFile == null) {
             return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
         }
 
         try {
-            IFolder bookmarkFolder = getBookmarkFolder(expUUID);
-            IFile bookmarkFile = bookmarkFolder.getFile(bookmarkUUID.toString() + ".bookmark"); //$NON-NLS-1$
-            Bookmark deletedBookmark = bookmarks.remove(bookmarkUUID);
-
-            if (bookmarkFile.exists()) {
-                bookmarkFile.delete(true, null);
+            IMarker[] markers = findBookmarkMarkers(editorFile);
+            IMarker marker = findMarkerByUUID(markers, bookmarkUUID);
+            if (marker == null) {
+                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
             }
 
-            if (bookmarks.isEmpty()) {
-                EXPERIMENT_BOOKMARKS.remove(expUUID);
-                if (bookmarkFolder.exists()) {
-                    bookmarkFolder.delete(true, null);
-                }
+            Bookmark bookmark = markerToBookmark(marker);
+            if (bookmark == null) {
+                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
             }
 
-            return Response.ok(deletedBookmark).build();
+            marker.delete();
+            return Response.ok(bookmark).build();
         } catch (CoreException e) {
             Activator.getInstance().logError("Failed to delete bookmark", e); //$NON-NLS-1$
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -413,36 +337,115 @@ public class BookmarkManagerService {
     }
 
     /**
-     * Gets the Eclipse resource folder for the bookmark.
-     *
-     * @param expUUID
-     *            UUID of the experiment
-     * @return The Eclipse resource folder
-     *
-     * @throws CoreException
-     *             if an error occurs
+     * Generate a random UUID for a new bookmark
      */
-    private static @NonNull IFolder getBookmarkFolder(UUID expUUID) throws CoreException {
-        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        IProject project = root.getProject(TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME);
-        project.refreshLocal(IResource.DEPTH_INFINITE, null);
-        IFolder bookmarksFolder = project.getFolder(BOOKMARKS_FOLDER);
-        return Objects.requireNonNull(bookmarksFolder.getFolder(expUUID.toString()));
-    }
+    private static UUID generateUUID(IFile editorFile) throws CoreException {
+        IMarker[] markers = findBookmarkMarkers(editorFile);
+        while (true) {
+            UUID uuid = UUID.randomUUID();
 
-    private static void createFolder(IFolder folder) throws CoreException {
-        if (!folder.exists()) {
-            if (folder.getParent() instanceof IFolder) {
-                createFolder((IFolder) folder.getParent());
+            // Check if the UUID hasn't been used yet
+            if (findMarkerByUUID(markers, uuid) == null) {
+                return uuid;
             }
-            folder.create(true, true, null);
         }
     }
 
     /**
-     * Dispose method to be only called at server shutdown.
+     * Find all bookmark markers in the editor file
      */
-    public static void dispose() {
-        EXPERIMENT_BOOKMARKS.clear();
+    private static IMarker[] findBookmarkMarkers(IFile editorFile) throws CoreException {
+        return editorFile.findMarkers(IMarker.BOOKMARK, false, IResource.DEPTH_ZERO);
+    }
+
+    /**
+     * Convert a marker to a Bookmark object
+     */
+    private static Bookmark markerToBookmark(IMarker marker) {
+        String uuid = marker.getAttribute(BOOKMARK_UUID, (String) null);
+        if (uuid == null) {
+            return null;
+        }
+
+        String name = marker.getAttribute(IMarker.MESSAGE, (String) null);
+        if (name == null) {
+            return null;
+        }
+
+        String startStr = marker.getAttribute(ITmfMarker.MARKER_TIME, (String) null);
+        if (startStr == null) {
+            return null;
+        }
+        long start;
+        try {
+            start = Long.parseLong(startStr);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        long duration = 0;
+        String durationStr = marker.getAttribute(ITmfMarker.MARKER_DURATION, (String) null);
+        if (durationStr != null) {
+            try {
+                duration = Long.parseLong(durationStr);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        long end = start + duration;
+
+        return new Bookmark(UUID.fromString(uuid), name, start, end);
+    }
+
+    /**
+     * Find a specific bookmark marker by UUID
+     */
+    private static IMarker findMarkerByUUID(IMarker[] markers, UUID bookmarkUUID) {
+        for (IMarker marker : markers) {
+            String uuid = marker.getAttribute(BOOKMARK_UUID, (String) null);
+            if (uuid != null && UUID.fromString(uuid).equals(bookmarkUUID)) {
+                return marker;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Create a new marker with bookmark attributes
+     */
+    private static void setMarkerAttributes(IMarker marker, Bookmark bookmark) throws CoreException {
+        Long duration = bookmark.getEnd() - bookmark.getStart();
+
+        marker.setAttribute(BOOKMARK_UUID, bookmark.getUUID().toString());
+        marker.setAttribute(IMarker.MESSAGE, bookmark.getName());
+        marker.setAttribute(ITmfMarker.MARKER_TIME, Long.toString(bookmark.getStart()));
+
+        if (duration > 0) {
+            marker.setAttribute(ITmfMarker.MARKER_DURATION, Long.toString(duration));
+            marker.setAttribute(IMarker.LOCATION,
+                    NLS.bind("timestamp [{0}, {1}]", //$NON-NLS-1$
+                            TmfTimestamp.fromNanos(bookmark.getStart()),
+                            TmfTimestamp.fromNanos(bookmark.getEnd())));
+        } else {
+            marker.setAttribute(IMarker.LOCATION,
+                    NLS.bind("timestamp [{0}]", //$NON-NLS-1$
+                            TmfTimestamp.fromNanos(bookmark.getStart())));
+        }
+
+        marker.setAttribute(ITmfMarker.MARKER_COLOR, BOOKMARK_DEFAULT_COLOR);
+    }
+
+    /**
+     * Convert list of markers to list of bookmarks
+     */
+    private static List<Bookmark> markersToBookmarks(IMarker[] markers) {
+        List<Bookmark> bookmarks = new ArrayList<>();
+        for (IMarker marker : markers) {
+            Bookmark bookmark = markerToBookmark(marker);
+            if (bookmark != null) {
+                bookmarks.add(bookmark);
+            }
+        }
+        return bookmarks;
     }
 }
