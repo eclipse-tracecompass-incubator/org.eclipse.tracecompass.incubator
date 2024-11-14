@@ -19,6 +19,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,6 +104,8 @@ public class ExperimentManagerService {
     private static final String EXPERIMENTS_FOLDER = "Experiments"; //$NON-NLS-1$
     private static final String TRACES_FOLDER = "Traces"; //$NON-NLS-1$
     private static final String SUFFIX = "_exp"; //$NON-NLS-1$
+    private static final String BOOKMARKS_HIDDEN_FILE = ".bookmarks"; //$NON-NLS-1$
+    private static final String EXPERIMENT_EDITOR_INPUT_TYPE = "editorInputType.experiment"; //$NON-NLS-1$
 
     /**
      * Getter for the list of experiments from the trace manager
@@ -374,7 +377,7 @@ public class ExperimentManagerService {
                 experiment.getNext(ctx);
                 ctx.dispose();
 
-                TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(ExperimentManagerService.class, experiment, null));
+                TmfSignalManager.dispatchSignal(new TmfTraceOpenedSignal(ExperimentManagerService.class, experiment, createBookmarksFile(resource)));
 
                 EXPERIMENTS.put(expUUID, experiment);
                 TRACE_INSTANCES.put(expUUID, uuidToTraceInstances);
@@ -493,6 +496,24 @@ public class ExperimentManagerService {
             experimentResource.setPersistentProperty(TmfCommonConstants.TRACE_SUPPLEMENTARY_FOLDER, supplFolder.getLocation().toOSString());
         } catch (CoreException e) {
         }
+    }
+
+    private static IFile createBookmarksFile(IResource resource) {
+        IFile file = ((IFolder) resource).getFile(resource.getName() + '_');
+        try {
+            if (!file.exists()) {
+                final IFile bookmarksFile = ((IFolder) resource.getParent()).getFile(BOOKMARKS_HIDDEN_FILE);
+                if (!bookmarksFile.exists()) {
+                    final InputStream source = new ByteArrayInputStream(new byte[0]);
+                    bookmarksFile.create(source, IResource.FORCE | IResource.HIDDEN, new NullProgressMonitor());
+                }
+                file.createLink(bookmarksFile.getLocation(), IResource.REPLACE | IResource.HIDDEN, new NullProgressMonitor());
+            }
+            file.setPersistentProperty(TmfCommonConstants.TRACETYPE, EXPERIMENT_EDITOR_INPUT_TYPE);
+        } catch (CoreException e) {
+            Activator.getInstance().logWarning("Error creating bookmarks file", e); //$NON-NLS-1$
+        }
+        return file;
     }
 
     private static void createFolder(IFolder folder) throws CoreException {
