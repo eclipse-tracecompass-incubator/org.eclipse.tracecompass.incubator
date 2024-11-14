@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Bookmark model for TSP
  *
  * @author Kaveh Shahedi
- * @since 10.1
  */
 public class Bookmark implements Serializable {
 

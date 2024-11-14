@@ -12,7 +12,6 @@
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -25,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * <code>BookmarkModel</code> schema
  *
  * @author Kaveh Shahedi
- * @since 10.1
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BookmarkModelStub implements Serializable {
@@ -71,11 +69,7 @@ public class BookmarkModelStub implements Serializable {
      *          end time
      */
     public BookmarkModelStub(String name, long start, long end) {
-        this(getUUID(name), name, start, end);
-    }
-
-    private static UUID getUUID(String name) {
-        return UUID.nameUUIDFromBytes(Objects.requireNonNull(name.getBytes(Charset.defaultCharset())));
+        this(UUID.randomUUID(), name, start, end);
     }
 
     /**

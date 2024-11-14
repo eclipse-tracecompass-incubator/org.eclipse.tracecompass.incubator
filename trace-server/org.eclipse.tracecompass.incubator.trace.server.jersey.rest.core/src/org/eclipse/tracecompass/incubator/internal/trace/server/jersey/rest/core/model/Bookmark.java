@@ -23,7 +23,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Contributes to the model used for TSP swagger-core annotations.
  *
  * @author Kaveh Shahedi
- * @since 10.1
  */
 public interface Bookmark {
 
