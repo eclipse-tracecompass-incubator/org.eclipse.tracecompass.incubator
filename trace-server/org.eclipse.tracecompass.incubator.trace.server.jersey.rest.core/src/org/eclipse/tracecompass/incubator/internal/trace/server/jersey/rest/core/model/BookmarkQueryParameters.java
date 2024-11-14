@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Parameters for bookmark creation and update operations
  *
  * @author Kaveh Shahedi
- * @since 10.1
  */
 public interface BookmarkQueryParameters {
 
@@ -30,6 +29,9 @@ public interface BookmarkQueryParameters {
     BookmarkParameters getParameters();
 
 
+    /**
+     * Bookmark parameters
+     */
     interface BookmarkParameters {
         /**
          * @return The bookmark name
