@@ -72,7 +72,7 @@ public class IdentifierService {
 
         if (product != null) {
             Version version = product.getDefiningBundle().getVersion();
-            response.setVersion(version.getMajor() + SEPARATOR + version.getMicro() + SEPARATOR + version.getMinor());
+            response.setVersion(version.getMajor() + SEPARATOR + version.getMinor() + SEPARATOR + version.getMicro());
             String qualifier = version.getQualifier();
             if (!QUALIFIER.equalsIgnoreCase(qualifier) && qualifier != null) {
                 response.setBuildTime(qualifier);
