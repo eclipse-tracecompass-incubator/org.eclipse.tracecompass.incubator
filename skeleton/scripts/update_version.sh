@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright (c) 2016, 2022 Ericsson
+# Copyright (c) 2016, 2024 Ericsson
 #
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -56,3 +56,6 @@ find ../../rcp/org.eclipse.tracecompass.incubator.rcp.product/ -name "*.product"
 #Update .product trace-server/org.eclipse.tracecompass.incubator.trace.server.product/(*/)traceserver.product
 find ../../trace-server/org.eclipse.tracecompass.incubator.trace.server.product/ -name "*.product" -type f -exec sed -i -e s/$oldVersion/$newVersion/g {} \;
 
+#Update rest.core plugin trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/META-INF/MANIFEST.MF.
+#This version is retrieved to show the server version and hence has to match the trace server product version
+sed -i -e s/$oldVersion.qualifier/$newVersion.qualifier/g ../../trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/META-INF/MANIFEST.MF
