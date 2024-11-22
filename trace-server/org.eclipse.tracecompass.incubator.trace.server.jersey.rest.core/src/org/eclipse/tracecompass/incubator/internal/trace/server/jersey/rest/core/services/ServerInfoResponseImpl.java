@@ -31,6 +31,7 @@ public class ServerInfoResponseImpl {
     private String launcherName;
     private String productId;
     private String tspVersion;
+    private String jvmVersion;
 
     /**
      * @return Version in the format Major.Minor.Micro
@@ -201,4 +202,21 @@ public class ServerInfoResponseImpl {
     public void setTspVersion(String version) {
         tspVersion = version;
     }
+
+    /**
+     * Set JVM Version
+     *
+     * @param jvmVersion jvm version
+     */
+    public void setJvmVersion(String jvmVersion) {
+        this.jvmVersion = jvmVersion;
+    }
+
+    /**
+     * @return the jvm Version
+     */
+    public String getJvmVersion() {
+        return jvmVersion;
+    }
+
 }
