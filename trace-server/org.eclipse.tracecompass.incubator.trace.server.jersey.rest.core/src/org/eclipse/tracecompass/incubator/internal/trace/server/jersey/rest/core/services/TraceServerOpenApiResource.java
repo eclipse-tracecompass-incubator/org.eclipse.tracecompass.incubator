@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ANN;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.BKM;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DESC;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.DIA;
@@ -48,6 +49,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
         @Server(url = SERVER)
 }, tags = {
         @Tag(name = ANN, description = "Retrieve annotations for different outputs."),
+        @Tag(name = BKM, description = "Bookmark areas of interest in the experiment."),
         @Tag(name = CFG, description = "Manage configuration source types and configurations."),
         @Tag(name = DIA, description = "Retrieve the server's status."),
         @Tag(name = DT,  description = "Query data tree models (e.g. for statistics)."),
