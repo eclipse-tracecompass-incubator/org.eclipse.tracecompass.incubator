@@ -23,9 +23,11 @@ import org.eclipse.tracecompass.incubator.internal.ros2.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.objects.Ros2ObjectsUtil;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2CallbackPublicationInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2MessageTransportInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ClientObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ObjectHandle;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ServiceObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2SubscriptionObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2TimerObject;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
@@ -50,6 +52,19 @@ public class Ros2MessagesUtil {
     public static final @NonNull String LIST_PUBLISHERS = "Publishers"; //$NON-NLS-1$
     /** Attribute name for subscriptions list */
     public static final @NonNull String LIST_SUBSCRIPTIONS = "Subscriptions"; //$NON-NLS-1$
+    /** Attribute name for clients list */
+    public static final @NonNull String LIST_CLIENTS = "Clients"; //$NON-NLS-1$
+    /** Attribute name for services list */
+    public static final @NonNull String LIST_SERVICES = "Services"; //$NON-NLS-1$
+
+    /** Types of instances for clients/services */
+    public enum ClientServiceInstanceType {
+        /** Send instance */
+        SEND,
+        /** Take or take+callback instance */
+        TAKE;
+    }
+
     /** Attribute name for timers list */
     public static final @NonNull String LIST_TIMERS = "Timers"; //$NON-NLS-1$
     /** Attribute name for transport instances list */
@@ -94,6 +109,20 @@ public class Ros2MessagesUtil {
      */
     private static String[] getSubscriptionRelativeAttribute(@NonNull Ros2ObjectHandle subscriptionHandle) {
         return new String[] { LIST_SUBSCRIPTIONS, subscriptionHandle.getStringId() };
+    }
+
+    /**
+     * Get client attribute relative to node attribute/quark.
+     */
+    private static String[] getClientRelativeAttribute(@NonNull Ros2ObjectHandle clientHandle, @NonNull ClientServiceInstanceType type) {
+        return new String[] { LIST_CLIENTS, clientHandle.getStringId(), type.toString() };
+    }
+
+    /**
+     * Get service attribute relative to node attribute/quark.
+     */
+    private static String[] getServiceRelativeAttribute(@NonNull Ros2ObjectHandle serviceHandle, @NonNull ClientServiceInstanceType type) {
+        return new String[] { LIST_SERVICES, serviceHandle.getStringId(), type.toString() };
     }
 
     /**
@@ -226,6 +255,62 @@ public class Ros2MessagesUtil {
     }
 
     /**
+     * Get client quark and add if needed.
+     *
+     * @param ss
+     *            the messages state system
+     * @param objectsSs
+     *            the objects state system
+     * @param timestamp
+     *            the timestamp within the client & node lifetime
+     * @param clientHandle
+     *            the client handle
+     * @param type
+     *            the instance type
+     * @return the client quark, or <code>null</code>
+     */
+    public static @Nullable Integer getClientQuarkAndAdd(ITmfStateSystemBuilder ss, ITmfStateSystem objectsSs, long timestamp, @NonNull Ros2ObjectHandle clientHandle, @NonNull ClientServiceInstanceType type) {
+        Ros2ClientObject clientObject = Ros2ObjectsUtil.getClientObjectFromHandle(objectsSs, timestamp, clientHandle);
+        if (null == clientObject) {
+            Activator.getInstance().logError("could not find corresponding client object for clientHandle=" + clientHandle.toString()); //$NON-NLS-1$
+            return null;
+        }
+        Integer nodeQuark = getNodeQuark(ss, objectsSs, timestamp, clientObject.getNodeHandle());
+        if (null == nodeQuark) {
+            return null;
+        }
+        return ss.getQuarkRelativeAndAdd(nodeQuark, getClientRelativeAttribute(clientHandle, type));
+    }
+
+    /**
+     * Get service quark and add if needed.
+     *
+     * @param ss
+     *            the messages state system
+     * @param objectsSs
+     *            the objects state system
+     * @param timestamp
+     *            the timestamp within the service & node lifetime
+     * @param serviceHandle
+     *            the service handle
+     * @param type
+     *            the instance type
+     * @return the service quark, or <code>null</code>
+     */
+    public static @Nullable Integer getServiceQuarkAndAdd(ITmfStateSystemBuilder ss, ITmfStateSystem objectsSs, long timestamp, @NonNull Ros2ObjectHandle serviceHandle, @NonNull ClientServiceInstanceType type) {
+        Ros2ServiceObject serviceObject = Ros2ObjectsUtil.getServiceObjectFromHandle(objectsSs, timestamp, serviceHandle);
+        if (null == serviceObject) {
+            Activator.getInstance().logError("could not find corresponding client object for serviceHandle=" + serviceHandle.toString()); //$NON-NLS-1$
+            return null;
+        }
+        Integer nodeQuark = getNodeQuark(ss, objectsSs, timestamp, serviceObject.getNodeHandle());
+        if (null == nodeQuark) {
+            return null;
+        }
+        return ss.getQuarkRelativeAndAdd(nodeQuark, getServiceRelativeAttribute(serviceHandle, type));
+    }
+
+    /**
      * Get timer quark and add if needed.
      *
      * @param ss
@@ -339,6 +424,72 @@ public class Ros2MessagesUtil {
         }
         try {
             return ss.getQuarkRelative(nodeQuark, getSubscriptionRelativeAttribute(subscriptionHandle));
+        } catch (AttributeNotFoundException e) {
+            // Do nothing
+        }
+        return null;
+    }
+
+    /**
+     * Get client quark.
+     *
+     * @param ss
+     *            the messages state system
+     * @param objectsSs
+     *            the objects state system
+     * @param timestamp
+     *            the timestamp within the client & node lifetime
+     * @param clientHandle
+     *            the client handle
+     * @param type
+     *            the instance type
+     * @return the client quark, or <code>null</code>
+     */
+    public static @Nullable Integer getClientQuark(ITmfStateSystem ss, ITmfStateSystem objectsSs, long timestamp, @NonNull Ros2ObjectHandle clientHandle, @NonNull ClientServiceInstanceType type) {
+        Ros2ClientObject clientObject = Ros2ObjectsUtil.getClientObjectFromHandle(objectsSs, timestamp, clientHandle);
+        if (null == clientObject) {
+            Activator.getInstance().logError("could not find corresponding client object for clientHandle=" + clientHandle.toString()); //$NON-NLS-1$
+            return null;
+        }
+        Integer nodeQuark = getNodeQuark(ss, objectsSs, timestamp, clientObject.getNodeHandle());
+        if (null == nodeQuark) {
+            return null;
+        }
+        try {
+            return ss.getQuarkRelative(nodeQuark, getClientRelativeAttribute(clientHandle, type));
+        } catch (AttributeNotFoundException e) {
+            // Do nothing
+        }
+        return null;
+    }
+
+    /**
+     * Get service quark.
+     *
+     * @param ss
+     *            the messages state system
+     * @param objectsSs
+     *            the objects state system
+     * @param timestamp
+     *            the timestamp within the service & node lifetime
+     * @param serviceHandle
+     *            the service handle
+     * @param type
+     *            the instance type
+     * @return the service quark, or <code>null</code>
+     */
+    public static @Nullable Integer getServiceQuark(ITmfStateSystem ss, ITmfStateSystem objectsSs, long timestamp, @NonNull Ros2ObjectHandle serviceHandle, @NonNull ClientServiceInstanceType type) {
+        Ros2ServiceObject serviceObject = Ros2ObjectsUtil.getServiceObjectFromHandle(objectsSs, timestamp, serviceHandle);
+        if (null == serviceObject) {
+            Activator.getInstance().logError("could not find corresponding service object for serviceHandle=" + serviceHandle.toString()); //$NON-NLS-1$
+            return null;
+        }
+        Integer nodeQuark = getNodeQuark(ss, objectsSs, timestamp, serviceObject.getNodeHandle());
+        if (null == nodeQuark) {
+            return null;
+        }
+        try {
+            return ss.getQuarkRelative(nodeQuark, getServiceRelativeAttribute(serviceHandle, type));
         } catch (AttributeNotFoundException e) {
             // Do nothing
         }

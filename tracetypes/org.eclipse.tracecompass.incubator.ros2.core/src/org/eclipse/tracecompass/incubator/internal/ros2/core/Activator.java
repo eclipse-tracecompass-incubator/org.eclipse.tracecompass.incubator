@@ -22,9 +22,11 @@ import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2TakeInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2TimerCallbackInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackObject;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ClientObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ObjectHandle;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ServiceObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2SubscriptionObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2TimerObject;
 import org.eclipse.tracecompass.internal.provisional.statesystem.core.statevalue.CustomStateValue;
@@ -65,6 +67,8 @@ public class Activator extends TraceCompassActivator {
         CustomStateValue.registerCustomFactory(Ros2SubscriptionObject.CUSTOM_TYPE_ID, Ros2SubscriptionObject.ROS2_SUBSCRIPTION_OBJECT_VALUE_FACTORY);
         CustomStateValue.registerCustomFactory(Ros2TimerObject.CUSTOM_TYPE_ID, Ros2TimerObject.ROS2_TIMER_OBJECT_VALUE_FACTORY);
         CustomStateValue.registerCustomFactory(Ros2CallbackObject.CUSTOM_TYPE_ID, Ros2CallbackObject.ROS2_CALLBACK_OBJECT_VALUE_FACTORY);
+        CustomStateValue.registerCustomFactory(Ros2ClientObject.CUSTOM_TYPE_ID, Ros2ClientObject.ROS2_CLIENT_OBJECT_VALUE_FACTORY);
+        CustomStateValue.registerCustomFactory(Ros2ServiceObject.CUSTOM_TYPE_ID, Ros2ServiceObject.ROS2_SERVICE_OBJECT_VALUE_FACTORY);
         // Instances (for messages analysis)
         CustomStateValue.registerCustomFactory(Ros2PubInstance.CUSTOM_TYPE_ID, Ros2PubInstance.ROS2_PUB_INSTANCE_VALUE_FACTORY);
         CustomStateValue.registerCustomFactory(Ros2TakeInstance.CUSTOM_TYPE_ID, Ros2TakeInstance.ROS2_TAKE_INSTANCE_VALUE_FACTORY);
