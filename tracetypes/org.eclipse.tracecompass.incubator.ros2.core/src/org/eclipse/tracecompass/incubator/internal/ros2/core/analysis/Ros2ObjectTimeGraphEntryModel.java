@@ -16,8 +16,10 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ClientObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ServiceObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2SubscriptionObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2TimerObject;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
@@ -72,6 +74,10 @@ public class Ros2ObjectTimeGraphEntryModel extends TimeGraphEntryModel {
             return ((Ros2PublisherObject) object).getTopicName();
         case SUBSCRIPTION:
             return ((Ros2SubscriptionObject) object).getTopicName();
+        case CLIENT:
+            return ((Ros2ClientObject) object).getTopicName();
+        case SERVICE:
+            return ((Ros2ServiceObject) object).getTopicName();
         case TIMER:
             return getTimerPeriodAsString((Ros2TimerObject) object);
         default:

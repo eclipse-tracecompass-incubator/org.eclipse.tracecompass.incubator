@@ -11,9 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.objects;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
@@ -26,9 +24,11 @@ import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcessPo
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Gid;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackType;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ClientObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ObjectHandle;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ServiceObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2SubscriptionObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2TimerObject;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
@@ -55,13 +55,16 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
     private Map<@NonNull Gid, ITmfEvent> fDdsCreateWriterEvents = Maps.newHashMap();
     private Map<HostProcessPointer, ITmfEvent> fRmwPublisherInitEvents = Maps.newHashMap();
     // Callbacks
-    private Collection<HostProcessPointer> fIgnoredCallbacks = new ArrayList<>();
     private Map<HostProcessPointer, Pair<Ros2CallbackType, @NonNull Ros2ObjectHandle>> fCallbackOwners = Maps.newHashMap();
     // Subscriptions
     private Map<@NonNull Gid, ITmfEvent> fDdsCreateReaderEvents = Maps.newHashMap();
     private Map<@NonNull Ros2ObjectHandle, ITmfEvent> fRmwSubscriptionInitEvents = Maps.newHashMap();
     private Map<@NonNull Ros2ObjectHandle, ITmfEvent> fRclSubscriptionInitEvents = Maps.newHashMap();
     private Map<HostProcessPointer, ITmfEvent> fRclcppSubscriptionInitEvents = Maps.newHashMap();
+    // Services
+    private Map<@NonNull Ros2ObjectHandle, ITmfEvent> fRclServiceInitEvents = Maps.newHashMap();
+    // Clients
+    private Map<@NonNull Ros2ObjectHandle, ITmfEvent> fRmwClientInitEvents = Maps.newHashMap();
     // Timers
     private Map<@NonNull Ros2ObjectHandle, ITmfEvent> fRclTimerInit = Maps.newHashMap();
     private Map<@NonNull Ros2ObjectHandle, ITmfEvent> fRclcppTimerCallbackAdded = Maps.newHashMap();
@@ -99,7 +102,8 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
         eventHandlePublisher(event, ss);
         eventHandleSubscription(event, ss);
         eventHandleTimer(event, ss, timestamp);
-        eventHandleService(event);
+        eventHandleService(event, ss, timestamp);
+        eventHandleClient(event, ss, timestamp);
         eventHandleCallback(event, ss, timestamp);
     }
 
@@ -376,14 +380,79 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
         }
     }
 
-    private void eventHandleService(@NonNull ITmfEvent event) {
+    private void eventHandleService(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp) {
+        eventHandleServiceInit(event);
+        eventHandleServiceCallbackAdded(event, ss, timestamp);
+    }
+
+    private void eventHandleServiceInit(@NonNull ITmfEvent event) {
+        // rcl_service_init
+        if (isEvent(event, LAYOUT.eventRclServiceInit())) {
+            Ros2ObjectHandle serviceHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldServiceHandle()));
+
+            // Add to temporary map
+            fRclServiceInitEvents.put(serviceHandle, event);
+        }
+    }
+
+    private void eventHandleServiceCallbackAdded(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp) {
         // rclcpp_service_callback_added
         if (isEvent(event, LAYOUT.eventRclcppServiceCallbackAdded())) {
+            Ros2ObjectHandle serviceHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldServiceHandle()));
             HostProcessPointer callback = hostProcessPointerFrom(event, (long) getField(event, LAYOUT.fieldCallback()));
 
-            // Add to list of ignored callbacks, since we don't currently
-            // process services
-            fIgnoredCallbacks.add(callback);
+            // Add callback owner info to map
+            fCallbackOwners.put(callback, new Pair<>(Ros2CallbackType.SERVICE, serviceHandle));
+
+            // Get correspondingrcl_service_init event
+            ITmfEvent rclServiceInit = fRclServiceInitEvents.remove(serviceHandle);
+            if (null == rclServiceInit) {
+                Activator.getInstance().logError("could not find corresponding rcl_service_init event for serviceHandle=" + serviceHandle.toString()); //$NON-NLS-1$
+                return;
+            }
+            Ros2ObjectHandle nodeHandle = handleFrom(event, (long) getField(rclServiceInit, LAYOUT.fieldNodeHandle()));
+            Ros2ObjectHandle rmwServiceHandle = handleFrom(event, (long) getField(rclServiceInit, LAYOUT.fieldRmwServiceHandle()));
+            String serviceName = Objects.requireNonNull((String) getField(rclServiceInit, LAYOUT.fieldServiceName()));
+
+            // Add to services list
+            Ros2ServiceObject serviceObject = new Ros2ServiceObject(serviceHandle, rmwServiceHandle, serviceName, nodeHandle, callback);
+            int serviceQuark = Ros2ObjectsUtil.getServiceQuarkAndAdd(ss, serviceObject.getHandle());
+            ss.modifyAttribute(timestamp, serviceObject, serviceQuark);
+        }
+    }
+
+    private void eventHandleClient(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp) {
+        // rmw_client_init
+        if (isEvent(event, LAYOUT.eventRmwClientInit())) {
+            Ros2ObjectHandle rmwClientHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldRmwClientHandle()));
+
+            // Add to temporary map
+            fRmwClientInitEvents.put(rmwClientHandle, event);
+
+            return;
+        }
+
+        // rcl_client_init
+        if (isEvent(event, LAYOUT.eventRclClientInit())) {
+            Ros2ObjectHandle clientHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldClientHandle()));
+            Ros2ObjectHandle nodeHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldNodeHandle()));
+            Ros2ObjectHandle rmwClientHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldRmwClientHandle()));
+            String serviceName = Objects.requireNonNull((String) getField(event, LAYOUT.fieldServiceName()));
+
+            // Get corresponding rmw_client_init event
+            ITmfEvent rmwClientInit = fRmwClientInitEvents.remove(rmwClientHandle);
+            if (null == rmwClientInit) {
+                Activator.getInstance().logError("could not find corresponding rmw_client_init event for rmwClientHandle=" + rmwClientHandle.toString()); //$NON-NLS-1$
+                return;
+            }
+            long[] gidArray = (long[]) getField(rmwClientInit, LAYOUT.fieldGid());
+            Gid gid = new Gid(gidArray);
+
+            // Add to clients list
+            Ros2ClientObject clientObject = new Ros2ClientObject(clientHandle, rmwClientHandle, serviceName, nodeHandle, gid);
+            int clientQuark = Ros2ObjectsUtil.getClientQuarkAndAdd(ss, clientHandle);
+            ss.modifyAttribute(timestamp, clientObject, clientQuark);
+            return;
         }
     }
 
@@ -392,11 +461,6 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
         if (isEvent(event, LAYOUT.eventRclcppCallbackRegister())) {
             HostProcessPointer callback = hostProcessPointerFrom(event, (long) getField(event, LAYOUT.fieldCallback()));
             String symbol = (String) getField(event, LAYOUT.fieldSymbol());
-
-            // Check if we should ignore this callback registration
-            if (fIgnoredCallbacks.contains(callback)) {
-                return;
-            }
 
             // Get owner info from map
             Pair<Ros2CallbackType, @NonNull Ros2ObjectHandle> ownerInfo = fCallbackOwners.remove(callback);

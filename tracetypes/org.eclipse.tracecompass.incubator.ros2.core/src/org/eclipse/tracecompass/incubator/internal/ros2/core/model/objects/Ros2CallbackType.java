@@ -24,6 +24,9 @@ public enum Ros2CallbackType {
     /**
      * Timer
      */
-    TIMER;
-    // TODO service, etc.
+    TIMER,
+    /**
+     * Service (i.e., service server)
+     */
+    SERVICE;
 }
