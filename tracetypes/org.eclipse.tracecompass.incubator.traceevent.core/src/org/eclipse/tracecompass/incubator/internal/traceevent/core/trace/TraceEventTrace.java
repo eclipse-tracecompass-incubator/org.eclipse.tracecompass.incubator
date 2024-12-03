@@ -228,13 +228,14 @@ public class TraceEventTrace extends JsonTrace {
         skipList.add((int) ' ');
         skipList.add((int) '\b');
         skipList.add((int) '\f');
-        while (val != -1 && val != ':' && sb.length() < 14) {
+        int maxLen = 1024;
+        while (val != -1 && val != ':' && sb.length() < maxLen && !sb.toString().endsWith(traceEventsKey)) {
             if (!skipList.contains(val)) {
                 sb.append((char) val);
             }
             val = rafile.read();
         }
-        if (!(sb.toString().startsWith('{' + traceEventsKey) && rafile.length() > 14)) {
+        if (!(sb.toString().endsWith(traceEventsKey) && rafile.length() > maxLen)) {
             // Trace does not start with {"TraceEvents", maybe it's the events
             // directly, go back to start of trace
             rafile.seek(0);
