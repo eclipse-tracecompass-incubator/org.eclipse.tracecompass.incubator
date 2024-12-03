@@ -289,6 +289,7 @@ public class TraceEventTrace extends JsonTrace {
             return;
         }
         Map<@NonNull String, @NonNull String> properties = fProperties;
+        Object tid = field.getTid();
         switch (name) {
         case PROCESS_NAME:
             String procName = (String) args.get(NAME_ARG);
@@ -311,15 +312,17 @@ public class TraceEventTrace extends JsonTrace {
             break;
         case THREAD_NAME:
             String threadName = (String) args.get(NAME_ARG);
-            fTidNames.put(field.getTid(), threadName);
+            if (tid instanceof Integer) {
+                fTidNames.put((Integer) tid, threadName);
+            }
             if (threadName != null) {
-                properties.put(TID_PREFIX + field.getTid(), threadName);
+                properties.put(TID_PREFIX + tid, threadName);
             }
             break;
         case THREAD_SORT_INDEX:
             sortIndex = (String) args.get(SORT_INDEX);
             if (sortIndex != null) {
-                properties.put(name + '-' + field.getTid(), sortIndex);
+                properties.put(name + '-' + tid, sortIndex);
             }
             break;
         default:
@@ -355,8 +358,12 @@ public class TraceEventTrace extends JsonTrace {
         public @Nullable String resolve(@NonNull ITmfEvent event) {
             if (event instanceof TraceEventEvent) {
                 TraceEventField field = ((TraceEventEvent) event).getField();
-                if (field.getTid() != null) {
-                    return fTidNames.get(field.getTid());
+                Object tid = field.getTid();
+                if (tid != null) {
+                    String tidName = fTidNames.get(tid);
+                    if (tidName == null) {
+                        return String.valueOf(tid);
+                    }
                 }
             }
             return null;
