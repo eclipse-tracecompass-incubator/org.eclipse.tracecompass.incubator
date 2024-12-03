@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -104,7 +105,10 @@ public class TraceEventTrace extends JsonTrace {
 
     private static final String EVENTS_ARRAY_KEY = "traceEvents"; //$NON-NLS-1$
 
+    private static final Pattern TID_REGEX = Pattern.compile("\\d+"); //$NON-NLS-1$
+
     private final @NonNull Map<Object, String> fPidNames = new HashMap<>();
+    private final @NonNull Map<Object, Integer> fTidMap = new HashMap<>();
     private final @NonNull NavigableMap<Integer, String> fTidNames = new TreeMap<>();
     private final @NonNull Iterable<@NonNull ITmfEventAspect<?>> fEventAspects;
 
@@ -322,6 +326,7 @@ public class TraceEventTrace extends JsonTrace {
             return;
         }
         Map<@NonNull String, @NonNull String> properties = fProperties;
+        Object tid = field.getTid();
         switch (name) {
         case PROCESS_NAME:
             String procName = (String) args.get(NAME_ARG);
@@ -344,15 +349,17 @@ public class TraceEventTrace extends JsonTrace {
             break;
         case THREAD_NAME:
             String threadName = (String) args.get(NAME_ARG);
-            fTidNames.put(field.getTid(), threadName);
+            if (tid instanceof Integer tidInt) {
+                fTidNames.put(tidInt, threadName);
+            }
             if (threadName != null) {
-                properties.put(TID_PREFIX + field.getTid(), threadName);
+                properties.put(TID_PREFIX + tid, threadName);
             }
             break;
         case THREAD_SORT_INDEX:
             sortIndex = (String) args.get(SORT_INDEX);
             if (sortIndex != null) {
-                properties.put(name + '-' + field.getTid(), sortIndex);
+                properties.put(name + '-' + tid, sortIndex);
             }
             break;
         default:
@@ -369,8 +376,8 @@ public class TraceEventTrace extends JsonTrace {
 
         @Override
         public @Nullable String resolve(@NonNull ITmfEvent event) {
-            if (event instanceof TraceEventEvent) {
-                TraceEventField field = ((TraceEventEvent) event).getField();
+            if (event instanceof TraceEventEvent traceEventEvent) {
+                TraceEventField field = traceEventEvent.getField();
                 if (field.getPid() != null) {
                     return fPidNames.get(field.getPid());
                 }
@@ -386,13 +393,38 @@ public class TraceEventTrace extends JsonTrace {
 
         @Override
         public @Nullable String resolve(@NonNull ITmfEvent event) {
-            if (event instanceof TraceEventEvent) {
-                TraceEventField field = ((TraceEventEvent) event).getField();
-                if (field.getTid() != null) {
-                    return fTidNames.get(field.getTid());
+            if (event instanceof TraceEventEvent traceEventEvent) {
+                TraceEventField field = traceEventEvent.getField();
+                Object tid = field.getTid();
+                if (tid instanceof String tidString && TID_REGEX.matcher(tidString).matches()) {
+                    tid = Integer.parseInt(tidString);
                 }
+                if (tid instanceof Integer) {
+                    return fTidNames.get(tid);
+                }
+
             }
             return null;
         }
+    }
+
+    /**
+     * Register a TID, it is normally numerical, but a best effort is made for
+     * string TIDs.
+     *
+     * @param tid
+     *            the TID object
+     * @return an integer value
+     */
+    public @Nullable Integer registerTid(Object tid) {
+        if (tid instanceof Integer tidInt) {
+            fTidMap.put(tid, tidInt);
+            return tidInt;
+        }
+        if (tid instanceof String tidString && TID_REGEX.matcher(tidString).matches()) {
+            return Integer.parseInt(tidString);
+        }
+
+        return null;
     }
 }

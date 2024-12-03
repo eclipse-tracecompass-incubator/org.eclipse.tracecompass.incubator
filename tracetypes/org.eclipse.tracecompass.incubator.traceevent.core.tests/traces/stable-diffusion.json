@@ -42,7 +42,7 @@
     }
   },
   {
-    "ph": "X", "cat": "cpu_op", "name": "aten::_to_copy", "pid": 301562, "tid": 455947,
+    "ph": "X", "cat": "cpu_op", "name": "aten::_to_copy", "pid": "Spans", "tid": "PyTorch Profiler",
     "ts": 5624160252062.298, "dur": 1737.624,
     "args": {
       "External id": 5,"Record function id": 0, "Concrete Inputs": ["", "4", "0", "", "", "False", ""], "Input type": ["long int", "Scalar", "Scalar", "", "", "Scalar", ""], "Input Strides": [[77, 1], [], [], [], [], [], []], "Input Dims": [[1, 77], [], [], [], [], [], []], "Ev Idx": 4
