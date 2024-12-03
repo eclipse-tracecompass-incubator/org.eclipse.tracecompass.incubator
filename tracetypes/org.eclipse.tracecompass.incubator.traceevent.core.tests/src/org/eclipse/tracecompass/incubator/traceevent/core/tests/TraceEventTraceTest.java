@@ -63,7 +63,7 @@ public class TraceEventTraceTest {
         ImmutableSet<String> aspectNames = ImmutableSet.of("TID", "Args", "Phase", "Category", "PID", "Duration", "ID", "Callsite", "Timestamp", "LogLevel", "Name", "Process Name", "Thread Name");
 
         assertEquals(aspectNames, eventAspects.keySet());
-        testAspect(eventAspects.get("TID"), event, "48");
+        testAspect(eventAspects.get("TID"), event, 0);
         testAspect(eventAspects.get("Phase"), event, "C");
         testAspect(eventAspects.get("Category"), event, null);
         testAspect(eventAspects.get("Name"), event, "foo");
