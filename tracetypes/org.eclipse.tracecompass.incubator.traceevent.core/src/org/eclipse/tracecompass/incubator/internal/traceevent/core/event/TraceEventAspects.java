@@ -159,7 +159,14 @@ public class TraceEventAspects {
         @Override
         public @Nullable Integer resolve(@NonNull ITmfEvent event) {
             if (event instanceof TraceEventEvent) {
-                return ((TraceEventEvent) event).getField().getTid();
+                Object tid = ((TraceEventEvent) event).getField().getTid();
+                if (tid instanceof Integer) {
+                    return (Integer) tid;
+                }
+                if (tid != null) {
+                    return tid.hashCode();
+                }
+
             }
             return null;
         }
