@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -45,6 +46,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
+import org.json.JSONObject;
 
 import com.google.common.collect.Lists;
 
@@ -167,9 +169,30 @@ public class TraceEventTrace extends JsonTrace {
         super.initTrace(resource, path, type);
         fProperties.put("Type", "Trace-Event"); //$NON-NLS-1$ //$NON-NLS-2$
         String dir = TmfTraceManager.getSupplementaryFileDir(this);
+        long startOffset = 0;
+        try (RandomAccessFile raf = (new RandomAccessFile(new File(path), "r"))) {
+            goToCorrectStart(raf);
+            startOffset = raf.getFilePointer();
+            if (startOffset > 14) {
+                raf.seek(0);
+                byte[] data = new byte[(int) startOffset];
+                raf.read(data);
+                String jsonSoFar = new String(data);
+                jsonSoFar = jsonSoFar.substring(0, jsonSoFar.length()-14)+'}';
+                Map<String, Object> map = new JSONObject(jsonSoFar).toMap();
+                for (Entry<String, Object> entry : map.entrySet()) {
+                    if (!fProperties.containsKey(entry.getKey())) {
+                        fProperties.put(entry.getKey(), entry.getValue().toString());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new TmfTraceException(e.getMessage(), e);
+        }
+
         fFile = new File(dir + new File(path).getName());
         if (!fFile.exists()) {
-            Job sortJob = new TraceEventSortingJob(this, path);
+            Job sortJob = new TraceEventSortingJob(this, path, startOffset);
             sortJob.schedule();
             while (sortJob.getResult() == null) {
                 try {
@@ -216,26 +239,27 @@ public class TraceEventTrace extends JsonTrace {
         // skip start if it's {"traceEvents":
         String traceEventsKey = "\"traceEvents\""; //$NON-NLS-1$
         StringBuilder sb = new StringBuilder();
+        rafile.seek(0);
         int val = rafile.read();
         /*
          * Skip list contains all the odd control characters
          */
         Set<Integer> skipList = new HashSet<>();
-        skipList.add((int) ':');
         skipList.add((int) '\t');
         skipList.add((int) '\n');
         skipList.add((int) '\r');
         skipList.add((int) ' ');
         skipList.add((int) '\b');
         skipList.add((int) '\f');
-        int maxLen = 1024;
-        while (val != -1 && val != ':' && sb.length() < maxLen && !sb.toString().endsWith(traceEventsKey)) {
+        int maxLen = 4096;
+        while (val != -1 && sb.length() < maxLen && !sb.toString().endsWith(traceEventsKey)) {
             if (!skipList.contains(val)) {
                 sb.append((char) val);
             }
             val = rafile.read();
         }
-        if (!(sb.toString().endsWith(traceEventsKey) && rafile.length() > maxLen)) {
+        String string = sb.toString();
+        if (!(string.endsWith(traceEventsKey) && string.length() < maxLen)) {
             // Trace does not start with {"TraceEvents", maybe it's the events
             // directly, go back to start of trace
             rafile.seek(0);
