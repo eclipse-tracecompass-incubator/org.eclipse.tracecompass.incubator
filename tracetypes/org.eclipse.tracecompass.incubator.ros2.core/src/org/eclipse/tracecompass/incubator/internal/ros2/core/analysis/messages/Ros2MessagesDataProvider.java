@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,9 +38,11 @@ import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2SubCallbackInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2TakeInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2TimerCallbackInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ClientObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ObjectHandle;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ServiceObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2SubscriptionObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2TimerObject;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
@@ -108,7 +111,7 @@ public class Ros2MessagesDataProvider extends AbstractTimeGraphDataProvider<@Non
      * @author Christophe Bedard
      */
     public enum ArrowType {
-        /** Transport link (pub->sub over network) */
+        /** Transport link (pub->sub or request/response over network) */
         TRANSPORT(1),
         /** Callback-publication link */
         CALLBACK_PUB(2),
@@ -206,7 +209,7 @@ public class Ros2MessagesDataProvider extends AbstractTimeGraphDataProvider<@Non
             if (monitor != null && monitor.isCanceled()) {
                 return new TimeGraphModel(Collections.emptyList());
             }
-            addRows(rows, entry, intervals, predicates, monitor);
+            addRows(ss, rows, entry, intervals, predicates, monitor);
         }
         return new TimeGraphModel(rows);
     }
@@ -236,12 +239,39 @@ public class Ros2MessagesDataProvider extends AbstractTimeGraphDataProvider<@Non
         return predicates;
     }
 
-    private void addRows(List<@NonNull ITimeGraphRowModel> rows, Map.Entry<@NonNull Long, @NonNull Integer> entry, TreeMultimap<Integer, ITmfStateInterval> intervals,
-            @NonNull Map<@NonNull Integer, @NonNull Predicate<@NonNull Multimap<@NonNull String, @NonNull Object>>> predicates, @Nullable IProgressMonitor monitor) {
+    private void addRows(@NonNull ITmfStateSystem ss, List<@NonNull ITimeGraphRowModel> rows, Map.Entry<@NonNull Long, @NonNull Integer> entry, TreeMultimap<Integer, ITmfStateInterval> intervals,
+            @NonNull Map<@NonNull Integer, @NonNull Predicate<@NonNull Multimap<@NonNull String, @NonNull Object>>> predicates, @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
         List<@NonNull ITimeGraphState> eventList = new ArrayList<>();
         for (ITmfStateInterval interval : intervals.get(entry.getValue())) {
             addRow(entry, predicates, monitor, eventList, interval);
         }
+
+        /**
+         * State system intervals for clients & services are stored under two
+         * attributes (send & take). However, an entry only corresponds to one
+         * attribute. Since we create entry models for clients & services using
+         * the "take" attribute, we need to do a simple workaround here to also
+         * create time graph states for state system intervals under the "send"
+         * attribute in the same client/service entry model.
+         */
+        int quark = Objects.requireNonNull(entry.getValue());
+        String name = ss.getAttributeName(quark);
+        int parentQuark = ss.getParentAttributeQuark(quark);
+        int grandParentQuark = ss.getParentAttributeQuark(parentQuark);
+        String grandParentName = grandParentQuark != ITmfStateSystem.ROOT_ATTRIBUTE ? ss.getAttributeName(grandParentQuark) : StringUtils.EMPTY;
+        // If this is an entry for a "take" attribute
+        if (name.equals(Ros2MessagesUtil.ClientServiceInstanceType.TAKE.toString()) &&
+                (grandParentName.equals(Ros2MessagesUtil.LIST_CLIENTS) || grandParentName.equals(Ros2MessagesUtil.LIST_SERVICES))) {
+            // Find quark for "send" attribute
+            int clientSendQuark = ss.optQuarkRelative(parentQuark, Ros2MessagesUtil.ClientServiceInstanceType.SEND.toString());
+            if (ITmfStateSystem.INVALID_ATTRIBUTE != clientSendQuark) {
+                // Create time graph states under the same ("take") entry model
+                for (ITmfStateInterval interval : ss.query2D(Collections.singleton(clientSendQuark), ss.getStartTime(), ss.getCurrentEndTime())) {
+                    addRow(entry, predicates, monitor, eventList, interval);
+                }
+            }
+        }
+
         rows.add(new TimeGraphRowModel(entry.getKey(), eventList));
     }
 
@@ -264,7 +294,7 @@ public class Ros2MessagesDataProvider extends AbstractTimeGraphDataProvider<@Non
 
             fHandleToIdMap.put(pubInstance.getPublisherHandle(), entry.getKey());
         } else if (valObject instanceof Ros2SubCallbackInstance) {
-            // Subscription callback
+            // Subscription callback or service request callback
             Ros2SubCallbackInstance subCallbackInstance = (Ros2SubCallbackInstance) valObject;
 
             Ros2TakeInstance takeInstance = subCallbackInstance.getTakeInstance();
@@ -274,6 +304,13 @@ public class Ros2MessagesDataProvider extends AbstractTimeGraphDataProvider<@Non
             Ros2CallbackInstance callbackInstance = subCallbackInstance.getCallbackInstance();
             Ros2CallbackTimeGraphState callbackState = new Ros2CallbackTimeGraphState(callbackInstance);
             applyFilterAndAddState(eventList, callbackState, entry.getKey(), predicates, monitor);
+
+            fHandleToIdMap.put(takeInstance.getSubscriptionHandle(), entry.getKey());
+        } else if (valObject instanceof Ros2TakeInstance) {
+            // Client response take
+            Ros2TakeInstance takeInstance = (Ros2TakeInstance) valObject;
+            Ros2TakeTimeGraphState takeState = new Ros2TakeTimeGraphState(takeInstance);
+            applyFilterAndAddState(eventList, takeState, entry.getKey(), predicates, monitor);
 
             fHandleToIdMap.put(takeInstance.getSubscriptionHandle(), entry.getKey());
         } else if (valObject instanceof Ros2TimerCallbackInstance) {
@@ -311,6 +348,8 @@ public class Ros2MessagesDataProvider extends AbstractTimeGraphDataProvider<@Non
         long childId = getId(child);
         String name = ss.getAttributeName(child);
         String parentName = quark != ITmfStateSystem.ROOT_ATTRIBUTE ? ss.getAttributeName(quark) : StringUtils.EMPTY;
+        int grandParentQuark = ss.getParentAttributeQuark(quark);
+        String grandParentName = grandParentQuark != ITmfStateSystem.ROOT_ATTRIBUTE ? ss.getAttributeName(grandParentQuark) : StringUtils.EMPTY;
         if (ITmfStateSystem.ROOT_ATTRIBUTE == quark) {
             if (addEntryModel(ss, builder, childId, parentId, child, Ros2ObjectTimeGraphEntryModelType.TRACE)) {
                 addChildren(ss, builder, child, childId);
@@ -323,9 +362,19 @@ public class Ros2MessagesDataProvider extends AbstractTimeGraphDataProvider<@Non
             addEntryModel(ss, builder, childId, parentId, child, Ros2ObjectTimeGraphEntryModelType.PUBLISHER);
         } else if (parentName.equals(Ros2MessagesUtil.LIST_SUBSCRIPTIONS)) {
             addEntryModel(ss, builder, childId, parentId, child, Ros2ObjectTimeGraphEntryModelType.SUBSCRIPTION);
+        } else if (name.equals(Ros2MessagesUtil.ClientServiceInstanceType.TAKE.toString())) {
+            // Only use the "take" attribute as the entry model
+            if (grandParentName.equals(Ros2MessagesUtil.LIST_CLIENTS)) {
+                addEntryModel(ss, builder, childId, parentId, child, Ros2ObjectTimeGraphEntryModelType.CLIENT);
+            } else if (grandParentName.equals(Ros2MessagesUtil.LIST_SERVICES)) {
+                addEntryModel(ss, builder, childId, parentId, child, Ros2ObjectTimeGraphEntryModelType.SERVICE);
+            }
         } else if (parentName.equals(Ros2MessagesUtil.LIST_TIMERS)) {
             addEntryModel(ss, builder, childId, parentId, child, Ros2ObjectTimeGraphEntryModelType.TIMER);
-        } else if (name.equals(Ros2MessagesUtil.LIST_NODES) || name.equals(Ros2MessagesUtil.LIST_PUBLISHERS) || name.equals(Ros2MessagesUtil.LIST_SUBSCRIPTIONS) || name.equals(Ros2MessagesUtil.LIST_TIMERS)) {
+        } else if (name.equals(Ros2MessagesUtil.LIST_NODES) || name.equals(Ros2MessagesUtil.LIST_PUBLISHERS) || name.equals(Ros2MessagesUtil.LIST_SUBSCRIPTIONS) ||
+                name.equals(Ros2MessagesUtil.LIST_CLIENTS) || parentName.equals(Ros2MessagesUtil.LIST_CLIENTS) ||
+                name.equals(Ros2MessagesUtil.LIST_SERVICES) || parentName.equals(Ros2MessagesUtil.LIST_SERVICES) ||
+                name.equals(Ros2MessagesUtil.ClientServiceInstanceType.SEND.toString()) || name.equals(Ros2MessagesUtil.LIST_TIMERS)) {
             /**
              * Skip this attribute: don't add an entry model, but do proceed
              * with children, effectively skipping a layer in the state system
@@ -369,6 +418,22 @@ public class Ros2MessagesDataProvider extends AbstractTimeGraphDataProvider<@Non
             Ros2SubscriptionObject subscriptionObject = getSubscriptionObject(ss, quark);
             if (null != subscriptionObject) {
                 builder.add(new Ros2ObjectTimeGraphEntryModel(id, parentId, ss.getStartTime(), ss.getCurrentEndTime(), Ros2ObjectTimeGraphEntryModelType.SUBSCRIPTION, subscriptionObject));
+                return true;
+            }
+            break;
+        case CLIENT:
+            @Nullable
+            Ros2ClientObject clientObject = getClientObject(ss, quark);
+            if (null != clientObject) {
+                builder.add(new Ros2ObjectTimeGraphEntryModel(id, parentId, ss.getStartTime(), ss.getCurrentEndTime(), Ros2ObjectTimeGraphEntryModelType.CLIENT, clientObject));
+                return true;
+            }
+            break;
+        case SERVICE:
+            @Nullable
+            Ros2ServiceObject serviceObject = getServiceObject(ss, quark);
+            if (null != serviceObject) {
+                builder.add(new Ros2ObjectTimeGraphEntryModel(id, parentId, ss.getStartTime(), ss.getCurrentEndTime(), Ros2ObjectTimeGraphEntryModelType.SERVICE, serviceObject));
                 return true;
             }
             break;
@@ -456,6 +521,46 @@ public class Ros2MessagesDataProvider extends AbstractTimeGraphDataProvider<@Non
             // Do nothing
         }
         Activator.getInstance().logError("could not get subscription object for entry model"); //$NON-NLS-1$
+        return null;
+    }
+
+    private @Nullable Ros2ClientObject getClientObject(ITmfStateSystem ss, int quark) {
+        try {
+            // Get client handle from a time graph state
+            Iterable<@NonNull ITmfStateInterval> query2d = ss.query2D(Collections.singleton(quark), ss.getStartTime(), ss.getCurrentEndTime());
+            for (ITmfStateInterval iTmfStateInterval : query2d) {
+                if(iTmfStateInterval.getValue() instanceof Ros2TakeInstance) {
+                    @Nullable
+                    Ros2TakeInstance responseTakeInstance = (Ros2TakeInstance) iTmfStateInterval.getValue();
+                    if (null != responseTakeInstance) {
+                        return Ros2ObjectsUtil.getClientObjectFromHandle(fObjectsSs, ss.getCurrentEndTime(), responseTakeInstance.getSubscriptionHandle());
+                    }
+                }
+            }
+        } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
+            // Do nothing
+        }
+        Activator.getInstance().logError("could not get client object for entry model"); //$NON-NLS-1$
+        return null;
+    }
+
+    private @Nullable Ros2ServiceObject getServiceObject(ITmfStateSystem ss, int quark) {
+        try {
+            // Get service handle from a time graph state
+            Iterable<@NonNull ITmfStateInterval> query2d = ss.query2D(Collections.singleton(quark), ss.getStartTime(), ss.getCurrentEndTime());
+            for (ITmfStateInterval iTmfStateInterval : query2d) {
+                if (iTmfStateInterval.getValue() instanceof Ros2SubCallbackInstance) {
+                    @Nullable
+                    Ros2SubCallbackInstance subCallbackInstance = (Ros2SubCallbackInstance) iTmfStateInterval.getValue();
+                    if (null != subCallbackInstance) {
+                        return Ros2ObjectsUtil.getServiceObjectFromHandle(fObjectsSs, ss.getCurrentEndTime(), subCallbackInstance.getTakeInstance().getSubscriptionHandle());
+                    }
+                }
+            }
+        } catch (IndexOutOfBoundsException | TimeRangeException | StateSystemDisposedException e) {
+            // Do nothing
+        }
+        Activator.getInstance().logError("could not get service object for entry model"); //$NON-NLS-1$
         return null;
     }
 

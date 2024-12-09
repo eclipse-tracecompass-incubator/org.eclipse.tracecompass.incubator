@@ -48,7 +48,7 @@ public class Ros2MessageTransportInstance extends CustomStateValue {
      * @param destinationSubscriptionHandle
      *            the destination subscription handle
      * @param sourcePublicationTimestamp
-     *            the source publication timestmap
+     *            the source publication timestamp
      * @param destinationTakeTimestamp
      *            the destination take timestamp
      */

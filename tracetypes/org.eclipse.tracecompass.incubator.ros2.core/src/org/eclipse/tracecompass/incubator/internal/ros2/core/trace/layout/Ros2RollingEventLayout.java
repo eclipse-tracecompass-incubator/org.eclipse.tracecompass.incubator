@@ -39,7 +39,12 @@ public class Ros2RollingEventLayout implements IRos2EventLayout {
     private static final String RCLCPP_TAKE = "rclcpp_take";
     private static final String RCL_SERVICE_INIT = "rcl_service_init";
     private static final String RCLCPP_SERVICE_CALLBACK_ADDED = "rclcpp_service_callback_added";
+    private static final String RMW_TAKE_REQUEST = "rmw_take_request";
+    private static final String RMW_SEND_RESPONSE = "rmw_send_response";
+    private static final String RMW_CLIENT_INIT = "rmw_client_init";
     private static final String RCL_CLIENT_INIT = "rcl_client_init";
+    private static final String RMW_SEND_REQUEST = "rmw_send_request";
+    private static final String RMW_TAKE_RESPONSE = "rmw_take_response";
     private static final String RCL_TIMER_INIT = "rcl_timer_init";
     private static final String RCLCPP_TIMER_CALLBACK_ADDED = "rclcpp_timer_callback_added";
     private static final String RCLCPP_TIMER_LINK_NODE = "rclcpp_timer_link_node";
@@ -85,6 +90,10 @@ public class Ros2RollingEventLayout implements IRos2EventLayout {
     private static final String SERVICE_NAME = "service_name";
     private static final String CLIENT_HANDLE = "client_handle";
     private static final String RMW_CLIENT_HANDLE = "rmw_client_handle";
+    private static final String CLIENT_GID = "client_gid";
+    private static final String REQUEST = "request";
+    private static final String SEQUENCE_NUMBER = "sequence_number";
+    private static final String RESPONSE = "response";
     private static final String TIMER_HANDLE = "timer_handle";
     private static final String PERIOD = "period";
     private static final String SYMBOL = "symbol";
@@ -246,11 +255,46 @@ public class Ros2RollingEventLayout implements IRos2EventLayout {
         return getProviderName() + RCLCPP_SERVICE_CALLBACK_ADDED;
     }
 
+    // rmw_take_request
+
+    @Override
+    public String eventRmwTakeRequest() {
+        return getProviderName() + RMW_TAKE_REQUEST;
+    }
+
+    // rmw_send_response
+
+    @Override
+    public String eventRmwSendResponse() {
+        return getProviderName() + RMW_SEND_RESPONSE;
+    }
+
+    // rmw_client_init
+
+    @Override
+    public String eventRmwClientInit() {
+        return getProviderName() + RMW_CLIENT_INIT;
+    }
+
     // rcl_client_init
 
     @Override
     public String eventRclClientInit() {
         return getProviderName() + RCL_CLIENT_INIT;
+    }
+
+    // rmw_send_request
+
+    @Override
+    public String eventRmwSendRequest() {
+        return getProviderName() + RMW_SEND_REQUEST;
+    }
+
+    // rmw_take_response
+
+    @Override
+    public String eventRmwTakeResponse() {
+        return getProviderName() + RMW_TAKE_RESPONSE;
     }
 
     // rcl_timer_init
@@ -500,6 +544,26 @@ public class Ros2RollingEventLayout implements IRos2EventLayout {
     @Override
     public String fieldRmwClientHandle() {
         return RMW_CLIENT_HANDLE;
+    }
+
+    @Override
+    public String fieldRequest() {
+        return REQUEST;
+    }
+
+    @Override
+    public String fieldClientGid() {
+        return CLIENT_GID;
+    }
+
+    @Override
+    public String fieldSequenceNumber() {
+        return SEQUENCE_NUMBER;
+    }
+
+    @Override
+    public String fieldResponse() {
+        return RESPONSE;
     }
 
     @Override

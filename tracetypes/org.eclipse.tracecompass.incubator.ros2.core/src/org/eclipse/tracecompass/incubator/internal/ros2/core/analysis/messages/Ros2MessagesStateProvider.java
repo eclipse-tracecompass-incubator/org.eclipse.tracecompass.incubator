@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.AbstractRos2StateProvider;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.messages.Ros2MessagesUtil.ClientServiceInstanceType;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.objects.Ros2ObjectsUtil;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcessPointer;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostThread;
@@ -30,10 +31,14 @@ import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2MessageTimestamp;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2MessageTransportInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2PubInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2Request;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2Response;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2SubCallbackInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2TakeInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2TimerCallbackInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Gid;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackType;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ClientObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ObjectHandle;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
@@ -78,6 +83,14 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
     private Multimap<HostThread, Pair<@NonNull Ros2ObjectHandle, @NonNull Long>> fCallbackPublications = MultimapBuilder.hashKeys().arrayListValues().build();
     // Pub-sub links
     private Map<Ros2MessageTimestamp, Pair<@NonNull Ros2ObjectHandle, @NonNull Long>> fPublications = Maps.newHashMap();
+    // Requests
+    private Map<Ros2ObjectHandle, Ros2ObjectHandle> fClientHandles = Maps.newHashMap();
+    // Responses
+    private Map<Ros2ObjectHandle, Ros2ObjectHandle> fServiceHandles = Maps.newHashMap();
+    // Request links
+    private Map<Ros2Request, Pair<@NonNull Ros2ObjectHandle, @NonNull Long>> fRequests = Maps.newHashMap();
+    // Response links
+    private Map<Ros2Response, Pair<@NonNull Ros2ObjectHandle, @NonNull Long>> fResponses = Maps.newHashMap();
 
     /**
      * Constructor
@@ -124,6 +137,7 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
         eventHandlePublish(event, ss, timestamp);
         eventHandleTake(ss, event, timestamp);
         eventHandleCallback(event, ss, timestamp);
+        eventHandleRequestResponse(event, ss, timestamp);
     }
 
     private void eventHandleHelpers(@NonNull ITmfEvent event) {
@@ -187,6 +201,23 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
                 Ros2ObjectHandle rmwPublisher = handleFrom(event, (long) getField(event, LAYOUT.fieldRmwPublisherHandle()));
                 fKnownRmwPublishers.add(rmwPublisher);
             }
+        }
+
+        /**
+         * Create { rmw_{client,service}_handle -> rcl_{client,service}_handle } map for easy lookup
+         * instead of looking it up in the state system.
+         */
+        // rcl_client_init
+        if (isEvent(event, LAYOUT.eventRclClientInit())) {
+            Ros2ObjectHandle rmwClientHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldRmwClientHandle()));
+            Ros2ObjectHandle clientHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldClientHandle()));
+            fClientHandles.put(rmwClientHandle, clientHandle);
+        }
+        // rcl_service_init
+        else if (isEvent(event, LAYOUT.eventRclServiceInit())) {
+            Ros2ObjectHandle rmwServiceHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldRmwServiceHandle()));
+            Ros2ObjectHandle serviceHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldServiceHandle()));
+            fServiceHandles.put(rmwServiceHandle, serviceHandle);
         }
     }
 
@@ -319,8 +350,9 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
 
         // Keep pub event for pub-sub links
         /**
-         * TODO match using publisher GID when rmw_cyclonedds correctly supports
-         * it.
+         * TODO match using publisher GID (and pub sequence number) when
+         * rmw_cyclonedds correctly supports it. See:
+         * https://github.com/ros2/rmw_cyclonedds/issues/377.
          */
         Ros2MessageTimestamp messageSourceTimestamp = new Ros2MessageTimestamp(pubInstance.getSourceTimestamp(), publisherObject.getTopicName());
         fPublications.put(messageSourceTimestamp, new Pair<>(publisherObject.getHandle(), endPubTimestamp));
@@ -510,6 +542,8 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
             Ros2CallbackType callbackType = callbackOwnerHandle.getSecond();
             if (callbackType.equals(Ros2CallbackType.SUBSCRIPTION)) {
                 addSubscriptionCallback(ss, timestamp, startTimestamp, isIntraProcess, tid, ownerHandle);
+            } else if (callbackType.equals(Ros2CallbackType.SERVICE)) {
+                addServiceCallback(ss, timestamp, startTimestamp, isIntraProcess, tid, ownerHandle);
             } else if (callbackType.equals(Ros2CallbackType.TIMER)) {
                 addTimerCallback(ss, timestamp, startTimestamp, isIntraProcess, tid, ownerHandle);
             }
@@ -540,6 +574,24 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
         ss.modifyAttribute(callbackInstance.getEndTime(), null, subQuark);
     }
 
+    private void addServiceCallback(ITmfStateSystemBuilder ss, long timestamp, long startTimestamp, boolean isIntraProcess, long tid, @NonNull Ros2ObjectHandle serviceHandle) {
+        // Get take instance from map
+        Ros2TakeInstance takeInstance = fTakeInstances.remove(serviceHandle);
+        if (null == takeInstance) {
+            Activator.getInstance().logError("could not find corresponding take instance"); //$NON-NLS-1$
+            return;
+        }
+        Ros2CallbackInstance callbackInstance = new Ros2CallbackInstance(serviceHandle, tid, isIntraProcess, startTimestamp, timestamp);
+        Ros2SubCallbackInstance serviceCallbackInstance = new Ros2SubCallbackInstance(takeInstance, callbackInstance);
+
+        Integer serviceCallbackQuark = Ros2MessagesUtil.getServiceQuarkAndAdd(ss, fObjectsSs, timestamp, serviceHandle, ClientServiceInstanceType.TAKE);
+        if (null == serviceCallbackQuark) {
+            return;
+        }
+        ss.modifyAttribute(takeInstance.getStartTime(), serviceCallbackInstance, serviceCallbackQuark);
+        ss.modifyAttribute(callbackInstance.getEndTime(), null, serviceCallbackQuark);
+    }
+
     private void addTimerCallback(ITmfStateSystemBuilder ss, long timestamp, long startTimestamp, boolean isIntraProcess, long tid, @NonNull Ros2ObjectHandle timerHandle) {
         Ros2CallbackInstance callbackInstance = new Ros2CallbackInstance(timerHandle, tid, isIntraProcess, startTimestamp, timestamp);
         Ros2TimerCallbackInstance timerCallbackInstance = new Ros2TimerCallbackInstance(timerHandle, callbackInstance);
@@ -567,6 +619,185 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
             ss.modifyAttribute(pubTimestamp + 1, null, callbackPublicationInstanceQuark);
         }
         fCallbackPublications.removeAll(hostThread);
+    }
+
+    private void eventHandleRequestResponse(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp) {
+        // rmw_send_request
+        if (isEvent(event, LAYOUT.eventRmwSendRequest())) {
+            eventHandleRequestSend(event, ss, timestamp);
+        }
+        // rmw_take_request
+        else if (isEvent(event, LAYOUT.eventRmwTakeRequest())) {
+            eventHandleRequestTake(event, ss, timestamp);
+        }
+        // rmw_send_response
+        else if (isEvent(event, LAYOUT.eventRmwSendResponse())) {
+            eventHandleResponseSend(event, ss, timestamp);
+        }
+        // rmw_take_response
+        else if (isEvent(event, LAYOUT.eventRmwTakeResponse())) {
+            eventHandleResponseTake(event, ss, timestamp);
+        }
+    }
+
+    private void eventHandleRequestSend(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp) {
+        Ros2ObjectHandle rmwClientHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldRmwClientHandle()));
+        HostProcessPointer request = hostProcessPointerFrom(event, (long) getField(event, LAYOUT.fieldRequest()));
+        long sequenceNumber = (long) getField(event, LAYOUT.fieldSequenceNumber());
+
+        // Get client handle and GID
+        Ros2ObjectHandle clientHandle = fClientHandles.get(rmwClientHandle);
+        if (null == clientHandle) {
+            Activator.getInstance().logError("could not find client_handle for rmw_client_handle=" + rmwClientHandle.toString()); //$NON-NLS-1$
+            return;
+        }
+        Ros2ClientObject clientObject = Ros2ObjectsUtil.getClientObjectFromHandle(fObjectsSs, timestamp, clientHandle);
+        if (null == clientObject) {
+            Activator.getInstance().logError("could not find client object for client handle=" + clientHandle.getHandle()); //$NON-NLS-1$
+            return;
+        }
+
+        // Create request instance
+        Integer clientPubQuark = Ros2MessagesUtil.getClientQuarkAndAdd(ss, fObjectsSs, timestamp, clientHandle, ClientServiceInstanceType.SEND);
+        if (null == clientPubQuark) {
+            return;
+        }
+        HostThread thread = hostThreadFrom(event);
+        Ros2PubInstance requestPubInstance = new Ros2PubInstance(clientHandle, thread.getTid(), request, timestamp);
+         // TODO figure out proper request publication start timestamp
+        long requestPubStartTime = timestamp - 5000;
+        long requestPubEndTime = timestamp;
+        ss.modifyAttribute(requestPubStartTime, requestPubInstance, clientPubQuark);
+        ss.modifyAttribute(requestPubEndTime, null, clientPubQuark);
+
+        // Save for request send/take matching
+        Ros2Request requestInfo = new Ros2Request(clientObject.getGid(), sequenceNumber);
+        fRequests.put(requestInfo, new Pair<>(clientHandle, timestamp));
+    }
+
+    private void eventHandleRequestTake(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp) {
+        Ros2ObjectHandle rmwServiceHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldRmwServiceHandle()));
+        HostProcessPointer request = hostProcessPointerFrom(event, (long) getField(event, LAYOUT.fieldRequest()));
+        long[] clientGidArray = (long[]) getField(event, LAYOUT.fieldClientGid());
+        long sequenceNumber = (long) getField(event, LAYOUT.fieldSequenceNumber());
+
+        Ros2ObjectHandle serviceHandle = fServiceHandles.get(rmwServiceHandle);
+        if (null == serviceHandle) {
+            Activator.getInstance().logError("could not find service_handle for rmw_service_handle=" + rmwServiceHandle.toString()); //$NON-NLS-1$
+            return;
+        }
+
+        /*
+         * Get request event without removing from map, since the same request
+         * can be received by more than 1 service.
+         *
+         * TODO drop elements from map after some time, in case the map gets
+         * too big?
+         */
+        Gid clientGid = new Gid(clientGidArray);
+        Ros2Request requestInfo = new Ros2Request(clientGid, sequenceNumber);
+        Pair<@NonNull Ros2ObjectHandle, @NonNull Long> requestSourceInfo = fRequests.get(requestInfo);
+        if (null == requestSourceInfo) {
+            Activator.getInstance().logError("could not find corresponding request=" + requestInfo.toString()); //$NON-NLS-1$
+            return;
+        }
+        Ros2ObjectHandle clientHandle = requestSourceInfo.getFirst();
+        long sourcePubTimestamp = requestSourceInfo.getSecond();
+
+        // Create request take instance object and add it to temporary map
+        long tid = getTid(event);
+        // TODO get proper take start time
+        long takeStartTime = timestamp - 5000;
+        long takeEndTime = timestamp;
+        Ros2TakeInstance takeInstance = new Ros2TakeInstance(serviceHandle, tid, request, sourcePubTimestamp, takeStartTime, takeEndTime);
+        fTakeInstances.put(serviceHandle, takeInstance);
+
+        // Create request transport instance
+        Ros2MessageTransportInstance transportInstance = new Ros2MessageTransportInstance(clientHandle, serviceHandle, sourcePubTimestamp, takeStartTime);
+        addTransportInstance(ss, transportInstance);
+    }
+
+    private void eventHandleResponseSend(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp) {
+        Ros2ObjectHandle rmwServiceHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldRmwServiceHandle()));
+        HostProcessPointer response = hostProcessPointerFrom(event, (long) getField(event, LAYOUT.fieldResponse()));
+        long[] clientGidArray = (long[]) getField(event, LAYOUT.fieldClientGid());
+        long sequenceNumber = (long) getField(event, LAYOUT.fieldSequenceNumber());
+        long sourceTimestamp = (long) getField(event, LAYOUT.fieldTimestamp());
+
+        Ros2ObjectHandle serviceHandle = fServiceHandles.get(rmwServiceHandle);
+        if (null == serviceHandle) {
+            Activator.getInstance().logError("could not find service_handle for rmw_service_handle=" + rmwServiceHandle.toString()); //$NON-NLS-1$
+            return;
+        }
+
+        // Create response instance
+        Integer servicePubQuark = Ros2MessagesUtil.getServiceQuarkAndAdd(ss, fObjectsSs, timestamp, serviceHandle, ClientServiceInstanceType.SEND);
+        if (null == servicePubQuark) {
+            return;
+        }
+        HostThread thread = hostThreadFrom(event);
+        Ros2PubInstance responsePubInstance = new Ros2PubInstance(serviceHandle, thread.getTid(), response, timestamp);
+        // TODO figure out proper response publication start timestamp
+        long responsePubStartTime = timestamp - 5000;
+        long responsePubEndTime = timestamp;
+        ss.modifyAttribute(responsePubStartTime, responsePubInstance, servicePubQuark);
+        ss.modifyAttribute(responsePubEndTime, null, servicePubQuark);
+
+        // Save for response send/take matching
+        Gid clientGid = new Gid(clientGidArray);
+        Ros2Response responseInfo = new Ros2Response(new Ros2Request(clientGid, sequenceNumber), sourceTimestamp);
+        fResponses.put(responseInfo, new Pair<>(serviceHandle, timestamp));
+    }
+
+    private void eventHandleResponseTake(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp) {
+        Ros2ObjectHandle rmwClientHandle = handleFrom(event, (long) getField(event, LAYOUT.fieldRmwClientHandle()));
+        HostProcessPointer response = hostProcessPointerFrom(event, (long) getField(event, LAYOUT.fieldResponse()));
+        long sequenceNumber = (long) getField(event, LAYOUT.fieldSequenceNumber());
+        long sourceTimestamp = (long) getField(event, LAYOUT.fieldSourceTimestamp());
+
+        // Get client handle and GID
+        Ros2ObjectHandle clientHandle = fClientHandles.get(rmwClientHandle);
+        if (null == clientHandle) {
+            Activator.getInstance().logError("could not find client_handle for rmw_client_handle=" + rmwClientHandle.toString()); //$NON-NLS-1$
+            return;
+        }
+        Ros2ClientObject clientObject = Ros2ObjectsUtil.getClientObjectFromHandle(fObjectsSs, timestamp, clientHandle);
+        if (null == clientObject) {
+            Activator.getInstance().logError("could not find client object for client handle=" + clientHandle.getHandle()); //$NON-NLS-1$
+            return;
+        }
+
+        // Create response take instance
+        long tid = getTid(event);
+        // TODO get proper start time
+        long takeStartTime = timestamp - 5000;
+        long takeEndTime = timestamp;
+        Ros2TakeInstance takeInstance = new Ros2TakeInstance(clientHandle, tid, response, sourceTimestamp, takeStartTime, takeEndTime);
+        Integer clientTakeQuark = Ros2MessagesUtil.getClientQuarkAndAdd(ss, fObjectsSs, timestamp, clientHandle, ClientServiceInstanceType.TAKE);
+        if (null == clientTakeQuark) {
+            return;
+        }
+        ss.modifyAttribute(takeInstance.getStartTime(), takeInstance, clientTakeQuark);
+        ss.modifyAttribute(takeInstance.getEndTime(), null, clientTakeQuark);
+
+        /**
+         * Get response event. This response should only be received and
+         * considered by a single client (the client that made the request that
+         * this response is for).
+         */
+        Ros2Request requestInfo = new Ros2Request(clientObject.getGid(), sequenceNumber);
+        Ros2Response responseInfo = new Ros2Response(requestInfo, sourceTimestamp);
+        Pair<@NonNull Ros2ObjectHandle, @NonNull Long> responseSourceInfo = fResponses.get(responseInfo);
+        if (null == responseSourceInfo) {
+            Activator.getInstance().logError("could not find corresponding response=" + responseInfo.toString()); //$NON-NLS-1$
+            return;
+        }
+        Ros2ObjectHandle serviceHandle = responseSourceInfo.getFirst();
+        long sourcePubTimestamp = responseSourceInfo.getSecond();
+
+        // Create response transport instance
+        Ros2MessageTransportInstance transportInstance = new Ros2MessageTransportInstance(serviceHandle, clientHandle, sourcePubTimestamp, takeStartTime);
+        addTransportInstance(ss, transportInstance);
     }
 
     private void createObjects(ITmfStateSystemBuilder ss) {
