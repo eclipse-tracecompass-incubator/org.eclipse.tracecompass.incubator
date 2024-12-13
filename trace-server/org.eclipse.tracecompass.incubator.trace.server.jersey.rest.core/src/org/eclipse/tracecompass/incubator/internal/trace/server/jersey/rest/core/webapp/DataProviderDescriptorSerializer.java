@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2024 Ericsson
+ * Copyright (c) 2018, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -14,7 +14,9 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import java.io.IOException;
 
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderCapabilities;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
+import org.eclipse.tracecompass.tmf.core.model.DataProviderCapabilities;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -54,6 +56,13 @@ public class DataProviderDescriptorSerializer extends StdSerializer<IDataProvide
         ITmfConfiguration config = value.getConfiguration();
         if (config != null) {
             gen.writeObjectField("configuration", config); //$NON-NLS-1$
+        }
+        IDataProviderCapabilities cap = value.getCapabilities();
+        if (cap != DataProviderCapabilities.NULL_INSTANCE) {
+            gen.writeObjectFieldStart("capabilities"); //$NON-NLS-1$
+            gen.writeBooleanField("canCreate", cap.canCreate()); //$NON-NLS-1$
+            gen.writeBooleanField("canDelete", cap.canDelete()); //$NON-NLS-1$
+            gen.writeEndObject();
         }
         gen.writeEndObject();
     }
