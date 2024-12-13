@@ -2,7 +2,7 @@
 Thank you for your Pull Request. Please provide a description and review
 the requirements below.
 
-Contributors guide: https://github.com/eclipse-tracecompass/org.eclipse.tracecompass/blob/master/CONTRIBUTING.md
+Contributors guide: https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator/blob/master/CONTRIBUTING.md
 
 Note: Security vulnerabilities should not be disclosed on GitHub, through a PR or any
 other means. See SECURITY.md at the root of this repository, to learn how to report
