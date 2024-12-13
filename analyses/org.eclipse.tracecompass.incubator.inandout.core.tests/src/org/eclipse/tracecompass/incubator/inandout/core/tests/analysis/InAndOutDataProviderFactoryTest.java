@@ -33,6 +33,7 @@ import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
+import org.eclipse.tracecompass.tmf.core.model.DataProviderCapabilities;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
@@ -72,6 +73,7 @@ public class InAndOutDataProviderFactoryTest {
             .setName(EXPECTED_CONFIGURATOR_NAME)
             .setDescription(EXPECTED_CONFIGURATOR_DESCRIPTION)
             .setProviderType(ProviderType.NONE)
+            .setCapabilities(new DataProviderCapabilities.Builder().setCanCreate(true).build())
             .build();
 
     private static InAndOutDataProviderFactory sfFixture = new InAndOutDataProviderFactory();
@@ -166,6 +168,7 @@ public class InAndOutDataProviderFactoryTest {
         assertEquals(CUSTOM_IN_AND_OUT_ANALYSIS_DESCRIPTION, descriptor.getDescription());
         assertEquals(ProviderType.NONE, descriptor.getType());
         assertEquals(EXPECTED_FACTORY_ID, descriptor.getParentId());
+        assertEquals(new DataProviderCapabilities.Builder().setCanDelete(true).build(), descriptor.getCapabilities());
         ITmfConfiguration config = descriptor.getConfiguration();
         assertNotNull(config);
 
