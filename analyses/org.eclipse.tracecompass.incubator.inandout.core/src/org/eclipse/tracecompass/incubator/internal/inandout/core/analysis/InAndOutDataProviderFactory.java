@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Ericsson
+ * Copyright (c) 2024, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -37,6 +37,7 @@ import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
+import org.eclipse.tracecompass.tmf.core.model.DataProviderCapabilities;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
@@ -98,6 +99,7 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
             .setName(CONFIGURATOR_NAME)
             .setDescription(CONFIGURATOR_DESCRIPTION)
             .setProviderType(ProviderType.NONE)
+            .setCapabilities(new DataProviderCapabilities.Builder().setCanCreate(true).build())
             .build();
 
     /**
@@ -264,6 +266,7 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
                 .setDescription(NLS.bind(CUSTOM_IN_AND_OUT_ANALYSIS_DESCRIPTION, config.getName()))
                 .setProviderType(ProviderType.NONE)
                 .setConfiguration(config)
+                .setCapabilities(new DataProviderCapabilities.Builder().setCanDelete(true).build())
                 .build();
     }
 }
