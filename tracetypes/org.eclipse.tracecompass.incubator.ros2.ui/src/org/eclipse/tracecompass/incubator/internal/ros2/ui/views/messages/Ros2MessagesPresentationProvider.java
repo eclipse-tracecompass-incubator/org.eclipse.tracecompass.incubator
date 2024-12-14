@@ -29,8 +29,10 @@ import org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.messages.R
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2CallbackInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2PubInstance;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.messages.Ros2TakeInstance;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ClientObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ServiceObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2SubscriptionObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2TimerObject;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
@@ -168,6 +170,18 @@ public class Ros2MessagesPresentationProvider extends TimeGraphPresentationProvi
 
             Iterator<@NonNull Object> stateDataIterator = event.getMetadata().get(Ros2TakeTimeGraphState.KEY_DATA).iterator();
             isTakeState = stateDataIterator.hasNext() && stateDataIterator.next() instanceof Ros2TakeInstance;
+        } else if (Ros2ObjectTimeGraphEntryModelType.CLIENT == type) {
+            Ros2ClientObject clientObject = (Ros2ClientObject) messagesModel.getObject();
+            hash = fHasher.hashUnencodedChars(clientObject.getTopicName()).asLong();
+
+            Iterator<@NonNull Object> stateDataIterator = event.getMetadata().get(Ros2TakeTimeGraphState.KEY_DATA).iterator();
+            isTakeState = stateDataIterator.hasNext() && stateDataIterator.next() instanceof Ros2TakeInstance;
+        } else if(Ros2ObjectTimeGraphEntryModelType.SERVICE == type) {
+            Ros2ServiceObject serviceObject = (Ros2ServiceObject) messagesModel.getObject();
+            hash = fHasher.hashUnencodedChars(serviceObject.getTopicName()).asLong();
+
+            Iterator<@NonNull Object> stateDataIterator = event.getMetadata().get(Ros2TakeTimeGraphState.KEY_DATA).iterator();
+            isTakeState = stateDataIterator.hasNext() && stateDataIterator.next() instanceof Ros2TakeInstance;
         } else if (Ros2ObjectTimeGraphEntryModelType.TIMER == type) {
             /**
              * Hashing the period as a string seems to result in fewer color
@@ -202,6 +216,10 @@ public class Ros2MessagesPresentationProvider extends TimeGraphPresentationProvi
             return "message publication"; //$NON-NLS-1$
         } else if (Ros2ObjectTimeGraphEntryModelType.SUBSCRIPTION == type) {
             return "subscription callback/take"; //$NON-NLS-1$
+        } else if (Ros2ObjectTimeGraphEntryModelType.CLIENT == type) {
+            return "request publication or response take"; //$NON-NLS-1$
+        } else if (Ros2ObjectTimeGraphEntryModelType.SERVICE == type) {
+            return "request callback/take or response publication"; //$NON-NLS-1$
         } else if (Ros2ObjectTimeGraphEntryModelType.TIMER == type) {
             return "timer callback"; //$NON-NLS-1$
         }
@@ -228,6 +246,10 @@ public class Ros2MessagesPresentationProvider extends TimeGraphPresentationProvi
             return "Publisher topic"; //$NON-NLS-1$
         } else if (Ros2ObjectTimeGraphEntryModelType.SUBSCRIPTION == type) {
             return "Subscription topic"; //$NON-NLS-1$
+        } else if (Ros2ObjectTimeGraphEntryModelType.CLIENT == type) {
+            return "Service client name"; //$NON-NLS-1$
+        } else if (Ros2ObjectTimeGraphEntryModelType.SERVICE == type) {
+            return "Service server name"; //$NON-NLS-1$
         } else if (Ros2ObjectTimeGraphEntryModelType.TIMER == type) {
             return "Timer period"; //$NON-NLS-1$
         }
@@ -271,6 +293,34 @@ public class Ros2MessagesPresentationProvider extends TimeGraphPresentationProvi
             } else if (takeOrCallback instanceof Ros2CallbackInstance) {
                 Ros2CallbackInstance callback = (Ros2CallbackInstance) takeOrCallback;
                 builder.put("Intra-process", Boolean.toString(callback.isIntraProcess())); //$NON-NLS-1$
+                builder.put("PID", Long.toString(callback.getOwnerHandle().getPid())); //$NON-NLS-1$
+                builder.put("TID", Long.toString(callback.getTid())); //$NON-NLS-1$
+            }
+        } else if (Ros2ObjectTimeGraphEntryModelType.CLIENT == type) {
+            Object requestPubOrResponseTake = metadata.get(Ros2PubTimeGraphState.KEY_DATA).iterator().next();
+            if (requestPubOrResponseTake instanceof Ros2PubInstance) {
+                Ros2PubInstance pub = (Ros2PubInstance) requestPubOrResponseTake;
+                builder.put("Request pointer", toHex(pub.getMessage().getPointer())); //$NON-NLS-1$
+                builder.put("Source timestamp", FormatTimeUtils.formatTimeAbs(pub.getSourceTimestamp(), Resolution.NANOSEC)); //$NON-NLS-1$
+                builder.put("PID", Long.toString(pub.getPublisherHandle().getPid())); //$NON-NLS-1$
+                builder.put("TID", Long.toString(pub.getTid())); //$NON-NLS-1$
+            } else if (requestPubOrResponseTake instanceof Ros2TakeInstance) {
+                Ros2TakeInstance take = (Ros2TakeInstance) requestPubOrResponseTake;
+                builder.put("Response pointer", toHex(take.getMessage().getPointer())); //$NON-NLS-1$
+                builder.put("Source timestamp", FormatTimeUtils.formatTimeAbs(take.getSourceTimestamp(), Resolution.NANOSEC)); //$NON-NLS-1$
+                builder.put("PID", Long.toString(take.getSubscriptionHandle().getPid())); //$NON-NLS-1$
+                builder.put("TID", Long.toString(take.getTid())); //$NON-NLS-1$
+            }
+        } else if (Ros2ObjectTimeGraphEntryModelType.SERVICE == type) {
+            Object takeOrCallback = metadata.get(Ros2TakeTimeGraphState.KEY_DATA).iterator().next();
+            if (takeOrCallback instanceof Ros2TakeInstance) {
+                Ros2TakeInstance take = (Ros2TakeInstance) takeOrCallback;
+                builder.put("Request pointer", toHex(take.getMessage().getPointer())); //$NON-NLS-1$
+                builder.put("Source timestamp", FormatTimeUtils.formatTimeAbs(take.getSourceTimestamp(), Resolution.NANOSEC)); //$NON-NLS-1$
+                builder.put("PID", Long.toString(take.getSubscriptionHandle().getPid())); //$NON-NLS-1$
+                builder.put("TID", Long.toString(take.getTid())); //$NON-NLS-1$
+            } else if (takeOrCallback instanceof Ros2CallbackInstance) {
+                Ros2CallbackInstance callback = (Ros2CallbackInstance) takeOrCallback;
                 builder.put("PID", Long.toString(callback.getOwnerHandle().getPid())); //$NON-NLS-1$
                 builder.put("TID", Long.toString(callback.getTid())); //$NON-NLS-1$
             }

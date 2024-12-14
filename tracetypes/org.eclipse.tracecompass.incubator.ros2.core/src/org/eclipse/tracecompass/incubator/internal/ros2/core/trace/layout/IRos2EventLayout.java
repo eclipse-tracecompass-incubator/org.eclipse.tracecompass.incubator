@@ -157,9 +157,34 @@ public interface IRos2EventLayout {
     String eventRclcppServiceCallbackAdded();
 
     /**
+     * <code>rmw_take_request</code>
+     */
+    String eventRmwTakeRequest();
+
+    /**
+     * <code>rmw_send_response</code>
+     */
+    String eventRmwSendResponse();
+
+    /**
+     * <code>rmw_client_init</code>
+     */
+    String eventRmwClientInit();
+
+    /**
      * <code>rcl_client_init</code>
      */
     String eventRclClientInit();
+
+    /**
+     * <code>rmw_send_request</code>
+     */
+    String eventRmwSendRequest();
+
+    /**
+     * <code>rmw_take_response</code>
+     */
+    String eventRmwTakeResponse();
 
     /**
      * <code>rcl_timer_init</code>
@@ -282,6 +307,10 @@ public interface IRos2EventLayout {
     String fieldServiceName();
     String fieldClientHandle();
     String fieldRmwClientHandle();
+    String fieldRequest();
+    String fieldClientGid();
+    String fieldSequenceNumber();
+    String fieldResponse();
     String fieldTimerHandle();
     String fieldPeriod();
     String fieldSymbol();
