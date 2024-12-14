@@ -37,6 +37,8 @@ public class Ros2ObjectTreeLabelProvider {
     private static final String COLUMN_TEXT_PREFIX_NODE = "🔲 "; //$NON-NLS-1$
     private static final String COLUMN_TEXT_PREFIX_PUBLISHER = "↗️ "; //$NON-NLS-1$
     private static final String COLUMN_TEXT_PREFIX_SUBSCRIPTION = "↘️ "; //$NON-NLS-1$
+    private static final String COLUMN_TEXT_PREFIX_CLIENT = "S↗️ "; //$NON-NLS-1$
+    private static final String COLUMN_TEXT_PREFIX_SERVICE = "S↘️ "; //$NON-NLS-1$
     private static final String COLUMN_TEXT_PREFIX_TIMER = "⏳ "; //$NON-NLS-1$
 
     private Ros2ObjectTreeLabelProvider() {
@@ -97,6 +99,10 @@ public class Ros2ObjectTreeLabelProvider {
             return COLUMN_TEXT_PREFIX_PUBLISHER + entry.getName();
         } else if (Ros2ObjectTimeGraphEntryModelType.SUBSCRIPTION == type) {
             return COLUMN_TEXT_PREFIX_SUBSCRIPTION + entry.getName();
+        } else if (Ros2ObjectTimeGraphEntryModelType.CLIENT == type) {
+            return COLUMN_TEXT_PREFIX_CLIENT + entry.getName();
+        } else if (Ros2ObjectTimeGraphEntryModelType.SERVICE == type) {
+            return COLUMN_TEXT_PREFIX_SERVICE + entry.getName();
         } else if (Ros2ObjectTimeGraphEntryModelType.TIMER == type) {
             return COLUMN_TEXT_PREFIX_TIMER + entry.getName();
         }

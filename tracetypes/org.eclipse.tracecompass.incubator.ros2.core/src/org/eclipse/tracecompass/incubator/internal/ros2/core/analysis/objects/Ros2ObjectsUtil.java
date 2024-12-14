@@ -24,10 +24,12 @@ import org.eclipse.tracecompass.incubator.internal.ros2.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcessPointer;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackType;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ClientObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2NodeObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2Object;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ObjectHandle;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2PublisherObject;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ServiceObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2SubscriptionObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2TimerObject;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
@@ -50,6 +52,8 @@ public class Ros2ObjectsUtil {
     private static final @NonNull String OBJECT_NODE = "Nodes"; //$NON-NLS-1$
     private static final @NonNull String OBJECT_PUBLISHER = "Publishers"; //$NON-NLS-1$
     private static final @NonNull String OBJECT_SUBSCRIPTION = "Subscriptions"; //$NON-NLS-1$
+    private static final @NonNull String OBJECT_CLIENT = "Clients"; //$NON-NLS-1$
+    private static final @NonNull String OBJECT_SERVICE = "Services"; //$NON-NLS-1$
     private static final @NonNull String OBJECT_TIMER = "Timers"; //$NON-NLS-1$
     private static final @NonNull String OBJECT_CALLBACK = "Callbacks"; //$NON-NLS-1$
 
@@ -75,6 +79,14 @@ public class Ros2ObjectsUtil {
         return new String[] { OBJECT_SUBSCRIPTION, stringId };
     }
 
+    private static String[] getClientAttribute(@NonNull String stringId) {
+        return new String[] { OBJECT_CLIENT, stringId };
+    }
+
+    private static String[] getServiceAttribute(@NonNull String stringId) {
+        return new String[] { OBJECT_SERVICE, stringId };
+    }
+
     private static String[] getTimerAttribute(@NonNull String stringId) {
         return new String[] { OBJECT_TIMER, stringId };
     }
@@ -93,6 +105,14 @@ public class Ros2ObjectsUtil {
 
     private static String[] getSubscriptionAttribute(@NonNull Ros2ObjectHandle subscriptionHandle) {
         return getSubscriptionAttribute(subscriptionHandle.getStringId());
+    }
+
+    private static String[] getClientAttribute(@NonNull Ros2ObjectHandle clientHandle) {
+        return getClientAttribute(clientHandle.getStringId());
+    }
+
+    private static String[] getServiceAttribute(@NonNull Ros2ObjectHandle serviceHandle) {
+        return getServiceAttribute(serviceHandle.getStringId());
     }
 
     private static String[] getTimerAttribute(@NonNull Ros2ObjectHandle timerHandle) {
@@ -146,6 +166,34 @@ public class Ros2ObjectsUtil {
     }
 
     /**
+     * Get client quark and add if needed.
+     *
+     * @param ss
+     *            the objects state system
+     * @param clientHandle
+     *            the client handle
+     * @return the client quark
+     */
+    public static int getClientQuarkAndAdd(ITmfStateSystemBuilder ss, @NonNull Ros2ObjectHandle clientHandle) {
+        assertStateSystem(ss);
+        return ss.getQuarkAbsoluteAndAdd(getClientAttribute(clientHandle));
+    }
+
+    /**
+     * Get client quark and add if needed.
+     *
+     * @param ss
+     *            the objects state system
+     * @param serviceHandle
+     *            the service handle
+     * @return the service quark
+     */
+    public static int getServiceQuarkAndAdd(ITmfStateSystemBuilder ss, @NonNull Ros2ObjectHandle serviceHandle) {
+        assertStateSystem(ss);
+        return ss.getQuarkAbsoluteAndAdd(getServiceAttribute(serviceHandle));
+    }
+
+    /**
      * Get timer quark and add if needed.
      *
      * @param ss
@@ -195,6 +243,24 @@ public class Ros2ObjectsUtil {
         assertStateSystem(ss);
         try {
             return ss.getQuarkAbsolute(getSubscriptionAttribute(subscriptionHandle));
+        } catch (AttributeNotFoundException e) {
+            return null;
+        }
+    }
+
+    private static Integer getClientQuark(ITmfStateSystem ss, @NonNull Ros2ObjectHandle clientHandle) {
+        assertStateSystem(ss);
+        try {
+            return ss.getQuarkAbsolute(getClientAttribute(clientHandle));
+        } catch (AttributeNotFoundException e) {
+            return null;
+        }
+    }
+
+    private static Integer getServiceQuark(ITmfStateSystem ss, @NonNull Ros2ObjectHandle serviceHandle) {
+        assertStateSystem(ss);
+        try {
+            return ss.getQuarkAbsolute(getServiceAttribute(serviceHandle));
         } catch (AttributeNotFoundException e) {
             return null;
         }
@@ -349,6 +415,54 @@ public class Ros2ObjectsUtil {
     }
 
     /**
+     * Get client object from client handle.
+     *
+     * @param ss
+     *            the objects state system
+     * @param timestamp
+     *            the timestamp
+     * @param clientHandle
+     *            the client handle
+     * @return the client object, or <code>null</code> if not found
+     */
+    public static @Nullable Ros2ClientObject getClientObjectFromHandle(ITmfStateSystem ss, long timestamp, @NonNull Ros2ObjectHandle clientHandle) {
+        Integer clientQuark = getClientQuark(ss, clientHandle);
+        if (null == clientQuark) {
+            return null;
+        }
+
+        try {
+            return (Ros2ClientObject) ss.querySingleState(timestamp, clientQuark).getValue();
+        } catch (StateSystemDisposedException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get service object from service handle.
+     *
+     * @param ss
+     *            the objects state system
+     * @param timestamp
+     *            the timestamp
+     * @param serviceHandle
+     *            the service handle
+     * @return the service object, or <code>null</code> if not found
+     */
+    public static @Nullable Ros2ServiceObject getServiceObjectFromHandle(ITmfStateSystem ss, long timestamp, @NonNull Ros2ObjectHandle serviceHandle) {
+        Integer serviceQuark = getServiceQuark(ss, serviceHandle);
+        if (null == serviceQuark) {
+            return null;
+        }
+
+        try {
+            return (Ros2ServiceObject) ss.querySingleState(timestamp, serviceQuark).getValue();
+        } catch (StateSystemDisposedException e) {
+            return null;
+        }
+    }
+
+    /**
      * Get timer object from timer handle.
      *
      * @param ss
@@ -412,6 +526,34 @@ public class Ros2ObjectsUtil {
      */
     public static @Nullable Ros2NodeObject getNodeObjectFromHandle(ITmfStateSystem ss, @NonNull Ros2ObjectHandle nodeHandle) {
         return getObjectFromHandle(ss, Ros2NodeObject.class, OBJECT_NODE, nodeHandle);
+    }
+
+    /**
+     * Get client object from client handle.
+     *
+     * @param ss
+     *            the objects state system
+     * @param clientHandle
+     *            the client handle
+     * @return the client object, or <code>null</code> if not found
+     * @see Ros2ObjectsUtil#getObjectFromHandle
+     */
+    public static @Nullable Ros2ClientObject getClientObjectFromHandle(ITmfStateSystem ss, @NonNull Ros2ObjectHandle clientHandle) {
+        return getObjectFromHandle(ss, Ros2ClientObject.class, OBJECT_CLIENT, clientHandle);
+    }
+
+    /**
+     * Get service object from service handle.
+     *
+     * @param ss
+     *            the objects state system
+     * @param serviceHandle
+     *            the service handle
+     * @return the service object, or <code>null</code> if not found
+     * @see Ros2ObjectsUtil#getObjectFromHandle
+     */
+    public static @Nullable Ros2ServiceObject getServiceObjectFromHandle(ITmfStateSystem ss, @NonNull Ros2ObjectHandle serviceHandle) {
+        return getObjectFromHandle(ss, Ros2ServiceObject.class, OBJECT_SERVICE, serviceHandle);
     }
 
     /**
@@ -590,6 +732,28 @@ public class Ros2ObjectsUtil {
      */
     public static Collection<@NonNull Ros2SubscriptionObject> getSubscriptionObjects(ITmfStateSystem ss) {
         return getObjects(ss, Ros2SubscriptionObject.class, OBJECT_SUBSCRIPTION);
+    }
+
+    /**
+     * Get all clients.
+     *
+     * @param ss
+     *            the objects state system
+     * @return the client objects
+     */
+    public static Collection<@NonNull Ros2ClientObject> getClientObjects(ITmfStateSystem ss) {
+        return getObjects(ss, Ros2ClientObject.class, OBJECT_CLIENT);
+    }
+
+    /**
+     * Get all services.
+     *
+     * @param ss
+     *            the objects state system
+     * @return the service objects
+     */
+    public static Collection<@NonNull Ros2ServiceObject> getServiceObjects(ITmfStateSystem ss) {
+        return getObjects(ss, Ros2ServiceObject.class, OBJECT_SERVICE);
     }
 
     /**
