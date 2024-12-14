@@ -25,6 +25,10 @@ public enum Ros2ObjectTimeGraphEntryModelType {
     PUBLISHER,
     /** Subscription */
     SUBSCRIPTION,
+    /** Client */
+    CLIENT,
+    /** Service */
+    SERVICE,
     /** Timer */
     TIMER;
 }
