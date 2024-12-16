@@ -56,6 +56,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Loic Prieur-Drevon
  */
+@SuppressWarnings("null")
 public class ExperimentManagerServiceTest extends RestServerTest {
 
     private static final String TEST = "test";

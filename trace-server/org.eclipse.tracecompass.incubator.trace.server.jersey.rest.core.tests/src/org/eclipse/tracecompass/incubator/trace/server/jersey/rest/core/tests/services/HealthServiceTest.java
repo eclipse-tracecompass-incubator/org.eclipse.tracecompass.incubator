@@ -29,6 +29,7 @@ import org.junit.Test;
  *
  * @author Geneviève Bastien
  */
+@SuppressWarnings("null")
 public class HealthServiceTest extends RestServerTest {
 
     /**
