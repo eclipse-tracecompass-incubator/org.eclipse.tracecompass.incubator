@@ -68,8 +68,8 @@ public class BookmarkManagerServiceTest extends RestServerTest {
     @Before
     public void setUp() {
         // Create the experiment first
-        experiment = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(),
-                CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        experiment = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(),
+                sfContextSwitchesUstNotInitializedStub);
         assertNotNull("Experiment should not be null", experiment);
         assertNotNull(NON_NULL_UUID, experiment.getUUID());
     }

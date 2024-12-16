@@ -199,13 +199,13 @@ public abstract class RestServerTest {
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
      */
-    protected static TraceModelStub CONTEXT_SWITCHES_UST_STUB;
+    protected static TraceModelStub sfContextSwitchesUstStub;
 
     /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_UST} without metadata initialized.
      */
-    protected static TraceModelStub CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB;
+    protected static TraceModelStub sfContextSwitchesUstNotInitializedStub;
 
     /**
      * The name used when posting the trace.
@@ -215,7 +215,7 @@ public abstract class RestServerTest {
     /**
      * The properties of the trace.
      */
-    public static final Map<String, String> CONTEXT_SWITCHES_UST_PROPERTIES = new HashMap<>(Map.ofEntries(
+    protected static final Map<String, String> CONTEXT_SWITCHES_UST_PROPERTIES = new HashMap<>(Map.ofEntries(
             Map.entry(HOSTNAME_KEY, "\"qemu1\""),
             Map.entry(CLOCK_OFFSET_KEY, "1450192743562703624"),
             Map.entry(DOMAIN_KEY, "\"ust\""),
@@ -230,13 +230,13 @@ public abstract class RestServerTest {
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL}.
      */
-    protected static TraceModelStub CONTEXT_SWITCHES_KERNEL_STUB;
+    protected static TraceModelStub sfContextSwitchesKernelStub;
 
     /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL} without metadata initialized.
      */
-    protected static TraceModelStub CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB;
+    protected static TraceModelStub sfContextSwitchesKernelNotInitializedStub;
 
     /**
      * The name used when posting the trace.
@@ -263,15 +263,15 @@ public abstract class RestServerTest {
 
     /**
      * {@link TraceModelStub} to represent the object returned by the server for
-     * {@link CtfTestTrace#ARM_64_BIT_HEADER}, with the same name as {@link #CONTEXT_SWITCHES_KERNEL_STUB}
+     * {@link CtfTestTrace#ARM_64_BIT_HEADER}, with the same name as {@link #sfContextSwitchesKernelStub}
      */
-    protected static TraceModelStub ARM_64_KERNEL_STUB;
+    protected static TraceModelStub sfArm64KernelStub;
 
     /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#ARM_64_BIT_HEADER} without metadata initialized.
      */
-    protected static TraceModelStub ARM_64_KERNEL_NOT_INITIALIZED_STUB;
+    protected static TraceModelStub sfArm64KernelNotIntitialzedStub;
 
     /**
      * The name used when posting the trace.
@@ -281,7 +281,7 @@ public abstract class RestServerTest {
     /**
      * The properties of the trace.
      */
-    public static final Map<String, String> ARM_64_KERNEL_PROPERTIES = new HashMap<>(Map.ofEntries(
+    protected static final Map<String, String> ARM_64_KERNEL_PROPERTIES = new HashMap<>(Map.ofEntries(
             Map.entry(HOSTNAME_KEY, "\"lager\""),
             Map.entry(KERNEL_VERSION_KEY, "\"#6 SMP PREEMPT Wed Oct 1 17:07:11 CEST 2014\""),
             Map.entry(TRACER_PATCHLEVEL_KEY, "0"),
@@ -299,7 +299,7 @@ public abstract class RestServerTest {
     /**
      * Expected toString() of all data providers for this experiment
      */
-    protected static List<DataProviderDescriptorStub> EXPECTED_DATA_PROVIDER_DESCRIPTOR = null;
+    protected static List<DataProviderDescriptorStub> sfExpectedDataProviderDescriptorStub = null;
 
     /**
      * Create the {@link TraceModelStub}s before running the tests
@@ -310,16 +310,16 @@ public abstract class RestServerTest {
     @BeforeClass
     public static void beforeTest() throws IOException {
         String contextSwitchesUstPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath().replaceAll("/$", "");
-        CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, Collections.EMPTY_MAP);
-        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, CONTEXT_SWITCHES_UST_PROPERTIES);
+        sfContextSwitchesUstNotInitializedStub = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, Collections.EMPTY_MAP);
+        sfContextSwitchesUstStub = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, CONTEXT_SWITCHES_UST_PROPERTIES);
 
         String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath().replaceAll("/$", "");
-        CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, Collections.EMPTY_MAP);
-        CONTEXT_SWITCHES_KERNEL_STUB = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_PROPERTIES);
+        sfContextSwitchesKernelNotInitializedStub = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, Collections.EMPTY_MAP);
+        sfContextSwitchesKernelStub = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_PROPERTIES);
 
         String arm64Path = FileLocator.toFileURL(CtfTestTrace.ARM_64_BIT_HEADER.getTraceURL()).getPath().replaceAll("/$", "");
-        ARM_64_KERNEL_NOT_INITIALIZED_STUB = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, Collections.EMPTY_MAP);
-        ARM_64_KERNEL_STUB = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, ARM_64_KERNEL_PROPERTIES);
+        sfArm64KernelNotIntitialzedStub = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, Collections.EMPTY_MAP);
+        sfArm64KernelStub = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, ARM_64_KERNEL_PROPERTIES);
 
         ImmutableList.Builder<DataProviderDescriptorStub> b = ImmutableList.builder();
         b.add(new DataProviderDescriptorStub(null, "org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack",
@@ -334,7 +334,7 @@ public abstract class RestServerTest {
                 "Histogram",
                 "Show a histogram of number of events to time for a trace",
                 ProviderType.TREE_TIME_XY.name(), null));
-        EXPECTED_DATA_PROVIDER_DESCRIPTOR = b.build();
+        sfExpectedDataProviderDescriptorStub = b.build();
     }
 
     /**
