@@ -83,7 +83,6 @@ import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
 
@@ -135,11 +134,11 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final String CONFIG_NAME = "My configuration";
     private static final String CONFIG_DESCRIPTION = "My description";
 
-    private static final  List<EntryHeaderStub> EXPECTED_XY_TREE_HEADERS = ImmutableList.of(new EntryHeaderStub("Process", "", null), new EntryHeaderStub("TID", "", null), new EntryHeaderStub("%", "", null), new EntryHeaderStub("Time", "", null));
+    private static final  List<EntryHeaderStub> EXPECTED_XY_TREE_HEADERS = List.of(new EntryHeaderStub("Process", "", null), new EntryHeaderStub("TID", "", null), new EntryHeaderStub("%", "", null), new EntryHeaderStub("Time", "", null));
 
-    private static final List<String> STATISTICS_TREE_HEADERS = ImmutableList.of("Label", "Minimum", "Maximum", "Average", "Std Dev", "Count", "Total", "Min Time Range", "Max Time Range");
-    private static final List<String> SAMPLE_TOTAL_STATS_LABELS = ImmutableList.of("ust", "1 ns", "5.979 s", "10.845 ms", "196.299 ms", "1948", "21.127 s", "[1450193745774189602,1450193745774189603]", "[1450193722283061910,1450193728261604656]");
-    private static final List<String> SAMPLE_SELECTION_STATS_LABELS = ImmutableList.of("Selection", "49.665 µs", "5.979 s", "11.388 ms", "201.201 ms", "1854", "21.113 s", "[1450193730177271075,1450193730177320740]", "[1450193722283061910,1450193728261604656]");
+    private static final List<String> STATISTICS_TREE_HEADERS = List.of("Label", "Minimum", "Maximum", "Average", "Std Dev", "Count", "Total", "Min Time Range", "Max Time Range");
+    private static final List<String> SAMPLE_TOTAL_STATS_LABELS = List.of("ust", "1 ns", "5.979 s", "10.845 ms", "196.299 ms", "1948", "21.127 s", "[1450193745774189602,1450193745774189603]", "[1450193722283061910,1450193728261604656]");
+    private static final List<String> SAMPLE_SELECTION_STATS_LABELS = List.of("Selection", "49.665 µs", "5.979 s", "11.388 ms", "201.201 ms", "1854", "21.113 s", "[1450193730177271075,1450193730177320740]", "[1450193722283061910,1450193728261604656]");
 
     private static final GenericType<List<TmfConfigurationSourceTypeStub>> DP_CONFIG_TYPES_SET_TYPE = new GenericType<>() {};
 
@@ -197,7 +196,7 @@ public class DataProviderServiceTest extends RestServerTest {
             WebTarget xyTree = getXYTreeEndpoint(exp.getUUID().toString(), XY_DATAPROVIDER_ID);
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(start, end));
+            parameters.put(REQUESTED_TIMES_KEY, List.of(start, end));
             XyTreeOutputResponseStub responseModel;
             Response tree = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
@@ -279,7 +278,7 @@ public class DataProviderServiceTest extends RestServerTest {
             WebTarget xyTree = getXYTreeEndpoint(exp.getUUID().toString(), XY_HISTOGRAM_DATAPROVIDER_ID);
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(start, end));
+            parameters.put(REQUESTED_TIMES_KEY, List.of(start, end));
             XyTreeOutputResponseStub responseModel;
             Response tree = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
@@ -393,7 +392,7 @@ public class DataProviderServiceTest extends RestServerTest {
 
             Map<String, Object> parameters = new HashMap<>();
             TgTreeOutputResponseStub responseModel;
-            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(start, end));
+            parameters.put(REQUESTED_TIMES_KEY, List.of(start, end));
             Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
             responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
@@ -563,7 +562,7 @@ public class DataProviderServiceTest extends RestServerTest {
             WebTarget tableColumns = getTableColumnsEndpoint(exp.getUUID().toString(), EVENTS_TABLE_DATAPROVIDER_ID);
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(start, end));
+            parameters.put(REQUESTED_TIMES_KEY, List.of(start, end));
             TableColumnsOutputResponseStub responseModel;
             Response tree = tableColumns.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
@@ -636,7 +635,7 @@ public class DataProviderServiceTest extends RestServerTest {
 
             Map<String, Object> parameters = new HashMap<>();
             TgTreeOutputResponseStub responseModel;
-            parameters.put(REQUESTED_TIMES_KEY, ImmutableList.of(1450193697034689597L, 1450193745774189602L));
+            parameters.put(REQUESTED_TIMES_KEY, List.of(1450193697034689597L, 1450193745774189602L));
             treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
             assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
             responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
