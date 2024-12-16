@@ -137,9 +137,9 @@ public class DataProviderServiceTest extends RestServerTest {
 
     private static final  List<EntryHeaderStub> EXPECTED_XY_TREE_HEADERS = ImmutableList.of(new EntryHeaderStub("Process", "", null), new EntryHeaderStub("TID", "", null), new EntryHeaderStub("%", "", null), new EntryHeaderStub("Time", "", null));
 
-    private static List<String> STATISTICS_TREE_HEADERS = ImmutableList.of("Label", "Minimum", "Maximum", "Average", "Std Dev", "Count", "Total", "Min Time Range", "Max Time Range");
-    private static List<String> SAMPLE_TOTAL_STATS_LABELS = ImmutableList.of("ust", "1 ns", "5.979 s", "10.845 ms", "196.299 ms", "1948", "21.127 s", "[1450193745774189602,1450193745774189603]", "[1450193722283061910,1450193728261604656]");
-    private static List<String> SAMPLE_SELECTION_STATS_LABELS = ImmutableList.of("Selection", "49.665 µs", "5.979 s", "11.388 ms", "201.201 ms", "1854", "21.113 s", "[1450193730177271075,1450193730177320740]", "[1450193722283061910,1450193728261604656]");
+    private static final List<String> STATISTICS_TREE_HEADERS = ImmutableList.of("Label", "Minimum", "Maximum", "Average", "Std Dev", "Count", "Total", "Min Time Range", "Max Time Range");
+    private static final List<String> SAMPLE_TOTAL_STATS_LABELS = ImmutableList.of("ust", "1 ns", "5.979 s", "10.845 ms", "196.299 ms", "1948", "21.127 s", "[1450193745774189602,1450193745774189603]", "[1450193722283061910,1450193728261604656]");
+    private static final List<String> SAMPLE_SELECTION_STATS_LABELS = ImmutableList.of("Selection", "49.665 µs", "5.979 s", "11.388 ms", "201.201 ms", "1854", "21.113 s", "[1450193730177271075,1450193730177320740]", "[1450193722283061910,1450193728261604656]");
 
     private static final GenericType<List<TmfConfigurationSourceTypeStub>> DP_CONFIG_TYPES_SET_TYPE = new GenericType<>() {};
 
