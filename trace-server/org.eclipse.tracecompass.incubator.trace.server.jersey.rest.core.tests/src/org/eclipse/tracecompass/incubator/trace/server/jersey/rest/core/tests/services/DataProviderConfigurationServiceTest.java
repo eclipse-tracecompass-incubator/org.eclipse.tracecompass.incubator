@@ -17,12 +17,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
@@ -49,8 +46,6 @@ import org.junit.Test;
  */
 @SuppressWarnings("null")
 public class DataProviderConfigurationServiceTest extends RestServerTest {
-    private static final String UNKNOWN_EXP_UUID = UUID.nameUUIDFromBytes(Objects.requireNonNull("unknown.experiment.id".getBytes(Charset.defaultCharset()))).toString();
-    private static final String UNKNOWN_DP_ID = "unknown.dp.id";
     private static final String UNKNOWN_TYPE_ID = "unknown.config.type.id";
 
     private static final String CONFIG_NAME = "My configuration";
