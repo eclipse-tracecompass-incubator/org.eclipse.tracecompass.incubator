@@ -85,6 +85,7 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
     private static final String FILTER_QUERY_PARAMETERS = "filter_query_parameters";
     private static final String STRATEGY = "strategy";
     private static final String DEEP_SEARCH = "DEEP";
+    private static final String SHALLOW_SEARCH = "SHALLOW";
     private static final String FILTER_QUERY = "test";
     private static final int DIMMED_FILTER_TAG = 1;
 
@@ -117,6 +118,12 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testTimeGraphDataProvider() throws InterruptedException {
+        testGetStates(null);
+        testGetStates(DEEP_SEARCH);
+        testGetStates(SHALLOW_SEARCH);
+    }
+
+    private static void testGetStates(String filterStrategy) throws InterruptedException {
         long start = 1450193697034689597L;
         long end = 1450193745774189602L;
         try {
@@ -163,13 +170,15 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
             parameters.remove(REQUESTED_TIMES_KEY);
             parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, 1450193697034689597L, END, 1450193697118480368L, NB_TIMES, 10));
             parameters.put(REQUESTED_ITEMS_KEY, items);
-            parameters.put(FILTER_QUERY_PARAMETERS, ImmutableMap.of(
-                    STRATEGY, DEEP_SEARCH,
-                    FILTER_EXPRESSIONS_MAP,
-                    ImmutableMap.of(
-                            Integer.toString(DIMMED_FILTER_TAG), Arrays.asList(FILTER_QUERY)
-                            )
-                    ));
+            if (filterStrategy != null) {
+                parameters.put(FILTER_QUERY_PARAMETERS, ImmutableMap.of(
+                        STRATEGY, filterStrategy,
+                        FILTER_EXPRESSIONS_MAP,
+                        ImmutableMap.of(
+                                Integer.toString(DIMMED_FILTER_TAG), Arrays.asList(FILTER_QUERY)
+                                )
+                        ));
+            }
             try (Response statesResponse = tgStatesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
                 assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, statesResponse.getStatus());
 
@@ -241,8 +250,10 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
                     assertEquals(Collections.emptyMap(), timegraphTooltipResponse.getModel());
                 }
 
-                // Test the tags of the state
-                assertEquals(DIMMED_FILTER_TAG, state.getTags());
+                if (filterStrategy != null) {
+                    // Test the tags of the state
+                    assertEquals(DIMMED_FILTER_TAG, state.getTags());
+                }
             }
 
         } catch (ProcessingException e) {
