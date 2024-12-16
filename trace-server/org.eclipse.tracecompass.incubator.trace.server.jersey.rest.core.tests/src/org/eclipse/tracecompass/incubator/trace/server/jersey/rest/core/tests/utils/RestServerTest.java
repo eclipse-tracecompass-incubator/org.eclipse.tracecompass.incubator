@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,12 +37,14 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.OutputConfigurationQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.TraceServerConfiguration;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
@@ -166,6 +169,11 @@ public abstract class RestServerTest {
      * States path segment
      */
     public static final String STATE_PATH = "states";
+
+    /**
+     * Arrows path segment
+     */
+    public static final String ARROWS_PATH = "arrows";
 
     /**
      * Tooltip path segment
@@ -520,6 +528,24 @@ public abstract class RestServerTest {
     }
 
     /**
+     * Get the {@link WebTarget} for the time graph data provider arrows endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getArrowsEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(TIMEGRAPH_PATH)
+                .path(dataProviderId)
+                .path(ARROWS_PATH);
+    }
+
+    /**
      * Get the {@link WebTarget} for the time graph tooltip endpoint.
      *
      * @param expUUID
@@ -757,6 +783,76 @@ public abstract class RestServerTest {
         try (InputStream inputStream = new FileInputStream(jsonFile)) {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(inputStream, new TypeReference<Map<String, Object>>() {});
+        }
+    }
+
+    /**
+     * Interface to implement to resolve an endpoint based on experiment and data provider ID,
+     * for example states, arrows etc.
+     */
+    protected interface IEndpointResolver {
+        /**
+         * Method to get endpoint
+         * @param expUUID
+         *          The experiment UUID
+         * @param dataProviderId
+         *          The data provider ID
+         * @return the endpoint
+         */
+        WebTarget getEndpoint(String expUUID, String dataProviderId);
+    }
+
+    /**
+     * Call method to execute common error test cases for a given endpoint.
+     *
+     * @param exp
+     *            the experiment
+     * @param resolver
+     *            the endpoint resolver
+     * @param dpId
+     *            the data provider ID
+     * @param hasParameters
+     *            whether the endpoint requires parameters (to test empty parameter map)
+     */
+    protected static void executePostErrorTests (ExperimentModelStub exp, IEndpointResolver resolver, String dpId, boolean hasParameters) {
+        // Invalid UUID string
+        WebTarget endpoint = resolver.getEndpoint(INVALID_EXP_UUID, dpId);
+        Map<String, Object> parameters = new HashMap<>();
+        try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+        }
+
+        // Unknown experiment
+        endpoint = resolver.getEndpoint(UUID.randomUUID().toString(), dpId);
+        try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+        }
+
+        // Missing parameters
+        endpoint = resolver.getEndpoint(exp.getUUID().toString(), dpId);
+        try (Response response = endpoint.request().post(Entity.json(NO_PARAMETERS))) {
+            assertNotNull(response);
+            assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        }
+
+        if (hasParameters) {
+            // Missing parameters
+            endpoint = resolver.getEndpoint(exp.getUUID().toString(), dpId);
+            try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+                assertNotNull(response);
+                assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            }
+        }
+
+        // Unknown data provider
+        endpoint = resolver.getEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
+        try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+            assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(String.class));
         }
     }
 }
