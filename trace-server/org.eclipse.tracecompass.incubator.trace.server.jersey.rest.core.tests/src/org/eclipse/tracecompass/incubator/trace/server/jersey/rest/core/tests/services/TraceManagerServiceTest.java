@@ -59,19 +59,19 @@ public class TraceManagerServiceTest extends RestServerTest {
 
         assertTrue("Expected empty set of traces", getTraces(traces).isEmpty());
 
-        TraceModelStub kernelStub = assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
+        TraceModelStub kernelStub = assertPost(traces, sfContextSwitchesKernelNotInitializedStub);
 
-        assertEquals(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB, traces.path(kernelStub.getUUID().toString()).request().get(TraceModelStub.class));
+        assertEquals(sfContextSwitchesKernelNotInitializedStub, traces.path(kernelStub.getUUID().toString()).request().get(TraceModelStub.class));
 
         assertEquals("Expected set of traces to contain trace2 stub",
-                Collections.singleton(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB), getTraces(traces));
+                Collections.singleton(sfContextSwitchesKernelNotInitializedStub), getTraces(traces));
 
         String kernelStubUUUID = kernelStub.getUUID().toString();
 
         try (Response deleteResponse = traces.path(kernelStub.getUUID().toString()).request().delete()) {
             int deleteCode = deleteResponse.getStatus();
             assertEquals("Failed to DELETE trace2, error code=" + deleteCode, 200, deleteCode);
-            assertEquals(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB, deleteResponse.readEntity(TraceModelStub.class));
+            assertEquals(sfContextSwitchesKernelNotInitializedStub, deleteResponse.readEntity(TraceModelStub.class));
         }
         try (Response response = traces.path(kernelStubUUUID).request(MediaType.APPLICATION_JSON).get()) {
             assertEquals("Trace should have been deleted", 404, response.getStatus());
@@ -86,10 +86,10 @@ public class TraceManagerServiceTest extends RestServerTest {
     public void testWithTwoTraces() {
         WebTarget traces = getApplicationEndpoint().path(TRACES);
 
-        assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
-        assertPost(traces, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        assertPost(traces, sfContextSwitchesKernelNotInitializedStub);
+        assertPost(traces, sfContextSwitchesUstNotInitializedStub);
 
-        assertEquals(ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB), getTraces(traces));
+        assertEquals(ImmutableSet.of(sfContextSwitchesKernelNotInitializedStub, sfContextSwitchesUstNotInitializedStub), getTraces(traces));
     }
 
     /**
@@ -99,17 +99,17 @@ public class TraceManagerServiceTest extends RestServerTest {
     public void testConflictingTraces() {
         WebTarget traces = getApplicationEndpoint().path(TRACES);
 
-        assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
-        assertEquals(ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB), getTraces(traces));
+        assertPost(traces, sfContextSwitchesKernelNotInitializedStub);
+        assertEquals(ImmutableSet.of(sfContextSwitchesKernelNotInitializedStub), getTraces(traces));
 
         // Post the trace a second time
-        assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
-        assertEquals(ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB), getTraces(traces));
+        assertPost(traces, sfContextSwitchesKernelNotInitializedStub);
+        assertEquals(ImmutableSet.of(sfContextSwitchesKernelNotInitializedStub), getTraces(traces));
 
         // Post a trace with the same name but another path, the name does not
         // matter if the path is different, the trace will be added
-        assertPost(traces, ARM_64_KERNEL_NOT_INITIALIZED_STUB);
-        assertEquals(ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB, ARM_64_KERNEL_NOT_INITIALIZED_STUB), getTraces(traces));
+        assertPost(traces, sfArm64KernelNotIntitialzedStub);
+        assertEquals(ImmutableSet.of(sfContextSwitchesKernelNotInitializedStub, sfArm64KernelNotIntitialzedStub), getTraces(traces));
     }
 
     /**
@@ -124,8 +124,8 @@ public class TraceManagerServiceTest extends RestServerTest {
     public void testWorkspaceStructure() throws CoreException, IOException {
         WebTarget traces = getApplicationEndpoint().path(TRACES);
 
-        assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
-        assertPost(traces, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        assertPost(traces, sfContextSwitchesKernelNotInitializedStub);
+        assertPost(traces, sfContextSwitchesUstNotInitializedStub);
 
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 
