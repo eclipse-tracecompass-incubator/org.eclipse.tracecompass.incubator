@@ -19,12 +19,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -85,6 +88,26 @@ public abstract class RestServerTest {
     private static final String TRACER_MINOR_KEY = "tracer_minor"; //$NON-NLS-1$
     private static final String TRACER_NAME_KEY = "tracer_name"; //$NON-NLS-1$
     private static final String TRACER_PATCHLEVEL_KEY = "tracer_patchlevel";
+
+    /**
+     * No parameter string
+     */
+    protected static final String NO_PARAMETERS = "no-parameters";
+
+    /**
+     * Invalid experiment UUID
+     */
+    protected static final String INVALID_EXP_UUID = "unknown.experiment.id";
+
+    /**
+     * Unknown experiment UUID
+     */
+    protected static final String UNKNOWN_EXP_UUID = UUID.nameUUIDFromBytes(Objects.requireNonNull(INVALID_EXP_UUID.getBytes(Charset.defaultCharset()))).toString();
+
+    /**
+     * Unknown data provider ID
+     */
+    protected static final String UNKNOWN_DP_ID = "unknown.dp.id";
 
     /**
      * Callstack data provider ID
@@ -153,6 +176,11 @@ public abstract class RestServerTest {
      * Table path segment
      */
     public static final String TABLE_PATH = "table";
+
+    /**
+     * Styles path segment
+     */
+    public static final String STYLES_PATH = "style";
 
     /**
      * Column path segment
@@ -608,6 +636,24 @@ public abstract class RestServerTest {
      */
     public static Set<DataProviderDescriptorStub> getDataProviderDescriptors(WebTarget outputs) {
         return outputs.request(MediaType.APPLICATION_JSON).get(DATAPROVIDER_DESCR_MODEL_SET_TYPE);
+    }
+
+
+    /**
+     * Get the {@link WebTarget} for the data provider styles tree endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getStylesEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(dataProviderId)
+                .path(STYLES_PATH);
     }
 
     /**

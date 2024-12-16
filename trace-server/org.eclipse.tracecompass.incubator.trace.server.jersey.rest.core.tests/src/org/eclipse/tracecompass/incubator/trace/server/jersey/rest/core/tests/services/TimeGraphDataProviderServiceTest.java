@@ -28,16 +28,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.OutputElementStyleStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.OutputStyleModelStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.StylesOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgEntryModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgStatesOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgTooltipOutputResponseStub;
@@ -121,6 +127,69 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
         testGetStates(null);
         testGetStates(DEEP_SEARCH);
         testGetStates(SHALLOW_SEARCH);
+    }
+
+    /**
+     * Tests querying styles for a time graph data provider
+     */
+    @Test
+    public void testStyles() {
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+
+        WebTarget stylesEndpoint = getStylesEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
+
+        Map<String, Object> parameters = new HashMap<>();
+        try (Response response = stylesEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, Status.OK.getStatusCode(), response.getStatus());
+            StylesOutputResponseStub outputResponse = response.readEntity(StylesOutputResponseStub.class);
+            assertNotNull(outputResponse);
+            OutputStyleModelStub model = outputResponse.getModel();
+            assertNotNull(model);
+            Map<String, OutputElementStyleStub> styles = model.getStyles();
+            assertFalse(styles.isEmpty());
+            OutputElementStyleStub elementStub = styles.get("0");
+            assertNotNull(elementStub);
+        }
+    }
+
+    /**
+     * Tests error cases when querying styles for a time graph data provider
+     */
+    @Test
+    public void testStylesErrors() {
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+
+        // Invalid UUID string
+        WebTarget stylesEndpoint = getStylesEndpoint(INVALID_EXP_UUID, CALL_STACK_DATAPROVIDER_ID);
+        Map<String, Object> parameters = new HashMap<>();
+        try (Response response = stylesEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+        }
+
+        // Unknown experiment
+        stylesEndpoint = getStylesEndpoint(UUID.randomUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
+        try (Response response = stylesEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+        }
+
+        // Missing parameters
+        stylesEndpoint = getStylesEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
+        try (Response response = stylesEndpoint.request().post(Entity.json(NO_PARAMETERS))) {
+            assertNotNull(response);
+            assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        }
+
+        // Unknown data provider
+        stylesEndpoint = getStylesEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
+        try (Response response = stylesEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+            assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(String.class));
+        }
     }
 
     private static void testGetStates(String filterStrategy) throws InterruptedException {
