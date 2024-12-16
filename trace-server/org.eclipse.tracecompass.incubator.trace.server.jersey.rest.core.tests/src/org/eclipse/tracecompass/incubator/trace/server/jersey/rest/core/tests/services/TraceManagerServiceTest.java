@@ -47,6 +47,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Loic Prieur-Drevon
  */
+@SuppressWarnings("null")
 public class TraceManagerServiceTest extends RestServerTest {
 
     /**
