@@ -94,10 +94,9 @@ public class TraceManagerServiceTest extends RestServerTest {
 
     /**
      * Test conflicting traces
-     * @throws IOException Exception thrown by getting trace path
      */
     @Test
-    public void testConflictingTraces() throws IOException {
+    public void testConflictingTraces() {
         WebTarget traces = getApplicationEndpoint().path(TRACES);
 
         assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
