@@ -149,14 +149,14 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testProviders() {
-        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
 
         WebTarget experiments = getApplicationEndpoint().path(EXPERIMENTS);
         WebTarget providers = experiments.path(exp.getUUID().toString())
                 .path(OUTPUTS_PATH);
 
         Set<DataProviderDescriptorStub> descriptors = getDataProviderDescriptors(providers);
-        for (DataProviderDescriptorStub desc : EXPECTED_DATA_PROVIDER_DESCRIPTOR) {
+        for (DataProviderDescriptorStub desc : sfExpectedDataProviderDescriptorStub) {
             assertTrue(desc.getName(), descriptors.contains(desc));
         }
     }
@@ -166,7 +166,7 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testCallStackDataProvider() {
-        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
 
         WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
 
@@ -193,7 +193,7 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1412670961211260539L;
         long end = 1412670967217750839L;
         try {
-            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_NOT_INITIALIZED_STUB.getName(), ARM_64_KERNEL_NOT_INITIALIZED_STUB);
+            ExperimentModelStub exp = assertPostExperiment(sfArm64KernelNotIntitialzedStub.getName(), sfArm64KernelNotIntitialzedStub);
 
             // Test getting the tree endpoint for an XY chart
             WebTarget xyTree = getXYTreeEndpoint(exp.getUUID().toString(), XY_DATAPROVIDER_ID);
@@ -274,7 +274,7 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1412670961211260539L;
         long end = 1412670967217750839L;
         try {
-            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_NOT_INITIALIZED_STUB.getName(), ARM_64_KERNEL_NOT_INITIALIZED_STUB);
+            ExperimentModelStub exp = assertPostExperiment(sfArm64KernelNotIntitialzedStub.getName(), sfArm64KernelNotIntitialzedStub);
 
             // Test getting the tree endpoint for an XY chart
             WebTarget xyTree = getXYTreeEndpoint(exp.getUUID().toString(), XY_HISTOGRAM_DATAPROVIDER_ID);
@@ -335,7 +335,7 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1450193697034689597L;
         long end = 1450193745774189602L;
         try {
-            ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+            ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
 
             // Test getting the time graph tree
             WebTarget dataTree = getDataTreeEndpoint(exp.getUUID().toString(), STATISTICS_DATAPROVIDER_ID);
@@ -386,7 +386,7 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1450193697034689597L;
         long end = 1450193745774189602L;
         try {
-            ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+            ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
 
             // Test getting the time graph tree
             WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
@@ -559,7 +559,7 @@ public class DataProviderServiceTest extends RestServerTest {
         long start = 1412670961211260539L;
         long end = 1412670967217750839L;
         try {
-            ExperimentModelStub exp = assertPostExperiment(ARM_64_KERNEL_NOT_INITIALIZED_STUB.getName(), ARM_64_KERNEL_NOT_INITIALIZED_STUB);
+            ExperimentModelStub exp = assertPostExperiment(sfArm64KernelNotIntitialzedStub.getName(), sfArm64KernelNotIntitialzedStub);
 
             // Test getting the tree endpoint for an XY chart
             WebTarget tableColumns = getTableColumnsEndpoint(exp.getUUID().toString(), EVENTS_TABLE_DATAPROVIDER_ID);
@@ -627,7 +627,7 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testTimeGraphMetaDataSerializer() {
-        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
 
         // Test getting the time graph tree
         WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), TestDataProviderService.INVALID_ENTRY_METADATA);
@@ -659,7 +659,7 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testDataProviderConfigTypes() {
-        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
         WebTarget configTypesEndpoint = getConfigEndpoint(exp.getUUID().toString(), TestDataProviderFactory.ID);
 
         // Get all config types
@@ -687,7 +687,7 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testDataProviderConfigTypesErrors() {
-        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
         WebTarget configTypesEndpoint = getConfigEndpoint(UNKNOWN_EXP_UUID, TestDataProviderFactory.ID);
 
         // Unknown experiment
@@ -747,7 +747,7 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testCreationDeletionOfDerivedDataProviders() throws IOException, URISyntaxException {
-        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
         WebTarget dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), TestDataProviderFactory.ID);
         Map<String, Object> params = readParametersFromJson(VALID_JSON_FILENAME);
         ITmfConfiguration configuration = new TmfConfiguration.Builder()
@@ -781,7 +781,7 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testCreationOfDerivedDataProvidersErrors() throws IOException, URISyntaxException {
-        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
         WebTarget dpCreationEndpoint = getDpCreationEndpoint(UNKNOWN_EXP_UUID, TestDataProviderFactory.ID);
         Map<String, Object> params = readParametersFromJson(VALID_JSON_FILENAME);
 
@@ -837,7 +837,7 @@ public class DataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testDeletionOfDerivedDataProvidersErrors() throws IOException, URISyntaxException {
-        ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
 
         // Unknown experiment
         WebTarget dpCreationEndpoint = getDpCreationEndpoint(UNKNOWN_EXP_UUID, TestDataProviderFactory.ID);
