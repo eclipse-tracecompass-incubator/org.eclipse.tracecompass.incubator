@@ -60,8 +60,8 @@ import com.google.common.collect.ImmutableSet;
 public class ExperimentManagerServiceTest extends RestServerTest {
 
     private static final String TEST = "test";
-    private static final @NonNull ImmutableSet<TraceModelStub> CONTEXT_SWITCH_SET = ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_STUB, CONTEXT_SWITCHES_UST_STUB);
-    private static final @NonNull ImmutableSet<TraceModelStub> CONTEXT_SWITCH_NOT_INITIALIZED_SET = ImmutableSet.of(CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
+    private static final @NonNull ImmutableSet<TraceModelStub> CONTEXT_SWITCH_SET = ImmutableSet.of(sfContextSwitchesKernelStub, sfContextSwitchesUstStub);
+    private static final @NonNull ImmutableSet<TraceModelStub> CONTEXT_SWITCH_NOT_INITIALIZED_SET = ImmutableSet.of(sfContextSwitchesKernelNotInitializedStub, sfContextSwitchesUstNotInitializedStub);
     private static final @NonNull ExperimentModelStub EXPECTED = new ExperimentModelStub(TEST, CONTEXT_SWITCH_SET);
 
     /**
@@ -73,8 +73,8 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         WebTarget traces = application.path(TRACES);
         WebTarget expTarget = application.path(EXPERIMENTS);
 
-        TraceModelStub ustStub = assertPost(traces, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
-        TraceModelStub kernelStub = assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
+        TraceModelStub ustStub = assertPost(traces, sfContextSwitchesUstNotInitializedStub);
+        TraceModelStub kernelStub = assertPost(traces, sfContextSwitchesKernelNotInitializedStub);
         assertEquals(CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
 
         assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
@@ -111,8 +111,8 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         WebTarget traces = application.path(TRACES);
         WebTarget expTarget = application.path(EXPERIMENTS);
 
-        TraceModelStub ustStub = assertPost(traces, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
-        TraceModelStub kernelStub = assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
+        TraceModelStub ustStub = assertPost(traces, sfContextSwitchesUstNotInitializedStub);
+        TraceModelStub kernelStub = assertPost(traces, sfContextSwitchesKernelNotInitializedStub);
         assertEquals(CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
 
         assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
@@ -162,10 +162,10 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         WebTarget traces = application.path(TRACES);
         WebTarget expTarget = application.path(EXPERIMENTS);
 
-        TraceModelStub ustStub = assertPost(traces, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
-        TraceModelStub kernelStub = assertPost(traces, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
-        TraceModelStub arm64Stub = assertPost(traces, ARM_64_KERNEL_NOT_INITIALIZED_STUB);
-        ImmutableSet<TraceModelStub> traceSet = ImmutableSet.of(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB, ARM_64_KERNEL_NOT_INITIALIZED_STUB);
+        TraceModelStub ustStub = assertPost(traces, sfContextSwitchesUstNotInitializedStub);
+        TraceModelStub kernelStub = assertPost(traces, sfContextSwitchesKernelNotInitializedStub);
+        TraceModelStub arm64Stub = assertPost(traces, sfArm64KernelNotIntitialzedStub);
+        ImmutableSet<TraceModelStub> traceSet = ImmutableSet.of(sfContextSwitchesUstNotInitializedStub, sfContextSwitchesKernelNotInitializedStub, sfArm64KernelNotIntitialzedStub);
         assertEquals(null, traceSet, getTraces(traces));
 
         assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
@@ -235,8 +235,8 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         WebTarget tracesTarget = applicationTarget.path(TRACES);
         WebTarget experimentsTarget = applicationTarget.path(EXPERIMENTS);
 
-        TraceModelStub ustStub = assertPost(tracesTarget, CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
-        TraceModelStub kernelStub = assertPost(tracesTarget, CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB);
+        TraceModelStub ustStub = assertPost(tracesTarget, sfContextSwitchesUstNotInitializedStub);
+        TraceModelStub kernelStub = assertPost(tracesTarget, sfContextSwitchesKernelNotInitializedStub);
 
         List<String> traceUUIDs = new ArrayList<>();
         traceUUIDs.add(ustStub.getUUID().toString());
