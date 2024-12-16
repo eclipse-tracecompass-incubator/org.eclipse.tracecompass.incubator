@@ -87,17 +87,19 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         parameters.put(NAME, EXPECTED.getName());
         parameters.put(TRACES, traceUUIDs);
 
-        Response response = expTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
-        ExperimentModelStub expStub = response.readEntity(ExperimentModelStub.class);
-        assertEquals("Failed to POST the experiment", EXPECTED, expStub);
-        assertEquals("Failed to add experiment to set of experiments", Collections.singleton(EXPECTED), getExperiments(expTarget));
-        assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
-        assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
-
-        assertEquals("Failed to DELETE the experiment", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().delete().readEntity(ExperimentModelStub.class));
-        assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
-        assertEquals("Deleting an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
-        response.close();
+        ExperimentModelStub expStub = null;
+        try (Response response = expTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            expStub = response.readEntity(ExperimentModelStub.class);
+            assertEquals("Failed to POST the experiment", EXPECTED, expStub);
+            assertEquals("Failed to add experiment to set of experiments", Collections.singleton(EXPECTED), getExperiments(expTarget));
+            assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
+            assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
+        }
+        try (Response deleteResponse = expTarget.path(expStub.getUUID().toString()).request().delete()) {
+            assertEquals("Failed to DELETE the experiment", EXPECTED, deleteResponse.readEntity(ExperimentModelStub.class));
+            assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
+            assertEquals("Deleting an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
+        }
     }
 
     /**
@@ -123,25 +125,29 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         parameters.put(NAME, EXPECTED.getName());
         parameters.put(TRACES, traceUUIDs);
 
-        Response response = expTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
-        ExperimentModelStub expStub = response.readEntity(ExperimentModelStub.class);
-        assertEquals("Failed to POST the experiment", EXPECTED, expStub);
-        assertEquals("Failed to add experiment to set of experiments", Collections.singleton(EXPECTED), getExperiments(expTarget));
-        assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
-        assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
-        response.close();
+        ExperimentModelStub expStub = null;
+        try (Response response = expTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            expStub = response.readEntity(ExperimentModelStub.class);
+            assertEquals("Failed to POST the experiment", EXPECTED, expStub);
+            assertEquals("Failed to add experiment to set of experiments", Collections.singleton(EXPECTED), getExperiments(expTarget));
+            assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
+            assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
+        }
 
         // Make a second post with the same name and traces, should return the experiment
-        Response response2 = expTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
-        ExperimentModelStub expStub2 = response2.readEntity(ExperimentModelStub.class);
-        assertEquals("Status of second post", Status.OK.getStatusCode(), response2.getStatus());
-        assertEquals("Failed to POST the experiment a second time", EXPECTED, expStub2);
-        assertEquals("There should still be only one experiment", Collections.singleton(EXPECTED), getExperiments(expTarget));
-        assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
-        assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub2.getUUID().toString()).request().get(ExperimentModelStub.class));
-        response2.close();
+        try (Response response = expTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            ExperimentModelStub expStub2 = response.readEntity(ExperimentModelStub.class);
+            assertEquals("Status of second post", Status.OK.getStatusCode(), response.getStatus());
+            assertEquals("Failed to POST the experiment a second time", EXPECTED, expStub2);
+            assertEquals("There should still be only one experiment", Collections.singleton(EXPECTED), getExperiments(expTarget));
+            assertEquals("Adding an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
+            assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub2.getUUID().toString()).request().get(ExperimentModelStub.class));
 
-        assertEquals("Failed to DELETE the experiment", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().delete().readEntity(ExperimentModelStub.class));
+        }
+
+        try (Response deleteResponse = expTarget.path(expStub.getUUID().toString()).request().delete()) {
+            assertEquals("Failed to DELETE the experiment", EXPECTED, deleteResponse.readEntity(ExperimentModelStub.class));
+        }
         assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
         assertEquals("Deleting an experiment should not change the trace set", CONTEXT_SWITCH_NOT_INITIALIZED_SET, getTraces(traces));
 
@@ -171,14 +177,15 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(NAME, EXPECTED.getName());
         parameters.put(TRACES, traceUUIDs);
+        ExperimentModelStub expStub = null;
 
-        Response response = expTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
-        ExperimentModelStub expStub = response.readEntity(ExperimentModelStub.class);
-        assertEquals("Failed to POST the experiment", EXPECTED, expStub);
-        assertEquals("Failed to add experiment to set of experiments", Collections.singleton(EXPECTED), getExperiments(expTarget));
-        assertEquals("Adding an experiment should not change the trace set", traceSet, getTraces(traces));
-        assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
-        response.close();
+        try (Response response = expTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            expStub = response.readEntity(ExperimentModelStub.class);
+            assertEquals("Failed to POST the experiment", EXPECTED, expStub);
+            assertEquals("Failed to add experiment to set of experiments", Collections.singleton(EXPECTED), getExperiments(expTarget));
+            assertEquals("Adding an experiment should not change the trace set", traceSet, getTraces(traces));
+            assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
+        }
 
         // Post same name experiment, but different traces, should return a conflict
         List<String> traceUUIDs2 = new ArrayList<>();
@@ -186,14 +193,13 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         Map<String, Object> parameters2 = new HashMap<>();
         parameters2.put(NAME, EXPECTED.getName());
         parameters2.put(TRACES, traceUUIDs2);
-        Response response2 = expTarget.request().post(Entity.json(new QueryParameters(parameters2, Collections.emptyList())));
-        assertEquals("Expected a conflict for posting different experiment", Status.CONFLICT.getStatusCode(), response2.getStatus());
-        assertEquals("Conflict should return original experiment name", EXPECTED.getName(), response2.readEntity(ExperimentModelStub.class).getName());
-        assertEquals("There should still be only one experiment", ImmutableSet.of(EXPECTED), getExperiments(expTarget));
-        assertEquals("Failing to add an experiment should not change the trace set", traceSet, getTraces(traces));
-        assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
-        response2.close();
-
+        try (Response response2 = expTarget.request().post(Entity.json(new QueryParameters(parameters2, Collections.emptyList())))) {
+            assertEquals("Expected a conflict for posting different experiment", Status.CONFLICT.getStatusCode(), response2.getStatus());
+            assertEquals("Conflict should return original experiment name", EXPECTED.getName(), response2.readEntity(ExperimentModelStub.class).getName());
+            assertEquals("There should still be only one experiment", ImmutableSet.of(EXPECTED), getExperiments(expTarget));
+            assertEquals("Failing to add an experiment should not change the trace set", traceSet, getTraces(traces));
+            assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
+        }
         // Post same experiment name, but with traces with the same names, but not the same traces
         List<String> traceUUIDs3 = new ArrayList<>();
         traceUUIDs3.add(arm64Stub.getUUID().toString());
@@ -201,17 +207,18 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         Map<String, Object> parameters3 = new HashMap<>();
         parameters3.put(NAME, EXPECTED.getName());
         parameters3.put(TRACES, traceUUIDs3);
-        Response response3 = expTarget.request().post(Entity.json(new QueryParameters(parameters3, Collections.emptyList())));
-        assertEquals("Expected a conflict for posting different experiment", Status.CONFLICT.getStatusCode(), response3.getStatus());
-        assertEquals("Conflict should return original experiment name", EXPECTED.getName(), response3.readEntity(ExperimentModelStub.class).getName());
-        assertEquals("There should still be only one experiment", ImmutableSet.of(EXPECTED), getExperiments(expTarget));
-        assertEquals("Failing to add an experiment should not change the trace set", traceSet, getTraces(traces));
-        assertEquals("Failed to get the new experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
-        response3.close();
-
-        assertEquals("Failed to DELETE the experiment", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().delete().readEntity(ExperimentModelStub.class));
-        assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
-        assertEquals("Deleting an experiment should not change the trace set", traceSet, getTraces(traces));
+        try (Response response3 = expTarget.request().post(Entity.json(new QueryParameters(parameters3, Collections.emptyList())))) {
+            assertEquals("Expected a conflict for posting different experiment", Status.CONFLICT.getStatusCode(), response3.getStatus());
+            assertEquals("Conflict should return original experiment name", EXPECTED.getName(), response3.readEntity(ExperimentModelStub.class).getName());
+            assertEquals("There should still be only one experiment", ImmutableSet.of(EXPECTED), getExperiments(expTarget));
+            assertEquals("Failing to add an experiment should not change the trace set", traceSet, getTraces(traces));
+            assertEquals("Failed to get the new experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
+        }
+        try (Response deleteResponse = expTarget.path(expStub.getUUID().toString()).request().delete()) {
+            assertEquals("Failed to DELETE the experiment", EXPECTED, deleteResponse.readEntity(ExperimentModelStub.class));
+            assertEquals("experiment set should be empty at this point", Collections.emptySet(), getExperiments(expTarget));
+            assertEquals("Deleting an experiment should not change the trace set", traceSet, getTraces(traces));
+        }
     }
 
     /**
@@ -239,9 +246,9 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         parameters.put(NAME, EXPECTED.getName());
         parameters.put(TRACES, traceUUIDs);
 
-        Response response = experimentsTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
-        assertNotNull(response);
-
+        try (Response response = experimentsTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+        }
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 
         // Make sure that workspace is refreshed
