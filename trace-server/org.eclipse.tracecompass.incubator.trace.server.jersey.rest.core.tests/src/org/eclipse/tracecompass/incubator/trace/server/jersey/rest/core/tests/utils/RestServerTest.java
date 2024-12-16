@@ -67,10 +67,24 @@ import com.google.common.collect.ImmutableList;
  */
 @SuppressWarnings("null")
 public abstract class RestServerTest {
+    private static final String ERROR_CODE_STR = ", error code=";
     private static final String SERVER = "http://localhost:8378/tsp/api"; //$NON-NLS-1$
     private static final WebApplication fWebApp = new TestWebApplication(new TraceServerConfiguration(TraceServerConfiguration.TEST_PORT, false, null, null));
     private static final Bundle TEST_BUNDLE = Platform.getBundle("org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests");
     private static final String CONFIG_FOLDER_NAME = "config";
+
+    private static final String CLOCK_OFFSET_KEY = "clock_offset"; //$NON-NLS-1$
+    private static final String CLOCK_SCALE_KEY = "clock_scale"; //$NON-NLS-1$
+    private static final String DOMAIN_KEY = "domain"; //$NON-NLS-1$
+    private static final String HOSTNAME_KEY = "hostname"; //$NON-NLS-1$
+    private static final String HOST_ID_KEY = "host ID"; //$NON-NLS-1$
+    private static final String KERNEL_RELEASE_KEY = "kernel_release";
+    private static final String KERNEL_VERSION_KEY = "kernel_version";
+    private static final String SYSNAME_KEY = "sysname";
+    private static final String TRACER_MAJOR_KEY = "tracer_major"; //$NON-NLS-1$
+    private static final String TRACER_MINOR_KEY = "tracer_minor"; //$NON-NLS-1$
+    private static final String TRACER_NAME_KEY = "tracer_name"; //$NON-NLS-1$
+    private static final String TRACER_PATCHLEVEL_KEY = "tracer_patchlevel";
 
     /**
      * Traces endpoint path (relative to application).
@@ -202,14 +216,14 @@ public abstract class RestServerTest {
      * The properties of the trace.
      */
     public static final Map<String, String> CONTEXT_SWITCHES_UST_PROPERTIES = new HashMap<>(Map.ofEntries(
-            Map.entry("hostname", "\"qemu1\""),
-            Map.entry("clock_offset", "1450192743562703624"),
-            Map.entry("domain", "\"ust\""),
-            Map.entry("host ID", "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
-            Map.entry("tracer_name", "\"lttng-ust\""),
-            Map.entry("clock_scale", "1.0"),
-            Map.entry("tracer_major", "2"),
-            Map.entry("tracer_minor", "6")
+            Map.entry(HOSTNAME_KEY, "\"qemu1\""),
+            Map.entry(CLOCK_OFFSET_KEY, "1450192743562703624"),
+            Map.entry(DOMAIN_KEY, "\"ust\""),
+            Map.entry(HOST_ID_KEY, "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
+            Map.entry(TRACER_NAME_KEY, "\"lttng-ust\""),
+            Map.entry(CLOCK_SCALE_KEY, "1.0"),
+            Map.entry(TRACER_MAJOR_KEY, "2"),
+            Map.entry(TRACER_MINOR_KEY, "6")
         ));
 
     /**
@@ -232,19 +246,19 @@ public abstract class RestServerTest {
     /**
      * The properties of the trace.
      */
-    public static final Map<String, String> CONTEXT_SWITCHES_KERNEL_PROPERTIES = new HashMap<>(Map.ofEntries(
-            Map.entry("hostname", "\"qemu1\""),
-            Map.entry("kernel_version", "\"#1 SMP PREEMPT Sat Dec 12 14:52:43 CET 2015\""),
-            Map.entry("tracer_patchlevel", "3"),
-            Map.entry("clock_offset", "1450192747804379176"),
-            Map.entry("domain", "\"kernel\""),
-            Map.entry("sysname", "\"Linux\""),
-            Map.entry("host ID", "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
-            Map.entry("kernel_release", "\"4.1.13-WR8.0.0.0_standard\""),
-            Map.entry("tracer_name", "\"lttng-modules\""),
-            Map.entry("clock_scale", "1.0"),
-            Map.entry("tracer_major", "2"),
-            Map.entry("tracer_minor", "6")
+    protected static final Map<String, String> CONTEXT_SWITCHES_KERNEL_PROPERTIES = new HashMap<>(Map.ofEntries(
+            Map.entry(HOSTNAME_KEY, "\"qemu1\""),
+            Map.entry(KERNEL_VERSION_KEY, "\"#1 SMP PREEMPT Sat Dec 12 14:52:43 CET 2015\""),
+            Map.entry(TRACER_PATCHLEVEL_KEY, "3"),
+            Map.entry(CLOCK_OFFSET_KEY, "1450192747804379176"),
+            Map.entry(DOMAIN_KEY, "\"kernel\""),
+            Map.entry(SYSNAME_KEY, "\"Linux\""),
+            Map.entry(HOST_ID_KEY, "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
+            Map.entry(KERNEL_RELEASE_KEY, "\"4.1.13-WR8.0.0.0_standard\""),
+            Map.entry(TRACER_NAME_KEY, "\"lttng-modules\""),
+            Map.entry(CLOCK_SCALE_KEY, "1.0"),
+            Map.entry(TRACER_MAJOR_KEY, "2"),
+            Map.entry(TRACER_MINOR_KEY, "6")
         ));
 
     /**
@@ -268,18 +282,18 @@ public abstract class RestServerTest {
      * The properties of the trace.
      */
     public static final Map<String, String> ARM_64_KERNEL_PROPERTIES = new HashMap<>(Map.ofEntries(
-            Map.entry("hostname", "\"lager\""),
-            Map.entry("kernel_version", "\"#6 SMP PREEMPT Wed Oct 1 17:07:11 CEST 2014\""),
-            Map.entry("tracer_patchlevel", "0"),
-            Map.entry("clock_offset", "1412663327522716450"),
-            Map.entry("domain", "\"kernel\""),
-            Map.entry("sysname", "\"Linux\""),
-            Map.entry("host ID", "\"5a71a43c-1390-4365-9baf-111c565e78c3\""),
-            Map.entry("kernel_release", "\"3.10.31-ltsi\""),
-            Map.entry("clock_scale", "1.0"),
-            Map.entry("tracer_name", "\"lttng-modules\""),
-            Map.entry("tracer_major", "2"),
-            Map.entry("tracer_minor", "5")
+            Map.entry(HOSTNAME_KEY, "\"lager\""),
+            Map.entry(KERNEL_VERSION_KEY, "\"#6 SMP PREEMPT Wed Oct 1 17:07:11 CEST 2014\""),
+            Map.entry(TRACER_PATCHLEVEL_KEY, "0"),
+            Map.entry(CLOCK_OFFSET_KEY, "1412663327522716450"),
+            Map.entry(DOMAIN_KEY, "\"kernel\""),
+            Map.entry(SYSNAME_KEY, "\"Linux\""),
+            Map.entry(HOST_ID_KEY, "\"5a71a43c-1390-4365-9baf-111c565e78c3\""),
+            Map.entry(KERNEL_RELEASE_KEY, "\"3.10.31-ltsi\""),
+            Map.entry(CLOCK_SCALE_KEY, "1.0"),
+            Map.entry(TRACER_NAME_KEY, "\"lttng-modules\""),
+            Map.entry(TRACER_MAJOR_KEY, "2"),
+            Map.entry(TRACER_MINOR_KEY, "5")
         ));
 
     /**
@@ -594,7 +608,7 @@ public abstract class RestServerTest {
         parameters.put(URI, stub.getPath());
         try (Response response = traces.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())))) {
             int code = response.getStatus();
-            assertEquals("Failed to POST " + stub.getName() + ", error code=" + code, 200, code);
+            assertEquals("Failed to POST " + stub.getName() + ERROR_CODE_STR + code, 200, code);
             TraceModelStub result = response.readEntity(TraceModelStub.class);
             assertEquals(stub, result);
             return result;
@@ -623,7 +637,7 @@ public abstract class RestServerTest {
         parameters.put(NAME, name);
         parameters.put(TRACES, traceUUIDs);
         try (Response response = application.path(EXPERIMENTS).request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals("Failed to POST experiment " + name + ", error code=" + response.getStatus(), 200, response.getStatus());
+            assertEquals("Failed to POST experiment " + name + ERROR_CODE_STR + response.getStatus(), 200, response.getStatus());
             return response.readEntity(ExperimentModelStub.class);
         }
     }
@@ -639,7 +653,7 @@ public abstract class RestServerTest {
         try (Response response = dpConfigEndpoint.request().post(Entity.json(
                 new OutputConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())))) {
             int code = response.getStatus();
-            assertEquals("Failed to POST " + configuration.getName() + ", error code=" + code, 200, code);
+            assertEquals("Failed to POST " + configuration.getName() + ERROR_CODE_STR + code, 200, code);
             DataProviderDescriptorStub result = response.readEntity(DataProviderDescriptorStub.class);
             assertEquals(configuration.getName(), result.getConfiguration().getName());
             assertEquals(configuration.getDescription(), result.getConfiguration().getDescription());
