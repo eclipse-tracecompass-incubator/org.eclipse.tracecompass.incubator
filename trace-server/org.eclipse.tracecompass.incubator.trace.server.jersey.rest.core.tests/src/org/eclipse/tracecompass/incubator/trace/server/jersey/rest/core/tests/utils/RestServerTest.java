@@ -65,6 +65,7 @@ import com.google.common.collect.ImmutableList;
  *
  * @author Loic Prieur-Drevon
  */
+@SuppressWarnings("null")
 public abstract class RestServerTest {
     private static final String SERVER = "http://localhost:8378/tsp/api"; //$NON-NLS-1$
     private static final WebApplication fWebApp = new TestWebApplication(new TraceServerConfiguration(TraceServerConfiguration.TEST_PORT, false, null, null));
@@ -628,7 +629,6 @@ public abstract class RestServerTest {
      *            the configuration with input parameters to post
      * @return the derived data provider descriptor stub
      */
-    @SuppressWarnings("null")
     public static DataProviderDescriptorStub assertDpPost(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
         try (Response response = dpConfigEndpoint.request().post(Entity.json(
                 new OutputConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())))) {
@@ -652,7 +652,6 @@ public abstract class RestServerTest {
      *            the configuration with input parameters to post
      * @return error code
      */
-    @SuppressWarnings("null")
     public static Response assertDpPostWithErrors(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
         return dpConfigEndpoint.request().post(Entity.json(
                 new OutputConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())));

@@ -93,6 +93,7 @@ import com.google.common.collect.Iterators;
  * @author Loic Prieur-Drevon
  * @author Geneviève Bastien
  */
+@SuppressWarnings("null")
 public class DataProviderServiceTest extends RestServerTest {
     private static final int MAX_ITER = 40;
     private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
@@ -662,7 +663,6 @@ public class DataProviderServiceTest extends RestServerTest {
     /**
      * Tests querying the data provider config types
      */
-    @SuppressWarnings("null")
     @Test
     public void testDataProviderConfigTypes() {
         ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
@@ -751,7 +751,6 @@ public class DataProviderServiceTest extends RestServerTest {
      * @throws IOException
      *             if such error occurs
      */
-    @SuppressWarnings("null")
     @Test
     public void testCreationDeletionOfDerivedDataProviders() throws IOException, URISyntaxException {
         ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
@@ -786,7 +785,6 @@ public class DataProviderServiceTest extends RestServerTest {
      * @throws IOException
      *             if such error occurs
      */
-    @SuppressWarnings("null")
     @Test
     public void testCreationOfDerivedDataProvidersErrors() throws IOException, URISyntaxException {
         ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
@@ -843,7 +841,6 @@ public class DataProviderServiceTest extends RestServerTest {
      * @throws IOException
      *             if such error occurs
      */
-    @SuppressWarnings("null")
     @Test
     public void testDeletionOfDerivedDataProvidersErrors() throws IOException, URISyntaxException {
         ExperimentModelStub exp = assertPostExperiment(CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB.getName(), CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB);
