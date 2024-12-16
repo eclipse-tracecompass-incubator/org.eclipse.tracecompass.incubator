@@ -310,15 +310,15 @@ public abstract class RestServerTest {
     @BeforeClass
     public static void beforeTest() throws IOException {
         String contextSwitchesUstPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath().replaceAll("/$", "");
-        sfContextSwitchesUstNotInitializedStub = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, Collections.EMPTY_MAP);
+        sfContextSwitchesUstNotInitializedStub = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, Collections.emptyMap());
         sfContextSwitchesUstStub = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, CONTEXT_SWITCHES_UST_PROPERTIES);
 
         String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath().replaceAll("/$", "");
-        sfContextSwitchesKernelNotInitializedStub = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, Collections.EMPTY_MAP);
+        sfContextSwitchesKernelNotInitializedStub = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, Collections.emptyMap());
         sfContextSwitchesKernelStub = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_PROPERTIES);
 
         String arm64Path = FileLocator.toFileURL(CtfTestTrace.ARM_64_BIT_HEADER.getTraceURL()).getPath().replaceAll("/$", "");
-        sfArm64KernelNotIntitialzedStub = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, Collections.EMPTY_MAP);
+        sfArm64KernelNotIntitialzedStub = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, Collections.emptyMap());
         sfArm64KernelStub = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, ARM_64_KERNEL_PROPERTIES);
 
         ImmutableList.Builder<DataProviderDescriptorStub> b = ImmutableList.builder();
