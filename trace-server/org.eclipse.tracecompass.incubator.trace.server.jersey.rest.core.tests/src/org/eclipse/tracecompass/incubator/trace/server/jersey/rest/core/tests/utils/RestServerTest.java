@@ -206,6 +206,17 @@ public abstract class RestServerTest {
     };
 
     /**
+     * Callstack data provider descriptor
+     */
+    protected static final DataProviderDescriptorStub EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR = new DataProviderDescriptorStub(
+            null,
+            CALL_STACK_DATAPROVIDER_ID,
+            "Flame Chart",
+            "Show a call stack over time",
+            ProviderType.TIME_GRAPH.name(),
+            null);
+
+    /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
      */
@@ -336,10 +347,7 @@ public abstract class RestServerTest {
                 "LTTng-UST CallStack - Latency vs Time",
                 "Show latencies provided by Analysis module: LTTng-UST CallStack",
                 ProviderType.TREE_TIME_XY.name(), null));
-        b.add(new DataProviderDescriptorStub(null,"org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider",
-                "Flame Chart",
-                "Show a call stack over time",
-                ProviderType.TIME_GRAPH.name(), null));
+        b.add(EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR);
         b.add(new DataProviderDescriptorStub(null,"org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
                 "Histogram",
                 "Show a histogram of number of events to time for a trace",

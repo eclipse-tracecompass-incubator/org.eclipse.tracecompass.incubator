@@ -11,11 +11,14 @@
 
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
@@ -30,6 +33,7 @@ import org.junit.Test;
  * @author Geneviève Bastien
  * @author Bernd Hufmann
  */
+@SuppressWarnings("null")
 public class DataProviderServiceTest extends RestServerTest {
 
     /**
@@ -47,5 +51,22 @@ public class DataProviderServiceTest extends RestServerTest {
         for (DataProviderDescriptorStub desc : sfExpectedDataProviderDescriptorStub) {
             assertTrue(desc.getName(), descriptors.contains(desc));
         }
+    }
+
+    /**
+     * Test getting a single data provider descriptor
+     */
+    @Test
+    public void testProvider() {
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+
+        WebTarget experiments = getApplicationEndpoint().path(EXPERIMENTS);
+        WebTarget provider = experiments.path(exp.getUUID().toString())
+                .path(OUTPUTS_PATH).path(CALL_STACK_DATAPROVIDER_ID);
+
+        DataProviderDescriptorStub descriptor = provider.request(MediaType.APPLICATION_JSON).get(DataProviderDescriptorStub.class);
+        assertNotNull(descriptor);
+
+        assertEquals(EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR, descriptor);
     }
 }
