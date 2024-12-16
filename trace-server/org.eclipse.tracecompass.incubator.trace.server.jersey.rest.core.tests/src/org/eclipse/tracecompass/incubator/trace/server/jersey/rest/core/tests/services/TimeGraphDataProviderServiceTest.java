@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
@@ -36,18 +35,20 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.OutputElementStyleStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.OutputStyleModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.StylesOutputResponseStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgArrowsOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgEntryModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgStatesOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgTooltipOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgTreeOutputResponseStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphArrowStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphEntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphRowStub;
@@ -70,6 +71,8 @@ import com.google.common.collect.Iterators;
  */
 @SuppressWarnings({"null", "restriction"})
 public class TimeGraphDataProviderServiceTest extends RestServerTest {
+
+    private static final String THREAD_STATUS_DP_ID = "org.eclipse.tracecompass.internal.analysis.os.linux.core.threadstatus.ThreadStatusDataProvider";
     private static final String DATA_PROVIDER_RESPONSE_FAILED_MSG = "There should be a positive response for the data provider";
     private static final String MODEL_NULL_MSG = "The model is null, maybe the analysis did not run long enough?";
     private static final int MAX_ITER = 40;
@@ -159,73 +162,56 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
     @Test
     public void testStylesErrors() {
         ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+        executePostErrorTests(exp, RestServerTest::getStylesEndpoint, CALL_STACK_DATAPROVIDER_ID, false);
+    }
 
-        // Invalid UUID string
-        WebTarget stylesEndpoint = getStylesEndpoint(INVALID_EXP_UUID, CALL_STACK_DATAPROVIDER_ID);
+    /**
+     * Tests querying arrows for a time graph data provider
+     *
+     * @throws InterruptedException
+     *             if such exception happens
+     */
+    @Test
+    public void testArrows() throws InterruptedException {
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
+
+        Set<TimeGraphEntryStub> entries = loadDataProvider(exp, THREAD_STATUS_DP_ID);
+        WebTarget arrowsEndpoint = getArrowsEndpoint(exp.getUUID().toString(), THREAD_STATUS_DP_ID);
+
         Map<String, Object> parameters = new HashMap<>();
-        try (Response response = stylesEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertNotNull(response);
-            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-        }
+        parameters.remove(REQUESTED_TIMES_KEY);
+        parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, 1450193714978685130L, END, 1450193715011015823L, NB_TIMES, 1000));
 
-        // Unknown experiment
-        stylesEndpoint = getStylesEndpoint(UUID.randomUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
-        try (Response response = stylesEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertNotNull(response);
-            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
-        }
+        try (Response arrowsResponse = arrowsEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, Status.OK.getStatusCode(), arrowsResponse.getStatus());
 
-        // Missing parameters
-        stylesEndpoint = getStylesEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
-        try (Response response = stylesEndpoint.request().post(Entity.json(NO_PARAMETERS))) {
-            assertNotNull(response);
-            assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        }
+            TgArrowsOutputResponseStub tgArrowsModelResponse = arrowsResponse.readEntity(TgArrowsOutputResponseStub.class);
+            assertNotNull(tgArrowsModelResponse);
 
-        // Unknown data provider
-        stylesEndpoint = getStylesEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
-        try (Response response = stylesEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertNotNull(response);
-            assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(String.class));
+            List<TimeGraphArrowStub> tgModel = tgArrowsModelResponse.getModel();
+            assertNotNull(tgModel);
+            assertFalse(tgModel.isEmpty());
+
+            TimeGraphArrowStub arrow = tgModel.get(0);
+            // Verify first arrow in list
+            verifyArrow(entries, arrow);
         }
     }
 
+    /**
+     * Tests error cases when querying arrows for a time graph data provider
+     */
+    @Test
+    public void testArrowsErrors() {
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
+        executePostErrorTests(exp, RestServerTest::getArrowsEndpoint, THREAD_STATUS_DP_ID, true);
+    }
+
     private static void testGetStates(String filterStrategy) throws InterruptedException {
-        long start = 1450193697034689597L;
-        long end = 1450193745774189602L;
         try {
             ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+            Set<TimeGraphEntryStub> entries = loadDataProvider(exp, CALL_STACK_DATAPROVIDER_ID);
 
-            // Test getting the time graph tree
-            WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
-
-            Map<String, Object> parameters = new HashMap<>();
-            TgTreeOutputResponseStub responseModel;
-            parameters.put(REQUESTED_TIMES_KEY, List.of(start, end));
-            try (Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
-                responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
-                assertNotNull(responseModel);
-            }
-
-            // Make sure the analysis ran enough and we have a model
-            int iteration = 0;
-            while ((responseModel.isRunning() || responseModel.getModel() == null) && iteration < MAX_ITER) {
-                Thread.sleep(100);
-                try (Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                    assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
-                    responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
-                    assertNotNull(responseModel);
-                    iteration++;
-                }
-            }
-
-            TgEntryModelStub model = responseModel.getModel();
-            assertNotNull(MODEL_NULL_MSG + responseModel, model);
-            Set<TimeGraphEntryStub> entries = model.getEntries();
-            assertFalse(entries.isEmpty());
             // add entries for the states query, and make sure they don't have
             // extra time fields
             List<Integer> items = new ArrayList<>();
@@ -236,6 +222,7 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
 
             // Test getting the time graph row data
             WebTarget tgStatesEnpoint = getTimeGraphStatesEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
+            Map<String, Object> parameters = new HashMap<>();
             parameters.remove(REQUESTED_TIMES_KEY);
             parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, 1450193697034689597L, END, 1450193697118480368L, NB_TIMES, 10));
             parameters.put(REQUESTED_ITEMS_KEY, items);
@@ -333,6 +320,36 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
         }
     }
 
+    private static @NonNull Set<TimeGraphEntryStub> loadDataProvider(ExperimentModelStub exp, String dataProviderId) throws InterruptedException {
+        // Test getting the time graph tree
+        WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), dataProviderId);
+
+        Map<String, Object> parameters = new HashMap<>();
+        TgTreeOutputResponseStub responseModel;
+        try (Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
+            responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
+            assertNotNull(responseModel);
+        }
+
+        // Make sure the analysis ran enough and we have a model
+        int iteration = 0;
+        while ((responseModel.isRunning() || responseModel.getModel() == null) && iteration < MAX_ITER) {
+            Thread.sleep(100);
+            try (Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+                assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
+                responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
+                assertNotNull(responseModel);
+                iteration++;
+            }
+        }
+        TgEntryModelStub model = responseModel.getModel();
+        assertNotNull(MODEL_NULL_MSG + responseModel, model);
+        Set<TimeGraphEntryStub> entries = model.getEntries();
+        assertFalse(entries.isEmpty());
+        return entries;
+    }
+
     private static int findCallStackEntry(Set<TimeGraphEntryStub> entries) {
         // Find trace entry
         Optional<TimeGraphEntryStub> traceOptional = entries.stream().filter(entry -> entry.getParentId() == -1).findFirst();
@@ -422,5 +439,20 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
             // Verify that entry doesn't have metadata
             assertNull(entry.getMetadata());
         }
+    }
+
+    private static void verifyArrow(Set<TimeGraphEntryStub> entries, TimeGraphArrowStub arrow) {
+        Optional<TimeGraphEntryStub> entryOptional = entries.stream().filter(entry -> entry.getId() == arrow.getSourceId()).findFirst();
+        assertTrue(entryOptional.isPresent());
+        TimeGraphEntryStub sourceEntry = entryOptional.get();
+        assertEquals("lsmod", sourceEntry.getLabels().get(0));
+
+        entryOptional = entries.stream().filter(entry -> entry.getId() == arrow.getTargetId()).findFirst();
+        assertTrue(entryOptional.isPresent());
+        TimeGraphEntryStub targetEntry = entryOptional.get();
+        assertEquals("rcu_preempt", targetEntry.getLabels().get(0));
+
+        assertNotNull(arrow.getStyle());
+        assertTrue(arrow.getEndTime() > arrow.getStartTime());
     }
 }
