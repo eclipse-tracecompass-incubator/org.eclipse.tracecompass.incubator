@@ -87,6 +87,16 @@ public abstract class RestServerTest {
     private static final String TRACER_PATCHLEVEL_KEY = "tracer_patchlevel";
 
     /**
+     * Callstack data provider ID
+     */
+    protected static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
+
+    /**
+     * Requested times key
+     */
+    protected static final String REQUESTED_TIMES_KEY = "requested_times";
+
+    /**
      * Traces endpoint path (relative to application).
      */
     public static final String TRACES = "traces";
