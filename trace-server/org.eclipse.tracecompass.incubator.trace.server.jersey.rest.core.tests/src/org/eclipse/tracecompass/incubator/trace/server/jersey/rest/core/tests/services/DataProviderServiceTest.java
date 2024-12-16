@@ -94,6 +94,8 @@ import com.google.common.collect.Iterators;
  */
 @SuppressWarnings({"null", "restriction"})
 public class DataProviderServiceTest extends RestServerTest {
+    private static final String DATA_PROVIDER_RESPONSE_FAILED_MSG = "There should be a positive response for the data provider";
+    private static final String MODEL_NULL_MSG = "The model is null, maybe the analysis did not run long enough?";
     private static final int MAX_ITER = 40;
     private static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
     private static final String STATISTICS_DATAPROVIDER_ID = "org.eclipse.tracecompass.analysis.timing.core.segmentstore.SegmentStoreStatisticsDataProvider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack";
@@ -170,7 +172,7 @@ public class DataProviderServiceTest extends RestServerTest {
 
         Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(0L, Long.MAX_VALUE, 2));
         try (Response tree = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
+            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, tree.getStatus());
         }
         parameters = new HashMap<>();
         try (Response defaults = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
@@ -200,7 +202,7 @@ public class DataProviderServiceTest extends RestServerTest {
             parameters.put(REQUESTED_TIMES_KEY, List.of(start, end));
             XyTreeOutputResponseStub responseModel;
             try (Response tree = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
+                assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, tree.getStatus());
                 responseModel = tree.readEntity(XyTreeOutputResponseStub.class);
                 assertNotNull(responseModel);
             }
@@ -209,7 +211,7 @@ public class DataProviderServiceTest extends RestServerTest {
             while (responseModel.isRunning() && responseModel.getModel() == null && iteration < MAX_ITER) {
                 Thread.sleep(100);
                 try (Response xyResponse = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                    assertEquals("There should be a positive response for the data provider", 200, xyResponse.getStatus());
+                    assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, xyResponse.getStatus());
                     responseModel = xyResponse.readEntity(XyTreeOutputResponseStub.class);
                     assertNotNull(responseModel);
                     iteration++;
@@ -229,7 +231,7 @@ public class DataProviderServiceTest extends RestServerTest {
                 assertTrue(expHeader.getName().equals(header.getName()) && expHeader.getTooltip().equals(header.getTooltip()));
             }
             // Verify Entries
-            assertNotNull("The model is null, maybe the analysis did not run long enough?" + responseModel, model);
+            assertNotNull(MODEL_NULL_MSG + responseModel, model);
             List<XyEntryStub> entries = model.getEntries();
             assertFalse(entries.isEmpty());
 
@@ -243,7 +245,7 @@ public class DataProviderServiceTest extends RestServerTest {
             parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, start, END, end, NB_TIMES, 10));
             parameters.put(REQUESTED_ITEMS_KEY, items);
             try (Response series = xySeriesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                assertEquals("There should be a positive response for the data provider", 200, series.getStatus());
+                assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, series.getStatus());
                 XyOutputResponseStub xyModelResponse = series.readEntity(XyOutputResponseStub.class);
                 assertNotNull(xyModelResponse);
 
@@ -281,7 +283,7 @@ public class DataProviderServiceTest extends RestServerTest {
             parameters.put(REQUESTED_TIMES_KEY, List.of(start, end));
             XyTreeOutputResponseStub responseModel;
             try (Response tree = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
+                assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, tree.getStatus());
                 responseModel = tree.readEntity(XyTreeOutputResponseStub.class);
                 assertNotNull(responseModel);
             }
@@ -290,7 +292,7 @@ public class DataProviderServiceTest extends RestServerTest {
             while (responseModel.isRunning() && responseModel.getModel() == null && iteration < MAX_ITER) {
                 Thread.sleep(100);
                 try (Response xyResponse = xyTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                    assertEquals("There should be a positive response for the data provider", 200, xyResponse.getStatus());
+                    assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, xyResponse.getStatus());
                     responseModel = xyResponse.readEntity(XyTreeOutputResponseStub.class);
                     assertNotNull(responseModel);
                     iteration++;
@@ -301,7 +303,7 @@ public class DataProviderServiceTest extends RestServerTest {
             XyEntryModelStub model = responseModel.getModel();
             assertNotNull(model);
             // Verify Entries
-            assertNotNull("The model is null, maybe the analysis did not run long enough?" + responseModel, model);
+            assertNotNull(MODEL_NULL_MSG + responseModel, model);
             List<XyEntryStub> entries = model.getEntries();
             assertFalse(entries.isEmpty());
 
@@ -393,7 +395,7 @@ public class DataProviderServiceTest extends RestServerTest {
             TgTreeOutputResponseStub responseModel;
             parameters.put(REQUESTED_TIMES_KEY, List.of(start, end));
             try (Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
+                assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
                 responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
                 assertNotNull(responseModel);
             }
@@ -403,7 +405,7 @@ public class DataProviderServiceTest extends RestServerTest {
             while ((responseModel.isRunning() || responseModel.getModel() == null) && iteration < MAX_ITER) {
                 Thread.sleep(100);
                 try (Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                    assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
+                    assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
                     responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
                     assertNotNull(responseModel);
                     iteration++;
@@ -411,7 +413,7 @@ public class DataProviderServiceTest extends RestServerTest {
             }
 
             TgEntryModelStub model = responseModel.getModel();
-            assertNotNull("The model is null, maybe the analysis did not run long enough?" + responseModel, model);
+            assertNotNull(MODEL_NULL_MSG + responseModel, model);
             Set<TimeGraphEntryStub> entries = model.getEntries();
             assertFalse(entries.isEmpty());
             // add entries for the states query, and make sure they don't have
@@ -435,7 +437,7 @@ public class DataProviderServiceTest extends RestServerTest {
                             )
                     ));
             try (Response statesResponse = tgStatesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                assertEquals("There should be a positive response for the data provider", 200, statesResponse.getStatus());
+                assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, statesResponse.getStatus());
 
                 TgStatesOutputResponseStub tgStateModelResponse = statesResponse.readEntity(TgStatesOutputResponseStub.class);
                 assertNotNull(tgStateModelResponse);
@@ -463,7 +465,7 @@ public class DataProviderServiceTest extends RestServerTest {
                         TIME, state.getStartTime(),
                         DURATION, (state.getEndTime() - state.getStartTime())));
                 try (Response tooltipResponse = tgTooltipEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                    assertEquals("There should be a positive response for the data provider", 200, tooltipResponse.getStatus());
+                    assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, tooltipResponse.getStatus());
 
                     TgTooltipOutputResponseStub timegraphTooltipResponse = tooltipResponse.readEntity(TgTooltipOutputResponseStub.class);
                     assertNotNull(timegraphTooltipResponse);
@@ -483,7 +485,7 @@ public class DataProviderServiceTest extends RestServerTest {
                         DURATION, 0L,
                         ENTRY_ID, row.getEntryId()));
                 try (Response tooltipResponse = tgTooltipEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                    assertEquals("There should be a positive response for the data provider", 200, tooltipResponse.getStatus());
+                    assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, tooltipResponse.getStatus());
 
                     // Test getting the time graph tooltip for an arrow
                     TimeGraphRowStub destinationRow = Iterators.get(rows.iterator(), rows.size() - 2);
@@ -498,7 +500,7 @@ public class DataProviderServiceTest extends RestServerTest {
                 }
 
                 try (Response tooltipResponse = tgTooltipEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                    assertEquals("There should be a positive response for the data provider", 200, tooltipResponse.getStatus());
+                    assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, tooltipResponse.getStatus());
 
                     TgTooltipOutputResponseStub timegraphTooltipResponse = tooltipResponse.readEntity(TgTooltipOutputResponseStub.class);
                     assertNotNull(timegraphTooltipResponse);
@@ -566,7 +568,7 @@ public class DataProviderServiceTest extends RestServerTest {
             parameters.put(REQUESTED_TIMES_KEY, List.of(start, end));
             TableColumnsOutputResponseStub responseModel;
             try (Response tree = tableColumns.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                assertEquals("There should be a positive response for the data provider", 200, tree.getStatus());
+                assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, tree.getStatus());
                 responseModel = tree.readEntity(TableColumnsOutputResponseStub.class);
                 assertNotNull(responseModel);
             }
@@ -575,7 +577,7 @@ public class DataProviderServiceTest extends RestServerTest {
             while (responseModel.isRunning() && responseModel.getModel() == null && iteration < MAX_ITER) {
                 Thread.sleep(100);
                 try (Response xyResponse = tableColumns.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                    assertEquals("There should be a positive response for the data provider", 200, xyResponse.getStatus());
+                    assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, xyResponse.getStatus());
                     responseModel = xyResponse.readEntity(TableColumnsOutputResponseStub.class);
                     assertNotNull(responseModel);
                     iteration++;
@@ -583,7 +585,7 @@ public class DataProviderServiceTest extends RestServerTest {
             }
 
             List<ColumnHeaderEntryStub> columns = responseModel.getModel();
-            assertNotNull("The model is null, maybe the analysis did not run long enough?" + responseModel, columns);
+            assertNotNull(MODEL_NULL_MSG + responseModel, columns);
             assertFalse(columns.isEmpty());
 
             // Test getting the XY series endpoint
@@ -596,7 +598,7 @@ public class DataProviderServiceTest extends RestServerTest {
             parameters.put(REQUESTED_TABLE_INDEX_KEY, TABLE_INDEX);
             parameters.put(REQUESTED_TABLE_COUNT_KEY, TABLE_COUNT);
             try (Response linesResponse = tableLinesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                assertEquals("There should be a positive response for the data provider", 200, linesResponse.getStatus());
+                assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, linesResponse.getStatus());
                 TableLinesOutputResponseStub lineModelResponse = linesResponse.readEntity(TableLinesOutputResponseStub.class);
                 assertNotNull(lineModelResponse);
 
@@ -634,7 +636,7 @@ public class DataProviderServiceTest extends RestServerTest {
         TgTreeOutputResponseStub responseModel;
         parameters.put(REQUESTED_TIMES_KEY, List.of(1450193697034689597L, 1450193745774189602L));
         try (Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
+            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
             responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
             assertNotNull(responseModel);
 
@@ -928,7 +930,7 @@ public class DataProviderServiceTest extends RestServerTest {
     private static EntryModelStub getDataTreeEntryModel(WebTarget dataTree, Map<String, Object> parameters) throws InterruptedException {
         TreeOutputResponseStub responseModel;
         Response treeResponse = dataTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
-        assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
+        assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
         responseModel = treeResponse.readEntity(TreeOutputResponseStub.class);
         assertNotNull(responseModel);
         treeResponse.close();
@@ -938,7 +940,7 @@ public class DataProviderServiceTest extends RestServerTest {
         while ((responseModel.isRunning() || responseModel.getModel() == null) && iteration < MAX_ITER) {
             Thread.sleep(100);
             treeResponse = dataTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
-            assertEquals("There should be a positive response for the data provider", 200, treeResponse.getStatus());
+            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
             responseModel = treeResponse.readEntity(TreeOutputResponseStub.class);
             assertNotNull(responseModel);
             iteration++;
@@ -946,7 +948,7 @@ public class DataProviderServiceTest extends RestServerTest {
         }
 
         EntryModelStub model = responseModel.getModel();
-        assertNotNull("The model is null, maybe the analysis did not run long enough?" + responseModel, model);
+        assertNotNull(MODEL_NULL_MSG + responseModel, model);
         List<EntryStub> totalEntries = model.getEntries();
         assertFalse(totalEntries.isEmpty());
 
