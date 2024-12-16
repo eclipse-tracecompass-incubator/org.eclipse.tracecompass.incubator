@@ -128,7 +128,7 @@ public class DataProviderServiceTest extends RestServerTest {
     private static final String DEEP_SEARCH = "DEEP";
     private static final String FILTER_QUERY = "test";
     private static final int DIMMED_FILTER_TAG = 1;
-    private static final String UNKNOWN_EXP_UUID = UUID.nameUUIDFromBytes(Objects.requireNonNull("unknown.experiment.id".toString().getBytes(Charset.defaultCharset()))).toString();
+    private static final String UNKNOWN_EXP_UUID = UUID.nameUUIDFromBytes(Objects.requireNonNull("unknown.experiment.id".getBytes(Charset.defaultCharset()))).toString();
     private static final String UNKNOWN_DP_ID = "unknown.dp.id";
     private static final String UNKNOWN_TYPE_ID = "unknown.config.type.id";
 
