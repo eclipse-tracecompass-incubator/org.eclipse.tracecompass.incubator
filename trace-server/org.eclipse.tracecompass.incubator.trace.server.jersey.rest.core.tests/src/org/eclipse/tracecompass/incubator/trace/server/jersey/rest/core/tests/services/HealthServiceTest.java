@@ -41,11 +41,12 @@ public class HealthServiceTest extends RestServerTest {
         WebTarget application = getApplicationEndpoint();
         WebTarget healthEndpoint = application.path("health");
 
-        Response response = healthEndpoint.request(MediaType.APPLICATION_JSON)
-                .get();
-        assertEquals("Health reponse should be OK", 200, response.getStatus());
-        Map<Object, Object> responseValues = response.readEntity(Map.class);
-        assertEquals("UP", responseValues.get("status"));
+        try (Response response = healthEndpoint.request(MediaType.APPLICATION_JSON)
+                .get()) {
+            assertEquals("Health reponse should be OK", 200, response.getStatus());
+            Map<Object, Object> responseValues = response.readEntity(Map.class);
+            assertEquals("UP", responseValues.get("status"));
+        }
 
     }
 

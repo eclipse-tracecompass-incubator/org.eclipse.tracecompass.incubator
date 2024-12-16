@@ -342,11 +342,15 @@ public abstract class RestServerTest {
         WebTarget application = getApplicationEndpoint();
         WebTarget experimentsTarget = application.path(EXPERIMENTS);
         for (ExperimentModelStub experiment: getExperiments(experimentsTarget)) {
-            assertEquals(experiment, experimentsTarget.path(experiment.getUUID().toString()).request().delete().readEntity(ExperimentModelStub.class));
+            try (Response response = experimentsTarget.path(experiment.getUUID().toString()).request().delete()) {
+                assertEquals(experiment, response.readEntity(ExperimentModelStub.class));
+            }
         }
         WebTarget traceTarget = application.path(TRACES);
         for (TraceModelStub trace : getTraces(traceTarget)) {
-            assertEquals(trace, traceTarget.path(trace.getUUID().toString()).request().delete().readEntity(TraceModelStub.class));
+            try (Response response = traceTarget.path(trace.getUUID().toString()).request().delete()) {
+                assertEquals(trace, response.readEntity(TraceModelStub.class));
+            }
         }
         assertEquals(Collections.emptySet(), getTraces(traceTarget));
         assertEquals(Collections.emptySet(), getExperiments(experimentsTarget));
@@ -588,12 +592,13 @@ public abstract class RestServerTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(NAME, stub.getName());
         parameters.put(URI, stub.getPath());
-        Response response = traces.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())));
-        int code = response.getStatus();
-        assertEquals("Failed to POST " + stub.getName() + ", error code=" + code, 200, code);
-        TraceModelStub result = response.readEntity(TraceModelStub.class);
-        assertEquals(stub, result);
-        return result;
+        try (Response response = traces.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())))) {
+            int code = response.getStatus();
+            assertEquals("Failed to POST " + stub.getName() + ", error code=" + code, 200, code);
+            TraceModelStub result = response.readEntity(TraceModelStub.class);
+            assertEquals(stub, result);
+            return result;
+        }
     }
 
     /**
@@ -617,9 +622,10 @@ public abstract class RestServerTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(NAME, name);
         parameters.put(TRACES, traceUUIDs);
-        Response response = application.path(EXPERIMENTS).request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
-        assertEquals("Failed to POST experiment " + name + ", error code=" + response.getStatus(), 200, response.getStatus());
-        return response.readEntity(ExperimentModelStub.class);
+        try (Response response = application.path(EXPERIMENTS).request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertEquals("Failed to POST experiment " + name + ", error code=" + response.getStatus(), 200, response.getStatus());
+            return response.readEntity(ExperimentModelStub.class);
+        }
     }
 
     /**
