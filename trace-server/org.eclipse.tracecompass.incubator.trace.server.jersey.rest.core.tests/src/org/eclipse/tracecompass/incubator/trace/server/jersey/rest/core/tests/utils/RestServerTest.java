@@ -141,6 +141,11 @@ public abstract class RestServerTest {
     public static final String OUTPUTS_PATH = "outputs";
 
     /**
+     * Marker sets path segment
+     */
+    public static final String MARKER_SETS = "markerSets";
+
+    /**
      * Tree path segment
      */
     public static final String TREE_PATH = "tree";
@@ -189,6 +194,11 @@ public abstract class RestServerTest {
      * Styles path segment
      */
     public static final String STYLES_PATH = "style";
+
+    /**
+     * Annotation path segment
+     */
+    public static final String ANNOTATIONS_PATH = "annotations";
 
     /**
      * Column path segment
@@ -631,6 +641,8 @@ public abstract class RestServerTest {
                 .path(dataProviderId);
     }
 
+
+
     /**
      * Get the traces currently open on the server.
      *
@@ -664,6 +676,19 @@ public abstract class RestServerTest {
         return outputs.request(MediaType.APPLICATION_JSON).get(DATAPROVIDER_DESCR_MODEL_SET_TYPE);
     }
 
+    /**
+     * Get the {@link WebTarget} for the experiment's marker sets
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @return marker sets model
+     */
+    public static WebTarget getMarkerSetsEndpoint(String expUUID) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(MARKER_SETS);
+    }
 
     /**
      * Get the {@link WebTarget} for the data provider styles tree endpoint.
@@ -680,6 +705,61 @@ public abstract class RestServerTest {
                 .path(OUTPUTS_PATH)
                 .path(dataProviderId)
                 .path(STYLES_PATH);
+    }
+
+
+    /**
+     * Get the {@link WebTarget} for the time graph data provider annotation categories endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @param markerSetId
+     *            The marker set ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getAnnotationCategoriesEndpoint(String expUUID, String dataProviderId, String markerSetId) {
+        WebTarget webTarget = getApplicationEndpoint()
+                .path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(dataProviderId)
+                .path(ANNOTATIONS_PATH);
+        if (markerSetId != null) {
+            webTarget = webTarget.queryParam("markerSetId", markerSetId);
+        }
+        return webTarget;
+    }
+
+    /**
+     * Get the {@link WebTarget} for the time graph data provider annotation categories endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getAnnotationCategoriesEndpoint(String expUUID, String dataProviderId) {
+        return getAnnotationCategoriesEndpoint(expUUID, dataProviderId, null);
+    }
+
+    /**
+     * Get the {@link WebTarget} for the time graph data provider annotation endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getAnnotationEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(dataProviderId)
+                .path(ANNOTATIONS_PATH);
     }
 
     /**
