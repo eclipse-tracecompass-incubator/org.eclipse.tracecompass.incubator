@@ -28,10 +28,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -39,6 +41,11 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.AnnotationCategoriesOutputResponseStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.AnnotationModelStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.AnnotationResponseStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.AnnotationStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.OutputElementStyleStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.OutputStyleModelStub;
@@ -56,6 +63,7 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp.TestDataProviderService;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
+import org.eclipse.tracecompass.tmf.core.model.annotations.IAnnotation.AnnotationType;
 import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
 import org.junit.Test;
 
@@ -72,11 +80,16 @@ import com.google.common.collect.Iterators;
 @SuppressWarnings({"null", "restriction"})
 public class TimeGraphDataProviderServiceTest extends RestServerTest {
 
+    private static final String UST_CATEGORY_NAME = "ust";
+    private static final String SLOT_CATEGORY_NAME = "Slot";
+    private static final String CTX_SWITCH_EXPERIMENT = "ctxSwitchExperiment";
     private static final String THREAD_STATUS_DP_ID = "org.eclipse.tracecompass.internal.analysis.os.linux.core.threadstatus.ThreadStatusDataProvider";
     private static final String DATA_PROVIDER_RESPONSE_FAILED_MSG = "There should be a positive response for the data provider";
     private static final String MODEL_NULL_MSG = "The model is null, maybe the analysis did not run long enough?";
     private static final int MAX_ITER = 40;
     private static final String REQUESTED_TIMERANGE_KEY = "requested_timerange";
+    private static final String REQUESTED_CATAGORIES_KEY = "requested_marker_categories";
+    private static final String REQUESTED_MARKERSET_ID_KEY = "requested_marker_set";
     private static final String REQUESTED_ITEMS_KEY = "requested_items";
     private static final String REQUESTED_ELEMENT_KEY = "requested_element";
     private static final String ELEMENT_TYPE = "elementType";
@@ -205,6 +218,140 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
     public void testArrowsErrors() {
         ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
         executePostErrorTests(exp, RestServerTest::getArrowsEndpoint, THREAD_STATUS_DP_ID, true);
+    }
+
+    /**
+     * Tests querying annotation categories for a time graph data provider
+     */
+    @Test
+    public void testAnnotationCategories() {
+        ExperimentModelStub exp = assertPostExperiment(CTX_SWITCH_EXPERIMENT, sfContextSwitchesKernelNotInitializedStub, sfContextSwitchesUstNotInitializedStub);
+
+        // Get ust category
+        WebTarget categoriesEndpoint = getAnnotationCategoriesEndpoint(exp.getUUID().toString(), THREAD_STATUS_DP_ID, "unknown.annotation.cat.id");
+        AnnotationCategoriesOutputResponseStub annotationCategoriesModel = categoriesEndpoint.request(MediaType.APPLICATION_JSON).get(AnnotationCategoriesOutputResponseStub.class);
+        assertNotNull(annotationCategoriesModel);
+        assertFalse(annotationCategoriesModel.getModel().getAnnotationCategories().isEmpty());
+        List<String> categories = annotationCategoriesModel.getModel().getAnnotationCategories();
+        assertFalse(categories.isEmpty());
+        assertTrue(categories.contains(UST_CATEGORY_NAME));
+
+        // get category from marker set
+        categoriesEndpoint = getAnnotationCategoriesEndpoint(exp.getUUID().toString(), THREAD_STATUS_DP_ID, "example.id");
+        annotationCategoriesModel = categoriesEndpoint.request(MediaType.APPLICATION_JSON).get(AnnotationCategoriesOutputResponseStub.class);
+
+        assertNotNull(annotationCategoriesModel);
+        categories = annotationCategoriesModel.getModel().getAnnotationCategories();
+        assertFalse(categories.isEmpty());
+        List<String> expectedCategories = List.of("Frame", "Subframe", SLOT_CATEGORY_NAME);
+        assertTrue(categories.containsAll(expectedCategories));
+    }
+
+    /**
+     * Tests error cases when querying annotation categories for a time graph data provider
+     */
+    @Test
+    public void testAnnotationCategoriesErrors() {
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
+        // Invalid UUID string
+        WebTarget endpoint = getAnnotationCategoriesEndpoint(INVALID_EXP_UUID, THREAD_STATUS_DP_ID);
+        try (Response response = endpoint.request(MediaType.APPLICATION_JSON).get()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+        }
+
+        // Unknown experiment
+        endpoint = getAnnotationCategoriesEndpoint(UUID.randomUUID().toString(), THREAD_STATUS_DP_ID);
+        try (Response response = endpoint.request(MediaType.APPLICATION_JSON).get()) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+        }
+
+        // Unknown data provider
+        endpoint = getAnnotationCategoriesEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
+        try (Response response = endpoint.request(MediaType.APPLICATION_JSON).get()) {
+            assertNotNull(response);
+            assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(String.class));
+        }
+    }
+
+    /**
+     * Tests querying annotation for a time graph data provider
+     *
+     * @throws InterruptedException
+     *             if such exception occurred
+     */
+    @Test
+    public void testAnnotations() throws InterruptedException {
+        ExperimentModelStub exp = assertPostExperiment(CTX_SWITCH_EXPERIMENT, sfContextSwitchesKernelNotInitializedStub, sfContextSwitchesUstNotInitializedStub);
+        Set<TimeGraphEntryStub> entries =  loadDataProvider(exp, THREAD_STATUS_DP_ID);
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.remove(REQUESTED_TIMES_KEY);
+        parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, 1450193722866679365L, END, 1450193722881450790L, NB_TIMES, 500));
+        parameters.put(REQUESTED_MARKERSET_ID_KEY, "example.id");
+        List<String> categories = List.of("Frame", "Subframe", SLOT_CATEGORY_NAME, UST_CATEGORY_NAME);
+        parameters.put(REQUESTED_CATAGORIES_KEY, categories);
+
+        // Find specific thread entry
+        final String threadNameForTooltip = "lemon_server";
+        Optional<TimeGraphEntryStub> threadOptional = entries.stream().filter(
+                entry -> threadNameForTooltip.equals(entry.getLabels().get(0)) && entry.getLabels().get(1).equals("592")).findFirst();
+        assertTrue(threadOptional.isPresent());
+        parameters.put(REQUESTED_ITEMS_KEY, List.of(threadOptional.get().getId()));
+
+        WebTarget annoationEndpoint = getAnnotationEndpoint(exp.getUUID().toString(), THREAD_STATUS_DP_ID);
+        try (Response response = annoationEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+            assertEquals(Status.OK.getStatusCode(), response.getStatus());
+            AnnotationResponseStub modelResponse = response.readEntity(AnnotationResponseStub.class);
+            assertNotNull(modelResponse);
+
+            AnnotationModelStub annotationModel = modelResponse.getModel();
+            assertNotNull(annotationModel);
+            Map<String, Collection<AnnotationStub>> annotationsMap = annotationModel.getAnnotations();
+            assertFalse(annotationsMap.isEmpty());
+            for (String category : categories) {
+                assertTrue(annotationsMap.containsKey(category));
+                Collection<AnnotationStub> annotations = annotationsMap.get(category);
+                assertNotNull(annotations);
+                assertFalse(annotations.isEmpty());
+            }
+
+            Collection<AnnotationStub> annotations = annotationsMap.get(SLOT_CATEGORY_NAME);
+            assertNotNull(annotations);
+            AnnotationStub annotation = annotations.iterator().next();
+
+            // Verify first annotation created from marker set and category Slot
+            assertEquals(1450193722866500000L, annotation.getTime());
+            assertEquals(500000, annotation.getDuration());
+            assertEquals(-1, annotation.getEntryId());
+            assertEquals("1", annotation.getLabel());
+            assertEquals(AnnotationType.CHART.name(), annotation.getType());
+            assertNotNull(annotation.getStyle());
+
+            // Verify first annotation created from category ust for specific thread
+            annotations = annotationsMap.get(UST_CATEGORY_NAME);
+            assertNotNull(annotations);
+            annotation = annotations.iterator().next();
+            assertEquals(1450193722867264709L, annotation.getTime());
+            assertEquals(0, annotation.getDuration());
+            assertEquals(threadOptional.get().getId(), annotation.getEntryId());
+            assertEquals("lttng_ust_tracef:event", annotation.getLabel());
+            assertEquals(AnnotationType.CHART.name(), annotation.getType());
+            assertNotNull(annotation.getStyle());
+        }
+    }
+
+    /**
+     * Tests error cases when querying annotation for a time graph data provider
+     */
+    @Test
+    public void testAnnotationErrors() {
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
+        executePostErrorTests(exp, RestServerTest::getAnnotationEndpoint, THREAD_STATUS_DP_ID, true);
     }
 
     private static void testGetStates(String filterStrategy) throws InterruptedException {
