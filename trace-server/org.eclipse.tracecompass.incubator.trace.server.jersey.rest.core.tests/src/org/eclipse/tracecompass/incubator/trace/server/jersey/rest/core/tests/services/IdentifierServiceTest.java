@@ -29,6 +29,7 @@ import org.junit.Test;
  *
  * @author Vlad Arama
  */
+@SuppressWarnings("null")
 public class IdentifierServiceTest extends RestServerTest {
 
     /**

@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,12 +20,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -33,12 +37,14 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.OutputConfigurationQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.TraceServerConfiguration;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
@@ -65,11 +71,56 @@ import com.google.common.collect.ImmutableList;
  *
  * @author Loic Prieur-Drevon
  */
+@SuppressWarnings("null")
 public abstract class RestServerTest {
+    private static final String ERROR_CODE_STR = ", error code=";
     private static final String SERVER = "http://localhost:8378/tsp/api"; //$NON-NLS-1$
     private static final WebApplication fWebApp = new TestWebApplication(new TraceServerConfiguration(TraceServerConfiguration.TEST_PORT, false, null, null));
     private static final Bundle TEST_BUNDLE = Platform.getBundle("org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests");
     private static final String CONFIG_FOLDER_NAME = "config";
+
+    private static final String CLOCK_OFFSET_KEY = "clock_offset"; //$NON-NLS-1$
+    private static final String CLOCK_SCALE_KEY = "clock_scale"; //$NON-NLS-1$
+    private static final String DOMAIN_KEY = "domain"; //$NON-NLS-1$
+    private static final String HOSTNAME_KEY = "hostname"; //$NON-NLS-1$
+    private static final String HOST_ID_KEY = "host ID"; //$NON-NLS-1$
+    private static final String KERNEL_RELEASE_KEY = "kernel_release";
+    private static final String KERNEL_VERSION_KEY = "kernel_version";
+    private static final String SYSNAME_KEY = "sysname";
+    private static final String TRACER_MAJOR_KEY = "tracer_major"; //$NON-NLS-1$
+    private static final String TRACER_MINOR_KEY = "tracer_minor"; //$NON-NLS-1$
+    private static final String TRACER_NAME_KEY = "tracer_name"; //$NON-NLS-1$
+    private static final String TRACER_PATCHLEVEL_KEY = "tracer_patchlevel";
+
+    /**
+     * No parameter string
+     */
+    protected static final String NO_PARAMETERS = "no-parameters";
+
+    /**
+     * Invalid experiment UUID
+     */
+    protected static final String INVALID_EXP_UUID = "unknown.experiment.id";
+
+    /**
+     * Unknown experiment UUID
+     */
+    protected static final String UNKNOWN_EXP_UUID = UUID.nameUUIDFromBytes(Objects.requireNonNull(INVALID_EXP_UUID.getBytes(Charset.defaultCharset()))).toString();
+
+    /**
+     * Unknown data provider ID
+     */
+    protected static final String UNKNOWN_DP_ID = "unknown.dp.id";
+
+    /**
+     * Callstack data provider ID
+     */
+    protected static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
+
+    /**
+     * Requested times key
+     */
+    protected static final String REQUESTED_TIMES_KEY = "requested_times";
 
     /**
      * Traces endpoint path (relative to application).
@@ -88,6 +139,11 @@ public abstract class RestServerTest {
      * Outputs path segment
      */
     public static final String OUTPUTS_PATH = "outputs";
+
+    /**
+     * Marker sets path segment
+     */
+    public static final String MARKER_SETS = "markerSets";
 
     /**
      * Tree path segment
@@ -120,6 +176,11 @@ public abstract class RestServerTest {
     public static final String STATE_PATH = "states";
 
     /**
+     * Arrows path segment
+     */
+    public static final String ARROWS_PATH = "arrows";
+
+    /**
      * Tooltip path segment
      */
     public static final String TOOLTIP_PATH = "tooltip";
@@ -128,6 +189,16 @@ public abstract class RestServerTest {
      * Table path segment
      */
     public static final String TABLE_PATH = "table";
+
+    /**
+     * Styles path segment
+     */
+    public static final String STYLES_PATH = "style";
+
+    /**
+     * Annotation path segment
+     */
+    public static final String ANNOTATIONS_PATH = "annotations";
 
     /**
      * Column path segment
@@ -173,24 +244,35 @@ public abstract class RestServerTest {
      */
     public static final String VALID_JSON_FILENAME = "custom-execution-analysis.json";
 
-    private static final GenericType<Set<TraceModelStub>> TRACE_MODEL_SET_TYPE = new GenericType<Set<TraceModelStub>>() {
+    private static final GenericType<Set<TraceModelStub>> TRACE_MODEL_SET_TYPE = new GenericType<>() {
     };
-    private static final GenericType<Set<ExperimentModelStub>> EXPERIMENT_MODEL_SET_TYPE = new GenericType<Set<ExperimentModelStub>>() {
+    private static final GenericType<Set<ExperimentModelStub>> EXPERIMENT_MODEL_SET_TYPE = new GenericType<>() {
     };
-    private static final GenericType<Set<DataProviderDescriptorStub>> DATAPROVIDER_DESCR_MODEL_SET_TYPE = new GenericType<Set<DataProviderDescriptorStub>>() {
+    private static final GenericType<Set<DataProviderDescriptorStub>> DATAPROVIDER_DESCR_MODEL_SET_TYPE = new GenericType<>() {
     };
+
+    /**
+     * Callstack data provider descriptor
+     */
+    protected static final DataProviderDescriptorStub EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR = new DataProviderDescriptorStub(
+            null,
+            CALL_STACK_DATAPROVIDER_ID,
+            "Flame Chart",
+            "Show a call stack over time",
+            ProviderType.TIME_GRAPH.name(),
+            null);
 
     /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
      */
-    protected static TraceModelStub CONTEXT_SWITCHES_UST_STUB;
+    protected static TraceModelStub sfContextSwitchesUstStub;
 
     /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_UST} without metadata initialized.
      */
-    protected static TraceModelStub CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB;
+    protected static TraceModelStub sfContextSwitchesUstNotInitializedStub;
 
     /**
      * The name used when posting the trace.
@@ -200,28 +282,28 @@ public abstract class RestServerTest {
     /**
      * The properties of the trace.
      */
-    public static final Map<String, String> CONTEXT_SWITCHES_UST_PROPERTIES = new HashMap<>(Map.ofEntries(
-            Map.entry("hostname", "\"qemu1\""),
-            Map.entry("clock_offset", "1450192743562703624"),
-            Map.entry("domain", "\"ust\""),
-            Map.entry("host ID", "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
-            Map.entry("tracer_name", "\"lttng-ust\""),
-            Map.entry("clock_scale", "1.0"),
-            Map.entry("tracer_major", "2"),
-            Map.entry("tracer_minor", "6")
+    protected static final Map<String, String> CONTEXT_SWITCHES_UST_PROPERTIES = new HashMap<>(Map.ofEntries(
+            Map.entry(HOSTNAME_KEY, "\"qemu1\""),
+            Map.entry(CLOCK_OFFSET_KEY, "1450192743562703624"),
+            Map.entry(DOMAIN_KEY, "\"ust\""),
+            Map.entry(HOST_ID_KEY, "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
+            Map.entry(TRACER_NAME_KEY, "\"lttng-ust\""),
+            Map.entry(CLOCK_SCALE_KEY, "1.0"),
+            Map.entry(TRACER_MAJOR_KEY, "2"),
+            Map.entry(TRACER_MINOR_KEY, "6")
         ));
 
     /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL}.
      */
-    protected static TraceModelStub CONTEXT_SWITCHES_KERNEL_STUB;
+    protected static TraceModelStub sfContextSwitchesKernelStub;
 
     /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL} without metadata initialized.
      */
-    protected static TraceModelStub CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB;
+    protected static TraceModelStub sfContextSwitchesKernelNotInitializedStub;
 
     /**
      * The name used when posting the trace.
@@ -231,32 +313,32 @@ public abstract class RestServerTest {
     /**
      * The properties of the trace.
      */
-    public static final Map<String, String> CONTEXT_SWITCHES_KERNEL_PROPERTIES = new HashMap<>(Map.ofEntries(
-            Map.entry("hostname", "\"qemu1\""),
-            Map.entry("kernel_version", "\"#1 SMP PREEMPT Sat Dec 12 14:52:43 CET 2015\""),
-            Map.entry("tracer_patchlevel", "3"),
-            Map.entry("clock_offset", "1450192747804379176"),
-            Map.entry("domain", "\"kernel\""),
-            Map.entry("sysname", "\"Linux\""),
-            Map.entry("host ID", "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
-            Map.entry("kernel_release", "\"4.1.13-WR8.0.0.0_standard\""),
-            Map.entry("tracer_name", "\"lttng-modules\""),
-            Map.entry("clock_scale", "1.0"),
-            Map.entry("tracer_major", "2"),
-            Map.entry("tracer_minor", "6")
+    protected static final Map<String, String> CONTEXT_SWITCHES_KERNEL_PROPERTIES = new HashMap<>(Map.ofEntries(
+            Map.entry(HOSTNAME_KEY, "\"qemu1\""),
+            Map.entry(KERNEL_VERSION_KEY, "\"#1 SMP PREEMPT Sat Dec 12 14:52:43 CET 2015\""),
+            Map.entry(TRACER_PATCHLEVEL_KEY, "3"),
+            Map.entry(CLOCK_OFFSET_KEY, "1450192747804379176"),
+            Map.entry(DOMAIN_KEY, "\"kernel\""),
+            Map.entry(SYSNAME_KEY, "\"Linux\""),
+            Map.entry(HOST_ID_KEY, "\"40b6dd3a-c130-431e-92ef-8c4dafe14627\""),
+            Map.entry(KERNEL_RELEASE_KEY, "\"4.1.13-WR8.0.0.0_standard\""),
+            Map.entry(TRACER_NAME_KEY, "\"lttng-modules\""),
+            Map.entry(CLOCK_SCALE_KEY, "1.0"),
+            Map.entry(TRACER_MAJOR_KEY, "2"),
+            Map.entry(TRACER_MINOR_KEY, "6")
         ));
 
     /**
      * {@link TraceModelStub} to represent the object returned by the server for
-     * {@link CtfTestTrace#ARM_64_BIT_HEADER}, with the same name as {@link #CONTEXT_SWITCHES_KERNEL_STUB}
+     * {@link CtfTestTrace#ARM_64_BIT_HEADER}, with the same name as {@link #sfContextSwitchesKernelStub}
      */
-    protected static TraceModelStub ARM_64_KERNEL_STUB;
+    protected static TraceModelStub sfArm64KernelStub;
 
     /**
      * {@link TraceModelStub} to represent the object returned by the server for
      * {@link CtfTestTrace#ARM_64_BIT_HEADER} without metadata initialized.
      */
-    protected static TraceModelStub ARM_64_KERNEL_NOT_INITIALIZED_STUB;
+    protected static TraceModelStub sfArm64KernelNotIntitialzedStub;
 
     /**
      * The name used when posting the trace.
@@ -266,25 +348,25 @@ public abstract class RestServerTest {
     /**
      * The properties of the trace.
      */
-    public static final Map<String, String> ARM_64_KERNEL_PROPERTIES = new HashMap<>(Map.ofEntries(
-            Map.entry("hostname", "\"lager\""),
-            Map.entry("kernel_version", "\"#6 SMP PREEMPT Wed Oct 1 17:07:11 CEST 2014\""),
-            Map.entry("tracer_patchlevel", "0"),
-            Map.entry("clock_offset", "1412663327522716450"),
-            Map.entry("domain", "\"kernel\""),
-            Map.entry("sysname", "\"Linux\""),
-            Map.entry("host ID", "\"5a71a43c-1390-4365-9baf-111c565e78c3\""),
-            Map.entry("kernel_release", "\"3.10.31-ltsi\""),
-            Map.entry("clock_scale", "1.0"),
-            Map.entry("tracer_name", "\"lttng-modules\""),
-            Map.entry("tracer_major", "2"),
-            Map.entry("tracer_minor", "5")
+    protected static final Map<String, String> ARM_64_KERNEL_PROPERTIES = new HashMap<>(Map.ofEntries(
+            Map.entry(HOSTNAME_KEY, "\"lager\""),
+            Map.entry(KERNEL_VERSION_KEY, "\"#6 SMP PREEMPT Wed Oct 1 17:07:11 CEST 2014\""),
+            Map.entry(TRACER_PATCHLEVEL_KEY, "0"),
+            Map.entry(CLOCK_OFFSET_KEY, "1412663327522716450"),
+            Map.entry(DOMAIN_KEY, "\"kernel\""),
+            Map.entry(SYSNAME_KEY, "\"Linux\""),
+            Map.entry(HOST_ID_KEY, "\"5a71a43c-1390-4365-9baf-111c565e78c3\""),
+            Map.entry(KERNEL_RELEASE_KEY, "\"3.10.31-ltsi\""),
+            Map.entry(CLOCK_SCALE_KEY, "1.0"),
+            Map.entry(TRACER_NAME_KEY, "\"lttng-modules\""),
+            Map.entry(TRACER_MAJOR_KEY, "2"),
+            Map.entry(TRACER_MINOR_KEY, "5")
         ));
 
     /**
      * Expected toString() of all data providers for this experiment
      */
-    protected static List<DataProviderDescriptorStub> EXPECTED_DATA_PROVIDER_DESCRIPTOR = null;
+    protected static List<DataProviderDescriptorStub> sfExpectedDataProviderDescriptorStub = null;
 
     /**
      * Create the {@link TraceModelStub}s before running the tests
@@ -295,31 +377,28 @@ public abstract class RestServerTest {
     @BeforeClass
     public static void beforeTest() throws IOException {
         String contextSwitchesUstPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath().replaceAll("/$", "");
-        CONTEXT_SWITCHES_UST_NOT_INITIALIZED_STUB = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, Collections.EMPTY_MAP);
-        CONTEXT_SWITCHES_UST_STUB = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, CONTEXT_SWITCHES_UST_PROPERTIES);
+        sfContextSwitchesUstNotInitializedStub = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, Collections.emptyMap());
+        sfContextSwitchesUstStub = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, CONTEXT_SWITCHES_UST_PROPERTIES);
 
         String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath().replaceAll("/$", "");
-        CONTEXT_SWITCHES_KERNEL_NOT_INITIALIZED_STUB = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, Collections.EMPTY_MAP);
-        CONTEXT_SWITCHES_KERNEL_STUB = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_PROPERTIES);
+        sfContextSwitchesKernelNotInitializedStub = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, Collections.emptyMap());
+        sfContextSwitchesKernelStub = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_PROPERTIES);
 
         String arm64Path = FileLocator.toFileURL(CtfTestTrace.ARM_64_BIT_HEADER.getTraceURL()).getPath().replaceAll("/$", "");
-        ARM_64_KERNEL_NOT_INITIALIZED_STUB = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, Collections.EMPTY_MAP);
-        ARM_64_KERNEL_STUB = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, ARM_64_KERNEL_PROPERTIES);
+        sfArm64KernelNotIntitialzedStub = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, Collections.emptyMap());
+        sfArm64KernelStub = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, ARM_64_KERNEL_PROPERTIES);
 
         ImmutableList.Builder<DataProviderDescriptorStub> b = ImmutableList.builder();
         b.add(new DataProviderDescriptorStub(null, "org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack",
                 "LTTng-UST CallStack - Latency vs Time",
                 "Show latencies provided by Analysis module: LTTng-UST CallStack",
                 ProviderType.TREE_TIME_XY.name(), null));
-        b.add(new DataProviderDescriptorStub(null,"org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider",
-                "Flame Chart",
-                "Show a call stack over time",
-                ProviderType.TIME_GRAPH.name(), null));
+        b.add(EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR);
         b.add(new DataProviderDescriptorStub(null,"org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
                 "Histogram",
                 "Show a histogram of number of events to time for a trace",
                 ProviderType.TREE_TIME_XY.name(), null));
-        EXPECTED_DATA_PROVIDER_DESCRIPTOR = b.build();
+        sfExpectedDataProviderDescriptorStub = b.build();
     }
 
     /**
@@ -341,11 +420,15 @@ public abstract class RestServerTest {
         WebTarget application = getApplicationEndpoint();
         WebTarget experimentsTarget = application.path(EXPERIMENTS);
         for (ExperimentModelStub experiment: getExperiments(experimentsTarget)) {
-            assertEquals(experiment, experimentsTarget.path(experiment.getUUID().toString()).request().delete().readEntity(ExperimentModelStub.class));
+            try (Response response = experimentsTarget.path(experiment.getUUID().toString()).request().delete()) {
+                assertEquals(experiment, response.readEntity(ExperimentModelStub.class));
+            }
         }
         WebTarget traceTarget = application.path(TRACES);
         for (TraceModelStub trace : getTraces(traceTarget)) {
-            assertEquals(trace, traceTarget.path(trace.getUUID().toString()).request().delete().readEntity(TraceModelStub.class));
+            try (Response response = traceTarget.path(trace.getUUID().toString()).request().delete()) {
+                assertEquals(trace, response.readEntity(TraceModelStub.class));
+            }
         }
         assertEquals(Collections.emptySet(), getTraces(traceTarget));
         assertEquals(Collections.emptySet(), getExperiments(experimentsTarget));
@@ -455,6 +538,24 @@ public abstract class RestServerTest {
     }
 
     /**
+     * Get the {@link WebTarget} for the time graph data provider arrows endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getArrowsEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(TIMEGRAPH_PATH)
+                .path(dataProviderId)
+                .path(ARROWS_PATH);
+    }
+
+    /**
      * Get the {@link WebTarget} for the time graph tooltip endpoint.
      *
      * @param expUUID
@@ -540,6 +641,8 @@ public abstract class RestServerTest {
                 .path(dataProviderId);
     }
 
+
+
     /**
      * Get the traces currently open on the server.
      *
@@ -574,6 +677,92 @@ public abstract class RestServerTest {
     }
 
     /**
+     * Get the {@link WebTarget} for the experiment's marker sets
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @return marker sets model
+     */
+    public static WebTarget getMarkerSetsEndpoint(String expUUID) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(MARKER_SETS);
+    }
+
+    /**
+     * Get the {@link WebTarget} for the data provider styles tree endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getStylesEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(dataProviderId)
+                .path(STYLES_PATH);
+    }
+
+
+    /**
+     * Get the {@link WebTarget} for the time graph data provider annotation categories endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @param markerSetId
+     *            The marker set ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getAnnotationCategoriesEndpoint(String expUUID, String dataProviderId, String markerSetId) {
+        WebTarget webTarget = getApplicationEndpoint()
+                .path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(dataProviderId)
+                .path(ANNOTATIONS_PATH);
+        if (markerSetId != null) {
+            webTarget = webTarget.queryParam("markerSetId", markerSetId);
+        }
+        return webTarget;
+    }
+
+    /**
+     * Get the {@link WebTarget} for the time graph data provider annotation categories endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getAnnotationCategoriesEndpoint(String expUUID, String dataProviderId) {
+        return getAnnotationCategoriesEndpoint(expUUID, dataProviderId, null);
+    }
+
+    /**
+     * Get the {@link WebTarget} for the time graph data provider annotation endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The time graph tree endpoint
+     */
+    public static WebTarget getAnnotationEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(dataProviderId)
+                .path(ANNOTATIONS_PATH);
+    }
+
+    /**
      * Post the trace from an expected {@link TraceModelStub}, ensure that the post
      * returned correctly and that the returned model was that of the expected stub.
      *
@@ -587,12 +776,13 @@ public abstract class RestServerTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(NAME, stub.getName());
         parameters.put(URI, stub.getPath());
-        Response response = traces.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())));
-        int code = response.getStatus();
-        assertEquals("Failed to POST " + stub.getName() + ", error code=" + code, 200, code);
-        TraceModelStub result = response.readEntity(TraceModelStub.class);
-        assertEquals(stub, result);
-        return result;
+        try (Response response = traces.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())))) {
+            int code = response.getStatus();
+            assertEquals("Failed to POST " + stub.getName() + ERROR_CODE_STR + code, 200, code);
+            TraceModelStub result = response.readEntity(TraceModelStub.class);
+            assertEquals(stub, result);
+            return result;
+        }
     }
 
     /**
@@ -616,9 +806,10 @@ public abstract class RestServerTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(NAME, name);
         parameters.put(TRACES, traceUUIDs);
-        Response response = application.path(EXPERIMENTS).request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())));
-        assertEquals("Failed to POST experiment " + name + ", error code=" + response.getStatus(), 200, response.getStatus());
-        return response.readEntity(ExperimentModelStub.class);
+        try (Response response = application.path(EXPERIMENTS).request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertEquals("Failed to POST experiment " + name + ERROR_CODE_STR + response.getStatus(), 200, response.getStatus());
+            return response.readEntity(ExperimentModelStub.class);
+        }
     }
 
     /**
@@ -628,12 +819,11 @@ public abstract class RestServerTest {
      *            the configuration with input parameters to post
      * @return the derived data provider descriptor stub
      */
-    @SuppressWarnings("null")
     public static DataProviderDescriptorStub assertDpPost(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
         try (Response response = dpConfigEndpoint.request().post(Entity.json(
                 new OutputConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())))) {
             int code = response.getStatus();
-            assertEquals("Failed to POST " + configuration.getName() + ", error code=" + code, 200, code);
+            assertEquals("Failed to POST " + configuration.getName() + ERROR_CODE_STR + code, 200, code);
             DataProviderDescriptorStub result = response.readEntity(DataProviderDescriptorStub.class);
             assertEquals(configuration.getName(), result.getConfiguration().getName());
             assertEquals(configuration.getDescription(), result.getConfiguration().getDescription());
@@ -652,7 +842,6 @@ public abstract class RestServerTest {
      *            the configuration with input parameters to post
      * @return error code
      */
-    @SuppressWarnings("null")
     public static Response assertDpPostWithErrors(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
         return dpConfigEndpoint.request().post(Entity.json(
                 new OutputConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())));
@@ -674,6 +863,76 @@ public abstract class RestServerTest {
         try (InputStream inputStream = new FileInputStream(jsonFile)) {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(inputStream, new TypeReference<Map<String, Object>>() {});
+        }
+    }
+
+    /**
+     * Interface to implement to resolve an endpoint based on experiment and data provider ID,
+     * for example states, arrows etc.
+     */
+    protected interface IEndpointResolver {
+        /**
+         * Method to get endpoint
+         * @param expUUID
+         *          The experiment UUID
+         * @param dataProviderId
+         *          The data provider ID
+         * @return the endpoint
+         */
+        WebTarget getEndpoint(String expUUID, String dataProviderId);
+    }
+
+    /**
+     * Call method to execute common error test cases for a given endpoint.
+     *
+     * @param exp
+     *            the experiment
+     * @param resolver
+     *            the endpoint resolver
+     * @param dpId
+     *            the data provider ID
+     * @param hasParameters
+     *            whether the endpoint requires parameters (to test empty parameter map)
+     */
+    protected static void executePostErrorTests (ExperimentModelStub exp, IEndpointResolver resolver, String dpId, boolean hasParameters) {
+        // Invalid UUID string
+        WebTarget endpoint = resolver.getEndpoint(INVALID_EXP_UUID, dpId);
+        Map<String, Object> parameters = new HashMap<>();
+        try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+        }
+
+        // Unknown experiment
+        endpoint = resolver.getEndpoint(UUID.randomUUID().toString(), dpId);
+        try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+        }
+
+        // Missing parameters
+        endpoint = resolver.getEndpoint(exp.getUUID().toString(), dpId);
+        try (Response response = endpoint.request().post(Entity.json(NO_PARAMETERS))) {
+            assertNotNull(response);
+            assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        }
+
+        if (hasParameters) {
+            // Missing parameters
+            endpoint = resolver.getEndpoint(exp.getUUID().toString(), dpId);
+            try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+                assertNotNull(response);
+                assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            }
+        }
+
+        // Unknown data provider
+        endpoint = resolver.getEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
+        try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
+            assertNotNull(response);
+            assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
+            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(String.class));
         }
     }
 }

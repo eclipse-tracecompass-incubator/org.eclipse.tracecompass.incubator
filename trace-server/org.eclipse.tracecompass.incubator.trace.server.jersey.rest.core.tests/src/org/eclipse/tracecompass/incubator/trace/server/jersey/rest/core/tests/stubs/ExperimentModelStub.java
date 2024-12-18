@@ -47,6 +47,8 @@ public class ExperimentModelStub extends AbstractModelStub {
      *            start time
      * @param end
      *            end time
+     * @param indexingStatus
+     *            the indexing status
      * @param traces
      *            encapsulated traces
      */

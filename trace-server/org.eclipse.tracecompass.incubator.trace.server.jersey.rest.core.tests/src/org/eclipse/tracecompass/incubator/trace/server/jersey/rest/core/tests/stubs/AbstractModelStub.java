@@ -45,8 +45,10 @@ public abstract class AbstractModelStub implements Serializable {
      *            the current start time
      * @param end
      *            the current end time
+     * @param indexingStatus
+     *            the indexingStatus
      */
-    public AbstractModelStub(String name, UUID uuid, long nbEvents, long start, long end, String indexingStatus) {
+    protected AbstractModelStub(String name, UUID uuid, long nbEvents, long start, long end, String indexingStatus) {
         fName = name;
         fUUID = uuid;
         fNbEvents = nbEvents;
@@ -100,6 +102,10 @@ public abstract class AbstractModelStub implements Serializable {
         return fEnd;
     }
 
+    /**
+     * Getter for indexing status
+     * @return the indexing status string
+     */
     public String getIndexingStatus() {
         return fIndexingStatus;
     }
