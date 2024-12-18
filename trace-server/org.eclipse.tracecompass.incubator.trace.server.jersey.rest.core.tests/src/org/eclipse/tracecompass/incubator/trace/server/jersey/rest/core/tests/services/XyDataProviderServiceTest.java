@@ -206,4 +206,14 @@ public class XyDataProviderServiceTest extends RestServerTest {
             fail(e.getCause().getMessage());
         }
     }
+
+    /**
+     * Tests error cases when querying arrows for a time graph data provider
+     */
+    @Test
+    public void testXYErrors() {
+        ExperimentModelStub exp = assertPostExperiment(sfArm64KernelNotIntitialzedStub.getName(), sfArm64KernelNotIntitialzedStub);
+        executePostErrorTests(exp, RestServerTest::getXYTreeEndpoint, XY_DATAPROVIDER_ID, false);
+        executePostErrorTests(exp, RestServerTest::getXYSeriesEndpoint, XY_DATAPROVIDER_ID, true);
+    }
 }
