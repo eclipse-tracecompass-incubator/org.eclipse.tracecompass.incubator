@@ -146,6 +146,24 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
     }
 
     /**
+     * Tests error cases when querying states for a time graph data provider
+     */
+    @Test
+    public void testStatesErrors() {
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+        executePostErrorTests(exp, RestServerTest::getArrowsEndpoint, CALL_STACK_DATAPROVIDER_ID, true);
+    }
+
+    /**
+     * Tests error cases when querying states for a time graph data provider
+     */
+    @Test
+    public void testTreeErrors() {
+        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+        executePostErrorTests(exp, RestServerTest::getTimeGraphTreeEndpoint, CALL_STACK_DATAPROVIDER_ID, false);
+    }
+
+    /**
      * Tests querying styles for a time graph data provider
      */
     @Test
