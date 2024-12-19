@@ -14,7 +14,6 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.s
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.BookmarkManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ConfigurationManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.FilterService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.HealthService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.IdentifierService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
@@ -46,7 +45,6 @@ public class TestWebApplication extends WebApplication {
         rc.register(TraceManagerService.class);
         rc.register(ExperimentManagerService.class);
         rc.register(TestDataProviderService.class);
-        rc.register(FilterService.class);
         rc.register(HealthService.class);
         rc.register(IdentifierService.class);
         rc.register(ConfigurationManagerService.class);
