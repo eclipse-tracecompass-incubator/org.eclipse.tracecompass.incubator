@@ -39,7 +39,7 @@ OpenAPI REST specification:
 
 The trace server can be run using SSL certificates.
 Jetty requires the certificate and private key to be in a keystore.
-Follow the instructions to [configure SSL on jetty](https://www.eclipse.org/jetty/documentation/current/configuring-ssl.html).
+Follow the instructions to [configure SSL on jetty](https://jetty.org/docs/jetty/12/operations-guide/keystore/index.html).
 
 Then, you can edit the `tracecompass-server.ini` file to pass the keystore data and SSL port as parameters after the `-vmargs` line.
 For example, here is an excerpt of the file:
