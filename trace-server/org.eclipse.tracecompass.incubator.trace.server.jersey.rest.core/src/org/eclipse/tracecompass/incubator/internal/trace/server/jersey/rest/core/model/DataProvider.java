@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2021, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -56,12 +56,19 @@ public interface DataProvider {
     /**
      * @return optional parent Id
      */
-    @Schema(required = false, description = "Optional parent Id for grouping purposes for example of derived data providers.")
+    @Schema(description = "Optional parent Id for grouping purposes for example of derived data providers.")
     String getParentId();
 
     /**
      * @return the input configuration used to create this data provider.
      */
-    @Schema(required = false, description = "Optional input configuration used to create this derived data provider.")
+    @Schema(description = "Optional input configuration used to create this derived data provider.")
     Configuration getConfiguration();
+
+    /**
+     * @return optional output capabilities. If absent, all capabilities are 'false'.
+     */
+    @Schema(description = "Optional output capabilities, such as 'canCreate' and 'canDelete'. If absent, all capabilities are 'false'.")
+    OutputCapabilities getCapabilities();
+
 }
