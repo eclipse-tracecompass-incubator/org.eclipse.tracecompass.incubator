@@ -2,7 +2,7 @@ name: Continuous Integration
 
 on:
   push:
-    branches: 
+    branches:
       - master
       - stable-*
       - 2021-06
@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 90
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Copy legacy files
@@ -27,7 +27,7 @@ jobs:
          cp -f ./rcp/org.eclipse.tracecompass.incubator.rcp.product/legacy/tracing.incubator.product ./rcp/org.eclipse.tracecompass.incubator.rcp.product/tracing.incubator.product
          cp -f ./trace-server/org.eclipse.tracecompass.incubator.trace.server.product/legacy/traceserver.product ./trace-server/org.eclipse.tracecompass.incubator.trace.server.product/traceserver.product 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -42,7 +42,7 @@ jobs:
        run: >- 
         mvn -B clean install -Dtarget-platform=tracecompass-incubator-e4.20 -Djdk.version=11 -Djdk.release=11 -Dtycho-use-project-settings=false
     - name: Upload logs
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success() || failure()
       with:
         name: build logs
@@ -50,7 +50,7 @@ jobs:
           */*tests/screenshots/*.jpeg
           */*tests/target/work/data/.metadata/.log
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success() || failure()
       with:
         name: test results
