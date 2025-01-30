@@ -45,6 +45,11 @@
                     <type>target</type>
                     <classifier>tracecompass-incubator-master</classifier>
                   </artifact>
+                  <artifact>
+                    <file>tracecompass-incubator-e4.34.target</file>
+                    <type>target</type>
+                    <classifier>tracecompass-incubator-e4.34</classifier>
+                  </artifact>
                   <!-- More targets could be added here -->
                 </artifacts>
               </configuration>
