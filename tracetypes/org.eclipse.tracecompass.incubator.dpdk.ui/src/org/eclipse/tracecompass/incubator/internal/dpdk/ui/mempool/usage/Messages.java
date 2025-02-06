@@ -9,22 +9,28 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package org.eclipse.tracecompass.incubator.internal.dpdk.core.mempool.analysis;
+package org.eclipse.tracecompass.incubator.internal.dpdk.ui.mempool.usage;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * Messages for {@link DpdkMempoolAnalysisModule} based data providers
+ * Messages for the {@link MempoolUsageViewer} view
  *
  * @author Adel Belkhiri
  */
-@SuppressWarnings("javadoc")
 public class Messages extends NLS {
-    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.dpdk.core.mempool.analysis.messages"; //$NON-NLS-1$
-
-    public static @Nullable String DpdkMempoolAllocFreeRate_DataProvider_YAxis;
-    public static @Nullable String DpdkMempoolUsage_DataProvider_YAxis;
+    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.incubator.internal.dpdk.ui.mempool.usage.messages"; //$NON-NLS-1$
+    /** Title of the view */
+    public static @Nullable String MempoolThreadUsageView_Title;
+    /** X axis caption */
+    public static @Nullable String MempoolThreadUsageViewer_XAxis;
+    /** Y axis caption */
+    public static @Nullable String MempoolThreadUsageViewer_YAxis;
+    /** Mempool name column */
+    public static @Nullable String MempoolThreadUsageTreeViewer_MempoolName;
+    /** Legend column */
+    public static @Nullable String MempoolThreadUsageTreeViewer_Legend;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

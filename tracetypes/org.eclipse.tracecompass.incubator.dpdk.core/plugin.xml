@@ -74,6 +74,10 @@
             class="org.eclipse.tracecompass.incubator.internal.dpdk.core.mempool.analysis.DpdkMempoolAllocFreeRateDataProviderFactory"
             id="org.eclipse.tracecompass.incubator.internal.dpdk.core.mempool.alloc.free.dataprovider">
       </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.mempool.analysis.DpdkMempoolUsageDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.internal.dpdk.core.mempool.dataprovider">
+      </dataProviderFactory>      
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.core.tracetype">
