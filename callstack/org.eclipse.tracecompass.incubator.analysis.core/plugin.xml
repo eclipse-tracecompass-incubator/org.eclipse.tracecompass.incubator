@@ -7,5 +7,12 @@
             class="org.eclipse.tracecompass.incubator.internal.analysis.core.model.ModelListener">
       </listener>
    </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.analysis.core.reports.ReportsDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.analysis.core.reports.reportsDataProviderFactory">
+      </dataProviderFactory>
+   </extension>
 
 </plugin>
