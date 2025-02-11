@@ -18,5 +18,13 @@
    <license url="%licenseURL">
       %license
    </license>
-   <!-- insert plugins here -->
+
+   <plugin
+         id="org.eclipse.tracecompass.incubator.dpdk.core"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.tracecompass.incubator.dpdk.ui"
+         version="0.0.0"/>
+
 </feature>
