@@ -56,7 +56,7 @@
     <tycho.scmUrl>scm:git:git://git.eclipse.org/gitroot/tracecompass.incubator/org.eclipse.tracecompass.incubator.git</tycho.scmUrl>
     <cbi-plugins.version>1.4.2</cbi-plugins.version>
     <target-platform>tracecompass-incubator-master</target-platform>
-    <help-docs-eclipserun-repo>http://download.eclipse.org/eclipse/updates/4.20</help-docs-eclipserun-repo>
+    <help-docs-eclipserun-repo>http://download.eclipse.org/eclipse/updates/4.23</help-docs-eclipserun-repo>
 
     <rcptt-version>2.5.4</rcptt-version>
     <!-- Disable GTK3 because it's not quite usable yet and it can make the tests hang (bug in IcedTea http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=1736) -->
@@ -385,7 +385,7 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <configuration>
-          <executionEnvironment>JavaSE-${jdk.version}</executionEnvironment>
+          <executionEnvironment>org.eclipse.justj.openjdk.hotspot.jre.minimal.stripped-${jdk.version}</executionEnvironment>
           <environments>
             <environment>
                 <os>win32</os>

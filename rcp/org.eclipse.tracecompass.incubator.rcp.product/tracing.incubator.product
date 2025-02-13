@@ -173,6 +173,7 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <feature id="org.eclipse.tracecompass.incubator.scripting.javascript" installMode="root"/>
       <feature id="org.eclipse.tracecompass.incubator.scripting.python" installMode="root"/>
       <feature id="org.eclipse.tracecompass.incubator.dpdk" installMode="root"/>
+      <feature id="org.eclipse.justj.openjdk.hotspot.jre.minimal.stripped" installMode="root"/>
    </features>
 
    <configurations>
