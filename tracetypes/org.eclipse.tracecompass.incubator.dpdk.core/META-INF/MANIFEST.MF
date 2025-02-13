@@ -16,7 +16,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.tracecompass.tmf.ctf.core,
  org.eclipse.tracecompass.analysis.os.linux.core,
  org.eclipse.tracecompass.analysis.lami.core,
- org.eclipse.jdt.annotation;bundle-version="2.2.400"
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.dpdk.core.trace,
  org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.analysis,
  org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.throughput.analysis,
