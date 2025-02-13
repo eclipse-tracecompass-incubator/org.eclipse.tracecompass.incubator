@@ -41,6 +41,7 @@ public class IdentifierService {
     private static final String OS_NAME = "os.name"; //$NON-NLS-1$
     private static final String OS_ARCH = "os.arch"; //$NON-NLS-1$
     private static final String OS_VERSION = "os.version"; //$NON-NLS-1$
+    private static final String JVM_VERSION = "java.version"; //$NON-NLS-1$
     private static final String PRODUCT_ID = "eclipse.product"; //$NON-NLS-1$
     private static final String LAUNCHER_NAME = "eclipse.launcher.name"; //$NON-NLS-1$
     private static final String QUALIFIER = "qualifier"; //$NON-NLS-1$
@@ -69,6 +70,7 @@ public class IdentifierService {
         response.setMaxMemory(Runtime.getRuntime().maxMemory());
         response.setProductId(System.getProperty(PRODUCT_ID));
         response.setLauncherName(System.getProperty(LAUNCHER_NAME));
+        response.setJvmVersion(System.getProperty(JVM_VERSION));
 
         if (product != null) {
             Version version = product.getDefiningBundle().getVersion();
