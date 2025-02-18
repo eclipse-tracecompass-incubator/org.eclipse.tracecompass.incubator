@@ -29,4 +29,5 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.kernel.core;x-friend
  org.eclipse.tracecompass.incubator.internal.kernel.core.swslatency;x-internal:=true
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.kernel.core
 Import-Package: com.google.common.collect,
- org.apache.commons.lang3
+ org.apache.commons.lang3,
+ org.eclipse.tracecompass.traceeventlogger

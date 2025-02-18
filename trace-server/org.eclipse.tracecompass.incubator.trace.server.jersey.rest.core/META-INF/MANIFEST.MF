@@ -66,6 +66,7 @@ Import-Package: com.fasterxml.jackson.module.jaxb,
  org.eclipse.tracecompass.internal.analysis.timing.core.event.matching,
  org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module,
  org.eclipse.tracecompass.tmf.analysis.xml.core.module,
+ org.eclipse.tracecompass.traceeventlogger,
  org.glassfish.jersey.inject.hk2,
  org.glassfish.jersey.servlet
 Bundle-ClassPath: .
