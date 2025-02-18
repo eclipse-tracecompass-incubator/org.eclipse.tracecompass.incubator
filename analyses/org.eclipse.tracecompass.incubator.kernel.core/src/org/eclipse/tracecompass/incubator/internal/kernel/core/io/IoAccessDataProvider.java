@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Ericsson and others
+ * Copyright (c) 2018, 2025 Ericsson and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -30,8 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.common.core.log.TraceCompassLog;
-import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLog;
-import org.eclipse.tracecompass.common.core.log.TraceCompassLogUtils.FlowScopeLogBuilder;
 import org.eclipse.tracecompass.incubator.internal.kernel.core.Activator;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.inputoutput.IODataPalette;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
@@ -60,6 +58,8 @@ import org.eclipse.tracecompass.tmf.core.response.ITmfResponse.Status;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
+import org.eclipse.tracecompass.traceeventlogger.LogUtils.FlowScopeLog;
+import org.eclipse.tracecompass.traceeventlogger.LogUtils.FlowScopeLogBuilder;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;

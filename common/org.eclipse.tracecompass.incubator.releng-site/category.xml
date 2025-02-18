@@ -95,6 +95,7 @@
    <bundle id="org.eclipse.nebula.widgets.opal.commons"/>
    <bundle id="org.eclipse.nebula.widgets.opal.duallist"/>
    <bundle id="org.eclipse.osgi.services"/>
+   <bundle id="org.eclipse.tracecompass.trace-event-logger"/>
    <bundle id="org.eclipse.wst.jsdt.core"/>
    <bundle id="org.eclipse.wst.jsdt.debug.core"/>
    <bundle id="org.eclipse.wst.jsdt.debug.ui"/>
