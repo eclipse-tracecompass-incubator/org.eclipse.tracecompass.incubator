@@ -115,6 +115,10 @@
                     <source>repository</source>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-gpg-plugin</artifactId>
+            </plugin>
 <!--
           <plugin>
             <groupId>org.eclipse.cbi.maven.plugins</groupId>
