@@ -116,6 +116,6 @@
          Additional functionalities for Trace Compass
       </description>
    </category-def>
-   <repository-reference location="https://download.eclipse.org/ease/release/0.8.0" name="" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/ease/release/0.9.0" name="" enabled="true" />
    <repository-reference location="https://eclipse.py4j.org" name="" enabled="true" />
 </site>
