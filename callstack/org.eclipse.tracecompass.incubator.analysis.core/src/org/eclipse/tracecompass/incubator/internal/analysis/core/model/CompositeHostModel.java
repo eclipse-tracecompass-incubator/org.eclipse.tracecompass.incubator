@@ -110,19 +110,20 @@ public class CompositeHostModel implements IHostModel {
 
     @Override
     public int getProcessId(int tid, long t) {
-        Integer pid = fKernelModules.stream()
+        Optional<Integer> pid = fKernelModules.stream()
                 .map(module -> KernelThreadInformationProvider.getProcessId(module, tid, t))
                 .filter(Objects::nonNull)
-                .findFirst().orElse(null);
-        return pid == null ? IHostModel.UNKNOWN_TID : (int) pid;
+                .findFirst();
+        return pid.isEmpty() ? IHostModel.UNKNOWN_TID : pid.get();
     }
 
     @Override
     public @Nullable String getExecName(int tid, long t) {
-        return fKernelModules.stream()
+        Optional<String> execName = fKernelModules.stream()
                 .map(module -> KernelThreadInformationProvider.getExecutableName(module, tid))
                 .filter(Objects::nonNull)
-                .findFirst().orElse(null);
+                .findFirst();
+        return execName.isPresent() ? execName.get() : null;
     }
 
     /**

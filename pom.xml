@@ -50,8 +50,8 @@
     <jdk.version>17</jdk.version>
     <jdk.release>17</jdk.release>
 
-    <tycho-version>4.0.3</tycho-version>
-    <tycho-extras-version>4.0.3</tycho-extras-version>
+    <tycho-version>4.0.11</tycho-version>
+    <tycho-extras-version>4.0.11</tycho-extras-version>
     <tycho-use-project-settings>true</tycho-use-project-settings>
     <tycho.scmUrl>scm:git:git://git.eclipse.org/gitroot/tracecompass.incubator/org.eclipse.tracecompass.incubator.git</tycho.scmUrl>
     <cbi-plugins.version>1.4.2</cbi-plugins.version>
