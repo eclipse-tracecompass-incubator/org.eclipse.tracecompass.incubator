@@ -28,9 +28,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.incubator.internal.inandout.core.Activator;
+import org.eclipse.tracecompass.tmf.core.config.AbstractTmfDataProviderConfigurator;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
-import org.eclipse.tracecompass.tmf.core.config.ITmfDataProviderConfigurator;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
@@ -41,10 +41,7 @@ import org.eclipse.tracecompass.tmf.core.model.DataProviderCapabilities;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
-import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
-import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
-import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
@@ -58,7 +55,7 @@ import com.google.common.collect.Table;
  * to create custom InAndOut analyses.
  */
 @NonNullByDefault
-public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDataProviderConfigurator {
+public class InAndOutDataProviderFactory extends AbstractTmfDataProviderConfigurator implements IDataProviderFactory {
 
     /** Data Provider factory ID */
     public static final String ID = "org.eclipse.tracecompass.incubator.inandout.core.analysis.inAndOutdataProviderFactory"; //$NON-NLS-1$
@@ -131,132 +128,8 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
     }
 
     @Override
-    public @NonNull IDataProviderDescriptor createDataProviderDescriptors(ITmfTrace trace, ITmfConfiguration configuration) throws TmfConfigurationException {
-
-        if (configuration.getName().equals(TmfConfiguration.UNKNOWN)) {
-            throw new TmfConfigurationException("Missing configuration name of InAndOut analysis"); //$NON-NLS-1$
-        }
-
-        if (configuration.getSourceTypeId().equals(TmfConfiguration.UNKNOWN)) {
-            throw new TmfConfigurationException("Missing configuration type for InAndOut analysis"); //$NON-NLS-1$
-        }
-
-        String description = configuration.getDescription();
-        if (configuration.getDescription().equals(TmfConfiguration.UNKNOWN)) {
-            description = "InAndOut Analysis defined by configuration " + configuration.getName(); //$NON-NLS-1$
-        }
-
-        TmfConfiguration.Builder builder = new TmfConfiguration.Builder();
-        builder.setId(configuration.getId())
-               .setSourceTypeId(configuration.getSourceTypeId())
-               .setName(configuration.getName())
-               .setDescription(description)
-               .setParameters(configuration.getParameters())
-               .build();
-
-        ITmfConfiguration config = builder.build();
-
-        applyConfiguration(trace, config, true);
-        if (fTmfConfigurationTable.contains(config.getId(), trace)) {
-            throw new TmfConfigurationException("Configuration already existis with label: " + config.getName()); //$NON-NLS-1$
-        }
-        fTmfConfigurationTable.put(config.getId(), trace, config);
-        return getDescriptorFromConfig(config);
-    }
-
-    @Override
-    public void removeDataProviderDescriptor(ITmfTrace trace, IDataProviderDescriptor descriptor) throws TmfConfigurationException {
-
-        ITmfConfiguration creationConfiguration = descriptor.getConfiguration();
-        if (creationConfiguration == null) {
-            throw new TmfConfigurationException("Data provider was not created by a configuration"); //$NON-NLS-1$
-        }
-
-        String configId = creationConfiguration.getId();
-        ITmfConfiguration config = fTmfConfigurationTable.get(configId, trace);
-        if (config == null) {
-            return;
-        }
-        config = fTmfConfigurationTable.remove(configId, trace);
-        removeConfiguration(trace, config);
-    }
-
-    /**
-     * Signal handler for opened trace signal. Will populate trace
-     * configurations
-     *
-     * @param signal
-     *            the signal to handle
-     */
-    @TmfSignalHandler
-    public void traceOpened(TmfTraceOpenedSignal signal) {
-        ITmfTrace trace = signal.getTrace();
-        if (trace == null) {
-            return;
-        }
-        try {
-             if (trace instanceof TmfExperiment) {
-                 for (ITmfTrace tr : TmfTraceManager.getTraceSet(trace)) {
-                    // Read configurations from sub-trace
-                    List<ITmfConfiguration> configs = TmfConfiguration.readConfigurations(tr, SegmentSpecifierConfiguration.IN_AND_OUT_CONFIG_SOURCE_TYPE_ID);
-                    readAndApplyConfiguration(trace, configs);
-                 }
-             } else {
-                 // Read configurations trace
-                 List<ITmfConfiguration> configs = TmfConfiguration.readConfigurations(trace, SegmentSpecifierConfiguration.IN_AND_OUT_CONFIG_SOURCE_TYPE_ID);
-                 readAndApplyConfiguration(trace, configs);
-             }
-        } catch (TmfConfigurationException e) {
-            Activator.getInstance().logError("Error applying configurations for trace " + trace.getName(), e); //$NON-NLS-1$
-        }
-    }
-
-    /**
-     * Handles trace closed signal
-     *
-     * @param signal
-     *            the close signal to handle
-     */
-    @TmfSignalHandler
-    public void traceClosed(TmfTraceClosedSignal signal) {
-        ITmfTrace trace = signal.getTrace();
-        fTmfConfigurationTable.column(trace).clear();
-    }
-
-    private void readAndApplyConfiguration(ITmfTrace trace, List<ITmfConfiguration> configs) throws TmfConfigurationException {
-        for (ITmfConfiguration config : configs) {
-            if (!fTmfConfigurationTable.contains(config.getId(), trace)) {
-                fTmfConfigurationTable.put(config.getId(), trace, config);
-                applyConfiguration(trace, config, false);
-            }
-        }
-    }
-
-    private void applyConfiguration(ITmfTrace trace, ITmfConfiguration config, boolean writeConfig) throws TmfConfigurationException {
-        if (trace instanceof TmfExperiment) {
-            for (ITmfTrace tr : TmfTraceManager.getTraceSet(trace)) {
-                applyConfiguration(tr, config, writeConfig);
-            }
-            // Only apply for traces in experiment
-            return;
-        }
-         // Apply configuration to any trace (no need to check trace type here)
-        TmfConfiguration.create(config, trace, writeConfig, new InAndOutAnalysisModule());
-    }
-
-    private void removeConfiguration(ITmfTrace trace, ITmfConfiguration config) throws TmfConfigurationException {
-        if (trace instanceof TmfExperiment) {
-            for (ITmfTrace tr : TmfTraceManager.getTraceSet(trace)) {
-                removeConfiguration(tr, config);
-            }
-            // only remove for traces in experiment
-            return;
-        }
-        TmfConfiguration.remove(config, trace, InAndOutAnalysisModule.ID);
-    }
-
     @SuppressWarnings("null")
-    private static IDataProviderDescriptor getDescriptorFromConfig(ITmfConfiguration config) {
+    protected IDataProviderDescriptor getDescriptorFromConfig(ITmfConfiguration config) {
         return new DataProviderDescriptor.Builder()
                 .setParentId(ID)
                 .setId(InAndOutAnalysisModule.ID + config.getId())
@@ -266,5 +139,40 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
                 .setConfiguration(config)
                 .setCapabilities(new DataProviderCapabilities.Builder().setCanDelete(true).build())
                 .build();
+    }
+
+    @Override
+    protected void applyConfiguration(ITmfTrace trace, ITmfConfiguration config, boolean writeConfig) {
+        if (trace instanceof TmfExperiment) {
+            for (ITmfTrace tr : TmfTraceManager.getTraceSet(trace)) {
+                applyConfiguration(tr, config, writeConfig);
+            }
+            // Only apply for traces in experiment
+            return;
+        }
+        // Apply configuration to any trace (no need to check trace type here)
+        try {
+            TmfConfiguration.create(config, trace, writeConfig, new InAndOutAnalysisModule());
+        } catch (TmfConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void removeConfiguration(ITmfTrace trace, ITmfConfiguration config) {
+        if (trace instanceof TmfExperiment) {
+            for (ITmfTrace tr : TmfTraceManager.getTraceSet(trace)) {
+                removeConfiguration(tr, config);
+            }
+            // only remove for traces in experiment
+            return;
+        }
+        try {
+            TmfConfiguration.remove(config, trace, InAndOutAnalysisModule.ID);
+        } catch (TmfConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }
