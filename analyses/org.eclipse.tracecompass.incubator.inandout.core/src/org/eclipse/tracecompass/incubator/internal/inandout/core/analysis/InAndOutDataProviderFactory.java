@@ -197,15 +197,13 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
         try {
              if (trace instanceof TmfExperiment) {
                  for (ITmfTrace tr : TmfTraceManager.getTraceSet(trace)) {
-                    @SuppressWarnings("null")
                     // Read configurations from sub-trace
-                    List<ITmfConfiguration> configs = InAndOutAnalysisModule.readConfigurations(tr);
+                    List<ITmfConfiguration> configs = TmfConfiguration.readConfigurations(tr, SegmentSpecifierConfiguration.IN_AND_OUT_CONFIG_SOURCE_TYPE_ID);
                     readAndApplyConfiguration(trace, configs);
                  }
              } else {
-                 @SuppressWarnings("null")
                  // Read configurations trace
-                 List<ITmfConfiguration> configs = InAndOutAnalysisModule.readConfigurations(trace);
+                 List<ITmfConfiguration> configs = TmfConfiguration.readConfigurations(trace, SegmentSpecifierConfiguration.IN_AND_OUT_CONFIG_SOURCE_TYPE_ID);
                  readAndApplyConfiguration(trace, configs);
              }
         } catch (TmfConfigurationException e) {
@@ -243,7 +241,7 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
             return;
         }
          // Apply configuration to any trace (no need to check trace type here)
-        InAndOutAnalysisModule.create(config, trace, writeConfig);
+        TmfConfiguration.create(config, trace, writeConfig, new InAndOutAnalysisModule());
     }
 
     private void removeConfiguration(ITmfTrace trace, ITmfConfiguration config) throws TmfConfigurationException {
@@ -254,7 +252,7 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
             // only remove for traces in experiment
             return;
         }
-        InAndOutAnalysisModule.remove(config, trace);
+        TmfConfiguration.remove(config, trace, InAndOutAnalysisModule.ID);
     }
 
     @SuppressWarnings("null")
