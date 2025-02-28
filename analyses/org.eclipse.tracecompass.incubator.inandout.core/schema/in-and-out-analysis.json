@@ -13,27 +13,27 @@
                 "properties": {
                     "label": {
                         "type": "string",
-                        "descritpion": "The label of the identifier"
+                        "description": "The label of the identifier"
                     },
                     "inRegex": {
                       "type": "string",
-                      "descritpion": "The IN regular expression"
+                      "description": "The IN regular expression"
                     },
                     "outRegex": {
                      "type": "string",
-                     "descritpion": "The OUT regular expression"
+                     "description": "The OUT regular expression"
                     },
                     "contextInRegex": {
                      "type": "string",
-                     "descritpion": "The context IN regular expression"
+                     "description": "The context IN regular expression"
                     },
                     "contextOutRegex": {
                      "type": "string",
-                     "descritpion": "The context OUT regular expression"
+                     "description": "The context OUT regular expression"
                     },
                     "classifier": {
                      "type": "string",
-                     "descritpion": "The classifier"
+                     "description": "The classifier"
                     },
                     "required": [
                         "label",
