@@ -28,15 +28,17 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.incubator.internal.inandout.core.Activator;
+import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.config.AbstractTmfDataProviderConfigurator;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
-import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderCapabilities;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
@@ -46,9 +48,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.osgi.framework.Bundle;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 
 /**
  * Data provider factory for InAndOut analysis. It doesn't have any output but is able
@@ -69,8 +68,6 @@ public class InAndOutDataProviderFactory extends AbstractTmfDataProviderConfigur
 
     private static final String CUSTOM_IN_AND_OUT_ANALYSIS_NAME = "InAndOut Analysis ({0})";  //$NON-NLS-1$
     private static final String CUSTOM_IN_AND_OUT_ANALYSIS_DESCRIPTION = "Custom InAndOut analysis configured by \" {0}\""; //$NON-NLS-1$
-
-    private Table<String, ITmfTrace, ITmfConfiguration> fTmfConfigurationTable = HashBasedTable.create();
 
     static {
         Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
@@ -115,7 +112,7 @@ public class InAndOutDataProviderFactory extends AbstractTmfDataProviderConfigur
     public Collection<IDataProviderDescriptor> getDescriptors(ITmfTrace trace) {
         List<IDataProviderDescriptor> list = new ArrayList<>();
         list.add(DESCRIPTOR);
-        for (ITmfConfiguration config : fTmfConfigurationTable.column(trace).values()) {
+        for (ITmfConfiguration config : getConfigurationTable().column(trace).values()) {
             list.add(getDescriptorFromConfig(config));
         }
         return list;
@@ -152,7 +149,7 @@ public class InAndOutDataProviderFactory extends AbstractTmfDataProviderConfigur
         }
         // Apply configuration to any trace (no need to check trace type here)
         try {
-            TmfConfiguration.create(config, trace, writeConfig, new InAndOutAnalysisModule());
+            create(config, trace, writeConfig, new InAndOutAnalysisModule());
         } catch (TmfConfigurationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -169,10 +166,98 @@ public class InAndOutDataProviderFactory extends AbstractTmfDataProviderConfigur
             return;
         }
         try {
-            TmfConfiguration.remove(config, trace, InAndOutAnalysisModule.ID);
+            remove(config, trace, InAndOutAnalysisModule.ID);
         } catch (TmfConfigurationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
+
+    /**
+     * Removes configuration from trace:
+     *  - delete configuration file
+     *  - remove analysis module from trace object
+     *
+     * @param config
+     *          the configuration to remove
+     * @param trace
+     *          the
+     * @throws TmfConfigurationException if an error occurs
+     */
+    private void remove(ITmfConfiguration config, @NonNull ITmfTrace trace, String baseAnalysisId) throws TmfConfigurationException {
+        // IPath traceConfig = getConfigurationRootFolder(trace, config.getSourceTypeId());
+        IPath traceConfig = getConfigurationRootFolder(trace);
+        traceConfig = traceConfig.append(File.separator).append(config.getId()).addFileExtension(JSON_EXTENSION);
+        File configFile = traceConfig.toFile();
+        if ((!configFile.exists()) || !configFile.delete()) {
+            throw new TmfConfigurationException("Configuration file can't be deleted from trace: configId=" + config.getId()); //$NON-NLS-1$
+        }
+
+        // Remove and clear persistent data
+        try {
+            IAnalysisModule module = trace.removeAnalysisModule(baseAnalysisId + config.getId());
+            if (module != null) {
+                module.dispose();
+                module.clearPersistentData();
+            }
+        } catch (TmfTraceException e) {
+            throw new TmfConfigurationException("Error removing analysis module from trace: analysis ID=" + baseAnalysisId + config.getId(), e); //$NON-NLS-1$
+        }
+    }
+
+    /**
+     * Create the InAndOutAnalysisModule for a given configuration and trace
+     *
+     * @param config
+     *            the input {@link ITmfConfiguration}
+     * @param trace
+     *            the trace to apply it to
+     * @param writeConfig
+     *            write the config (do only once)
+     * @return InAndOutAnalysisModule
+     * @throws TmfConfigurationException
+     *             if an error occurs
+     */
+    public void create(@NonNull ITmfConfiguration config, @NonNull ITmfTrace trace, boolean writeConfig, IAnalysisModule module) throws TmfConfigurationException {
+        /*
+         * Apply configuration to each trace (no need to check trace type here)
+         */
+        module.setConfiguration(config);
+        if (writeConfig) {
+            // IPath traceConfigPath = getConfigurationRootFolder(trace, config.getSourceTypeId());
+            IPath traceConfigPath = getConfigurationRootFolder(trace);
+            writeConfiguration(config, traceConfigPath);
+        }
+        try {
+            if (module.setTrace(trace)) {
+                IAnalysisModule oldModule = trace.addAnalysisModule(module);
+                if (oldModule != null) {
+                    oldModule.dispose();
+                    oldModule.clearPersistentData();
+                }
+            } else {
+                module.dispose();
+                throw new TmfConfigurationException("InAndOut analysis module can't be created"); //$NON-NLS-1$
+            }
+        } catch (TmfAnalysisException | TmfTraceException e) {
+            module.dispose();
+            throw new TmfConfigurationException("Exception when setting trace", e); //$NON-NLS-1$
+        }
+    }
+
+//    protected IPath getConfigurationRootFolder(ITmfTrace trace, String subFolder) {
+//        String supplFolder = TmfTraceManager.getSupplementaryFileDir(trace);
+//        IPath supplPath = new Path(supplFolder);
+//        supplPath = supplPath.addTrailingSeparator().append(subFolder);
+//        return supplPath;
+//    }
+
+    @Override
+    protected IPath getConfigurationRootFolder(ITmfTrace trace) {
+        String supplFolder = TmfTraceManager.getSupplementaryFileDir(trace);
+        IPath supplPath = new Path(supplFolder);
+        supplPath = supplPath.addTrailingSeparator().append(ID);
+        return supplPath;
+    }
+
 }
