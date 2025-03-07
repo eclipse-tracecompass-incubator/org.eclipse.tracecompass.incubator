@@ -40,7 +40,7 @@ public class DpdkLogicalCoreAnalysisModule extends TmfStateSystemAnalysisModule 
     private final DpdkLogicalCoreEventLayout fLayout = new DpdkLogicalCoreEventLayout();
 
     private final TmfAbstractAnalysisRequirement REQUIREMENT = new TmfAnalysisEventRequirement(ImmutableList.of(
-            fLayout.eventLcoreStateChange(), fLayout.eventServiceMapLcore()), PriorityLevel.AT_LEAST_ONE);
+            fLayout.eventLcoreStateChange(), fLayout.eventServiceRunStateSet()), PriorityLevel.AT_LEAST_ONE);
 
     @Override
     protected ITmfStateProvider createStateProvider() {

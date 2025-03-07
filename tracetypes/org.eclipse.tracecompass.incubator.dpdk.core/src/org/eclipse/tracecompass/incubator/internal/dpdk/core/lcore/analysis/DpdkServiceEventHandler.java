@@ -43,17 +43,6 @@ public class DpdkServiceEventHandler implements IDpdkEventHandler {
                 LogicalCore.setServiceName(ssb, serviceName, serviceId, ts);
                 LogicalCore.setServiceStatus(ssb, ServiceStatus.REGISTERED, serviceId, ts);
             }
-        } else if (eventName.equals(fLayout.eventServiceMapLcore())) {
-            Integer lcoreId = event.getContent().getFieldValue(Integer.class, fLayout.fieldLcoreId());
-            if (lcoreId != null) {
-                LogicalCore.setServiceLcore(ssb, lcoreId, serviceId, ts);
-            }
-            Integer enabled = event.getContent().getFieldValue(Integer.class, fLayout.fieldEnabled());
-            if (enabled != null && enabled == 0) {
-                LogicalCore.setServiceStatus(ssb, ServiceStatus.DISABLED, serviceId, ts);
-            } else {
-                LogicalCore.setServiceStatus(ssb, ServiceStatus.ENABLED, serviceId, ts);
-            }
         } else if (eventName.equals(fLayout.eventServiceRunBegin())) {
             Integer lcoreId = event.getContent().getFieldValue(Integer.class, fLayout.fieldLcoreId());
             if (lcoreId != null) {
