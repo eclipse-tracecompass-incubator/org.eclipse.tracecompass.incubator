@@ -76,7 +76,6 @@ public class DpdkLogicalCoreStateProvider extends AbstractDpdkStateProvider {
             builder.put(fLayout.eventThreadLcoreReady(), logicalCoreEventHandler);
             IDpdkEventHandler serviceEventHandler = new DpdkServiceEventHandler(fLayout);
             builder.put(fLayout.eventServiceComponentRegister(), serviceEventHandler);
-            builder.put(fLayout.eventServiceMapLcore(), serviceEventHandler);
             builder.put(fLayout.eventServiceRunBegin(), serviceEventHandler);
             builder.put(fLayout.eventServiceRunEnd(), serviceEventHandler);
             builder.put(fLayout.eventServiceRunStateSet(), serviceEventHandler);
