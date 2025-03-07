@@ -28,7 +28,6 @@ public class DpdkLogicalCoreEventLayout {
     private static final String SERVICE_RUN_BEGIN = "lib.eal.service.run.begin"; //$NON-NLS-1$
     private static final String SERVICE_RUN_STATE_SET = "lib.eal.service.run.state.set"; //$NON-NLS-1$
     private static final String SERVICE_RUN_END = "lib.eal.service.run.end"; //$NON-NLS-1$
-    private static final String SERVICE_MAP_LCORE = "lib.eal.service.map.lcore"; //$NON-NLS-1$
     private static final String SERVICE_COMPONENT_REGISTER = "lib.eal.service.component.register"; //$NON-NLS-1$
 
     /* Event field names */
@@ -130,19 +129,6 @@ public class DpdkLogicalCoreEventLayout {
      */
     public String eventServiceRunEnd() {
         return SERVICE_RUN_END;
-    }
-
-    /**
-     * This event is generated when an lcore is mapped or unmapped to a service.
-     *
-     * Each core can be added or removed from running a specific service. If
-     * multiple cores are enabled on a service, a lock is used to ensure that
-     * only one core runs the service at a time.
-     *
-     * @return The event name
-     */
-    public String eventServiceMapLcore() {
-        return SERVICE_MAP_LCORE;
     }
 
     /**
