@@ -73,7 +73,7 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
     private static final String CUSTOM_IN_AND_OUT_ANALYSIS_NAME = "InAndOut Analysis ({0})";  //$NON-NLS-1$
     private static final String CUSTOM_IN_AND_OUT_ANALYSIS_DESCRIPTION = "Custom InAndOut analysis configured by \" {0}\""; //$NON-NLS-1$
 
-    private static final Table<String, ITmfTrace, ITmfConfiguration> fTmfConfigurationTable = HashBasedTable.create();
+    private Table<String, ITmfTrace, ITmfConfiguration> fTmfConfigurationTable = HashBasedTable.create();
 
     static {
         Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
