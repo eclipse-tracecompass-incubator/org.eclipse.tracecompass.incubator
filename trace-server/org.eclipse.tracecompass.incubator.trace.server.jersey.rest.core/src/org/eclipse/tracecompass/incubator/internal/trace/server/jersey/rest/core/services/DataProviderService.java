@@ -209,6 +209,9 @@ public class DataProviderService {
     // InAndOut analysis ID
     private static final String INANDOUT_ANALYSIS_ID = "org.eclipse.tracecompass.incubator.inandout.analysis"; //$NON-NLS-1$
 
+    // Reports factory ID
+    private static final String REPORTS_FACTORY_ID = "org.eclipse.tracecompass.incubator.analysis.core.reports.reportsDataProviderFactory"; //$NON-NLS-1$
+
     private static final @NonNull Logger LOGGER = TraceCompassLog.getLogger(DataProviderService.class);
 
     private final DataProviderManager manager = DataProviderManager.getInstance();
@@ -247,8 +250,11 @@ public class DataProviderService {
          * - Legacy InAndOut
          *   Remove default InAndOutAnalysis used in legacy Trace Compass with Eclipse UI
          *   For trace server, InAndOutAnlaysis is done using the createDataProvider endpoint below.
+         *
+         * - Reports Factory
+         *   Remove the reports factory data provider as it is not yet supported in the frond-end products.
          */
-        list.removeIf(dp -> dp.getId().endsWith(EventMatchingLatencyAnalysis.ID) || dp.getId().endsWith(INANDOUT_ANALYSIS_ID));
+        list.removeIf(dp -> dp.getId().endsWith(EventMatchingLatencyAnalysis.ID) || dp.getId().endsWith(INANDOUT_ANALYSIS_ID) || dp.getId().endsWith(REPORTS_FACTORY_ID));
 
         return Response.ok(list).build();
     }
