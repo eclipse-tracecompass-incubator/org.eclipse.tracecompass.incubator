@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Ericsson
+ * Copyright (c) 2022, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -30,6 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.profiling.core.instrumented.InstrumentedCallStackAnalysis;
 import org.eclipse.tracecompass.incubator.internal.inandout.core.Activator;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
@@ -106,7 +107,7 @@ public class InAndOutAnalysisModule extends InstrumentedCallStackAnalysis {
         if (config == null || fSpecifiers == null) {
             return ID;
         }
-        return ID + config.getId();
+        return ID + DataProviderConstants.CONFIG_SEPARATOR + config.getId();
     }
 
     @Override
@@ -245,7 +246,7 @@ public class InAndOutAnalysisModule extends InstrumentedCallStackAnalysis {
 
         // Remove and clear persistent data
         try {
-            IAnalysisModule module = trace.removeAnalysisModule(ID + config.getId());
+            IAnalysisModule module = trace.removeAnalysisModule(ID + DataProviderConstants.CONFIG_SEPARATOR + config.getId());
             if (module != null) {
                 module.dispose();
                 module.clearPersistentData();

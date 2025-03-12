@@ -60,7 +60,7 @@ public class InAndOutDataProviderFactoryTest {
     private static final String CONFIG_NAME = "An InAndOut Analysis"; //$NON-NLS-1$
 
     private static final String CUSTOM_IN_AND_OUT_ANALYSIS_NAME = "InAndOut Analysis (" + CONFIG_NAME + ")"; //$NON-NLS-1$
-    private static final String CUSTOM_IN_AND_OUT_ANALYSIS_DESCRIPTION = "Custom InAndOut analysis configured by \" " + CONFIG_NAME + "\""; //$NON-NLS-1$
+    private static final String CUSTOM_IN_AND_OUT_ANALYSIS_DESCRIPTION = "Custom InAndOut analysis configured by '" + CONFIG_NAME + "'"; //$NON-NLS-1$
 
     private static final String XML_TRACE = "testfiles/stub_xml_traces/valid/analysis_dependency.xml";
     private static ITmfTrace sfTestTrace;

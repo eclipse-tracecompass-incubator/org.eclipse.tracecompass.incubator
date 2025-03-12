@@ -28,6 +28,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.incubator.internal.inandout.core.Activator;
+import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.config.ITmfDataProviderConfigurator;
@@ -71,7 +72,7 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
     private static final String CONFIGURATOR_DESCRIPTION = "Configure custom InAndOut analysis"; //$NON-NLS-1$
 
     private static final String CUSTOM_IN_AND_OUT_ANALYSIS_NAME = "InAndOut Analysis ({0})";  //$NON-NLS-1$
-    private static final String CUSTOM_IN_AND_OUT_ANALYSIS_DESCRIPTION = "Custom InAndOut analysis configured by \" {0}\""; //$NON-NLS-1$
+    private static final String CUSTOM_IN_AND_OUT_ANALYSIS_DESCRIPTION = "Custom InAndOut analysis configured by \'\'{0}\'\'"; //$NON-NLS-1$
 
     private Table<String, ITmfTrace, ITmfConfiguration> fTmfConfigurationTable = HashBasedTable.create();
 
@@ -158,7 +159,7 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
 
         applyConfiguration(trace, config, true);
         if (fTmfConfigurationTable.contains(config.getId(), trace)) {
-            throw new TmfConfigurationException("Configuration already existis with label: " + config.getName()); //$NON-NLS-1$
+            throw new TmfConfigurationException("Configuration already exists with label: " + config.getName()); //$NON-NLS-1$
         }
         fTmfConfigurationTable.put(config.getId(), trace, config);
         return getDescriptorFromConfig(config);
@@ -261,7 +262,7 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
     private static IDataProviderDescriptor getDescriptorFromConfig(ITmfConfiguration config) {
         return new DataProviderDescriptor.Builder()
                 .setParentId(ID)
-                .setId(InAndOutAnalysisModule.ID + config.getId())
+                .setId(InAndOutAnalysisModule.ID + DataProviderConstants.CONFIG_SEPARATOR + config.getId())
                 .setName(NLS.bind(CUSTOM_IN_AND_OUT_ANALYSIS_NAME, config.getName()))
                 .setDescription(NLS.bind(CUSTOM_IN_AND_OUT_ANALYSIS_DESCRIPTION, config.getName()))
                 .setProviderType(ProviderType.NONE)
