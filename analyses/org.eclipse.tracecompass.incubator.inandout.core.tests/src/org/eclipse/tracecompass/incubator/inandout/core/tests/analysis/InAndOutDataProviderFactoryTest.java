@@ -28,7 +28,6 @@ import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.config.ITmfDataProviderConfigurator;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
-import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
@@ -177,11 +176,11 @@ public class InAndOutDataProviderFactoryTest {
         assertEquals(sfTestConfig.getSourceTypeId(), config.getSourceTypeId());
         assertEquals(sfTestConfig.getParameters(), config.getParameters());
 
-        List<IDataProviderDescriptor> descriptors = DataProviderManager.getInstance().getAvailableProviders(sfTestTrace);
+        Collection<IDataProviderDescriptor> descriptors = sfFixture.getDescriptors(sfTestTrace);
         assertTrue(descriptors.contains(descriptor));
 
         configurator.removeDataProviderDescriptor(sfTestTrace, descriptor);
-        descriptors = DataProviderManager.getInstance().getAvailableProviders(sfTestTrace);
+        descriptors = sfFixture.getDescriptors(sfTestTrace);
         assertFalse(descriptors.contains(descriptor));
     }
 
