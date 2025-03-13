@@ -215,7 +215,7 @@ public class InAndOutDataProviderFactory extends AbstractTmfDataProviderConfigur
      * @throws TmfConfigurationException
      *             if an error occurs
      */
-    public void create(@NonNull ITmfConfiguration config, @NonNull ITmfTrace trace, boolean writeConfig, IAnalysisModule module) throws TmfConfigurationException {
+    private void create(@NonNull ITmfConfiguration config, @NonNull ITmfTrace trace, boolean writeConfig, IAnalysisModule module) throws TmfConfigurationException {
         /*
          * Apply configuration to each trace (no need to check trace type here)
          */
