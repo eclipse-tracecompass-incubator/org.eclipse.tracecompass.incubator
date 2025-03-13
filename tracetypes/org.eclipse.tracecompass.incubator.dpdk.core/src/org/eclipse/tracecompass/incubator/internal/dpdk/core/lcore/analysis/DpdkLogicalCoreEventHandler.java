@@ -40,10 +40,12 @@ public class DpdkLogicalCoreEventHandler implements IDpdkEventHandler {
 
         if (eventName.equals(fLayout.eventLcoreStateChange())) {
             Integer lcoreRole = event.getContent().getFieldValue(Integer.class, fLayout.fieldLcoreState());
-            LogicalCore.setRole(ssb, Objects.requireNonNull(lcoreRole), Objects.requireNonNull(lcoreId), ts);
-        } else if (eventName.equals(fLayout.eventServiceLcoreStart())
-                || eventName.equals(fLayout.eventServiceLcoreStop())
-                || eventName.equals(fLayout.eventThreadLcoreStopped())) {
+            LogicalCore.setRole(ssb, LogicalCoreRole.fromInt(Objects.requireNonNull(lcoreRole)), Objects.requireNonNull(lcoreId), ts);
+        } else if (eventName.equals(fLayout.eventServiceLcoreStart())) {
+            LogicalCore.setRole(ssb, LogicalCoreRole.ROLE_SERVICE, Objects.requireNonNull(lcoreId), ts);
+        } else if (eventName.equals(fLayout.eventServiceLcoreStop())) {
+            LogicalCore.setRole(ssb, LogicalCoreRole.ROLE_RTE, Objects.requireNonNull(lcoreId), ts);
+        } else if (eventName.equals(fLayout.eventThreadLcoreStopped())) {
             LogicalCore.setStatus(ssb, LogicalCoreStatus.IDLE, Objects.requireNonNull(lcoreId), ts);
             LogicalCore.setFunction(ssb, 0L, Objects.requireNonNull(lcoreId), ts);
         } else if (eventName.equals(fLayout.eventThreadLcoreRunning())) {
