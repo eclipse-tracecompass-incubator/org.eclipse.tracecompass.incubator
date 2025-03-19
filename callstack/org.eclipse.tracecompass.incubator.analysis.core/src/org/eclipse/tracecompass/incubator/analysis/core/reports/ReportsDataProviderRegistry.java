@@ -54,4 +54,11 @@ public class ReportsDataProviderRegistry {
     public static @Nullable IReportDataProvider getProvider(ReportProviderType type) {
         return PROVIDERS.get(type);
     }
+
+    /**
+     * Clear all registered providers
+     */
+    public static void cleanup() {
+        PROVIDERS.clear();
+    }
 }

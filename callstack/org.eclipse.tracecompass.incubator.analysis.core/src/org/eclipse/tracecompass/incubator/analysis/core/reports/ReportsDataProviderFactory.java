@@ -90,7 +90,6 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
 
     static {
         // Register built-in providers
-        ReportsDataProviderRegistry.registerProvider(new ReportsDataProviderFactory());
         ReportsDataProviderRegistry.registerProvider(new ImageReportDataProvider());
 
         CONFIGURATION_SOURCE_TYPE = new TmfConfigurationSourceType.Builder()
@@ -113,6 +112,7 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
      */
     public ReportsDataProviderFactory() {
         TmfSignalManager.register(this);
+        ReportsDataProviderRegistry.registerProvider(this);
     }
 
     @Override
@@ -716,6 +716,14 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
                 .findFirst()
                 .map(IReportDataProvider::getReportType)
                 .orElseThrow(() -> new TmfConfigurationException("Invalid report configuration source type")); //$NON-NLS-1$
+    }
+
+    @Override
+    public void dispose() {
+        TmfSignalManager.deregister(this);
+
+        fTmfConfigurationTable.clear();
+        fTmfConfigurationHierarchy.clear();
     }
 
 }
