@@ -17,6 +17,7 @@ import org.eclipse.tracecompass.incubator.analysis.core.aspects.AnalysisProcessN
 import org.eclipse.tracecompass.incubator.analysis.core.aspects.AnalysisThreadNameAspect;
 import org.eclipse.tracecompass.incubator.analysis.core.aspects.AnalysisTidAspect;
 import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
+import org.eclipse.tracecompass.incubator.analysis.core.reports.ReportsDataProviderRegistry;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
@@ -53,6 +54,8 @@ public class Activator extends TraceCompassActivator {
 
     @Override
     protected void stopActions() {
+        ReportsDataProviderRegistry.cleanup();
+
         ModelManager.disposeModels();
     }
 
