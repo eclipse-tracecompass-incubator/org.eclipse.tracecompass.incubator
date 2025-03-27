@@ -35,6 +35,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.EXP_UUID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.FILTER_QUERY_PARAMETERS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.FILTER_QUERY_PARAMETERS_EX;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.IMG;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INDEX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INDEX_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
@@ -74,6 +75,9 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.VTB;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.X_Y;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1098,6 +1102,70 @@ public class DataProviderService {
             TmfModelResponse<?> treeResponse = provider.fetchTree(params, null);
             Object model = treeResponse.getModel();
             return Response.ok(model instanceof TmfTreeModel ? new TmfModelResponse<>(new TreeModelWrapper((TmfTreeModel<@NonNull ITmfTreeDataModel>) model), treeResponse.getStatus(), treeResponse.getStatusMessage()) : treeResponse).build();
+        }
+    }
+
+    /**
+     * Query the provider for an image-based data provider
+     *
+     * @param expUUID
+     *            desired experiment UUID
+     * @param outputId
+     *            Output ID for the data provider to query
+     * @return {@link Response} with the corresponding image
+     */
+    @GET
+    @Path("/image/{outputId}")
+    @Tag(name = IMG)
+    @Produces({ MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON })
+    @Operation(summary = "API to get an image", responses = {
+            @ApiResponse(responseCode = "200", description = "Returns the image file", content = @Content(mediaType = "application/octet-stream")),
+            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "500", description = "Error reading the image file", content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response getImage(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId) {
+
+        if (outputId == null) {
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
+        }
+
+        TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+        if (experiment == null) {
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        }
+
+        IDataProviderDescriptor descriptor = getDescriptor(experiment, outputId);
+        if (descriptor == null || descriptor.getType() != ProviderType.IMAGE) {
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
+        }
+
+        ITmfConfiguration config = descriptor.getConfiguration();
+        if (config == null) {
+            return Response.status(Status.NOT_FOUND).entity("No configuration found for this provider").build(); //$NON-NLS-1$
+        }
+
+        String imagePath = (String) config.getParameters().get("path"); //$NON-NLS-1$
+        if (imagePath == null) {
+            return Response.status(Status.NOT_FOUND).entity("Image path not found in configuration").build(); //$NON-NLS-1$
+        }
+
+        File imageFile = new File(imagePath);
+        if (!imageFile.exists() || !imageFile.isFile()) {
+            return Response.status(Status.NOT_FOUND).entity("Image file not found").build(); //$NON-NLS-1$
+        }
+
+        try {
+            String contentType = Files.probeContentType(imageFile.toPath());
+            if (contentType == null) {
+                contentType = MediaType.APPLICATION_OCTET_STREAM;
+            }
+
+            return Response.ok(imageFile, contentType).build();
+        } catch (IOException e) {
+            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 

@@ -118,7 +118,7 @@ public class ImageReportDataProvider implements IReportDataProvider {
                 .setId(configuration.getId())
                 .setName(configuration.getName())
                 .setDescription(configuration.getDescription())
-                .setProviderType(ProviderType.NONE)
+                .setProviderType(ProviderType.IMAGE)
                 .setConfiguration(configuration)
                 .setCapabilities(new DataProviderCapabilities.Builder().setCanDelete(true).build())
                 .build();
