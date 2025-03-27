@@ -11,18 +11,19 @@
 
 package org.eclipse.tracecompass.incubator.internal.traceevent.core.event;
 
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect;
+import org.eclipse.tracecompass.incubator.internal.traceevent.core.trace.TraceEventTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfCallsite;
-
-import com.google.common.collect.ImmutableList;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
  * Aspects for Trace Compass Logs
@@ -60,7 +61,7 @@ public class TraceEventAspects {
     public static @NonNull Iterable<@NonNull ITmfEventAspect<?>> getAspects() {
         Iterable<@NonNull ITmfEventAspect<?>> aspectSet = aspects;
         if (aspectSet == null) {
-            aspectSet = ImmutableList.of(
+            aspectSet = List.of(
                     new TraceCompassScopeLogLabelAspect(),
                     TmfBaseAspects.getTimestampAspect(),
                     new TraceCompassLogPhaseAspect(),
@@ -159,7 +160,15 @@ public class TraceEventAspects {
         @Override
         public @Nullable Integer resolve(@NonNull ITmfEvent event) {
             if (event instanceof TraceEventEvent) {
-                return ((TraceEventEvent) event).getField().getTid();
+                ITmfTrace trace = event.getTrace();
+                Object tid = ((TraceEventEvent) event).getField().getTid();
+                if (trace instanceof TraceEventTrace) {
+                    TraceEventTrace traceEventTrace = (TraceEventTrace) trace;
+                    return traceEventTrace.registerTid(tid);
+                }
+                if (tid instanceof Integer) {
+                    return (Integer) tid;
+                }
             }
             return null;
         }
