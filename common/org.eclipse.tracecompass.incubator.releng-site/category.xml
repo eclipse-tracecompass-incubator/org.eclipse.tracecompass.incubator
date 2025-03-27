@@ -6,87 +6,115 @@
    <feature url="features/org.eclipse.tracecompass.incubator.traceevent_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.traceevent" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.traceevent.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.traceevent.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.virtual.machine.analysis_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.virtual.machine.analysis" version="0.0.0">
       <category name="virtualization"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.virtual.machine.analysis.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.callstack_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.callstack" version="0.0.0">
       <category name="callstack"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.callstack.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.callstack.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.perf.profiling_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.perf.profiling" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.perf.profiling.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.perf.profiling.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.uftrace_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.uftrace" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.uftrace.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.uftrace.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.lttng2.ust.extras_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.lttng2.ust.extras" version="0.0.0">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.lttng2.ust.extras.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.lttng2.ust.extras.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.tracecompass_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.tracecompass" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.tracecompass.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.tracecompass.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.atrace_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.atrace" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.atrace.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.atrace.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.ftrace_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.ftrace" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.ftrace.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.ftrace.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.hudson.maven_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.hudson.maven" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.hudson.maven.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.hudson.maven.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.opentracing_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.opentracing" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.opentracing.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.opentracing.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.otf2_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.otf2" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.otf2.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.otf2.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.kernel_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.kernel" version="0.0.0">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.kernel.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.kernel.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.eventfieldcount_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.eventfieldcount" version="0.0.0">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.eventfieldcount.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.eventfieldcount.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.filters_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.filters" version="0.0.0">
       <category name="utilities"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.filters.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.filters.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.scripting_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.scripting" version="0.0.0">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.scripting.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.scripting.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.scripting.javascript_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.scripting.javascript" version="0.0.0">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.scripting.javascript.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.scripting.javascript.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.scripting.python_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.scripting.python" version="0.0.0">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.scripting.python.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.scripting.python.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.rocm_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.rocm" version="0.0.0">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.rocm.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.rocm.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.inandout_0.0.0.jar" id="org.eclipse.tracecompass.incubator.inandout" version="0.0.0">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.inandout.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.inandout.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.ros_0.0.0.jar" id="org.eclipse.tracecompass.incubator.ros" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.ros.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.ros.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.ros2_0.0.0.jar" id="org.eclipse.tracecompass.incubator.ros2" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.ros2.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.ros2.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.executioncomparison_0.0.0.jar" id="org.eclipse.tracecompass.incubator.executioncomparison" version="0.0.0">
       <category name="analyses"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.executioncomparison.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.executioncomparison.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.gpu_0.0.0.jar" id="org.eclipse.tracecompass.incubator.gpu" version="0.0.0">
       <category name="analyses"/>
    </feature>
-   <feature id="org.eclipse.tracecompass.incubator.dpdk">
+   <feature url="features/org.eclipse.tracecompass.incubator.gpu.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.gpu.source" version="0.0.0"/>
+   <feature url="features/org.eclipse.tracecompass.incubator.dpdk_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.dpdk" version="0.0.0">
       <category name="trace-types"/>
    </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.dpdk.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.dpdk.source" version="0.0.0"/>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.0">
       <category name="analyses"/>
    </bundle>
+   <bundle id="org.eclipse.tracecompass.incubator.analysis.core.source"/>
    <bundle id="org.eclipse.tracecompass.incubator.tmf.ui.multiview.ui" version="0.0.0">
       <category name="analyses"/>
    </bundle>
+   <bundle id="org.eclipse.tracecompass.incubator.tmf.ui.multiview.ui.source"/>
    <bundle id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core" version="0.0.0">
       <category name="server"/>
    </bundle>
+   <bundle id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.source"/>
    <bundle id="com.google.javascript"/>
    <bundle id="jakarta.activation-api" version="1.2.2"/>
    <bundle id="jakarta.ws.rs-api"/>
@@ -109,7 +137,7 @@
    <category-def name="trace-types" label="Trace Types"/>
    <category-def name="virtualization" label="Virtualization"/>
    <category-def name="analyses" label="Analyses"/>
-   <category-def name="callstack" label="Call Stack analyses">
+   <category-def name="callstack" label="Call Stack Analyses">
       <description>
          Contains feature related to call stack data, stack traces, sampling, etc.
       </description>
