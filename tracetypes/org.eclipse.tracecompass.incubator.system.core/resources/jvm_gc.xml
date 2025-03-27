@@ -10,10 +10,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************
--->
-<CustomTxtTraceDefinitionList>
+--><CustomTxtTraceDefinitionList>
+        
+
     <Definition category="Syslog" name="JVM_GC-log">
         <TimeStampOutputFormat>yyyy-MM-dd HH:mm.ss.SSS</TimeStampOutputFormat>
+        <InputLine>
+            <Cardinality max="2147483647" min="0"/>
+            <RegEx>\s*(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\d)([\+-]\d\d\d\d):\s*(\S*):\s+Total time for which application threads were (\S+):\s(\S+)\s+seconds, .*:\s+(\S+).*</RegEx>
+            <InputData action="0" format="yyyy-MM-dd'T'HH:mm:ss.SSS" name="Timestamp" tag="TIMESTAMP"/>
+            <InputData action="0" format="" name="Time Zone" tag="OTHER"/>
+            <InputData action="0" format="" name="Delta" tag="OTHER"/>
+            <InputData action="0" format="" name="Event type" tag="EVENT_TYPE"/>
+            <InputData action="0" format="" name="halt" tag="OTHER"/>
+            <InputData action="0" format="" name="start halt" tag="OTHER"/>
+        </InputLine>
         <InputLine>
             <Cardinality max="2147483647" min="0"/>
             <RegEx>\s*(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\d)([\+-]\d\d\d\d):\s*(\S*):(.*)\S*</RegEx>
@@ -31,5 +42,8 @@
         <OutputColumn name="Time Zone" tag="OTHER"/>
         <OutputColumn name="Delta" tag="OTHER"/>
         <OutputColumn name="Message" tag="MESSAGE"/>
+        <OutputColumn name="Event type" tag="EVENT_TYPE"/>
+        <OutputColumn name="halt" tag="OTHER"/>
+        <OutputColumn name="start halt" tag="OTHER"/>
     </Definition>
 </CustomTxtTraceDefinitionList>
