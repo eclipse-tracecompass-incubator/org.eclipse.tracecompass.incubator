@@ -48,6 +48,7 @@ import org.eclipse.tracecompass.tmf.core.model.DataProviderCapabilities;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
+import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
@@ -55,6 +56,7 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.incubator.internal.analysis.core.Activator;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.dataprovider.TmfDataProviderConfigurationDataModel;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -726,4 +728,18 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
         fTmfConfigurationHierarchy.clear();
     }
 
+    @Override
+    public TmfModelResponse<TmfDataProviderConfigurationDataModel> getData(ITmfTrace trace, ITmfConfiguration configuration) throws Exception {
+        ReportProviderType reportType = getReportType(configuration);
+        IReportDataProvider provider = ReportsDataProviderRegistry.getProvider(reportType);
+        if (provider == null) {
+            throw new TmfConfigurationException("No provider found for report type"); //$NON-NLS-1$
+        }
+
+        if (provider instanceof ReportsDataProviderFactory) {
+            throw new TmfConfigurationException("Cannot get data from the report factory"); //$NON-NLS-1$
+        }
+
+        return provider.getData(trace, configuration);
+    }
 }
