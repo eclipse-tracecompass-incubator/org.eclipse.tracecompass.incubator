@@ -6,7 +6,7 @@ Bundle-Version: 0.1.2.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests.Activator
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-SymbolicName: org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests;singleton:=true
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
