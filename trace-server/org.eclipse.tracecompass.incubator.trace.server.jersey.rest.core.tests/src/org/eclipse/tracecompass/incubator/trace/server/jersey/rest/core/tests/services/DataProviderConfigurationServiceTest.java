@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Ericsson and others
+ * Copyright (c) 2024, 2025 Ericsson and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -201,7 +201,7 @@ public class DataProviderConfigurationServiceTest extends RestServerTest {
         dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
         try (Response response = assertDpPostWithErrors(dpCreationEndpoint, configuration)) {
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER + ": " + UNKNOWN_DP_ID, response.readEntity(String.class));
         }
 
         // Test config type is not applicable for another data provider
