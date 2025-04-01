@@ -1302,6 +1302,11 @@ public class DataProviderService {
                 return errorResponse;
             }
 
+            IDataProviderDescriptor parentDescriptor = getDescriptor(experiment, outputId);
+            if (parentDescriptor == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER + ": " + outputId).build(); //$NON-NLS-1$
+            }
+
             IDataProviderFactory factory = manager.getFactory(outputId);
             if (factory == null) {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
