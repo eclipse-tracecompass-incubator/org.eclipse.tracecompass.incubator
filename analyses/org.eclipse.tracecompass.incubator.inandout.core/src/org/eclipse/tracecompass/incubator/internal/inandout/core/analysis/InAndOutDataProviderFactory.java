@@ -43,7 +43,6 @@ import org.eclipse.tracecompass.tmf.core.model.DataProviderCapabilities;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
-import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
@@ -95,13 +94,6 @@ public class InAndOutDataProviderFactory extends AbstractTmfDataProviderConfigur
             .setProviderType(ProviderType.NONE)
             .setCapabilities(new DataProviderCapabilities.Builder().setCanCreate(true).build())
             .build();
-
-    /**
-     * Default constructor
-     */
-    public InAndOutDataProviderFactory() {
-        TmfSignalManager.register(this);
-    }
 
     @Override
     public @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> createProvider(ITmfTrace trace) {
@@ -182,7 +174,7 @@ public class InAndOutDataProviderFactory extends AbstractTmfDataProviderConfigur
      *          the
      * @throws TmfConfigurationException if an error occurs
      */
-    private void remove(ITmfConfiguration config, @NonNull ITmfTrace trace, String baseAnalysisId) throws TmfConfigurationException {
+    private void remove(ITmfConfiguration config, ITmfTrace trace, String baseAnalysisId) throws TmfConfigurationException {
         IPath traceConfig = getConfigurationRootFolder(trace);
         traceConfig = traceConfig.append(File.separator).append(config.getId()).addFileExtension(JSON_EXTENSION);
         File configFile = traceConfig.toFile();
@@ -211,11 +203,10 @@ public class InAndOutDataProviderFactory extends AbstractTmfDataProviderConfigur
      *            the trace to apply it to
      * @param writeConfig
      *            write the config (do only once)
-     * @return InAndOutAnalysisModule
      * @throws TmfConfigurationException
      *             if an error occurs
      */
-    private void create(@NonNull ITmfConfiguration config, @NonNull ITmfTrace trace, boolean writeConfig, IAnalysisModule module) throws TmfConfigurationException {
+    private void create(ITmfConfiguration config, ITmfTrace trace, boolean writeConfig, IAnalysisModule module) throws TmfConfigurationException {
         /*
          * Apply configuration to each trace (no need to check trace type here)
          */
@@ -247,6 +238,11 @@ public class InAndOutDataProviderFactory extends AbstractTmfDataProviderConfigur
         IPath supplPath = new Path(supplFolder);
         supplPath = supplPath.addTrailingSeparator().append(ID);
         return supplPath;
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
     }
 
 }
