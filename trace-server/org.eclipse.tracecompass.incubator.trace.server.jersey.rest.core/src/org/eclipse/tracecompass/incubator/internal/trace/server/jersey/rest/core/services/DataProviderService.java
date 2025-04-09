@@ -83,7 +83,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -136,15 +135,10 @@ import org.eclipse.tracecompass.internal.analysis.timing.core.event.matching.Eve
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableDataProvider;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
-import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlOutputElement;
-import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils.OutputType;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output.XmlDataProviderManager;
 import org.eclipse.tracecompass.internal.tmf.core.markers.MarkerConfigXmlParser;
 import org.eclipse.tracecompass.internal.tmf.core.markers.MarkerSet;
-import org.eclipse.tracecompass.tmf.analysis.xml.core.module.TmfXmlUtils;
-import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
-import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisManager;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.config.ITmfDataProviderConfigurator;
@@ -152,11 +146,9 @@ import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderParameterUtils;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
-import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
-import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
 import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
 import org.eclipse.tracecompass.tmf.core.model.annotations.Annotation;
@@ -176,15 +168,12 @@ import org.eclipse.tracecompass.tmf.core.model.xy.ITmfXyModel;
 import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.eclipse.tracecompass.traceeventlogger.LogUtils.FlowScopeLog;
 import org.eclipse.tracecompass.traceeventlogger.LogUtils.FlowScopeLogBuilder;
-import org.w3c.dom.Element;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -215,6 +204,7 @@ public class DataProviderService {
     private static final @NonNull Logger LOGGER = TraceCompassLog.getLogger(DataProviderService.class);
 
     private final DataProviderManager manager = DataProviderManager.getInstance();
+    private final XmlDataProviderManager xmlManager = XmlDataProviderManager.getInstance();
 
     /**
      * Getter for the list of data provider descriptions
@@ -236,8 +226,8 @@ public class DataProviderService {
             return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
         }
         List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(experiment);
-        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
-        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.XY)));
+        list.addAll(xmlManager.getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
+        list.addAll(xmlManager.getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.XY)));
         list.sort(Comparator.comparing(IDataProviderDescriptor::getName));
 
         /*
@@ -406,7 +396,7 @@ public class DataProviderService {
 
             if (provider == null) {
                 // try and find the XML provider for the ID.
-                provider = getXmlProvider(experiment, outputId, EnumSet.of(OutputType.XY));
+                provider = xmlManager.getXmlProvider(experiment, outputId, EnumSet.of(OutputType.XY));
             }
 
             if (provider == null) {
@@ -876,7 +866,7 @@ public class DataProviderService {
 
         if (provider == null && outputId != null) {
             // try and find the XML provider for the ID.
-            provider = getXmlProvider(trace, outputId, EnumSet.of(OutputType.TIME_GRAPH));
+            provider = xmlManager.getXmlProvider(trace, outputId, EnumSet.of(OutputType.TIME_GRAPH));
         }
         return provider;
     }
@@ -993,72 +983,6 @@ public class DataProviderService {
         }
     }
 
-    /**
-     * Get the XML data provider for a trace, provider id and XML
-     * {@link OutputType}
-     *
-     * @param trace
-     *            the queried trace
-     * @param id
-     *            the queried ID
-     * @param types
-     *            the data provider type
-     * @return the provider if an XML containing the ID exists and applies to
-     *         the trace, else null
-     */
-    private static <@Nullable P extends ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel>> P getXmlProvider(@NonNull ITmfTrace trace, @NonNull String id, EnumSet<OutputType> types) {
-        for (OutputType viewType : types) {
-            for (XmlOutputElement element : Iterables.filter(XmlUtils.getXmlOutputElements().values(),
-                    element -> element.getXmlElem().equals(viewType.getXmlElem()) && id.equals(element.getId()))) {
-                Element viewElement = TmfXmlUtils.getElementInFile(element.getPath(), viewType.getXmlElem(), id);
-                if (viewElement != null && viewType == OutputType.XY) {
-                    return (P) XmlDataProviderManager.getInstance().getXyProvider(trace, viewElement);
-                } else if (viewElement != null && viewType == OutputType.TIME_GRAPH) {
-                    return (P) XmlDataProviderManager.getInstance().getTimeGraphProvider(trace, viewElement);
-                }
-            }
-        }
-        return null;
-    }
-
-    private static @NonNull List<IDataProviderDescriptor> getXmlDataProviderDescriptors(@NonNull ITmfTrace trace, EnumSet<OutputType> types) {
-        /*
-         *  TODO: find a better way to create the data provider descriptors.
-         *  This should be part of the XmlDataProviderManager.
-         */
-        List<IDataProviderDescriptor> descriptors = new ArrayList<>();
-        for (ITmfTrace tr : TmfTraceManager.getTraceSetWithExperiment(trace)) {
-            Map<String, IAnalysisModuleHelper> modules = TmfAnalysisManager.getAnalysisModules(tr.getClass());
-            for (OutputType viewType : types) {
-                for (XmlOutputElement element : Iterables.filter(XmlUtils.getXmlOutputElements().values(), element -> element.getXmlElem().equals(viewType.getXmlElem()))) {
-                    DataProviderDescriptor.Builder builder = new DataProviderDescriptor.Builder();
-                    String label = String.valueOf(element.getLabel());
-                    String elemId = element.getId();
-                    if (elemId == null) {
-                        // Ignore element
-                        continue;
-                    }
-                    builder.setId(elemId);
-                    if (viewType == OutputType.XY) {
-                        builder.setProviderType(ProviderType.TREE_TIME_XY);
-                    } else if (viewType == OutputType.TIME_GRAPH) {
-                        builder.setProviderType(ProviderType.TIME_GRAPH);
-                    }
-                    for (String id : element.getAnalyses()) {
-                        if (modules.containsKey(id)) {
-                            String analysisName = Objects.requireNonNull(modules.get(id)).getName();
-                            builder.setName(analysisName + ": " + label); //$NON-NLS-1$
-                            builder.setDescription(label + " provided by Analysis module: " + analysisName); //$NON-NLS-1$
-                            descriptors.add(builder.build());
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        return descriptors;
-    }
-
     private Response getTree(UUID expUUID, String outputId, QueryParameters queryParameters) {
         Response errorResponse = validateParameters(outputId, queryParameters);
         if (errorResponse != null) {
@@ -1081,7 +1005,7 @@ public class DataProviderService {
 
             if (provider == null) {
                 // try and find the XML provider for the ID.
-                provider = getXmlProvider(experiment, outputId, EnumSet.allOf(OutputType.class));
+                provider = xmlManager.getXmlProvider(experiment, outputId, EnumSet.allOf(OutputType.class));
             }
 
             if (provider == null) {
@@ -1424,8 +1348,8 @@ public class DataProviderService {
 
     private @Nullable IDataProviderDescriptor getDescriptor(@NonNull ITmfTrace experiment, @NonNull String outputId) {
         List<IDataProviderDescriptor> list = manager.getAvailableProviders(experiment);
-        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
-        list.addAll(getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.XY)));
+        list.addAll(xmlManager.getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
+        list.addAll(xmlManager.getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.XY)));
 
         Optional<IDataProviderDescriptor> provider = list.stream().filter(p -> p.getId().equals(outputId)).findFirst();
         if (provider.isPresent()) {
