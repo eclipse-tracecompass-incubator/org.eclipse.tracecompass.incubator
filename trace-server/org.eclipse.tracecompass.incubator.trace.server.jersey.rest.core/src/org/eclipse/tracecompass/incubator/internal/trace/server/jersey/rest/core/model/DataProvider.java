@@ -22,7 +22,7 @@ public interface DataProvider {
      * The provider types.
      */
     enum ProviderType {
-        TABLE, TREE_TIME_XY, TIME_GRAPH, DATA_TREE, NONE
+        TABLE, TREE_TIME_XY, TIME_GRAPH, DATA_TREE, MIME, NONE
     }
 
     /**
