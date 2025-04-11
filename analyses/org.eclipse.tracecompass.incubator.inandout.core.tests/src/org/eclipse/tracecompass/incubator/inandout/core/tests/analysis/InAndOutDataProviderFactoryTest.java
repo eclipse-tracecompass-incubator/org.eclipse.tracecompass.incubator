@@ -24,10 +24,12 @@ import java.util.Map;
 
 import org.eclipse.tracecompass.incubator.internal.inandout.core.analysis.InAndOutDataProviderFactory;
 import org.eclipse.tracecompass.incubator.internal.inandout.core.analysis.SegmentSpecifierConfiguration;
+import org.eclipse.tracecompass.tmf.core.component.DataProviderConstants;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.config.ITmfDataProviderConfigurator;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
@@ -36,9 +38,11 @@ import org.eclipse.tracecompass.tmf.core.model.DataProviderCapabilities;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.tests.TmfCoreTestPlugin;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.TmfXmlTraceStub;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.TmfXmlTraceStubNs;
 import org.junit.AfterClass;
@@ -83,7 +87,9 @@ public class InAndOutDataProviderFactoryTest {
     @BeforeClass
     public static void setup() {
         TmfXmlTraceStub trace = TmfXmlTraceStubNs.setupTrace(TmfCoreTestPlugin.getAbsoluteFilePath(XML_TRACE));
-        trace.traceOpened(new TmfTraceOpenedSignal(trace, trace, null));
+        TmfTraceOpenedSignal signal = new TmfTraceOpenedSignal(trace, trace, null);
+        TmfTraceManager.getInstance().traceOpened(signal);
+        trace.traceOpened(signal);
         sfTestTrace = trace;
 
         Map<String, Object> params = new HashMap<>();
@@ -111,6 +117,8 @@ public class InAndOutDataProviderFactoryTest {
     @AfterClass
     public static void cleanup() {
         if (sfTestTrace != null) {
+            TmfTraceClosedSignal signal = new TmfTraceClosedSignal(sfTestTrace, sfTestTrace);
+            TmfTraceManager.getInstance().traceClosed(signal);
             sfTestTrace.dispose();
         }
         if (sfFixture != null) {
@@ -157,6 +165,7 @@ public class InAndOutDataProviderFactoryTest {
      * @throws TmfConfigurationException
      *             if a config error happens
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void testCreateAndDeleteDataProviderDescriptor() throws TmfConfigurationException {
         ITmfDataProviderConfigurator configurator = sfFixture.getAdapter(ITmfDataProviderConfigurator.class);
@@ -179,9 +188,16 @@ public class InAndOutDataProviderFactoryTest {
         Collection<IDataProviderDescriptor> descriptors = sfFixture.getDescriptors(sfTestTrace);
         assertTrue(descriptors.contains(descriptor));
 
+        String dpId = "org.eclipse.tracecompass.analysis.profiling.core.flamechart:org.eclipse.tracecompass.incubator.inandout.analysis" + DataProviderConstants.CONFIG_SEPARATOR + config.getId();
+        ITmfTreeDataProvider<?> dp = DataProviderManager.getInstance().getOrCreateDataProvider(
+                    sfTestTrace,
+                    dpId,
+                    ITmfTreeDataProvider.class);
+        assertNotNull(dp);
         configurator.removeDataProviderDescriptor(sfTestTrace, descriptor);
         descriptors = sfFixture.getDescriptors(sfTestTrace);
         assertFalse(descriptors.contains(descriptor));
+        assertNull(DataProviderManager.getInstance().getExistingDataProvider(sfTestTrace, dpId, ITmfTreeDataProvider.class));
     }
 
     /**
