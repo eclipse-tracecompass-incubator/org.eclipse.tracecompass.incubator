@@ -1318,7 +1318,16 @@ public class DataProviderService {
             if (configurator == null) {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
             }
+
+            // Get all descriptors of all corresponding derived data providers
+            List<IDataProviderDescriptor> allDerivedDps = manager.getAvailableProviders(experiment, derivedDescriptor.getConfiguration());
+
+            // Remove any derived data provider instances stored in the manager
+            allDerivedDps.forEach(desc -> manager.removeDataProvider(experiment, desc.getId()));
+
+            // Clean-up configuration
             configurator.removeDataProviderDescriptor(experiment, derivedDescriptor);
+
             return Response.ok(derivedDescriptor).build();
         } catch (TmfConfigurationException e) {
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
