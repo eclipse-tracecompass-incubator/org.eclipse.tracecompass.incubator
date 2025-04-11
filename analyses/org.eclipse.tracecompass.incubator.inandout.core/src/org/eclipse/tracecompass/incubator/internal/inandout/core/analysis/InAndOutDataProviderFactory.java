@@ -18,6 +18,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
@@ -34,6 +36,7 @@ import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.config.ITmfDataProviderConfigurator;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceType;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
@@ -248,14 +251,37 @@ public class InAndOutDataProviderFactory implements IDataProviderFactory, ITmfDa
     }
 
     private void removeConfiguration(ITmfTrace trace, ITmfConfiguration config) throws TmfConfigurationException {
+        // Collect all children data providers (e.g. call stack dp) before analysis modules are gone otherwise
+        // they won't exist anymore
+        Predicate<IDataProviderDescriptor> predicate = desc -> {
+            ITmfConfiguration cfg = desc.getConfiguration();
+            return (cfg != null && cfg.getId().equals(config.getId()));
+        };
+        @SuppressWarnings("null")
+        List<IDataProviderDescriptor> dps = DataProviderManager.getInstance().getAvailableProviders(trace)
+            .stream()
+            .filter(predicate)
+            .collect(Collectors.toList());
         if (trace instanceof TmfExperiment) {
+            // Remove analysis modules in removeConfiguration per trace
             for (ITmfTrace tr : TmfTraceManager.getTraceSet(trace)) {
                 removeConfiguration(tr, config);
+            }
+
+            // This will remove any dp instance (e.g. call stack dp)
+            for (IDataProviderDescriptor desc : dps) {
+                DataProviderManager.getInstance().removeDataProvider(trace, desc.getId());
             }
             // only remove for traces in experiment
             return;
         }
+        // This will remove the analysis module
         InAndOutAnalysisModule.remove(config, trace);
+
+        // This will remove any dp instance (e.g. call stack dp)
+        for (IDataProviderDescriptor desc : dps) {
+            DataProviderManager.getInstance().removeDataProvider(trace, desc.getId());
+        }
     }
 
     @SuppressWarnings("null")
