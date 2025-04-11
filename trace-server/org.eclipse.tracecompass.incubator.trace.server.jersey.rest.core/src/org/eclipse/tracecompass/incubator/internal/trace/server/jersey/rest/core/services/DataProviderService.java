@@ -1395,6 +1395,9 @@ public class DataProviderService {
                 return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
             }
             configurator.removeDataProviderDescriptor(experiment, derivedDescriptor);
+
+            // Remove any instances of the derived data provider stored in the manager
+            DataProviderManager.getInstance().removeDataProvider(experiment, derivedOutputId);
             return Response.ok(derivedDescriptor).build();
         } catch (TmfConfigurationException e) {
             return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
