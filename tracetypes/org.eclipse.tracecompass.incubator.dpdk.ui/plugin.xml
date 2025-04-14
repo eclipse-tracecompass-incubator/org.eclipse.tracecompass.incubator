@@ -32,6 +32,13 @@
                class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.analysis.DpdkEthdevSpinAnalysisModule">
          </analysisModuleClass>
       </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.internal.dpdk.ui.mempool.alloc.free.rate.view">
+         <analysisId
+               id="org.eclipse.tracecompass.incubator.dpdk.mempool.analysis">
+         </analysisId>
+      </output>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -66,6 +73,13 @@
             class="org.eclipse.tracecompass.incubator.internal.dpdk.ui.ethdev.spin.ThreadSpinStatisticsView"
             id="org.eclipse.tracecompass.incubator.internal.dpdk.ui.ethdev.spin.statistics.view"
             name="Ethernet PMD Effective Busyness"
+            restorable="true">
+      </view>
+      <view
+            category="org.eclipse.tracecompass.incubator.internal.dpdk.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.ui.mempool.alloc.free.rate.MempoolAllocFreeRateView"
+            id="org.eclipse.tracecompass.incubator.internal.dpdk.ui.mempool.alloc.free.rate.view"
+            name="Mempool Objects Alloc/Free Rate"
             restorable="true">
       </view>
    </extension>
