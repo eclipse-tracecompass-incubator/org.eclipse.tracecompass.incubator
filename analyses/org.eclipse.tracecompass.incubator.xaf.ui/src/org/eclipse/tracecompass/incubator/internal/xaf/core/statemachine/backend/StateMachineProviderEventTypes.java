@@ -18,6 +18,8 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
+import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelThreadInformationProvider;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
 import org.eclipse.tracecompass.incubator.internal.xaf.ui.Activator;
@@ -29,6 +31,7 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
+import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
@@ -63,7 +66,6 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
 
     /** Forgotten string chains */
     private static final @NonNull String LAYOUT_CONTEXT_VTID = "context._vtid"; //$NON-NLS-1$
-    private static final @NonNull String LAYOUT_PREV_PRIO = "prev_prio"; //$NON-NLS-1$
     private static final @NonNull String LAYOUT_STATE = "state"; //$NON-NLS-1$
     private static final @NonNull String LAYOUT_CPU_ID = "cpu_id"; //$NON-NLS-1$
     private static final @NonNull String EVENT_SCHED_WAKING = "sched_waking"; //$NON-NLS-1$
@@ -71,8 +73,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
     private static final @NonNull String EVENT_POWER_CPU_FREQUENCY = "power_cpu_frequency"; //$NON-NLS-1$
 
     /**
-     * A map giving information about what process
-     * is on what CPU
+     * A map giving information about what process is on what CPU
      */
     private Map<Integer, Long> threadByCPU = new TreeMap<>();
 
@@ -80,6 +81,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
      * Save the information to compute the CPU Usage by TID
      */
     private Map<Long, ThreadInfo> info_by_tid = new HashMap<>();
+
     private @NonNull ThreadInfo getThreadInfoOrCreate(Long tid) {
         ThreadInfo threadInfo = info_by_tid.get(tid);
         if (threadInfo == null) {
@@ -96,7 +98,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
      *            The trace for which we build this state system
      */
     public StateMachineProviderEventTypes(@NonNull ITmfTrace trace) {
-        super(trace , StateMachineBackendAnalysis.NAME);
+        super(trace, StateMachineBackendAnalysis.NAME);
     }
 
     @Override
@@ -114,8 +116,10 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
         ITmfStateSystemBuilder ss = Objects.requireNonNull(getStateSystemBuilder());
         int quark;
 
-        /* Since this can be used for any trace types, normalize all the
-         * timestamp values to nanoseconds. */
+        /*
+         * Since this can be used for any trace types, normalize all the
+         * timestamp values to nanoseconds.
+         */
         final long ts = event.getTimestamp().toNanos();
 
         final String eventName = event.getType().getName();
@@ -123,13 +127,17 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
 
         if (eventName.equals(layout.eventSchedSwitch())) {
             ITmfEventField content = event.getContent();
-            Long prevTid = (Long)content.getField(layout.fieldPrevTid()).getValue();
-            Long nextTid = (Long)content.getField(layout.fieldNextTid()).getValue();
-            Long prevState = (Long)content.getField(layout.fieldPrevState()).getValue();
-            Integer nextPrio = ((Long)content.getField(layout.fieldNextPrio()).getValue()).intValue();
-            Integer prevPrio = ((Long)content.getField(LAYOUT_PREV_PRIO).getValue()).intValue();
+            Long prevTid = content.getFieldValue(Long.class, layout.fieldPrevTid());
+            Long nextTid = content.getFieldValue(Long.class, layout.fieldNextTid());
+            Long prevState = content.getFieldValue(Long.class, layout.fieldPrevState());
+            Long nextPrio = content.getFieldValue(Long.class, layout.fieldNextPrio());
+            Long prevPrio = content.getFieldValue(Long.class, layout.fieldPrevPrio());
 
-            Integer cpu = Objects.requireNonNull((Integer)TmfTraceUtils.resolveEventAspectOfClassForEvent(getTrace(), TmfCpuAspect.class, event));
+            if (nextPrio == null || nextTid == null || prevTid == null || prevState == null || prevPrio == null) {
+                return;
+            }
+
+            Integer cpu = Objects.requireNonNull((Integer) TmfTraceUtils.resolveEventAspectOfClassForEvent(getTrace(), TmfCpuAspect.class, event));
             threadByCPU.put(cpu, nextTid);
 
             ThreadInfo prevThreadInfo = getThreadInfoOrCreate(prevTid);
@@ -140,7 +148,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             int quarkNextTid = ss.getQuarkAbsoluteAndAdd(Attributes.TID, nextTid.toString());
 
             // CPU: update the cpu number if needed
-            if (nextThreadInfo.cpu_last != cpu) {
+            if (!Objects.equals(nextThreadInfo.cpu_last, cpu)) {
                 try {
                     quark = ss.getQuarkRelativeAndAdd(quarkNextTid, Attributes.CPU);
                     TmfStateValue value = TmfStateValue.newValueInt(cpu);
@@ -152,12 +160,11 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             }
 
             // PRIO: update the priority if needed
-            if (nextThreadInfo.prio_last != nextPrio) {
+            if (!Objects.equals(nextThreadInfo.prio_last, nextPrio)) {
                 try {
                     quark = ss.getQuarkRelativeAndAdd(quarkNextTid, Attributes.PRIO);
-                    TmfStateValue value = TmfStateValue.newValueInt(nextPrio);
-                    ss.modifyAttribute(ts, value, quark);
-                    nextThreadInfo.prio_last = nextPrio;
+                    ss.modifyAttribute(ts, nextPrio, quark);
+                    nextThreadInfo.prio_last = nextPrio.intValue();
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
                     Activator.logError(e.getMessage(), e);
                 }
@@ -236,7 +243,8 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     TmfStateValue value = TmfStateValue.newValueLong(nextThreadInfo.cumul_wakeup_latency);
                     ss.modifyAttribute(ts, value, quark);
 
-                    // Reset last wakeup time to null, so that it will be used only next time we receive a sched_waking
+                    // Reset last wakeup time to null, so that it will be used
+                    // only next time we receive a sched_waking
                     nextThreadInfo.last_wakeup = null;
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
                     Activator.logError(e.getMessage(), e);
@@ -248,40 +256,34 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             int quarkPrevTid = ss.getQuarkAbsoluteAndAdd(Attributes.TID, prevTid.toString());
 
             // PRIO: update the priority if needed
-            if (prevThreadInfo.prio_last != prevPrio) {
+            if (!Objects.equals(prevThreadInfo.prio_last, prevPrio)) {
                 try {
                     quark = ss.getQuarkRelativeAndAdd(quarkPrevTid, Attributes.PRIO);
-                    TmfStateValue value = TmfStateValue.newValueInt(prevPrio);
-                    ss.modifyAttribute(ts, value, quark);
-                    prevThreadInfo.prio_last = prevPrio;
+                    ss.modifyAttribute(ts, prevPrio, quark);
+                    prevThreadInfo.prio_last = prevPrio.intValue();
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
                     Activator.logError(e.getMessage(), e);
                 }
             }
 
             // TIMER_CPU_USAGE
-            // We chose here to consider the data from the trace, even if it's not the actual running duration
-            //if (prevThreadInfo.last_ts != null) {
-                try {
-                    quark = ss.getQuarkRelativeAndAdd(quarkPrevTid, Attributes.TIMER_CPU_USAGE);
+            // We chose here to consider the data from the trace, even if it's
+            // not the actual running duration
+            try {
+                quark = ss.getQuarkRelativeAndAdd(quarkPrevTid, Attributes.TIMER_CPU_USAGE);
 
-                    if (prevThreadInfo.cumul_cpu_usage == 0L) {
-                        TmfStateValue value = TmfStateValue.newValueLong(0L);
-                        ss.modifyAttribute(getTrace().getStartTime().toNanos(), value, quark);
-                        //ss.modifyAttribute(prevThreadInfo.last_ts, value, quark);
-                    }
-
-                    long previousTs = (prevThreadInfo.last_ts != null)
-                            ? prevThreadInfo.last_ts
-                            : getTrace().getStartTime().toNanos();
-                    prevThreadInfo.cumul_cpu_usage += ts - previousTs;
-
-                    TmfStateValue value = TmfStateValue.newValueLong(prevThreadInfo.cumul_cpu_usage);
-                    ss.modifyAttribute(ts, value, quark);
-                } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
-                    Activator.logError(e.getMessage(), e);
+                if (prevThreadInfo.cumul_cpu_usage == 0L) {
+                    ss.modifyAttribute(getTrace().getStartTime().toNanos(), 0L, quark);
                 }
-            //}
+
+                long previousTs = (prevThreadInfo.last_ts != null)
+                        ? prevThreadInfo.last_ts
+                        : getTrace().getStartTime().toNanos();
+                prevThreadInfo.cumul_cpu_usage += ts - previousTs;
+                ss.modifyAttribute(ts, prevThreadInfo.cumul_cpu_usage, quark);
+            } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
+                Activator.logError(e.getMessage(), e);
+            }
             nextThreadInfo.last_ts = ts;
 
             // For wait for CPU and wait blocked for next time
@@ -323,20 +325,20 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             }
         } else if (eventName.equals(layout.eventSchedPiSetprio())) {
             ITmfEventField content = event.getContent();
-            Long fromTid = (Long)content.getField(LAYOUT_CONTEXT_VTID).getValue();
-            Long toTid = (Long)content.getField(layout.fieldTid()).getValue();
-            Integer newPrio = ((Long)content.getField(layout.fieldNewPrio()).getValue()).intValue();
+            Long fromTid = (Long) content.getField(LAYOUT_CONTEXT_VTID).getValue();
+            Long toTid = (Long) content.getField(layout.fieldTid()).getValue();
+            Integer newPrio = ((Long) content.getField(layout.fieldNewPrio()).getValue()).intValue();
 
             // Get the threadInfo from the thread with raised priority
             ThreadInfo toThreadInfo = getThreadInfoOrCreate(toTid);
 
             // PRIO: update the priority if needed
-            if (toThreadInfo.prio_last != newPrio) {
+            if (!Objects.equals(toThreadInfo.prio_last, newPrio)) {
                 try {
                     quark = ss.getQuarkAbsoluteAndAdd(Attributes.TID, toTid.toString(), Attributes.PRIO);
                     TmfStateValue value = TmfStateValue.newValueInt(newPrio);
                     ss.modifyAttribute(ts, value, quark);
-                    toThreadInfo.prio_last = newPrio;
+                    toThreadInfo.prio_last = newPrio.intValue();
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
                     Activator.logError(e.getMessage(), e);
                 }
@@ -344,14 +346,15 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
 
             if (fromTid.equals(toTid)) {
                 // Going back to normal
-                // Then, for each thread that raised its priority, add to the cumulated time
+                // Then, for each thread that raised its priority, add to the
+                // cumulated time
                 for (Long tid : toThreadInfo.sched_pi_fromTids) {
                     ThreadInfo fromThreadInfo = getThreadInfoOrCreate(tid);
 
                     boolean wasZero = (fromThreadInfo.sched_pi_cumul == 0);
                     fromThreadInfo.sched_pi_cumul += ts - fromThreadInfo.sched_pi_lastTs;
                     fromThreadInfo.sched_pi_lastTs = null;
-                    //fromThreadInfo.sched_pi_toTid = null;
+                    // fromThreadInfo.sched_pi_toTid = null;
 
                     // Update SS
                     try {
@@ -377,7 +380,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                 // Update the threadInfo for the fromTid
                 ThreadInfo fromThreadInfo = getThreadInfoOrCreate(fromTid);
                 fromThreadInfo.sched_pi_lastTs = ts;
-                //fromThreadInfo.sched_pi_toTid = toTid;
+                // fromThreadInfo.sched_pi_toTid = toTid;
 
                 // Update the threadInfo for the toTid
                 toThreadInfo.sched_pi_fromTids.add(fromTid);
@@ -385,8 +388,8 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
         } else if (eventName.equals(EVENT_SCHED_WAKING)) {
             // Get the TID we want to wake up
             ITmfEventField content = event.getContent();
-            Long tid = (Long)content.getField(layout.fieldTid()).getValue();
-            Integer prio = ((Long)content.getField(layout.fieldPrio()).getValue()).intValue();
+            Long tid = (Long) content.getField(layout.fieldTid()).getValue();
+            Integer prio = ((Long) content.getField(layout.fieldPrio()).getValue()).intValue();
 
             ThreadInfo threadInfo = getThreadInfoOrCreate(tid);
 
@@ -396,7 +399,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             int quarkTid = ss.getQuarkAbsoluteAndAdd(Attributes.TID, tid.toString());
 
             // PRIO: update the priority if needed
-            if (threadInfo.prio_last != prio) {
+            if (!Objects.equals(threadInfo.prio_last, prio)) {
                 try {
                     quark = ss.getQuarkAbsoluteAndAdd(Attributes.TID, tid.toString(), Attributes.PRIO);
                     TmfStateValue value = TmfStateValue.newValueInt(prio);
@@ -410,8 +413,10 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             // STATE: Change to WAKING
             BackendState s = new BackendState(BackendStateValue.WAKING.getValue());
             if (!threadInfo.stack_state.isEmpty()) {
-                // If not empty, the last status should either be PREEMPTED or BLOCKED,
-                // we don't need any of them anymore in the stack as they are over so...
+                // If not empty, the last status should either be PREEMPTED or
+                // BLOCKED,
+                // we don't need any of them anymore in the stack as they are
+                // over so...
                 threadInfo.stack_state.pop();
             }
             threadInfo.stack_state.push(s);
@@ -424,8 +429,8 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             }
         } else if (eventName.equals(EVENT_POWER_CPU_FREQUENCY)) {
             ITmfEventField content = event.getContent();
-            Long cpu = (Long)content.getField(LAYOUT_CPU_ID).getValue();
-            Long freq = (Long)content.getField(LAYOUT_STATE).getValue();
+            Long cpu = (Long) content.getField(LAYOUT_CPU_ID).getValue();
+            Long freq = (Long) content.getField(LAYOUT_STATE).getValue();
 
             try {
                 quark = ss.getQuarkAbsoluteAndAdd(Attributes.CPU_FREQ, cpu.toString());
@@ -436,8 +441,8 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             }
         } else if (eventName.equals(layout.eventSoftIrqEntry()) || eventName.equals(EVENT_IRQ_SOFTIRQ_ENTRY)) {
             ITmfEventField content = event.getContent();
-            Long tid = (Long)content.getField(LAYOUT_CONTEXT_VTID).getValue();
-            Long vec = (Long)content.getField("vec").getValue(); //$NON-NLS-1$
+            Long tid = (Long) content.getField(LAYOUT_CONTEXT_VTID).getValue();
+            Long vec = (Long) content.getField("vec").getValue(); //$NON-NLS-1$
 
             // Thread quark
             int quarkTid = ss.getQuarkAbsoluteAndAdd(Attributes.TID, tid.toString());
@@ -457,7 +462,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             }
         } else if (eventName.equals(layout.eventHRTimerExpireEntry()) || eventName.equals("timer_hrtimer_expire_entry")) { //$NON-NLS-1$
             ITmfEventField content = event.getContent();
-            Long tid = (Long)content.getField(LAYOUT_CONTEXT_VTID).getValue();
+            Long tid = (Long) content.getField(LAYOUT_CONTEXT_VTID).getValue();
 
             // Thread quark
             int quarkTid = ss.getQuarkAbsoluteAndAdd(Attributes.TID, tid.toString());
@@ -477,8 +482,8 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             }
         } else if (eventName.equals(layout.eventIrqHandlerEntry())) {
             ITmfEventField content = event.getContent();
-            Long tid = (Long)content.getField(LAYOUT_CONTEXT_VTID).getValue();
-            Long irq = (Long)content.getField("irq").getValue(); //$NON-NLS-1$
+            Long tid = (Long) content.getField(LAYOUT_CONTEXT_VTID).getValue();
+            Long irq = (Long) content.getField("irq").getValue(); //$NON-NLS-1$
 
             // Thread quark
             int quarkTid = ss.getQuarkAbsoluteAndAdd(Attributes.TID, tid.toString());
@@ -496,29 +501,32 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
                 Activator.logError(e.getMessage(), e);
             }
-            // TODO: démarrer le timer de IRQ preemption, qui sera stoppé lors du irq handler exit
+            // TODO: démarrer le timer de IRQ preemption, qui sera stoppé lors
+            // du irq handler exit
             // TODO: augmenter le compteur de préemptions ? (probablement!)
-            // TODO: stopper le timer de CPU Usage et démarrer le timer de preemption ?
+            // TODO: stopper le timer de CPU Usage et démarrer le timer de
+            // preemption ?
             // TODO: mettre à jour l'attribute state pour "IRQ_PREEMPTED" ?
         } else if (eventName.startsWith(layout.eventSyscallEntryPrefix())) {
             ITmfEventField content = event.getContent();
-            Long tid = (Long)content.getField(LAYOUT_CONTEXT_VTID).getValue();
+            Long tid = (Long) content.getField(LAYOUT_CONTEXT_VTID).getValue();
 
-            /*
-            Integer cpu = Objects.requireNonNull((Integer)TmfTraceUtils.resolveEventAspectOfClassForEvent(getTrace(), TmfCpuAspect.class, event));
-            Long tid = threadByCPU.get(cpu);
-
+            Integer cpu = Objects.requireNonNull((Integer) TmfTraceUtils.resolveEventAspectOfClassForEvent(getTrace(), TmfCpuAspect.class,
+                    event));
+            tid = threadByCPU.getOrDefault(cpu, tid);
             if (tid == null) {
-                KernelAnalysisModule kernelAnalysisModule = (KernelAnalysisModule)TmfTraceUtils.getAnalysisModuleOfClass(getTrace(), TmfStateSystemAnalysisModule.class, KernelAnalysisModule.ID);
+                KernelAnalysisModule kernelAnalysisModule = (KernelAnalysisModule) TmfTraceUtils.getAnalysisModuleOfClass(
+                        getTrace(), TmfStateSystemAnalysisModule.class,
+                        KernelAnalysisModule.ID);
                 if (kernelAnalysisModule != null) {
-                    Integer eventTid = KernelThreadInformationProvider.getThreadOnCpu(kernelAnalysisModule, cpu, ts);
+                    Integer eventTid = KernelThreadInformationProvider.getThreadOnCpu(
+                            kernelAnalysisModule, cpu, ts);
                     if (eventTid != null) {
-                        tid = new Long(eventTid);
+                        tid = eventTid.longValue();
                         threadByCPU.put(cpu, tid);
                     }
                 }
             }
-            */
 
             if (tid != null) {
                 ThreadInfo threadInfo = getThreadInfoOrCreate(tid);
@@ -562,7 +570,7 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                 || eventName.equals(layout.eventIrqHandlerExit())
                 || eventName.startsWith(layout.eventSyscallExitPrefix())) {
             ITmfEventField content = event.getContent();
-            Long tid = (Long)content.getField(LAYOUT_CONTEXT_VTID).getValue();
+            Long tid = (Long) content.getField(LAYOUT_CONTEXT_VTID).getValue();
 
             // Thread quark
             int quarkTid = ss.getQuarkAbsoluteAndAdd(Attributes.TID, tid.toString());
@@ -586,9 +594,10 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
             } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
                 Activator.logError(e.getMessage(), e);
             }
-        //} else if (eventName.equals(layout.eventIrqHandlerExit())) {
+            // } else if (eventName.equals(layout.eventIrqHandlerExit())) {
             // TODO: stopper le timer de IRQ preemption
-            // TODO: stopper le timer de preemption et redémarrer le timer de CPU Usage ?
+            // TODO: stopper le timer de preemption et redémarrer le timer de
+            // CPU Usage ?
         }
     }
 
@@ -604,7 +613,8 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
         long traceEndTime = getTrace().getEndTime().toNanos();
 
         // Update all the timers if necessary
-        for (@NonNull Entry<Long, ThreadInfo> entry : info_by_tid.entrySet()) {
+        for (@NonNull
+        Entry<Long, ThreadInfo> entry : info_by_tid.entrySet()) {
             Long tid = entry.getKey();
             ThreadInfo threadInfo = entry.getValue();
 
@@ -625,7 +635,8 @@ class StateMachineProviderEventTypes extends AbstractTmfStateProvider {
                     value = TmfStateValue.newValueLong(threadInfo.cumul_wakeup_latency);
                     ss.modifyAttribute(traceEndTime, value, quark);
 
-                    // Reset last wakeup time to null, so that it will be used only next time we receive a sched_waking
+                    // Reset last wakeup time to null, so that it will be used
+                    // only next time we receive a sched_waking
                     threadInfo.last_wakeup = null;
                 } catch (StateValueTypeException | TimeRangeException | IndexOutOfBoundsException e) {
                     Activator.logError(e.getMessage(), e);
