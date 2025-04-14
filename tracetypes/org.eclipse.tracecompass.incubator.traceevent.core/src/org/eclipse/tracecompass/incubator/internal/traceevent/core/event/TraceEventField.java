@@ -51,7 +51,7 @@ public class TraceEventField {
     private final String fName;
     private ITmfEventField fContent;
     private final @Nullable Map<String, Object> fArgs;
-    private final @Nullable Integer fTid;
+    private final @Nullable Object fTid;
     private final @Nullable String fCategory;
     private final @Nullable String fId;
     private final @Nullable Long fDuration;
@@ -91,10 +91,7 @@ public class TraceEventField {
         }
         // We differentiate between the duration exit and the other exits for some reason
         String name = String.valueOf(optString(root, ITraceEventConstants.NAME,  TraceEventPhases.DURATION_END.equals(phase) ? UNKNOWN_DURATION_EXIT_EVENT : UNKNOWN_EXIT_EVENT));
-        Integer tid = optInt(root, ITraceEventConstants.TID);
-        if (tid == Integer.MIN_VALUE) {
-            tid = null;
-        }
+        String tid = optString(root, ITraceEventConstants.TID, null);
         JsonElement jsonElement = root.get(ITraceEventConstants.PID);
         JsonPrimitive primitive = jsonElement == null ? null : jsonElement.isJsonPrimitive() ? jsonElement.getAsJsonPrimitive() : null;
         Object pid = primitive == null ? null : primitive.isNumber() ? primitive.getAsNumber() : primitive.isString() ? primitive.getAsString() : null;
@@ -143,11 +140,6 @@ public class TraceEventField {
         return jsonElement != null ? jsonElement.getAsDouble() : Double.NaN;
     }
 
-    private static int optInt(JsonObject root, String key) {
-        JsonElement jsonElement = root.get(key);
-        return jsonElement != null ? jsonElement.getAsInt() : Integer.MIN_VALUE;
-    }
-
     private static @Nullable JsonObject optJSONObject(JsonObject root, String key) {
         JsonElement jsonElement = root.get(key);
         return jsonElement != null ? jsonElement.getAsJsonObject() : null;
@@ -184,7 +176,7 @@ public class TraceEventField {
      * @param fields
      *            event fields (arguments)
      */
-    protected TraceEventField(String name, long ts, String phase, @Nullable Object pid, @Nullable Integer tid, @Nullable String category, @Nullable String id, @Nullable Double duration, Map<String, Object> fields) {
+    protected TraceEventField(String name, long ts, String phase, @Nullable Object pid, @Nullable Object tid, @Nullable String category, @Nullable String id, @Nullable Double duration, Map<String, Object> fields) {
         fName = name;
         fPid = pid;
         fTid = tid;
@@ -258,7 +250,7 @@ public class TraceEventField {
      *
      * @return the event TID
      */
-    public @Nullable Integer getTid() {
+    public @Nullable Object getTid() {
         return fTid;
     }
 
