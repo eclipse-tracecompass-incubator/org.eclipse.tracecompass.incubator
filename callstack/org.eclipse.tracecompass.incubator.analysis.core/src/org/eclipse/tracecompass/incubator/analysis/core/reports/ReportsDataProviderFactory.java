@@ -113,6 +113,7 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
     public ReportsDataProviderFactory() {
         TmfSignalManager.register(this);
         ReportsDataProviderRegistry.registerProvider(this);
+        Activator.getInstance().logInfo("Reports data provider factory initialized"); //$NON-NLS-1$
     }
 
     @Override
@@ -207,6 +208,7 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
     @SuppressWarnings("null")
     @Override
     public @NonNull IDataProviderDescriptor createDataProviderDescriptors(@NonNull ITmfTrace trace, @NonNull ITmfConfiguration configuration) throws TmfConfigurationException {
+        Activator.getInstance().logInfo("Creating data provider descriptor for trace: " + trace.getName()); //$NON-NLS-1$ );
         ITmfConfiguration config = validateConfiguration(trace, configuration);
 
         ReportProviderType type = getReportType(config);
@@ -233,6 +235,8 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
 
         writeConfiguration(trace, config);
 
+        Activator.getInstance().logInfo("Created data provider descriptor: " + descriptor.getName() + " for trace: " + trace.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+
         return descriptor;
     }
 
@@ -248,6 +252,8 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
      */
     @Override
     public void removeDataProviderDescriptor(@NonNull ITmfTrace trace, @NonNull IDataProviderDescriptor descriptor) throws TmfConfigurationException {
+        Activator.getInstance().logInfo("Removing data provider descriptor: " + descriptor.getName() + " for trace: " + trace.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+
         ITmfConfiguration config = descriptor.getConfiguration();
         if (config == null) {
             throw new TmfConfigurationException("Data provider was not created by a configuration"); //$NON-NLS-1$
@@ -574,6 +580,8 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
      *             if an error occurs while writing
      */
     private static void writeConfiguration(@NonNull ITmfTrace trace, @NonNull ITmfConfiguration configuration) throws TmfConfigurationException {
+        Activator.getInstance().logInfo("Writing configuration " + configuration.getName() + " for trace " + trace.getName() + " to disk"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
         IPath basePath = getConfigurationBasePath(trace, configuration);
 
         File folder = basePath.toFile();
@@ -595,6 +603,8 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
      *             if an error occurs while removing
      */
     private static void removeConfiguration(@NonNull ITmfTrace trace, @NonNull ITmfConfiguration configuration) throws TmfConfigurationException {
+        Activator.getInstance().logInfo("Removing configuration " + configuration.getName() + " for trace " + trace.getName() + " from disk"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
         IPath configPath = getConfigurationBasePath(trace, configuration);
         File file = configPath.toFile();
 
@@ -724,6 +734,8 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
 
         fTmfConfigurationTable.clear();
         fTmfConfigurationHierarchy.clear();
+
+        Activator.getInstance().logInfo("Reports data provider factory disposed"); //$NON-NLS-1$
     }
 
 }

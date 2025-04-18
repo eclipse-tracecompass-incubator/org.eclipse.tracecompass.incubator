@@ -135,6 +135,8 @@ public class ImageReportDataProvider implements IReportDataProvider {
      */
     @SuppressWarnings("null")
     private static IStatus createImage(ITmfTrace trace, ITmfConfiguration configuration) {
+        Activator.getInstance().logInfo("Creating image report configuration " + configuration.getName() + " for trace " + trace.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+
         IPath originalPath = new Path((String) configuration.getParameters().get(PATH));
 
         if (!originalPath.toFile().exists()) {
@@ -182,12 +184,16 @@ public class ImageReportDataProvider implements IReportDataProvider {
                 FileChannel source = fis.getChannel();
                 FileChannel destination = fos.getChannel()) {
             destination.transferFrom(source, 0, source.size());
+            Activator.getInstance().logInfo("Image file copied from " + fromFile.getAbsolutePath() + " to " + toFile.getAbsolutePath() //$NON-NLS-1$ //$NON-NLS-2$
+                    + " of configuration " + configuration.getName() + " for trace " + trace.getName()); //$NON-NLS-1$ //$NON-NLS-2$
         } catch (IOException e) {
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Failed to copy image file", e); //$NON-NLS-1$
         }
 
         // Set the configuration path to the new path
         configuration.getParameters().put(PATH, toFile.getAbsolutePath());
+
+        Activator.getInstance().logInfo("Image report configuration " + configuration.getName() + " for trace " + trace.getName() + " created successfully"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         return Status.OK_STATUS;
     }
@@ -248,6 +254,9 @@ public class ImageReportDataProvider implements IReportDataProvider {
         if (imageFile.exists() && !imageFile.delete()) {
             throw new TmfConfigurationException("Failed to delete image file"); //$NON-NLS-1$
         }
+
+        Activator.getInstance().logInfo("Image file " + imageFile.getAbsolutePath() + " of configuration " + configuration.getName() //$NON-NLS-1$ //$NON-NLS-2$
+                + " for trace " + trace.getName() + " deleted successfully"); //$NON-NLS-1$ //$NON-NLS-2$
 
         return getDescriptorFromConfig(trace, configuration);
     }
