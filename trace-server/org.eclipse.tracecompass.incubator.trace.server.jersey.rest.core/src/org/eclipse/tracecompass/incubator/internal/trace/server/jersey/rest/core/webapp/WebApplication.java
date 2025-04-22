@@ -143,6 +143,7 @@ public class WebApplication {
         EncodingFilter.enableFor(rc, GZipEncoder.class);
         rc.register(TraceServerOpenApiResource.class);
         rc.register(BookmarkManagerService.class);
+        rc.register(RequestResponseLogger.class);
     }
 
     /**
