@@ -34,18 +34,18 @@
                     "classifier": {
                      "type": "string",
                      "description": "The classifier"
-                    },
-                    "required": [
-                        "label",
-                        "inRegex",
-                        "outRegex",
-                        "contextInRegex",
-                        "contextOutRegex",
-                        "classifier"
-                    ]
-               }
+                    }
+                },
+                "required": [
+                    "label",
+                    "inRegex",
+                    "outRegex",
+                    "contextInRegex",
+                    "contextOutRegex",
+                    "classifier"
+                ]
             }
         }
     },
-    "required": ["name", "specifiers"]
+    "required": ["specifiers"]
 }
