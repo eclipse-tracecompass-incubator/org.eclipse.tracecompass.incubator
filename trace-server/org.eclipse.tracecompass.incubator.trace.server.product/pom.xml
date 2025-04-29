@@ -49,6 +49,7 @@
                                 <solaris>zip</solaris>
                                 <win32>zip</win32>
                             </formats>
+                            <storeCreationTime>false</storeCreationTime>
                         </configuration>
                     </execution>
                 </executions>
