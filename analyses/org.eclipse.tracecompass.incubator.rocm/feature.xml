@@ -27,15 +27,11 @@
       <import plugin="org.eclipse.tracecompass.segmentstore.core"/>
       <import plugin="org.eclipse.tracecompass.analysis.timing.core"/>
       <import plugin="org.eclipse.tracecompass.incubator.analysis.core"/>
-      <import plugin="org.eclipse.tracecompass.incubator.callstack.core"/>
       <import plugin="org.eclipse.tracecompass.tmf.ctf.core"/>
    </requires>
 
    <plugin
          id="org.eclipse.tracecompass.incubator.rocm.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/> 
+         version="0.0.0"/>
 
 </feature>

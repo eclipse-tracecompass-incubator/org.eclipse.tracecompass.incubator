@@ -12,10 +12,10 @@
 package org.eclipse.tracecompass.incubator.analysis.core.tests.stubs.weighted;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeProvider;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeSet;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeGroupDescriptor;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeSet;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
 
 /**
  * Simple implementation of the {@link IWeightedTreeProvider} interface, for

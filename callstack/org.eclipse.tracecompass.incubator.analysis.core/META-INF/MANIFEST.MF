@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-SymbolicName: org.eclipse.tracecompass.incubator.analysis.core;singleton:=true
-Bundle-Version: 0.1.4.qualifier
+Bundle-Version: 0.2.0.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.eclipse.tracecompass.incubator.internal.analysis.core.Activator
 Bundle-ActivationPolicy: lazy
@@ -20,14 +20,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional,
  org.eclipse.tracecompass.analysis.profiling.core
 Export-Package: org.eclipse.tracecompass.incubator.analysis.core.aspects,
- org.eclipse.tracecompass.incubator.analysis.core.concepts,
- org.eclipse.tracecompass.incubator.analysis.core.model,
  org.eclipse.tracecompass.incubator.analysis.core.reports,
- org.eclipse.tracecompass.incubator.analysis.core.weighted.tree,
  org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.diff,
  org.eclipse.tracecompass.incubator.internal.analysis.core;x-internal:=true,
  org.eclipse.tracecompass.incubator.internal.analysis.core.aspects;x-internal:=true,
- org.eclipse.tracecompass.incubator.internal.analysis.core.model;x-friends:="org.eclipse.tracecompass.incubator.analysis.core.tests,org.eclipse.tracecompass.incubator.callstack.core.tests",
  org.eclipse.tracecompass.incubator.internal.analysis.core.weighted.tree;x-friends:="org.eclipse.tracecompass.incubator.analysis.core.tests"
 Import-Package: com.google.common.collect,
  org.apache.commons.lang3

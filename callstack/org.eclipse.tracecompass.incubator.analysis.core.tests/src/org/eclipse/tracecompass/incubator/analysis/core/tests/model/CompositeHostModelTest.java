@@ -20,11 +20,11 @@ import java.util.Collections;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.analysis.core.concepts.ICpuTimeProvider;
-import org.eclipse.tracecompass.incubator.analysis.core.concepts.IThreadOnCpuProvider;
-import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
-import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
-import org.eclipse.tracecompass.incubator.internal.analysis.core.model.CompositeHostModel;
+import org.eclipse.tracecompass.analysis.profiling.core.model.ICpuTimeProvider;
+import org.eclipse.tracecompass.analysis.profiling.core.model.IHostModel;
+import org.eclipse.tracecompass.analysis.profiling.core.model.IThreadOnCpuProvider;
+import org.eclipse.tracecompass.internal.analysis.profiling.core.model.CompositeHostModel;
+import org.eclipse.tracecompass.internal.analysis.profiling.core.model.ModelManager;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisManager;
 import org.eclipse.tracecompass.tmf.tests.stubs.analysis.TestAnalysis;
