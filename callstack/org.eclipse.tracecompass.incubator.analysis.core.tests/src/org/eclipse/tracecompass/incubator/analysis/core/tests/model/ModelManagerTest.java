@@ -15,8 +15,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.eclipse.tracecompass.incubator.analysis.core.model.IHostModel;
-import org.eclipse.tracecompass.incubator.analysis.core.model.ModelManager;
+import org.eclipse.tracecompass.analysis.profiling.core.model.IHostModel;
+import org.eclipse.tracecompass.internal.analysis.profiling.core.model.ModelManager;
 import org.junit.Test;
 
 /**

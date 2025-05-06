@@ -23,16 +23,16 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.ITree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.IWeightedTreeGroupDescriptor;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTreeGroupBy;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTreeSet;
 import org.eclipse.tracecompass.incubator.analysis.core.tests.stubs.weighted.SimpleTree;
 import org.eclipse.tracecompass.incubator.analysis.core.tests.stubs.weighted.SimpleWeightedTreeProvider;
 import org.eclipse.tracecompass.incubator.analysis.core.tests.stubs.weighted.WeightedTreeTestData;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.AllGroupDescriptor;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.DepthGroupDescriptor;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.IWeightedTreeGroupDescriptor;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeGroupBy;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeSet;
+import org.eclipse.tracecompass.internal.analysis.profiling.core.tree.AllGroupDescriptor;
+import org.eclipse.tracecompass.internal.analysis.profiling.core.tree.DepthGroupDescriptor;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;

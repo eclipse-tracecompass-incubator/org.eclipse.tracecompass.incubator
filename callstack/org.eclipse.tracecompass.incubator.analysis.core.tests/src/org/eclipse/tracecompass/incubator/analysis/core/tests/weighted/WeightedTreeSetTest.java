@@ -17,10 +17,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.ITree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTreeSet;
 import org.eclipse.tracecompass.incubator.analysis.core.tests.stubs.weighted.SimpleTree;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.ITree;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeSet;
 import org.junit.Test;
 
 /**

@@ -11,8 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.analysis.core.tests.stubs.weighted;
 
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTreeSet;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTreeSet;
 
 /**
  * A class that encapsulates stub data for multiple tests

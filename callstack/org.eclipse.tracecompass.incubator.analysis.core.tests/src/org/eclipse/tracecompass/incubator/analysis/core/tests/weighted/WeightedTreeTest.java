@@ -19,7 +19,7 @@ import static org.junit.Assert.fail;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.tracecompass.incubator.analysis.core.weighted.tree.WeightedTree;
+import org.eclipse.tracecompass.analysis.profiling.core.tree.WeightedTree;
 import org.junit.Test;
 
 /**

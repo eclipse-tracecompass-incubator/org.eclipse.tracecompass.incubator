@@ -2,12 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.eclipse.linuxtools.tmf.core.analysis">
-      <listener
-            class="org.eclipse.tracecompass.incubator.internal.analysis.core.model.ModelListener">
-      </listener>
-   </extension>
-   <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
       <dataProviderFactory
             class="org.eclipse.tracecompass.incubator.analysis.core.reports.ReportsDataProviderFactory"
