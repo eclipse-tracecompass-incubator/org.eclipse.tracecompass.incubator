@@ -30,6 +30,16 @@
                class="org.eclipse.tracecompass.incubator.dpdk.core.trace.DpdkTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.dpdk.core.mempool.analysis.DpdkMempoolAnalysisModule"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.dpdk.mempool.analysis"
+            name="DPDK Mempool Analysis">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.dpdk.core.trace.DpdkTrace">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.core.analysis.ondemand">
@@ -37,7 +47,7 @@
             class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.poll.distribution.analysis.DpdkPollDistributionAnalysis"
             id="org.eclipse.tracecompass.incubator.dpdk.core.ethdev.poll.distribution">
       </analysis>
-	<analysis
+      <analysis
             class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.poll.stats.analysis.DpdkPollStatsAnalysis"
             id="org.eclipse.tracecompass.incubator.dpdk.core.ethdev.poll.stats">
       </analysis>
@@ -59,6 +69,10 @@
       <dataProviderFactory
             class="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.analysis.DpdkEthdevSpinDataProviderFactory"
             id="org.eclipse.tracecompass.incubator.internal.dpdk.core.ethdev.spin.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.dpdk.core.mempool.analysis.DpdkMempoolAllocFreeRateDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.internal.dpdk.core.mempool.alloc.free.dataprovider">
       </dataProviderFactory>
    </extension>
    <extension
