@@ -48,6 +48,7 @@ import org.eclipse.tracecompass.tmf.core.model.DataProviderCapabilities;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
+import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
@@ -55,6 +56,7 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.incubator.internal.analysis.core.Activator;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.dataprovider.TmfDataProviderDataModel;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -726,4 +728,28 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
         fTmfConfigurationHierarchy.clear();
     }
 
+    @SuppressWarnings("restriction")
+    @Override
+    public TmfModelResponse<TmfDataProviderDataModel<?>> getData(ITmfTrace trace, IDataProviderDescriptor descriptor) throws Exception {
+        if (descriptor.getType() != ProviderType.NONE) {
+            throw new TmfConfigurationException("The requested output is not a MIME report"); //$NON-NLS-1$
+        }
+
+        ITmfConfiguration configuration = descriptor.getConfiguration();
+        if (configuration == null) {
+            throw new TmfConfigurationException("Missing configuration for report"); //$NON-NLS-1$ "
+        }
+
+        ReportProviderType reportType = getReportType(configuration);
+        IReportDataProvider provider = ReportsDataProviderRegistry.getProvider(reportType);
+        if (provider == null) {
+            throw new TmfConfigurationException("No provider found for report type"); //$NON-NLS-1$
+        }
+
+        if (provider instanceof ReportsDataProviderFactory) {
+            throw new TmfConfigurationException("Cannot get data from the report factory"); //$NON-NLS-1$
+        }
+
+        return provider.getData(trace, descriptor);
+    }
 }

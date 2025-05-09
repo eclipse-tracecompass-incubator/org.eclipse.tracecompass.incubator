@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,7 +25,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.analysis.core.Activator;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.dataprovider.TmfDataProviderDataModel;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigParamDescriptor;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
@@ -33,9 +36,14 @@ import org.eclipse.tracecompass.tmf.core.config.TmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderCapabilities;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
+import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
+import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
+import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
+import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
@@ -43,7 +51,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  *
  * @author Kaveh Shahedi
  */
-public class ImageReportDataProvider implements IReportDataProvider {
+public class ImageReportDataProvider implements IReportDataProvider, IDataProviderFactory {
 
     private static final String[] VALID_EXTENSIONS = { "png", "jpg", "jpeg", "svg" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
                                                                                       // //$NON-NLS-5$
@@ -250,5 +258,39 @@ public class ImageReportDataProvider implements IReportDataProvider {
         }
 
         return getDescriptorFromConfig(trace, configuration);
+    }
+
+    @SuppressWarnings("restriction")
+    @Override
+    public TmfModelResponse<TmfDataProviderDataModel<?>> getData(ITmfTrace trace, IDataProviderDescriptor descriptor) throws Exception {
+        ITmfConfiguration configuration = descriptor.getConfiguration();
+        if (configuration == null) {
+            throw new TmfConfigurationException("Missing configuration for report"); //$NON-NLS-1$
+        }
+
+        // Get the image path from the configuration
+        String imagePath = (String) configuration.getParameters().get(PATH);
+        if (imagePath == null) {
+            throw new TmfConfigurationException("Image path not found in configuration"); //$NON-NLS-1$
+        }
+
+        File imageFile = new File(imagePath);
+        if (!imageFile.exists() || !imageFile.isFile()) {
+            throw new TmfConfigurationException("Image file not found"); //$NON-NLS-1$
+        }
+
+        String contentType = Files.probeContentType(imageFile.toPath());
+        if (contentType == null) {
+            contentType = "application/octet-stream"; //$NON-NLS-1$
+        }
+
+        TmfDataProviderDataModel<File> dataModel = new TmfDataProviderDataModel<>(imageFile, contentType, imageFile.getName());
+
+        return new TmfModelResponse<>(dataModel, ITmfResponse.Status.COMPLETED, configuration.getName());
+    }
+
+    @Override
+    public @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> createProvider(@NonNull ITmfTrace trace) {
+        return null;
     }
 }
