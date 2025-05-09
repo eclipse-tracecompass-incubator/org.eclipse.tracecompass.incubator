@@ -33,19 +33,20 @@ import com.google.common.base.Strings;
 public class StateMachineReport {
 
     /** Main report instance */
-    public final static StateMachineReport R = new StateMachineReport();
+    public static final StateMachineReport R = new StateMachineReport();
 
     /** The name of the ANALYZE print */
-    public final static String ANALYZE = "ANALYZE"; //$NON-NLS-1$
+    public static final String ANALYZE = "ANALYZE"; //$NON-NLS-1$
     /** The name of the DEBUG print */
-    public final static String DEBUG = "DEBUG"; //$NON-NLS-1$
+    public static final String DEBUG = "DEBUG"; //$NON-NLS-1$
     /** The name of the BENCHMARK print */
-    public final static String BENCHMARK = "BENCHMARK"; //$NON-NLS-1$
+    public static final String BENCHMARK = "BENCHMARK"; //$NON-NLS-1$
 
-    private final static Map<String, Boolean> shouldPrintMap = new HashMap<>();
+    private static final Map<String, Boolean> shouldPrintMap = new HashMap<>();
 
     /**
-     * @param type The type of element to check the environment variable for
+     * @param type
+     *            The type of element to check the environment variable for
      * @return If we should print
      */
     public static boolean shouldPrint(String type) {
@@ -53,8 +54,10 @@ public class StateMachineReport {
     }
 
     /**
-     * @param type The type of element to check the environment variable for
-     * @param defaultValue The default value if none is given
+     * @param type
+     *            The type of element to check the environment variable for
+     * @param defaultValue
+     *            The default value if none is given
      * @return If we should print
      */
     public static boolean shouldPrint(String type, boolean defaultValue) {
@@ -99,7 +102,9 @@ public class StateMachineReport {
 
     /**
      * Print a debug message
-     * @param str The message to print
+     *
+     * @param str
+     *            The message to print
      */
     public static void debug(Object str) {
         specialPrint(str, DEBUG);
@@ -107,7 +112,9 @@ public class StateMachineReport {
 
     /**
      * Print a benchmark message
-     * @param str The message to print
+     *
+     * @param str
+     *            The message to print
      */
     public static void benchmark(Object str) {
         specialPrint(str, BENCHMARK);
@@ -141,7 +148,7 @@ public class StateMachineReport {
     private RTOutputStream output = new RTOutputStream(System.out);
     private int level = 0;
     private String tabStr = null;
-    private final static char SHIFT = '\t';
+    private static final char SHIFT = '\t';
 
     /**
      * Default constructor
@@ -151,7 +158,9 @@ public class StateMachineReport {
 
     /**
      * Constructor with parameter
-     * @param output The stream in which to output the report
+     *
+     * @param output
+     *            The stream in which to output the report
      */
     public StateMachineReport(PrintStream output) {
         this.output = new RTOutputStream(output);
@@ -164,23 +173,15 @@ public class StateMachineReport {
      *    ║ str ║
      *    ╚═════╝
      * </pre>
-     * @param str The text
+     *
+     * @param str
+     *            The text
      */
     public void println_section(String str) {
         if (!shouldPrint(ANALYZE)) {
             return;
         }
-
-        String top = "╔══"; //$NON-NLS-1$
-        String bottom = "╚══"; //$NON-NLS-1$
-        for (int i = 0; i < str.length(); i++) {
-            top += "═"; //$NON-NLS-1$
-            bottom += "═"; //$NON-NLS-1$
-        }
-        top += "╗"; //$NON-NLS-1$
-        bottom += "╝"; //$NON-NLS-1$
-        String t = top + "\n║ " + Font.boldItalic(str) + " ║\n" + bottom; //$NON-NLS-1$ //$NON-NLS-2$
-        println(t);
+        innerPrintBox(str, "═", "║", "╔", "╚", "╗", "╝"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
     }
 
     /**
@@ -190,23 +191,15 @@ public class StateMachineReport {
      *    ┃ str ┃
      *    ┗━━━━━┛
      * </pre>
-     * @param str The text
+     *
+     * @param str
+     *            The text
      */
     public void println_subsection(String str) {
         if (!shouldPrint(ANALYZE)) {
             return;
         }
-
-        String top = "┏━━"; //$NON-NLS-1$
-        String bottom = "┗━━"; //$NON-NLS-1$
-        for (int i = 0; i < str.length(); i++) {
-            top += "━"; //$NON-NLS-1$
-            bottom += "━"; //$NON-NLS-1$
-        }
-        top += "┓"; //$NON-NLS-1$
-        bottom += "┛"; //$NON-NLS-1$
-        String t = top + "\n┃ " + Font.bold(str) + " ┃\n" + bottom; //$NON-NLS-1$ //$NON-NLS-2$
-        println(t);
+        innerPrintBox(str, "━", "┃", "┏", "┗", "┓", "┛"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
     }
 
     /**
@@ -216,22 +209,45 @@ public class StateMachineReport {
      *    │ str │
      *    └─────┘
      * </pre>
-     * @param str The text
+     *
+     * @param str
+     *            The text
      */
     public void println_subsubsection(String str) {
         if (!shouldPrint(ANALYZE)) {
             return;
         }
+        innerPrintBox(str, "─", "|", "┌", "└", "┐", "┘"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+    }
 
-        String top = "┌──"; //$NON-NLS-1$
-        String bottom = "└──"; //$NON-NLS-1$
+    /**
+     * Inner box Print
+     *
+     * @param str
+     *            the item to print
+     * @param hLine
+     *            horizontal line
+     * @param vLine
+     *            vertical line
+     * @param topCorner1
+     *            top left corner
+     * @param bottomCorner1
+     *            bottom left corner
+     * @param topCorner2
+     *            top right corner
+     * @param bottomCorner2
+     *            bottom right corner
+     */
+    private void innerPrintBox(String str, String hLine, String vLine, String topCorner1, String bottomCorner1, String topCorner2, String bottomCorner2) {
+        StringBuilder top = new StringBuilder(topCorner1).append(hLine).append(hLine);
+        StringBuilder bottom = new StringBuilder(bottomCorner1).append(hLine).append(hLine);
         for (int i = 0; i < str.length(); i++) {
-            top += "─"; //$NON-NLS-1$
-            bottom += "─"; //$NON-NLS-1$
+            top.append(hLine);
+            bottom.append(hLine);
         }
-        top += "┐"; //$NON-NLS-1$
-        bottom += "┘"; //$NON-NLS-1$
-        String t = top + "\n│ " + str + " │\n" + bottom; //$NON-NLS-1$ //$NON-NLS-2$
+        top.append(topCorner2);
+        bottom.append(bottomCorner2);
+        String t = top.toString() + "\n" + vLine + " " + str + " " + vLine + "\n" + bottom; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         println(t);
     }
 
@@ -242,23 +258,15 @@ public class StateMachineReport {
      *    ┊ str ┊
      *    └┄┄┄┄┄┘
      * </pre>
-     * @param str The text
+     *
+     * @param str
+     *            The text
      */
     public void println_subsubsubsection(String str) {
         if (!shouldPrint(ANALYZE)) {
             return;
         }
-
-        String top = "┌┄┄"; //$NON-NLS-1$
-        String bottom = "└┄┄"; //$NON-NLS-1$
-        for (int i = 0; i < str.length(); i++) {
-            top += "┄"; //$NON-NLS-1$
-            bottom += "┄"; //$NON-NLS-1$
-        }
-        top += "┐"; //$NON-NLS-1$
-        bottom += "┘"; //$NON-NLS-1$
-        String t = top + "\n┊ " + Font.italic(str) + " ┊\n" + bottom; //$NON-NLS-1$ //$NON-NLS-2$
-        println(t);
+        innerPrintBox(str, "┄", "┊", "┌", "└", "┐", "┘"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
     }
 
     /**
@@ -267,7 +275,9 @@ public class StateMachineReport {
      *    str
      *    ‾‾‾
      * </pre>
-     * @param str The text
+     *
+     * @param str
+     *            The text
      */
     public void println_subsubsubsubsection(String str) {
         if (!shouldPrint(ANALYZE)) {
@@ -284,9 +294,15 @@ public class StateMachineReport {
 
     /**
      * Print a table in the stream
-     * @param header The String array containing the header for the table
-     * @param strs The String array of String arrays representing the content of the table
-     * @param rightAlign The collection indexes of columns that have to be right aligned
+     *
+     * @param header
+     *            The String array containing the header for the table
+     * @param strs
+     *            The String array of String arrays representing the content of
+     *            the table
+     * @param rightAlign
+     *            The collection indexes of columns that have to be right
+     *            aligned
      */
     public void println_table(Object[] header, Object[][] strs, Collection<Integer> rightAlign) {
         if (!shouldPrint(ANALYZE)) {
@@ -298,10 +314,17 @@ public class StateMachineReport {
 
     /**
      * Print a table in the stream
-     * @param header The String array containing the header for the table
-     * @param strs The String array of String arrays representing the content of the table
-     * @param rightAlign The collection indexes of columns that have to be right aligned
-     * @param bottomAlign To align the rows to the bottom for multiline cases
+     *
+     * @param header
+     *            The String array containing the header for the table
+     * @param strs
+     *            The String array of String arrays representing the content of
+     *            the table
+     * @param rightAlign
+     *            The collection indexes of columns that have to be right
+     *            aligned
+     * @param bottomAlign
+     *            To align the rows to the bottom for multiline cases
      */
     public void println_table(Object[] header, Object[][] strs, Collection<Integer> rightAlign, boolean bottomAlign) {
         if (!shouldPrint(ANALYZE)) {
@@ -436,7 +459,9 @@ public class StateMachineReport {
 
     /**
      * Print the given object with the right tabulation level
-     * @param obj The object to print
+     *
+     * @param obj
+     *            The object to print
      */
     public void println(Object obj) {
         if (!shouldPrint(ANALYZE)) {
@@ -473,8 +498,11 @@ public class StateMachineReport {
 
     /**
      * Print a progress bar
-     * @param ratio The ratio to print (in percent)
-     * @param progressSize The size of the progress bar
+     *
+     * @param ratio
+     *            The ratio to print (in percent)
+     * @param progressSize
+     *            The size of the progress bar
      * @return A String representing the progress bar
      */
     public static String progressBar(double ratio, int progressSize) {
@@ -485,7 +513,7 @@ public class StateMachineReport {
         String symbol = ""; //$NON-NLS-1$
         while (cratio >= chunkSize
                 || (Math.abs(chunkSize - cratio) <= cratio
-                    && Math.abs(chunkSize - cratio) <= Math.abs((chunkSize / 2) - cratio))) {
+                        && Math.abs(chunkSize - cratio) <= Math.abs((chunkSize / 2) - cratio))) {
             cratio -= chunkSize;
             symbol += "█"; //$NON-NLS-1$
             size++;
@@ -532,7 +560,9 @@ public class StateMachineReport {
     /**
      * Print the number of dropped instances during the analysis, and the reason
      * why they were dropped
-     * @param smva The state machine variable analysis instance
+     *
+     * @param smva
+     *            The state machine variable analysis instance
      */
     public void printDropped(StateMachineVariableAnalysis smva) {
         if (!shouldPrint(ANALYZE)) {
