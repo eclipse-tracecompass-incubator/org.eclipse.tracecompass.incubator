@@ -1,0 +1,1 @@
+package org.eclipse.tracecompass.incubator.opentracing.core.analysis.callstack;
