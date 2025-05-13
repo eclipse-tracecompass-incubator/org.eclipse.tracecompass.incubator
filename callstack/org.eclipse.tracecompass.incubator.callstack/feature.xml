@@ -45,10 +45,6 @@
    </requires>
 
    <plugin
-         id="org.eclipse.tracecompass.incubator.callstack.doc.user"
-         version="0.0.0"/>
-
-   <plugin
          id="org.eclipse.tracecompass.incubator.analysis.core"
          version="0.0.0"/>
 

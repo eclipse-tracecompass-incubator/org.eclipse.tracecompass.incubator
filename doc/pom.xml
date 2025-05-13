@@ -34,7 +34,6 @@
 
   <modules>
 
-    <module>org.eclipse.tracecompass.incubator.callstack.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.perf.profiling.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.virtual.machine.analysis.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.uftrace.doc.user</module>
