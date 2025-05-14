@@ -27,6 +27,9 @@
   <name>Trace Compass Incubator analyses Parent</name>
 
   <modules>
+    <module>org.eclipse.tracecompass.incubator.analysis</module>
+    <module>org.eclipse.tracecompass.incubator.analysis.core</module>
+    <module>org.eclipse.tracecompass.incubator.analysis.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.xaf.core</module>
     <module>org.eclipse.tracecompass.incubator.xaf.ui</module>
     <module>org.eclipse.tracecompass.incubator.lttng2.ust.extras</module>
