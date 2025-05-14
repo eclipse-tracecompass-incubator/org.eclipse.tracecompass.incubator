@@ -35,6 +35,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.EXP_UUID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.FILTER_QUERY_PARAMETERS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.FILTER_QUERY_PARAMETERS_EX;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.RPT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INDEX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INDEX_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
@@ -132,6 +133,8 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TreeModelWrapper;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.VirtualTableModelWrapper;
 import org.eclipse.tracecompass.internal.analysis.timing.core.event.matching.EventMatchingLatencyAnalysis;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.dataprovider.ITmfDataProviderDataFetcher;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.dataprovider.TmfDataProviderDataModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableDataProvider;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.ITmfVirtualTableModel;
 import org.eclipse.tracecompass.internal.provisional.tmf.core.model.table.IVirtualTableLine;
@@ -1022,6 +1025,78 @@ public class DataProviderService {
             TmfModelResponse<?> treeResponse = provider.fetchTree(params, null);
             Object model = treeResponse.getModel();
             return Response.ok(model instanceof TmfTreeModel ? new TmfModelResponse<>(new TreeModelWrapper((TmfTreeModel<@NonNull ITmfTreeDataModel>) model), treeResponse.getStatus(), treeResponse.getStatusMessage()) : treeResponse).build();
+        }
+    }
+
+    /**
+     * Query the provider for a MIME report. Based on the given output, this
+     * endpoint will return a specific report, which can be an image, a
+     * textual data, a HTML, etc.
+     *
+     * @param expUUID
+     *            desired experiment UUID
+     * @param outputId
+     *            Output ID for the data provider to query
+     * @return {@link Response} with the corresponding report data
+     */
+    @GET
+    @Path("/report/{outputId}")
+    @Tag(name = RPT)
+    @Produces(MediaType.WILDCARD)
+    @Operation(summary = "API to get a MIME report", responses = {
+        @ApiResponse(responseCode = "200", description = "Returns the report data"),
+        @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "404", description = "Provider not found, missing subtype, or requested resource not found", content = @Content(schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "500", description = "Error retrieving the report data", content = @Content(schema = @Schema(implementation = String.class))),
+    })
+    public Response getReport(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId) {
+
+        if (outputId == null) {
+            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
+        }
+
+        TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+        if (experiment == null) {
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+        }
+
+        IDataProviderDescriptor descriptor = getDescriptor(experiment, outputId);
+        if (descriptor == null) {
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
+        }
+
+        IDataProviderFactory factory = manager.getFactory(REPORTS_FACTORY_ID);
+        if (factory == null) {
+            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
+        }
+
+        ITmfDataProviderDataFetcher dataFetcher = factory.getAdapter(ITmfDataProviderDataFetcher.class);
+        if (dataFetcher == null) {
+            return Response.status(Status.NOT_FOUND).entity("Report data fetcher not found").build(); //$NON-NLS-1$ "
+        }
+
+        try {
+            TmfModelResponse<TmfDataProviderDataModel<?>> reportResponse = dataFetcher.getData(experiment, descriptor);
+            if (reportResponse == null) {
+                return Response.status(Status.NOT_FOUND).entity("Report data not found").build(); //$NON-NLS-1$
+            }
+
+            if (reportResponse.getStatus() != ITmfResponse.Status.COMPLETED) {
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity(reportResponse.getStatusMessage()).build();
+            }
+
+            TmfDataProviderDataModel<?> responseModel = reportResponse.getModel();
+            if (responseModel == null) {
+                return Response.status(Status.NOT_FOUND).entity("Report data model not found").build(); //$NON-NLS-1$
+            }
+
+            return Response.ok(responseModel.getContent(), responseModel.getContentType()).build();
+        } catch (TmfConfigurationException e) {
+            return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 

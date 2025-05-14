@@ -11,6 +11,7 @@
 package org.eclipse.tracecompass.incubator.analysis.core.reports;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.dataprovider.ITmfDataProviderDataFetcher;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
@@ -25,7 +26,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  *
  * @author Kaveh Shahedi
  */
-public interface IReportDataProvider {
+public interface IReportDataProvider extends ITmfDataProviderDataFetcher {
 
     /**
      * Type identifier for report providers
