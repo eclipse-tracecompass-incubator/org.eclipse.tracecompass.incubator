@@ -11,10 +11,7 @@
       <category name="virtualization"/>
    </feature>
    <feature url="features/org.eclipse.tracecompass.incubator.virtual.machine.analysis.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.source" version="0.0.0"/>
-   <feature url="features/org.eclipse.tracecompass.incubator.callstack_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.callstack" version="0.0.0">
-      <category name="callstack"/>
-   </feature>
-   <feature url="features/org.eclipse.tracecompass.incubator.callstack.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.callstack.source" version="0.0.0"/>
+   <feature url="features/org.eclipse.tracecompass.incubator.analysis.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.analysis.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.perf.profiling_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.perf.profiling" version="0.0.0">
       <category name="trace-types"/>
    </feature>
@@ -103,9 +100,9 @@
       <category name="trace-types"/>
    </feature>
    <feature url="features/org.eclipse.tracecompass.incubator.dpdk.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.dpdk.source" version="0.0.0"/>
-   <bundle id="org.eclipse.tracecompass.incubator.analysis.core" version="0.0.0">
+   <feature id="org.eclipse.tracecompass.incubator.analysis">
       <category name="analyses"/>
-   </bundle>
+   </feature>
    <bundle id="org.eclipse.tracecompass.incubator.analysis.core.source"/>
    <bundle id="org.eclipse.tracecompass.incubator.tmf.ui.multiview.ui" version="0.0.0">
       <category name="analyses"/>
@@ -137,11 +134,6 @@
    <category-def name="trace-types" label="Trace Types"/>
    <category-def name="virtualization" label="Virtualization"/>
    <category-def name="analyses" label="Analyses"/>
-   <category-def name="callstack" label="Call Stack Analyses">
-      <description>
-         Contains feature related to call stack data, stack traces, sampling, etc.
-      </description>
-   </category-def>
    <category-def name="utilities" label="Utilities">
       <description>
          Additional functionalities for Trace Compass
