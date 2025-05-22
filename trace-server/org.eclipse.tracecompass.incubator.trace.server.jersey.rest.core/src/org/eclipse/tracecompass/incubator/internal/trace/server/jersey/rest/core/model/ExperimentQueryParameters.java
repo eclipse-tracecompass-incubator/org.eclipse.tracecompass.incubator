@@ -25,16 +25,29 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public interface ExperimentQueryParameters {
 
     /**
-     * @return The name.
+     * @return The parameters.
      */
     @NonNull
-    @Schema(description = "The name to give this experiment", required = true)
-    String getName();
+    @Schema(required = true)
+    ExperimentParameters getParameters();
 
     /**
-     * @return The traces.
+     * Detailed experiment parameters.
      */
-    @NonNull
-    @ArraySchema(arraySchema = @Schema(description = "The unique identifiers of the traces to encapsulate in this experiment", required = true))
-    List<@NonNull UUID> getTraces();
+    interface ExperimentParameters {
+
+        /**
+         * @return The name.
+         */
+        @NonNull
+        @Schema(description = "The name to give this experiment", required = true)
+        String getName();
+
+        /**
+         * @return The traces.
+         */
+        @NonNull
+        @ArraySchema(arraySchema = @Schema(description = "The unique identifiers of the traces to encapsulate in this experiment", required = true))
+        List<@NonNull UUID> getTraces();
+    }
 }
