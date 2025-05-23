@@ -49,7 +49,7 @@ public interface SeriesModel {
      */
     @JsonProperty("yValues")
     @ArraySchema(arraySchema = @Schema(description = "Series' Y values", required = true))
-    long[] getYValues();
+    double[] getYValues();
 
     /**
      * @return The series style.
