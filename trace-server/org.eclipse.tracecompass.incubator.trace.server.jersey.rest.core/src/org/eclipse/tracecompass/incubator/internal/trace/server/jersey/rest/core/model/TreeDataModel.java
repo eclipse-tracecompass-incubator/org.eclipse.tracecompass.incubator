@@ -28,14 +28,13 @@ public interface TreeDataModel {
     /**
      * @return The ID.
      */
-    @Schema(description = "Unique id to identify this entry in the backend", required = true)
+    @Schema(description = "Unique ID to identify this entry in the backend", required = true)
     long getId();
 
     /**
      * @return The parent ID.
      */
-    @Schema(description = "Unique id to identify this parent's entry, " +
-            "optional if this entry does not have a parent.")
+    @Schema(description = "Optional unique ID to identify this entry's parent. If the parent ID is -1 or omitted, this entry has no parent.")
     long getParentId();
 
     /**
