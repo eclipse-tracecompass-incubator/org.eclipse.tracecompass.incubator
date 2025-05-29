@@ -45,7 +45,7 @@ public interface OutputElementStyle {
     /**
      * Type for style values (String, Float, Integer or Boolean)
      */
-    @Schema(description = "Supported types of a style value.", oneOf = { String.class, Float.class, Integer.class, Boolean.class })
+    @Schema(description = "Supported types of a style value.", oneOf = { String.class, Double.class, Integer.class })
     interface StyleValue {
         // empty
     }
