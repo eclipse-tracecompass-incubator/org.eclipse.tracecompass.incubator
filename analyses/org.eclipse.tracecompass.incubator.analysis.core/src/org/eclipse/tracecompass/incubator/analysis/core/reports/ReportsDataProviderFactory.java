@@ -734,8 +734,6 @@ public class ReportsDataProviderFactory implements IDataProviderFactory, ITmfDat
 
         fTmfConfigurationTable.clear();
         fTmfConfigurationHierarchy.clear();
-
-        Activator.getInstance().logInfo("Reports data provider factory disposed"); //$NON-NLS-1$
     }
 
 }
