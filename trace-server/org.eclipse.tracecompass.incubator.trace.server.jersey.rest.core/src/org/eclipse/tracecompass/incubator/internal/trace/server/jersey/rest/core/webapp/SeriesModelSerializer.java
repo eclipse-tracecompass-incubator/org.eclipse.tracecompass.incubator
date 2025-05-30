@@ -38,7 +38,7 @@ public class SeriesModelSerializer extends StdSerializer<@NonNull ISeriesModel> 
     /**
      * Constructor.
      */
-    protected SeriesModelSerializer() {
+    public SeriesModelSerializer() {
         super(ISeriesModel.class);
     }
 
