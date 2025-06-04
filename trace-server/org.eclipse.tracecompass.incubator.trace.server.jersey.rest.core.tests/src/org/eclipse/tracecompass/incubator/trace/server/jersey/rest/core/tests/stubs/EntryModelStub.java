@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2020 École Polytechnique de Montréal
+ * Copyright (c) 2020, 2025 École Polytechnique de Montréal and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -36,6 +36,7 @@ public class EntryModelStub implements Serializable {
 
     private final List<EntryStub> fEntries;
     private final List<EntryHeaderStub> fHeaders;
+    private final int fAutoExpandLevel;
 
     /**
      * {@link JsonCreator} Constructor for final fields
@@ -44,12 +45,16 @@ public class EntryModelStub implements Serializable {
      *            The set of entries for this model
      * @param headers
      *            The set of headers for this model
+     * @param autoExpandLevel
+     *            The auto-expand level for this model
      */
     @JsonCreator
     public EntryModelStub(@JsonProperty("entries") List<EntryStub> entries,
-            @JsonProperty("headers") List<EntryHeaderStub> headers) {
+            @JsonProperty("headers") List<EntryHeaderStub> headers,
+            @JsonProperty("autoExpandLevel") Integer autoExpandLevel) {
         fEntries = Objects.requireNonNull(entries, "The 'entries' json field was not set");
         fHeaders = headers == null ? Collections.emptyList() : headers;
+        fAutoExpandLevel = autoExpandLevel == null ? -1 : autoExpandLevel;
     }
 
     /**
@@ -68,6 +73,15 @@ public class EntryModelStub implements Serializable {
      */
     public List<EntryHeaderStub> getHeaders() {
         return fHeaders;
+    }
+
+    /**
+     * Get the auto-expand level
+     *
+     * @return auto-expand level
+     */
+    public int getAutoExpandLevel() {
+        return fAutoExpandLevel;
     }
 
 }
