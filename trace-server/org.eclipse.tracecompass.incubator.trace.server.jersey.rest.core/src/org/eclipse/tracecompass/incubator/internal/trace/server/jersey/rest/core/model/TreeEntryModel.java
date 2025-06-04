@@ -34,4 +34,9 @@ public interface TreeEntryModel {
      */
     @NonNull
     List<@NonNull TreeColumnHeader> getHeaders();
+
+    /**
+     * @return The expand level.
+     */
+    int getExpandLevel();
 }
