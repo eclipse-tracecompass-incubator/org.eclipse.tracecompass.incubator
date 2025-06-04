@@ -114,4 +114,12 @@ public class TreeModelWrapper {
         return fModel.getEntries();
     }
 
+    /**
+     * Wrapper to the {@link TmfTreeModel#getAutoExpandLevel()} method
+     *
+     * @return Indicates till which level of the tree we should expand the nodes
+     */
+    public int getAutoExpandLevel() {
+        return fModel.getAutoExpandLevel();
+    }
 }
