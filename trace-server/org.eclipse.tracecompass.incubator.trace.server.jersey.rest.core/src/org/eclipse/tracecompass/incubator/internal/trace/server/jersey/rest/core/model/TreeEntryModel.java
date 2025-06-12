@@ -38,10 +38,11 @@ public interface TreeEntryModel {
     /**
      * @return The auto-expand level.
      */
-    @Schema(description = "Sets the auto-expand level to be used for the input of the tree. The "
+    @Schema(description = "Optional auto-expand level to be used for the input of the tree. "
+            + "If omitted or value -1 means that all subtrees should be expanded. The "
             + "value 0 means that there is no auto-expand; 1 means that top-level "
             + "elements are expanded, but not their children; 2 means that top-level "
             + "elements are expanded, and their children, but not grand-children; and so "
-            + "on. The value -1 means that all subtrees should be expanded.")
+            + "on.")
     int getAutoExpandLevel();
 }
