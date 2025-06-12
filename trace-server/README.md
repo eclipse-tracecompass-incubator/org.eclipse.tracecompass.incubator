@@ -5,11 +5,16 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+- [Developing for the server](#developing-for-the-server)
 - [Compiling manually](#compiling-manually)
 - [Running the server](#running-the-server)
-- [Run the Server with SSL](#running-the-server-with-ssl)
+- [Running the server with SSL](#running-the-server-with-ssl)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Developing for the server
+
+For information on developing for the '''Trace Compass Trace Server''' see the [Trace Server Developer Guide](https://github.com/eclipse-tracecompass/org.eclipse.tracecompass/blob/master/doc/trace-server/trace-server-dev-guide.md).
 
 ## Compiling manually
 
