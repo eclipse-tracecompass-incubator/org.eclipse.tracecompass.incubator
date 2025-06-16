@@ -154,11 +154,10 @@ public class InAndOutDataProviderConfigurator extends TmfComponent implements IT
         }
 
         String configId = creationConfiguration.getId();
-        ITmfConfiguration config = fTmfConfigurationTable.get(configId, trace);
-        if (config == null) {
+        if (!fTmfConfigurationTable.contains(configId, trace)) {
             return;
         }
-        config = fTmfConfigurationTable.remove(configId, trace);
+        ITmfConfiguration config = fTmfConfigurationTable.remove(configId, trace);
         removeConfiguration(trace, config);
     }
 
