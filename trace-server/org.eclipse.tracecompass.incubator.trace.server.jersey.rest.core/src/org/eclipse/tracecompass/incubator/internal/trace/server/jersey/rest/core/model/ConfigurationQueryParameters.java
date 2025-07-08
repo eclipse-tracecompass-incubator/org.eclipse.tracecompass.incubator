@@ -11,9 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
-import java.util.Map;
-
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.AdditionalPropertiesValue;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -32,6 +31,7 @@ public interface ConfigurationQueryParameters {
     /**
      * @return parameters map for custom parameters as defined in the corresponding {@link ConfigurationSourceType}
      */
-    @Schema(required = true, description = "Parameters as specified in the schema or list of ConfigurationParameterDescriptor of the corresponding ConfigurationTypeDescriptor.")
-    Map<String, Object> getParameters();
+    @Schema(required = true, description = "Parameters as specified in the schema or list of ConfigurationParameterDescriptor of the corresponding ConfigurationTypeDescriptor."
+            , additionalProperties = AdditionalPropertiesValue.TRUE)
+    Object getParameters();
 }
