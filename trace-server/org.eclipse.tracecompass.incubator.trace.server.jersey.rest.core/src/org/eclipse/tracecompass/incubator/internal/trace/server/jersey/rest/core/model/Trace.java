@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
+@Schema(description = "Trace model")
 public interface Trace {
 
     /**

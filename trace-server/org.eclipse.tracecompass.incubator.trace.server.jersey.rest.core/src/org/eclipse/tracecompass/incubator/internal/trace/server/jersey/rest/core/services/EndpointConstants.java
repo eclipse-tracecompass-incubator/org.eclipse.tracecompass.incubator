@@ -162,6 +162,7 @@ public final class EndpointConstants {
     static final String COUNT_EX = "\"" + REQUESTED_TABLE_COUNT_KEY + "\": 100,"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String DIRECTION_EX = "\"" + TABLE_SEARCH_DIRECTION_KEY + "\": \"NEXT\""; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ELEMENT_EX = "\"" + REQUESTED_ELEMENT_KEY + "\": {\"elementType\": \"state\", \"time\": 111100000, \"duration\": 100000}"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String EXPERIMENT_EX = "{\"name\": \"experiment-1\", ...}"; //$NON-NLS-1$
     static final String EXPRESSIONS_EX = "\"" + TABLE_SEARCH_EXPRESSIONS_KEY + "\": {\"1\": \"cpu.*\"},"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String INDEX_EX = "\"" + REQUESTED_TABLE_INDEX_KEY + "\": 0,"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String ITEMS_EX = "\"" + REQUESTED_ITEMS_KEY + "\": [1, 2]"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -173,11 +174,18 @@ public final class EndpointConstants {
     static final String TIMERANGE_EX_TREE = "\"" + REQUESTED_TIMERANGE_KEY + "\": {\"start\": 111111111, \"end\": 222222222}"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_EX_TT = "\"" + REQUESTED_TIME_KEY + "\": [111200000],"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String DP_CFG_EX = "{\"name\": \"Follow My-thread\", \"description\": \"My-thread on even CPUs\", \"typeId\": \"my.config.source.type.id\", \"parameters\":{ \"threads\": \"My-thread\", \"cpus\": [0,2,4,6] }}"; //$NON-NLS-1$
+    static final String TRACE_EX = "{\"name\": \"trace-1\", ...}"; //$NON-NLS-1$
 
     /** Swagger @ApiResponse description constants reused, or centralized. */
     static final String CANNOT_READ = "Cannot read this trace type"; //$NON-NLS-1$
     static final String CONSISTENT_PARENT = "The returned model must be consistent, parentIds must refer to a parent which exists in the model."; //$NON-NLS-1$
-    static final String NAME_EXISTS = "There was already a trace with this name"; //$NON-NLS-1$
+    static final String EXPERIMENT_NAME_EXISTS = "The experiment (name) already exists and both differ."; //$NON-NLS-1$
+    static final String EXPERIMENT_NAME_EXISTS_DETAIL = "The experiment with same name already exists with conflicting parameters. Use a different name to avoid the conflict."; //$NON-NLS-1$
+    static final String NAME_EXISTS = "The trace (name) already exists and both differ"; //$NON-NLS-1$
+    static final String NAME_EXISTS_DETAIL = "The trace with same name already exists with conflicting parameters. Use a different name to avoid the conflict. See error details for conflicting trace."; //$NON-NLS-1$
+    static final String TRACE_IN_USE = "The trace is in use by at least one experiment thus cannot be deleted."; //$NON-NLS-1$
+    static final String TRACE_IN_USE_DETAIL = "Delete all experiements using this trace before deleting the trace."; //$NON-NLS-1$
+
     static final String NOT_SUPPORTED = "Trace type not supported"; //$NON-NLS-1$
     static final String NO_SUCH_EXPERIMENT = "No such experiment"; //$NON-NLS-1$
     static final String PROVIDER_NOT_FOUND = "Experiment or output provider not found"; //$NON-NLS-1$

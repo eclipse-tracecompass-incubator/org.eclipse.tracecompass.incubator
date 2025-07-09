@@ -42,6 +42,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ErrorResponseImpl;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.AnnotationCategoriesOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.AnnotationModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.AnnotationResponseStub;
@@ -283,7 +284,7 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
         try (Response response = endpoint.request(MediaType.APPLICATION_JSON).get()) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         // Unknown data provider
@@ -291,7 +292,7 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
         try (Response response = endpoint.request(MediaType.APPLICATION_JSON).get()) {
             assertNotNull(response);
             assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
     }
 

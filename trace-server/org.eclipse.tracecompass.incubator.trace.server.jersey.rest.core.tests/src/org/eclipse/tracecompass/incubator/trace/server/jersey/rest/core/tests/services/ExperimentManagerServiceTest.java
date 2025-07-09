@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentErrorResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
@@ -63,6 +64,9 @@ public class ExperimentManagerServiceTest extends RestServerTest {
     private static final @NonNull ImmutableSet<TraceModelStub> CONTEXT_SWITCH_SET = ImmutableSet.of(sfContextSwitchesKernelStub, sfContextSwitchesUstStub);
     private static final @NonNull ImmutableSet<TraceModelStub> CONTEXT_SWITCH_NOT_INITIALIZED_SET = ImmutableSet.of(sfContextSwitchesKernelNotInitializedStub, sfContextSwitchesUstNotInitializedStub);
     private static final @NonNull ExperimentModelStub EXPECTED = new ExperimentModelStub(TEST, CONTEXT_SWITCH_SET);
+
+    private static final String EXPERIMENT_NAME_EXISTS = "The experiment (name) already exists and both differ."; //$NON-NLS-1$
+    private static final String EXPERIMENT_NAME_EXISTS_DETAIL = "The experiment with same name already exists with conflicting parameters. Use a different name to avoid the conflict."; //$NON-NLS-1$
 
     /**
      * Basic test for the {@link ExperimentManagerService}
@@ -195,11 +199,16 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         parameters2.put(TRACES, traceUUIDs2);
         try (Response response2 = expTarget.request().post(Entity.json(new QueryParameters(parameters2, Collections.emptyList())))) {
             assertEquals("Expected a conflict for posting different experiment", Status.CONFLICT.getStatusCode(), response2.getStatus());
-            assertEquals("Conflict should return original experiment name", EXPECTED.getName(), response2.readEntity(ExperimentModelStub.class).getName());
+            ExperimentErrorResponseStub errorResponse = response2.readEntity(ExperimentErrorResponseStub.class);
+            assertEquals("Conflict detail should be returned", EXPERIMENT_NAME_EXISTS, errorResponse.getTitle());
+            assertEquals("Conflict detail should be returned", EXPERIMENT_NAME_EXISTS_DETAIL, errorResponse.getDetail());
+            ExperimentModelStub traceObj = errorResponse.getExperiment();
+            assertEquals("Conflict should return original experiment", EXPECTED, traceObj);
             assertEquals("There should still be only one experiment", ImmutableSet.of(EXPECTED), getExperiments(expTarget));
             assertEquals("Failing to add an experiment should not change the trace set", traceSet, getTraces(traces));
             assertEquals("Failed to get the experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
         }
+
         // Post same experiment name, but with traces with the same names, but not the same traces
         List<String> traceUUIDs3 = new ArrayList<>();
         traceUUIDs3.add(arm64Stub.getUUID().toString());
@@ -209,7 +218,11 @@ public class ExperimentManagerServiceTest extends RestServerTest {
         parameters3.put(TRACES, traceUUIDs3);
         try (Response response3 = expTarget.request().post(Entity.json(new QueryParameters(parameters3, Collections.emptyList())))) {
             assertEquals("Expected a conflict for posting different experiment", Status.CONFLICT.getStatusCode(), response3.getStatus());
-            assertEquals("Conflict should return original experiment name", EXPECTED.getName(), response3.readEntity(ExperimentModelStub.class).getName());
+            ExperimentErrorResponseStub errorResponse = response3.readEntity(ExperimentErrorResponseStub.class);
+            assertEquals("Conflict detail should be returned", EXPERIMENT_NAME_EXISTS, errorResponse.getTitle());
+            assertEquals("Conflict detail should be returned", EXPERIMENT_NAME_EXISTS_DETAIL, errorResponse.getDetail());
+            ExperimentModelStub traceObj = errorResponse.getExperiment();
+            assertEquals("Conflict should return original experiment", EXPECTED, traceObj);
             assertEquals("There should still be only one experiment", ImmutableSet.of(EXPECTED), getExperiments(expTarget));
             assertEquals("Failing to add an experiment should not change the trace set", traceSet, getTraces(traces));
             assertEquals("Failed to get the new experiment by its UUID", EXPECTED, expTarget.path(expStub.getUUID().toString()).request().get(ExperimentModelStub.class));
