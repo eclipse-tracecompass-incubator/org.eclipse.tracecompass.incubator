@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -26,13 +27,13 @@ public interface TimeGraphRowModel {
     /**
      * @return The entry ID.
      */
-    @Schema(description = "The entry to map this state list to", required = true)
+    @Schema(description = "The entry to map this state list to", requiredMode = RequiredMode.REQUIRED)
     long getEntryId();
 
     /**
      * @return The states.
      */
-    @ArraySchema(arraySchema = @Schema(description = "List of the time graph entry states associated to this entry and zoom level", required = true))
+    @ArraySchema(arraySchema = @Schema(description = "List of the time graph entry states associated to this entry and zoom level", requiredMode = RequiredMode.REQUIRED))
     @NonNull
     List<TimeGraphState> getStates();
 }

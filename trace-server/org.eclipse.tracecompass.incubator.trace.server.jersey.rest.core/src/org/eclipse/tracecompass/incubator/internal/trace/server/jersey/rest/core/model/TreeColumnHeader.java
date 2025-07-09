@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import org.eclipse.jdt.annotation.NonNull;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -24,7 +25,7 @@ public interface TreeColumnHeader {
      * @return The name.
      */
     @NonNull
-    @Schema(description = "Displayed name for this header", required = true)
+    @Schema(description = "Displayed name for this header", requiredMode = RequiredMode.REQUIRED)
     String getName();
 
     /**

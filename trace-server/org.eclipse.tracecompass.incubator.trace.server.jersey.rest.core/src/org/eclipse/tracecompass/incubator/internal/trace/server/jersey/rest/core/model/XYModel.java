@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -27,13 +28,13 @@ public interface XYModel {
      * @return The title.
      */
     @NonNull
-    @Schema(description = "Title of the model", required = true)
+    @Schema(description = "Title of the model", requiredMode = RequiredMode.REQUIRED)
     String getTitle();
 
     /**
      * @return The series.
      */
     @NonNull
-    @ArraySchema(arraySchema = @Schema(description = "The collection of series", required = true))
+    @ArraySchema(arraySchema = @Schema(description = "The collection of series", requiredMode = RequiredMode.REQUIRED))
     Collection<@NonNull SeriesModel> getSeries();
 }

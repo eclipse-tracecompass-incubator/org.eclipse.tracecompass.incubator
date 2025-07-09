@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import org.eclipse.jdt.annotation.NonNull;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -32,19 +33,19 @@ public interface Element {
      * @return The element type.
      */
     @NonNull
-    @Schema(description = "The type of element", required = true)
+    @Schema(description = "The type of element", requiredMode = RequiredMode.REQUIRED)
     ElementType getElementType();
 
     /**
      * @return The time.
      */
-    @Schema(description = "Element's start time", required = true)
+    @Schema(description = "Element's start time", requiredMode = RequiredMode.REQUIRED)
     long getTime();
 
     /**
      * @return The duration.
      */
-    @Schema(description = "Element's duration", required = true)
+    @Schema(description = "Element's duration", requiredMode = RequiredMode.REQUIRED)
     long getDuration();
 
     /**

@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import org.eclipse.jdt.annotation.Nullable;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -23,25 +24,25 @@ public interface TimeGraphArrow {
     /**
      * @return The start time.
      */
-    @Schema(description = "Start time for this arrow", required = true)
+    @Schema(description = "Start time for this arrow", requiredMode = RequiredMode.REQUIRED)
     long getStart();
 
     /**
      * @return The end time.
      */
-    @Schema(description = "End time for this arrow", required = true)
+    @Schema(description = "End time for this arrow", requiredMode = RequiredMode.REQUIRED)
     long getEnd();
 
     /**
      * @return The source ID.
      */
-    @Schema(description = "Source entry's unique ID", required = true)
+    @Schema(description = "Source entry's unique ID", requiredMode = RequiredMode.REQUIRED)
     long getSourceId();
 
     /**
      * @return The target ID.
      */
-    @Schema(description = "Target entry's unique ID", required = true)
+    @Schema(description = "Target entry's unique ID", requiredMode = RequiredMode.REQUIRED)
     long getTargetId();
 
     /**

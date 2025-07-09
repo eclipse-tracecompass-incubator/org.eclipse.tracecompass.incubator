@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -26,7 +27,7 @@ public interface TooltipQueryParameters {
      * @return The parameters.
      */
     @NonNull
-    @Schema(required = true)
+    @Schema(requiredMode = RequiredMode.REQUIRED)
     TooltipParameters getParameters();
 
     /**
@@ -35,16 +36,16 @@ public interface TooltipQueryParameters {
     interface TooltipParameters {
 
         @JsonProperty("requested_times")
-        @Schema(required = true)
+        @Schema(requiredMode = RequiredMode.REQUIRED)
         long[] getRequestedTimes();
 
         @JsonProperty("requested_items")
-        @Schema(required = true)
+        @Schema(requiredMode = RequiredMode.REQUIRED)
         int[] getRequestedItems();
 
         @JsonProperty("requested_element")
         @NonNull
-        @Schema(required = true)
+        @Schema(requiredMode = RequiredMode.REQUIRED)
         Element getRequestedElement();
     }
 }

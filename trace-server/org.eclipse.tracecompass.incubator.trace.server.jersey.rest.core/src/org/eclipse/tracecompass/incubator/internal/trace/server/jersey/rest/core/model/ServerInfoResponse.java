@@ -11,6 +11,7 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -23,7 +24,7 @@ public interface ServerInfoResponse {
     /**
      * @return Version in the format Major.Minor.Micro
      */
-    @Schema(required = true, description = "Version in the format Major.Minor.Micro")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "Version in the format Major.Minor.Micro")
     String getVersion();
 
     /**
@@ -35,7 +36,7 @@ public interface ServerInfoResponse {
     /**
      * @return Operating system name
      */
-    @Schema(required = true, description = "Operating system name")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "Operating system name")
     String getOs();
 
     /**
@@ -71,13 +72,13 @@ public interface ServerInfoResponse {
     /**
      * @return Product identifier for the trace server
      */
-    @Schema(required = true, description = "Product identifier for the trace server")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "Product identifier for the trace server")
     String getProductId();
 
     /**
      * @return supported TSP version
      */
-    @Schema(required = true, description = "The TSP version that the trace server supports")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "The TSP version that the trace server supports")
     String getTspVersion();
 
 }

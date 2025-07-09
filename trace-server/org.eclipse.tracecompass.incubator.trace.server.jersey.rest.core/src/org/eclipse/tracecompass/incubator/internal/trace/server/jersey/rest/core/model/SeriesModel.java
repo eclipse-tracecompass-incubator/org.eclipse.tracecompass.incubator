@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -27,34 +28,34 @@ public interface SeriesModel {
     /**
      * @return The series ID.
      */
-    @Schema(description = "Series' ID", required = true)
+    @Schema(description = "Series' ID", requiredMode = RequiredMode.REQUIRED)
     long getSeriesId();
 
     /**
      * @return The series name.
      */
     @NonNull
-    @Schema(description = "Series' name", required = true)
+    @Schema(description = "Series' name", requiredMode = RequiredMode.REQUIRED)
     String getSeriesName();
 
     /**
      * @return The X values.
      */
     @JsonProperty("xValues")
-    @ArraySchema(arraySchema = @Schema(description = "Series' X values", required = true))
+    @ArraySchema(arraySchema = @Schema(description = "Series' X values", requiredMode = RequiredMode.REQUIRED))
     long[] getXValues();
 
     /**
      * @return The Y values.
      */
     @JsonProperty("yValues")
-    @ArraySchema(arraySchema = @Schema(description = "Series' Y values", required = true))
+    @ArraySchema(arraySchema = @Schema(description = "Series' Y values", requiredMode = RequiredMode.REQUIRED))
     double[] getYValues();
 
     /**
      * @return The series style.
      */
     @NonNull
-    @Schema(required = true)
+    @Schema(requiredMode = RequiredMode.REQUIRED)
     OutputElementStyle getStyle();
 }

@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -22,18 +23,18 @@ public interface TimeRange {
     /**
      * @return The start time.
      */
-    @Schema(description = "The start of the time range", required = true)
+    @Schema(description = "The start of the time range", requiredMode = RequiredMode.REQUIRED)
     long getStart();
 
     /**
      * @return The end time.
      */
-    @Schema(description = "The end of the time range", required = true)
+    @Schema(description = "The end of the time range", requiredMode = RequiredMode.REQUIRED)
     long getEnd();
 
     /**
      * @return The number of times to be sampled.
      */
-    @Schema(description = "The number of timestamps to be sampled (1-65536) in the given range", required = false)
+    @Schema(description = "The number of timestamps to be sampled (1-65536) in the given range", requiredMode = RequiredMode.NOT_REQUIRED)
     int getNbTimes();
 }

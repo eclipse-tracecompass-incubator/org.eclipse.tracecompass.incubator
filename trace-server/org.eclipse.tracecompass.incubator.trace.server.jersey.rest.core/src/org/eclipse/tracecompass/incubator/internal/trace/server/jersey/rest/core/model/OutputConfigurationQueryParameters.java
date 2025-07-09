@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -24,7 +25,7 @@ public interface OutputConfigurationQueryParameters {
      * @return the typeId of the configuration according to the
      *         {@link ConfigurationSourceType}
      */
-    @Schema(required = true, description = "The type ID of the corresponding ConfigurationSourceType defined by this output.")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "The type ID of the corresponding ConfigurationSourceType defined by this output.")
     @JsonProperty("sourceTypeId")
     String getSourceTypeId();
 }

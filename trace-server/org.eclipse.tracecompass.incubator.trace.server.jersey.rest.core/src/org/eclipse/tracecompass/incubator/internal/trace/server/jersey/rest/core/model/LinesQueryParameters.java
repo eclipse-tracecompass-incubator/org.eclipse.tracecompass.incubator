@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -28,7 +29,7 @@ public interface LinesQueryParameters {
      * @return The parameters.
      */
     @NonNull
-    @Schema(required = true)
+    @Schema(requiredMode = RequiredMode.REQUIRED)
     LinesParameters getParameters();
 
     /**
@@ -47,7 +48,7 @@ public interface LinesQueryParameters {
         long[] getRequestedTimes();
 
         @JsonProperty("requested_table_count")
-        @Schema(required = true)
+        @Schema(requiredMode = RequiredMode.REQUIRED)
         int getRequestedTableCount();
 
         @JsonProperty("requested_table_column_ids")
