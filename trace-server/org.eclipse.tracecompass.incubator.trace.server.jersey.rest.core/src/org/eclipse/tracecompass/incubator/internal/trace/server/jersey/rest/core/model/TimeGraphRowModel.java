@@ -33,7 +33,7 @@ public interface TimeGraphRowModel {
     /**
      * @return The states.
      */
-    @ArraySchema(arraySchema = @Schema(description = "List of the time graph entry states associated to this entry and zoom level", requiredMode = RequiredMode.REQUIRED))
+    @ArraySchema(arraySchema = @Schema(description = "List of the time graph entry states associated to this entry and zoom level"), schema = @Schema(requiredMode = RequiredMode.REQUIRED))
     @NonNull
     List<TimeGraphState> getStates();
 }

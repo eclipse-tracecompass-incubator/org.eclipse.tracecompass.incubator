@@ -42,14 +42,14 @@ public interface SeriesModel {
      * @return The X values.
      */
     @JsonProperty("xValues")
-    @ArraySchema(arraySchema = @Schema(description = "Series' X values", requiredMode = RequiredMode.REQUIRED))
+    @ArraySchema(arraySchema = @Schema(description = "Series' X values"), schema = @Schema(requiredMode = RequiredMode.REQUIRED))
     long[] getXValues();
 
     /**
      * @return The Y values.
      */
     @JsonProperty("yValues")
-    @ArraySchema(arraySchema = @Schema(description = "Series' Y values", requiredMode = RequiredMode.REQUIRED))
+    @ArraySchema(arraySchema = @Schema(description = "Series' Y values"), schema = @Schema(requiredMode = RequiredMode.REQUIRED))
     double[] getYValues();
 
     /**
