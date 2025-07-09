@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -26,7 +27,7 @@ public interface TraceQueryParameters {
      * @return The parameters.
      */
     @NonNull
-    @Schema(required = true)
+    @Schema(requiredMode = RequiredMode.REQUIRED)
     TraceParameters getParameters();
 
     /**
@@ -50,7 +51,7 @@ public interface TraceQueryParameters {
          */
         @JsonProperty("uri")
         @NonNull
-        @Schema(description = "URI of the trace", required = true)
+        @Schema(description = "URI of the trace", requiredMode = RequiredMode.REQUIRED)
         String getUri();
     }
 }

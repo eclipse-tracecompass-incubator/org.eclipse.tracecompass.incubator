@@ -15,6 +15,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -32,26 +33,26 @@ public interface Annotation {
     /**
      * @return The time.
      */
-    @Schema(description = "Time of this annotation", required = true)
+    @Schema(description = "Time of this annotation", requiredMode = RequiredMode.REQUIRED)
     long getTime();
 
     /**
      * @return The duration.
      */
-    @Schema(description = "Duration of this annotation", required = true)
+    @Schema(description = "Duration of this annotation", requiredMode = RequiredMode.REQUIRED)
     long getDuration();
 
     /**
      * @return The entry ID.
      */
-    @Schema(description = "Entry's unique ID or -1 if annotation not associated with an entry", required = true)
+    @Schema(description = "Entry's unique ID or -1 if annotation not associated with an entry", requiredMode = RequiredMode.REQUIRED)
     long getEntryId();
 
     /**
      * @return The type.
      */
     @NonNull
-    @Schema(description = "Type of annotation indicating its location", required = true)
+    @Schema(description = "Type of annotation indicating its location", requiredMode = RequiredMode.REQUIRED)
     AnnotationType getType();
 
     /**

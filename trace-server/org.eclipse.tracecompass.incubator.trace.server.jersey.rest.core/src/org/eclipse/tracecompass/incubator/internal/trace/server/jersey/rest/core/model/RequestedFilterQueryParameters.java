@@ -19,6 +19,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -30,13 +31,13 @@ public interface RequestedFilterQueryParameters {
      * @return Strategy of search.
      */
     @JsonProperty("strategy")
-    @Schema(description = "Optional parameter that enables the full search (deep search) or not", required = false)
+    @Schema(description = "Optional parameter that enables the full search (deep search) or not", requiredMode = RequiredMode.NOT_REQUIRED)
     FilterQueryStrategy getStrategy();
 
     /**
      * @return Map of filter expressions.
      */
     @JsonProperty("filter_expressions_map")
-    @Schema(description = "The key of this map can be \"1\" (means DIMMED) or \"4\" (means EXCLUDED) and the value is an array of the desired search query (e.g. {\"1\": [\"openat\", \"duration>10ms\"]})", required = true)
+    @Schema(description = "The key of this map can be \"1\" (means DIMMED) or \"4\" (means EXCLUDED) and the value is an array of the desired search query (e.g. {\"1\": [\"openat\", \"duration>10ms\"]})", requiredMode = RequiredMode.REQUIRED)
     Map<Integer, Collection<String>> getFilterExpressionsMap();
 }

@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.cor
 import org.eclipse.jdt.annotation.Nullable;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -31,13 +32,13 @@ public interface TimeGraphState {
     /**
      * @return The start time.
      */
-    @Schema(description = "Start time for this state", required = true)
+    @Schema(description = "Start time for this state", requiredMode = RequiredMode.REQUIRED)
     long getStart();
 
     /**
      * @return The end time.
      */
-    @Schema(description = "End time for this state", required = true)
+    @Schema(description = "End time for this state", requiredMode = RequiredMode.REQUIRED)
     long getEnd();
 
     /**

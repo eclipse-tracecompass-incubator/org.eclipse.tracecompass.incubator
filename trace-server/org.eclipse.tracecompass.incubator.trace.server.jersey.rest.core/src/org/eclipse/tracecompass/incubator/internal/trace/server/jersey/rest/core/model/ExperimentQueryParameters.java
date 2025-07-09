@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -28,7 +29,7 @@ public interface ExperimentQueryParameters {
      * @return The parameters.
      */
     @NonNull
-    @Schema(required = true)
+    @Schema(requiredMode = RequiredMode.REQUIRED)
     ExperimentParameters getParameters();
 
     /**
@@ -40,14 +41,14 @@ public interface ExperimentQueryParameters {
          * @return The name.
          */
         @NonNull
-        @Schema(description = "The name to give this experiment", required = true)
+        @Schema(description = "The name to give this experiment", requiredMode = RequiredMode.REQUIRED)
         String getName();
 
         /**
          * @return The traces.
          */
         @NonNull
-        @ArraySchema(arraySchema = @Schema(description = "The unique identifiers of the traces to encapsulate in this experiment", required = true))
+        @ArraySchema(arraySchema = @Schema(description = "The unique identifiers of the traces to encapsulate in this experiment", requiredMode = RequiredMode.REQUIRED))
         List<@NonNull UUID> getTraces();
     }
 }

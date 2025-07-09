@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -26,7 +27,7 @@ public interface ArrowsQueryParameters {
      * @return The parameters.
      */
     @NonNull
-    @Schema(required = true)
+    @Schema(requiredMode = RequiredMode.REQUIRED)
     ArrowsParameters getParameters();
 
     /**
@@ -35,7 +36,7 @@ public interface ArrowsQueryParameters {
     interface ArrowsParameters {
 
         @JsonProperty("requested_timerange")
-        @Schema(required = true)
+        @Schema(requiredMode = RequiredMode.REQUIRED)
         TimeRange getRequestedTimeRange();
     }
 }

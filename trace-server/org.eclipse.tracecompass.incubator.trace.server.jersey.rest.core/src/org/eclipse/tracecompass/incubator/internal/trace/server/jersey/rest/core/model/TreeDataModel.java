@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -28,7 +29,7 @@ public interface TreeDataModel {
     /**
      * @return The ID.
      */
-    @Schema(description = "Unique ID to identify this entry in the backend", required = true)
+    @Schema(description = "Unique ID to identify this entry in the backend", requiredMode = RequiredMode.REQUIRED)
     long getId();
 
     /**
@@ -41,7 +42,7 @@ public interface TreeDataModel {
      * @return The labels.
      */
     @ArraySchema(arraySchema = @Schema(description = "Array of cell labels to be displayed. " +
-            "The length of the array and the index of each column need to correspond to the header array returned in the tree model.", required = true))
+            "The length of the array and the index of each column need to correspond to the header array returned in the tree model.", requiredMode = RequiredMode.REQUIRED))
     @NonNull
     List<@NonNull String> getLabels();
 
