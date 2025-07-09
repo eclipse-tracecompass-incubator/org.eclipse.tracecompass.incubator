@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.BookmarkQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ErrorResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.tmf.core.resources.ITmfMarker;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
@@ -86,12 +87,12 @@ public class BookmarkManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get all bookmarks for an experiment", responses = {
             @ApiResponse(responseCode = "200", description = "Returns the list of bookmarks", content = @Content(array = @ArraySchema(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Bookmark.class)))),
-            @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getBookmarks(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_EXPERIMENT).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_EXPERIMENT);
         }
 
         IFile editorFile = TmfTraceManager.getInstance().getTraceEditorFile(experiment);
@@ -105,7 +106,7 @@ public class BookmarkManagerService {
             return Response.ok(bookmarks).build();
         } catch (CoreException e) {
             Activator.getInstance().logError("Failed to get bookmarks", e); //$NON-NLS-1$
-            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            return ErrorResponseUtil.newErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to get bookmarks: " + e.getMessage()); //$NON-NLS-1$
         }
     }
 
@@ -123,7 +124,7 @@ public class BookmarkManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get a specific bookmark from an experiment", responses = {
             @ApiResponse(responseCode = "200", description = "Returns the bookmark", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Bookmark.class))),
-            @ApiResponse(responseCode = "404", description = "Experiment or bookmark not found", content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = "Experiment or bookmark not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getBookmark(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -131,30 +132,30 @@ public class BookmarkManagerService {
 
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_EXPERIMENT).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_EXPERIMENT);
         }
 
         IFile editorFile = TmfTraceManager.getInstance().getTraceEditorFile(experiment);
         if (editorFile == null) {
-            return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, EndpointConstants.BOOKMARK_NOT_FOUND);
         }
 
         try {
             IMarker[] markers = findBookmarkMarkers(editorFile);
             IMarker marker = findMarkerByUUID(markers, bookmarkUUID);
             if (marker == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, EndpointConstants.BOOKMARK_NOT_FOUND);
             }
 
             Bookmark bookmark = markerToBookmark(marker);
             if (bookmark == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, EndpointConstants.BOOKMARK_NOT_FOUND);
             }
 
             return Response.ok(bookmark).build();
         } catch (CoreException e) {
             Activator.getInstance().logError("Failed to get bookmark", e); //$NON-NLS-1$
-            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            return ErrorResponseUtil.newErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to get bookmarks: " + e.getMessage()); //$NON-NLS-1$
         }
     }
 
@@ -172,8 +173,8 @@ public class BookmarkManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Create a new bookmark in an experiment", responses = {
             @ApiResponse(responseCode = "200", description = "Bookmark created successfully", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Bookmark.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response createBookmark(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -188,17 +189,17 @@ public class BookmarkManagerService {
         Map<String, Object> parameters = queryParameters.getParameters();
         String errorMessage = QueryParametersUtil.validateBookmarkQueryParameters(parameters);
         if (errorMessage != null) {
-            return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
         }
 
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_EXPERIMENT).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_EXPERIMENT);
         }
 
         IFile editorFile = TmfTraceManager.getInstance().getTraceEditorFile(experiment);
         if (editorFile == null) {
-            return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, EndpointConstants.BOOKMARK_NOT_FOUND);
         }
 
         try {
@@ -214,7 +215,7 @@ public class BookmarkManagerService {
             return Response.ok(bookmark).build();
         } catch (CoreException e) {
             Activator.getInstance().logError("Failed to create bookmark", e); //$NON-NLS-1$
-            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            return ErrorResponseUtil.newErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to create bookmarks: " + e.getMessage()); //$NON-NLS-1$
         }
     }
 
@@ -235,8 +236,8 @@ public class BookmarkManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update an existing bookmark in an experiment", responses = {
             @ApiResponse(responseCode = "200", description = "Bookmark updated successfully", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Bookmark.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = "Experiment or bookmark not found", content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Experiment or bookmark not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response updateBookmark(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -246,23 +247,23 @@ public class BookmarkManagerService {
             }, required = true) QueryParameters queryParameters) {
 
         if (queryParameters == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_PARAMETERS);
         }
 
         Map<String, Object> parameters = queryParameters.getParameters();
         String errorMessage = QueryParametersUtil.validateBookmarkQueryParameters(parameters);
         if (errorMessage != null) {
-            return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
         }
 
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_EXPERIMENT).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_EXPERIMENT);
         }
 
         IFile editorFile = TmfTraceManager.getInstance().getTraceEditorFile(experiment);
         if (editorFile == null) {
-            return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, EndpointConstants.BOOKMARK_NOT_FOUND);
         }
 
         String name = Objects.requireNonNull((String) parameters.get(BOOKMARK_NAME));
@@ -275,14 +276,14 @@ public class BookmarkManagerService {
             IMarker[] markers = findBookmarkMarkers(editorFile);
             IMarker marker = findMarkerByUUID(markers, bookmarkUUID);
             if (marker == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, EndpointConstants.BOOKMARK_NOT_FOUND);
             }
 
             setMarkerAttributes(marker, bookmark);
             return Response.ok(bookmark).build();
         } catch (CoreException e) {
             Activator.getInstance().logError("Failed to update bookmark", e); //$NON-NLS-1$
-            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            return ErrorResponseUtil.newErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to update bookmarks: " + e.getMessage()); //$NON-NLS-1$
         }
     }
 
@@ -300,7 +301,7 @@ public class BookmarkManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Delete a bookmark from an experiment", responses = {
             @ApiResponse(responseCode = "200", description = "Bookmark deleted successfully", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Bookmark.class))),
-            @ApiResponse(responseCode = "404", description = "Experiment or bookmark not found", content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = "Experiment or bookmark not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response deleteBookmark(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -308,31 +309,31 @@ public class BookmarkManagerService {
 
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_EXPERIMENT).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_EXPERIMENT);
         }
 
         IFile editorFile = TmfTraceManager.getInstance().getTraceEditorFile(experiment);
         if (editorFile == null) {
-            return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, EndpointConstants.BOOKMARK_NOT_FOUND);
         }
 
         try {
             IMarker[] markers = findBookmarkMarkers(editorFile);
             IMarker marker = findMarkerByUUID(markers, bookmarkUUID);
             if (marker == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, EndpointConstants.BOOKMARK_NOT_FOUND);
             }
 
             Bookmark bookmark = markerToBookmark(marker);
             if (bookmark == null) {
-                return Response.status(Status.NOT_FOUND).entity(EndpointConstants.BOOKMARK_NOT_FOUND).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, EndpointConstants.BOOKMARK_NOT_FOUND);
             }
 
             marker.delete();
             return Response.ok(bookmark).build();
         } catch (CoreException e) {
             Activator.getInstance().logError("Failed to delete bookmark", e); //$NON-NLS-1$
-            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            return ErrorResponseUtil.newErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to delete bookmarks: " + e.getMessage()); //$NON-NLS-1$
         }
     }
 

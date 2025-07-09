@@ -109,6 +109,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.AnnotationsQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ArrowsQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.DataProvider;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ErrorResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.LinesQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.MarkerSetsResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.OptionalQueryParameters;
@@ -218,12 +219,12 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the list of outputs for this experiment", responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of output provider descriptors", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DataProvider.class)))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getProviders(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
         }
         List<IDataProviderDescriptor> list = DataProviderManager.getInstance().getAvailableProviders(experiment);
         list.addAll(xmlManager.getXmlDataProviderDescriptors(experiment, EnumSet.of(OutputType.TIME_GRAPH)));
@@ -264,21 +265,21 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the output descriptor for this experiment and output", responses = {
             @ApiResponse(responseCode = "200", description = "Returns the output provider descriptor", content = @Content(schema = @Schema(implementation = DataProvider.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getProvider(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
             @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId) {
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
         }
 
         IDataProviderDescriptor provider = getDescriptor(experiment, outputId);
         if (provider != null) {
             return Response.ok(provider).build();
         }
-        return Response.status(Status.NOT_FOUND).build();
+        return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_PROVIDER);
     }
 
     /**
@@ -301,9 +302,9 @@ public class DataProviderService {
     @Operation(summary = "API to get the data tree", description = TREE_ENTRIES, responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of data tree entries. " +
                     CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = XYTreeResponse.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getDataTree(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -335,9 +336,9 @@ public class DataProviderService {
     @Operation(summary = "API to get the XY tree", description = TREE_ENTRIES, responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of XY entries. " +
                     CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = XYTreeResponse.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getXYTree(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -368,9 +369,9 @@ public class DataProviderService {
     @Operation(summary = "API to get the XY model", description = "Unique endpoint for all xy models, " +
             "ensures that the same template is followed for all endpoints.", responses = {
                     @ApiResponse(responseCode = "200", description = "Return the queried XYResponse", content = @Content(schema = @Schema(implementation = XYResponse.class))),
-                    @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+                    @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
     public Response getXY(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -388,7 +389,7 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
 
             ITmfTreeXYDataProvider<@NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
@@ -401,13 +402,13 @@ public class DataProviderService {
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
             }
 
             Map<String, Object> params = queryParameters.getParameters();
             String errorMessage = QueryParametersUtil.validateRequestedQueryParameters(params);
             if (errorMessage != null) {
-                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+                return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
             }
 
             TmfModelResponse<@NonNull ITmfXyModel> response = provider.fetchXY(params, null);
@@ -440,7 +441,7 @@ public class DataProviderService {
             @QueryParam("xValue") long xValue,
             @QueryParam("yValue") long yValue,
             @QueryParam("entryId") long entryId) {
-        return Response.status(Status.NOT_IMPLEMENTED).entity("XY tooltip are not implemented yet").build(); //$NON-NLS-1$
+        return ErrorResponseUtil.newErrorResponse(Status.NOT_IMPLEMENTED, "XY tooltip are not implemented yet"); //$NON-NLS-1$
     }
 
     /**
@@ -463,9 +464,9 @@ public class DataProviderService {
     @Operation(summary = "API to get the Time Graph tree", description = TREE_ENTRIES, responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of Time Graph entries. " +
                     CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = TimeGraphTreeResponse.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getTimeGraphTree(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -496,9 +497,9 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the Time Graph states", description = "Unique entry point for all TimeGraph states, ensures that the same template is followed for all views", responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of time graph rows", content = @Content(schema = @Schema(implementation = TimeGraphStatesResponse.class))),
-            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getStates(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -516,25 +517,25 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
 
             ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(experiment, outputId);
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
             }
 
             Map<String, Object> params = queryParameters.getParameters();
             String errorMessage = QueryParametersUtil.validateRequestedQueryParameters(params);
             if (errorMessage != null) {
-                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+                return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
             }
 
             errorMessage = QueryParametersUtil.validateFilterQueryParameters(params);
             if (errorMessage != null) {
-                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+                return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
             }
 
             TmfModelResponse<TimeGraphModel> response = provider.fetchRowModel(params, null);
@@ -562,9 +563,9 @@ public class DataProviderService {
     @Operation(summary = "API to get the Time Graph arrows", description = "Unique entry point for all TimeGraph models, " +
             "ensures that the same template is followed for all models", responses = {
                     @ApiResponse(responseCode = "200", description = "Returns a sampled list of TimeGraph arrows", content = @Content(schema = @Schema(implementation = TimeGraphArrowsResponse.class))),
-                    @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+                    @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
     public Response getArrows(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -582,20 +583,20 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
 
             ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(experiment, outputId);
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
             }
 
             Map<String, Object> params = queryParameters.getParameters();
             String errorMessage = QueryParametersUtil.validateArrowsQueryParameters(params);
             if (errorMessage != null) {
-                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+                return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
             }
 
             TmfModelResponse<@NonNull List<@NonNull ITimeGraphArrow>> response = provider.fetchArrows(params, null);
@@ -616,14 +617,14 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get marker sets available for this experiment", responses = {
             @ApiResponse(responseCode = "200", description = "List of marker sets", content = @Content(schema = @Schema(implementation = MarkerSetsResponse.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getMarkerSets(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
 
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getMarkerSets").build()) { //$NON-NLS-1$
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
             List<MarkerSet> markerSets = MarkerConfigXmlParser.getMarkerSets();
             return Response.ok(new TmfModelResponse<>(markerSets, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED)).build();
@@ -646,9 +647,9 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get annotation categories associated to this experiment and output", responses = {
             @ApiResponse(responseCode = "200", description = "Annotation categories", content = @Content(schema = @Schema(implementation = AnnotationCategoriesResponse.class))),
-            @ApiResponse(responseCode = "400", description = MISSING_OUTPUTID, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = MISSING_OUTPUTID, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getAnnotationCategories(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -656,13 +657,13 @@ public class DataProviderService {
             @Parameter(description = MARKER_SET_ID) @QueryParam("markerSetId") String markerSetId) {
 
         if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_OUTPUTID);
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getAnnotationCategories") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
 
             ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
@@ -670,7 +671,7 @@ public class DataProviderService {
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
             }
 
             boolean isComplete = true;
@@ -724,9 +725,9 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the annotations associated to this experiment and output", responses = {
             @ApiResponse(responseCode = "200", description = "Annotation", content = @Content(schema = @Schema(implementation = AnnotationResponse.class))),
-            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getAnnotations(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -746,7 +747,7 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
 
             ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
@@ -754,13 +755,13 @@ public class DataProviderService {
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
             }
 
             Map<String, Object> params = queryParameters.getParameters();
             String errorMessage = QueryParametersUtil.validateAnnotationsQueryParameters(params);
             if (errorMessage != null) {
-                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+                return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
             }
 
             boolean isComplete = true;
@@ -819,9 +820,9 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get a Time Graph tooltip", description = "Endpoint to retrieve tooltips for time graph", responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of tooltip keys to values", content = @Content(schema = @Schema(implementation = TimeGraphTooltipResponse.class))),
-            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getTimeGraphTooltip(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -839,20 +840,20 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
 
             ITimeGraphDataProvider<@NonNull ITimeGraphEntryModel> provider = getTimeGraphProvider(experiment, outputId);
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
             }
 
             Map<String, Object> params = queryParameters.getParameters();
             String errorMessage = QueryParametersUtil.validateTooltipQueryParameters(params);
             if (errorMessage != null) {
-                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+                return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
             }
 
             TmfModelResponse<@NonNull Map<@NonNull String, @NonNull String>> response = provider.fetchTooltip(params, null);
@@ -891,9 +892,9 @@ public class DataProviderService {
     @Operation(summary = "API to get table columns", description = "Unique entry point for output providers, " +
             "to get the column entries", responses = {
                     @ApiResponse(responseCode = "200", description = "Returns a list of table headers", content = @Content(schema = @Schema(implementation = TableColumnHeadersResponse.class))),
-                    @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+                    @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
     public Response getColumns(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -938,10 +939,10 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get virtual table lines", responses = {
             @ApiResponse(responseCode = "200", description = "Returns a table model with a 2D array of strings and metadata", content = @Content(schema = @Schema(implementation = VirtualTableResponse.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "500", description = "Error reading the experiment", content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Error reading the experiment", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getLines(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -961,23 +962,23 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
 
             ITmfVirtualTableDataProvider<? extends IVirtualTableLine, ? extends ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment, outputId, ITmfVirtualTableDataProvider.class);
             if (provider == null) {
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
             }
 
             Map<String, Object> params = queryParameters.getParameters();
             String errorMessage = QueryParametersUtil.validateLinesQueryParameters(params);
             if (errorMessage != null) {
-                return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+                return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
             }
 
             TmfModelResponse<?> response = provider.fetchLines(params, null);
             if (response.getStatus() == ITmfResponse.Status.FAILED) {
-                return Response.status(Status.BAD_REQUEST).entity(response.getStatusMessage()).build();
+                return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, response.getStatusMessage());
             }
             return Response.ok(new TmfModelResponse<>(new VirtualTableModelWrapper((ITmfVirtualTableModel) response.getModel()), response.getStatus(), response.getStatusMessage())).build();
         }
@@ -991,13 +992,13 @@ public class DataProviderService {
         Map<String, Object> params = queryParameters.getParameters();
         String errorMessage = QueryParametersUtil.validateTreeQueryParameters(params);
         if (errorMessage != null) {
-            return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
         }
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTree") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
 
             ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
@@ -1010,7 +1011,7 @@ public class DataProviderService {
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
             }
             List<Long> timeRequested = DataProviderParameterUtils.extractTimeRequested(params);
             if (timeRequested == null || timeRequested.isEmpty()) {
@@ -1044,9 +1045,9 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the style map associated to this experiment and output", responses = {
             @ApiResponse(responseCode = "200", description = "Style model that can be used jointly with OutputElementStyle to retrieve specific style values", content = @Content(schema = @Schema(implementation = StylesResponse.class))),
-            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getStyles(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -1064,7 +1065,7 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
 
             ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
@@ -1072,7 +1073,7 @@ public class DataProviderService {
 
             if (provider == null) {
                 // The analysis cannot be run on this trace
-                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
             }
 
             if (provider instanceof IOutputStyleProvider) {
@@ -1102,7 +1103,7 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the list of configuration types defined on the server for a given output and experiment", responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of configuration types that this output supports.", content = @Content(array = @ArraySchema(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationSourceType.class)))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_CONFIG_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_CONFIG_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public Response getConfigurationTypes(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -1111,17 +1112,17 @@ public class DataProviderService {
 
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
         }
 
         if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_OUTPUTID);
         }
 
         IDataProviderDescriptor sourceDescriptor = getDescriptor(experiment, outputId);
         IDataProviderFactory factory = manager.getFactory(outputId);
         if (sourceDescriptor == null || factory == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_PROVIDER);
         }
 
         ITmfDataProviderConfigurator configurator = factory.getAdapter(ITmfDataProviderConfigurator.class);
@@ -1148,8 +1149,8 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get a single configuration source type defined on the server for a given data provider and experiment.", responses = {
             @ApiResponse(responseCode = "200", description = "Returns a single configuration source type", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationSourceType.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_CONFIG_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_CONFIG_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public Response getConfigurationType(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -1158,28 +1159,28 @@ public class DataProviderService {
 
         TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
         if (experiment == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
         }
 
         if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_OUTPUTID);
         }
 
         IDataProviderDescriptor sourceDescriptor = getDescriptor(experiment, outputId);
         IDataProviderFactory factory = manager.getFactory(outputId);
         if (sourceDescriptor == null || factory == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_PROVIDER);
         }
 
         ITmfDataProviderConfigurator configurator = factory.getAdapter(ITmfDataProviderConfigurator.class);
         if (configurator == null) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_PROVIDER);
         }
 
         Optional<ITmfConfigurationSourceType> optional = configurator.getConfigurationSourceTypes().stream().filter(type -> type.getId().equals(typeId)).findAny();
 
         if (!optional.isPresent()) {
-            return Response.status(Status.NOT_FOUND).entity(NO_SUCH_CONFIGURATION_TYPE).build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_CONFIGURATION_TYPE);
         }
         return Response.ok(optional.get()).build();
     }
@@ -1204,8 +1205,8 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get a derived data provider from a input configuration", responses = {
             @ApiResponse(responseCode = "200", description = "Returns the derived data provider descriptor.", content = @Content(schema = @Schema(implementation = DataProvider.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_CONFIG_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_CONFIG_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public Response createProvider(
                 @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -1218,7 +1219,7 @@ public class DataProviderService {
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
 
             Response errorResponse = validateOutputConfigParameters(outputId, queryParameters);
@@ -1228,17 +1229,17 @@ public class DataProviderService {
 
             IDataProviderDescriptor parentDescriptor = getDescriptor(experiment, outputId);
             if (parentDescriptor == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER + ": " + outputId).build(); //$NON-NLS-1$
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_PROVIDER + ": " + outputId); //$NON-NLS-1$
             }
 
             IDataProviderFactory factory = manager.getFactory(outputId);
             if (factory == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_PROVIDER);
             }
 
             ITmfDataProviderConfigurator configurator = factory.getAdapter(ITmfDataProviderConfigurator.class);
             if (configurator == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_PROVIDER);
             }
 
             ITmfConfiguration inputConfig = new TmfConfiguration.Builder()
@@ -1250,12 +1251,12 @@ public class DataProviderService {
             String typeId = inputConfig.getSourceTypeId();
             Optional<ITmfConfigurationSourceType> optional = configurator.getConfigurationSourceTypes().stream().filter(type -> type.getId().equals(typeId)).findAny();
             if (!optional.isPresent()) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_CONFIGURATION_TYPE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_CONFIGURATION_TYPE);
             }
             IDataProviderDescriptor returnDescr = configurator.createDataProviderDescriptors(experiment, inputConfig);
             return Response.ok(returnDescr).build();
         } catch (TmfConfigurationException e) {
-            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -1276,8 +1277,8 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Delete a derived output (and its configuration).", responses = {
             @ApiResponse(responseCode = "200", description = "Returns the deleted derived data provider descriptor. The derived data provider (and its configuration) was successfully deleted.", content = @Content(schema = @Schema(implementation = DataProvider.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = PROVIDER_CONFIG_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_CONFIG_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public Response deleteDerivedProvider(
             @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
@@ -1285,38 +1286,38 @@ public class DataProviderService {
             @Parameter(description = DERIVED_OUTPUT_ID) @PathParam("derivedOutputId") String derivedOutputId) {
 
         if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID + " (parent)").build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_OUTPUTID + " (parent)"); //$NON-NLS-1$
         }
 
         if (derivedOutputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID + " (derived)").build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_OUTPUTID + " (derived)"); //$NON-NLS-1$
         }
 
         try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#removeDataProvider") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
             }
 
             IDataProviderDescriptor parentDescriptor = getDescriptor(experiment, outputId);
             if (parentDescriptor == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER + ": " + outputId).build(); //$NON-NLS-1$
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_PROVIDER + ": " + outputId); //$NON-NLS-1$
             }
 
             IDataProviderDescriptor derivedDescriptor = getDescriptor(experiment, derivedOutputId);
             if (derivedDescriptor == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_DERIVED_PROVIDER + ": " + derivedOutputId).build(); //$NON-NLS-1$
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_DERIVED_PROVIDER + ": " + derivedOutputId); //$NON-NLS-1$
             }
 
             IDataProviderFactory factory = manager.getFactory(outputId);
             if (factory == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_PROVIDER);
             }
 
             ITmfDataProviderConfigurator configurator = factory.getAdapter(ITmfDataProviderConfigurator.class);
             if (configurator == null) {
-                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_PROVIDER).build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_PROVIDER);
             }
 
             // Get all descriptors of all corresponding derived data providers
@@ -1330,26 +1331,26 @@ public class DataProviderService {
 
             return Response.ok(derivedDescriptor).build();
         } catch (TmfConfigurationException e) {
-            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
     }
 
     private static Response validateParameters(String outputId, QueryParameters queryParameters) {
         if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_OUTPUTID);
         }
         if (queryParameters == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_PARAMETERS);
         }
         return null;
     }
 
     private static Response validateOutputConfigParameters(String outputId, ConfigurationQueryParameters queryParameters) {
         if (outputId == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_OUTPUTID).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_OUTPUTID);
         }
         if (queryParameters == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_PARAMETERS);
         }
 
         return null;

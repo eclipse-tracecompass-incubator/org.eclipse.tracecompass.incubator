@@ -29,6 +29,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ErrorResponseImpl;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TestDataProviderFactory;
@@ -93,14 +94,14 @@ public class DataProviderConfigurationServiceTest extends RestServerTest {
         try (Response response = configTypesEndpoint.request(MediaType.APPLICATION_JSON).get()) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         WebTarget singleTypeEndpoint = configTypesEndpoint.path(TestSchemaConfigurationSource.TYPE.getId());
         try (Response response = singleTypeEndpoint.request(MediaType.APPLICATION_JSON).get()) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         // Unknown data provider
@@ -108,14 +109,14 @@ public class DataProviderConfigurationServiceTest extends RestServerTest {
         try (Response response = configTypesEndpoint.request(MediaType.APPLICATION_JSON).get()) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         singleTypeEndpoint = configTypesEndpoint.path(TestSchemaConfigurationSource.TYPE.getId());
         try (Response response = singleTypeEndpoint.request(MediaType.APPLICATION_JSON).get()) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         // Test config type is not applicable for another data provider
@@ -124,7 +125,7 @@ public class DataProviderConfigurationServiceTest extends RestServerTest {
         try (Response response = singleTypeEndpoint.request(MediaType.APPLICATION_JSON).get()) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         configTypesEndpoint = getConfigEndpoint(exp.getUUID().toString(), TestDataProviderFactory.ID);
@@ -132,7 +133,7 @@ public class DataProviderConfigurationServiceTest extends RestServerTest {
         try (Response response = singleTypeEndpoint.request(MediaType.APPLICATION_JSON).get()) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_CONFIGURATION_TYPE, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_CONFIGURATION_TYPE, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
     }
 
@@ -194,21 +195,21 @@ public class DataProviderConfigurationServiceTest extends RestServerTest {
         // Unknown experiment
         try (Response response = assertDpPostWithErrors(dpCreationEndpoint, configuration)) {
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         // Unknown data provider
         dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
         try (Response response = assertDpPostWithErrors(dpCreationEndpoint, configuration)) {
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_PROVIDER + ": " + UNKNOWN_DP_ID, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER + ": " + UNKNOWN_DP_ID, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         // Test config type is not applicable for another data provider
         dpCreationEndpoint = getDpCreationEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
         try (Response response = assertDpPostWithErrors(dpCreationEndpoint, configuration)) {
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         // Invalid config type ID
@@ -222,7 +223,7 @@ public class DataProviderConfigurationServiceTest extends RestServerTest {
         configuration = builder.build();
         try (Response response = assertDpPostWithErrors(dpCreationEndpoint, configuration)) {
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_CONFIGURATION_TYPE, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_CONFIGURATION_TYPE, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
     }
 
@@ -244,7 +245,7 @@ public class DataProviderConfigurationServiceTest extends RestServerTest {
         try (Response response = dpDeletionEndpoint.request().delete()) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         // Unknown input data provider
@@ -253,7 +254,7 @@ public class DataProviderConfigurationServiceTest extends RestServerTest {
         try (Response response = dpDeletionEndpoint.request().delete()) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_PROVIDER + ": " + UNKNOWN_DP_ID, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER + ": " + UNKNOWN_DP_ID, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         // Unknown derived data provider
@@ -262,7 +263,7 @@ public class DataProviderConfigurationServiceTest extends RestServerTest {
         try (Response response = dpDeletionEndpoint.request().delete()) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_DERIVED_PROVIDER + ": " + UNKNOWN_DP_ID, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_DERIVED_PROVIDER + ": " + UNKNOWN_DP_ID, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         Map<String, Object> params = readParametersFromJson(VALID_JSON_FILENAME);
@@ -283,7 +284,7 @@ public class DataProviderConfigurationServiceTest extends RestServerTest {
         try (Response response = dpDeletionEndpoint.request().delete()) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(String.class));
+            assertEquals(EndpointConstants.NO_SUCH_PROVIDER, response.readEntity(ErrorResponseImpl.class).getTitle());
         }
 
         // Successful deletion

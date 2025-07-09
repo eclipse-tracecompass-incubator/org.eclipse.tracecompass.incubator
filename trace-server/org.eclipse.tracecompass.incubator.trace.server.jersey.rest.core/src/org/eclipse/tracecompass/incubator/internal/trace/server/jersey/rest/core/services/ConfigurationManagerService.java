@@ -18,6 +18,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_TYPE_ID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.CFG_UPDATE_DESC;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_CONFIGURATION_TYPE;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -31,6 +32,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ErrorResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.ConfigurationQueryParameters;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSource;
@@ -86,12 +88,13 @@ public class ConfigurationManagerService {
     @Path("/types/{typeId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get a single configuration source type defined on the server", responses = {
-            @ApiResponse(responseCode = "200", description = "Returns a single configuration source type", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationSourceType.class)))
+            @ApiResponse(responseCode = "200", description = "Returns a single configuration source type", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ConfigurationSourceType.class))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_CONFIGURATION_TYPE, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getConfigurationType(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
-            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "Configuration source type doesn't exist"); //$NON-NLS-1$
         }
         return Response.ok(configurationSource.getConfigurationSourceType()).build();
     }
@@ -110,12 +113,12 @@ public class ConfigurationManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the list of configurations that are instantiated of a given configuration source type", responses = {
             @ApiResponse(responseCode = "200", description = "Get the list of configuration descriptors ", content = @Content(array = @ArraySchema(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Configuration.class)))),
-            @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getConfigurations(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
-            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "Configuration source type doesn't exist"); //$NON-NLS-1$
         }
         return Response.ok(configurationSource.getConfigurations()).build();
     }
@@ -136,9 +139,9 @@ public class ConfigurationManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Create a configuration instance for the given configuration source type", responses = {
             @ApiResponse(responseCode = "200", description = "The configuration instance was successfully created", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Configuration.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to create configuration instance", content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to create configuration instance", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response postConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
             @RequestBody(description = CFG_CREATE_DESC + " " + CFG_KEYS_DESC, content = {
@@ -146,10 +149,10 @@ public class ConfigurationManagerService {
             }, required = true) ConfigurationQueryParameters queryParameters) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
-            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "Configuration source type doesn't exist"); //$NON-NLS-1$
         }
         if (queryParameters == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, EndpointConstants.MISSING_PARAMETERS);
         }
         ITmfConfiguration inputConfig = new TmfConfiguration.Builder()
                     .setName(queryParameters.getName())
@@ -161,7 +164,7 @@ public class ConfigurationManagerService {
             ITmfConfiguration config = configurationSource.create(inputConfig);
             return Response.ok(config).build();
         } catch (TmfConfigurationException e) {
-            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -179,20 +182,20 @@ public class ConfigurationManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get a configuration instance of a given configuration source type", responses = {
             @ApiResponse(responseCode = "200", description = "Get a configuration instance", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Configuration.class))),
-            @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
             @Parameter(description = CFG_CONFIG_ID) @PathParam("configId") String configId) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
-            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "Configuration source type doesn't exist"); //$NON-NLS-1$
         }
         if (configId == null || !configurationSource.contains(configId)) {
-            return Response.status(Status.NOT_FOUND).entity("Configuration instance doesn't exist for type " + typeId).build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "Configuration instance doesn't exist for type " + typeId); //$NON-NLS-1$
         }
         ITmfConfiguration config = configurationSource.get(configId);
         if (config == null) {
-            return Response.status(Status.NOT_FOUND).entity("Configuration instance doesn't exist for type " + typeId).build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "Configuration instance doesn't exist for type " + typeId); //$NON-NLS-1$
         }
         return Response.ok(config).build();
     }
@@ -214,9 +217,9 @@ public class ConfigurationManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update a configuration instance of a given configuration source type", responses = {
             @ApiResponse(responseCode = "200", description = "The configuration instance was successfully updated", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Configuration.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to update configuration instance", content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to update configuration instance", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @SuppressWarnings("null")
     public Response putConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
@@ -226,14 +229,14 @@ public class ConfigurationManagerService {
             }, required = true) ConfigurationQueryParameters queryParameters) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
-            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "Configuration source type doesn't exist"); //$NON-NLS-1$
         }
         if (queryParameters == null) {
-            return Response.status(Status.BAD_REQUEST).entity(EndpointConstants.MISSING_PARAMETERS).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, EndpointConstants.MISSING_PARAMETERS);
         }
 
         if (configId == null || !configurationSource.contains(configId)) {
-            return Response.status(Status.NOT_FOUND).entity("Configuration instance doesn't exist for type " + typeId).build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "Configuration instance doesn't exist for type " + typeId); //$NON-NLS-1$
         }
 
         ITmfConfiguration inputConfig = new TmfConfiguration.Builder()
@@ -247,7 +250,7 @@ public class ConfigurationManagerService {
             ITmfConfiguration config = configurationSource.update(configId, inputConfig);
             return Response.ok(config).build();
         } catch (TmfConfigurationException e) {
-            return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -265,23 +268,23 @@ public class ConfigurationManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Delete a configuration instance of a given configuration source type", responses = {
             @ApiResponse(responseCode = "200", description = "The configuration instance was successfully deleted", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Configuration.class))),
-            @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to delete configuration instance", content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = EndpointConstants.NO_SUCH_CONFIGURATION, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to delete configuration instance", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response deleteConfiguration(@Parameter(description = CFG_TYPE_ID) @PathParam("typeId") String typeId,
             @Parameter(description = CFG_CONFIG_ID) @PathParam("configId") String configId) {
         ITmfConfigurationSource configurationSource = fConfigSourceManager.getConfigurationSource(typeId);
         if (configurationSource == null) {
-            return Response.status(Status.NOT_FOUND).entity("Configuration source type doesn't exist").build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "Configuration source type doesn't exist"); //$NON-NLS-1$
         }
 
         if (configId == null || !configurationSource.contains(configId)) {
-            return Response.status(Status.NOT_FOUND).entity("Configuration instance doesn't exist for type " + typeId).build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "Configuration instance doesn't exist for type " + typeId); //$NON-NLS-1$
         }
 
         ITmfConfiguration config = configurationSource.remove(configId);
         if (config == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Failed removing configuration instance").build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, "Failed removing configuration instance"); //$NON-NLS-1$
         }
         return Response.ok(config).build();
     }

@@ -11,10 +11,13 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services;
 
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.EXPERIMENT_NAME_EXISTS;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.EXPERIMENT_NAME_EXISTS_DETAIL;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.EXP_UUID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.MISSING_PARAMETERS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_EXPERIMENT;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_TRACE;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -59,6 +62,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ErrorResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ExperimentErrorResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ExperimentQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
@@ -185,14 +190,14 @@ public class ExperimentManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get the model object for an experiment", responses = {
             @ApiResponse(responseCode = "200", description = "Return the experiment model", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Experiment.class))),
-            @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response getExperiment(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
         TmfExperiment experiment = getExperimentByUUID(expUUID);
         if (experiment != null) {
             return Response.ok(Experiment.from(experiment, expUUID)).build();
         }
-        return Response.status(Status.NOT_FOUND).build();
+        return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "No experiment found with uuid " + expUUID); //$NON-NLS-1$
     }
 
     /**
@@ -208,12 +213,12 @@ public class ExperimentManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Remove an experiment from the server", responses = {
             @ApiResponse(responseCode = "200", description = "The trace was successfully deleted, return the deleted experiment.", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Experiment.class))),
-            @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "404", description = NO_SUCH_EXPERIMENT, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response deleteExperiment(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
         IResource resource = EXPERIMENT_RESOURCES.remove(expUUID);
         if (resource == null) {
-            return Response.status(Status.NOT_FOUND).build();
+            return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "No experiment found with uuid " + expUUID); //$NON-NLS-1$
         }
         TmfExperiment experiment = EXPERIMENTS.remove(expUUID);
         Experiment experimentModel = experiment != null ? Experiment.from(experiment, expUUID) : Experiment.from(resource, expUUID);
@@ -269,21 +274,22 @@ public class ExperimentManagerService {
     @Operation(summary = "Create a new experiment on the server", responses = {
             @ApiResponse(responseCode = "200", description = "The experiment was successfully created", content = @Content(schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.Experiment.class))),
             @ApiResponse(responseCode = "204", description = "The experiment has at least one trace which hasn't been created yet", content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "409", description = "The experiment (name) already exists and both differ", content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to post experiment", content = @Content(schema = @Schema(implementation = String.class)))
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = NO_SUCH_TRACE, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = EXPERIMENT_NAME_EXISTS, content = @Content(schema = @Schema(implementation = ExperimentErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal trace-server error while trying to post experiment", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public Response postExperiment(@RequestBody(content = {
             @Content(schema = @Schema(implementation = ExperimentQueryParameters.class))
     }, required = true) QueryParameters queryParameters) {
 
         if (queryParameters == null) {
-            return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_PARAMETERS);
         }
         Map<String, Object> parameters = queryParameters.getParameters();
         String errorMessage = QueryParametersUtil.validateExperimentQueryParameters(parameters);
         if (errorMessage != null) {
-            return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+            return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
         }
         String name = Objects.requireNonNull((String) parameters.get("name")); //$NON-NLS-1$
         List<String> tracesObj = Objects.requireNonNull((List<String>) parameters.get("traces")); //$NON-NLS-1$
@@ -292,13 +298,13 @@ public class ExperimentManagerService {
         List<IResource> traceResources = new ArrayList<>();
         for (Object uuidObj : tracesObj) {
             if (!(uuidObj instanceof String)) {
-                return Response.status(Status.BAD_REQUEST).build();
+                return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, "UUID object is not instance of String"); //$NON-NLS-1$
             }
             UUID uuid = UUID.fromString((String) uuidObj);
             IResource traceResource = TraceManagerService.getTraceResource(uuid);
             if (traceResource == null) {
                 // The trace should have been created first
-                return Response.noContent().build();
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, "No trace found with UUID " + uuid); //$NON-NLS-1$
             }
             traceResources.add(traceResource);
             traceUUIDs.add(uuid);
@@ -317,7 +323,7 @@ public class ExperimentManagerService {
                     TmfExperiment oldExperiment = new TmfExperiment(ITmfEvent.class, resource.getLocation().toOSString(), new ITmfTrace[0], TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, resource);
                     Experiment entity = Experiment.from(oldExperiment, expUUID);
                     oldExperiment.dispose();
-                    return Response.status(Status.CONFLICT).entity(entity).build();
+                    return ErrorResponseUtil.newErrorResponse(Status.CONFLICT, EXPERIMENT_NAME_EXISTS, EXPERIMENT_NAME_EXISTS_DETAIL, entity);
                 }
                 // It's the same experiment, check if it is opened already
                 TmfExperiment experiment = EXPERIMENTS.get(expUUID);
@@ -331,14 +337,14 @@ public class ExperimentManagerService {
                 createExperiment(resource, traceResources);
             }
         } catch (CoreException e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+            return ErrorResponseUtil.newErrorResponse(Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
         TRACE_UUIDS.put(expUUID, traceUUIDs);
         EXPERIMENT_RESOURCES.put(expUUID, resource);
         TmfExperiment experiment = createExperimentInstance(expUUID);
         if (experiment == null) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to instantiate experiment").build(); //$NON-NLS-1$
+            return ErrorResponseUtil.newErrorResponse(Status.INTERNAL_SERVER_ERROR, "Failed to instantiate experiment"); //$NON-NLS-1$
         }
 
         return Response.ok(Experiment.from(experiment, expUUID)).build();
