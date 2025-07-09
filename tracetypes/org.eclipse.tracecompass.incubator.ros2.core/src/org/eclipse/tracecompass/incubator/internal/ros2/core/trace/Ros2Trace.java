@@ -25,16 +25,10 @@ import org.eclipse.tracecompass.incubator.internal.ros2.core.trace.layout.IRos2E
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
-import org.eclipse.tracecompass.tmf.ctf.core.context.CtfLocation;
-import org.eclipse.tracecompass.tmf.ctf.core.context.CtfLocationInfo;
-import org.eclipse.tracecompass.tmf.ctf.core.context.CtfTmfContext;
-import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent;
 import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEventFactory;
 import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
 import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTraceValidationStatus;
-import org.osgi.framework.Version;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -57,16 +51,9 @@ public class Ros2Trace extends CtfTmfTrace {
         ROS_ASPECTS = builder.build();
     }
 
-    /**
-     * Last version before the 'version' field was added. As it turns out, the
-     * field was added in 0.1.0.
-     */
-    private static final @NonNull String TRACETOOLS_VERSION_UNKNOWN = "0.0.0"; //$NON-NLS-1$
-
     private @NonNull Collection<ITmfEventAspect<?>> fRos2TraceAspects = ImmutableSet.copyOf(ROS_ASPECTS);
 
     private @Nullable IRos2EventLayout fLayout = null;
-    private @Nullable Version fTracetoolsVersion = null;
 
     /**
      * Default constructor
@@ -99,18 +86,6 @@ public class Ros2Trace extends CtfTmfTrace {
         return layout;
     }
 
-    /**
-     * @return the version of the ROS 2 tracetools package used to generate the
-     *         trace
-     */
-    public @NonNull Version getTracetoolsVersion() {
-        Version tracetoolsVersion = fTracetoolsVersion;
-        if (null == tracetoolsVersion) {
-            throw new IllegalStateException("Cannot get the tracetools version of a non-initialized trace"); //$NON-NLS-1$
-        }
-        return tracetoolsVersion;
-    }
-
     @Override
     public void initTrace(IResource resource, String path,
             Class<? extends ITmfEvent> eventType) throws TmfTraceException {
@@ -118,50 +93,11 @@ public class Ros2Trace extends CtfTmfTrace {
 
         // Determine the event layout to use
         fLayout = getLayout();
-        fTracetoolsVersion = getTracetoolsVersion(fLayout);
     }
 
     private static @NonNull IRos2EventLayout getLayout() {
         // Only one layout for the moment
         return Objects.requireNonNull(IRos2EventLayout.getDefault());
-    }
-
-    private @NonNull Version getTracetoolsVersion(IRos2EventLayout layout) {
-        return getVersionFromEvent(layout.eventRclInit(), layout);
-    }
-
-    private @NonNull Version getVersionFromEvent(@NonNull String versionEventName, IRos2EventLayout layout) {
-        CtfTmfEvent event = seekEvent(versionEventName);
-        if (null == event) {
-            /**
-             * This could happen if the tracepoint is not enabled, in which case
-             * we just have to assume a version.
-             */
-            Activator.getInstance().logError("Cannot get event " + versionEventName); //$NON-NLS-1$
-            return new Version(TRACETOOLS_VERSION_UNKNOWN);
-        }
-        String versionStr = (String) event.getContent().getFieldValue(Object.class, layout.fieldVersion());
-        if (null == versionStr) {
-            /**
-             * If the event exists, but the field doesn't exist, default to the
-             * version right before the field was added.
-             */
-            return new Version(TRACETOOLS_VERSION_UNKNOWN);
-        }
-        return new Version(versionStr);
-    }
-
-    private @Nullable CtfTmfEvent seekEvent(@NonNull String eventName) {
-        // Seek the first event and then advance until we get the right event
-        CtfLocation location = new CtfLocation(new CtfLocationInfo(0L, 0L));
-        ITmfContext result = seekEvent(location);
-        CtfTmfContext context = (CtfTmfContext) result;
-        while (!context.getCurrentEvent().getName().equals(eventName)) {
-            if (!context.advance()) {
-                return null;
-            }
-        }
-        return context.getCurrentEvent();
     }
 
     @Override

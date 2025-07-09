@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.AbstractRos2StateProvider;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcess;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcessPointer;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Gid;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackObject;
@@ -31,6 +32,7 @@ import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2P
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ServiceObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2SubscriptionObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2TimerObject;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.trace.layout.IRos2EventLayout;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
@@ -98,6 +100,7 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
         ITmfStateSystemBuilder ss = Objects.requireNonNull(getStateSystemBuilder());
         long timestamp = event.getTimestamp().toNanos();
 
+        eventHandleInit(event, ss, timestamp);
         eventHandleNode(event, ss, timestamp);
         eventHandlePublisher(event, ss);
         eventHandleSubscription(event, ss);
@@ -105,6 +108,34 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
         eventHandleService(event, ss, timestamp);
         eventHandleClient(event, ss, timestamp);
         eventHandleCallback(event, ss, timestamp);
+    }
+
+    private static void eventHandleInit(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp) {
+        // rcl_init
+        if (isEvent(event, LAYOUT.eventRclInit())) {
+            String version;
+            if (hasField(event, LAYOUT.fieldVersion())) {
+                version = (String) getField(event, LAYOUT.fieldVersion());
+            } else {
+                /**
+                 * If the event exists, but the field doesn't exist, default to the
+                 * version right before the field was added.
+                 */
+                version = IRos2EventLayout.TRACETOOLS_VERSION_UNKNOWN;
+            }
+            // Note: we need the pid context field for this
+            HostProcess process = hostProcessFrom(event);
+
+            int versionQuark = Ros2ObjectsUtil.getTracetoolsVersionQuarkAndAdd(ss, process);
+            /**
+             * The version should not change during the lifetime of the process,
+             * but process IDs can be reused, and the tracetools version is the
+             * first information we get from the trace (i.e., the events that
+             * need this info happen later), so we can make it time-specific and
+             * not just update the ongoing state.
+             */
+            ss.modifyAttribute(timestamp, version, versionQuark);
+        }
     }
 
     private static void eventHandleNode(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp) {
@@ -123,7 +154,7 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
     }
 
     private void eventHandlePublisher(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss) {
-        if (!isPubSourceTimestampAvailableFromRmw()) {
+        if (!isPubSourceTimestampAvailableFromRmw(event, ss)) {
             eventHandlePublisherDdsCreate(event);
         }
         eventHandlePublisherInit(event, ss);
@@ -187,7 +218,7 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
 
             long publisherTimestamp = rmwPublisherInit.getTimestamp().toNanos();
             HostProcessPointer ddsWriter = hostProcessPointerFrom(rmwPublisherInit, 0L);
-            if (!isPubSourceTimestampAvailableFromRmw()) {
+            if (!isPubSourceTimestampAvailableFromRmw(event, ss)) {
                 // Get corresponding dds:create_writer event
                 ITmfEvent ddsCreateWriter = fDdsCreateWriterEvents.remove(gid);
                 if (null == ddsCreateWriter) {
@@ -207,7 +238,7 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
     }
 
     private void eventHandleSubscription(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss) {
-        if (!isPubSourceTimestampAvailableFromRmw()) {
+        if (!isPubSourceTimestampAvailableFromRmw(event, ss)) {
             eventHandleSubscriptionDdsCreate(event);
         }
         eventHandleSubscriptionInit(event);
@@ -298,7 +329,7 @@ public class Ros2ObjectsStateProvider extends AbstractRos2StateProvider {
 
             long subscriptionTimestamp = rmwSubscriptionInit.getTimestamp().toNanos();
             HostProcessPointer ddsReader = hostProcessPointerFrom(rmwSubscriptionInit, 0L);
-            if (!isPubSourceTimestampAvailableFromRmw()) {
+            if (!isPubSourceTimestampAvailableFromRmw(event, ss)) {
                 // Get corresponding dds:create_reader event
                 ITmfEvent ddsCreateReader = fDdsCreateReaderEvents.remove(gid);
                 if (null == ddsCreateReader) {

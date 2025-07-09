@@ -116,8 +116,8 @@ public abstract class HostProcessValue<@NonNull T extends Comparable<T>> extends
      */
     public @NonNull String getStringId() {
         return String.format(
-                "%s%s%d%s%s", //$NON-NLS-1$
-                valueToString(), STRING_ID_SEP, getPid(), STRING_ID_SEP, getHostProcess().getHostId().getId());
+                "%s%s%s", //$NON-NLS-1$
+                valueToString(), STRING_ID_SEP, getHostProcess().getStringId());
     }
 
     @Override

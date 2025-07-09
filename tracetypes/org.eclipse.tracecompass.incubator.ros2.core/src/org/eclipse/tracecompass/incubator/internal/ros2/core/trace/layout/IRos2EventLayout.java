@@ -36,6 +36,11 @@ public interface IRos2EventLayout {
 
     public static String PROVIDER_NAME = "ros2:"; //$NON-NLS-1$
     public static String DDS_PROVIDER_NAME = "dds:"; //$NON-NLS-1$
+    /**
+     * Last version before the 'version' field was added. As it turns out, the
+     * field was added in 0.1.0.
+     */
+    public static final String TRACETOOLS_VERSION_UNKNOWN = "0.0.0"; //$NON-NLS-1$
 
     /**
      * The default layout
