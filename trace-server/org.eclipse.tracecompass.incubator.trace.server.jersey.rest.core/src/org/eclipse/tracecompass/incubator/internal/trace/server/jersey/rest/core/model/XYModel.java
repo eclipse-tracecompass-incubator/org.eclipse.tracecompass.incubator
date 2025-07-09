@@ -35,6 +35,6 @@ public interface XYModel {
      * @return The series.
      */
     @NonNull
-    @ArraySchema(arraySchema = @Schema(description = "The collection of series", requiredMode = RequiredMode.REQUIRED))
+    @ArraySchema(arraySchema = @Schema(description = "The collection of series"), schema = @Schema(requiredMode = RequiredMode.REQUIRED))
     Collection<@NonNull SeriesModel> getSeries();
 }

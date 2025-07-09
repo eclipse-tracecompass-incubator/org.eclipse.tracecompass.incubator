@@ -42,7 +42,7 @@ public interface TreeDataModel {
      * @return The labels.
      */
     @ArraySchema(arraySchema = @Schema(description = "Array of cell labels to be displayed. " +
-            "The length of the array and the index of each column need to correspond to the header array returned in the tree model.", requiredMode = RequiredMode.REQUIRED))
+            "The length of the array and the index of each column need to correspond to the header array returned in the tree model."), schema = @Schema(requiredMode = RequiredMode.REQUIRED))
     @NonNull
     List<@NonNull String> getLabels();
 

@@ -48,7 +48,7 @@ public interface ExperimentQueryParameters {
          * @return The traces.
          */
         @NonNull
-        @ArraySchema(arraySchema = @Schema(description = "The unique identifiers of the traces to encapsulate in this experiment", requiredMode = RequiredMode.REQUIRED))
+        @ArraySchema(arraySchema = @Schema(description = "The unique identifiers of the traces to encapsulate in this experiment"), schema = @Schema(requiredMode = RequiredMode.REQUIRED))
         List<@NonNull UUID> getTraces();
     }
 }
