@@ -66,6 +66,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TGR;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_EX;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_SAMPLING_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_EX_TREE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_TREE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMES_EX_TT;
@@ -73,6 +74,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TREE_ENTRIES;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.VTB;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.X_Y;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.GXY;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -110,6 +112,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ArrowsQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.DataProvider;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ErrorResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.GenericXYQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.LinesQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.MarkerSetsResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.OptionalQueryParameters;
@@ -410,6 +413,100 @@ public class DataProviderService {
             if (errorMessage != null) {
                 return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
             }
+
+            TmfModelResponse<@NonNull ITmfXyModel> response = provider.fetchXY(params, null);
+            return Response.ok(response).build();
+        }
+    }
+
+    /**
+     * Query the generic xy chart data provider for its tree structure.
+     *
+     * @param expUUID
+     *            desired experiment UUID
+     * @param outputId
+     *            Output ID for the data provider to query
+     * @param queryParameters
+     *            Parameters used to request the tree and axis descriptions, as
+     *            defined in {@link QueryParameters}
+     * @return an {@link GenericView} with the results
+     */
+    @POST
+    @Path("/genericXY/{outputId}/tree")
+    @Tag(name = GXY)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "API to get the tree for generic xy chart", description = TREE_ENTRIES, responses = {
+            @ApiResponse(responseCode = "200", description = "Returns a list of generic xy chart entries. " +
+                    CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = XYTreeResponse.class))),
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response getGenericXYChartTree(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @RequestBody(description = "Query parameters to fetch the generic XY tree. " + TIMERANGE_TREE, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMERANGE_EX_TREE +
+                            "}}"), schema = @Schema(implementation = TreeQueryParameters.class))
+            }, required = true) QueryParameters queryParameters) {
+        return getTree(expUUID, outputId, queryParameters);
+    }
+
+    /**
+     * Query the provider for the generic xy chart.
+     *
+     * @param expUUID
+     *            {@link UUID} of the experiment to query
+     * @param outputId
+     *            Output ID for the data provider to query
+     * @param queryParameters
+     *            Parameters to fetch xy as described by {@link QueryParameters}
+     * @return an {@link GenericView} with the results
+     */
+    @POST
+    @Path("/genericXY/{outputId}/xy")
+    @Tag(name = GXY)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "API to get the xy model", description = "Unique endpoint for all xy models, " +
+            "ensures that the same template is followed for all endpoints.", responses = {
+                    @ApiResponse(responseCode = "200", description = "Return the queried xy response", content = @Content(schema = @Schema(implementation = XYResponse.class))),
+                    @ApiResponse(responseCode = "400", description = MISSING_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response getGenericXY(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @RequestBody(description = "Query parameters to fetch the xy model. " + TIMERANGE + " " + ITEMS_XY, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMERANGE_SAMPLING_EX + "," + ITEMS_EX +
+                            "}}"), schema = @Schema(implementation = GenericXYQueryParameters.class))
+            }, required = true) QueryParameters queryParameters) {
+
+        Response errorResponse = validateParameters(outputId, queryParameters);
+        if (errorResponse != null) {
+            return errorResponse;
+        }
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#fetchXY") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
+            }
+
+            ITmfTreeXYDataProvider<@NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
+                    outputId, ITmfTreeXYDataProvider.class);
+
+            if (provider == null) {
+                // The analysis cannot be run on this trace
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
+            }
+
+            Map<String, Object> params = queryParameters.getParameters();
+            String errorMessage = QueryParametersUtil.validateGenericXYQueryParameters(params);
+            if (errorMessage != null) {
+                return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);            }
 
             TmfModelResponse<@NonNull ITmfXyModel> response = provider.fetchXY(params, null);
             return Response.ok(response).build();

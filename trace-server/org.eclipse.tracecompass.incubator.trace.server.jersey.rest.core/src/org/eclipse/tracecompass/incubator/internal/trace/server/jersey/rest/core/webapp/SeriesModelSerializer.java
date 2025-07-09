@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2019 Ericsson
+ * Copyright (c) 2019, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -47,13 +47,15 @@ public class SeriesModelSerializer extends StdSerializer<@NonNull ISeriesModel> 
         gen.writeStartObject();
         gen.writeNumberField("seriesId", value.getId()); //$NON-NLS-1$
         gen.writeStringField("seriesName", value.getName()); //$NON-NLS-1$
-        gen.writeObjectField("xValues", value.getXAxis()); //$NON-NLS-1$
+        gen.writeObjectField("xValues", value.getSampling()); //$NON-NLS-1$
         gen.writeObjectField("yValues", value.getData()); //$NON-NLS-1$
 
         // no-op trim below, null-related (unlikely case) warning otherwise-
         String type = value.getDisplayType().name().toLowerCase().trim();
         OutputElementStyle style = new OutputElementStyle(null, ImmutableMap.of(StyleProperties.SERIES_TYPE, type));
         gen.writeObjectField("style", style); //$NON-NLS-1$
+        gen.writeObjectField("xValuesDescription", value.getXAxisDescription()); //$NON-NLS-1$
+        gen.writeObjectField("yValuesDescription", value.getYAxisDescription()); //$NON-NLS-1$
         gen.writeEndObject();
     }
 }

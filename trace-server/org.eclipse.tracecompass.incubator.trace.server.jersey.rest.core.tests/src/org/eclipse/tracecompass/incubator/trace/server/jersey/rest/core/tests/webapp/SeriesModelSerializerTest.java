@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.webapp;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -19,10 +20,13 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.OutputElementStyleSerializer;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.SamplingSerializer;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.SeriesModelSerializer;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.OutputElementStyleStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ISamplingStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XySeriesStub;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
+import org.eclipse.tracecompass.tmf.core.model.ISampling;
 import org.eclipse.tracecompass.tmf.core.model.SeriesModel.SeriesModelBuilder;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
@@ -41,7 +45,7 @@ public class SeriesModelSerializerTest extends AbstractSerializerTest {
 
     private static final long ID = 0;
     private static final String TITLE = "valid-styles";
-    private static final long[] times = { 0, 1, 2, 3 };
+    private static final ISampling times = new ISampling.Timestamps(new long[] { 0, 1, 2, 3 });
     private static final double[] fValues = { 0.1, 0.2, 0.3, 0.4 };
 
     /**
@@ -62,6 +66,7 @@ public class SeriesModelSerializerTest extends AbstractSerializerTest {
         SimpleModule module = new SimpleModule();
         module.addSerializer(ISeriesModel.class, new SeriesModelSerializer());
         module.addSerializer(OutputElementStyle.class, new OutputElementStyleSerializer());
+        module.addSerializer(ISampling.class, new SamplingSerializer());
         fMapper.registerModule(module);
 
         String json = fMapper.writeValueAsString(lineModel);
@@ -69,11 +74,10 @@ public class SeriesModelSerializerTest extends AbstractSerializerTest {
         assertNotNull(deserialized);
         assertEquals(TITLE, deserialized.getName());
         assertEquals(ID, deserialized.getId());
-        List<Long> xValues = deserialized.getXValues();
-        assertTrue(times.length == xValues.size());
-        for (int i = 0; i < times.length; i++) {
-            assertEquals(i, times[i], xValues.get(i));
-        }
+        // the sampling is de-serialized into sampling-stub
+        assertTrue(deserialized.getXValues() instanceof ISamplingStub.TimestampsStub);
+        long[] actual = ((ISamplingStub.TimestampsStub) deserialized.getXValues()).getTimestamps();
+        assertArrayEquals(new long[] {0, 1, 2, 3}, actual);
         List<Double> yValues = deserialized.getYValues();
         assertTrue(fValues.length == yValues.size());
         for (int i = 0; i < fValues.length; i++) {

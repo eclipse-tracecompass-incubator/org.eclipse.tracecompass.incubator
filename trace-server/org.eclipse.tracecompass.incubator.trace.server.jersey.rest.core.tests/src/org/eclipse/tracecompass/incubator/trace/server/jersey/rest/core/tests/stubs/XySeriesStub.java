@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2020 École Polytechnique de Montréal
+ * Copyright (c) 2020, 2025 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -29,9 +29,11 @@ public class XySeriesStub implements Serializable {
 
     private final String fName;
     private final int fId;
-    private final List<Long> fXValues;
+    private final ISamplingStub fSampling;
     private final List<Double> fYValues;
     private final OutputElementStyleStub fStyle;
+    private final TmfXYAxisDescriptionStub fXAxisDescription;
+    private final TmfXYAxisDescriptionStub fYAxisDescription;
 
     /**
      * {@link JsonCreator} Constructor for final fields
@@ -46,18 +48,26 @@ public class XySeriesStub implements Serializable {
      *            The values for the y axis of this series
      * @param style
      *            The style for this series
+     * @param xAxisDescription
+     *            The description for x axis
+     * @param yAxisDescription
+     *            The description for y axis
      */
     @JsonCreator
     public XySeriesStub(@JsonProperty("seriesName") String name,
             @JsonProperty("seriesId") Integer id,
-            @JsonProperty("xValues") List<Long> xValues,
+            @JsonProperty("xValues") ISamplingStub xValues,
             @JsonProperty("yValues") List<Double> yValues,
-            @JsonProperty("style") OutputElementStyleStub style) {
+            @JsonProperty("style") OutputElementStyleStub style,
+            @JsonProperty("xValuesDescription") TmfXYAxisDescriptionStub xAxisDescription,
+            @JsonProperty("yValuesDescription") TmfXYAxisDescriptionStub yAxisDescription) {
         fName = Objects.requireNonNull(name, "The 'seriesName' json field was not set");
         fId = Objects.requireNonNull(id, "The 'seriesId' json field was not set");
-        fXValues = Objects.requireNonNull(xValues, "The 'xValues' json field was not set");
+        fSampling = Objects.requireNonNull(xValues, "The 'xValues' json field was not set");
         fYValues = Objects.requireNonNull(yValues, "The 'yValues' json field was not set");
         fStyle = Objects.requireNonNull(style, "The 'style' json field was not set");
+        fXAxisDescription = xAxisDescription;
+        fYAxisDescription = yAxisDescription;
     }
 
     /**
@@ -83,8 +93,8 @@ public class XySeriesStub implements Serializable {
      *
      * @return The values on the x axis
      */
-    public List<Long> getXValues() {
-        return fXValues;
+    public ISamplingStub getXValues() {
+        return fSampling;
     }
 
     /**
@@ -103,5 +113,23 @@ public class XySeriesStub implements Serializable {
      */
     public OutputElementStyleStub getStyle() {
         return fStyle;
+    }
+
+    /**
+     * Get the description for x axis
+     *
+     * @return The description for x axis
+     */
+    public TmfXYAxisDescriptionStub getXAxisDescription() {
+        return fXAxisDescription;
+    }
+
+    /**
+     * Get the description for y axis
+     *
+     * @return The description for y axis
+     */
+    public TmfXYAxisDescriptionStub getYAxisDescription() {
+        return fYAxisDescription;
     }
 }

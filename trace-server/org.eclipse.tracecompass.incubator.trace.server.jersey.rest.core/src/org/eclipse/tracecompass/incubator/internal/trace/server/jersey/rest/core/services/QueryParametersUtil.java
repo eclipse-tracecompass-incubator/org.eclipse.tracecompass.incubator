@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2022 Ericsson
+ * Copyright (c) 2022, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -54,7 +54,7 @@ public class QueryParametersUtil {
     private static final String FILTER_EXPRESSIONS_MAP = "filter_expressions_map";  //$NON-NLS-1$
     private static final String NAME = "name"; //$NON-NLS-1$
     private static final String NBTIMES = "nbTimes"; //$NON-NLS-1$
-    private static final String REQUESTED_TIMERANGE_KEY = "requested_timerange"; //$NON-NLS-1$
+    private static final String NBSAMPLES = "nbSamples"; //$NON-NLS-1$
     private static final String SEP = ": "; //$NON-NLS-1$
     private static final String START = "start"; //$NON-NLS-1$
     private static final String STRATEGY = "strategy"; //$NON-NLS-1$
@@ -256,6 +256,24 @@ public class QueryParametersUtil {
     }
 
     /**
+     * Validate generic XY chart query parameters.
+     *
+     * @param params
+     *            the mutable map of query parameters
+     * @return an error message if validation fails, or null otherwise
+     */
+    public static String validateGenericXYQueryParameters(Map<String, Object> params) {
+        String errorMessage;
+        if ((errorMessage = validateRequestedTimeRangeWithSamples(params)) != null) {
+            return errorMessage;
+        }
+        if ((errorMessage = validateRequestedItems(params, true)) != null) {
+            return errorMessage;
+        }
+        return null;
+    }
+
+    /**
      * Validate a string query parameter.
      *
      * @param params
@@ -310,24 +328,28 @@ public class QueryParametersUtil {
      * @return an error message if validation fails, or null otherwise
      */
     private static String validateRequestedTimeRange(Map<String, Object> params, boolean required, boolean isTree) {
-        Object requestedTimeRange = params.get(REQUESTED_TIMERANGE_KEY);
+        Object requestedTimeRange = params.get(DataProviderParameterUtils.REQUESTED_TIMERANGE_KEY);
         Object requestedTimes = params.get(DataProviderParameterUtils.REQUESTED_TIME_KEY);
         if (required && requestedTimeRange == null && requestedTimes == null) {
-            return MISSING_PARAMETERS + SEP + REQUESTED_TIMERANGE_KEY;
+            return MISSING_PARAMETERS + SEP + DataProviderParameterUtils.REQUESTED_TIMERANGE_KEY;
         }
         if (requestedTimeRange != null) {
             /* Transform requested timerange to requested times array */
-            requestedTimes = params.computeIfPresent(REQUESTED_TIMERANGE_KEY, (k, v) -> {
+            requestedTimes = params.computeIfPresent(DataProviderParameterUtils.REQUESTED_TIMERANGE_KEY, (k, v) -> {
                 if (v instanceof Map) {
                     Map<String, Object> map = (Map<String, Object>) v;
                     Object startObj = map.get(START);
                     Object endObj = map.get(END);
-                    Object nbTimesObj = map.get(NBTIMES);
                     if (!(startObj instanceof Number && endObj instanceof Number)) {
                         return null;
                     }
                     long start = ((Number) startObj).longValue();
                     long end = ((Number) endObj).longValue();
+                    Object nbTimesObj = map.get(NBTIMES);
+                    if (nbTimesObj == null) {
+                        return Arrays.asList(start, end);
+                    }
+
                     if (!(nbTimesObj instanceof Number)) {
                         return Arrays.asList(start, end);
                     }
@@ -341,10 +363,10 @@ public class QueryParametersUtil {
                 return null;
             });
             if (requestedTimes == null) {
-                return INVALID_PARAMETERS + SEP + REQUESTED_TIMERANGE_KEY;
+                return INVALID_PARAMETERS + SEP + DataProviderParameterUtils.REQUESTED_TIMERANGE_KEY;
             }
             params.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, requestedTimes);
-            params.remove(REQUESTED_TIMERANGE_KEY);
+            params.remove(DataProviderParameterUtils.REQUESTED_TIMERANGE_KEY);
         } else if (requestedTimes != null) {
             List<@NonNull Long> timeRequested = DataProviderParameterUtils.extractTimeRequested(params);
             if ((timeRequested == null) || (isTree && timeRequested.size() == 1) || (!isTree && timeRequested.isEmpty())) {
@@ -352,6 +374,56 @@ public class QueryParametersUtil {
             }
             params.put(DataProviderParameterUtils.REQUESTED_TIME_KEY, timeRequested);
         }
+        return null;
+    }
+
+    /**
+     * Validate and transform the requested_timerange query parameter with the
+     * number of samples specified is in a valid format.
+     *
+     * The transformed object is a list of long values in order:
+     * [start, end, nbSamples].
+     *
+     * @param params
+     *            the mutable map of query parameters
+     * @return an error message if validation fails, or null otherwise
+     */
+    private static String validateRequestedTimeRangeWithSamples(Map<String, Object> params) {
+        Object requestedTimeRange = params.get(DataProviderParameterUtils.REQUESTED_TIMERANGE_KEY);
+        if (requestedTimeRange == null) {
+            return MISSING_PARAMETERS + SEP + DataProviderParameterUtils.REQUESTED_TIMERANGE_KEY;
+        }
+
+        if (!(requestedTimeRange instanceof Map)) {
+            return INVALID_PARAMETERS + SEP + DataProviderParameterUtils.REQUESTED_TIMERANGE_KEY;
+        }
+
+        Map<String, Object> map = (Map<String, Object>) requestedTimeRange;
+        Object startObj = map.get(START);
+        if (startObj == null) {
+            return MISSING_PARAMETERS + SEP + START;
+        }
+        if (!(startObj instanceof Number)) {
+            return INVALID_PARAMETERS + SEP + START;
+        }
+        Object endObj = map.get(END);
+        if (endObj == null) {
+            return MISSING_PARAMETERS + SEP + END;
+        }
+        if (!(endObj instanceof Number)) {
+            return INVALID_PARAMETERS + SEP + END;
+        }
+        Object nbSamplesObj = map.get(NBSAMPLES);
+        if (nbSamplesObj == null) {
+            return MISSING_PARAMETERS + SEP + NBSAMPLES;
+        }
+        if (!(nbSamplesObj instanceof Number)) {
+            return INVALID_PARAMETERS + SEP + NBSAMPLES;
+        }
+
+        Object requestedTimes = Arrays.asList(
+                ((Number) startObj).longValue(), ((Number) endObj).longValue(), ((Number) nbSamplesObj).longValue());
+        params.put(DataProviderParameterUtils.REQUESTED_TIMERANGE_KEY, requestedTimes);
         return null;
     }
 
