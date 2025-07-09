@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2024 Ericsson
+ * Copyright (c) 2018, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -119,6 +119,11 @@ public abstract class RestServerTest {
     protected static final String CALL_STACK_DATAPROVIDER_ID = "org.eclipse.tracecompass.internal.analysis.profiling.callstack.provider.CallStackDataProvider";
 
     /**
+     * Callstack function density data provider ID
+     */
+    protected static final String CALL_STACK_FUNCTION_DENSITY_DATAPROVIDER_ID = "org.eclipse.tracecompass.analysis.profiling.core.callstack.functiondensity.provider";
+
+    /**
      * Requested times key
      */
     protected static final String REQUESTED_TIMES_KEY = "requested_times";
@@ -170,6 +175,11 @@ public abstract class RestServerTest {
      * XY series path segment
      */
     public static final String XY_SERIES_PATH = "xy";
+
+    /**
+     * Generic XY path segment
+     */
+    public static final String GENERIC_XY_PATH = "genericXY";
 
     /**
      * States path segment
@@ -599,6 +609,24 @@ public abstract class RestServerTest {
     }
 
     /**
+     * Get the {@link WebTarget} for the generic xy tree endpoint.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The generic xy tree endpoint
+     */
+    public static WebTarget getGenericXYTreeEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(GENERIC_XY_PATH)
+                .path(dataProviderId)
+                .path(TREE_PATH);
+    }
+
+    /**
      * Get the {@link WebTarget} for the XY series endpoint.
      *
      * @param expUUID     *            Experiment UUID
@@ -611,6 +639,25 @@ public abstract class RestServerTest {
                 .path(expUUID)
                 .path(OUTPUTS_PATH)
                 .path(XY_PATH)
+                .path(dataProviderId)
+                .path(XY_SERIES_PATH);
+    }
+
+    /**
+     * Get the {@link WebTarget} for the generic XY series end point with
+     * non-time x-axis.
+     *
+     * @param expUUID
+     *            Experiment UUID
+     * @param dataProviderId
+     *            Data provider ID
+     * @return The generic XY series endpoint
+     */
+    public static WebTarget getGenericXYSeriesEndpoint(String expUUID, String dataProviderId) {
+        return getApplicationEndpoint().path(EXPERIMENTS)
+                .path(expUUID)
+                .path(OUTPUTS_PATH)
+                .path(GENERIC_XY_PATH)
                 .path(dataProviderId)
                 .path(XY_SERIES_PATH);
     }

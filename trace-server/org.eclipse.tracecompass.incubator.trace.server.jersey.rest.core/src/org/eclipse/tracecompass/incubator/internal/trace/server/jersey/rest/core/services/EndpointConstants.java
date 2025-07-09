@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Ericsson
+ * Copyright (c) 2021, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -97,6 +97,7 @@ public final class EndpointConstants {
     static final String DIA = "Diagnostic"; //$NON-NLS-1$
     static final String DT = "Data Tree"; //$NON-NLS-1$
     static final String EXP = "Experiments"; //$NON-NLS-1$
+    static final String GXY = "Generic XY"; //$NON-NLS-1$
     static final String IDF = "Identifier"; //$NON-NLS-1$
     static final String OCG = "Output Configurations"; //$NON-NLS-1$
     static final String STY = "Styles"; //$NON-NLS-1$
@@ -170,6 +171,7 @@ public final class EndpointConstants {
     static final String MARKER_CATEGORIES_EX = "\"" + REQUESTED_MARKER_CATEGORIES_KEY + "\": [\"category1\", \"category2\"]"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String MARKER_SET_EX = "\"" + REQUESTED_MARKER_SET_KEY + "\": \"markerSetId\","; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMERANGE_EX = "\"" + REQUESTED_TIMERANGE_KEY + "\": {\"start\": 111111111, \"end\": 222222222, \"nbTimes\": 1920}"; //$NON-NLS-1$ //$NON-NLS-2$
+    static final String TIMERANGE_SAMPLING_EX = "\"" + REQUESTED_TIMERANGE_KEY + "\": {\"start\": 111111111, \"end\": 222222222, \"nbSamples\": 1920}"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String FILTER_QUERY_PARAMETERS_EX = "\"" + FILTER_QUERY_PARAMETERS_KEY + "\": {\"" + FILTER_QUERY_STRATEGY + "\": \"SAMPLED\", \"" + FILTER_EXPRESSIONS_MAP + "\": {\"1\":[\"openat\", \"duration>10ms\"]}}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     static final String TIMERANGE_EX_TREE = "\"" + REQUESTED_TIMERANGE_KEY + "\": {\"start\": 111111111, \"end\": 222222222}"; //$NON-NLS-1$ //$NON-NLS-2$
     static final String TIMES_EX_TT = "\"" + REQUESTED_TIME_KEY + "\": [111200000],"; //$NON-NLS-1$ //$NON-NLS-2$
