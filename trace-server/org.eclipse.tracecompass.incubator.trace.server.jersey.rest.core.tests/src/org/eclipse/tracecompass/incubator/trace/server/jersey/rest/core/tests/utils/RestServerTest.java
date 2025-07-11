@@ -260,6 +260,7 @@ public abstract class RestServerTest {
             "Flame Chart",
             "Show a call stack over time",
             ProviderType.TIME_GRAPH.name(),
+            null,
             null);
 
     /**
@@ -392,12 +393,12 @@ public abstract class RestServerTest {
         b.add(new DataProviderDescriptorStub(null, "org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack",
                 "LTTng-UST CallStack - Latency vs Time",
                 "Show latencies provided by Analysis module: LTTng-UST CallStack",
-                ProviderType.TREE_TIME_XY.name(), null));
+                ProviderType.TREE_TIME_XY.name(), null, null));
         b.add(EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR);
         b.add(new DataProviderDescriptorStub(null,"org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
                 "Histogram",
                 "Show a histogram of number of events to time for a trace",
-                ProviderType.TREE_TIME_XY.name(), null));
+                ProviderType.TREE_TIME_XY.name(), null, null));
         sfExpectedDataProviderDescriptorStub = b.build();
     }
 
