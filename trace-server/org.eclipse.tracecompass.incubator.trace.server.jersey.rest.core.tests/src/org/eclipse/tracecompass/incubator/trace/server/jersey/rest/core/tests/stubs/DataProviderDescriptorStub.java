@@ -39,6 +39,7 @@ public class DataProviderDescriptorStub implements Serializable {
     private final String fDescription;
     private final String fTypeId;
     private final TmfConfigurationStub fConfiguration;
+    private final TmfCapabilitiesStub fCapabilities;
 
     /**
      * {@link JsonCreator} Constructor for final fields
@@ -55,6 +56,8 @@ public class DataProviderDescriptorStub implements Serializable {
      *            the type id
      * @param configuration
      *            the configuration
+     * @param capabilities
+     *            the data provider capabilities
      *
      */
     @JsonCreator
@@ -63,13 +66,15 @@ public class DataProviderDescriptorStub implements Serializable {
             @JsonProperty("name") String name,
             @JsonProperty("description") String description,
             @JsonProperty("type") String type,
-            @JsonProperty("configuration") TmfConfigurationStub configuration) {
+            @JsonProperty("configuration") TmfConfigurationStub configuration,
+            @JsonProperty("capabilities") TmfCapabilitiesStub capabilities) {
         fParentId = parentId;
         fId = id;
         fName = name;
         fDescription = description;
         fTypeId = type;
         fConfiguration = configuration;
+        fCapabilities = capabilities;
     }
 
     /**
@@ -126,15 +131,24 @@ public class DataProviderDescriptorStub implements Serializable {
         return fConfiguration;
     }
 
+    /**
+     * Gets the capabilities
+     *
+     * @return the capabilities
+     */
+    public TmfCapabilitiesStub getCapabilities() {
+        return fCapabilities;
+    }
+
     @Override
     public String toString() {
         return "DataProviderDescriptorStub[fParentId=" + getParentId() + ", fId=" + getId() + ", fName=" + fName + ", fDescription=" + fDescription
-                + ", fTypeId=" + fTypeId + ", fConfiguration=" + getConfiguration() + "]";
+                + ", fTypeId=" + fTypeId + ", fConfiguration=" + getConfiguration() + ", fCapabilities=" + getCapabilities() + "]";
         }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fParentId, fId, fName, fDescription, fTypeId, fConfiguration);
+        return Objects.hash(fParentId, fId, fName, fDescription, fTypeId, fConfiguration, fCapabilities);
     }
 
     @Override
@@ -166,6 +180,9 @@ public class DataProviderDescriptorStub implements Serializable {
             }
             if (Objects.equals(fConfiguration, other.fConfiguration)) {
                 return true;
+            }
+            if (!Objects.equals(fCapabilities, other.fCapabilities)) {
+                return false;
             }
         }
         return false;
