@@ -157,6 +157,7 @@ public class TraceManagerService {
             @Content(schema = @Schema(implementation = TraceQueryParameters.class))
     }, required = true) QueryParameters queryParameters) {
 
+        System.out.println("test:");
         if (queryParameters == null) {
             return Response.status(Status.BAD_REQUEST).entity(MISSING_PARAMETERS).build();
         }
