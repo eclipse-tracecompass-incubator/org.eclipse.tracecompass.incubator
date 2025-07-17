@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcess;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcessPointer;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackObject;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2CallbackType;
@@ -49,6 +50,14 @@ import com.google.common.collect.Lists;
  */
 public class Ros2ObjectsUtil {
 
+    /**
+     * Store the version of tracetools used by each process, which allows us to
+     * adapt the processing of certain events and fields based on the version
+     * that was used to generate the ROS 2 trace. It also allows us to combine
+     * multiple traces of the same system (e.g., at different time points) and
+     * let both traces have access to the version number.
+     */
+    private static final @NonNull String TRACETOOLS_VERSION = "Version"; //$NON-NLS-1$
     private static final @NonNull String OBJECT_NODE = "Nodes"; //$NON-NLS-1$
     private static final @NonNull String OBJECT_PUBLISHER = "Publishers"; //$NON-NLS-1$
     private static final @NonNull String OBJECT_SUBSCRIPTION = "Subscriptions"; //$NON-NLS-1$
@@ -65,6 +74,10 @@ public class Ros2ObjectsUtil {
         if (!ss.getSSID().equals(Ros2ObjectsAnalysis.getFullAnalysisId())) {
             throw new IllegalArgumentException(String.format("wrong state system; need '%s', got '%s'", Ros2ObjectsAnalysis.getFullAnalysisId(), ss.getSSID())); //$NON-NLS-1$
         }
+    }
+
+    private static String[] getTracetoolsVersionAttribute(@NonNull String stringId) {
+        return new String[] { TRACETOOLS_VERSION, stringId };
     }
 
     private static String[] getNodeAttribute(@NonNull String stringId) {
@@ -95,6 +108,10 @@ public class Ros2ObjectsUtil {
         return new String[] { OBJECT_CALLBACK, stringId };
     }
 
+    private static String[] getTracetoolsVersionAttribute(@NonNull HostProcess process) {
+        return getTracetoolsVersionAttribute(process.getStringId());
+    }
+
     private static String[] getNodeAttribute(@NonNull Ros2ObjectHandle nodeHandle) {
         return getNodeAttribute(nodeHandle.getStringId());
     }
@@ -121,6 +138,20 @@ public class Ros2ObjectsUtil {
 
     private static String[] getCallbackAttribute(@NonNull HostProcessPointer callbackHandle) {
         return getCallbackAttribute(callbackHandle.getStringId());
+    }
+
+    /**
+     * Get tracetools version and add if needed.
+     *
+     * @param ss
+     *            the objects state system
+     * @param process
+     *            the process
+     * @return the tracetools version quark
+     */
+    public static int getTracetoolsVersionQuarkAndAdd(ITmfStateSystemBuilder ss, @NonNull HostProcess process) {
+        assertStateSystem(ss);
+        return ss.getQuarkAbsoluteAndAdd(getTracetoolsVersionAttribute(process));
     }
 
     /**
@@ -221,6 +252,15 @@ public class Ros2ObjectsUtil {
         return ss.getQuarkAbsoluteAndAdd(getCallbackAttribute(callbackHandle));
     }
 
+    private static Integer getTracetoolsVersionQuark(ITmfStateSystem ss, @NonNull HostProcess process) {
+        assertStateSystem(ss);
+        try {
+            return ss.getQuarkAbsolute(getTracetoolsVersionAttribute(process));
+        } catch (AttributeNotFoundException e) {
+            return null;
+        }
+    }
+
     private static Integer getNodeQuark(ITmfStateSystem ss, @NonNull Ros2ObjectHandle nodeHandle) {
         assertStateSystem(ss);
         try {
@@ -282,6 +322,34 @@ public class Ros2ObjectsUtil {
         } catch (AttributeNotFoundException e) {
             return null;
         }
+    }
+
+    /**
+     * Get tracetools version for process.
+     *
+     * @param ss
+     *            the objects state system
+     * @param timestamp
+     *            the timestamp
+     * @param process
+     *            the process
+     * @return the tracetools version string, or <code>null</code> if not found
+     */
+    public static @Nullable String getTracetoolsVersion(ITmfStateSystem ss, long timestamp, @NonNull HostProcess process) {
+        Integer versionQuark = getTracetoolsVersionQuark(ss, process);
+        if (null == versionQuark) {
+            return null;
+        }
+
+        try {
+            ITmfStateInterval versionInterval = ss.querySingleState(timestamp, versionQuark);
+            if (null != versionInterval.getValue()) {
+                return (String) versionInterval.getValue();
+            }
+        } catch (StateSystemDisposedException e) {
+            return null;
+        }
+        return null;
     }
 
     /**

@@ -16,13 +16,14 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.ros2.core.analysis.objects.Ros2ObjectsUtil;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostInfo;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcess;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostProcessPointer;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.HostThread;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.model.objects.Ros2ObjectHandle;
-import org.eclipse.tracecompass.incubator.internal.ros2.core.trace.Ros2Trace;
 import org.eclipse.tracecompass.incubator.internal.ros2.core.trace.layout.IRos2EventLayout;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -46,8 +47,6 @@ public abstract class AbstractRos2StateProvider extends AbstractTmfStateProvider
     /** The event layout */
     protected static final IRos2EventLayout LAYOUT = IRos2EventLayout.getDefault();
 
-    private final boolean fIsPubSourceTimestampAvailableFromRmw;
-
     /**
      * Constructor
      *
@@ -58,16 +57,36 @@ public abstract class AbstractRos2StateProvider extends AbstractTmfStateProvider
      */
     protected AbstractRos2StateProvider(ITmfTrace trace, String id) {
         super(Objects.requireNonNull(trace), Objects.requireNonNull(id));
-        // Version in trace needs to be >= the minimum version
-        fIsPubSourceTimestampAvailableFromRmw = ((Ros2Trace) getTrace()).getTracetoolsVersion().compareTo(RMW_SOURCE_TIMESTAMP_MINIMUM_VERSION) >= 0;
     }
 
     /**
+     * Check if the trace for the process corresponding to the given event has
+     * publication source_timestamp values at the rmw layer.
+     *
+     * This depends on the version of tracetools (i.e., the instrumentation)
+     * used by the process.
+     *
+     * @param event
+     *            the event whose trace/process to check
+     * @param objectsSs
+     *            the objects state system
      * @return whether the source_timestamp value on the publication side is
      *         available from the rmw layer; if not, it is available from DDS
      */
-    protected boolean isPubSourceTimestampAvailableFromRmw() {
-        return fIsPubSourceTimestampAvailableFromRmw;
+    protected boolean isPubSourceTimestampAvailableFromRmw(@NonNull ITmfEvent event, @NonNull ITmfStateSystem objectsSs) {
+        HostProcess process = hostProcessFrom(event);
+        String tracetoolsVersionStr = Ros2ObjectsUtil.getTracetoolsVersion(objectsSs, event.getTimestamp().toNanos(), process);
+        // If version is missing, assume we're using a more recent version
+        if (null == tracetoolsVersionStr) {
+            Activator.getInstance().logWarning(
+                    String.format("cannot get tracetools version from trace for PID=%d, assuming >=%s", //$NON-NLS-1$
+                            process.getPid(),
+                            RMW_SOURCE_TIMESTAMP_MINIMUM_VERSION.toString()));
+            return true;
+        }
+        // Version in trace needs to be >= the minimum version
+        Version tracetoolsVersion = new Version(tracetoolsVersionStr);
+        return tracetoolsVersion.compareTo(RMW_SOURCE_TIMESTAMP_MINIMUM_VERSION) >= 0;
     }
 
     /**

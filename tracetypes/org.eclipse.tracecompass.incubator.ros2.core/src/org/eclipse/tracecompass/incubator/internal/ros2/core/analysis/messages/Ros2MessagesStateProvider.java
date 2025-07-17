@@ -66,7 +66,7 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
 
     private static final int VERSION_NUMBER = 0;
 
-    private final ITmfStateSystem fObjectsSs;
+    private final @NonNull ITmfStateSystem fObjectsSs;
     private boolean fInitialSetupDone = false;
 
     // Publications
@@ -102,7 +102,7 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
      */
     public Ros2MessagesStateProvider(ITmfTrace trace, ITmfStateSystem objectsSs) {
         super(trace, Ros2MessagesAnalysis.getFullAnalysisId());
-        fObjectsSs = objectsSs;
+        fObjectsSs = Objects.requireNonNull(objectsSs);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
 
         eventHandleHelpers(event);
         // If we can get the source_timestamp from rmw, don't process DDS events
-        if (!isPubSourceTimestampAvailableFromRmw()) {
+        if (!isPubSourceTimestampAvailableFromRmw(event, fObjectsSs)) {
             eventHandlePublishDds(event, ss, timestamp);
         }
         eventHandlePublish(event, ss, timestamp);
@@ -154,7 +154,7 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
          * known/"valid" DDS writers and rmw publishers and only consider events
          * concerning those DDS writers or rmw publishers.
          */
-        if (!isPubSourceTimestampAvailableFromRmw()) {
+        if (!isPubSourceTimestampAvailableFromRmw(event, fObjectsSs)) {
             // dds:create_writer
             if (isEvent(event, LAYOUT.eventDdsCreateWriter())) {
                 /**
@@ -238,7 +238,7 @@ public class Ros2MessagesStateProvider extends AbstractRos2StateProvider {
         }
         // rmw_publish
         // We only need these events if we can get the source_timestamp
-        else if (isPubSourceTimestampAvailableFromRmw() && isEvent(event, LAYOUT.eventRmwPublish())) {
+        else if (isPubSourceTimestampAvailableFromRmw(event, fObjectsSs) && isEvent(event, LAYOUT.eventRmwPublish())) {
             handleRmwPublish(event, ss, timestamp);
         }
     }

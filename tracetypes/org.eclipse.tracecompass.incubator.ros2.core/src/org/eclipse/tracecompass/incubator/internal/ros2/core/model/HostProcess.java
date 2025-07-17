@@ -28,6 +28,7 @@ public class HostProcess implements Comparable<HostProcess> {
 
     private static Comparator<HostProcess> COMPARATOR = Comparator.comparing(HostProcess::getHostId)
             .thenComparing(HostProcess::getPid);
+    private static final @NonNull String STRING_ID_SEP = "|"; //$NON-NLS-1$
 
     private final @NonNull HostInfo fHostId;
     private final @NonNull Long fPid;
@@ -88,6 +89,15 @@ public class HostProcess implements Comparable<HostProcess> {
         }
         HostProcess o = (HostProcess) obj;
         return o.fHostId.equals(fHostId) && o.fPid.equals(fPid);
+    }
+
+    /**
+     * @return the string ID to uniquely represent this process
+     */
+    public @NonNull String getStringId() {
+        return String.format(
+                "%d%s%s", //$NON-NLS-1$
+                getPid(), STRING_ID_SEP, getHostId().getId());
     }
 
     @Override
