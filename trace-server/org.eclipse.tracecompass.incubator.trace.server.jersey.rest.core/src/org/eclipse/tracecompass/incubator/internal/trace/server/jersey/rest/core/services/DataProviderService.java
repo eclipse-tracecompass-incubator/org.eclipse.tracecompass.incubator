@@ -575,6 +575,28 @@ public class DataProviderService {
         return getTree(expUUID, outputId, queryParameters);
     }
 
+    @POST
+    @Path("/timeGraph/{outputId}/tree:context")
+    @Tag(name = TGR)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "API to get the Time Graph tree:context", description = TREE_ENTRIES, responses = {
+            @ApiResponse(responseCode = "200", description = "Returns a list of Time Graph entries. " +
+                    CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = TimeGraphTreeResponse.class))),
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    public Response getTimeGraphTreeContext(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @RequestBody(description = "Query parameters to fetch the timegraph tree. " + TIMERANGE_TREE, content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{" + TIMERANGE_EX_TREE +
+                            "}}"), schema = @Schema(implementation = TreeQueryParameters.class))
+            }, required = true) QueryParameters queryParameters) {
+        return getTreeContext(expUUID, outputId, queryParameters);
+    }
+
     /**
      * Query the provider for the time graph states
      *
@@ -1120,6 +1142,42 @@ public class DataProviderService {
             TmfModelResponse<?> treeResponse = provider.fetchTree(params, null);
             Object model = treeResponse.getModel();
             return Response.ok(model instanceof TmfTreeModel ? new TmfModelResponse<>(new TreeModelWrapper((TmfTreeModel<@NonNull ITmfTreeDataModel>) model), treeResponse.getStatus(), treeResponse.getStatusMessage()) : treeResponse).build();
+        }
+    }
+
+    private Response getTreeContext(UUID expUUID, String outputId, QueryParameters queryParameters) {
+        Response errorResponse = validateParameters(outputId, queryParameters);
+        if (errorResponse != null) {
+            return errorResponse;
+        }
+        Map<String, Object> params = queryParameters.getParameters();
+        String errorMessage = QueryParametersUtil.validateTreeQueryParameters(params);
+        if (errorMessage != null) {
+            return Response.status(Status.BAD_REQUEST).entity(errorMessage).build();
+        }
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTree") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
+                return Response.status(Status.NOT_FOUND).entity(NO_SUCH_TRACE).build();
+            }
+
+            ITmfTreeDataProvider<? extends @NonNull ITmfTreeDataModel> provider = manager.getOrCreateDataProvider(experiment,
+                    outputId, ITmfTreeDataProvider.class);
+
+            if (provider == null) {
+                // try and find the XML provider for the ID.
+                provider = getXmlProvider(experiment, outputId, EnumSet.allOf(OutputType.class));
+            }
+
+            if (provider == null) {
+                // The analysis cannot be run on this trace
+                return Response.status(Status.METHOD_NOT_ALLOWED).entity(NO_PROVIDER).build();
+            }
+
+            TmfModelResponse<Map<String, Object>> treeResponse = provider.fetchTreeContext(params, null);
+            Object model = treeResponse.getModel();
+            return Response.ok(treeResponse).build();
         }
     }
 
