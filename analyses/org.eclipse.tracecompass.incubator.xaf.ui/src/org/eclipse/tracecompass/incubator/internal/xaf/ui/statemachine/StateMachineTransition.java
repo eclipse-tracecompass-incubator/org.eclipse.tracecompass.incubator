@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.StringJoiner;
 
 import org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.constraint.StateMachineConstraint;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -72,26 +73,20 @@ public class StateMachineTransition {
      * @return the full event name with potential contexts
      */
     public String getFullEvent() {
-        String contentAsString = ""; //$NON-NLS-1$
+        StringJoiner joiner = new StringJoiner(", ", "[", "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        joiner.setEmptyValue(""); //$NON-NLS-1$
         if (!eventContexts.isEmpty()) {
-            contentAsString += "["; //$NON-NLS-1$
-            boolean comma = false;
             for (Entry<String, String> entry : eventContexts.entrySet()) {
-                if (comma) {
-                    contentAsString += ", "; //$NON-NLS-1$
-                } else {
-                    comma = true;
-                }
-                contentAsString += String.format("%s=%s", //$NON-NLS-1$
+                joiner.add(String.format("%s=%s", //$NON-NLS-1$
                         entry.getKey(),
-                        entry.getValue());
+                        entry.getValue()));
             }
-            contentAsString += "]"; //$NON-NLS-1$
+
         }
 
         return String.format("%s%s", //$NON-NLS-1$
                 eventName,
-                contentAsString);
+                joiner.toString());
     }
 
     /**
