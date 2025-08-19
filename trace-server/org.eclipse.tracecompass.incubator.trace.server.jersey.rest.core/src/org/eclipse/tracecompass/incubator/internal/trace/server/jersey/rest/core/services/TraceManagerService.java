@@ -203,9 +203,9 @@ public class TraceManagerService {
             }
             resource.setPersistentProperty(TmfCommonConstants.TRACETYPE, traceType);
         } else {
-            IPath targetLocation = getTargetLocation(path);
             IPath oldLocation = ResourceUtil.getLocation(resource);
-            if (oldLocation == null || !targetLocation.equals(oldLocation.removeTrailingSeparator()) ||
+            java.nio.file.Path targetPath = Paths.get(path);
+            if (oldLocation == null || !targetPath.equals(Paths.get(oldLocation.toString())) ||
                     !traceType.equals(resource.getPersistentProperty(TmfCommonConstants.TRACETYPE))) {
                 synchronized (TRACES) {
                     Optional<@NonNull Entry<UUID, IResource>> oldEntry = TRACES.entrySet().stream().filter(entry -> resource.equals(entry.getValue())).findFirst();
