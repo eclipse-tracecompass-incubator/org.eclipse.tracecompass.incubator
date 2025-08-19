@@ -37,7 +37,15 @@ public interface TimeGraphEntry {
     /**
      * @return The entry's metadata map.
      */
-    @Schema(description = "Optional metadata map for domain specific data for matching data across data providers. Keys for the same data shall be the same across data providers. "
-            + "Only values of type Number or String are allowed. For each key all values shall have the same type.")
-    Map<String, Collection<Object>> getMetadata();
+    @Schema(description = "Optional metadata map for domain specific data for matching data across data providers. Keys for the same data shall be the same across data providers."
+            + " For each key all values shall have the same type.")
+    Map<String, Collection<MetadataValue>> getMetadata();
+
+    /**
+     * Type for metadata values (String or Number)
+     */
+    @Schema(description = "Supported types of a metadata value. Only values of type Number or String are allowed.", oneOf = { String.class, Number.class })
+    interface MetadataValue {
+        // empty
+    }
 }
