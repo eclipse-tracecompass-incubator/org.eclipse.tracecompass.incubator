@@ -60,14 +60,14 @@ public interface SeriesModel {
      * @return The X values' description.
      */
     @JsonProperty("xValuesDescription")
-    @ArraySchema(arraySchema = @Schema(description = "Series' X axis description"), schema = @Schema(requiredMode = RequiredMode.REQUIRED))
+    @Schema(description = "Series' X axis description", requiredMode = RequiredMode.REQUIRED)
     XYAxisDescription getXAxisDescription();
 
     /**
      * @return The Y values' description.
      */
     @JsonProperty("yValuesDescription")
-    @ArraySchema(arraySchema = @Schema(description = "Series' Y axis description"), schema = @Schema(requiredMode = RequiredMode.REQUIRED))
+    @Schema(description = "Series' Y axis description", requiredMode = RequiredMode.REQUIRED)
     XYAxisDescription getYAxisDescription();
 
     /**

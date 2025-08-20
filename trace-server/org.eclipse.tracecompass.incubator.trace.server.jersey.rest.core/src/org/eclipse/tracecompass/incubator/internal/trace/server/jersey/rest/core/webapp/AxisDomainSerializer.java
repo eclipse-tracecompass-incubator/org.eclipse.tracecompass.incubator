@@ -54,10 +54,10 @@ public class AxisDomainSerializer extends JsonSerializer<IAxisDomain> {
         if (value instanceof IAxisDomain.Categorical categorical) {
             gen.writeStringField(TYPE, "categorical"); //$NON-NLS-1$
             gen.writeObjectField("categories", categorical.categories()); //$NON-NLS-1$
-        } else if (value instanceof IAxisDomain.Range timeRange) {
-            gen.writeStringField(TYPE, "timeRange"); //$NON-NLS-1$
-            gen.writeNumberField("start", timeRange.start()); //$NON-NLS-1$
-            gen.writeNumberField("end", timeRange.end()); //$NON-NLS-1$
+        } else if (value instanceof IAxisDomain.Range range) {
+            gen.writeStringField(TYPE, "range"); //$NON-NLS-1$
+            gen.writeNumberField("start", range.start()); //$NON-NLS-1$
+            gen.writeNumberField("end", range.end()); //$NON-NLS-1$
         } else {
             throw new IllegalArgumentException("Unsupported AxisDomain implementation: " + value.getClass()); //$NON-NLS-1$
         }

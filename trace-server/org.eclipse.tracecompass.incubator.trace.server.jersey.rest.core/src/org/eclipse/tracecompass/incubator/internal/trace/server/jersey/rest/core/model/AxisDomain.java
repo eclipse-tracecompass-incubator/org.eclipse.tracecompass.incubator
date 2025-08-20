@@ -31,7 +31,7 @@ import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = AxisDomainCategorical.class, name = "categorical"),
-    @JsonSubTypes.Type(value = AxisDomainTimeRange.class, name = "timeRange")
+    @JsonSubTypes.Type(value = AxisDomainRange.class, name = "range")
 })
 public interface AxisDomain {
 
@@ -39,11 +39,11 @@ public interface AxisDomain {
      * Returns the type of axis domain.
      * <p>
      * This is used as a discriminator to identify the specific subtype
-     * implementation (e.g., "categorical", "timeRange").
+     * implementation (e.g., "categorical", "range").
      *
      * @return A string identifying the domain type
      */
-    @Schema(description = "Type of axis domain (e.g., 'categorical' or 'timeRange')", requiredMode = RequiredMode.REQUIRED)
+    @Schema(description = "Type of axis domain (e.g., 'categorical' or 'range')", requiredMode = RequiredMode.REQUIRED)
     @JsonProperty("type")
     String getType();
 }
