@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
  * <p>
  * Used in Swagger schema generation for chart axis descriptions.
  */
-public class AxisDomainTimeRange implements AxisDomain {
+public class AxisDomainRange implements AxisDomain {
 
     private final long start;
     private final long end;
@@ -37,7 +37,7 @@ public class AxisDomainTimeRange implements AxisDomain {
      *            The maximum value of the axis domain
      */
     @JsonCreator
-    public AxisDomainTimeRange(
+    public AxisDomainRange(
             @JsonProperty("start") long start,
             @JsonProperty("end") long end) {
         this.start = start;
@@ -47,7 +47,7 @@ public class AxisDomainTimeRange implements AxisDomain {
     @Override
     @Schema(description = "Type of axis domain", requiredMode = RequiredMode.REQUIRED)
     public String getType() {
-        return "timeRange";
+        return "range";
     }
 
     /**
