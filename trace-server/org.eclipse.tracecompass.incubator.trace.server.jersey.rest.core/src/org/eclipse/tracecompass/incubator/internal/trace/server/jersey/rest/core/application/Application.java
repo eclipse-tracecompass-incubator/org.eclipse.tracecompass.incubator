@@ -128,6 +128,7 @@ public class Application implements IApplication {
             Platform.getLog(bundle).log(new Status(IStatus.ERROR, bundle.getSymbolicName(), exitCode.getErrorText(), e));
             return fResult;
         }
+        // exit asyncronously
         return IApplicationContext.EXIT_ASYNC_RESULT;
     }
 
