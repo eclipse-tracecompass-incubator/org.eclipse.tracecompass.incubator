@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = IAxisDomainStub.CategoricalStub.class, name = "categorical"),
-    @JsonSubTypes.Type(value = IAxisDomainStub.RangeStub.class, name = "timeRange")
+    @JsonSubTypes.Type(value = IAxisDomainStub.RangeStub.class, name = "range")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public sealed interface IAxisDomainStub extends Serializable permits
