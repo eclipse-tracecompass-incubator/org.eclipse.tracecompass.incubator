@@ -35,6 +35,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.EXP_UUID;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.FILTER_QUERY_PARAMETERS;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.FILTER_QUERY_PARAMETERS_EX;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.GXY;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INDEX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INDEX_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.INVALID_PARAMETERS;
@@ -66,15 +67,14 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TGR;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_EX;
-import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_SAMPLING_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_EX_TREE;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_SAMPLING_EX;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMERANGE_TREE;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMES_EX_TT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TIMES_TT;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.TREE_ENTRIES;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.VTB;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.X_Y;
-import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.GXY;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -129,7 +129,6 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.XYResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.XYTreeResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.ConfigurationQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.GenericView;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.OutputConfigurationQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.TableColumnHeader;
@@ -215,7 +214,8 @@ public class DataProviderService {
      *
      * @param expUUID
      *            UUID of the experiment to search for
-     * @return the data provider descriptions with the queried {@link UUID} if it exists.
+     * @return a {@link Response} with the result, if successful a list of
+     *         {@link IDataProviderDescriptor}
      */
     @GET
     @Tag(name = EXP)
@@ -260,7 +260,8 @@ public class DataProviderService {
      *            UUID of the experiment to search for
      * @param outputId
      *            Output ID for the data provider to query
-     * @return the data provider descriptions with the queried {@link UUID} if it exists.
+     * @return a {@link Response} with the result, if successful a
+     *         {@link IDataProviderDescriptor}
      */
     @GET
     @Path("/{outputId}")
@@ -295,7 +296,8 @@ public class DataProviderService {
      * @param queryParameters
      *            Parameters to fetch a data tree as described by
      *            {@link QueryParameters}
-     * @return an {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link TreeModelWrapper}
      */
     @POST
     @Path("/data/{outputId}/tree")
@@ -329,7 +331,8 @@ public class DataProviderService {
      * @param queryParameters
      *            Parameters to fetch an XY tree as described by
      *            {@link QueryParameters}
-     * @return an {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link TreeModelWrapper}
      */
     @POST
     @Path("/XY/{outputId}/tree")
@@ -362,7 +365,8 @@ public class DataProviderService {
      *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch XY as described by {@link QueryParameters}
-     * @return an {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link ITmfXyModel}
      */
     @POST
     @Path("/XY/{outputId}/xy")
@@ -429,7 +433,8 @@ public class DataProviderService {
      * @param queryParameters
      *            Parameters used to request the tree and axis descriptions, as
      *            defined in {@link QueryParameters}
-     * @return an {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link TreeModelWrapper}
      */
     @POST
     @Path("/genericXY/{outputId}/tree")
@@ -462,7 +467,8 @@ public class DataProviderService {
      *            Output ID for the data provider to query
      * @param queryParameters
      *            Parameters to fetch xy as described by {@link QueryParameters}
-     * @return an {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link ITmfXyModel}
      */
     @POST
     @Path("/genericXY/{outputId}/xy")
@@ -527,7 +533,7 @@ public class DataProviderService {
      *            point if two points have the same X value
      * @param entryId
      *            Entry Id or series Id
-     * @return {@link GenericView} with the results
+     * @return a {@link Response} with the result
      */
     @GET
     @Hidden
@@ -551,7 +557,8 @@ public class DataProviderService {
      * @param queryParameters
      *            Parameters to fetch time graph tree as described by
      *            {@link QueryParameters}
-     * @return {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link TreeModelWrapper}
      */
     @POST
     @Path("/timeGraph/{outputId}/tree")
@@ -585,7 +592,8 @@ public class DataProviderService {
      * @param queryParameters
      *            Parameters to fetch time graph states as described by
      *            {@link QueryParameters}
-     * @return {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link TimeGraphModel}
      */
     @POST
     @Path("/timeGraph/{outputId}/states")
@@ -650,7 +658,8 @@ public class DataProviderService {
      * @param queryParameters
      *            Parameters to fetch time graph arrows as described by
      *            {@link QueryParameters}
-     * @return {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a list of {@link ITimeGraphArrow}
      */
     @POST
     @Path("/timeGraph/{outputId}/arrows")
@@ -706,7 +715,8 @@ public class DataProviderService {
      *
      * @param expUUID
      *            desired experiment UUID
-     * @return {@link TmfModelResponse} containing the list of {@link MarkerSet}s
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a list of {@link MarkerSet}
      */
     @GET
     @Path("/markerSets")
@@ -736,7 +746,8 @@ public class DataProviderService {
      *            Output ID for the data provider to query
      * @param markerSetId
      *            marker set ID
-     * @return {@link TmfModelResponse} containing {@link AnnotationCategoriesModel}
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link AnnotationCategoriesModel}
      */
     @GET
     @Path("/{outputId}/annotations")
@@ -813,7 +824,8 @@ public class DataProviderService {
      * @param queryParameters
      *            Parameters to fetch annotations as described by
      *            {@link QueryParameters}
-     * @return {@link TmfModelResponse} containing {@link AnnotationModel}
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link AnnotationModel}
      */
     @POST
     @Path("/{outputId}/annotations")
@@ -908,7 +920,8 @@ public class DataProviderService {
      * @param queryParameters
      *            Parameters to fetch time graph tooltip as described by
      *            {@link QueryParameters}
-     * @return {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a map of key-value pairs
      */
     @POST
     @Path("/timeGraph/{outputId}/tooltip")
@@ -979,7 +992,8 @@ public class DataProviderService {
      * @param queryParameters
      *            Parameters to fetch table columns as described by
      *            {@link QueryParameters}
-     * @return {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a list of {@link TableColumnHeader}
      */
     @POST
     @Path("/table/{outputId}/columns")
@@ -1027,7 +1041,8 @@ public class DataProviderService {
      * @param queryParameters
      *            Parameters to fetch table lines as described by
      *            {@link QueryParameters}
-     * @return {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link VirtualTableModelWrapper}
      */
     @POST
     @Path("/table/{outputId}/lines")
@@ -1133,7 +1148,8 @@ public class DataProviderService {
      * @param queryParameters
      *            Parameters to fetch styles as described by
      *            {@link QueryParameters}
-     * @return {@link GenericView} with the results
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link OutputStyleModel}
      */
     @POST
     @Path("/{outputId}/style")
@@ -1192,7 +1208,8 @@ public class DataProviderService {
      *            desired experiment UUID
      * @param outputId
      *            Output ID for the data provider to query
-     * @return list of available configuration source types
+     * @return a {@link Response} with the result, if successful a
+     *         {@link IDataProviderDescriptor}
      */
     @GET
     @Path("/{outputId}/configTypes/")
@@ -1238,7 +1255,8 @@ public class DataProviderService {
      *            Output ID for the data provider to query
      * @param typeId
      *            the configuration source type ID
-     * @return a configuration source type
+     * @return a {@link Response} with the result, if successful a
+     *         {@link ITmfConfigurationSourceType}
      */
     @GET
     @Path("/{outputId}/configTypes/{typeId}")
@@ -1292,7 +1310,8 @@ public class DataProviderService {
      *            ID of the output provider to create a derived output from
      * @param queryParameters
      *            the query parameters used to create a output provider
-     * @return a list of data provider descriptors
+     * @return a {@link Response} with the result, if successful a
+     *         {@link IDataProviderDescriptor}
      */
     @SuppressWarnings("null")
     @POST
@@ -1366,7 +1385,8 @@ public class DataProviderService {
      *            Output ID of the parent output provider
      * @param derivedOutputId
      *            Output ID for the derived output provider to delete
-     * @return status and the deleted configuration instance, if successful
+     * @return a {@link Response} with the result, if successful a
+     *         {@link IDataProviderDescriptor}
      */
     @DELETE
     @Path("/{outputId}/{derivedOutputId}")
