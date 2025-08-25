@@ -11,11 +11,10 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.AdditionalPropertiesValue;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -51,6 +50,6 @@ public interface Configuration {
      * @return parameters to return. Can be used to show
      *         more details to users of the configuration instance
      */
-    @Schema(description = "Optional parameters representing the configuration parameters used to create this configuration.")
-    Map<String, Object> getParameters();
+    @Schema(description = "Optional parameters representing the configuration parameters used to create this configuration.", additionalProperties = AdditionalPropertiesValue.TRUE)
+    Object getParameters();
 }
