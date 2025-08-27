@@ -51,6 +51,9 @@ public interface XYAxisDescription {
      * @return Optional domain of values that this axis can take.
      */
     @JsonProperty("axisDomain")
-    @Schema(description = "Optional domain of values that this axis supports", requiredMode = RequiredMode.NOT_REQUIRED)
-    @Nullable AxisDomain getAxisDomain();
+    @Schema(description = "Optional domain of values that this axis supports", requiredMode = RequiredMode.NOT_REQUIRED, oneOf = {
+            AxisDomainCategorical.class,
+            AxisDomainRange.class
+    })
+    @Nullable Object getAxisDomain();
 }

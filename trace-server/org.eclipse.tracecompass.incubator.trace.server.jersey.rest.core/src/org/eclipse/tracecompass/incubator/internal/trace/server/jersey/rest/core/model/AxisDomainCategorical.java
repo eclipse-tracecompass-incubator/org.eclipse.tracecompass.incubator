@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
  * <p>
  * Used in Swagger schema generation for chart axis descriptions.
  */
+@Schema(description = "Domain of values supported on a categorical chart axis.")
 public class AxisDomainCategorical implements AxisDomain {
 
     private final @NonNull Set<String> categories;
@@ -46,9 +47,9 @@ public class AxisDomainCategorical implements AxisDomain {
     }
 
     @Override
-    @Schema(description = "Type of axis domain", requiredMode = RequiredMode.REQUIRED)
+    @Schema(description = "Type of axis domain: 'categorical'", requiredMode = RequiredMode.REQUIRED)
     public String getType() {
-        return "categorical";
+        return "categorical"; //$NON-NLS-1$
     }
 
     /**

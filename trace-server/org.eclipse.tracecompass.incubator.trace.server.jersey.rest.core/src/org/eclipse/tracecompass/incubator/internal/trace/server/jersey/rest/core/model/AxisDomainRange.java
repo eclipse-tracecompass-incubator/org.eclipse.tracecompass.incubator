@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
  * <p>
  * Used in Swagger schema generation for chart axis descriptions.
  */
+@Schema(description = "Domain of values supported on a numberical range chart axis.")
 public class AxisDomainRange implements AxisDomain {
 
     private final long start;
@@ -45,9 +46,9 @@ public class AxisDomainRange implements AxisDomain {
     }
 
     @Override
-    @Schema(description = "Type of axis domain", requiredMode = RequiredMode.REQUIRED)
+    @Schema(description = "Type of axis domain: 'range'", requiredMode = RequiredMode.REQUIRED)
     public String getType() {
-        return "range";
+        return "range"; //$NON-NLS-1$
     }
 
     /**
