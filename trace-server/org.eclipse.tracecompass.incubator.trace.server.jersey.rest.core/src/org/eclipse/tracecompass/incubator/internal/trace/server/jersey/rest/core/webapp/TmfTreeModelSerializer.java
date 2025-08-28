@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2020 École Polytechnique de Montréal
+ * Copyright (c) 2020, 2025 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -45,13 +45,17 @@ public class TmfTreeModelSerializer extends StdSerializer<@NonNull TmfTreeDataMo
         gen.writeStartObject();
         gen.writeNumberField("id", value.getId()); //$NON-NLS-1$
         gen.writeNumberField("parentId", value.getParentId()); //$NON-NLS-1$
-        gen.writeObjectField("style", value.getStyle()); //$NON-NLS-1$
+        if (value.getStyle() != null) {
+            gen.writeObjectField("style", value.getStyle()); //$NON-NLS-1$
+        }
         gen.writeArrayFieldStart("labels"); //$NON-NLS-1$
         for (String label : value.getLabels()) {
             gen.writeString(label);
         }
         gen.writeEndArray();
-        gen.writeBooleanField("hasData", value.hasRowModel()); //$NON-NLS-1$
+        if (value.hasRowModel()) {
+            gen.writeBooleanField("hasData", value.hasRowModel()); //$NON-NLS-1$
+        }
 
         if (value instanceof ITmfXyEntryModel) {
             ITmfXyEntryModel xyValue = (ITmfXyEntryModel) value;

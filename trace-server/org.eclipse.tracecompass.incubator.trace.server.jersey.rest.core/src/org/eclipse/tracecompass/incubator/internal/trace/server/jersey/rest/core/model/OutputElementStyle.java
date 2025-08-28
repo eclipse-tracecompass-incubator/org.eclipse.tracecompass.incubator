@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2021, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -16,6 +16,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.Nullable;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -29,7 +30,7 @@ public interface OutputElementStyle {
      * @return The parent key.
      */
     @Nullable
-    @Schema(description = "Parent style key or empty if there is no parent. " +
+    @Schema(description = "Optional, parent style key. If omitted there is no parent. " +
             "The parent key should match a style key defined in the style model and is used for style inheritance. " +
             "A comma-delimited list of parent style keys can be used for style composition, the last one taking precedence.")
     String getParentKey();
@@ -39,7 +40,8 @@ public interface OutputElementStyle {
      */
     @Schema(description = "Style values or empty map if there are no values. " +
             "Keys and values are defined in " +
-            "https://github.com/eclipse-tracecompass/org.eclipse.tracecompass/blob/master/tmf/org.eclipse.tracecompass.tmf.core/src/org/eclipse/tracecompass/tmf/core/model/StyleProperties.java")
+            "https://github.com/eclipse-tracecompass/org.eclipse.tracecompass/blob/master/tmf/org.eclipse.tracecompass.tmf.core/src/org/eclipse/tracecompass/tmf/core/model/StyleProperties.java",
+            requiredMode = RequiredMode.REQUIRED)
     Map<String, StyleValue> getValues();
 
     /**
