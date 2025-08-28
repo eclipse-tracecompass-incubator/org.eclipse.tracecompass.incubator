@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2021, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -11,9 +11,9 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
-import java.util.List;
+import java.util.Map;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -26,6 +26,7 @@ public interface TimeGraphTooltipResponse {
     /**
      * @return The model.
      */
-    @NonNull
-    List<@NonNull TimeGraphTooltip> getModel();
+    @Nullable
+    @Schema(description = "Tooltip map with key-value pairs, where the key is the tooltip name and the corresponding value is the tooltip value")
+    Map<String, String> getModel();
 }
