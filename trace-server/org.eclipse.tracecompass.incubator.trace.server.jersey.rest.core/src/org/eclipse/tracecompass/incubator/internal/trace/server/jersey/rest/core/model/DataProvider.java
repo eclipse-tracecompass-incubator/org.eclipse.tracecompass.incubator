@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -28,13 +29,13 @@ public interface DataProvider {
     /**
      * @return The name.
      */
-    @Schema(description = "The human readable name")
+    @Schema(description = "The human readable name", requiredMode = RequiredMode.REQUIRED)
     String getName();
 
     /**
      * @return The ID.
      */
-    @Schema(description = "The output provider's ID")
+    @Schema(description = "The output provider's ID", requiredMode = RequiredMode.REQUIRED)
     String getId();
 
     /**
@@ -46,13 +47,14 @@ public interface DataProvider {
             "Providers of type DATA_TREE only provide a tree with columns and don't have any XY nor time graph data associated with it. " +
             "Providers of type GANTT_CHART use the same endpoint as TIME_GRAPH, but have a different x-axis (duration, page faults, etc.), with their own separate ranges. " +
             "Providers of type TREE_GENERIC_XY supports XY view with non-time x-axis. " +
-            "Providers of type NONE have no data to visualize. Can be used for grouping purposes and/or as data provider configurator.")
+            "Providers of type NONE have no data to visualize. Can be used for grouping purposes and/or as data provider configurator.",
+            requiredMode = RequiredMode.REQUIRED)
     ProviderType getType();
 
     /**
      * @return The description.
      */
-    @Schema(description = "Describes the output provider's features")
+    @Schema(description = "Describes the output provider's features", requiredMode = RequiredMode.REQUIRED)
     String getDescription();
 
     /**

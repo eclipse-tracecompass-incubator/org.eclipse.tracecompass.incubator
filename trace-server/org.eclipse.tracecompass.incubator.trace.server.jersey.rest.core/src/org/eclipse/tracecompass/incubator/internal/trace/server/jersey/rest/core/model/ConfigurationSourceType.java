@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Ericsson
+ * Copyright (c) 2023, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -26,19 +27,19 @@ public interface ConfigurationSourceType {
     /**
      * @return the name of the configuration source type
      */
-    @Schema(description = "The human readable name")
+    @Schema(description = "The human readable name", requiredMode = RequiredMode.REQUIRED)
     String getName();
 
     /**
      * @return the ID for of the configuration source type
      */
-    @Schema(description = "The unique ID of the configuration source type")
+    @Schema(description = "The unique ID of the configuration source type", requiredMode = RequiredMode.REQUIRED)
     String getId();
 
     /**
      * @return a short description of this configuration source type
      */
-    @Schema(description = "Describes the configuration source type")
+    @Schema(description = "Optional, describes the configuration source type")
     String getDescription();
 
     /**

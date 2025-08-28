@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2021, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -55,6 +55,6 @@ public interface TreeDataModel {
     /**
      * @return Has data (or not).
      */
-    @Schema(description = "Whether or not this entry has data")
+    @Schema(description = "Whether or not this entry has data. false if absent.")
     boolean getHasData();
 }
