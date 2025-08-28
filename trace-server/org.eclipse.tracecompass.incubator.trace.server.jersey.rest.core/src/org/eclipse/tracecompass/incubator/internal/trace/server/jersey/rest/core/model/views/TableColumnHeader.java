@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2020 École Polytechnique de Montréal
+ * Copyright (c) 2020, 2025 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableColumnDataModel;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataType;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 
@@ -36,11 +37,16 @@ public class TableColumnHeader {
      * @param dataModel
      *            The tree model that serves as base for this column
      */
+    @SuppressWarnings("restriction")
     public TableColumnHeader(ITmfTreeDataModel dataModel) {
         fId = dataModel.getId();
         List<@NonNull String> labels = dataModel.getLabels();
         fName = dataModel.getLabels().get(0);
-        fDescription = labels.size() >= 2 ? dataModel.getLabels().get(1) : null;
+        if (dataModel instanceof TmfEventTableColumnDataModel) {
+            fDescription = ((TmfEventTableColumnDataModel) dataModel).getHeaderTooltip();
+        } else {
+            fDescription = labels.size() >= 2 ? dataModel.getLabels().get(1) : null;
+        }
         fType = dataModel.getDataType();
     }
 

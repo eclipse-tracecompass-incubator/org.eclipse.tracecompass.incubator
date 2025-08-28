@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021, 2024 Ericsson
+ * Copyright (c) 2021, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -17,6 +17,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -27,49 +28,49 @@ public interface Trace {
     /**
      * @return The name.
      */
-    @Schema(description = "User defined name for the trace")
+    @Schema(description = "User defined name for the trace", requiredMode = RequiredMode.REQUIRED)
     String getName();
 
     /**
      * @return The path.
      */
-    @Schema(description = "Path to the trace on the server's file system")
+    @Schema(description = "Path to the trace on the server's file system", requiredMode = RequiredMode.REQUIRED)
     String getPath();
 
     /**
      * @return The UUID.
      */
     @JsonProperty("UUID")
-    @Schema(description = "The trace's unique identifier")
+    @Schema(description = "The trace's unique identifier", requiredMode = RequiredMode.REQUIRED)
     UUID getUUID();
 
     /**
      * @return The number of events.
      */
-    @Schema(description = "Current number of indexed events in the trace")
+    @Schema(description = "Current number of indexed events in the trace", requiredMode = RequiredMode.REQUIRED)
     long getNbEvents();
 
     /**
      * @return The start time.
      */
-    @Schema(description = "The trace's start time")
+    @Schema(description = "The trace's start time", requiredMode = RequiredMode.REQUIRED)
     long getStart();
 
     /**
      * @return The end time.
      */
-    @Schema(description = "The trace's end time")
+    @Schema(description = "The trace's end time", requiredMode = RequiredMode.REQUIRED)
     long getEnd();
 
     /**
      * @return The properties.
      */
-    @Schema(description = "The trace's properties")
+    @Schema(description = "The trace's properties", requiredMode = RequiredMode.REQUIRED)
     Map<String, String> getProperties();
 
     /**
      * @return The indexing status.
      */
-    @Schema(description = "Status of the trace indexing")
+    @Schema(description = "Status of the trace indexing", requiredMode = RequiredMode.REQUIRED)
     IndexingStatus getIndexingStatus();
 }

@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2020 École Polytechnique de Montréal
+ * Copyright (c) 2020, 2025 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -47,7 +47,9 @@ public class OutputElementStyleSerializer extends StdSerializer<@NonNull OutputE
     @Override
     public void serialize(@NonNull OutputElementStyle value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
-        gen.writeStringField("parentKey", value.getParentKey());
+        if (value.getParentKey() != null) {
+            gen.writeStringField("parentKey", value.getParentKey());
+        }
 
         // Verify the type of style values. Make sure only supported types are returned.
         gen.writeObjectFieldStart("values");
