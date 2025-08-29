@@ -111,6 +111,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.AnnotationsQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ArrowsQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.DataProvider;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.DataTreeResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ErrorResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.GenericXYQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.LinesQueryParameters;
@@ -306,7 +307,7 @@ public class DataProviderService {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "API to get the data tree", description = TREE_ENTRIES, responses = {
             @ApiResponse(responseCode = "200", description = "Returns a list of data tree entries. " +
-                    CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = XYTreeResponse.class))),
+                    CONSISTENT_PARENT, content = @Content(schema = @Schema(implementation = DataTreeResponse.class))),
             @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
