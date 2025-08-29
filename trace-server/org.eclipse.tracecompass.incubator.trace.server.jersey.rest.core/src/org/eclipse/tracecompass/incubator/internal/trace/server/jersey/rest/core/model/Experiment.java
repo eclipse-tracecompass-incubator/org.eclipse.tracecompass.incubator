@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021 Ericsson
+ * Copyright (c) 2021, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -28,43 +29,43 @@ public interface Experiment {
     /**
      * @return The name.
      */
-    @Schema(description = "User defined name for the experiment")
+    @Schema(description = "User defined name for the experiment", requiredMode = RequiredMode.REQUIRED)
     String getName();
 
     /**
      * @return The UUID.
      */
     @JsonProperty("UUID")
-    @Schema(description = "The experiment's unique identifier")
+    @Schema(description = "The experiment's unique identifier", requiredMode = RequiredMode.REQUIRED)
     UUID getUUID();
 
     /**
      * @return The number of events.
      */
-    @Schema(description = "Current number of indexed events in the experiment")
+    @Schema(description = "Current number of indexed events in the experiment", requiredMode = RequiredMode.REQUIRED)
     long getNbEvents();
 
     /**
      * @return The start time.
      */
-    @Schema(description = "The experiment's start time")
+    @Schema(description = "The experiment's start time", requiredMode = RequiredMode.REQUIRED)
     long getStart();
 
     /**
      * @return The end time.
      */
-    @Schema(description = "The experiment's end time")
+    @Schema(description = "The experiment's end time", requiredMode = RequiredMode.REQUIRED)
     long getEnd();
 
     /**
      * @return The indexing status.
      */
-    @Schema(description = "Status of the experiment indexing")
+    @Schema(description = "Status of the experiment indexing", requiredMode = RequiredMode.REQUIRED)
     IndexingStatus getIndexingStatus();
 
     /**
      * @return The traces.
      */
-    @ArraySchema(arraySchema = @Schema(description = "The traces encapsulated by this experiment"))
+    @ArraySchema(arraySchema = @Schema(description = "The traces encapsulated by this experiment"), schema = @Schema(requiredMode = RequiredMode.REQUIRED))
     List<Trace> getTraces();
 }

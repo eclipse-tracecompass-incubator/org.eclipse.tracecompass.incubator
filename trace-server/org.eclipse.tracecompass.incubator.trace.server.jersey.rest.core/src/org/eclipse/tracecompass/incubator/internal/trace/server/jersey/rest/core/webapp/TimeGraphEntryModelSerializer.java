@@ -49,7 +49,9 @@ public class TimeGraphEntryModelSerializer extends StdSerializer<@NonNull ITimeG
         gen.writeStartObject();
         gen.writeNumberField("id", value.getId()); //$NON-NLS-1$
         gen.writeNumberField("parentId", value.getParentId()); //$NON-NLS-1$
-        gen.writeObjectField("style", value.getStyle()); //$NON-NLS-1$
+        if (value.getStyle() != null) {
+            gen.writeObjectField("style", value.getStyle()); //$NON-NLS-1$
+        }
         gen.writeArrayFieldStart("labels"); //$NON-NLS-1$
         for (String label : value.getLabels()) {
             gen.writeString(label);
@@ -57,7 +59,9 @@ public class TimeGraphEntryModelSerializer extends StdSerializer<@NonNull ITimeG
         gen.writeEndArray();
         gen.writeNumberField("start", value.getStartTime()); //$NON-NLS-1$
         gen.writeNumberField("end", value.getEndTime()); //$NON-NLS-1$
-        gen.writeBooleanField("hasData", value.hasRowModel()); //$NON-NLS-1$
+        if (value.hasRowModel()) {
+            gen.writeBooleanField("hasData", value.hasRowModel()); //$NON-NLS-1$
+        }
         @NonNull Multimap<@NonNull String, @NonNull Object> metadata = value.getMetadata();
         if (!metadata.isEmpty()) {
             Map<String, Collection<Object>> serializedMap = new HashMap<>();

@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2021, 2022 Ericsson
+ * Copyright (c) 2021, 2025 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 /**
  * Contributes to the model used for TSP swagger-core annotations.
@@ -25,13 +26,13 @@ public interface TimeGraphEntry {
     /**
      * @return The start time.
      */
-    @Schema(description = "Beginning of the range for which this entry exists")
+    @Schema(description = "Beginning of the range for which this entry exists", requiredMode = RequiredMode.REQUIRED)
     long getStart();
 
     /**
      * @return The end time.
      */
-    @Schema(description = "End of the range for which this entry exists")
+    @Schema(description = "End of the range for which this entry exists", requiredMode = RequiredMode.REQUIRED)
     long getEnd();
 
     /**
