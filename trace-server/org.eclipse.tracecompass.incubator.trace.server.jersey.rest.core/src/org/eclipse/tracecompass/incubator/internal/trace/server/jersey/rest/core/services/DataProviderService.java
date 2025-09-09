@@ -154,6 +154,7 @@ import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfConfigurationException;
 import org.eclipse.tracecompass.tmf.core.model.CommonStatusMessage;
 import org.eclipse.tracecompass.tmf.core.model.IOutputStyleProvider;
+import org.eclipse.tracecompass.tmf.core.model.ITableColumnDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.OutputStyleModel;
 import org.eclipse.tracecompass.tmf.core.model.annotations.Annotation;
 import org.eclipse.tracecompass.tmf.core.model.annotations.AnnotationCategoriesModel;
@@ -1015,21 +1016,36 @@ public class DataProviderService {
                     @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = OptionalQueryParameters.class))
             }, required = true) QueryParameters queryParameters) {
 
-        Response response = getTree(expUUID, outputId, queryParameters);
-        Object entity = response.getEntity();
-        if (!(entity instanceof TmfModelResponse<?>)) {
-            return response;
+        Response errorResponse = validateParameters(outputId, queryParameters);
+        if (errorResponse != null) {
+            return errorResponse;
         }
-        Object model = ((TmfModelResponse<?>) entity).getModel();
-        if (!(model instanceof TreeModelWrapper)) {
-            return response;
+        Map<String, Object> params = queryParameters.getParameters();
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getColumns") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
+            }
+
+            ITmfVirtualTableDataProvider<? extends @NonNull ITmfTreeDataModel, ? extends IVirtualTableLine> provider = manager.getOrCreateDataProvider(experiment,
+                    outputId, ITmfVirtualTableDataProvider.class);
+            if (provider == null) {
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
+            }
+
+            TmfModelResponse<?> response = provider.fetchColumns(params, null);
+            if (response.getStatus() == ITmfResponse.Status.FAILED) {
+                return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, response.getStatusMessage());
+            }
+            List<ITableColumnDescriptor> model = (List<ITableColumnDescriptor>) response.getModel();
+            if (model == null) {
+                return Response.ok(response).build();
+            }
+            List<@NonNull TableColumnHeader> columns = new ArrayList<>();
+            model.forEach(descriptor -> columns.add(new TableColumnHeader(descriptor)));
+            return Response.ok(new TmfModelResponse<>(columns, response.getStatus(), response.getStatusMessage())).build();
         }
-        List<@NonNull ITmfTreeDataModel> entries = ((TreeModelWrapper) model).getEntries();
-        List<TableColumnHeader> columns = new ArrayList<>();
-        for (ITmfTreeDataModel dataModel : entries) {
-            columns.add(new TableColumnHeader(dataModel));
-        }
-        return Response.ok(new TmfModelResponse<>(columns, ((TmfModelResponse<?>) entity).getStatus(), ((TmfModelResponse<?>) entity).getStatusMessage())).build();
     }
 
     /**
