@@ -5,10 +5,13 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Developing for the server](#developing-for-the-server)
-- [Compiling manually](#compiling-manually)
-- [Running the server](#running-the-server)
-- [Running the server with SSL](#running-the-server-with-ssl)
+- [Eclipse Trace Compass Server](#eclipse-trace-compass-server)
+  - [Table of Contents](#table-of-contents)
+  - [Developing for the server](#developing-for-the-server)
+  - [Compiling manually](#compiling-manually)
+  - [Generating the Trace Server Protocol Client in Java (for testing)](#generating-the-trace-server-protocol-client-in-java-for-testing)
+  - [Running the server](#running-the-server)
+  - [Running the server with SSL](#running-the-server-with-ssl)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -25,6 +28,10 @@ The resulting trace server executables will be in the
 There are the archives for linux, macos and Windows. The sub-directories
 `trace-server/org.eclipse.tracecompass.incubator.trace.server.product/target/products/traceserver/<os>/...`
 contain the executable for each OS.
+
+## Generating the Trace Server Protocol Client in Java (for testing)
+
+See here on how to compile the Trace Server Protocol client for Java using for testing see [here](../BUILDING.md#generate-trace-server-protocol-client-in-java).
 
 ## Running the server
 

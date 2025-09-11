@@ -27,6 +27,7 @@
   <name>Trace Compass Incubator Trace Server Parent</name>
 
   <modules>
+    <module>org.eclipse.tracecompass.incubator.tsp.client.core</module>
     <module>org.eclipse.tracecompass.incubator.trace.server.jersey.rest</module>
     <module>org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core</module>
     <module>org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests</module>
