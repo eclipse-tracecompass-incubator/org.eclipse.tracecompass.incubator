@@ -697,6 +697,11 @@
             </execution>
           </executions>
         </plugin>
+        <plugin>
+          <groupId>org.openapitools</groupId>
+          <artifactId>openapi-generator-maven-plugin</artifactId>
+          <version>7.15.0</version>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
