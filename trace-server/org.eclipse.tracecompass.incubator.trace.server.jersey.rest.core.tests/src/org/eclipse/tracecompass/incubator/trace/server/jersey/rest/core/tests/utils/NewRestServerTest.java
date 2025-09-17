@@ -317,8 +317,20 @@ public abstract class NewRestServerTest {
     /**
      * {@link Trace} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
+     *
+     * Note: Trace opened alone without kernel trace in experiment, hence no automatic
+     * time offset is applied by Trace Compass
      */
     protected static Trace sfContextSwitchesUstStub;
+
+    /**
+     * {@link Trace} to represent the object returned by the server for
+     * {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
+     *
+     * Note: Trace opened with kernel trace in experiment, hence automatic
+     * time offset is applied by Trace Compass
+     */
+    protected static Trace sfContextSwitchesUstWithOffsetStub;
 
     /**
      * {@link Trace} to represent the object returned by the server for
@@ -348,8 +360,19 @@ public abstract class NewRestServerTest {
     /**
      * {@link Trace} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL}.
+     * Note: Trace opened alone without kernel trace in experiment, hence no automatic
+     * time offset is applied by Trace Compass
      */
     protected static Trace sfContextSwitchesKernelStub;
+
+    /**
+     * {@link Trace} to represent the object returned by the server for
+     * {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
+     *
+     * Note: Trace opened with UST trace in experiment, hence automatic
+     * time offset is applied by Trace Compass
+     */
+    protected static Trace sfContextSwitchesKernelWithOffsetStub;
 
     /**
      * {@link Trace} to represent the object returned by the server for
@@ -429,6 +452,13 @@ public abstract class NewRestServerTest {
     @BeforeClass
     public static void beforeTest() throws IOException {
         String contextSwitchesUstPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath().replaceAll("/$", "");
+        long ustStart = 1450193697034689597L;
+        long ustEnd = 1450193745774189602L;
+        long offset = 2120837776L;
+        long kernelStart = 1450193684107249704L;
+        long kernelEnd = 1450193776505076263L;
+
+        // Trace posted to trace server but not yet indexed (not part of experiment)
         sfContextSwitchesUstNotInitializedStub = new Trace()
                 .name(CONTEXT_SWITCHES_UST_NAME)
                 .path(contextSwitchesUstPath)
@@ -438,17 +468,33 @@ public abstract class NewRestServerTest {
                 .nbEvents(0L)
                 .indexingStatus(IndexingStatusEnum.CLOSED)
                 .uuid(getTraceUUID(contextSwitchesUstPath, CONTEXT_SWITCHES_UST_NAME));
+
+        // Trace opened standalone in experiment without corresponding kernel trace, hence no
+        // automatic time offset is applied by Trace Compass
         sfContextSwitchesUstStub = new Trace()
                 .name(CONTEXT_SWITCHES_UST_NAME)
                 .path(contextSwitchesUstPath)
                 .properties(CONTEXT_SWITCHES_UST_PROPERTIES)
-                .end(1450193745774189602L)
-                .start(1450193697034689597L)
+                .end(ustEnd)
+                .start(ustStart)
+                .nbEvents(3934L)
+                .indexingStatus(IndexingStatusEnum.COMPLETED)
+                .uuid(getTraceUUID(contextSwitchesUstPath, CONTEXT_SWITCHES_UST_NAME));
+
+        // Trace opened in experiment with corresponding kernel trace, hence an
+        // automatic time offset is applied by Trace Compass
+        sfContextSwitchesUstWithOffsetStub = new Trace()
+                .name(CONTEXT_SWITCHES_UST_NAME)
+                .path(contextSwitchesUstPath)
+                .properties(CONTEXT_SWITCHES_UST_PROPERTIES)
+                .end(ustEnd + offset)
+                .start(ustStart + offset)
                 .nbEvents(3934L)
                 .indexingStatus(IndexingStatusEnum.COMPLETED)
                 .uuid(getTraceUUID(contextSwitchesUstPath, CONTEXT_SWITCHES_UST_NAME));
 
         String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath().replaceAll("/$", "");
+        // Trace posted to trace server but not yet indexed (not part of experiment)
         sfContextSwitchesKernelNotInitializedStub = new Trace()
                 .name(CONTEXT_SWITCHES_KERNEL_NAME)
                 .path(contextSwitchesKernelPath)
@@ -458,7 +504,30 @@ public abstract class NewRestServerTest {
                 .nbEvents(0L)
                 .indexingStatus(IndexingStatusEnum.CLOSED)
                 .uuid(getTraceUUID(contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_NAME));
-        sfContextSwitchesKernelStub = new Trace().name(CONTEXT_SWITCHES_KERNEL_NAME).path(contextSwitchesKernelPath).properties(CONTEXT_SWITCHES_KERNEL_PROPERTIES);
+
+        // Trace opened standalone in experiment without corresponding UST trace, hence no
+        // automatic time offset is applied by Trace Compass
+        sfContextSwitchesKernelStub = new Trace()
+                .name(CONTEXT_SWITCHES_KERNEL_NAME)
+                .path(contextSwitchesKernelPath)
+                .properties(CONTEXT_SWITCHES_KERNEL_PROPERTIES)
+                .end(kernelEnd)
+                .start(kernelStart)
+                .nbEvents(241566L)
+                .indexingStatus(IndexingStatusEnum.COMPLETED)
+                .uuid(getTraceUUID(contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_NAME));
+
+         // Trace opened in experiment with corresponding UST trace, hence an
+         // automatic time offset is applied by Trace Compass
+         sfContextSwitchesKernelWithOffsetStub = new Trace()
+                .name(CONTEXT_SWITCHES_KERNEL_NAME)
+                .path(contextSwitchesKernelPath)
+                .properties(CONTEXT_SWITCHES_KERNEL_PROPERTIES)
+                .end(kernelEnd - offset)
+                .start(kernelStart - offset)
+                .nbEvents(241566L)
+                .indexingStatus(IndexingStatusEnum.COMPLETED)
+                .uuid(getTraceUUID(contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_NAME));
 
         String arm64Path = FileLocator.toFileURL(CtfTestTrace.ARM_64_BIT_HEADER.getTraceURL()).getPath().replaceAll("/$", "");
         sfArm64KernelNotIntitialzedStub = new Trace()
@@ -508,7 +577,7 @@ public abstract class NewRestServerTest {
     @After
     public void stopServer() throws ApiException {
         for (Experiment experiment: getExperiments()) {
-            assertEquals(experiment, sfExpApi.deleteExperiment(experiment.getUUID()));
+            assertEquals(experiment, deleteExperiment(experiment.getUUID()));
         }
         for (Trace trace : getTraces()) {
             assertEquals(trace, sfTracesApi.deleteTrace(trace.getUUID()));
@@ -787,7 +856,52 @@ public abstract class NewRestServerTest {
     public static List<Experiment> getExperiments() throws ApiException {
         List<Experiment> experiments = sfExpApi.getExperiments();
         experiments.sort(EXPERIMENT_COMPARATOR);
+        for (Experiment exp : experiments) {
+            sortExperiment(exp);
+        }
         return experiments;
+    }
+
+    /**
+     * Sort traces in experiment
+     *
+     * @param exp
+     *            the experiment
+     */
+    protected static void sortExperiment(Experiment exp) {
+        List<Trace> traces = exp.getTraces();
+        traces.sort(TRACE_COMPARATOR);
+        exp.traces(traces);
+    }
+
+    /**
+     * Get the experiment by uuid currently open on the server.
+     *
+     * @param uuid
+     *            the experiment UUID
+     * @return set of currently open experiments.
+     * @throws ApiException
+     *             if an error occurs experiment.
+     */
+    public static Experiment getExperiment(UUID uuid) throws ApiException {
+        Experiment exp = sfExpApi.getExperiment(uuid);
+        sortExperiment(exp);
+        return exp;
+    }
+
+    /**
+     * Delete the experiment by uuid currently open on the server.
+     *
+     * @param uuid
+     *            the experiment UUID
+     * @return set of currently open experiments.
+     * @throws ApiException
+     *             if an error occurs experiment.
+     */
+    public static Experiment deleteExperiment(UUID uuid) throws ApiException {
+        Experiment exp = sfExpApi.deleteExperiment(uuid);
+        sortExperiment(exp);
+        return exp;
     }
 
     /**
@@ -804,6 +918,8 @@ public abstract class NewRestServerTest {
         dps.sort(DP_COMPARATOR);
         return dps;
     }
+
+
 
     /**
      * Get the {@link WebTarget} for the experiment's marker sets
@@ -936,17 +1052,25 @@ public abstract class NewRestServerTest {
         try {
             newExperiment = sfExpApi.postExperiment(experimentQueryParameters);
             int count = 0;
-            while ((count < 1000) && (newExperiment.getIndexingStatus() == org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment.IndexingStatusEnum.RUNNING)) {
+            while ((count < 100) &&
+                    ((newExperiment.getIndexingStatus() == org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment.IndexingStatusEnum.RUNNING)) ||
+                    (newExperiment.getTraces().stream().anyMatch(t -> t.getIndexingStatus() == IndexingStatusEnum.RUNNING))) {
                 newExperiment = sfExpApi.getExperiment(newExperiment.getUUID());
                 count++;
+
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
+            }
+            if (count >= 100) {
+                fail("Failed to index experiment");
             }
         } catch (ApiException e) {
             fail("Failed to POST experiment: " + e.getMessage());
         }
         assertNotNull(newExperiment);
-        List<Trace> tracesList = newExperiment.getTraces();
-        tracesList.sort(TRACE_COMPARATOR);
-        newExperiment.traces(tracesList);
+        sortExperiment(newExperiment);
         return newExperiment;
     }
 
