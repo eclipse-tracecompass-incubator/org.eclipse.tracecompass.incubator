@@ -271,7 +271,6 @@ public class TraceManagerService {
                 String path = Objects.requireNonNull(ResourceUtil.getLocation(resource)).removeTrailingSeparator().toOSString();
                 String name = resource.getName();
                 trace.initTrace(resource, path, ITmfEvent.class, name, typeID);
-                trace.indexTrace(false);
                 // read first event to make sure start time is initialized
                 ITmfContext ctx = trace.seekEvent(0);
                 trace.getNext(ctx);
