@@ -55,9 +55,11 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiClient;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.Configuration;
+import org.eclipse.tracecompass.incubator.tsp.client.core.api.AnnotationsApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.ExperimentsApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.TracesApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.DataProvider;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.DataProvider.TypeEnum;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.ExperimentParameters;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.ExperimentQueryParameters;
@@ -67,7 +69,6 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.model.TraceParameters;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.TraceQueryParameters;
 import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
 import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
-import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -303,16 +304,18 @@ public abstract class NewRestServerTest {
     protected static ExperimentsApi sfExpApi = new ExperimentsApi(sfApiClient);
 
     /**
+     * Annotations API
+     */
+    protected static AnnotationsApi sfAnnotationApi = new AnnotationsApi(sfApiClient);
+
+    /**
      * Callstack data provider descriptor
      */
-    protected static final DataProviderDescriptorStub EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR = new DataProviderDescriptorStub(
-            null,
-            CALL_STACK_DATAPROVIDER_ID,
-            "Flame Chart",
-            "Show a call stack over time",
-            ProviderType.TIME_GRAPH.name(),
-            null,
-            null);
+    protected static final DataProvider EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR =
+            new DataProvider().id(CALL_STACK_DATAPROVIDER_ID)
+            .name("Flame Chart")
+            .description("Show a call stack over time")
+            .type(TypeEnum.TIME_GRAPH);
 
     /**
      * {@link Trace} to represent the object returned by the server for
@@ -441,7 +444,7 @@ public abstract class NewRestServerTest {
     /**
      * Expected toString() of all data providers for this experiment
      */
-    protected static List<DataProviderDescriptorStub> sfExpectedDataProviderDescriptorStub = null;
+    protected static List<DataProvider> sfExpectedDataProviderDescriptorStub = null;
 
     /**
      * Create the {@link Trace}s before running the tests
@@ -541,16 +544,19 @@ public abstract class NewRestServerTest {
                 .uuid(getTraceUUID(arm64Path, ARM_64_KERNEL_NAME));
         sfArm64KernelStub = new Trace().name(ARM_64_KERNEL_NAME).path(arm64Path).properties(ARM_64_KERNEL_PROPERTIES);
 
-        ImmutableList.Builder<DataProviderDescriptorStub> b = ImmutableList.builder();
-        b.add(new DataProviderDescriptorStub(null, "org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack",
-                "LTTng-UST CallStack - Latency vs Time",
-                "Show latencies provided by Analysis module: LTTng-UST CallStack",
-                ProviderType.TREE_TIME_XY.name(), null, null));
+        ImmutableList.Builder<DataProvider> b = ImmutableList.builder();
+        b.add(new DataProvider().id("org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack")
+                .name("LTTng-UST CallStack - Latency vs Time")
+                .description("Show latencies provided by Analysis module: LTTng-UST CallStack")
+                .type(TypeEnum.TREE_TIME_XY));
+
         b.add(EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR);
-        b.add(new DataProviderDescriptorStub(null,"org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
-                "Histogram",
-                "Show a histogram of number of events to time for a trace",
-                ProviderType.TREE_TIME_XY.name(), null, null));
+
+        b.add(new DataProvider().id("org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider")
+                .name("Histogram")
+                .description("Show a histogram of number of events to time for a trace")
+                .type(TypeEnum.TREE_TIME_XY));
+
         sfExpectedDataProviderDescriptorStub = b.build();
 
         sfApiClient.setBasePath("http://localhost:8378/tsp/api");
@@ -905,7 +911,7 @@ public abstract class NewRestServerTest {
     }
 
     /**
-     * Get a set of {@link DataProviderDescriptorStub}
+     * Get a set of {@link DataProvider}
      *
      * @param expUuid
      *            the experiment UUID to get the list of data providers
@@ -919,21 +925,6 @@ public abstract class NewRestServerTest {
         return dps;
     }
 
-
-
-    /**
-     * Get the {@link WebTarget} for the experiment's marker sets
-     *
-     * @param expUUID
-     *            Experiment UUID
-     * @return marker sets model
-     */
-    public static WebTarget getMarkerSetsEndpoint(String expUUID) {
-        return getApplicationEndpoint().path(EXPERIMENTS)
-                .path(expUUID)
-                .path(OUTPUTS_PATH)
-                .path(MARKER_SETS);
-    }
 
     /**
      * Get the {@link WebTarget} for the data provider styles tree endpoint.

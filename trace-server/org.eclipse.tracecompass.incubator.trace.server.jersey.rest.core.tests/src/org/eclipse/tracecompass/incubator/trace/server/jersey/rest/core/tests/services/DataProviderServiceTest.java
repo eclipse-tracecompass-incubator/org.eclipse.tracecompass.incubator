@@ -17,17 +17,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.MarkerSetStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.MarkerSetsOutputResponseStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.DataProvider;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.MarkerSet;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.MarkerSetsResponse;
 import org.junit.Test;
 
 /**
@@ -37,38 +34,35 @@ import org.junit.Test;
  * @author Geneviève Bastien
  * @author Bernd Hufmann
  */
-@SuppressWarnings("null")
-public class DataProviderServiceTest extends RestServerTest {
+public class DataProviderServiceTest extends NewRestServerTest {
 
     /**
      * Test getting the data provider descriptors
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testProviders() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+    public void testProviders() throws ApiException {
+        Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
 
-        WebTarget experiments = getApplicationEndpoint().path(EXPERIMENTS);
-        WebTarget providers = experiments.path(exp.getUUID().toString())
-                .path(OUTPUTS_PATH);
-
-        Set<DataProviderDescriptorStub> descriptors = getDataProviderDescriptors(providers);
-        for (DataProviderDescriptorStub desc : sfExpectedDataProviderDescriptorStub) {
+        List<DataProvider> descriptors = getDataProviderDescriptors(exp.getUUID());
+        for (DataProvider desc : sfExpectedDataProviderDescriptorStub) {
             assertTrue(desc.getName(), descriptors.contains(desc));
         }
     }
 
     /**
      * Test getting a single data provider descriptor
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testProvider() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+    public void testProvider() throws ApiException {
+        Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
 
-        WebTarget experiments = getApplicationEndpoint().path(EXPERIMENTS);
-        WebTarget provider = experiments.path(exp.getUUID().toString())
-                .path(OUTPUTS_PATH).path(CALL_STACK_DATAPROVIDER_ID);
-
-        DataProviderDescriptorStub descriptor = provider.request(MediaType.APPLICATION_JSON).get(DataProviderDescriptorStub.class);
+        DataProvider descriptor = sfExpApi.getProvider(exp.getUUID(), CALL_STACK_DATAPROVIDER_ID);
         assertNotNull(descriptor);
 
         assertEquals(EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR, descriptor);
@@ -79,14 +73,16 @@ public class DataProviderServiceTest extends RestServerTest {
      *
      * Note: For this test a marker set extension is defined in the plugin.xml
      * of this test plug-in.
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testGetMarkerSets() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
-
-        MarkerSetsOutputResponseStub outputResponseStub = getMarkerSetsEndpoint(exp.getUUID().toString()).request(MediaType.APPLICATION_JSON).get(MarkerSetsOutputResponseStub.class);
+    public void testGetMarkerSets() throws ApiException {
+        Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+        MarkerSetsResponse outputResponseStub = sfAnnotationApi.getMarkerSets(exp.getUUID());
         assertNotNull(outputResponseStub);
-        List<MarkerSetStub> markerSets = outputResponseStub.getModel();
+        List<MarkerSet> markerSets = outputResponseStub.getModel();
         assertFalse(markerSets.isEmpty());
         assertEquals("Example", markerSets.get(0).getName());
         assertEquals("example.id", markerSets.get(0).getId());
