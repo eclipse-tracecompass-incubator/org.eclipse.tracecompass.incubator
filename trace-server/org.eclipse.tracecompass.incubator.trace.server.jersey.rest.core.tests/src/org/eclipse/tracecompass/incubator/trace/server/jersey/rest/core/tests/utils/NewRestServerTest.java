@@ -50,7 +50,6 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.TraceServerConfiguration;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp.TestWebApplication;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiClient;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
@@ -770,7 +769,8 @@ public abstract class NewRestServerTest {
     /**
      * Get the {@link WebTarget} for the XY series endpoint.
      *
-     * @param expUUID     *            Experiment UUID
+     * @param expUUID
+     *            Experiment UUID
      * @param dataProviderId
      *            Data provider ID
      * @return The XY series endpoint
@@ -1138,8 +1138,8 @@ public abstract class NewRestServerTest {
     /**
      * Call method to execute common error test cases for a given endpoint.
      *
-     * @param exp
-     *            the experiment
+     * @param expUuid
+     *            the experiment UUID
      * @param resolver
      *            the endpoint resolver
      * @param dpId
@@ -1147,7 +1147,7 @@ public abstract class NewRestServerTest {
      * @param hasParameters
      *            whether the endpoint requires parameters (to test empty parameter map)
      */
-    protected static void executePostErrorTests (ExperimentModelStub exp, IEndpointResolver resolver, String dpId, boolean hasParameters) {
+    protected static void executePostErrorTests (UUID expUuid, IEndpointResolver resolver, String dpId, boolean hasParameters) {
         // Invalid UUID string
         WebTarget endpoint = resolver.getEndpoint(INVALID_EXP_UUID, dpId);
         Map<String, Object> parameters = new HashMap<>();
@@ -1165,7 +1165,7 @@ public abstract class NewRestServerTest {
         }
 
         // Missing parameters
-        endpoint = resolver.getEndpoint(exp.getUUID().toString(), dpId);
+        endpoint = resolver.getEndpoint(expUuid.toString(), dpId);
         try (Response response = endpoint.request().post(Entity.json(NO_PARAMETERS))) {
             assertNotNull(response);
             assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -1173,7 +1173,7 @@ public abstract class NewRestServerTest {
 
         if (hasParameters) {
             // Missing parameters
-            endpoint = resolver.getEndpoint(exp.getUUID().toString(), dpId);
+            endpoint = resolver.getEndpoint(expUuid.toString(), dpId);
             try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
                 assertNotNull(response);
                 assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -1181,7 +1181,7 @@ public abstract class NewRestServerTest {
         }
 
         // Unknown data provider
-        endpoint = resolver.getEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
+        endpoint = resolver.getEndpoint(expUuid.toString(), UNKNOWN_DP_ID);
         try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
             assertNotNull(response);
             assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
