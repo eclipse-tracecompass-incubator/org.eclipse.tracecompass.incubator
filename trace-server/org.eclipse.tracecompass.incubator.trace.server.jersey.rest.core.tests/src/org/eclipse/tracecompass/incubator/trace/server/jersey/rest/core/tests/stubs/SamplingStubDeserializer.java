@@ -50,17 +50,36 @@ public class SamplingStubDeserializer extends JsonDeserializer<ISamplingStub> {
             } while (p.nextToken() != JsonToken.END_ARRAY);
             return new ISamplingStub.CategoriesStub(categories);
 
-        } else if (token == JsonToken.START_ARRAY) {
+        } else if (token == JsonToken.START_OBJECT) {
             List<ISamplingStub.RangesStub.RangeStub> ranges = new ArrayList<>();
-            while (token != JsonToken.END_ARRAY) {
-                p.nextToken(); // start
-                long start = p.getLongValue();
-                p.nextToken(); // end
-                long end = p.getLongValue();
-                p.nextToken(); // end of inner array
-                ranges.add(new ISamplingStub.RangesStub.RangeStub(start, end));
-                token = p.nextToken(); // next outer token
-            }
+            // Loop through the array of range objects
+            do {
+                long start = -1;
+                long end = -1;
+                boolean startFound = false;
+                boolean endFound = false;
+
+                while (p.nextToken() != JsonToken.END_OBJECT) {
+                    String fieldName = p.currentName();
+                    p.nextToken(); // Move to the value token
+                    if ("start".equals(fieldName)) {
+                        start = p.getLongValue();
+                        startFound = true;
+                    } else if ("end".equals(fieldName)) {
+                        end = p.getLongValue();
+                        endFound = true;
+                    } else {
+                        p.skipChildren();
+                    }
+                }
+
+                if (startFound && endFound) {
+                    ranges.add(new ISamplingStub.RangesStub.RangeStub(start, end));
+                } else {
+                    ctxt.reportInputMismatch(ISamplingStub.RangesStub.RangeStub.class, "RangeStub object requires both 'start' and 'end' fields");
+                    return null;
+                }
+            } while (p.nextToken() != JsonToken.END_ARRAY);
             return new ISamplingStub.RangesStub(ranges);
         }
 

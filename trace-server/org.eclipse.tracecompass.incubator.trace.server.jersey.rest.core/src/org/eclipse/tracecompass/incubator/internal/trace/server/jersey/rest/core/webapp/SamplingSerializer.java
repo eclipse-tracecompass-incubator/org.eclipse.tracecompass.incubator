@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  * Custom serializer for all Sampling subtypes.
  * - Timestamps → flat array: [1, 2, 3]
  * - Categories → array of strings: ["Read", "Write"]
- * - TimeRanges → array of arrays: [[1, 2], [2, 3]]
+ * - Ranges → array of objects: [{"start": 1, "end": 2}, {"start": 2, "end": 3}]
  */
 public class SamplingSerializer extends StdSerializer<ISampling> {
 
@@ -56,10 +56,10 @@ public class SamplingSerializer extends StdSerializer<ISampling> {
         } else if (value instanceof Ranges timeRanges) {
             gen.writeStartArray();
             for (Range<@NonNull Long> range : timeRanges.ranges()) {
-                gen.writeStartArray();
-                gen.writeNumber(range.start());
-                gen.writeNumber(range.end());
-                gen.writeEndArray();
+                gen.writeStartObject();
+                gen.writeNumberField("start", range.start()); //$NON-NLS-1$
+                gen.writeNumberField("end", range.end()); //$NON-NLS-1$
+                gen.writeEndObject();
             }
             gen.writeEndArray();
         } else {
