@@ -35,6 +35,7 @@ import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphState;
 import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
 import org.eclipse.tracecompass.tmf.core.model.xy.ITmfXyModel;
+import org.eclipse.tracecompass.tmf.core.model.xy.TmfXYAxisDescription;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -80,6 +81,7 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
             module.addSerializer(ITmfConfigurationSourceType.class, new TmfConfigurationSourceTypeSerializer());
             module.addSerializer(ITmfConfigParamDescriptor.class, new TmfConfigParamDescriptorSerializer());
             module.addSerializer(IAxisDomain.class, new AxisDomainSerializer());
+            module.addSerializer(TmfXYAxisDescription.class, new TmfXYAxisDescriptionSerializer());
 
             // create JsonProvider to provide custom ObjectMapper
             JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
