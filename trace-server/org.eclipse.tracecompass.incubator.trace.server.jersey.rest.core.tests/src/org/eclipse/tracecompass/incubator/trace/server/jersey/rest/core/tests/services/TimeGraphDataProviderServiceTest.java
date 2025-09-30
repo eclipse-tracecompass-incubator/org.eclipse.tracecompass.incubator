@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2024 Ericsson and others
+ * Copyright (c) 2018, 2025 Ericsson and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License 2.0 which
@@ -27,11 +27,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -39,33 +37,53 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ErrorResponseImpl;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.AnnotationCategoriesOutputResponseStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.AnnotationModelStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.AnnotationResponseStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.AnnotationStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.OutputElementStyleStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.OutputStyleModelStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.StylesOutputResponseStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgArrowsOutputResponseStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgEntryModelStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgStatesOutputResponseStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgTooltipOutputResponseStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TgTreeOutputResponseStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphArrowStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphEntryStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphModelStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphRowStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TimeGraphStateStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp.TestDataProviderService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
-import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
-import org.eclipse.tracecompass.tmf.core.model.annotations.IAnnotation.AnnotationType;
-import org.eclipse.tracecompass.tmf.core.model.filters.TimeQueryFilter;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
+import org.eclipse.tracecompass.incubator.tsp.client.core.api.StylesApi;
+import org.eclipse.tracecompass.incubator.tsp.client.core.api.TimeGraphApi;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Annotation;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Annotation.TypeEnum;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.AnnotationCategoriesResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.AnnotationModel;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.AnnotationResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.AnnotationsParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.AnnotationsQueryParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ArrowsParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ArrowsQueryParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.DataTreeResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Element;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Element.ElementTypeEnum;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ErrorResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.MetadataValue;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.OptionalQueryParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.OutputElementStyle;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.OutputStyleModel;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.RequestedFilterQueryParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.RequestedFilterQueryParameters.StrategyEnum;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.RequestedParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.RequestedQueryParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.StylesResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphArrow;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphArrowsResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphEntry;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphModel;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphRowModel;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphState;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphStatesResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphStatesResponse.StatusEnum;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphTooltipResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphTreeModel;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphTreeResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeRange;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TooltipParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TooltipQueryParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TreeParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TreeQueryParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.XYTreeResponse;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -78,8 +96,7 @@ import com.google.common.collect.Iterators;
  * @author Geneviève Bastien
  * @author Bernd Hufmann
  */
-@SuppressWarnings({"null", "restriction"})
-public class TimeGraphDataProviderServiceTest extends RestServerTest {
+public class TimeGraphDataProviderServiceTest extends NewRestServerTest {
 
     private static final String UST_CATEGORY_NAME = "ust";
     private static final String SLOT_CATEGORY_NAME = "Slot";
@@ -88,47 +105,33 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
     private static final String DATA_PROVIDER_RESPONSE_FAILED_MSG = "There should be a positive response for the data provider";
     private static final String MODEL_NULL_MSG = "The model is null, maybe the analysis did not run long enough?";
     private static final int MAX_ITER = 40;
-    private static final String REQUESTED_TIMERANGE_KEY = "requested_timerange";
-    private static final String REQUESTED_CATAGORIES_KEY = "requested_marker_categories";
-    private static final String REQUESTED_MARKERSET_ID_KEY = "requested_marker_set";
-    private static final String REQUESTED_ITEMS_KEY = "requested_items";
-    private static final String REQUESTED_ELEMENT_KEY = "requested_element";
-    private static final String ELEMENT_TYPE = "elementType";
-    private static final String STATE = "state";
-    private static final String ANNOTATION = "annotation";
-    private static final String ARROW = "arrow";
-    private static final String TIME = "time";
-    private static final String DURATION = "duration";
-    private static final String ENTRY_ID = "entryId";
-    private static final String DESTINATION_ID = "destinationId";
-    private static final String START = "start";
-    private static final String END = "end";
-    private static final String NB_TIMES = "nbTimes";
-    private static final String FILTER_EXPRESSIONS_MAP = "filter_expressions_map";
-    private static final String FILTER_QUERY_PARAMETERS = "filter_query_parameters";
-    private static final String STRATEGY = "strategy";
     private static final String DEEP_SEARCH = "DEEP";
-    private static final String SHALLOW_SEARCH = "SHALLOW";
+    private static final String SHALLOW_SEARCH = "SAMPLED";
     private static final String FILTER_QUERY = "test";
-    private static final int DIMMED_FILTER_TAG = 1;
+    private static final Integer DIMMED_FILTER_TAG = 1;
+
+    private static final TimeGraphApi sfTgApi = new TimeGraphApi(sfApiClient);
+    private static final StylesApi sfStylesApi = new StylesApi(sfApiClient);
 
     /**
      * Ensure that the Call Stack data provider exists for the trace.
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testCallStackDataProvider() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+    public void testCallStackDataProvider() throws ApiException {
+        Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
 
-        WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
+        TreeParameters params = new TreeParameters();
+        params.requestedTimerange(new TimeRange().start(0L).end(Long.MAX_VALUE).nbTimes(2));
+        TreeQueryParameters queryParams = new TreeQueryParameters().parameters(params);
 
-        Map<String, Object> parameters = FetchParametersUtils.timeQueryToMap(new TimeQueryFilter(0L, Long.MAX_VALUE, 2));
-        try (Response tree = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, tree.getStatus());
-        }
-        parameters = new HashMap<>();
-        try (Response defaults = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals("Default values should return OK code", 200, defaults.getStatus());
-        }
+        TimeGraphTreeResponse treeResponse = sfTgApi.getTimeGraphTree(exp.getUUID(), CALL_STACK_DATAPROVIDER_ID, queryParams);
+        assertTrue(DATA_PROVIDER_RESPONSE_FAILED_MSG, !treeResponse.getStatus().equals(TimeGraphTreeResponse.StatusEnum.FAILED));
+
+        treeResponse = sfTgApi.getTimeGraphTree(exp.getUUID(), CALL_STACK_DATAPROVIDER_ID, new TreeQueryParameters().parameters(params));
+        assertTrue("Default values should return OK code", !treeResponse.getStatus().equals(TimeGraphTreeResponse.StatusEnum.FAILED));
     }
 
     /**
@@ -138,9 +141,11 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
      *
      * @throws InterruptedException
      *             Exception thrown while waiting to execute again
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testTimeGraphDataProvider() throws InterruptedException {
+    public void testTimeGraphDataProvider() throws InterruptedException, ApiException {
         testGetStates(null);
         testGetStates(DEEP_SEARCH);
         testGetStates(SHALLOW_SEARCH);
@@ -151,8 +156,8 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testStatesErrors() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
-        executePostErrorTests(exp, RestServerTest::getArrowsEndpoint, CALL_STACK_DATAPROVIDER_ID, true);
+        Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+        executePostErrorTests(exp.getUUID(), NewRestServerTest::getArrowsEndpoint, CALL_STACK_DATAPROVIDER_ID, true);
     }
 
     /**
@@ -160,32 +165,29 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testTreeErrors() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
-        executePostErrorTests(exp, RestServerTest::getTimeGraphTreeEndpoint, CALL_STACK_DATAPROVIDER_ID, false);
+        Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+        executePostErrorTests(exp.getUUID(), NewRestServerTest::getTimeGraphTreeEndpoint, CALL_STACK_DATAPROVIDER_ID, false);
     }
 
     /**
      * Tests querying styles for a time graph data provider
+     *
+     * @throws ApiException
+     *             if such exception happens
      */
     @Test
-    public void testStyles() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+    public void testStyles() throws ApiException {
+        Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
 
-        WebTarget stylesEndpoint = getStylesEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
-
-        Map<String, Object> parameters = new HashMap<>();
-        try (Response response = stylesEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertNotNull(response);
-            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, Status.OK.getStatusCode(), response.getStatus());
-            StylesOutputResponseStub outputResponse = response.readEntity(StylesOutputResponseStub.class);
-            assertNotNull(outputResponse);
-            OutputStyleModelStub model = outputResponse.getModel();
-            assertNotNull(model);
-            Map<String, OutputElementStyleStub> styles = model.getStyles();
-            assertFalse(styles.isEmpty());
-            OutputElementStyleStub elementStub = styles.get("0");
-            assertNotNull(elementStub);
-        }
+        StylesResponse outputResponse = sfStylesApi.getStyles(exp.getUUID(), CALL_STACK_DATAPROVIDER_ID, new OptionalQueryParameters());
+        assertNotNull(outputResponse);
+        assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, org.eclipse.tracecompass.incubator.tsp.client.core.model.StylesResponse.StatusEnum.COMPLETED, outputResponse.getStatus());
+        OutputStyleModel model = outputResponse.getModel();
+        assertNotNull(model);
+        Map<String, OutputElementStyle> styles = model.getStyles();
+        assertFalse(styles.isEmpty());
+        OutputElementStyle elementStub = styles.get("0");
+        assertNotNull(elementStub);
     }
 
     /**
@@ -193,8 +195,8 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testStylesErrors() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
-        executePostErrorTests(exp, RestServerTest::getStylesEndpoint, CALL_STACK_DATAPROVIDER_ID, false);
+        Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+        executePostErrorTests(exp.getUUID(), NewRestServerTest::getStylesEndpoint, CALL_STACK_DATAPROVIDER_ID, false);
     }
 
     /**
@@ -202,32 +204,28 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
      *
      * @throws InterruptedException
      *             if such exception happens
+     * @throws ApiException
+     *             if such exception happens
      */
     @Test
-    public void testArrows() throws InterruptedException {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
+    public void testArrows() throws InterruptedException, ApiException {
+        Experiment exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
 
-        Set<TimeGraphEntryStub> entries = loadDataProvider(exp, THREAD_STATUS_DP_ID);
-        WebTarget arrowsEndpoint = getArrowsEndpoint(exp.getUUID().toString(), THREAD_STATUS_DP_ID);
+        List<TimeGraphEntry> entries = loadDataProvider(exp, THREAD_STATUS_DP_ID);
 
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.remove(REQUESTED_TIMES_KEY);
-        parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, 1450193714978685130L, END, 1450193715011015823L, NB_TIMES, 1000));
+        ArrowsParameters params = new ArrowsParameters().requestedTimerange(new TimeRange().start(1450193714978685130L).end(1450193715011015823L).nbTimes(1000));
+        ArrowsQueryParameters queryParam = new ArrowsQueryParameters().parameters(params);
+        TimeGraphArrowsResponse arrowsResponse = sfTgApi.getArrows(exp.getUUID(), THREAD_STATUS_DP_ID, queryParam);
+        assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphArrowsResponse.StatusEnum.COMPLETED, arrowsResponse.getStatus());
 
-        try (Response arrowsResponse = arrowsEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, Status.OK.getStatusCode(), arrowsResponse.getStatus());
+        List<TimeGraphArrow> tgModel = arrowsResponse.getModel();
+        assertNotNull(tgModel);
 
-            TgArrowsOutputResponseStub tgArrowsModelResponse = arrowsResponse.readEntity(TgArrowsOutputResponseStub.class);
-            assertNotNull(tgArrowsModelResponse);
+        assertFalse(tgModel.isEmpty());
 
-            List<TimeGraphArrowStub> tgModel = tgArrowsModelResponse.getModel();
-            assertNotNull(tgModel);
-            assertFalse(tgModel.isEmpty());
-
-            TimeGraphArrowStub arrow = tgModel.get(0);
-            // Verify first arrow in list
-            verifyArrow(entries, arrow);
-        }
+        TimeGraphArrow arrow = tgModel.get(0);
+        // Verify first arrow in list
+        verifyArrow(entries, arrow);
     }
 
     /**
@@ -235,20 +233,22 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testArrowsErrors() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
-        executePostErrorTests(exp, RestServerTest::getArrowsEndpoint, THREAD_STATUS_DP_ID, true);
+        Experiment exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
+        executePostErrorTests(exp.getUUID(), NewRestServerTest::getArrowsEndpoint, THREAD_STATUS_DP_ID, true);
     }
 
     /**
      * Tests querying annotation categories for a time graph data provider
+     *
+     * @throws ApiException
+     *             if such exception happen
      */
     @Test
-    public void testAnnotationCategories() {
-        ExperimentModelStub exp = assertPostExperiment(CTX_SWITCH_EXPERIMENT, sfContextSwitchesKernelNotInitializedStub, sfContextSwitchesUstNotInitializedStub);
+    public void testAnnotationCategories() throws ApiException {
+        Experiment exp = assertPostExperiment(CTX_SWITCH_EXPERIMENT, sfContextSwitchesKernelNotInitializedStub, sfContextSwitchesUstNotInitializedStub);
 
         // Get ust category
-        WebTarget categoriesEndpoint = getAnnotationCategoriesEndpoint(exp.getUUID().toString(), THREAD_STATUS_DP_ID, "unknown.annotation.cat.id");
-        AnnotationCategoriesOutputResponseStub annotationCategoriesModel = categoriesEndpoint.request(MediaType.APPLICATION_JSON).get(AnnotationCategoriesOutputResponseStub.class);
+        AnnotationCategoriesResponse annotationCategoriesModel = sfAnnotationApi.getAnnotationCategories(exp.getUUID(), THREAD_STATUS_DP_ID, "unknown.annotation.cat.id");
         assertNotNull(annotationCategoriesModel);
         assertFalse(annotationCategoriesModel.getModel().getAnnotationCategories().isEmpty());
         List<String> categories = annotationCategoriesModel.getModel().getAnnotationCategories();
@@ -256,9 +256,7 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
         assertTrue(categories.contains(UST_CATEGORY_NAME));
 
         // get category from marker set
-        categoriesEndpoint = getAnnotationCategoriesEndpoint(exp.getUUID().toString(), THREAD_STATUS_DP_ID, "example.id");
-        annotationCategoriesModel = categoriesEndpoint.request(MediaType.APPLICATION_JSON).get(AnnotationCategoriesOutputResponseStub.class);
-
+        annotationCategoriesModel = sfAnnotationApi.getAnnotationCategories(exp.getUUID(), THREAD_STATUS_DP_ID, "example.id");
         assertNotNull(annotationCategoriesModel);
         categories = annotationCategoriesModel.getModel().getAnnotationCategories();
         assertFalse(categories.isEmpty());
@@ -267,11 +265,12 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
     }
 
     /**
-     * Tests error cases when querying annotation categories for a time graph data provider
+     * Tests error cases when querying annotation categories for a time graph
+     * data provider
      */
     @Test
     public void testAnnotationCategoriesErrors() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
+        Experiment exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
         // Invalid UUID string
         WebTarget endpoint = getAnnotationCategoriesEndpoint(INVALID_EXP_UUID, THREAD_STATUS_DP_ID);
         try (Response response = endpoint.request(MediaType.APPLICATION_JSON).get()) {
@@ -280,19 +279,25 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
         }
 
         // Unknown experiment
-        endpoint = getAnnotationCategoriesEndpoint(UUID.randomUUID().toString(), THREAD_STATUS_DP_ID);
-        try (Response response = endpoint.request(MediaType.APPLICATION_JSON).get()) {
-            assertNotNull(response);
-            assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(ErrorResponseImpl.class).getTitle());
+        try {
+            sfAnnotationApi.getAnnotationCategories(UUID.randomUUID(), THREAD_STATUS_DP_ID, "unknown.annotation.cat.id");
+            fail();
+        } catch (ApiException ex) {
+            assertEquals(Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, errorResponse.getTitle());
         }
 
         // Unknown data provider
-        endpoint = getAnnotationCategoriesEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
-        try (Response response = endpoint.request(MediaType.APPLICATION_JSON).get()) {
-            assertNotNull(response);
-            assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(ErrorResponseImpl.class).getTitle());
+        try {
+            sfAnnotationApi.getAnnotationCategories(exp.getUUID(), UNKNOWN_DP_ID, "unknown.annotation.cat.id");
+            fail();
+        } catch (ApiException ex) {
+            assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals(EndpointConstants.NO_PROVIDER, errorResponse.getTitle());
         }
     }
 
@@ -301,67 +306,67 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
      *
      * @throws InterruptedException
      *             if such exception occurred
+     * @throws ApiException
+     *             if such exception occurrs
      */
     @Test
-    public void testAnnotations() throws InterruptedException {
-        ExperimentModelStub exp = assertPostExperiment(CTX_SWITCH_EXPERIMENT, sfContextSwitchesKernelNotInitializedStub, sfContextSwitchesUstNotInitializedStub);
-        Set<TimeGraphEntryStub> entries =  loadDataProvider(exp, THREAD_STATUS_DP_ID);
+    public void testAnnotations() throws InterruptedException, ApiException {
+        Experiment exp = assertPostExperiment(CTX_SWITCH_EXPERIMENT, sfContextSwitchesKernelNotInitializedStub, sfContextSwitchesUstNotInitializedStub);
+        List<TimeGraphEntry> entries = loadDataProvider(exp, THREAD_STATUS_DP_ID);
 
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.remove(REQUESTED_TIMES_KEY);
-        parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, 1450193722866679365L, END, 1450193722881450790L, NB_TIMES, 500));
-        parameters.put(REQUESTED_MARKERSET_ID_KEY, "example.id");
         List<String> categories = List.of("Frame", "Subframe", SLOT_CATEGORY_NAME, UST_CATEGORY_NAME);
-        parameters.put(REQUESTED_CATAGORIES_KEY, categories);
+        AnnotationsParameters params = new AnnotationsParameters()
+                .requestedTimerange(new TimeRange().start(1450193722866679365L).end(1450193722881450790L).nbTimes(500))
+                .requestedMarkerSet("example.id")
+                .requestedMarkerCategories(categories);
+        AnnotationsQueryParameters queryParam = new AnnotationsQueryParameters().parameters(params);
 
         // Find specific thread entry
         final String threadNameForTooltip = "lemon_server";
-        Optional<TimeGraphEntryStub> threadOptional = entries.stream().filter(
+        Optional<TimeGraphEntry> threadOptional = entries.stream().filter(
                 entry -> threadNameForTooltip.equals(entry.getLabels().get(0)) && entry.getLabels().get(1).equals("592")).findFirst();
         assertTrue(threadOptional.isPresent());
-        parameters.put(REQUESTED_ITEMS_KEY, List.of(threadOptional.get().getId()));
+        params.requestedItems(List.of(Long.valueOf(threadOptional.get().getId()).intValue()));
 
-        WebTarget annoationEndpoint = getAnnotationEndpoint(exp.getUUID().toString(), THREAD_STATUS_DP_ID);
-        try (Response response = annoationEndpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertNotNull(response);
-            assertEquals(Status.OK.getStatusCode(), response.getStatus());
-            AnnotationResponseStub modelResponse = response.readEntity(AnnotationResponseStub.class);
-            assertNotNull(modelResponse);
+        AnnotationResponse modelResponse = sfAnnotationApi.getAnnotations(exp.getUUID(), THREAD_STATUS_DP_ID, queryParam);
 
-            AnnotationModelStub annotationModel = modelResponse.getModel();
-            assertNotNull(annotationModel);
-            Map<String, Collection<AnnotationStub>> annotationsMap = annotationModel.getAnnotations();
-            assertFalse(annotationsMap.isEmpty());
-            for (String category : categories) {
-                assertTrue(annotationsMap.containsKey(category));
-                Collection<AnnotationStub> annotations = annotationsMap.get(category);
-                assertNotNull(annotations);
-                assertFalse(annotations.isEmpty());
-            }
+        assertEquals(org.eclipse.tracecompass.incubator.tsp.client.core.model.AnnotationResponse.StatusEnum.COMPLETED, modelResponse.getStatus());
+        assertNotNull(modelResponse);
 
-            Collection<AnnotationStub> annotations = annotationsMap.get(SLOT_CATEGORY_NAME);
+        AnnotationModel annotationModel = modelResponse.getModel();
+        assertNotNull(annotationModel);
+        Map<String, List<Annotation>> annotationsMap = annotationModel.getAnnotations();
+        assertFalse(annotationsMap.isEmpty());
+        for (String category : categories) {
+            assertTrue(annotationsMap.containsKey(category));
+            List<Annotation> annotations = annotationsMap.get(category);
             assertNotNull(annotations);
-            AnnotationStub annotation = annotations.iterator().next();
-
-            // Verify first annotation created from marker set and category Slot
-            assertEquals(1450193722866500000L, annotation.getTime());
-            assertEquals(500000, annotation.getDuration());
-            assertEquals(-1, annotation.getEntryId());
-            assertEquals("1", annotation.getLabel());
-            assertEquals(AnnotationType.CHART.name(), annotation.getType());
-            assertNotNull(annotation.getStyle());
-
-            // Verify first annotation created from category ust for specific thread
-            annotations = annotationsMap.get(UST_CATEGORY_NAME);
-            assertNotNull(annotations);
-            annotation = annotations.iterator().next();
-            assertEquals(1450193722867264709L, annotation.getTime());
-            assertEquals(0, annotation.getDuration());
-            assertEquals(threadOptional.get().getId(), annotation.getEntryId());
-            assertEquals("lttng_ust_tracef:event", annotation.getLabel());
-            assertEquals(AnnotationType.CHART.name(), annotation.getType());
-            assertNotNull(annotation.getStyle());
+            assertFalse(annotations.isEmpty());
         }
+
+        List<Annotation> annotations = annotationsMap.get(SLOT_CATEGORY_NAME);
+        assertNotNull(annotations);
+        Annotation annotation = annotations.iterator().next();
+
+        // Verify first annotation created from marker set and category Slot
+        assertEquals(Long.valueOf(1450193722866500000L), annotation.getTime());
+        assertEquals(Long.valueOf(500000), annotation.getDuration());
+        assertEquals(Long.valueOf(-1), annotation.getEntryId());
+        assertEquals("1", annotation.getLabel());
+        assertEquals(TypeEnum.CHART, annotation.getType());
+        assertNotNull(annotation.getStyle());
+
+        // Verify first annotation created from category ust for specific
+        // thread
+        annotations = annotationsMap.get(UST_CATEGORY_NAME);
+        assertNotNull(annotations);
+        annotation = annotations.iterator().next();
+        assertEquals(Long.valueOf(1450193722867264709L), annotation.getTime());
+        assertEquals(Long.valueOf(0), annotation.getDuration());
+        assertEquals(threadOptional.get().getId(), annotation.getEntryId());
+        assertEquals("lttng_ust_tracef:event", annotation.getLabel());
+        assertEquals(TypeEnum.CHART, annotation.getType());
+        assertNotNull(annotation.getStyle());
     }
 
     /**
@@ -369,113 +374,115 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
      */
     @Test
     public void testAnnotationErrors() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
-        executePostErrorTests(exp, RestServerTest::getAnnotationEndpoint, THREAD_STATUS_DP_ID, true);
+        Experiment exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
+        executePostErrorTests(exp.getUUID(), NewRestServerTest::getAnnotationEndpoint, THREAD_STATUS_DP_ID, true);
     }
 
-    private static void testGetStates(String filterStrategy) throws InterruptedException {
+    private static void testGetStates(String filterStrategy) throws InterruptedException, ApiException {
         try {
-            ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
-            Set<TimeGraphEntryStub> entries = loadDataProvider(exp, CALL_STACK_DATAPROVIDER_ID);
+            Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
+            List<TimeGraphEntry> entries = loadDataProvider(exp, CALL_STACK_DATAPROVIDER_ID);
 
             // add entries for the states query, and make sure they don't have
             // extra time fields
             List<Integer> items = new ArrayList<>();
             // Find a specific call stack entry
-            for (TimeGraphEntryStub entry : entries) {
-                items.add(entry.getId());
+            for (TimeGraphEntry entry : entries) {
+                items.add(entry.getId().intValue()); // FIXME https://github.com/eclipse-cdt-cloud/trace-server-protocol/issues/140
             }
 
-            // Test getting the time graph row data
-            WebTarget tgStatesEnpoint = getTimeGraphStatesEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
-            Map<String, Object> parameters = new HashMap<>();
-            parameters.remove(REQUESTED_TIMES_KEY);
-            parameters.put(REQUESTED_TIMERANGE_KEY, ImmutableMap.of(START, 1450193697034689597L, END, 1450193697118480368L, NB_TIMES, 10));
-            parameters.put(REQUESTED_ITEMS_KEY, items);
+            long start = 1450193697034689597L;
+            long end = 1450193697118480368L;
+            RequestedParameters reqParams = new RequestedParameters()
+                    .requestedTimerange(new TimeRange().start(start).end(end).nbTimes(10))
+                    .requestedItems(items);
             if (filterStrategy != null) {
-                parameters.put(FILTER_QUERY_PARAMETERS, ImmutableMap.of(
-                        STRATEGY, filterStrategy,
-                        FILTER_EXPRESSIONS_MAP,
-                        ImmutableMap.of(
-                                Integer.toString(DIMMED_FILTER_TAG), Arrays.asList(FILTER_QUERY)
-                                )
-                        ));
+                RequestedFilterQueryParameters filterParams = new RequestedFilterQueryParameters()
+                        .strategy(StrategyEnum.fromValue(filterStrategy))
+                        .filterExpressionsMap(ImmutableMap.of(
+                                Integer.toString(DIMMED_FILTER_TAG), Arrays.asList(FILTER_QUERY)));
+                reqParams.filterQueryParameters(filterParams);
             }
-            try (Response statesResponse = tgStatesEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, statesResponse.getStatus());
+            RequestedQueryParameters reqQueryParameters = new RequestedQueryParameters().parameters(reqParams);
 
-                TgStatesOutputResponseStub tgStateModelResponse = statesResponse.readEntity(TgStatesOutputResponseStub.class);
-                assertNotNull(tgStateModelResponse);
+            TimeGraphStatesResponse tgModelResponse = sfTgApi.getStates(exp.getUUID(), CALL_STACK_DATAPROVIDER_ID, reqQueryParameters);
+            assertNotNull(tgModelResponse);
+            assertEquals(StatusEnum.COMPLETED, tgModelResponse.getStatus());
 
-                TimeGraphModelStub tgModel = tgStateModelResponse.getModel();
-                Set<TimeGraphRowStub> rows = tgModel.getRows();
-                assertFalse(rows.isEmpty());
+            TimeGraphModel tgModel = tgModelResponse.getModel();
+            List<TimeGraphRowModel> rows = tgModel.getRows();
+            assertFalse(rows.isEmpty());
 
-                // Test getting the time graph tooltip for a state
-                int callstackEntryIdForTooltip = findCallStackEntry(entries);
-                TimeGraphRowStub row = null;
-                for (Iterator<TimeGraphRowStub> iterator = rows.iterator(); iterator.hasNext();) {
-                    TimeGraphRowStub timeGraphRowStub = iterator.next();
-                    if (timeGraphRowStub.getEntryId() == callstackEntryIdForTooltip) {
-                        row = timeGraphRowStub;
-                    }
+            // Test getting the time graph tooltip for a state
+            int callstackEntryIdForTooltip = findCallStackEntry(entries);
+            TimeGraphRowModel row = null;
+            for (Iterator<TimeGraphRowModel> iterator = rows.iterator(); iterator.hasNext();) {
+                TimeGraphRowModel timeGraphRowModel = iterator.next();
+                if (timeGraphRowModel.getEntryId() == callstackEntryIdForTooltip) {
+                    row = timeGraphRowModel;
                 }
-                assertNotNull(row);
-                TimeGraphStateStub state = row.getStates().get(0);
-                WebTarget tgTooltipEnpoint = getTimeGraphTooltipEndpoint(exp.getUUID().toString(), CALL_STACK_DATAPROVIDER_ID);
-                parameters.put(REQUESTED_ITEMS_KEY, Collections.singletonList(row.getEntryId()));
-                parameters.put(REQUESTED_TIMES_KEY, Collections.singletonList(state.getStartTime()));
-                parameters.put(REQUESTED_ELEMENT_KEY, ImmutableMap.of(
-                        ELEMENT_TYPE, STATE,
-                        TIME, state.getStartTime(),
-                        DURATION, (state.getEndTime() - state.getStartTime())));
-                try (Response tooltipResponse = tgTooltipEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                    assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, tooltipResponse.getStatus());
+            }
+            assertNotNull(row);
+            TimeGraphState state = row.getStates().get(0);
 
-                    TgTooltipOutputResponseStub timegraphTooltipResponse = tooltipResponse.readEntity(TgTooltipOutputResponseStub.class);
-                    assertNotNull(timegraphTooltipResponse);
-                    Map<String, String> expectedTooltip = new HashMap<>();
-                    expectedTooltip.put("Address", "0x804a291");
-                    expectedTooltip.put("State", "000000000804a291");
-                    assertEquals(expectedTooltip, timegraphTooltipResponse.getModel());
-                }
+            TooltipParameters tooltipParams = new TooltipParameters()
+                    .requestedItems(Collections.singletonList(Long.valueOf(row.getEntryId()).intValue())) // FIXME https://github.com/eclipse-cdt-cloud/trace-server-protocol/issues/140
+                    .requestedTimes(Collections.singletonList(state.getStart()))
+                    .requestedElement(new Element()
+                            .elementType(ElementTypeEnum.STATE)
+                            .time(state.getStart())
+                            .duration((state.getEnd() - state.getStart())));
 
-                // Test getting the time graph tooltip for an annotation
-                long time = state.getStartTime();
-                parameters.put(REQUESTED_ITEMS_KEY, Collections.singletonList(row.getEntryId()));
-                parameters.put(REQUESTED_TIMES_KEY, Collections.singletonList(state.getStartTime()));
-                parameters.put(REQUESTED_ELEMENT_KEY, ImmutableMap.of(
-                        ELEMENT_TYPE, ANNOTATION,
-                        TIME, time,
-                        DURATION, 0L,
-                        ENTRY_ID, row.getEntryId()));
-                try (Response tooltipResponse = tgTooltipEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                    assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, tooltipResponse.getStatus());
+            TooltipQueryParameters tooltipQueryParams = new TooltipQueryParameters().parameters(tooltipParams);
+            TimeGraphTooltipResponse timegraphTooltipResponse = sfTgApi.getTimeGraphTooltip(exp.getUUID(), CALL_STACK_DATAPROVIDER_ID, tooltipQueryParams);
 
-                    // Test getting the time graph tooltip for an arrow
-                    TimeGraphRowStub destinationRow = Iterators.get(rows.iterator(), rows.size() - 2);
-                    parameters.put(REQUESTED_ITEMS_KEY, Collections.singletonList(row.getEntryId()));
-                    parameters.put(REQUESTED_TIMES_KEY, Collections.singletonList(state.getStartTime()));
-                    parameters.put(REQUESTED_ELEMENT_KEY, ImmutableMap.of(
-                            ELEMENT_TYPE, ARROW,
-                            TIME, time,
-                            DURATION, 0L,
-                            ENTRY_ID, row.getEntryId(),
-                            DESTINATION_ID, destinationRow.getEntryId()));
-                }
+            assertNotNull(timegraphTooltipResponse);
+            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphTooltipResponse.StatusEnum.COMPLETED, timegraphTooltipResponse.getStatus());
+            Map<String, String> expectedTooltip = new HashMap<>();
+            expectedTooltip.put("Address", "0x804a291");
+            expectedTooltip.put("State", "000000000804a291");
+            assertEquals(expectedTooltip, timegraphTooltipResponse.getModel());
 
-                try (Response tooltipResponse = tgTooltipEnpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                    assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, tooltipResponse.getStatus());
+            // Test getting the time graph tooltip for an annotation
+            long time = state.getStart();
+            tooltipParams = new TooltipParameters()
+                    .requestedItems(Collections.singletonList(Long.valueOf(row.getEntryId()).intValue())) // FIXME https://github.com/eclipse-cdt-cloud/trace-server-protocol/issues/140
+                    .requestedTimes(Collections.singletonList(time))
+                    .requestedElement(new Element()
+                            .elementType(ElementTypeEnum.ANNOTATION)
+                            .time(time)
+                            .duration(0L));
 
-                    TgTooltipOutputResponseStub timegraphTooltipResponse = tooltipResponse.readEntity(TgTooltipOutputResponseStub.class);
-                    assertNotNull(timegraphTooltipResponse);
-                    assertEquals(Collections.emptyMap(), timegraphTooltipResponse.getModel());
-                }
+            tooltipQueryParams = new TooltipQueryParameters().parameters(tooltipParams);
+            timegraphTooltipResponse = sfTgApi.getTimeGraphTooltip(exp.getUUID(), CALL_STACK_DATAPROVIDER_ID, tooltipQueryParams);
 
-                if (filterStrategy != null) {
-                    // Test the tags of the state
-                    assertEquals(DIMMED_FILTER_TAG, state.getTags());
-                }
+            assertNotNull(timegraphTooltipResponse);
+            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphTooltipResponse.StatusEnum.COMPLETED, timegraphTooltipResponse.getStatus());
+
+            // Test getting the time graph tooltip for an arrow
+            TimeGraphRowModel destinationRow = Iterators.get(rows.iterator(), rows.size() - 2);
+
+            tooltipParams = new TooltipParameters()
+                    .requestedItems(Collections.singletonList(Long.valueOf(row.getEntryId()).intValue())) // FIXME https://github.com/eclipse-cdt-cloud/trace-server-protocol/issues/140
+                    .requestedTimes(Collections.singletonList(time))
+                    .requestedElement(new Element()
+                            .elementType(ElementTypeEnum.ARROW)
+                            .time(time)
+                            .duration(0L)
+                            .entryId(row.getEntryId())
+                            .destinationId(destinationRow.getEntryId()));
+
+            tooltipQueryParams = new TooltipQueryParameters().parameters(tooltipParams);
+            timegraphTooltipResponse = sfTgApi.getTimeGraphTooltip(exp.getUUID(), CALL_STACK_DATAPROVIDER_ID, tooltipQueryParams);
+
+            assertNotNull(timegraphTooltipResponse);
+            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeGraphTooltipResponse.StatusEnum.COMPLETED, timegraphTooltipResponse.getStatus());
+
+            assertEquals(Collections.emptyMap(), timegraphTooltipResponse.getModel());
+
+            if (filterStrategy != null) {
+                // Test the tags of the state
+                assertEquals(DIMMED_FILTER_TAG, state.getTags());
             }
 
         } catch (ProcessingException e) {
@@ -486,107 +493,95 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
         }
     }
 
-    private static @NonNull Set<TimeGraphEntryStub> loadDataProvider(ExperimentModelStub exp, String dataProviderId) throws InterruptedException {
+    private static @NonNull List<TimeGraphEntry> loadDataProvider(Experiment exp, String dataProviderId) throws InterruptedException, ApiException {
         // Test getting the time graph tree
-        WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), dataProviderId);
+        TreeParameters params = new TreeParameters();
+        TreeQueryParameters queryParams = new TreeQueryParameters().parameters(params);
 
-        Map<String, Object> parameters = new HashMap<>();
-        TgTreeOutputResponseStub responseModel;
-        try (Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
-            responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
-            assertNotNull(responseModel);
-        }
+        TimeGraphTreeResponse treeResponse = sfTgApi.getTimeGraphTree(exp.getUUID(), dataProviderId, queryParams);
+        assertTrue(DATA_PROVIDER_RESPONSE_FAILED_MSG, !treeResponse.getStatus().equals(XYTreeResponse.StatusEnum.FAILED));
+        TimeGraphTreeModel responseModel = treeResponse.getModel();
 
         // Make sure the analysis ran enough and we have a model
         int iteration = 0;
-        while ((responseModel.isRunning() || responseModel.getModel() == null) && iteration < MAX_ITER) {
+        while ((treeResponse.getStatus().equals(DataTreeResponse.StatusEnum.RUNNING)) || (responseModel == null) && (iteration < MAX_ITER)) {
             Thread.sleep(100);
-            try (Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
-                responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
-                assertNotNull(responseModel);
-                iteration++;
-            }
+            treeResponse = sfTgApi.getTimeGraphTree(exp.getUUID(), dataProviderId, queryParams);
+            assertTrue(DATA_PROVIDER_RESPONSE_FAILED_MSG, !treeResponse.getStatus().equals(DataTreeResponse.StatusEnum.FAILED));
+            responseModel = treeResponse.getModel();
+            iteration++;
         }
-        TgEntryModelStub model = responseModel.getModel();
-        assertNotNull(MODEL_NULL_MSG + responseModel, model);
-        Set<TimeGraphEntryStub> entries = model.getEntries();
+
+        // Verify Entries
+        assertNotNull(responseModel);
+        List<TimeGraphEntry> entries = responseModel.getEntries();
+        assertNotNull(MODEL_NULL_MSG, entries);
         assertFalse(entries.isEmpty());
+
         return entries;
     }
 
-    private static int findCallStackEntry(Set<TimeGraphEntryStub> entries) {
+    private static int findCallStackEntry(List<TimeGraphEntry> entries) {
         // Find trace entry
-        Optional<TimeGraphEntryStub> traceOptional = entries.stream().filter(entry -> entry.getParentId() == -1).findFirst();
+        Optional<TimeGraphEntry> traceOptional = entries.stream().filter(entry -> entry.getParentId() == -1).findFirst();
         assertTrue(traceOptional.isPresent());
-        int traceId = traceOptional.get().getId();
+        long traceId = traceOptional.get().getId();
 
         // Find process
         final String processNameForTooltip = "UNKNOWN";
-        Optional<TimeGraphEntryStub> processOptional = entries.stream().filter(
+        Optional<TimeGraphEntry> processOptional = entries.stream().filter(
                 entry -> processNameForTooltip.equals(entry.getLabels().get(0)) && entry.getParentId() == traceId).findFirst();
         assertTrue(processOptional.isPresent());
-        int processEntryId = processOptional.get().getId();
+        long processEntryId = processOptional.get().getId();
 
         // Find specific thread entry
         final String threadNameForTooltip = "lemon_server-589";
-        Optional<TimeGraphEntryStub> threadOptional = entries.stream().filter(
+        Optional<TimeGraphEntry> threadOptional = entries.stream().filter(
                 entry -> threadNameForTooltip.equals(entry.getLabels().get(0)) && entry.getParentId() == processEntryId).findFirst();
         assertTrue(threadOptional.isPresent());
-        int threadId = threadOptional.get().getId();
+        long threadId = threadOptional.get().getId();
 
         // Find first callstack entry under the thread entry
-        Optional<TimeGraphEntryStub> callstackOptional = entries.stream().filter(
+        Optional<TimeGraphEntry> callstackOptional = entries.stream().filter(
                 entry -> threadNameForTooltip.equals(entry.getLabels().get(0)) && entry.getParentId() == threadId).findFirst();
         assertTrue(callstackOptional.isPresent());
-        return callstackOptional.get().getId();
+        return callstackOptional.get().getId().intValue(); // FIXME https://github.com/eclipse-cdt-cloud/trace-server-protocol/issues/140
     }
 
     /**
      * Using the custom data provider verify that only allowed types (Number,
      * String) are serialized in the metadata map of time graph entries.
+     *
+     * @throws ApiException
+     *             if such exception happens
+     * @throws InterruptedException
+     *             if such exception happens
      */
     @Test
-    public void testTimeGraphMetaDataSerializer() {
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
-
+    public void testTimeGraphMetaDataSerializer() throws ApiException, InterruptedException {
+        Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
         // Test getting the time graph tree
-        WebTarget callstackTree = getTimeGraphTreeEndpoint(exp.getUUID().toString(), TestDataProviderService.INVALID_ENTRY_METADATA);
+        List<TimeGraphEntry> entries = loadDataProvider(exp, TestDataProviderService.INVALID_ENTRY_METADATA);
 
-        Map<String, Object> parameters = new HashMap<>();
-        TgTreeOutputResponseStub responseModel;
-        parameters.put(REQUESTED_TIMES_KEY, List.of(1450193697034689597L, 1450193745774189602L));
-        try (Response treeResponse = callstackTree.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals(DATA_PROVIDER_RESPONSE_FAILED_MSG, 200, treeResponse.getStatus());
-            responseModel = treeResponse.readEntity(TgTreeOutputResponseStub.class);
-            assertNotNull(responseModel);
-
-            // Verify Time Graph Entries
-            Set<TimeGraphEntryStub> entries = responseModel.getModel().getEntries();
-            assertEquals(2, entries.size());
-            for (TimeGraphEntryStub entry : entries) {
-                verifyEntry(entry);
-            }
-        } catch (ProcessingException e) {
-            // The failure from this exception alone is not helpful. Use the
-            // suppressed exception's message be the failure message for more
-            // help debugging failed tests.
-            fail(e.getCause().getMessage());
+        // Verify Time Graph Entries
+        assertEquals(2, entries.size());
+        for (TimeGraphEntry entry : entries) {
+            verifyEntry(entry);
         }
     }
 
-    private static void verifyMetadata(Map<String, Collection<Object>> metadata, String key, Class<?> clazz) {
-        Collection<Object> col = metadata.get(key);
+    private static void verifyMetadata(Map<String, List<MetadataValue>> metadata, String key, Class<?> clazz) {
+        List<MetadataValue> col = metadata.get(key);
         assertNotNull(key, col);
-        assertTrue(key, col.stream().allMatch(clazz::isInstance));
+        assertTrue(key, col.stream().allMatch((value) -> clazz.isInstance(value.getActualInstance())));
     }
 
-    private static void verifyEntry(TimeGraphEntryStub entry) {
+    private static void verifyEntry(TimeGraphEntry entry) {
         assertFalse(entry.getLabels().isEmpty());
         if (entry.getLabels().get(0).equals(TestDataProviderService.ENTRY_NAME_WITH_METADATA)) {
             // Verify supported values for metadata in entry
-            @Nullable Map<String, Collection<Object>> metadata = entry.getMetadata();
+            @Nullable
+            Map<String, List<MetadataValue>> metadata = entry.getMetadata();
             assertNotNull(metadata);
             verifyMetadata(metadata, TestDataProviderService.VALID_TEST_KEY_BYTE, Number.class);
             verifyMetadata(metadata, TestDataProviderService.VALID_TEST_KEY_SHORT, Number.class);
@@ -597,28 +592,28 @@ public class TimeGraphDataProviderServiceTest extends RestServerTest {
             verifyMetadata(metadata, TestDataProviderService.VALID_TEST_KEY_STRING, String.class);
 
             // Verify unsupported object
-            Collection<Object> col = metadata.get(TestDataProviderService.INVALID_TEST_KEY);
+            Collection<MetadataValue> col = metadata.get(TestDataProviderService.INVALID_TEST_KEY);
             assertNull(TestDataProviderService.INVALID_TEST_KEY, col);
         }
 
         if (entry.getLabels().get(0).equals(TestDataProviderService.ENTRY_NAME_WITHOUT_METADATA)) {
             // Verify that entry doesn't have metadata
-            assertNull(entry.getMetadata());
+            assertTrue(entry.getMetadata().isEmpty());
         }
     }
 
-    private static void verifyArrow(Set<TimeGraphEntryStub> entries, TimeGraphArrowStub arrow) {
-        Optional<TimeGraphEntryStub> entryOptional = entries.stream().filter(entry -> entry.getId() == arrow.getSourceId()).findFirst();
+    private static void verifyArrow(List<TimeGraphEntry> entries, TimeGraphArrow arrow) {
+        Optional<TimeGraphEntry> entryOptional = entries.stream().filter(entry -> entry.getId().equals(arrow.getSourceId())).findFirst();
         assertTrue(entryOptional.isPresent());
-        TimeGraphEntryStub sourceEntry = entryOptional.get();
+        TimeGraphEntry sourceEntry = entryOptional.get();
         assertEquals("lsmod", sourceEntry.getLabels().get(0));
 
-        entryOptional = entries.stream().filter(entry -> entry.getId() == arrow.getTargetId()).findFirst();
+        entryOptional = entries.stream().filter(entry -> entry.getId().equals(arrow.getTargetId())).findFirst();
         assertTrue(entryOptional.isPresent());
-        TimeGraphEntryStub targetEntry = entryOptional.get();
+        TimeGraphEntry targetEntry = entryOptional.get();
         assertEquals("rcu_preempt", targetEntry.getLabels().get(0));
 
         assertNotNull(arrow.getStyle());
-        assertTrue(arrow.getEndTime() > arrow.getStartTime());
+        assertTrue(arrow.getEnd() > arrow.getStart());
     }
 }

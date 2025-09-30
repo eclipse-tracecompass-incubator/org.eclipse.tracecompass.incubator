@@ -46,7 +46,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.OutputConfigurationQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ErrorResponseImpl;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.TraceServerConfiguration;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
@@ -59,6 +58,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.api.ExperimentsApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.TracesApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.DataProvider;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.DataProvider.TypeEnum;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ErrorResponse;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.ExperimentParameters;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.ExperimentQueryParameters;
@@ -1161,7 +1161,7 @@ public abstract class NewRestServerTest {
         try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(ErrorResponseImpl.class).getTitle());
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(ErrorResponse.class).getTitle());
         }
 
         // Missing parameters
@@ -1185,7 +1185,7 @@ public abstract class NewRestServerTest {
         try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
             assertNotNull(response);
             assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(ErrorResponseImpl.class).getTitle());
+            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(ErrorResponse.class).getTitle());
         }
     }
 
