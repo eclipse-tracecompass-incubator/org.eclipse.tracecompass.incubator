@@ -47,7 +47,7 @@ public class SeriesModelSerializer extends StdSerializer<@NonNull ISeriesModel> 
         gen.writeStartObject();
         gen.writeNumberField("seriesId", value.getId()); //$NON-NLS-1$
         gen.writeStringField("seriesName", value.getName()); //$NON-NLS-1$
-        gen.writeObjectField("xValues", value.getSampling()); //$NON-NLS-1$
+        gen.writeObject(value.getSampling());
         gen.writeObjectField("yValues", value.getData()); //$NON-NLS-1$
 
         // no-op trim below, null-related (unlikely case) warning otherwise-

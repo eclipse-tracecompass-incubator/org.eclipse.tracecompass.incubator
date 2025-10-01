@@ -22,8 +22,8 @@ import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 /**
  * Contributes to the model used for TSP swagger-core annotations.
  */
-@Schema(description = "This model includes the series output style values.")
-public interface SeriesModel {
+@Schema(description = "This model includes the series output style values.", allOf = Sampling.class)
+public interface SeriesModel extends Sampling {
 
     /**
      * @return The series ID.
@@ -37,17 +37,6 @@ public interface SeriesModel {
     @NonNull
     @Schema(description = "Series' name", requiredMode = RequiredMode.REQUIRED)
     String getSeriesName();
-
-    /**
-     * @return The X values.
-     */
-    @JsonProperty("xValues")
-    @Schema(description = "Sampling values", requiredMode = RequiredMode.REQUIRED, oneOf = {
-            Sampling.TimestampSampling.class,
-            Sampling.CategorySampling.class,
-            Sampling.RangeSampling.class
-    })
-    Sampling getXValues();
 
     /**
      * @return The Y values.

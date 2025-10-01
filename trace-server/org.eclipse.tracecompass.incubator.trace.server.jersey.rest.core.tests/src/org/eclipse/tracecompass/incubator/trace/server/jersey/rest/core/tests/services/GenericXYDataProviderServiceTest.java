@@ -38,6 +38,7 @@ import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.st
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyEntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyTreeOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ISamplingStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ISamplingStub.RangesStub.RangeStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TmfXYAxisDescriptionStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyOutputResponseStub;
@@ -227,8 +228,9 @@ public class GenericXYDataProviderServiceTest extends RestServerTest {
         assertEquals("Name mismatch", "UNKNOWN_PID", seriesStub.getName());
 
         // Validate xValues
-        ISamplingStub xValues = seriesStub.getXValues();
-        assertTrue("xValues should be a RangesStub", xValues instanceof ISamplingStub.RangesStub);
+        List<RangeStub> xValues = seriesStub.getXRanges();
+        assertNotNull(xValues);
+        assertFalse(xValues.isEmpty());
         List<ISamplingStub.RangesStub.RangeStub> expectedRanges = Arrays.asList(
                 new ISamplingStub.RangesStub.RangeStub(0L, 1195708549L),
                 new ISamplingStub.RangesStub.RangeStub(1195708550L, 2391417098L),
@@ -236,7 +238,7 @@ public class GenericXYDataProviderServiceTest extends RestServerTest {
                 new ISamplingStub.RangesStub.RangeStub(3587125648L, 4782834196L),
                 new ISamplingStub.RangesStub.RangeStub(4782834197L, 5978542746L)
             );
-        List<ISamplingStub.RangesStub.RangeStub> actualRanges = ((ISamplingStub.RangesStub) xValues).getRanges();
+        List<RangeStub> actualRanges = xValues;
         assertEquals("Range size mismatch", expectedRanges.size(), actualRanges.size());
         assertEquals("Range size mismatch", expectedRanges.size(), actualRanges.size());
         for (int i = 0; i < expectedRanges.size(); i++) {

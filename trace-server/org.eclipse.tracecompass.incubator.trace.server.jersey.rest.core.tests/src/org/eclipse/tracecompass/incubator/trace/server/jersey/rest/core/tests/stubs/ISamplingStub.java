@@ -18,16 +18,14 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.model.ISampling;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Stub version of {@link ISampling}.
  *
  * @author Siwei Zhang
  */
-@JsonSerialize(using = SamplingStubSerializer.class)
-@JsonDeserialize(using = SamplingStubDeserializer.class)
 public sealed interface ISamplingStub extends Serializable permits
         ISamplingStub.TimestampsStub,
         ISamplingStub.CategoriesStub,
@@ -46,35 +44,36 @@ public sealed interface ISamplingStub extends Serializable permits
     final class TimestampsStub implements ISamplingStub {
         private static final long serialVersionUID = -8242136490356720296L;
 
-        private final long[] fTimestamps;
+        private final long[] fXValues;
 
-        public TimestampsStub(long[] timestamps) {
-            this.fTimestamps = Objects.requireNonNull(timestamps);
+        @JsonCreator
+        public TimestampsStub(@JsonProperty("xValues") long[] xValues) {
+            this.fXValues = Objects.requireNonNull(xValues);
         }
 
-        public long[] getTimestamps() {
-            return fTimestamps;
+        public long[] getXValues() {
+            return fXValues;
         }
 
         @Override
         public int size() {
-            return fTimestamps.length;
+            return fXValues.length;
         }
 
         @Override
         public boolean equals(@Nullable Object obj) {
             return (this == obj) || (obj instanceof TimestampsStub other &&
-                    Arrays.equals(this.fTimestamps, other.fTimestamps));
+                    Arrays.equals(this.fXValues, other.fXValues));
         }
 
         @Override
         public int hashCode() {
-            return Arrays.hashCode(fTimestamps);
+            return Arrays.hashCode(fXValues);
         }
 
         @Override
         public String toString() {
-            return "Timestamps" + Arrays.toString(fTimestamps); //$NON-NLS-1$
+            return "Timestamps" + Arrays.toString(fXValues); //$NON-NLS-1$
         }
     }
 
@@ -86,7 +85,8 @@ public sealed interface ISamplingStub extends Serializable permits
 
         private final List<String> fCategories;
 
-        public CategoriesStub(List<String> categories) {
+        @JsonCreator
+        public CategoriesStub(@JsonProperty("xCategories") List<String> categories) {
             this.fCategories = Objects.requireNonNull(categories);
         }
 
@@ -112,7 +112,7 @@ public sealed interface ISamplingStub extends Serializable permits
 
         @Override
         public String toString() {
-            return "Categories" + fCategories.toString(); //$NON-NLS-1$
+            return "xCategories" + fCategories.toString(); //$NON-NLS-1$
         }
     }
 
@@ -124,7 +124,8 @@ public sealed interface ISamplingStub extends Serializable permits
 
         private final List<RangeStub> fRanges;
 
-        public RangesStub(List<RangeStub> ranges) {
+        @JsonCreator
+        public RangesStub(@JsonProperty("xRanges") List<RangeStub> ranges) {
             this.fRanges = Objects.requireNonNull(ranges);
         }
 
@@ -150,7 +151,7 @@ public sealed interface ISamplingStub extends Serializable permits
 
         @Override
         public String toString() {
-            return "Ranges" + fRanges.toString(); //$NON-NLS-1$
+            return "xRanges" + fRanges.toString(); //$NON-NLS-1$
         }
 
         /**
@@ -162,7 +163,8 @@ public sealed interface ISamplingStub extends Serializable permits
             private final long fStart;
             private final long fEnd;
 
-            public RangeStub(long start, long end) {
+            @JsonCreator
+            public RangeStub(@JsonProperty("start") Long start, @JsonProperty("end") Long end) {
                 this.fStart = start;
                 this.fEnd = end;
             }

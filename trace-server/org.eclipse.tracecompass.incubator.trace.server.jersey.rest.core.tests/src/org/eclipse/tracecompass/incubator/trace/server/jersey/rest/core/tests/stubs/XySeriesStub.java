@@ -14,6 +14,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ISamplingStub.RangesStub.RangeStub;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -29,7 +32,9 @@ public class XySeriesStub implements Serializable {
 
     private final String fName;
     private final int fId;
-    private final ISamplingStub fSampling;
+    private final long[] fXValues;
+    private final List<String> fCategories;
+    private final List<RangeStub> fRanges;
     private final List<Double> fYValues;
     private final OutputElementStyleStub fStyle;
     private final TmfXYAxisDescriptionStub fXAxisDescription;
@@ -43,7 +48,11 @@ public class XySeriesStub implements Serializable {
      * @param id
      *            The unique ID of the series
      * @param xValues
-     *            The values for the x axis of this series
+     *            The values for the x axis of this series (timestamps)
+     * @param categories
+     *            The values for the x axis of this series (categories)
+     * @param ranges
+     *            The values for the x axis of this series (ranges)
      * @param yValues
      *            The values for the y axis of this series
      * @param style
@@ -56,14 +65,21 @@ public class XySeriesStub implements Serializable {
     @JsonCreator
     public XySeriesStub(@JsonProperty("seriesName") String name,
             @JsonProperty("seriesId") Integer id,
-            @JsonProperty("xValues") ISamplingStub xValues,
+            @JsonProperty("xValues") long[] xValues,
+            @JsonProperty("xCategories") List<String> categories,
+            @JsonProperty("xRanges") List<RangeStub> ranges,
             @JsonProperty("yValues") List<Double> yValues,
             @JsonProperty("style") OutputElementStyleStub style,
             @JsonProperty("xValuesDescription") TmfXYAxisDescriptionStub xAxisDescription,
             @JsonProperty("yValuesDescription") TmfXYAxisDescriptionStub yAxisDescription) {
         fName = Objects.requireNonNull(name, "The 'seriesName' json field was not set");
         fId = Objects.requireNonNull(id, "The 'seriesId' json field was not set");
-        fSampling = Objects.requireNonNull(xValues, "The 'xValues' json field was not set");
+        fXValues = xValues;
+        fCategories = categories;
+        fRanges = ranges;
+        if (fXValues == null && fCategories == null && fRanges == null) {
+            throw new IllegalArgumentException("Neither xValues, xCategories or xRanges were set");
+        }
         fYValues = Objects.requireNonNull(yValues, "The 'yValues' json field was not set");
         fStyle = Objects.requireNonNull(style, "The 'style' json field was not set");
         fXAxisDescription = xAxisDescription;
@@ -89,14 +105,31 @@ public class XySeriesStub implements Serializable {
     }
 
     /**
-     * Get the x values of the series
+     * Get the x values of the series as list of timestamps
      *
      * @return The values on the x axis
      */
-    public ISamplingStub getXValues() {
-        return fSampling;
+    public long[] getXValues() {
+        return fXValues;
     }
 
+    /**
+     * Get the x categories of the series
+     *
+     * @return The values on the x axis as list of categories
+     */
+    public @Nullable List<String> getXCategories() {
+        return fCategories;
+    }
+
+    /**
+     * Get the x ranges of the series
+     *
+     * @return The values on the x axis as list of ranges
+     */
+    public @Nullable List<RangeStub> getXRanges() {
+        return fRanges;
+    }
     /**
      * Get the y values of the series
      *

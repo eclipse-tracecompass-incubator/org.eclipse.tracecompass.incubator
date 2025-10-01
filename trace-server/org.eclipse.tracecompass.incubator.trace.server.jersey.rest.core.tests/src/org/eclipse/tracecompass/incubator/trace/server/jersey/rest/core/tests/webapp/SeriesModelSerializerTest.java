@@ -23,10 +23,9 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.SamplingSerializer;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.SeriesModelSerializer;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.OutputElementStyleStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ISamplingStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XySeriesStub;
-import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.ISampling;
+import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.SeriesModel.SeriesModelBuilder;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
@@ -75,9 +74,13 @@ public class SeriesModelSerializerTest extends AbstractSerializerTest {
         assertEquals(TITLE, deserialized.getName());
         assertEquals(ID, deserialized.getId());
         // the sampling is de-serialized into sampling-stub
-        assertTrue(deserialized.getXValues() instanceof ISamplingStub.TimestampsStub);
-        long[] actual = ((ISamplingStub.TimestampsStub) deserialized.getXValues()).getTimestamps();
-        assertArrayEquals(new long[] {0, 1, 2, 3}, actual);
+        long[] xValues = deserialized.getXValues();
+        assertNotNull(xValues);
+        assertNull(deserialized.getXCategories());
+        assertNull(deserialized.getXRanges());
+        assertTrue(xValues.length > 0);
+
+        assertArrayEquals(new long[] {0, 1, 2, 3}, xValues);
         List<Double> yValues = deserialized.getYValues();
         assertTrue(fValues.length == yValues.size());
         for (int i = 0; i < fValues.length; i++) {
