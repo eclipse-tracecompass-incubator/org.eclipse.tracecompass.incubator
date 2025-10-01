@@ -11,6 +11,8 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,15 +41,25 @@ public interface SeriesModel {
     String getSeriesName();
 
     /**
-     * @return The X values.
+     * @return The X values as list of longs
      */
     @JsonProperty("xValues")
-    @Schema(description = "Sampling values", requiredMode = RequiredMode.REQUIRED, oneOf = {
-            Sampling.TimestampSampling.class,
-            Sampling.CategorySampling.class,
-            Sampling.RangeSampling.class
-    })
-    Sampling getXValues();
+    @Schema(description = "X values as list of int64 values (e.g. timestamps). Example: [100, 200, 350]. Mutually exclusive with xCategories/xRanges.")
+    public List<Long> getXValues();
+
+    /**
+     * @return The X values as list of strings
+     */
+    @JsonProperty("xCategories")
+    @Schema(description = "X values as list of category strings. Example: [\"READ\", \"WRITE\"]. Mutually exclusive with xValues/xRanges.")
+    public List<String> getXCategories();
+
+    /**
+     * @return The X values as list of ranges
+     */
+    @JsonProperty("xRanges")
+    @Schema(description = "X values as list of start/end range objects. Example: [{\"start\": 10, \"end\": 20}, {\"start\": 50, \"end\": 75}]. Mutually exclusive with xValues/xCategories.")
+    public List<Range> getXRanges();
 
     /**
      * @return The Y values.

@@ -16,6 +16,11 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
+import org.eclipse.tracecompass.tmf.core.model.ISampling;
+import org.eclipse.tracecompass.tmf.core.model.ISampling.Categories;
+import org.eclipse.tracecompass.tmf.core.model.ISampling.Range;
+import org.eclipse.tracecompass.tmf.core.model.ISampling.Ranges;
+import org.eclipse.tracecompass.tmf.core.model.ISampling.Timestamps;
 import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -47,7 +52,27 @@ public class SeriesModelSerializer extends StdSerializer<@NonNull ISeriesModel> 
         gen.writeStartObject();
         gen.writeNumberField("seriesId", value.getId()); //$NON-NLS-1$
         gen.writeStringField("seriesName", value.getName()); //$NON-NLS-1$
-        gen.writeObjectField("xValues", value.getSampling()); //$NON-NLS-1$
+
+        // Serialize the sampling
+        ISampling sampling = value.getSampling();
+        if (sampling instanceof Timestamps timestamps) {
+            gen.writeObjectField("xValues", timestamps.timestamps()); //$NON-NLS-1$
+        } else if (sampling instanceof Categories categories) {
+            gen.writeObjectField("xCategories", categories.categories()); //$NON-NLS-1$
+        } else if (sampling instanceof Ranges timeRanges) {
+            gen.writeFieldName("xRanges"); //$NON-NLS-1$
+            gen.writeStartArray();
+            for (Range<@NonNull Long> range : timeRanges.ranges()) {
+                gen.writeStartObject();
+                gen.writeNumberField("start", range.start()); //$NON-NLS-1$
+                gen.writeNumberField("end", range.end()); //$NON-NLS-1$
+                gen.writeEndObject();
+            }
+            gen.writeEndArray();
+        } else {
+            throw new IllegalArgumentException("Unknown Sampling type: " + value.getClass().getName()); //$NON-NLS-1$
+        }
+
         gen.writeObjectField("yValues", value.getData()); //$NON-NLS-1$
 
         // no-op trim below, null-related (unlikely case) warning otherwise-
