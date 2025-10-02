@@ -7,17 +7,17 @@ import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
  * Represents a closed interval [start, end] for a sampling range.
  */
 @Schema(
-     name = "StartEndRange",
+     name = "Range",
      description = "An object representing a closed interval with a start and end."
 )
-class StartEndRange {
+class Range {
     @Schema(description = "Start of the range (inclusive).", requiredMode = RequiredMode.REQUIRED)
     private final long start;
 
     @Schema(description = "End of the range (inclusive).", requiredMode = RequiredMode.REQUIRED)
     private final long end;
 
-    public StartEndRange(long start, long end) {
+    public Range(long start, long end) {
         this.start = start;
         this.end = end;
     }

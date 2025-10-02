@@ -34,15 +34,14 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.EntryStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.IAxisDomainStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.RangeStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TmfXYAxisDescriptionStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyEntryModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyEntryStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyTreeOutputResponseStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ISamplingStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ISamplingStub.RangesStub.RangeStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TmfXYAxisDescriptionStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XySeriesStub;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.XyTreeOutputResponseStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
@@ -231,12 +230,12 @@ public class GenericXYDataProviderServiceTest extends RestServerTest {
         List<RangeStub> xValues = seriesStub.getXRanges();
         assertNotNull(xValues);
         assertFalse(xValues.isEmpty());
-        List<ISamplingStub.RangesStub.RangeStub> expectedRanges = Arrays.asList(
-                new ISamplingStub.RangesStub.RangeStub(0L, 1195708549L),
-                new ISamplingStub.RangesStub.RangeStub(1195708550L, 2391417098L),
-                new ISamplingStub.RangesStub.RangeStub(2391417099L, 3587125647L),
-                new ISamplingStub.RangesStub.RangeStub(3587125648L, 4782834196L),
-                new ISamplingStub.RangesStub.RangeStub(4782834197L, 5978542746L)
+        List<RangeStub> expectedRanges = Arrays.asList(
+                new RangeStub(0L, 1195708549L),
+                new RangeStub(1195708550L, 2391417098L),
+                new RangeStub(2391417099L, 3587125647L),
+                new RangeStub(3587125648L, 4782834196L),
+                new RangeStub(4782834197L, 5978542746L)
             );
         List<RangeStub> actualRanges = xValues;
         assertEquals("Range size mismatch", expectedRanges.size(), actualRanges.size());
