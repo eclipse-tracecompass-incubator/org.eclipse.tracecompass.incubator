@@ -82,8 +82,7 @@ public class SamplingSerializerTest {
 
     /**
      * Test round-trip serialization and deserialization for
-     * {@link ISampling.Ranges}. The format is a 2D array of timestamp
-     * ranges, i.e., {@code [[start, end], ...]}.
+     * {@link ISampling.Ranges}. The format is an array of range json objects.
      *
      * @throws JsonProcessingException
      *             if JSON processing fails
@@ -96,6 +95,6 @@ public class SamplingSerializerTest {
                 new Range<>(3L, 4L)
         ));
         String json = fMapper.writeValueAsString(original);
-        assertEquals("[[1,2],[2,3],[3,4]]", json);
+        assertEquals("[{\"start\":1,\"end\":2},{\"start\":2,\"end\":3},{\"start\":3,\"end\":4}]", json);
     }
 }

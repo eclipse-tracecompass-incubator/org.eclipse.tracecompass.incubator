@@ -11,14 +11,15 @@
 
 package org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * Describes alternative representations of sampling options.
- * Used for OpenAPI generation.
  */
 @Schema(oneOf = {
         Sampling.TimestampSampling.class,
@@ -30,59 +31,67 @@ public interface Sampling {
     /**
      * Sampling as list of timestamps.
      */
-    public static class TimestampSampling {
-        /**
-         * The sampling points as timestamp values.
-         */
-        @Schema(
-            description = "Sampling as list of timestamps",
-            requiredMode = RequiredMode.REQUIRED
-        )
-        public long[] sampling;
+    @ArraySchema(
+        arraySchema = @Schema(
+            description = "Sampling as a flat list of timestamps. Example: [100, 200, 350]"
+        ),
+        schema = @Schema(type = "integer", format = "int64")
+    )
+    class TimestampSampling implements Sampling {
+        private final long[] timestamps;
+
+        public TimestampSampling(long[] timestamps) {
+            this.timestamps = timestamps;
+        }
+
+        @JsonValue
+        public long[] getTimestamps() {
+            return timestamps;
+        }
     }
 
     /**
      * Sampling as list of categories.
      */
-    public static class CategorySampling {
-        /**
-         * The sampling points as category names or labels.
-         */
-        @Schema(
-            description = "Sampling as list of categories",
-            requiredMode = RequiredMode.REQUIRED
-        )
-        public String[] sampling;
+    @ArraySchema(
+        arraySchema = @Schema(
+            description = "Sampling as a flat list of categories. Example: [\"READ\", \"WRITE\"]"
+        ),
+        schema = @Schema(type = "string")
+    )
+    class CategorySampling implements Sampling {
+        private final String[] categories;
+
+        public CategorySampling(String[] categories) {
+            this.categories = categories;
+        }
+
+        @JsonValue
+        public String[] getCategories() {
+            return categories;
+        }
     }
 
     /**
-     * Sampling as a list of [start, end] ranges.
+     * Sampling as a list of start/end range objects.
      */
-    public static class RangeSampling {
-        /**
-         * The list of sampling ranges, each with a start and end value.
-         */
-        @Schema(
-            description = "Sampling as list of [start, end] timestamp ranges",
-            requiredMode = RequiredMode.REQUIRED
-        )
-        public List<StartEndRange> sampling;
-    }
+    @ArraySchema(
+        arraySchema = @Schema(
+            description = "Sampling as a list of start/end range objects. Example: [{\"start\": 10, \"end\": 20}, {\"start\": 50, \"end\": 75}]"
+        ),
+        // This will now correctly reference the StartEndRange object schema
+        schema = @Schema(implementation = StartEndRange.class)
+    )
+    class RangeSampling implements Sampling {
+        private final List<StartEndRange> ranges;
 
-    /**
-     * Represents a closed interval [start, end] for a sampling range.
-     */
-    public static class StartEndRange {
-        /**
-         * Start timestamp of the range (inclusive).
-         */
-        @Schema(description = "Start timestamp of the range", requiredMode = RequiredMode.REQUIRED)
-        public long start;
+        public RangeSampling(List<StartEndRange> ranges) {
+            this.ranges = ranges;
+        }
 
-        /**
-         * End timestamp of the range (inclusive).
-         */
-        @Schema(description = "End timestamp of the range", requiredMode = RequiredMode.REQUIRED)
-        public long end;
+        @JsonValue
+        public List<StartEndRange> getRanges() {
+            return ranges;
+        }
     }
 }

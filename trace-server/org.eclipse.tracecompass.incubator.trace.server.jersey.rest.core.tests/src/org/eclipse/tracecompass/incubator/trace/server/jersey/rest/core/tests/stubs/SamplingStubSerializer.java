@@ -13,6 +13,8 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.s
 
 import java.io.IOException;
 
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ISamplingStub.RangesStub.RangeStub;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
@@ -43,16 +45,15 @@ public class SamplingStubSerializer extends StdSerializer<ISamplingStub> {
             }
             gen.writeEndArray();
 
-        } else if (value instanceof ISamplingStub.RangesStub ranges) {
+        } else if (value instanceof ISamplingStub.RangesStub timeRanges) {
             gen.writeStartArray();
-            for (ISamplingStub.RangesStub.RangeStub range : ranges.getRanges()) {
-                gen.writeStartArray();
-                gen.writeNumber(range.getStart());
-                gen.writeNumber(range.getEnd());
-                gen.writeEndArray();
+            for (RangeStub range : timeRanges.getRanges()) {
+                gen.writeStartObject();
+                gen.writeNumberField("start", range.getStart()); //$NON-NLS-1$
+                gen.writeNumberField("end", range.getEnd()); //$NON-NLS-1$
+                gen.writeEndObject();
             }
             gen.writeEndArray();
-
         } else {
             throw new IllegalArgumentException("Unknown SamplingStub type: " + value.getClass().getName());
         }
