@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  *
  * - Timestamps → flat array → "xValues": [1, 2, 3]
  * - Categories → array of strings → "categories": ["Read", "Write"]
- * - TimeRanges → array of StartEndRange → ["ranges": { "start": 1, "end": 2 }, { "start": 3, "end": 4 }]
+ * - Ranges → array of Range → ["ranges": { "start": 1, "end": 2 }, { "start": 3, "end": 4 }]
  */
 public class SamplingSerializer extends StdSerializer<ISampling> {
 

@@ -136,6 +136,4 @@ public class SamplingSerializerTest {
             gen.writeEndObject();
         }
     }
-
-
 }
