@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright (C) 2017 Ericsson
+
+   All rights reserved. This program and the accompanying materials
+   are made available under the terms of the Eclipse Public License 2.0
+   which accompanies this distribution, and is available at
+   https://www.eclipse.org/legal/epl-2.0/
+
+   SPDX-License-Identifier: EPL-2.0
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>org.eclipse.tracecompass.incubator.trace.server-parent</artifactId>
+    <groupId>org.eclipse.tracecompass.incubator</groupId>
+    <version>0.14.0-SNAPSHOT</version>
+  </parent>
+
+  <name>Trace Compass TSP Java Client Plug-in</name>
+  <artifactId>org.eclipse.tracecompass.incubator.tsp.client.core</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>eclipse-plugin</packaging>
+
+  <properties>
+      <excluded>generated-sources/openapi/*/**</excluded>
+      <skipIfTspIsUnchanged>true</skipIfTspIsUnchanged>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-source-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <excludeDefaultDirectories>true</excludeDefaultDirectories>
+          <filesets>
+            <fileset>
+              <directory>target</directory>
+              <followSymlinks>false</followSymlinks>
+              <includes>
+                <include>*/**</include>
+              </includes>
+              <excludes>
+                <exclude>${excluded}</exclude>
+              </excludes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <!-- Manually-set profile to sign the generated update sites -->
+    <profile>
+      <id>downloadTsp</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>download-files</id>
+                    <phase>validate</phase>
+                    <goals>
+                        <goal>run</goal>
+                    </goals>
+                    <configuration>
+                        <target>
+                            <!-- download file -->
+                            <get src="https://raw.githubusercontent.com/eclipse-cdt-cloud/trace-server-protocol/refs/heads/master/API.yaml"
+                                 dest="${project.basedir}/API.yaml"
+                                 verbose="false"
+                                 usetimestamp="true"/>
+                         </target>
+                     </configuration>
+                 </execution>
+             </executions>
+          </plugin>
+          
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>buildTsp</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.openapitools</groupId>
+            <artifactId>openapi-generator-maven-plugin</artifactId>
+            <version>7.15.0</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>generate</goal>
+                    </goals>
+                    <configuration>
+                        <inputSpec>${project.basedir}/API.yaml</inputSpec>
+                        <!--
+                        <inputSpec>${project.build.directory}/API.yaml</inputSpec>
+                        -->
+                        <generatorName>java</generatorName>
+                        <skipIfSpecIsUnchanged>${skipIfTspIsUnchanged}</skipIfSpecIsUnchanged>
+                        <cleanupOutput>true</cleanupOutput>
+                        <configOptions>
+                           <sourceFolder>src/main/java</sourceFolder>
+                           <apiPackage>org.eclipse.tracecompass.incubator.tsp.client.core.api</apiPackage>
+                           <artifactId>org.eclipse.tracecompass.incubator.tsp.client.core</artifactId>
+                           <developerName>Eclipse Trace Compass Community</developerName>
+                           <developerOrganization>Eclipse Trace Compass Project</developerOrganization>
+                           <developerOrganizationUrl>https://projects.eclipse.org/projects/tools.tracecompass</developerOrganizationUrl>
+                           <developerEmail>tracecompass-dev@eclipse.org</developerEmail>
+                           <groupId>org.eclipse.tracecompass.incubator</groupId>
+                           <library>jersey2</library>
+                           <licenseName>EPL-2.0</licenseName>
+                           <licenseUrl>https://www.eclipse.org/legal/epl-2.0</licenseUrl>
+                           <modelPackage>org.eclipse.tracecompass.incubator.tsp.client.core.model</modelPackage>
+                           <openApiNullable>false</openApiNullable>
+                           <Organisation>Eclipse Trace Compass</Organisation>
+                           <OrganisationUrl>https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator</OrganisationUrl>
+                           <scmUrl>https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator</scmUrl>
+                           <scmConnection>git@github.com:eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator</scmConnection>
+                        </configOptions>
+                    </configuration>
+                </execution>
+            </executions>
+          </plugin>
+        </plugins>  
+      </build>
+    </profile>
+  </profiles>
+</project>
