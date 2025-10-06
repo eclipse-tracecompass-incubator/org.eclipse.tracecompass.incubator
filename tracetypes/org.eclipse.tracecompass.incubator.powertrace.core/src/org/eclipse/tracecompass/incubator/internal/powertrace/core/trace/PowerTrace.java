@@ -31,7 +31,7 @@ public class PowerTrace extends CtfTmfTrace {
             /* Make sure the domain is "kernel" in the trace's env vars */
             String domain = environment.get("tracer"); //$NON-NLS-1$
             if (domain == null || !domain.equals("\"PowerTrace25\"")) { //$NON-NLS-1$
-                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "not andy"); //$NON-NLS-1$
+                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "domain not recognized by PowerTrace"); //$NON-NLS-1$
             }
             return new TraceValidationStatus(CONFIDENCE, Activator.PLUGIN_ID);
         }
