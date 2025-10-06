@@ -17,7 +17,7 @@
             analysis_module="org.eclipse.tracecompass.analysis.counters.core.CounterAnalysis"
             automatic="true"
             id="org.eclipse.tracecompass.incubator.powertrace.core.counter"
-            name="Powah!!!">
+            name="PowerTrace25">
          <tracetype
                applies="true"
                class="org.eclipse.tracecompass.incubator.internal.powertrace.core.trace.PowerTrace">
