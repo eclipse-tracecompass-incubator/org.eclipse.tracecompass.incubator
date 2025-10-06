@@ -491,18 +491,21 @@ public class QueryParametersUtil {
         params.computeIfPresent(DataProviderParameterUtils.REQUESTED_ELEMENT_KEY, (k, v) -> {
             if (v instanceof Map) {
                 Map<String, Object> map = (Map<String, Object>) v;
-                Object elementType = map.get(ELEMENT_TYPE);
-                long time = ((Number) map.getOrDefault(TIME, 0L)).longValue();
-                long duration = ((Number) map.getOrDefault(DURATION, 0L)).longValue();
-                if (ElementType.STATE.equals(elementType)) {
-                    return new TimeGraphState(time, duration, null, null);
-                } else if (ElementType.ANNOTATION.equals(elementType)) {
-                    long entryId = ((Number) map.getOrDefault(ENTRY_ID, -1L)).longValue();
-                    return new Annotation(time, duration, entryId, AnnotationType.CHART, null, EMPTY_STYLE);
-                } else if (ElementType.ARROW.equals(elementType)) {
-                    long sourceId = ((Number) map.getOrDefault(ENTRY_ID, -1L)).longValue();
-                    long destinationId = ((Number) map.getOrDefault(DESTINATION_ID, -1L)).longValue();
-                    return new TimeGraphArrow(sourceId, destinationId, time, duration, EMPTY_STYLE);
+                Object elementTypeObj = map.get(ELEMENT_TYPE);
+                if ((elementTypeObj != null)) {
+                    String elementType = elementTypeObj.toString().toLowerCase();
+                    long time = ((Number) map.getOrDefault(TIME, 0L)).longValue();
+                    long duration = ((Number) map.getOrDefault(DURATION, 0L)).longValue();
+                    if (ElementType.STATE.equals(elementType)) {
+                        return new TimeGraphState(time, duration, null, null);
+                    } else if (ElementType.ANNOTATION.equals(elementType)) {
+                        long entryId = ((Number) map.getOrDefault(ENTRY_ID, -1L)).longValue();
+                        return new Annotation(time, duration, entryId, AnnotationType.CHART, null, EMPTY_STYLE);
+                    } else if (ElementType.ARROW.equals(elementType)) {
+                        long sourceId = ((Number) map.getOrDefault(ENTRY_ID, -1L)).longValue();
+                        long destinationId = ((Number) map.getOrDefault(DESTINATION_ID, -1L)).longValue();
+                        return new TimeGraphArrow(sourceId, destinationId, time, duration, EMPTY_STYLE);
+                    }
                 }
             }
             return null;
