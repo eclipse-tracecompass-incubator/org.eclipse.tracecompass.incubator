@@ -21,40 +21,39 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.ConfigurationQueryParameters;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ConfigurationManagerService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TmfConfigurationSourceTypeStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TmfConfigurationStub;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.config.TestSchemaConfigurationSource.Parameters;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
+import org.eclipse.tracecompass.incubator.tsp.client.core.api.ConfigurationsApi;
+import org.eclipse.tracecompass.incubator.tsp.client.core.api.XyApi;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ConfigurationParameterDescriptor;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ConfigurationQueryParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ConfigurationSourceType;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ErrorResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ModelConfiguration;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TreeParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TreeQueryParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.XYTreeResponse;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.core.module.XmlUtils;
-import org.eclipse.tracecompass.tmf.core.config.ITmfConfigParamDescriptor;
-import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
-import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
 import org.junit.After;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 
 /**
@@ -63,7 +62,7 @@ import com.google.gson.Gson;
  * @author Bernd Hufmann
  */
 @SuppressWarnings("restriction")
-public class ConfigurationManagerServiceTest extends RestServerTest {
+public class ConfigurationManagerServiceTest extends NewRestServerTest {
 
     private static final Bundle XML_CORE_TESTS = Platform.getBundle("org.eclipse.tracecompass.tmf.analysis.xml.core.tests");
 
@@ -91,10 +90,7 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
     private static final String EXPECTED_JSON_CONFIG_DESCRIPTION = "My Config Description";
     private static final String EXPECTED_JSON_CONFIG_ID = "My Config Id";
 
-    private static final GenericType<TmfConfigurationStub> CONFIGURATION = new GenericType<>() { };
-    private static final GenericType<List<TmfConfigurationStub>> LIST_CONFIGURATION_TYPE = new GenericType<>() { };
-    private static final GenericType<TmfConfigurationSourceTypeStub> CONFIGURATION_SOURCE = new GenericType<>() { };
-    private static final GenericType<List<TmfConfigurationSourceTypeStub>> LIST_CONFIGURATION_SOURCE_TYPE = new GenericType<>() { };
+    private static final ConfigurationsApi sfConfigApi = new ConfigurationsApi(sfApiClient);
 
     /**
      * Empty the XML directory after the test
@@ -113,105 +109,118 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
     /**
      * Test getting configuration source types and verify existing XML source
      * type
+     *
+     * @throws ApiException
+     *             if such exception occurred
      */
     @Test
-    public void testSourceType() {
-        WebTarget endpoint = getApplicationEndpoint()
-                .path(CONFIG_PATH)
-                .path(TYPES_PATH);
-
-        List<TmfConfigurationSourceTypeStub> configurations = endpoint.request().get(LIST_CONFIGURATION_SOURCE_TYPE);
+    public void testSourceType() throws ApiException {
+        List<ConfigurationSourceType> configurations = sfConfigApi.getConfigurationTypes();
         assertTrue(configurations.size() > 0);
-        Optional<TmfConfigurationSourceTypeStub> optional = configurations.stream().filter(config -> config.getId().equals(XML_ANALYSIS_TYPE_ID)).findAny();
+        Optional<ConfigurationSourceType> optional = configurations.stream().filter(config -> config.getId().equals(XML_ANALYSIS_TYPE_ID)).findAny();
         assertTrue(optional.isPresent());
 
-        ITmfConfigurationSourceType type = optional.get();
+        ConfigurationSourceType type = optional.get();
         assertEquals(XML_ANALYSIS_TYPE_ID, type.getId());
         assertEquals(EXPECTED_TYPE_NAME, type.getName());
         assertEquals(EXPECTED_TYPE_DESCRIPTION, type.getDescription());
-        List<ITmfConfigParamDescriptor> descriptors = type.getConfigParamDescriptors();
+        List<ConfigurationParameterDescriptor> descriptors = type.getParameterDescriptors();
         assertNotNull(descriptors);
         assertEquals(1, descriptors.size());
-        ITmfConfigParamDescriptor desc = descriptors.get(0);
+        ConfigurationParameterDescriptor desc = descriptors.get(0);
         assertEquals(EXPECTED_KEY_NAME, desc.getKeyName());
         assertEquals(EXPECTED_DATA_TYPE, desc.getDataType());
         assertEquals(EXPECTED_PARAM_DESCRIPTION, desc.getDescription());
-        assertTrue(desc.isRequired());
+        assertTrue(desc.getRequired());
 
-        endpoint = getApplicationEndpoint()
-                .path(CONFIG_PATH)
-                .path(TYPES_PATH)
-                .path(XML_ANALYSIS_TYPE_ID);
-        TmfConfigurationSourceTypeStub sourceStub = endpoint.request().get(CONFIGURATION_SOURCE);
+        ConfigurationSourceType sourceStub = sfConfigApi.getConfigurationType(XML_ANALYSIS_TYPE_ID);
         assertEquals(XML_ANALYSIS_TYPE_ID, sourceStub.getId());
         assertEquals(EXPECTED_TYPE_NAME, sourceStub.getName());
         assertEquals(EXPECTED_TYPE_DESCRIPTION, sourceStub.getDescription());
-        descriptors = sourceStub.getConfigParamDescriptors();
+        descriptors = sourceStub.getParameterDescriptors();
         assertNotNull(descriptors);
         assertEquals(1, descriptors.size());
         desc = descriptors.get(0);
         assertEquals(EXPECTED_KEY_NAME, desc.getKeyName());
         assertEquals(EXPECTED_DATA_TYPE, desc.getDataType());
         assertEquals(EXPECTED_PARAM_DESCRIPTION, desc.getDescription());
-        assertTrue(desc.isRequired());
+        assertTrue(desc.getRequired());
 
         // Verify configuration source type with schema
-        Optional<TmfConfigurationSourceTypeStub> optional2 = configurations.stream().filter(config -> config.getId().equals("org.eclipse.tracecompass.tmf.core.config.testschemasourcetype")).findAny();
+        Optional<ConfigurationSourceType> optional2 = configurations.stream().filter(config -> config.getId().equals("org.eclipse.tracecompass.tmf.core.config.testschemasourcetype")).findAny();
         assertTrue(optional2.isPresent());
-        TmfConfigurationSourceTypeStub type2 = optional2.get();
-        JsonNode schema = type2.getSchema();
+        ConfigurationSourceType type2 = optional2.get();
+        Object schema = type2.getSchema();
         // Verify that schema exists
         assertNotNull(schema);
     }
 
     /**
      * Test POST to create configurations using XML configuration source type.
+     *
+     * @throws ApiException
+     *             if such error occurred
      */
     @Test
-    public void testCreateGetAndDelete() {
+    public void testCreateGetAndDelete() throws ApiException {
         // Missing path
-        try (Response response = createConfig(null) ) {
-            assertEquals(400, response.getStatus());
+        try {
+            createConfig(null);
+        } catch (ApiException ex) {
+            assertEquals(Status.BAD_REQUEST.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("Missing path", errorResponse.getTitle());
             assertEquals("No XML configuration should exists because no path provided", 0, getConfigurations().size());
         }
 
         // XML file doesn't exists
-        try (Response response = createConfig(PATH_TO_INVALID_PATH + UNKNOWN_TYPE) ) {
-            assertEquals(400, response.getStatus());
+        try {
+            createConfig(PATH_TO_INVALID_PATH + UNKNOWN_TYPE);
+        } catch (ApiException ex) {
+            assertEquals(Status.BAD_REQUEST.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("An error occurred while validating the XML file.", errorResponse.getTitle());
             assertEquals("No XML configuration should exists because xml file doesn't exists", 0, getConfigurations().size());
         }
 
         // Invalid XML file
-        try (Response response = createConfig(PATH_TO_INVALID_PATH) ) {
-            assertEquals(400, response.getStatus());
+        try {
+            createConfig(PATH_TO_INVALID_PATH);
+        } catch (ApiException ex) {
+            assertEquals(Status.BAD_REQUEST.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertTrue(errorResponse.getTitle().contains("XML Parsing error"));
             assertEquals("No XML configuration should exists duo to invalid XML file", 0, getConfigurations().size());
         }
 
         // Unknown type
-        try (Response response = createConfig(PATH_TO_VALID_PATH, false) ) {
-            assertEquals(404, response.getStatus());
+        try {
+            createConfig(PATH_TO_VALID_PATH, false);
+        } catch (ApiException ex) {
+            assertEquals(Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("Configuration source type doesn't exist", errorResponse.getTitle());
             assertEquals("No XML configuration should exists due to unknown configuration source type", 0, getConfigurations().size());
         }
 
         // Valid XML file
-        try (Response response = createConfig(PATH_TO_VALID_PATH)) {
-            assertEquals(200, response.getStatus());
-            TmfConfigurationStub config = response.readEntity(CONFIGURATION);
-            validateConfig(config);
-        }
+        ModelConfiguration config = createConfig(PATH_TO_VALID_PATH);
+        validateConfig(config);
 
-        List<TmfConfigurationStub> configurations = getConfigurations();
+        List<ModelConfiguration> configurations = getConfigurations();
         assertEquals("Valid XML configuration should be added", 1, configurations.size());
         assertTrue("XML configuration instance should exist", configurations.stream().anyMatch(conf -> conf.getId().equals(VALID_XML_FILE)));
 
-        TmfConfigurationStub config = getConfiguration(VALID_XML_FILE);
+        config = getConfiguration(VALID_XML_FILE);
         assertNotNull(config);
         assertTrue("XML configuration instance should exist", config.getId().equals(VALID_XML_FILE));
 
-        try (Response response = deleteConfig(EXPECTED_CONFIG_ID)) {
-            assertEquals(200, response.getStatus());
-            assertEquals("XML configuration should have been deleted", 0, getConfigurations().size());
-        }
+        ModelConfiguration delConfig = deleteConfig(EXPECTED_CONFIG_ID);
+        assertEquals(config, delConfig);
     }
 
     /**
@@ -221,107 +230,132 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
      *             if exception occurs
      * @throws URISyntaxException
      *             if exception occurs
+     * @throws ApiException
+     *             if such exception occurred
      */
     @Test
-    public void testCreateGetAndDeleteSchema() throws URISyntaxException, IOException {
-        try (Response response = createJsonConfig(VALID_JSON_FILENAME)) {
-            assertEquals(200, response.getStatus());
-            TmfConfigurationStub config = response.readEntity(CONFIGURATION);
-            assertNotNull(config);
-            validateJsonConfig(config);
-        }
+    public void testCreateGetAndDeleteSchema() throws URISyntaxException, IOException, ApiException {
+        ModelConfiguration config = createJsonConfig(VALID_JSON_FILENAME);
+        assertNotNull(config);
+        validateJsonConfig(config);
 
-        List<TmfConfigurationStub> configurations = getConfigurations(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID);
+        List<ModelConfiguration> configurations = getConfigurations(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID);
         assertEquals("Valid JSON configuration should be added", 1, configurations.size());
         assertTrue("Valid configuration instance should exist", configurations.stream().anyMatch(conf -> conf.getName().equals(EXPECTED_JSON_CONFIG_NAME)));
 
-        TmfConfigurationStub config = getConfiguration(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID, configurations.get(0).getId());
-        assertNotNull(config);
-        assertTrue("JSON configuration instance should exist", config.getId().equals(EXPECTED_JSON_CONFIG_ID));
+        ModelConfiguration config2 = getConfiguration(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID, configurations.get(0).getId());
+        assertNotNull(config2);
+        assertTrue("JSON configuration instance should exist", config2.getId().equals(EXPECTED_JSON_CONFIG_ID));
 
-        try (Response response = deleteConfig(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID, config.getId())) {
-            assertEquals(200, response.getStatus());
-            assertEquals("JSON configuration should have been deleted", 0, getConfigurations(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID).size());
-        }
+        ModelConfiguration delConfig = deleteConfig(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID, config.getId());
+        assertNotNull(delConfig);
+        assertEquals("JSON configuration should have been deleted", 0, getConfigurations(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID).size());
     }
 
     /**
      * Test PUT to update configurations using XML configuration source type.
+     *
+     * @throws ApiException
+     *             if such exception occurred
      */
     @Test
-    public void testUpdate() {
+    public void testUpdate() throws ApiException {
         // Valid XML file
-        try (Response response = createConfig(PATH_TO_VALID_PATH)) {
-            assertEquals(200, response.getStatus());
-        }
+        ModelConfiguration config = createConfig(PATH_TO_VALID_PATH);
+        assertNotNull(config);
 
         // Missing path
-        try (Response response = updateConfig(null, EXPECTED_CONFIG_ID)) {
-            assertEquals(400, response.getStatus());
+        try {
+            updateConfig(null, EXPECTED_CONFIG_ID);
+        } catch (ApiException ex) {
+            assertEquals(Status.BAD_REQUEST.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("Missing path", errorResponse.getTitle());
         }
 
         // XML file doesn't exists
-        try (Response response = updateConfig(PATH_TO_INVALID_PATH + UNKNOWN_TYPE, EXPECTED_CONFIG_ID)) {
-            assertEquals(400, response.getStatus());
+        try {
+            updateConfig(PATH_TO_INVALID_PATH + UNKNOWN_TYPE, EXPECTED_CONFIG_ID);
+        } catch (ApiException ex) {
+            assertEquals(Status.BAD_REQUEST.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("An error occurred while validating the XML file.", errorResponse.getTitle());
         }
 
         // Invalid XML file
-        try (Response response = updateConfig(PATH_TO_INVALID_PATH, EXPECTED_CONFIG_ID)) {
-            assertEquals(400, response.getStatus());
+        try {
+            updateConfig(PATH_TO_INVALID_PATH, EXPECTED_CONFIG_ID);
+        } catch (ApiException ex) {
+            assertEquals(Status.BAD_REQUEST.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertTrue(errorResponse.getTitle().contains("XML Parsing error"));
         }
 
         // Unknown type
-        try (Response response = updateConfig(PATH_TO_INVALID_PATH, EXPECTED_CONFIG_ID, false)) {
-            assertEquals(404, response.getStatus());
+        try {
+            updateConfig(PATH_TO_INVALID_PATH, EXPECTED_CONFIG_ID, false);
+        } catch (ApiException ex) {
+            assertEquals(Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("Configuration source type doesn't exist", errorResponse.getTitle());
         }
 
         // Unknown config
-        try (Response response = updateConfig(PATH_TO_INVALID_PATH, EXPECTED_CONFIG_ID, true, false)) {
-            assertEquals(404, response.getStatus());
+        try {
+            updateConfig(PATH_TO_INVALID_PATH, EXPECTED_CONFIG_ID, true, false);
+        } catch (ApiException ex) {
+            assertEquals(Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("Configuration instance doesn't exist for type org.eclipse.tracecompass.tmf.core.config.xmlsourcetype", errorResponse.getTitle());
         }
 
         // Valid XML file
-        try (Response response = updateConfig(PATH_TO_VALID_PATH, EXPECTED_CONFIG_ID)) {
-            assertEquals(200, response.getStatus());
-            TmfConfigurationStub config = response.readEntity(CONFIGURATION);
-            validateConfig(config);
-        }
+        config = updateConfig(PATH_TO_VALID_PATH, EXPECTED_CONFIG_ID);
+        validateConfig(config);
 
-        List<TmfConfigurationStub> configurations = getConfigurations();
+        List<ModelConfiguration> configurations = getConfigurations();
         assertEquals("Valid XML configuration should be added", 1, configurations.size());
         assertTrue("XML configuration instance should exist", configurations.stream().anyMatch(conf -> conf.getId().equals(VALID_XML_FILE)));
 
-        try (Response response = deleteConfig(EXPECTED_CONFIG_ID)) {
-            assertEquals(200, response.getStatus());
-            assertEquals("XML configuration should have been deleted", 0, getConfigurations().size());
-        }
+        ModelConfiguration delConfig = deleteConfig(EXPECTED_CONFIG_ID);
+        assertNotNull(delConfig);
+        assertEquals("XML configuration should have been deleted", 0, getConfigurations().size());
     }
 
     /**
      * Test create and created XML data providers.
+     * @throws ApiException if such exception occurred
      */
     @Test
-    public void testXmlDataProvider() {
-        try (Response response = createConfig(PATH_TO_VALID_PATH)) {
-            assertEquals(200, response.getStatus());
-            TmfConfigurationStub config = response.readEntity(CONFIGURATION);
-            validateConfig(config);
-        }
-        ExperimentModelStub exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
-        WebTarget xmlProviderPath = getXYTreeEndpoint(exp.getUUID().toString(), "org.eclipse.linuxtools.tmf.analysis.xml.core.tests.xy");
-        Map<String, Object> parameters = new HashMap<>();
-        try (Response xmlTree = xmlProviderPath.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals("The endpoint for the XML data provider should be available", 200, xmlTree.getStatus());
-        }
+    public void testXmlDataProvider() throws ApiException {
+        ModelConfiguration config = createConfig(PATH_TO_VALID_PATH);
+        validateConfig(config);
 
-        try (Response response = deleteConfig(EXPECTED_CONFIG_ID)) {
-            assertEquals(200, response.getStatus());
-            assertEquals("XML configuration should have been deleted", 0, getConfigurations().size());
-        }
+        Experiment exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
+        XyApi xyApi = new XyApi(sfApiClient);
 
-        try (Response noXmlTree = xmlProviderPath.request(MediaType.APPLICATION_JSON).get()) {
-            assertEquals("The endpoint for the XML data provider should not be available anymore",
-                405, noXmlTree.getStatus());
+        TreeParameters params = new TreeParameters();
+        TreeQueryParameters queryParams = new TreeQueryParameters().parameters(params);
+
+        XYTreeResponse xmlTree = xyApi.getXYTree(exp.getUUID(), "org.eclipse.linuxtools.tmf.analysis.xml.core.tests.xy", queryParams);
+        assertTrue("The endpoint for the XML data provider should be available", !xmlTree.getStatus().equals(XYTreeResponse.StatusEnum.FAILED));
+
+        ModelConfiguration deletedConfig = deleteConfig(EXPECTED_CONFIG_ID);
+        assertEquals(config, deletedConfig);
+        assertEquals("XML configuration should have been deleted", 0, getConfigurations().size());
+
+        try {
+            xmlTree = xyApi.getXYTree(exp.getUUID(), "org.eclipse.linuxtools.tmf.analysis.xml.core.tests.xy", queryParams);
+        } catch (ApiException ex) {
+            assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals(EndpointConstants.NO_PROVIDER, errorResponse.getTitle());
         }
     }
 
@@ -338,51 +372,48 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
         return path;
     }
 
-    private static Response createConfig(String path) {
+    private static ModelConfiguration createConfig(String path) throws ApiException {
         return createConfig(path, true);
     }
 
-    private static Response createConfig(String path, boolean isCorrectType) {
+    private static ModelConfiguration createConfig(String path, boolean isCorrectType) throws ApiException {
         String typeId = XML_ANALYSIS_TYPE_ID;
         if (!isCorrectType) {
             typeId = UNKNOWN_TYPE;
         }
-        WebTarget endpoint = getApplicationEndpoint()
-                .path(CONFIG_PATH)
-                .path(TYPES_PATH)
-                .path(typeId)
-                .path(CONFIG_INSTANCES_PATH);
 
         Map<String, Object> parameters = new HashMap<>();
         if (path != null) {
             parameters.put(PATH, path);
         }
-        return endpoint.request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(new ConfigurationQueryParameters(null, null, parameters)));
+
+        ConfigurationQueryParameters queryParameters = new ConfigurationQueryParameters()
+                .name("ignored")
+                .description("ignored")
+                .parameters(parameters);
+
+        return sfConfigApi.postConfiguration(typeId, queryParameters);
     }
 
-    private static Response createJsonConfig(String jsonFileName) throws URISyntaxException, IOException {
+    private static ModelConfiguration createJsonConfig(String jsonFileName) throws URISyntaxException, IOException, ApiException {
         String typeId = CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID;
-        WebTarget endpoint = getApplicationEndpoint()
-                .path(CONFIG_PATH)
-                .path(TYPES_PATH)
-                .path(typeId)
-                .path(CONFIG_INSTANCES_PATH);
-
         Map<String, Object> params = readParametersFromJson(jsonFileName);
-        return endpoint.request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(new ConfigurationQueryParameters(null, null, params)));
+        ConfigurationQueryParameters queryParameters = new ConfigurationQueryParameters()
+                .name("ignored")
+                .description("ignored")
+                .parameters(params);
+        return sfConfigApi.postConfiguration(typeId, queryParameters);
     }
 
-    private static Response updateConfig(String path, String id) {
+    private static ModelConfiguration updateConfig(String path, String id) throws ApiException {
         return updateConfig(path, id, true, true);
     }
 
-    private static Response updateConfig(String path, String id, boolean isCorrectType) {
+    private static ModelConfiguration updateConfig(String path, String id, boolean isCorrectType) throws ApiException {
         return updateConfig(path, id, isCorrectType, true);
     }
 
-    private static Response updateConfig(String path, String id, boolean isCorrectType, boolean isCorrectId) {
+    private static ModelConfiguration updateConfig(String path, String id, boolean isCorrectType, boolean isCorrectId) throws ApiException {
         String typeId = XML_ANALYSIS_TYPE_ID;
         if (!isCorrectType) {
             typeId = UNKNOWN_TYPE;
@@ -391,75 +422,57 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
         if (!isCorrectId) {
             localId = UNKNOWN_TYPE;
         }
-        WebTarget endpoint = getApplicationEndpoint()
-                .path(CONFIG_PATH)
-                .path(TYPES_PATH)
-                .path(typeId)
-                .path(CONFIG_INSTANCES_PATH)
-                .path(localId);
-
         Map<String, Object> parameters = new HashMap<>();
         if (path != null) {
             parameters.put(PATH, path);
         }
-        return endpoint.request(MediaType.APPLICATION_JSON)
-                .put(Entity.json(new ConfigurationQueryParameters(null, null, parameters)));
+
+        ConfigurationQueryParameters queryParameters = new ConfigurationQueryParameters()
+                .name("ignored")
+                .description("ignored")
+                .parameters(parameters);
+
+        return sfConfigApi.putConfiguration(typeId, localId, queryParameters);
     }
 
-    private static Response deleteConfig(String id) {
+    private static ModelConfiguration deleteConfig(String id) throws ApiException {
         return deleteConfig(null, id);
     }
 
-    private static Response deleteConfig(String type, String id) {
+    private static ModelConfiguration deleteConfig(String type, String id) throws ApiException {
+
         String requestType = type;
         if (requestType == null) {
             requestType = XML_ANALYSIS_TYPE_ID;
         }
-        WebTarget endpoint = getApplicationEndpoint()
-                .path(CONFIG_PATH)
-                .path(TYPES_PATH)
-                .path(requestType)
-                .path(CONFIG_INSTANCES_PATH);
-        return endpoint.path(id).request().delete();
+        return sfConfigApi.deleteConfiguration(requestType, id);
     }
 
-    private static List<TmfConfigurationStub> getConfigurations() {
+    private static List<ModelConfiguration> getConfigurations() throws ApiException {
         return getConfigurations(null);
     }
 
-    private static List<TmfConfigurationStub> getConfigurations(@Nullable String type) {
+    private static List<ModelConfiguration> getConfigurations(@Nullable String type) throws ApiException {
         String requestType = type;
         if (requestType == null) {
             requestType = XML_ANALYSIS_TYPE_ID;
         }
-
-        WebTarget endpoint = getApplicationEndpoint()
-                .path(CONFIG_PATH)
-                .path(TYPES_PATH)
-                .path(requestType)
-                .path(CONFIG_INSTANCES_PATH);
-        return endpoint.request().get(LIST_CONFIGURATION_TYPE);
+        return sfConfigApi.getConfigurations(requestType);
     }
 
-    private static TmfConfigurationStub getConfiguration(String configId) {
+    private static ModelConfiguration getConfiguration(String configId) throws ApiException {
         return getConfiguration(null, configId);
     }
 
-    private static TmfConfigurationStub getConfiguration(String type, String configId) {
+    private static ModelConfiguration getConfiguration(String type, String configId) throws ApiException {
         String requestType = type;
         if (requestType == null) {
             requestType = XML_ANALYSIS_TYPE_ID;
         }
-        WebTarget endpoint = getApplicationEndpoint()
-                .path(CONFIG_PATH)
-                .path(TYPES_PATH)
-                .path(requestType)
-                .path(CONFIG_INSTANCES_PATH)
-                .path(configId);
-        return endpoint.request().get(CONFIGURATION);
+        return sfConfigApi.getConfiguration(requestType, configId);
     }
 
-    private static void validateConfig(ITmfConfiguration config) {
+    private static void validateConfig(ModelConfiguration config) {
         assertNotNull(config);
         assertEquals(EXPECTED_CONFIG_NAME, config.getName());
         assertEquals(EXPECTED_CONFIG_ID, config.getId());
@@ -469,7 +482,7 @@ public class ConfigurationManagerServiceTest extends RestServerTest {
     }
 
     @SuppressWarnings("null")
-    private static void validateJsonConfig(ITmfConfiguration config) {
+    private static void validateJsonConfig(ModelConfiguration config) {
         assertEquals(EXPECTED_JSON_CONFIG_NAME, config.getName());
         assertEquals(EXPECTED_JSON_CONFIG_ID, config.getId());
         assertEquals(CONFIG_WITH_SCHEMA_ANALYSIS_TYPE_ID, config.getSourceTypeId());
