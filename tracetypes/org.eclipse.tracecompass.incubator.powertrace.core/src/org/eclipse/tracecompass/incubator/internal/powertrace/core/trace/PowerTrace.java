@@ -3,6 +3,7 @@ package org.eclipse.tracecompass.incubator.internal.powertrace.core.trace;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
@@ -29,7 +30,7 @@ public class PowerTrace extends CtfTmfTrace {
             Map<String, String> environment = ((CtfTraceValidationStatus) status).getEnvironment();
             /* Make sure the domain is "kernel" in the trace's env vars */
             String domain = environment.get("tracer"); //$NON-NLS-1$
-            if (domain == null || !domain.equals("\"AndyTracer\"")) { //$NON-NLS-1$
+            if (domain == null || !domain.equals("\"PowerTrace25\"")) { //$NON-NLS-1$
                 return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "not andy"); //$NON-NLS-1$
             }
             return new TraceValidationStatus(CONFIDENCE, Activator.PLUGIN_ID);
@@ -40,12 +41,36 @@ public class PowerTrace extends CtfTmfTrace {
     @Override
     public Iterable<ITmfEventAspect<?>> getEventAspects() {
         List<ITmfEventAspect<?>> current = new ArrayList<>();
+        Map<String, String> environment = super.getEnvironment();
+        String source_names = environment.get("source_names");
+        Map<Integer, String> source_id_name_pairs = new HashMap<>();
+        if (source_names != null) {
+            source_names = source_names.replaceAll("^\"|\"$", "");//remove leading and trailing ""
+            String[] pairs = source_names.split(",");
+            for (int index = 0; index < pairs.length; index ++) {
+                String[] line = pairs[index].split(":");
+                int id;
+                if (line[0] != null && line[0].matches("[-+]?\\d+")) {//check if string is numerical
+                    id = Integer.parseInt(line[0]);
+                    if (line[1] != null) {
+                        source_id_name_pairs.put(id, line[1]);
+                    }
+                }
+            }
+        }
+
+
         for (ITmfEventAspect<?> eventAspect : super.getEventAspects()) {
             current.add(eventAspect);
         }
         for (int index = 0; index < 16; index++) {
             final int i = index;
-            CounterAspect aspect = new CounterAspect("sensors " + i, "Sensor " + i, CounterType.DOUBLE) {
+            String fieldName = "sensors " + i;
+            String label = "Sensors " + i;
+            if (source_id_name_pairs.containsKey(i)) {
+                label = source_id_name_pairs.get(i);
+            }
+            CounterAspect aspect = new CounterAspect(fieldName, label, CounterType.DOUBLE) {
                 @Override
                 public @Nullable Number resolve(@NonNull ITmfEvent event) {
                     ITmfEventField array = event.getContent().getField("sensors");
@@ -59,7 +84,7 @@ public class PowerTrace extends CtfTmfTrace {
             };
             current.add(aspect);
         }
-        CounterAspect aspect = new CounterAspect("CPU Power", "CPU POWAH", CounterType.DOUBLE) {
+        CounterAspect aspect = new CounterAspect("CPU power total", "CPU power total", CounterType.DOUBLE) {
             @Override
             public @Nullable Number resolve(@NonNull ITmfEvent event) {
                 ITmfEventField array = event.getContent().getField("sensors");
