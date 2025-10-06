@@ -52,7 +52,7 @@ public class ConfigParamDescriptorStub implements Serializable, ITmfConfigParamD
     public ConfigParamDescriptorStub(@JsonProperty("keyName") String keyName,
             @JsonProperty("dataType") String dataType,
             @JsonProperty("description") String description,
-            @JsonProperty("isRequired") Boolean isRequired) {
+            @JsonProperty("required") Boolean isRequired) {
         super();
 
         TmfConfigParamDescriptor.Builder builder = new TmfConfigParamDescriptor.Builder()

@@ -45,7 +45,7 @@ public class TmfConfigParamDescriptorSerializer extends StdSerializer<ITmfConfig
         gen.writeStringField("keyName", value.getKeyName()); //$NON-NLS-1$
         gen.writeStringField("dataType", value.getDataType()); //$NON-NLS-1$
         gen.writeStringField("description", value.getDescription()); //$NON-NLS-1$
-        gen.writeBooleanField("isRequired", value.isRequired()); //$NON-NLS-1$
+        gen.writeBooleanField("required", value.isRequired()); //$NON-NLS-1$
         gen.writeEndObject();
     }
 }
