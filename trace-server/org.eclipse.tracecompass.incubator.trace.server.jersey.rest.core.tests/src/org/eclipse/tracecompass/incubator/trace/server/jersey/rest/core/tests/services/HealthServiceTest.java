@@ -12,16 +12,15 @@
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services;
 
 import static org.junit.Assert.assertEquals;
-
-import java.util.Map;
-
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.HealthService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
+import org.eclipse.tracecompass.incubator.tsp.client.core.api.DiagnosticApi;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ServerStatus;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ServerStatus.StatusEnum;
 import org.junit.Test;
 
 /**
@@ -29,25 +28,20 @@ import org.junit.Test;
  *
  * @author Geneviève Bastien
  */
-@SuppressWarnings("null")
-public class HealthServiceTest extends RestServerTest {
+public class HealthServiceTest extends NewRestServerTest {
+
+    private static final DiagnosticApi sfDiagnosticApi = new DiagnosticApi(sfApiClient);
 
     /**
      * Test basic operations on the {@link TraceManagerService}.
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testHealthStatus() {
-
-        WebTarget application = getApplicationEndpoint();
-        WebTarget healthEndpoint = application.path("health");
-
-        try (Response response = healthEndpoint.request(MediaType.APPLICATION_JSON)
-                .get()) {
-            assertEquals("Health reponse should be OK", 200, response.getStatus());
-            Map<Object, Object> responseValues = response.readEntity(Map.class);
-            assertEquals("UP", responseValues.get("status"));
-        }
-
+    public void testHealthStatus() throws ApiException {
+        ServerStatus status = sfDiagnosticApi.getHealthStatus();
+        assertNotNull(status);
+        assertEquals(StatusEnum.UP, status.getStatus());
     }
-
 }
