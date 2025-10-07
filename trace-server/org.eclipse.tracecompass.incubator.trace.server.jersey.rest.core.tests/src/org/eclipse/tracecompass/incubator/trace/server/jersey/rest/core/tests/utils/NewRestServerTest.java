@@ -43,12 +43,10 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.OutputConfigurationQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.TraceServerConfiguration;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp.TestWebApplication;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiClient;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
@@ -67,7 +65,6 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.model.Trace.IndexingSt
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.TraceParameters;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.TraceQueryParameters;
 import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
-import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -88,7 +85,6 @@ import com.google.common.collect.ImmutableList;
  */
 @SuppressWarnings("null")
 public abstract class NewRestServerTest {
-    private static final String ERROR_CODE_STR = ", error code=";
     private static final String SERVER = "http://localhost:8378/tsp/api"; //$NON-NLS-1$
     private static final WebApplication fWebApp = new TestWebApplication(new TraceServerConfiguration(TraceServerConfiguration.TEST_PORT, false, null, null));
     private static final Bundle TEST_BUNDLE = Platform.getBundle("org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests");
@@ -1063,41 +1059,6 @@ public abstract class NewRestServerTest {
         assertNotNull(newExperiment);
         sortExperiment(newExperiment);
         return newExperiment;
-    }
-
-    /**
-     * @param dpConfigEndpoint
-     *            the dp config endpoint to create a derived data provider
-     * @param configuration
-     *            the configuration with input parameters to post
-     * @return the derived data provider descriptor stub
-     */
-    public static DataProviderDescriptorStub assertDpPost(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
-        try (Response response = dpConfigEndpoint.request().post(Entity.json(
-                new OutputConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())))) {
-            int code = response.getStatus();
-            assertEquals("Failed to POST " + configuration.getName() + ERROR_CODE_STR + code, 200, code);
-            DataProviderDescriptorStub result = response.readEntity(DataProviderDescriptorStub.class);
-            assertEquals(configuration.getName(), result.getConfiguration().getName());
-            assertEquals(configuration.getDescription(), result.getConfiguration().getDescription());
-            assertEquals(configuration.getSourceTypeId(), result.getConfiguration().getSourceTypeId());
-            assertEquals(configuration.getParameters(), result.getConfiguration().getParameters());
-            return result;
-        }
-    }
-
-    /**
-     * Request to create a derived DP but will cause errors
-     *
-     * @param dpConfigEndpoint
-     *            the dp config endpoint to create a derived data provider
-     * @param configuration
-     *            the configuration with input parameters to post
-     * @return error code
-     */
-    public static Response assertDpPostWithErrors(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
-        return dpConfigEndpoint.request().post(Entity.json(
-                new OutputConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())));
     }
 
     /**
