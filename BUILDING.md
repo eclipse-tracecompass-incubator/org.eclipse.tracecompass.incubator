@@ -37,6 +37,31 @@ mvn clean package javadoc:aggregate
 
 The javadoc html files will be under `target/site/apidocs`.
 
+## Generate Trace Server Protocol Client (in Java)
+
+The Trace Server test plug-in `trace-server/org.eclipse.tracecompass.incubator.jersey.rest.core.tests` uses a generated [Trace Server Protocol][trace-server-protocol] client written in Java to test the trace server TSP API. The client code is part of the plug-in `trace-server/org.eclipse.tracecompass.incubator.tsp.client.core` and can be found under `trace-server/org.eclipse.tracecompass.incubator.tsp.client.core/target/generated-sources/openapi`.
+
+### Download the latest TSP specification
+
+The currently used specification is (API.yaml) is downloaded to `trace-server/org.eclipse.tracecompass.incubator.tsp.client.core/` and under version control. To download a new version from the [Trace Server Protocol][trace-server-protocol] repository execute the following command. 
+
+```bash
+mvn validate -PdownloadTsp
+```
+
+### Generate the latest client code
+
+The generation of the trace server client code from the specification (API.yaml) is done using the maven plugin of the [OpenAPI Generator][openapi-codegen]. To re-generate the TSP client execute the following command:
+
+```bash
+mvn generated-resources -PdownloadTsp -PbuildTsp
+```
+
+Notes:
+- You can skip the profile to download the TSP if has been done separately
+- If the API.yaml file didn't change the generation of TSP Java client is skipped.
+- If you want to regenerate the TSP Java, add `-DskipIfTspIsUnchanged=false` to the maven command-line
+
 ## Maven profiles and properties
 
 The following Maven profiles and properties are defined in
@@ -114,3 +139,4 @@ Refer to the [Trace Server Protocol][trace-server-protocol] for more endpoints.
 
 [tracecompass-test-traces]: https://github.com/eclipse-tracecompass/tracecompass-test-traces
 [trace-server-protocol]: https://github.com/eclipse-cdt-cloud/trace-server-protocol
+[openapi-codegen]: https://openapi-generator.tech/docs/generators/java
