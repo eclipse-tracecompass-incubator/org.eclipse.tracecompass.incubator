@@ -832,8 +832,6 @@ public abstract class NewRestServerTest {
                 .path(dataProviderId);
     }
 
-
-
     /**
      * Get the traces currently open on the server.
      *
