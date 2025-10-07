@@ -11,11 +11,16 @@
 
 package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -23,12 +28,18 @@ import java.util.UUID;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.BookmarkModelStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
+import org.eclipse.tracecompass.incubator.tsp.client.core.api.BookmarksApi;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Bookmark;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.BookmarkParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.BookmarkQueryParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ErrorResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,13 +50,13 @@ import org.junit.Test;
  * @author Kaveh Shahedi
  */
 @SuppressWarnings("null")
-public class BookmarkManagerServiceTest extends RestServerTest {
+public class BookmarkManagerServiceTest extends NewRestServerTest {
 
     private static final String BOOKMARK_NAME = "TEST";
     private static final long START_TIME = 0L;
     private static final long END_TIME = 10L;
-    private static final @NonNull BookmarkModelStub BOOKMARK = new BookmarkModelStub(BOOKMARK_NAME, START_TIME, END_TIME);
-    private ExperimentModelStub experiment;
+    private static final @NonNull Bookmark BOOKMARK = new Bookmark().name(BOOKMARK_NAME).start(START_TIME).end(END_TIME).uuid(UUID.randomUUID());
+    private Experiment experiment;
 
     private static final String START = "start";
     private static final String END = "end";
@@ -59,8 +70,8 @@ public class BookmarkManagerServiceTest extends RestServerTest {
     private static final String NON_NULL_RESPONSE_BODY = "Response body should not be null";
     private static final String NON_NULL_UUID = "UUID should not be null";
     private static final String NON_NUMERIC_TIMES_STATUS_CODE = "Should return 400 for non-numeric times";
-    private static final String SUCCESSFUL_BOOKMARK_CREATION = "Bookmark creation should succeed";
-    private static final String SUCCESSFUL_STATUS_CODE = "Response status should be 200";
+
+    private static final BookmarksApi sfBookmarksApi = new BookmarksApi(sfApiClient);
 
     /**
      * Setup method to run before each test
@@ -76,28 +87,16 @@ public class BookmarkManagerServiceTest extends RestServerTest {
 
     /**
      * Tear down method to run after each test
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @After
-    public void tearDown() {
+    public void tearDown() throws ApiException {
         // Remove all bookmarks
-        WebTarget application = getApplicationEndpoint();
-        WebTarget bookmarkTarget = application.path(EXPERIMENTS)
-                .path(experiment.getUUID().toString())
-                .path(BOOKMARKS);
-
-        try (Response response = bookmarkTarget.request().get()) {
-            assertEquals("GET request for bookmarks should return 200", 200, response.getStatus());
-
-            BookmarkModelStub[] existingBookmarks = response.readEntity(BookmarkModelStub[].class);
-            assertNotNull("Bookmark array should not be null", existingBookmarks);
-
-            for (BookmarkModelStub bookmark : existingBookmarks) {
-                try (Response deleteResponse = bookmarkTarget.path(bookmark.getUUID().toString())
-                        .request()
-                        .delete()) {
-                    assertEquals("DELETE request should return 200", 200, deleteResponse.getStatus());
-                }
-            }
+        List<Bookmark> existingBookmarks = sfBookmarksApi.getBookmarks(experiment.getUUID());
+        for (Bookmark bookmark : existingBookmarks) {
+            sfBookmarksApi.deleteBookmark(experiment.getUUID(), bookmark.getUuid());
         }
     }
 
@@ -107,38 +106,61 @@ public class BookmarkManagerServiceTest extends RestServerTest {
      */
     @Test
     public void testBookmarkEndpointsInvalidExperiment() {
-        WebTarget application = getApplicationEndpoint();
-        WebTarget bookmarkTarget = application.path(EXPERIMENTS)
-                .path(UUID.randomUUID().toString())
-                .path(BOOKMARKS);
 
         // Test getting all bookmarks
-        try (Response response = bookmarkTarget.request().get()) {
-            assertEquals(NON_EXISTENT_EXPERIMENT_STATUS_CODE, 404, response.getStatus());
+        try {
+            sfBookmarksApi.getBookmarks(UUID.randomUUID());
+        } catch (ApiException ex) {
+            assertEquals(NON_EXISTENT_EXPERIMENT_STATUS_CODE, Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("No such experiment", errorResponse.getTitle());
         }
 
         // Test getting a specific bookmark
-        try (Response response = bookmarkTarget.path(BOOKMARK.getUUID().toString()).request().get()) {
-            assertEquals(NON_EXISTENT_EXPERIMENT_STATUS_CODE, 404, response.getStatus());
+        try {
+            sfBookmarksApi.getBookmark(UUID.randomUUID(), BOOKMARK.getUuid());
+        } catch (ApiException ex) {
+            assertEquals(NON_EXISTENT_EXPERIMENT_STATUS_CODE, Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("No such experiment", errorResponse.getTitle());
         }
 
         // Test creating a bookmark
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(NAME, BOOKMARK_NAME);
-        parameters.put(START, START_TIME);
-        parameters.put(END, END_TIME);
-        try (Response response = bookmarkTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals(NON_EXISTENT_EXPERIMENT_STATUS_CODE, 404, response.getStatus());
+        BookmarkParameters params = new BookmarkParameters()
+                .name(BOOKMARK_NAME)
+                .start(START_TIME)
+                .end(END_TIME);
+        BookmarkQueryParameters queryParams = new BookmarkQueryParameters().parameters(params);
+
+        try {
+            sfBookmarksApi.createBookmark(UUID.randomUUID(), queryParams);
+        } catch (ApiException ex) {
+            assertEquals(NON_EXISTENT_EXPERIMENT_STATUS_CODE, Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("No such experiment", errorResponse.getTitle());
         }
 
         // Test updating a bookmark
-        try (Response response = bookmarkTarget.path(BOOKMARK.getUUID().toString()).request().put(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals(NON_EXISTENT_EXPERIMENT_STATUS_CODE, 404, response.getStatus());
+        try {
+            sfBookmarksApi.updateBookmark(UUID.randomUUID(), BOOKMARK.getUuid(), queryParams);
+        } catch (ApiException ex) {
+            assertEquals(NON_EXISTENT_EXPERIMENT_STATUS_CODE, Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("No such experiment", errorResponse.getTitle());
         }
 
         // Test deleting a bookmark
-        try (Response response = bookmarkTarget.path(BOOKMARK.getUUID().toString()).request().delete()) {
-            assertEquals(NON_EXISTENT_EXPERIMENT_STATUS_CODE, 404, response.getStatus());
+        try {
+            sfBookmarksApi.deleteBookmark(UUID.randomUUID(), BOOKMARK.getUuid());
+        } catch (ApiException ex) {
+            assertEquals(NON_EXISTENT_EXPERIMENT_STATUS_CODE, Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("No such experiment", errorResponse.getTitle());
         }
     }
 
@@ -188,272 +210,245 @@ public class BookmarkManagerServiceTest extends RestServerTest {
 
     /**
      * Test the creation of a bookmark.
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testCreateBookmark() {
-        WebTarget application = getApplicationEndpoint();
-        WebTarget bookmarkTarget = application.path(EXPERIMENTS)
-                .path(experiment.getUUID().toString())
-                .path(BOOKMARKS);
+    public void testCreateBookmark() throws ApiException {
+        BookmarkParameters params = new BookmarkParameters()
+                .name(BOOKMARK_NAME)
+                .start(START_TIME)
+                .end(END_TIME);
+        BookmarkQueryParameters queryParams = new BookmarkQueryParameters().parameters(params);
 
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(NAME, BOOKMARK.getName());
-        parameters.put(START, START_TIME);
-        parameters.put(END, END_TIME);
-
-        try (Response response = bookmarkTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals(SUCCESSFUL_STATUS_CODE, 200, response.getStatus());
-
-            BookmarkModelStub expStub = response.readEntity(BookmarkModelStub.class);
-            assertNotNull(NON_NULL_RESPONSE_BODY, expStub);
-            assertEquals(BOOKMARK_NAME_MATCH, BOOKMARK.getName(), expStub.getName());
-            assertEquals(BOOKMARK_START_TIME_MATCH, BOOKMARK.getStart(), expStub.getStart());
-            assertEquals(BOOKMARK_END_TIME_MATCH, BOOKMARK.getEnd(), expStub.getEnd());
-            assertNotNull(NON_NULL_UUID, expStub.getUUID());
-        }
+        Bookmark expStub = sfBookmarksApi.createBookmark(experiment.getUUID(), queryParams);
+        assertNotNull(NON_NULL_RESPONSE_BODY, expStub);
+        assertEquals(BOOKMARK_NAME_MATCH, BOOKMARK.getName(), expStub.getName());
+        assertEquals(BOOKMARK_START_TIME_MATCH, BOOKMARK.getStart(), expStub.getStart());
+        assertEquals(BOOKMARK_END_TIME_MATCH, BOOKMARK.getEnd(), expStub.getEnd());
+        assertNotNull(NON_NULL_UUID, expStub.getUuid());
     }
 
     /**
      * Test the creation of a bookmark with no end time (i.e., just start time).
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testCreateBookmarkNoEndTime() {
-        WebTarget application = getApplicationEndpoint();
-        WebTarget bookmarkTarget = application.path(EXPERIMENTS)
-                .path(experiment.getUUID().toString())
-                .path(BOOKMARKS);
+    public void testCreateBookmarkNoEndTime() throws ApiException {
+        BookmarkParameters params = new BookmarkParameters()
+                .name(BOOKMARK_NAME)
+                .start(START_TIME)
+                .end(START_TIME);
+        BookmarkQueryParameters queryParams = new BookmarkQueryParameters().parameters(params);
+        Bookmark expStub = sfBookmarksApi.createBookmark(experiment.getUUID(), queryParams);
 
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(NAME, BOOKMARK.getName());
-        parameters.put(START, START_TIME);
-        parameters.put(END, START_TIME);
-
-        try (Response response = bookmarkTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals(SUCCESSFUL_STATUS_CODE, 200, response.getStatus());
-
-            BookmarkModelStub expStub = response.readEntity(BookmarkModelStub.class);
-            assertNotNull(NON_NULL_RESPONSE_BODY, expStub);
-            assertEquals(BOOKMARK_NAME_MATCH, BOOKMARK.getName(), expStub.getName());
-            assertEquals(BOOKMARK_START_TIME_MATCH, BOOKMARK.getStart(), expStub.getStart());
-            assertEquals(BOOKMARK_END_TIME_MATCH, BOOKMARK.getStart(), expStub.getEnd());
-            assertNotNull(NON_NULL_UUID, expStub.getUUID());
-        }
+        assertNotNull(NON_NULL_RESPONSE_BODY, expStub);
+        assertEquals(BOOKMARK_NAME_MATCH, BOOKMARK.getName(), expStub.getName());
+        assertEquals(BOOKMARK_START_TIME_MATCH, BOOKMARK.getStart(), expStub.getStart());
+        assertEquals(BOOKMARK_END_TIME_MATCH, BOOKMARK.getStart(), expStub.getEnd());
+        assertNotNull(NON_NULL_UUID, expStub.getUuid());
     }
 
     /**
      * Test the creation of a bookmark with a repetitive data.
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testCreateIdenticalBookmarks() {
-        WebTarget application = getApplicationEndpoint();
-        WebTarget bookmarkTarget = application.path(EXPERIMENTS)
-                .path(experiment.getUUID().toString())
-                .path(BOOKMARKS);
-
+    public void testCreateIdenticalBookmarks() throws ApiException {
         Set<UUID> uuids = new HashSet<>();
         for (int i = 0; i < 3; i++) {
-            Map<String, Object> parameters = new HashMap<>();
-            parameters.put(NAME, BOOKMARK.getName());
-            parameters.put(START, START_TIME);
-            parameters.put(END, END_TIME);
 
-            try (Response response = bookmarkTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-                assertEquals(SUCCESSFUL_STATUS_CODE, 200, response.getStatus());
+            BookmarkParameters params = new BookmarkParameters()
+                    .name(BOOKMARK_NAME)
+                    .start(START_TIME)
+                    .end(END_TIME);
+            BookmarkQueryParameters queryParams = new BookmarkQueryParameters().parameters(params);
+            Bookmark expStub = sfBookmarksApi.createBookmark(experiment.getUUID(), queryParams);
+            assertNotNull(NON_NULL_RESPONSE_BODY, expStub);
+            assertEquals(BOOKMARK_NAME_MATCH, BOOKMARK.getName(), expStub.getName());
+            assertEquals(BOOKMARK_START_TIME_MATCH, BOOKMARK.getStart(), expStub.getStart());
+            assertEquals(BOOKMARK_END_TIME_MATCH, BOOKMARK.getEnd(), expStub.getEnd());
+            assertNotNull(NON_NULL_UUID, expStub.getUuid());
 
-                BookmarkModelStub expStub = response.readEntity(BookmarkModelStub.class);
-                assertNotNull(NON_NULL_RESPONSE_BODY, expStub);
-                assertEquals(BOOKMARK_NAME_MATCH, BOOKMARK.getName(), expStub.getName());
-                assertEquals(BOOKMARK_START_TIME_MATCH, BOOKMARK.getStart(), expStub.getStart());
-                assertEquals(BOOKMARK_END_TIME_MATCH, BOOKMARK.getEnd(), expStub.getEnd());
-                assertNotNull(NON_NULL_UUID, expStub.getUUID());
-
-                // Check if the UUID is unique
-                assertFalse("UUID should be unique", uuids.contains(expStub.getUUID()));
-                uuids.add(expStub.getUUID());
-            }
+            // Check if the UUID is unique
+            assertFalse("UUID should be unique", uuids.contains(expStub.getUuid()));
+            uuids.add(expStub.getUuid());
         }
 
     }
 
     /**
      * Test the fetching of all bookmarks.
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testGetAllBookmarks() {
-        WebTarget application = getApplicationEndpoint();
-        WebTarget bookmarkTarget = application.path(EXPERIMENTS)
-                .path(experiment.getUUID().toString())
-                .path(BOOKMARKS);
-
-        // Initially there should be no bookmarks
-        try (Response response = bookmarkTarget.request().get()) {
-            BookmarkModelStub[] initialBookmarks = response.readEntity(BookmarkModelStub[].class);
-            assertEquals("Should start with no bookmarks", 0, initialBookmarks.length);
-        }
+    public void testGetAllBookmarks() throws ApiException {
+        List<Bookmark> initialBookmarks = sfBookmarksApi.getBookmarks(experiment.getUUID());
+        assertEquals("Should start with no bookmarks", 0, initialBookmarks.size());
 
         // Create multiple bookmarks
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(START, START_TIME);
-        parameters.put(END, END_TIME);
-
+        BookmarkParameters params = new BookmarkParameters()
+                .start(START_TIME)
+                .end(END_TIME);
         // Create first bookmark
-        parameters.put(NAME, "Bookmark1");
-        try (Response response = bookmarkTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals("First bookmark creation should succeed", 200, response.getStatus());
-        }
+        params.name("Bookmark1");
+        BookmarkQueryParameters queryParams = new BookmarkQueryParameters().parameters(params);
+        Bookmark createdBookmark = sfBookmarksApi.createBookmark(experiment.getUUID(), queryParams);
+        assertNotNull(createdBookmark);
 
         // Create second bookmark
-        parameters.put(NAME, "Bookmark2");
-        try (Response response = bookmarkTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals("Second bookmark creation should succeed", 200, response.getStatus());
-        }
+        params.name("Bookmark2");
+        queryParams = new BookmarkQueryParameters().parameters(params);
+        createdBookmark = sfBookmarksApi.createBookmark(experiment.getUUID(), queryParams);
+        assertNotNull(createdBookmark);
 
         // Get all bookmarks
-        try (Response response = bookmarkTarget.request().get()) {
-            BookmarkModelStub[] allBookmarks = response.readEntity(BookmarkModelStub[].class);
-            assertEquals("Should have 2 bookmarks", 2, allBookmarks.length);
+        List<Bookmark> allBookmarks = sfBookmarksApi.getBookmarks(experiment.getUUID());
+        assertEquals("Should have 2 bookmarks", 2, allBookmarks.size());
 
-            // Verify bookmark properties
-            for (BookmarkModelStub bookmark : allBookmarks) {
-                assertNotNull("Bookmark should not be null", bookmark);
-                assertNotNull("Bookmark UUID should not be null", bookmark.getUUID());
-                assertEquals(BOOKMARK_START_TIME_MATCH, START_TIME, bookmark.getStart());
-                assertEquals(BOOKMARK_END_TIME_MATCH, END_TIME, bookmark.getEnd());
-                assertTrue("Name should be either Bookmark1 or Bookmark2",
-                        bookmark.getName().equals("Bookmark1") || bookmark.getName().equals("Bookmark2"));
-            }
+        // Verify bookmark properties
+        for (Bookmark bookmark : allBookmarks) {
+            assertNotNull("Bookmark should not be null", bookmark);
+            assertNotNull("Bookmark UUID should not be null", bookmark.getUuid());
+            assertEquals(BOOKMARK_START_TIME_MATCH, START_TIME, bookmark.getStart().longValue());
+            assertEquals(BOOKMARK_END_TIME_MATCH, END_TIME, bookmark.getEnd().longValue());
+            assertTrue("Name should be either Bookmark1 or Bookmark2",
+                    bookmark.getName().equals("Bookmark1") || bookmark.getName().equals("Bookmark2"));
         }
     }
 
     /**
      * Test the fetching of a specific bookmark.
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testGetSpecificBookmark() {
-        WebTarget application = getApplicationEndpoint();
-        WebTarget bookmarkTarget = application.path(EXPERIMENTS)
-                .path(experiment.getUUID().toString())
-                .path(BOOKMARKS);
-
+    public void testGetSpecificBookmark() throws ApiException {
         // Create a bookmark
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(NAME, BOOKMARK.getName());
-        parameters.put(START, START_TIME);
-        parameters.put(END, END_TIME);
-
-        BookmarkModelStub createdBookmark = null;
-        try (Response response = bookmarkTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals(SUCCESSFUL_BOOKMARK_CREATION, 200, response.getStatus());
-            createdBookmark = response.readEntity(BookmarkModelStub.class);
-            assertNotNull(NON_NULL_BOOKMARK, createdBookmark);
-        }
+        BookmarkParameters params = new BookmarkParameters()
+                .name(BOOKMARK_NAME)
+                .start(START_TIME)
+                .end(START_TIME);
+        BookmarkQueryParameters queryParams = new BookmarkQueryParameters().parameters(params);
+        Bookmark createdBookmark = sfBookmarksApi.createBookmark(experiment.getUUID(), queryParams);
+        assertNotNull(NON_NULL_BOOKMARK, createdBookmark);
 
         // Test getting non-existent bookmark
-        try (Response nonExistentResponse = bookmarkTarget.path(experiment.getUUID().toString()).request().get()) {
-            assertEquals(NON_EXISTENT_BOOKMARK_STATUS_CODE, 404, nonExistentResponse.getStatus());
+        try {
+            sfBookmarksApi.getBookmark(experiment.getUUID(), UUID.randomUUID());
+        } catch (ApiException ex) {
+            assertEquals(NON_EXISTENT_BOOKMARK_STATUS_CODE, Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("Bookmark not found", errorResponse.getTitle());
         }
 
         // Test getting existing bookmark
-        try (Response response = bookmarkTarget.path(createdBookmark.getUUID().toString()).request().get()) {
-            assertEquals("Should successfully get existing bookmark", 200, response.getStatus());
-
-            BookmarkModelStub retrievedBookmark = response.readEntity(BookmarkModelStub.class);
-            assertEquals("Retrieved bookmark should match created bookmark", createdBookmark, retrievedBookmark);
-        }
+        Bookmark retrievedBookmark = sfBookmarksApi.getBookmark(experiment.getUUID(), createdBookmark.getUuid());
+        assertEquals("Retrieved bookmark should match created bookmark", createdBookmark, retrievedBookmark);
     }
 
     /**
      * Test updating a bookmark.
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testUpdateBookmark() {
-        WebTarget application = getApplicationEndpoint();
-        WebTarget bookmarkTarget = application.path(EXPERIMENTS)
-                .path(experiment.getUUID().toString())
-                .path(BOOKMARKS);
+    public void testUpdateBookmark() throws ApiException {
 
-        // Create initial bookmark
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(NAME, BOOKMARK.getName());
-        parameters.put(START, START_TIME);
-        parameters.put(END, END_TIME);
-
-        BookmarkModelStub originalBookmark = null;
-        try (Response response = bookmarkTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            originalBookmark = response.readEntity(BookmarkModelStub.class);
-            assertEquals(SUCCESSFUL_BOOKMARK_CREATION, 200, response.getStatus());
-            assertNotNull(NON_NULL_BOOKMARK, originalBookmark);
-        }
+        BookmarkParameters params = new BookmarkParameters()
+                .name(BOOKMARK_NAME)
+                .start(START_TIME)
+                .end(END_TIME);
+        BookmarkQueryParameters queryParams = new BookmarkQueryParameters().parameters(params);
+        Bookmark originalBookmark = sfBookmarksApi.createBookmark(experiment.getUUID(), queryParams);
+        assertNotNull(NON_NULL_BOOKMARK, originalBookmark);
 
         // Test updating with invalid parameters
-        parameters.put(START, END_TIME);
-        parameters.put(END, START_TIME);
-        try (Response invalidResponse = bookmarkTarget.path(originalBookmark.getUUID().toString()).request().put(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals("Should return 400 for invalid parameters", 400, invalidResponse.getStatus());
+        params = new BookmarkParameters()
+                .name(BOOKMARK_NAME)
+                .start(END_TIME)
+                .end(START_TIME);
+        queryParams = new BookmarkQueryParameters().parameters(params);
+
+        try {
+            sfBookmarksApi.updateBookmark(experiment.getUUID(), BOOKMARK.getUuid(), queryParams);
+        } catch (ApiException ex) {
+            assertEquals("Should return 400 for invalid parameters", Status.BAD_REQUEST.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("Invalid query parameters: Start time cannot be after end time", errorResponse.getTitle());
         }
 
         // Test successful update
-        parameters.put("name", "Updated Name");
-        parameters.put(START, START_TIME + 5);
-        parameters.put(END, END_TIME + 5);
-        try (Response response = bookmarkTarget.path(originalBookmark.getUUID().toString()).request().put(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals("Update should succeed", 200, response.getStatus());
+        params = new BookmarkParameters()
+                .name("Updated Name")
+                .start(START_TIME + 5)
+                .end(END_TIME + 5);
+        queryParams = new BookmarkQueryParameters().parameters(params);
 
-            BookmarkModelStub updatedBookmark = response.readEntity(BookmarkModelStub.class);
-            assertNotNull(NON_NULL_BOOKMARK, updatedBookmark);
-            assertEquals("UUID should be the same", originalBookmark.getUUID(), updatedBookmark.getUUID());
-            assertEquals("Name should be updated", "Updated Name", updatedBookmark.getName());
-            assertEquals("Start time should be updated", START_TIME + 5, updatedBookmark.getStart());
-            assertEquals("End time should be updated", END_TIME + 5, updatedBookmark.getEnd());
-        }
+        Bookmark updatedBookmark = sfBookmarksApi.updateBookmark(experiment.getUUID(), originalBookmark.getUuid(), queryParams);
+        assertNotNull(NON_NULL_BOOKMARK, updatedBookmark);
+        assertEquals("UUID should be the same", originalBookmark.getUuid(), updatedBookmark.getUuid());
+        assertEquals("Name should be updated", "Updated Name", updatedBookmark.getName());
+        assertEquals("Start time should be updated", START_TIME + 5, updatedBookmark.getStart().longValue());
+        assertEquals("End time should be updated", END_TIME + 5, updatedBookmark.getEnd().longValue());
     }
 
     /**
      * Test the deletion of a bookmark with various scenarios.
+     *
+     * @throws ApiException
+     *             if such exception occurs
      */
     @Test
-    public void testDeleteBookmark() {
-        WebTarget application = getApplicationEndpoint();
-        WebTarget bookmarkTarget = application.path(EXPERIMENTS)
-                .path(experiment.getUUID().toString())
-                .path(BOOKMARKS);
+    public void testDeleteBookmark() throws ApiException {
 
-        // Try deleting non-existent bookmark
-        try (Response nonExistentResponse = bookmarkTarget.path(experiment.getUUID().toString()).request().delete()) {
-            assertEquals(NON_EXISTENT_BOOKMARK_STATUS_CODE, 404, nonExistentResponse.getStatus());
+        try {
+            sfBookmarksApi.deleteBookmark(experiment.getUUID(), UUID.randomUUID());
+        } catch (ApiException ex) {
+            assertEquals(NON_EXISTENT_BOOKMARK_STATUS_CODE, Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("Bookmark not found", errorResponse.getTitle());
         }
 
         // Create a bookmark to delete
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(NAME, BOOKMARK.getName());
-        parameters.put(START, START_TIME);
-        parameters.put(END, END_TIME);
-
-        BookmarkModelStub createdBookmark = null;
-        try (Response response = bookmarkTarget.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            createdBookmark = response.readEntity(BookmarkModelStub.class);
-            assertEquals(SUCCESSFUL_BOOKMARK_CREATION, 200, response.getStatus());
-            assertNotNull(NON_NULL_BOOKMARK, createdBookmark);
-        }
+        BookmarkParameters params = new BookmarkParameters()
+                .name(BOOKMARK_NAME)
+                .start(START_TIME)
+                .end(END_TIME);
+        BookmarkQueryParameters queryParams = new BookmarkQueryParameters().parameters(params);
+        Bookmark createdBookmark = sfBookmarksApi.createBookmark(experiment.getUUID(), queryParams);
+        assertNotNull(NON_NULL_BOOKMARK, createdBookmark);
 
         // Delete the bookmark
-        try (Response response = bookmarkTarget.path(createdBookmark.getUUID().toString()).request().delete()) {
-            assertEquals("Delete should succeed", 200, response.getStatus());
-            BookmarkModelStub deletedBookmark = response.readEntity(BookmarkModelStub.class);
-            assertEquals("Deleted bookmark should match created bookmark", createdBookmark, deletedBookmark);
-        }
+        Bookmark deletedBookmark = sfBookmarksApi.deleteBookmark(experiment.getUUID(), createdBookmark.getUuid());
+        assertEquals("Deleted bookmark should match created bookmark", createdBookmark, deletedBookmark);
 
         // Verify the bookmark is actually deleted
-        try (Response getResponse = bookmarkTarget.path(createdBookmark.getUUID().toString()).request().get()) {
-            assertEquals("Should return 404 for deleted bookmark", 404, getResponse.getStatus());
+        try {
+            sfBookmarksApi.getBookmark(UUID.randomUUID(), BOOKMARK.getUuid());
+        } catch (ApiException ex) {
+            assertEquals(NON_EXISTENT_EXPERIMENT_STATUS_CODE, Status.NOT_FOUND.getStatusCode(), ex.getCode());
+            ErrorResponse errorResponse = deserializeErrorResponse(ex.getResponseBody(), ErrorResponse.class);
+            assertNotNull(errorResponse);
+            assertEquals("No such experiment", errorResponse.getTitle());
         }
 
         // Verify it's not in the list of all bookmarks
-        try (Response getAllResponse = bookmarkTarget.request().get()) {
-            BookmarkModelStub[] allBookmarks = getAllResponse.readEntity(BookmarkModelStub[].class);
-            for (BookmarkModelStub bookmark : allBookmarks) {
-                assertNotEquals("Deleted bookmark should not be in list of all bookmarks", createdBookmark.getUUID(), bookmark.getUUID());
-            }
+        List<Bookmark> allBookmarks = sfBookmarksApi.getBookmarks(experiment.getUUID());
+        for (Bookmark bookmark : allBookmarks) {
+            assertNotEquals("Deleted bookmark should not be in list of all bookmarks", createdBookmark.getUuid(), bookmark.getUuid());
         }
     }
 }
