@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.DataProvider;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
@@ -34,7 +34,7 @@ import org.junit.Test;
  * @author Geneviève Bastien
  * @author Bernd Hufmann
  */
-public class DataProviderServiceTest extends NewRestServerTest {
+public class DataProviderServiceTest extends RestServerTest {
 
     /**
      * Test getting the data provider descriptors

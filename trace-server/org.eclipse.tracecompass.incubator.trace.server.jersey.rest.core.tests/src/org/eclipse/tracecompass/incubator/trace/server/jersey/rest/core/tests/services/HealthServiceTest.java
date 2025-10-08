@@ -16,7 +16,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.HealthService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.DiagnosticApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.ServerStatus;
@@ -28,7 +28,7 @@ import org.junit.Test;
  *
  * @author Geneviève Bastien
  */
-public class HealthServiceTest extends NewRestServerTest {
+public class HealthServiceTest extends RestServerTest {
 
     private static final DiagnosticApi sfDiagnosticApi = new DiagnosticApi(sfApiClient);
 
