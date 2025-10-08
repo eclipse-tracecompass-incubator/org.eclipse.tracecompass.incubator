@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.OutputElementStyleSerializer;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.OutputElementStyleStub;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.StyleValue;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
 import org.eclipse.tracecompass.tmf.core.model.StyleProperties;
 import org.junit.Test;
@@ -61,7 +61,7 @@ public class OutputElementStyleSerializerTest extends AbstractSerializerTest {
         OutputElementStyle testStyle = new OutputElementStyle(VALID_STYLE_NAME, validStyles);
         String json = fMapper.writeValueAsString(testStyle);
 
-        OutputElementStyleStub deserialized = fMapper.readValue(json, OutputElementStyleStub.class);
+        org.eclipse.tracecompass.incubator.tsp.client.core.model.OutputElementStyle deserialized = fMapper.readValue(json, org.eclipse.tracecompass.incubator.tsp.client.core.model.OutputElementStyle.class);
         assertEquals(testStyle.getParentKey(), deserialized.getParentKey());
 
         verifyStyles(testStyle, deserialized);
@@ -90,7 +90,7 @@ public class OutputElementStyleSerializerTest extends AbstractSerializerTest {
         OutputElementStyle testStyle = new OutputElementStyle(MAPPED_STYLE_NAME, mappedStyles);
         String json = fMapper.writeValueAsString(testStyle);
 
-        OutputElementStyleStub deserialized = fMapper.readValue(json, OutputElementStyleStub.class);
+        org.eclipse.tracecompass.incubator.tsp.client.core.model.OutputElementStyle deserialized = fMapper.readValue(json, org.eclipse.tracecompass.incubator.tsp.client.core.model.OutputElementStyle.class);
         assertEquals(testStyle.getParentKey(), deserialized.getParentKey());
 
         verifyStyles(testStyle, deserialized);
@@ -117,24 +117,26 @@ public class OutputElementStyleSerializerTest extends AbstractSerializerTest {
         OutputElementStyle testStyle = new OutputElementStyle(INVALID_STYLE_NAME, invalidStyles);
         String json = fMapper.writeValueAsString(testStyle);
 
-        OutputElementStyleStub deserialized = fMapper.readValue(json, OutputElementStyleStub.class);
+        org.eclipse.tracecompass.incubator.tsp.client.core.model.OutputElementStyle deserialized = fMapper.readValue(json, org.eclipse.tracecompass.incubator.tsp.client.core.model.OutputElementStyle.class);
         assertEquals(testStyle.getParentKey(), deserialized.getParentKey());
-        assertTrue(deserialized.getStyleValues().isEmpty());
+        assertTrue(deserialized.getValues().isEmpty());
     }
 
-    private static void verifyStyles(OutputElementStyle testStyle, OutputElementStyleStub deserialized) {
+    private static void verifyStyles(OutputElementStyle testStyle, org.eclipse.tracecompass.incubator.tsp.client.core.model.OutputElementStyle deserialized) {
         for (Entry<String, Object> entry : testStyle.getStyleValues().entrySet()) {
-            Map<String, Object> styleValues = deserialized.getStyleValues();
+            Map<String, StyleValue> styleValues = deserialized.getValues();
             assertNotNull(styleValues);
             String key = entry.getKey();
             Object entryValue = entry.getValue();
             assertTrue(key, styleValues.containsKey(key));
+            StyleValue val = styleValues.get(key);
+            assertNotNull(val);
             if (entryValue instanceof Float || entryValue instanceof Double) {
-                assertEquals(key, Double.valueOf(entryValue.toString()), styleValues.get(key));
+                assertEquals(key, Double.valueOf(entryValue.toString()), val.getDouble());
             } else if (entryValue instanceof Number longValue) {
-                assertEquals(key, longValue.intValue(), styleValues.get(key));
+                assertEquals(key, longValue.intValue(), (val.getInteger().intValue()));
             } else {
-                assertEquals(key, entryValue, styleValues.get(key));
+                assertEquals(key, entryValue, val.getString());
             }
         }
     }
