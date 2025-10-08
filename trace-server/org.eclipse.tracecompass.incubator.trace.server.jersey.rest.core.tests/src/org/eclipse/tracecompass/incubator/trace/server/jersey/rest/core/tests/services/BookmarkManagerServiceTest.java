@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.BookmarksApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.Bookmark;
@@ -50,7 +50,7 @@ import org.junit.Test;
  * @author Kaveh Shahedi
  */
 @SuppressWarnings("null")
-public class BookmarkManagerServiceTest extends NewRestServerTest {
+public class BookmarkManagerServiceTest extends RestServerTest {
 
     private static final String BOOKMARK_NAME = "TEST";
     private static final long START_TIME = 0L;

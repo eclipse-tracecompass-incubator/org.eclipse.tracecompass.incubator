@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.XyApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
@@ -48,7 +48,7 @@ import org.junit.Test;
  * @author Geneviève Bastien
  * @author Bernd Hufmann
  */
-public class XyDataProviderServiceTest extends NewRestServerTest {
+public class XyDataProviderServiceTest extends RestServerTest {
     private static final String DATA_PROVIDER_RESPONSE_FAILED_MSG = "There should be a positive response for the data provider";
     private static final String MODEL_NULL_MSG = "The model is null, maybe the analysis did not run long enough?";
     private static final int MAX_ITER = 40;
@@ -235,7 +235,7 @@ public class XyDataProviderServiceTest extends NewRestServerTest {
     @Test
     public void testXYErrors() {
         Experiment exp = assertPostExperiment(sfArm64KernelNotIntitialzedStub.getName(), sfArm64KernelNotIntitialzedStub);
-        executePostErrorTests(exp.getUUID(), NewRestServerTest::getXYTreeEndpoint, XY_DATAPROVIDER_ID, false);
-        executePostErrorTests(exp.getUUID(), NewRestServerTest::getXYSeriesEndpoint, XY_DATAPROVIDER_ID, true);
+        executePostErrorTests(exp.getUUID(), RestServerTest::getXYTreeEndpoint, XY_DATAPROVIDER_ID, false);
+        executePostErrorTests(exp.getUUID(), RestServerTest::getXYSeriesEndpoint, XY_DATAPROVIDER_ID, true);
     }
 }

@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.TraceManagerService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.ErrorResponse;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
@@ -53,7 +53,7 @@ import org.junit.Test;
  * @author Bend Hufmann
  */
 @SuppressWarnings("null")
-public class TraceManagerServiceTest extends NewRestServerTest {
+public class TraceManagerServiceTest extends RestServerTest {
 
     private static final String TEST = "test";
     private static final @NonNull List<Trace> CONTEXT_SWITCH_SET = List.of(sfContextSwitchesUstStub);
