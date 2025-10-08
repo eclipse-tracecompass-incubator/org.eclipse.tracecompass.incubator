@@ -320,9 +320,17 @@ public class ExperimentManagerService {
                 Multiset<IResource> newTraceResources = HashMultiset.create(traceResources);
                 if (!oldTraceResources.equals(newTraceResources)) {
                     // It's a different experiment, return a conflict
-                    TmfExperiment oldExperiment = new TmfExperiment(ITmfEvent.class, resource.getLocation().toOSString(), new ITmfTrace[0], TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, resource);
+                    TmfExperiment oldExperiment = EXPERIMENTS.get(expUUID);
+                    boolean dispose = false;
+                    if (oldExperiment == null) {
+                        // should not happen
+                        dispose = true;
+                        oldExperiment = new TmfExperiment(ITmfEvent.class, resource.getLocation().toOSString(), new ITmfTrace[0], TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, resource);
+                    }
                     Experiment entity = Experiment.from(oldExperiment, expUUID);
-                    oldExperiment.dispose();
+                    if (dispose) {
+                        oldExperiment.dispose();
+                    }
                     return ErrorResponseUtil.newErrorResponse(Status.CONFLICT, EXPERIMENT_NAME_EXISTS, EXPERIMENT_NAME_EXISTS_DETAIL, entity);
                 }
                 // It's the same experiment, check if it is opened already

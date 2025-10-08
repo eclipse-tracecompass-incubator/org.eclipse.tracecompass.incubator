@@ -67,7 +67,12 @@ public class IdentifierService {
         response.setOsVersion(System.getProperty(OS_VERSION));
         response.setCpuCount(Runtime.getRuntime().availableProcessors());
         response.setMaxMemory(Runtime.getRuntime().maxMemory());
-        response.setProductId(System.getProperty(PRODUCT_ID));
+        String productId = System.getProperty(PRODUCT_ID);
+        if (productId == null) {
+            // Product ID is null when running JUnit test from IDE. Return a non-null value here.
+            productId = "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id.test"; //$NON-NLS-1$
+        }
+        response.setProductId(productId);
         response.setLauncherName(System.getProperty(LAUNCHER_NAME));
 
         if (product != null) {
