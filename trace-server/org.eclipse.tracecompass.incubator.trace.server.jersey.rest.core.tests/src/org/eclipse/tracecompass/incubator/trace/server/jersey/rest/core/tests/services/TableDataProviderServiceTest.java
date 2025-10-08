@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.VirtualTablesApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
@@ -40,7 +40,7 @@ import org.junit.Test;
  *
  * @author Bernd Hufmann
  */
-public class TableDataProviderServiceTest extends NewRestServerTest {
+public class TableDataProviderServiceTest extends RestServerTest {
     private static final String DATA_PROVIDER_RESPONSE_FAILED_MSG = "There should be a positive response for the data provider";
     private static final String MODEL_NULL_MSG = "The model is null, maybe the analysis did not run long enough?";
     private static final int MAX_ITER = 40;
@@ -122,7 +122,7 @@ public class TableDataProviderServiceTest extends NewRestServerTest {
     @Test
     public void testTableErrors() {
         Experiment exp = assertPostExperiment(sfArm64KernelNotIntitialzedStub.getName(), sfArm64KernelNotIntitialzedStub);
-        executePostErrorTests(exp.getUUID(), NewRestServerTest::getTableColumnsEndpoint, EVENTS_TABLE_DATAPROVIDER_ID, false);
-        executePostErrorTests(exp.getUUID(), NewRestServerTest::getTableLinesEndpoint, EVENTS_TABLE_DATAPROVIDER_ID, true);
+        executePostErrorTests(exp.getUUID(), RestServerTest::getTableColumnsEndpoint, EVENTS_TABLE_DATAPROVIDER_ID, false);
+        executePostErrorTests(exp.getUUID(), RestServerTest::getTableLinesEndpoint, EVENTS_TABLE_DATAPROVIDER_ID, true);
     }
 }

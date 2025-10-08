@@ -36,7 +36,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ConfigurationManagerService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.config.TestSchemaConfigurationSource.Parameters;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.ConfigurationsApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.XyApi;
@@ -62,7 +62,7 @@ import com.google.gson.Gson;
  * @author Bernd Hufmann
  */
 @SuppressWarnings("restriction")
-public class ConfigurationManagerServiceTest extends NewRestServerTest {
+public class ConfigurationManagerServiceTest extends RestServerTest {
 
     private static final Bundle XML_CORE_TESTS = Platform.getBundle("org.eclipse.tracecompass.tmf.analysis.xml.core.tests");
 

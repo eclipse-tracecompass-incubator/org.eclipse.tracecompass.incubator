@@ -16,7 +16,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.IdentifierService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.IdentifierApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.ServerInfoResponse;
@@ -27,7 +27,7 @@ import org.junit.Test;
  *
  * @author Vlad Arama
  */
-public class IdentifierServiceTest extends NewRestServerTest {
+public class IdentifierServiceTest extends RestServerTest {
 
     private static final IdentifierApi sfIdentifierApi = new IdentifierApi(sfApiClient);
 

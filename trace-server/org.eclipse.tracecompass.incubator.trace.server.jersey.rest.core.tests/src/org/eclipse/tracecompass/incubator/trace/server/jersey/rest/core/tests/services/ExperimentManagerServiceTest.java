@@ -35,7 +35,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ExperimentManagerService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment.IndexingStatusEnum;
@@ -56,7 +56,7 @@ import org.junit.Test;
  * @author Bernd Hufamnn
  */
 @SuppressWarnings("null")
-public class ExperimentManagerServiceTest extends NewRestServerTest {
+public class ExperimentManagerServiceTest extends RestServerTest {
 
     private static final String TEST = "test";
     private static final @NonNull List<Trace> CONTEXT_SWITCH_SET = List.of(sfContextSwitchesKernelWithOffsetStub, sfContextSwitchesUstWithOffsetStub);

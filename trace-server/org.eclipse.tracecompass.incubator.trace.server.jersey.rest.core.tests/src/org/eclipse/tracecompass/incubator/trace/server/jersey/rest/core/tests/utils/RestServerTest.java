@@ -13,6 +13,7 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.u
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,43 +24,53 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.OutputConfigurationQueryParameters;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.views.QueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
-import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ErrorResponseImpl;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.TraceServerConfiguration;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.webapp.WebApplication;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.DataProviderDescriptorStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.ExperimentModelStub;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TraceModelStub;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp.TestWebApplication;
+import org.eclipse.tracecompass.incubator.tsp.client.core.ApiClient;
+import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
+import org.eclipse.tracecompass.incubator.tsp.client.core.Configuration;
+import org.eclipse.tracecompass.incubator.tsp.client.core.api.AnnotationsApi;
+import org.eclipse.tracecompass.incubator.tsp.client.core.api.ExperimentsApi;
+import org.eclipse.tracecompass.incubator.tsp.client.core.api.TracesApi;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.DataProvider;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.DataProvider.TypeEnum;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ErrorResponse;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ExperimentParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.ExperimentQueryParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Trace;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Trace.IndexingStatusEnum;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TraceParameters;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.TraceQueryParameters;
 import org.eclipse.tracecompass.testtraces.ctf.CtfTestTrace;
-import org.eclipse.tracecompass.tmf.core.config.ITmfConfiguration;
-import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.osgi.framework.Bundle;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
@@ -74,7 +85,6 @@ import com.google.common.collect.ImmutableList;
  */
 @SuppressWarnings("null")
 public abstract class RestServerTest {
-    private static final String ERROR_CODE_STR = ", error code=";
     private static final String SERVER = "http://localhost:8378/tsp/api"; //$NON-NLS-1$
     private static final WebApplication fWebApp = new TestWebApplication(new TraceServerConfiguration(TraceServerConfiguration.TEST_PORT, false, null, null));
     private static final Bundle TEST_BUNDLE = Platform.getBundle("org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests");
@@ -92,6 +102,21 @@ public abstract class RestServerTest {
     private static final String TRACER_MINOR_KEY = "tracer_minor"; //$NON-NLS-1$
     private static final String TRACER_NAME_KEY = "tracer_name"; //$NON-NLS-1$
     private static final String TRACER_PATCHLEVEL_KEY = "tracer_patchlevel";
+
+    /**
+     * Comparator to sort a list of traces by name
+     */
+    protected static final Comparator<Trace> TRACE_COMPARATOR = Comparator.comparing(Trace::getName).thenComparing(Trace::getPath);
+
+    /**
+     * Comparator to sort a list of experiments by name
+     */
+    protected static final Comparator<Experiment> EXPERIMENT_COMPARATOR = (p1, p2) -> p1.getName().compareTo(p2.getName());
+
+    /**
+     * Comparator to sort a list of Data providers by name
+     */
+    protected static final Comparator<DataProvider> DP_COMPARATOR = (p1, p2) -> p1.getName().compareTo(p2.getName());
 
     /**
      * No parameter string
@@ -260,36 +285,56 @@ public abstract class RestServerTest {
      */
     public static final String VALID_JSON_FILENAME = "custom-execution-analysis.json";
 
-    private static final GenericType<Set<TraceModelStub>> TRACE_MODEL_SET_TYPE = new GenericType<>() {
-    };
-    private static final GenericType<Set<ExperimentModelStub>> EXPERIMENT_MODEL_SET_TYPE = new GenericType<>() {
-    };
-    private static final GenericType<Set<DataProviderDescriptorStub>> DATAPROVIDER_DESCR_MODEL_SET_TYPE = new GenericType<>() {
-    };
+    /**
+     * API client
+     */
+    protected static ApiClient sfApiClient = Configuration.getDefaultApiClient();
+    /**
+     * Traces API
+     */
+    protected static TracesApi sfTracesApi = new TracesApi(sfApiClient);
+    /**
+     * Experiments API
+     */
+    protected static ExperimentsApi sfExpApi = new ExperimentsApi(sfApiClient);
+
+    /**
+     * Annotations API
+     */
+    protected static AnnotationsApi sfAnnotationApi = new AnnotationsApi(sfApiClient);
 
     /**
      * Callstack data provider descriptor
      */
-    protected static final DataProviderDescriptorStub EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR = new DataProviderDescriptorStub(
-            null,
-            CALL_STACK_DATAPROVIDER_ID,
-            "Flame Chart",
-            "Show a call stack over time",
-            ProviderType.TIME_GRAPH.name(),
-            null,
-            null);
+    protected static final DataProvider EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR =
+            new DataProvider().id(CALL_STACK_DATAPROVIDER_ID)
+            .name("Flame Chart")
+            .description("Show a call stack over time")
+            .type(TypeEnum.TIME_GRAPH);
 
     /**
-     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link Trace} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
+     *
+     * Note: Trace opened alone without kernel trace in experiment, hence no automatic
+     * time offset is applied by Trace Compass
      */
-    protected static TraceModelStub sfContextSwitchesUstStub;
+    protected static Trace sfContextSwitchesUstStub;
 
     /**
-     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link Trace} to represent the object returned by the server for
+     * {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
+     *
+     * Note: Trace opened with kernel trace in experiment, hence automatic
+     * time offset is applied by Trace Compass
+     */
+    protected static Trace sfContextSwitchesUstWithOffsetStub;
+
+    /**
+     * {@link Trace} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_UST} without metadata initialized.
      */
-    protected static TraceModelStub sfContextSwitchesUstNotInitializedStub;
+    protected static Trace sfContextSwitchesUstNotInitializedStub;
 
     /**
      * The name used when posting the trace.
@@ -311,16 +356,27 @@ public abstract class RestServerTest {
         ));
 
     /**
-     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link Trace} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL}.
+     * Note: Trace opened alone without kernel trace in experiment, hence no automatic
+     * time offset is applied by Trace Compass
      */
-    protected static TraceModelStub sfContextSwitchesKernelStub;
+    protected static Trace sfContextSwitchesKernelStub;
 
     /**
-     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link Trace} to represent the object returned by the server for
+     * {@link CtfTestTrace#CONTEXT_SWITCHES_UST}.
+     *
+     * Note: Trace opened with UST trace in experiment, hence automatic
+     * time offset is applied by Trace Compass
+     */
+    protected static Trace sfContextSwitchesKernelWithOffsetStub;
+
+    /**
+     * {@link Trace} to represent the object returned by the server for
      * {@link CtfTestTrace#CONTEXT_SWITCHES_KERNEL} without metadata initialized.
      */
-    protected static TraceModelStub sfContextSwitchesKernelNotInitializedStub;
+    protected static Trace sfContextSwitchesKernelNotInitializedStub;
 
     /**
      * The name used when posting the trace.
@@ -346,16 +402,16 @@ public abstract class RestServerTest {
         ));
 
     /**
-     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link Trace} to represent the object returned by the server for
      * {@link CtfTestTrace#ARM_64_BIT_HEADER}, with the same name as {@link #sfContextSwitchesKernelStub}
      */
-    protected static TraceModelStub sfArm64KernelStub;
+    protected static Trace sfArm64KernelStub;
 
     /**
-     * {@link TraceModelStub} to represent the object returned by the server for
+     * {@link Trace} to represent the object returned by the server for
      * {@link CtfTestTrace#ARM_64_BIT_HEADER} without metadata initialized.
      */
-    protected static TraceModelStub sfArm64KernelNotIntitialzedStub;
+    protected static Trace sfArm64KernelNotIntitialzedStub;
 
     /**
      * The name used when posting the trace.
@@ -383,10 +439,10 @@ public abstract class RestServerTest {
     /**
      * Expected toString() of all data providers for this experiment
      */
-    protected static List<DataProviderDescriptorStub> sfExpectedDataProviderDescriptorStub = null;
+    protected static List<DataProvider> sfExpectedDataProviderDescriptorStub = null;
 
     /**
-     * Create the {@link TraceModelStub}s before running the tests
+     * Create the {@link Trace}s before running the tests
      *
      * @throws IOException
      *             if the URL could not be converted to a path
@@ -394,28 +450,113 @@ public abstract class RestServerTest {
     @BeforeClass
     public static void beforeTest() throws IOException {
         String contextSwitchesUstPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_UST.getTraceURL()).getPath().replaceAll("/$", "");
-        sfContextSwitchesUstNotInitializedStub = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, Collections.emptyMap());
-        sfContextSwitchesUstStub = new TraceModelStub(CONTEXT_SWITCHES_UST_NAME, contextSwitchesUstPath, CONTEXT_SWITCHES_UST_PROPERTIES);
+        long ustStart = 1450193697034689597L;
+        long ustEnd = 1450193745774189602L;
+        long offset = 2120837776L;
+        long kernelStart = 1450193684107249704L;
+        long kernelEnd = 1450193776505076263L;
+
+        // Trace posted to trace server but not yet indexed (not part of experiment)
+        sfContextSwitchesUstNotInitializedStub = new Trace()
+                .name(CONTEXT_SWITCHES_UST_NAME)
+                .path(contextSwitchesUstPath)
+                .properties(Collections.emptyMap())
+                .end(0L)
+                .start(0L)
+                .nbEvents(0L)
+                .indexingStatus(IndexingStatusEnum.CLOSED)
+                .uuid(getTraceUUID(contextSwitchesUstPath, CONTEXT_SWITCHES_UST_NAME));
+
+        // Trace opened standalone in experiment without corresponding kernel trace, hence no
+        // automatic time offset is applied by Trace Compass
+        sfContextSwitchesUstStub = new Trace()
+                .name(CONTEXT_SWITCHES_UST_NAME)
+                .path(contextSwitchesUstPath)
+                .properties(CONTEXT_SWITCHES_UST_PROPERTIES)
+                .end(ustEnd)
+                .start(ustStart)
+                .nbEvents(3934L)
+                .indexingStatus(IndexingStatusEnum.COMPLETED)
+                .uuid(getTraceUUID(contextSwitchesUstPath, CONTEXT_SWITCHES_UST_NAME));
+
+        // Trace opened in experiment with corresponding kernel trace, hence an
+        // automatic time offset is applied by Trace Compass
+        sfContextSwitchesUstWithOffsetStub = new Trace()
+                .name(CONTEXT_SWITCHES_UST_NAME)
+                .path(contextSwitchesUstPath)
+                .properties(CONTEXT_SWITCHES_UST_PROPERTIES)
+                .end(ustEnd + offset)
+                .start(ustStart + offset)
+                .nbEvents(3934L)
+                .indexingStatus(IndexingStatusEnum.COMPLETED)
+                .uuid(getTraceUUID(contextSwitchesUstPath, CONTEXT_SWITCHES_UST_NAME));
 
         String contextSwitchesKernelPath = FileLocator.toFileURL(CtfTestTrace.CONTEXT_SWITCHES_KERNEL.getTraceURL()).getPath().replaceAll("/$", "");
-        sfContextSwitchesKernelNotInitializedStub = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, Collections.emptyMap());
-        sfContextSwitchesKernelStub = new TraceModelStub(CONTEXT_SWITCHES_KERNEL_NAME, contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_PROPERTIES);
+        // Trace posted to trace server but not yet indexed (not part of experiment)
+        sfContextSwitchesKernelNotInitializedStub = new Trace()
+                .name(CONTEXT_SWITCHES_KERNEL_NAME)
+                .path(contextSwitchesKernelPath)
+                .properties(Collections.emptyMap())
+                .end(0L)
+                .start(0L)
+                .nbEvents(0L)
+                .indexingStatus(IndexingStatusEnum.CLOSED)
+                .uuid(getTraceUUID(contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_NAME));
+
+        // Trace opened standalone in experiment without corresponding UST trace, hence no
+        // automatic time offset is applied by Trace Compass
+        sfContextSwitchesKernelStub = new Trace()
+                .name(CONTEXT_SWITCHES_KERNEL_NAME)
+                .path(contextSwitchesKernelPath)
+                .properties(CONTEXT_SWITCHES_KERNEL_PROPERTIES)
+                .end(kernelEnd)
+                .start(kernelStart)
+                .nbEvents(241566L)
+                .indexingStatus(IndexingStatusEnum.COMPLETED)
+                .uuid(getTraceUUID(contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_NAME));
+
+         // Trace opened in experiment with corresponding UST trace, hence an
+         // automatic time offset is applied by Trace Compass
+         sfContextSwitchesKernelWithOffsetStub = new Trace()
+                .name(CONTEXT_SWITCHES_KERNEL_NAME)
+                .path(contextSwitchesKernelPath)
+                .properties(CONTEXT_SWITCHES_KERNEL_PROPERTIES)
+                .end(kernelEnd - offset)
+                .start(kernelStart - offset)
+                .nbEvents(241566L)
+                .indexingStatus(IndexingStatusEnum.COMPLETED)
+                .uuid(getTraceUUID(contextSwitchesKernelPath, CONTEXT_SWITCHES_KERNEL_NAME));
 
         String arm64Path = FileLocator.toFileURL(CtfTestTrace.ARM_64_BIT_HEADER.getTraceURL()).getPath().replaceAll("/$", "");
-        sfArm64KernelNotIntitialzedStub = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, Collections.emptyMap());
-        sfArm64KernelStub = new TraceModelStub(ARM_64_KERNEL_NAME, arm64Path, ARM_64_KERNEL_PROPERTIES);
+        sfArm64KernelNotIntitialzedStub = new Trace()
+                .name(ARM_64_KERNEL_NAME)
+                .path(arm64Path)
+                .properties(Collections.emptyMap())
+                .end(0L)
+                .start(0L)
+                .nbEvents(0L)
+                .indexingStatus(IndexingStatusEnum.CLOSED)
+                .uuid(getTraceUUID(arm64Path, ARM_64_KERNEL_NAME));
+        sfArm64KernelStub = new Trace().name(ARM_64_KERNEL_NAME).path(arm64Path).properties(ARM_64_KERNEL_PROPERTIES);
 
-        ImmutableList.Builder<DataProviderDescriptorStub> b = ImmutableList.builder();
-        b.add(new DataProviderDescriptorStub(null, "org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack",
-                "LTTng-UST CallStack - Latency vs Time",
-                "Show latencies provided by Analysis module: LTTng-UST CallStack",
-                ProviderType.TREE_TIME_XY.name(), null, null));
+        ImmutableList.Builder<DataProvider> b = ImmutableList.builder();
+        b.add(new DataProvider().id("org.eclipse.tracecompass.internal.analysis.timing.core.segmentstore.scatter.dataprovider:org.eclipse.linuxtools.lttng2.ust.analysis.callstack")
+                .name("LTTng-UST CallStack - Latency vs Time")
+                .description("Show latencies provided by Analysis module: LTTng-UST CallStack")
+                .type(TypeEnum.TREE_TIME_XY));
+
         b.add(EXPECTED_CALLSTACK_PROVIDER_DESCRIPTOR);
-        b.add(new DataProviderDescriptorStub(null,"org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
-                "Histogram",
-                "Show a histogram of number of events to time for a trace",
-                ProviderType.TREE_TIME_XY.name(), null, null));
+
+        b.add(new DataProvider().id("org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider")
+                .name("Histogram")
+                .description("Show a histogram of number of events to time for a trace")
+                .type(TypeEnum.TREE_TIME_XY));
+
         sfExpectedDataProviderDescriptorStub = b.build();
+
+        sfApiClient.setBasePath("http://localhost:8378/tsp/api");
+        sfTracesApi = new TracesApi(sfApiClient);
+        sfExpApi = new ExperimentsApi(sfApiClient);
     }
 
     /**
@@ -431,24 +572,19 @@ public abstract class RestServerTest {
 
     /**
      * Stop the server once tests are finished, and close the traces
+     * @throws ApiException
+     *             if an error occurs
      */
     @After
-    public void stopServer() {
-        WebTarget application = getApplicationEndpoint();
-        WebTarget experimentsTarget = application.path(EXPERIMENTS);
-        for (ExperimentModelStub experiment: getExperiments(experimentsTarget)) {
-            try (Response response = experimentsTarget.path(experiment.getUUID().toString()).request().delete()) {
-                assertEquals(experiment, response.readEntity(ExperimentModelStub.class));
-            }
+    public void stopServer() throws ApiException {
+        for (Experiment experiment: getExperiments()) {
+            assertEquals(experiment, deleteExperiment(experiment.getUUID()));
         }
-        WebTarget traceTarget = application.path(TRACES);
-        for (TraceModelStub trace : getTraces(traceTarget)) {
-            try (Response response = traceTarget.path(trace.getUUID().toString()).request().delete()) {
-                assertEquals(trace, response.readEntity(TraceModelStub.class));
-            }
+        for (Trace trace : getTraces()) {
+            assertEquals(trace, sfTracesApi.deleteTrace(trace.getUUID()));
         }
-        assertEquals(Collections.emptySet(), getTraces(traceTarget));
-        assertEquals(Collections.emptySet(), getExperiments(experimentsTarget));
+        assertEquals(Collections.emptyList(), getTraces());
+        assertEquals(Collections.emptyList(), getExperiments());
         fWebApp.stop();
     }
 
@@ -629,7 +765,8 @@ public abstract class RestServerTest {
     /**
      * Get the {@link WebTarget} for the XY series endpoint.
      *
-     * @param expUUID     *            Experiment UUID
+     * @param expUUID
+     *            Experiment UUID
      * @param dataProviderId
      *            Data provider ID
      * @return The XY series endpoint
@@ -695,54 +832,93 @@ public abstract class RestServerTest {
                 .path(dataProviderId);
     }
 
-
-
     /**
      * Get the traces currently open on the server.
      *
-     * @param traces
-     *            traces endpoint on the server
-     * @return list of currently open traces.
+     * @return set of traces
+     * @throws ApiException
+     *             if an error occurs
+     *
      */
-    public static Set<TraceModelStub> getTraces(WebTarget traces) {
-        return traces.request(MediaType.APPLICATION_JSON).get(TRACE_MODEL_SET_TYPE);
+    public static List<Trace> getTraces() throws ApiException {
+        List<Trace> traces = sfTracesApi.getTraces();
+        traces.sort(TRACE_COMPARATOR);
+        return traces;
     }
 
     /**
      * Get the experiments currently open on the server.
      *
-     * @param experiments
-     *            experiment endpoint on the server.
-     * @return list of currently open experiments.
+     * @return set of currently open experiments.
+     * @throws ApiException
+     *             if an error occurs experiment.
      */
-    public static Set<ExperimentModelStub> getExperiments(WebTarget experiments) {
-        return experiments.request(MediaType.APPLICATION_JSON).get(EXPERIMENT_MODEL_SET_TYPE);
+    public static List<Experiment> getExperiments() throws ApiException {
+        List<Experiment> experiments = sfExpApi.getExperiments();
+        experiments.sort(EXPERIMENT_COMPARATOR);
+        for (Experiment exp : experiments) {
+            sortExperiment(exp);
+        }
+        return experiments;
     }
 
     /**
-     * Get a set of {@link DataProviderDescriptorStub}
+     * Sort traces in experiment
      *
-     * @param outputs
-     *            {@link WebTarget} for the outputs endpoint
-     * @return Set of {@link DataProviderDescriptorStub} given by the server
+     * @param exp
+     *            the experiment
      */
-    public static Set<DataProviderDescriptorStub> getDataProviderDescriptors(WebTarget outputs) {
-        return outputs.request(MediaType.APPLICATION_JSON).get(DATAPROVIDER_DESCR_MODEL_SET_TYPE);
+    protected static void sortExperiment(Experiment exp) {
+        List<Trace> traces = exp.getTraces();
+        traces.sort(TRACE_COMPARATOR);
+        exp.traces(traces);
     }
 
     /**
-     * Get the {@link WebTarget} for the experiment's marker sets
+     * Get the experiment by uuid currently open on the server.
      *
-     * @param expUUID
-     *            Experiment UUID
-     * @return marker sets model
+     * @param uuid
+     *            the experiment UUID
+     * @return set of currently open experiments.
+     * @throws ApiException
+     *             if an error occurs experiment.
      */
-    public static WebTarget getMarkerSetsEndpoint(String expUUID) {
-        return getApplicationEndpoint().path(EXPERIMENTS)
-                .path(expUUID)
-                .path(OUTPUTS_PATH)
-                .path(MARKER_SETS);
+    public static Experiment getExperiment(UUID uuid) throws ApiException {
+        Experiment exp = sfExpApi.getExperiment(uuid);
+        sortExperiment(exp);
+        return exp;
     }
+
+    /**
+     * Delete the experiment by uuid currently open on the server.
+     *
+     * @param uuid
+     *            the experiment UUID
+     * @return set of currently open experiments.
+     * @throws ApiException
+     *             if an error occurs experiment.
+     */
+    public static Experiment deleteExperiment(UUID uuid) throws ApiException {
+        Experiment exp = sfExpApi.deleteExperiment(uuid);
+        sortExperiment(exp);
+        return exp;
+    }
+
+    /**
+     * Get a set of {@link DataProvider}
+     *
+     * @param expUuid
+     *            the experiment UUID to get the list of data providers
+     * @return list of {@link DataProvider} given by the server for given experiment
+     * @throws ApiException
+     *             if an error occurs experiment.
+     */
+    public static List<DataProvider> getDataProviderDescriptors(UUID expUuid) throws ApiException {
+        List<DataProvider> dps = sfExpApi.getProviders(expUuid);
+        dps.sort(DP_COMPARATOR);
+        return dps;
+    }
+
 
     /**
      * Get the {@link WebTarget} for the data provider styles tree endpoint.
@@ -817,30 +993,29 @@ public abstract class RestServerTest {
     }
 
     /**
-     * Post the trace from an expected {@link TraceModelStub}, ensure that the post
+     * Post the trace from an expected {@link Trace}, ensure that the post
      * returned correctly and that the returned model was that of the expected stub.
      *
-     * @param traces
-     *            traces endpoint
      * @param stub
      *            expected trace stub
      * @return the resulting stub
      */
-    public static TraceModelStub assertPost(WebTarget traces, TraceModelStub stub) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(NAME, stub.getName());
-        parameters.put(URI, stub.getPath());
-        try (Response response = traces.request().post(Entity.json(new QueryParameters(parameters , Collections.emptyList())))) {
-            int code = response.getStatus();
-            assertEquals("Failed to POST " + stub.getName() + ERROR_CODE_STR + code, 200, code);
-            TraceModelStub result = response.readEntity(TraceModelStub.class);
-            assertEquals(stub, result);
-            return result;
+    public static Trace assertPost(Trace stub) {
+        TraceParameters params = new TraceParameters();
+        params.uri(stub.getPath()).name(stub.getName());
+        TraceQueryParameters traceQueryParameters = new TraceQueryParameters().parameters(params);
+        Trace newTrace = null;
+        try {
+            newTrace =  sfTracesApi.putTrace(traceQueryParameters);
+            assertEquals(stub, newTrace);
+        } catch (ApiException e) {
+            fail("Failed to POST trace: " + e.getMessage());
         }
+        return newTrace;
     }
 
     /**
-     * Post an experiment from a list of {@link TraceModelStub}, ensure that the
+     * Post an experiment from a list of {@link Trace}, ensure that the
      * post returned correctly and that the returned model was that of the
      * expected stub.
      *
@@ -850,55 +1025,38 @@ public abstract class RestServerTest {
      *            traces to include in experiment
      * @return the resulting experiment stub
      */
-    public static ExperimentModelStub assertPostExperiment(String name, TraceModelStub... traces) {
-        WebTarget application = getApplicationEndpoint();
-        List<String> traceUUIDs = new ArrayList<>();
-        for (TraceModelStub trace : traces) {
-            TraceModelStub traceStub = assertPost(application.path(TRACES), trace);
-            traceUUIDs.add(traceStub.getUUID().toString());
+    public static Experiment assertPostExperiment(String name, Trace... traces) {
+        List<UUID> traceUUIDs = new ArrayList<>();
+        for (Trace trace : traces) {
+            Trace traceStub = assertPost(trace);
+            traceUUIDs.add(traceStub.getUUID());
         }
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(NAME, name);
-        parameters.put(TRACES, traceUUIDs);
-        try (Response response = application.path(EXPERIMENTS).request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
-            assertEquals("Failed to POST experiment " + name + ERROR_CODE_STR + response.getStatus(), 200, response.getStatus());
-            return response.readEntity(ExperimentModelStub.class);
-        }
-    }
+        ExperimentParameters params = new ExperimentParameters().name(name).traces(traceUUIDs);
+        ExperimentQueryParameters experimentQueryParameters = new ExperimentQueryParameters().parameters(params);
+        Experiment newExperiment = null;
+        try {
+            newExperiment = sfExpApi.postExperiment(experimentQueryParameters);
+            int count = 0;
+            while ((count < 100) &&
+                    ((newExperiment.getIndexingStatus() == org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment.IndexingStatusEnum.RUNNING)) ||
+                    (newExperiment.getTraces().stream().anyMatch(t -> t.getIndexingStatus() == IndexingStatusEnum.RUNNING))) {
+                newExperiment = sfExpApi.getExperiment(newExperiment.getUUID());
+                count++;
 
-    /**
-     * @param dpConfigEndpoint
-     *            the dp config endpoint to create a derived data provider
-     * @param configuration
-     *            the configuration with input parameters to post
-     * @return the derived data provider descriptor stub
-     */
-    public static DataProviderDescriptorStub assertDpPost(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
-        try (Response response = dpConfigEndpoint.request().post(Entity.json(
-                new OutputConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())))) {
-            int code = response.getStatus();
-            assertEquals("Failed to POST " + configuration.getName() + ERROR_CODE_STR + code, 200, code);
-            DataProviderDescriptorStub result = response.readEntity(DataProviderDescriptorStub.class);
-            assertEquals(configuration.getName(), result.getConfiguration().getName());
-            assertEquals(configuration.getDescription(), result.getConfiguration().getDescription());
-            assertEquals(configuration.getSourceTypeId(), result.getConfiguration().getSourceTypeId());
-            assertEquals(configuration.getParameters(), result.getConfiguration().getParameters());
-            return result;
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
+            }
+            if (count >= 100) {
+                fail("Failed to index experiment");
+            }
+        } catch (ApiException e) {
+            fail("Failed to POST experiment: " + e.getMessage());
         }
-    }
-
-    /**
-     * Request to create a derived DP but will cause errors
-     *
-     * @param dpConfigEndpoint
-     *            the dp config endpoint to create a derived data provider
-     * @param configuration
-     *            the configuration with input parameters to post
-     * @return error code
-     */
-    public static Response assertDpPostWithErrors(WebTarget dpConfigEndpoint, ITmfConfiguration configuration) {
-        return dpConfigEndpoint.request().post(Entity.json(
-                new OutputConfigurationQueryParameters(configuration.getName(), configuration.getDescription(), configuration.getSourceTypeId(), configuration.getParameters())));
+        assertNotNull(newExperiment);
+        sortExperiment(newExperiment);
+        return newExperiment;
     }
 
     /**
@@ -939,8 +1097,8 @@ public abstract class RestServerTest {
     /**
      * Call method to execute common error test cases for a given endpoint.
      *
-     * @param exp
-     *            the experiment
+     * @param expUuid
+     *            the experiment UUID
      * @param resolver
      *            the endpoint resolver
      * @param dpId
@@ -948,7 +1106,7 @@ public abstract class RestServerTest {
      * @param hasParameters
      *            whether the endpoint requires parameters (to test empty parameter map)
      */
-    protected static void executePostErrorTests (ExperimentModelStub exp, IEndpointResolver resolver, String dpId, boolean hasParameters) {
+    protected static void executePostErrorTests (UUID expUuid, IEndpointResolver resolver, String dpId, boolean hasParameters) {
         // Invalid UUID string
         WebTarget endpoint = resolver.getEndpoint(INVALID_EXP_UUID, dpId);
         Map<String, Object> parameters = new HashMap<>();
@@ -962,11 +1120,11 @@ public abstract class RestServerTest {
         try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
             assertNotNull(response);
             assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(ErrorResponseImpl.class).getTitle());
+            assertEquals(EndpointConstants.NO_SUCH_TRACE, response.readEntity(ErrorResponse.class).getTitle());
         }
 
         // Missing parameters
-        endpoint = resolver.getEndpoint(exp.getUUID().toString(), dpId);
+        endpoint = resolver.getEndpoint(expUuid.toString(), dpId);
         try (Response response = endpoint.request().post(Entity.json(NO_PARAMETERS))) {
             assertNotNull(response);
             assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -974,7 +1132,7 @@ public abstract class RestServerTest {
 
         if (hasParameters) {
             // Missing parameters
-            endpoint = resolver.getEndpoint(exp.getUUID().toString(), dpId);
+            endpoint = resolver.getEndpoint(expUuid.toString(), dpId);
             try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
                 assertNotNull(response);
                 assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -982,11 +1140,56 @@ public abstract class RestServerTest {
         }
 
         // Unknown data provider
-        endpoint = resolver.getEndpoint(exp.getUUID().toString(), UNKNOWN_DP_ID);
+        endpoint = resolver.getEndpoint(expUuid.toString(), UNKNOWN_DP_ID);
         try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
             assertNotNull(response);
             assertEquals(Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
-            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(ErrorResponseImpl.class).getTitle());
+            assertEquals(EndpointConstants.NO_PROVIDER, response.readEntity(ErrorResponse.class).getTitle());
         }
+    }
+
+    /**
+     * Calculate the trace UUID as it's done in the trace server
+     *
+     * @param path
+     *            the trace path
+     * @param name
+     *            the trace name
+     *
+     * @return trace UUID
+     */
+    protected static UUID getTraceUUID(String path, String name) {
+        IPath tracePath = new Path(path).append(name);
+        return UUID.nameUUIDFromBytes(Objects.requireNonNull(tracePath.toString().getBytes(Charset.defaultCharset())));
+    }
+
+    /**
+     * Calculate the trace UUID as it's done in the trace server
+     *
+     * @param name
+     *            the trace name
+     * @return experiment UUID
+     */
+    protected static UUID getExperimentUUID(String name) {
+        return UUID.nameUUIDFromBytes(Objects.requireNonNull(name).getBytes(Charset.defaultCharset()));
+    }
+
+    /**
+     * @param <T>
+     *            class to deserialize into
+     * @param json
+     *            The json string containing the error response
+     * @param clazz
+     *            The actual class expected
+     * @return The error response instance
+     */
+    protected static @Nullable <T> T deserializeErrorResponse(String json, Class <T> clazz) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(json, clazz);
+        } catch (JsonProcessingException e) {
+            fail(e.toString());
+        }
+        return null;
     }
 }

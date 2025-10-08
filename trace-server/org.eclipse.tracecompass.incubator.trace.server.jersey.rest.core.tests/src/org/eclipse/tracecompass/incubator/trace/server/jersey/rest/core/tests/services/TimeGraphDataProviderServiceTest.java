@@ -40,7 +40,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.webapp.TestDataProviderService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.StylesApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.TimeGraphApi;
@@ -96,7 +96,7 @@ import com.google.common.collect.Iterators;
  * @author Geneviève Bastien
  * @author Bernd Hufmann
  */
-public class TimeGraphDataProviderServiceTest extends NewRestServerTest {
+public class TimeGraphDataProviderServiceTest extends RestServerTest {
 
     private static final String UST_CATEGORY_NAME = "ust";
     private static final String SLOT_CATEGORY_NAME = "Slot";
@@ -157,7 +157,7 @@ public class TimeGraphDataProviderServiceTest extends NewRestServerTest {
     @Test
     public void testStatesErrors() {
         Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
-        executePostErrorTests(exp.getUUID(), NewRestServerTest::getArrowsEndpoint, CALL_STACK_DATAPROVIDER_ID, true);
+        executePostErrorTests(exp.getUUID(), RestServerTest::getArrowsEndpoint, CALL_STACK_DATAPROVIDER_ID, true);
     }
 
     /**
@@ -166,7 +166,7 @@ public class TimeGraphDataProviderServiceTest extends NewRestServerTest {
     @Test
     public void testTreeErrors() {
         Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
-        executePostErrorTests(exp.getUUID(), NewRestServerTest::getTimeGraphTreeEndpoint, CALL_STACK_DATAPROVIDER_ID, false);
+        executePostErrorTests(exp.getUUID(), RestServerTest::getTimeGraphTreeEndpoint, CALL_STACK_DATAPROVIDER_ID, false);
     }
 
     /**
@@ -196,7 +196,7 @@ public class TimeGraphDataProviderServiceTest extends NewRestServerTest {
     @Test
     public void testStylesErrors() {
         Experiment exp = assertPostExperiment(sfContextSwitchesUstNotInitializedStub.getName(), sfContextSwitchesUstNotInitializedStub);
-        executePostErrorTests(exp.getUUID(), NewRestServerTest::getStylesEndpoint, CALL_STACK_DATAPROVIDER_ID, false);
+        executePostErrorTests(exp.getUUID(), RestServerTest::getStylesEndpoint, CALL_STACK_DATAPROVIDER_ID, false);
     }
 
     /**
@@ -234,7 +234,7 @@ public class TimeGraphDataProviderServiceTest extends NewRestServerTest {
     @Test
     public void testArrowsErrors() {
         Experiment exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
-        executePostErrorTests(exp.getUUID(), NewRestServerTest::getArrowsEndpoint, THREAD_STATUS_DP_ID, true);
+        executePostErrorTests(exp.getUUID(), RestServerTest::getArrowsEndpoint, THREAD_STATUS_DP_ID, true);
     }
 
     /**
@@ -375,7 +375,7 @@ public class TimeGraphDataProviderServiceTest extends NewRestServerTest {
     @Test
     public void testAnnotationErrors() {
         Experiment exp = assertPostExperiment(sfContextSwitchesKernelNotInitializedStub.getName(), sfContextSwitchesKernelNotInitializedStub);
-        executePostErrorTests(exp.getUUID(), NewRestServerTest::getAnnotationEndpoint, THREAD_STATUS_DP_ID, true);
+        executePostErrorTests(exp.getUUID(), RestServerTest::getAnnotationEndpoint, THREAD_STATUS_DP_ID, true);
     }
 
     private static void testGetStates(String filterStrategy) throws InterruptedException, ApiException {

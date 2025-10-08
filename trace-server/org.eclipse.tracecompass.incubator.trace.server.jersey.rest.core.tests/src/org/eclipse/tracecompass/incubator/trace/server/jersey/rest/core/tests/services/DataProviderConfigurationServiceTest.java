@@ -32,7 +32,7 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.ErrorResponseImpl;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.TestDataProviderFactory;
 import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.stubs.config.TestSchemaConfigurationSource;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.OutputConfigurationsApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.ConfigurationSourceType;
@@ -49,7 +49,7 @@ import org.junit.Test;
  * @author Bernd Hufmann
  */
 @SuppressWarnings("null")
-public class DataProviderConfigurationServiceTest extends NewRestServerTest {
+public class DataProviderConfigurationServiceTest extends RestServerTest {
     private static final String UNKNOWN_TYPE_ID = "unknown.config.type.id";
 
     private static final String CONFIG_NAME = "My configuration";

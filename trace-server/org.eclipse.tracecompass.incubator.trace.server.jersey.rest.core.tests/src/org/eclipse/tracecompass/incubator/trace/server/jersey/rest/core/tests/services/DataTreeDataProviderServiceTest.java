@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.ProcessingException;
 
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.DataProviderService;
-import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.NewRestServerTest;
+import org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.RestServerTest;
 import org.eclipse.tracecompass.incubator.tsp.client.core.ApiException;
 import org.eclipse.tracecompass.incubator.tsp.client.core.api.DataTreeApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.DataTreeEntry;
@@ -45,7 +45,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @author Bernd Hufmann
  */
-public class DataTreeDataProviderServiceTest extends NewRestServerTest {
+public class DataTreeDataProviderServiceTest extends RestServerTest {
     private static final String DATA_PROVIDER_RESPONSE_FAILED_MSG = "There should be a positive response for the data provider";
     private static final String MODEL_NULL_MSG = "The model is null, maybe the analysis did not run long enough?";
     private static final int MAX_ITER = 40;
