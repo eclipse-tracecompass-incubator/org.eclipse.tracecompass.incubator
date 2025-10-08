@@ -13,7 +13,9 @@ package org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.w
 
 import org.junit.Before;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 /**
  * Abstract test class for testing serializers
@@ -33,6 +35,6 @@ public class AbstractSerializerTest {
      */
     @Before
     public void setup() {
-        fMapper = new ObjectMapper();
+        fMapper = JsonMapper.builder().configure(MapperFeature.ALLOW_COERCION_OF_SCALARS, false).build();
     }
 }
