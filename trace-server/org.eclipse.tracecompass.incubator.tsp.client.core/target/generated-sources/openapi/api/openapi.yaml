@@ -11,7 +11,7 @@ info:
     url: http://www.apache.org/licenses/
   termsOfService: https://www.eclipse.org/tracecompass/
   title: Trace Server Protocol
-  version: 0.5.0
+  version: 0.6.0
 servers:
 - url: https://localhost:8080/tsp/api
 tags:
@@ -3256,33 +3256,23 @@ components:
       - start
       - type
       type: object
-    CategorySampling:
+    Range:
+      description: An object representing a closed interval with a start and end.
+      example:
+        start: 1
+        end: 5
       properties:
-        sampling:
-          description: Sampling as list of categories
-          items:
-            description: Sampling as list of categories
-            type: string
-          type: array
+        start:
+          description: Start of the range (inclusive).
+          format: int64
+          type: integer
+        end:
+          description: End of the range (inclusive).
+          format: int64
+          type: integer
       required:
-      - sampling
-      type: object
-    RangeSampling:
-      properties:
-        sampling:
-          description: "Sampling as list of [start, end] timestamp ranges"
-          items:
-            $ref: "#/components/schemas/StartEndRange"
-          type: array
-      required:
-      - sampling
-      type: object
-    Sampling:
-      description: Sampling values
-      oneOf:
-      - $ref: "#/components/schemas/TimestampSampling"
-      - $ref: "#/components/schemas/CategorySampling"
-      - $ref: "#/components/schemas/RangeSampling"
+      - end
+      - start
       type: object
     SeriesModel:
       description: This model includes the series output style values.
@@ -3307,16 +3297,23 @@ components:
             type: type
         seriesName: seriesName
         yValues:
-        - 1.4658129805029452
-        - 1.4658129805029452
+        - 5.637376656633329
+        - 5.637376656633329
+        xCategories:
+        - xCategories
+        - xCategories
         style:
           parentKey: parentKey
           values:
             key: StyleValue
         xValues:
-          sampling:
-          - 6
-          - 6
+        - 6
+        - 6
+        xRanges:
+        - start: 1
+          end: 5
+        - start: 1
+          end: 5
         seriesId: 0
       properties:
         seriesId:
@@ -3329,7 +3326,29 @@ components:
         style:
           $ref: "#/components/schemas/OutputElementStyle"
         xValues:
-          $ref: "#/components/schemas/Sampling"
+          description: "X values as list of int64 values (e.g. timestamps). Example:\
+            \ [100, 200, 350]. Mutually exclusive with xCategories/xRanges."
+          items:
+            description: "X values as list of int64 values (e.g. timestamps). Example:\
+              \ [100, 200, 350]. Mutually exclusive with xCategories/xRanges."
+            format: int64
+            type: integer
+          type: array
+        xCategories:
+          description: "X values as list of category strings. Example: [\"READ\",\
+            \ \"WRITE\"]. Mutually exclusive with xValues/xRanges."
+          items:
+            description: "X values as list of category strings. Example: [\"READ\"\
+              , \"WRITE\"]. Mutually exclusive with xValues/xRanges."
+            type: string
+          type: array
+        xRanges:
+          description: "X values as list of start/end range objects. Example: [{\"\
+            start\": 10, \"end\": 20}, {\"start\": 50, \"end\": 75}]. Mutually exclusive\
+            \ with xValues/xCategories."
+          items:
+            $ref: "#/components/schemas/Range"
+          type: array
         yValues:
           description: Series' Y values
           items:
@@ -3344,41 +3363,9 @@ components:
       - seriesId
       - seriesName
       - style
-      - xValues
       - xValuesDescription
       - yValues
       - yValuesDescription
-      type: object
-    StartEndRange:
-      description: "Sampling as list of [start, end] timestamp ranges"
-      properties:
-        start:
-          description: Start timestamp of the range
-          format: int64
-          type: integer
-        end:
-          description: End timestamp of the range
-          format: int64
-          type: integer
-      required:
-      - end
-      - start
-      type: object
-    TimestampSampling:
-      example:
-        sampling:
-        - 6
-        - 6
-      properties:
-        sampling:
-          description: Sampling as list of timestamps
-          items:
-            description: Sampling as list of timestamps
-            format: int64
-            type: integer
-          type: array
-      required:
-      - sampling
       type: object
     XYAxisDescription:
       description: "Describes a single axis in an XY chart, including label, unit,\
@@ -3439,16 +3426,23 @@ components:
               type: type
           seriesName: seriesName
           yValues:
-          - 1.4658129805029452
-          - 1.4658129805029452
+          - 5.637376656633329
+          - 5.637376656633329
+          xCategories:
+          - xCategories
+          - xCategories
           style:
             parentKey: parentKey
             values:
               key: StyleValue
           xValues:
-            sampling:
-            - 6
-            - 6
+          - 6
+          - 6
+          xRanges:
+          - start: 1
+            end: 5
+          - start: 1
+            end: 5
           seriesId: 0
         - xValuesDescription:
             unit: unit
@@ -3470,16 +3464,23 @@ components:
               type: type
           seriesName: seriesName
           yValues:
-          - 1.4658129805029452
-          - 1.4658129805029452
+          - 5.637376656633329
+          - 5.637376656633329
+          xCategories:
+          - xCategories
+          - xCategories
           style:
             parentKey: parentKey
             values:
               key: StyleValue
           xValues:
-            sampling:
-            - 6
-            - 6
+          - 6
+          - 6
+          xRanges:
+          - start: 1
+            end: 5
+          - start: 1
+            end: 5
           seriesId: 0
         title: title
       properties:
@@ -3525,16 +3526,23 @@ components:
                 type: type
             seriesName: seriesName
             yValues:
-            - 1.4658129805029452
-            - 1.4658129805029452
+            - 5.637376656633329
+            - 5.637376656633329
+            xCategories:
+            - xCategories
+            - xCategories
             style:
               parentKey: parentKey
               values:
                 key: StyleValue
             xValues:
-              sampling:
-              - 6
-              - 6
+            - 6
+            - 6
+            xRanges:
+            - start: 1
+              end: 5
+            - start: 1
+              end: 5
             seriesId: 0
           - xValuesDescription:
               unit: unit
@@ -3556,16 +3564,23 @@ components:
                 type: type
             seriesName: seriesName
             yValues:
-            - 1.4658129805029452
-            - 1.4658129805029452
+            - 5.637376656633329
+            - 5.637376656633329
+            xCategories:
+            - xCategories
+            - xCategories
             style:
               parentKey: parentKey
               values:
                 key: StyleValue
             xValues:
-              sampling:
-              - 6
-              - 6
+            - 6
+            - 6
+            xRanges:
+            - start: 1
+              end: 5
+            - start: 1
+              end: 5
             seriesId: 0
           title: title
         statusMessage: statusMessage
