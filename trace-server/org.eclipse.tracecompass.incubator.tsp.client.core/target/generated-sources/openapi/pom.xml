@@ -5,7 +5,7 @@
     <artifactId>org.eclipse.tracecompass.incubator.tsp.client.core</artifactId>
     <packaging>jar</packaging>
     <name>org.eclipse.tracecompass.incubator.tsp.client.core</name>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
     <url>https://github.com/openapitools/openapi-generator</url>
     <description>OpenAPI Java</description>
     <scm>
@@ -17,7 +17,7 @@
     <licenses>
         <license>
             <name>EPL-2.0</name>
-            <url>https://www.eclipse.org/legal/epl-2.0/</url>
+            <url>http://www.apache.org/licenses/</url>
             <distribution>repo</distribution>
         </license>
     </licenses>

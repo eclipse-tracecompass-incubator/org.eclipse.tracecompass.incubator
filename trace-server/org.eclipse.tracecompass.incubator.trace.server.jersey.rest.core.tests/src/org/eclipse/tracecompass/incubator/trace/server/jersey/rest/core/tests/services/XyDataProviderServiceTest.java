@@ -28,7 +28,6 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.api.XyApi;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.RequestedParameters;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.RequestedQueryParameters;
-import org.eclipse.tracecompass.incubator.tsp.client.core.model.Sampling;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.SeriesModel;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeRange;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.TreeColumnHeader;
@@ -201,31 +200,23 @@ public class XyDataProviderServiceTest extends RestServerTest {
 
         RequestedQueryParameters reqQueryParameters = new RequestedQueryParameters().parameters(reqParams);
 
-        /*
-         * FIXME: Remove try/catch after fixing issue:
-         * https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator/issues/236
-         */
-        try {
-            XYResponse xyModelResponse = sfxyApi.getXY(exp.getUUID(), XY_HISTOGRAM_DATAPROVIDER_ID, reqQueryParameters);
-            assertNotNull(xyModelResponse);
+        XYResponse xyModelResponse = sfxyApi.getXY(exp.getUUID(), XY_HISTOGRAM_DATAPROVIDER_ID, reqQueryParameters);
+        assertNotNull(xyModelResponse);
 
-            XYModel xyModel = xyModelResponse.getModel();
-            List<SeriesModel> xySeries = xyModel.getSeries();
-            assertFalse(xySeries.isEmpty());
-            SeriesModel series = xySeries.get(0);
+        XYModel xyModel = xyModelResponse.getModel();
+        List<SeriesModel> xySeries = xyModel.getSeries();
+        assertFalse(xySeries.isEmpty());
+        SeriesModel series = xySeries.get(0);
 
-            Sampling xValues = series.getxValues();
-            assertFalse(xValues.getTimestampSampling().getSampling().isEmpty());
+        List<Long> xValues = series.getxValues();
+        assertFalse(xValues.isEmpty());
 
-            for (XYTreeEntry entry : entries) {
-                if (entry.getParentId() == -1) {
-                    assertTrue(entry.getIsDefault() == null || !entry.getIsDefault());
-                } else {
-                    assertTrue(entry.getIsDefault() != null && entry.getIsDefault());
-                }
+        for (XYTreeEntry entry : entries) {
+            if (entry.getParentId() == -1) {
+                assertTrue(entry.getIsDefault() == null || !entry.getIsDefault());
+            } else {
+                assertTrue(entry.getIsDefault() != null && entry.getIsDefault());
             }
-        } catch (Exception ex) {
-
         }
     }
 

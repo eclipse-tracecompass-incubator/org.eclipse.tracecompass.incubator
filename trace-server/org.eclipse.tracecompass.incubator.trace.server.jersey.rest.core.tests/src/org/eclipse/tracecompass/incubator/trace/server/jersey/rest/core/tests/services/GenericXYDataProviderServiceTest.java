@@ -31,14 +31,14 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.model.Experiment;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.GenericTimeRange;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.GenericXYQueryParameters;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.GenericXYRequestedParameters;
-import org.eclipse.tracecompass.incubator.tsp.client.core.model.RangeSampling;
-import org.eclipse.tracecompass.incubator.tsp.client.core.model.Sampling;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.Range;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.SeriesModel;
-import org.eclipse.tracecompass.incubator.tsp.client.core.model.StartEndRange;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.StyleValue;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.TimeRange;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.TreeParameters;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.TreeQueryParameters;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.XYAxisDescription;
+import org.eclipse.tracecompass.incubator.tsp.client.core.model.XYAxisDescription.DataTypeEnum;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.XYAxisDescriptionAxisDomain;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.XYModel;
 import org.eclipse.tracecompass.incubator.tsp.client.core.model.XYResponse;
@@ -202,85 +202,79 @@ public class GenericXYDataProviderServiceTest extends RestServerTest {
                 .requestedTimerange(new GenericTimeRange().start(TRACE_START_TIME).end(TRACE_END_TIME).nbSamples(5));
 
         GenericXYQueryParameters xyQueryParams = new GenericXYQueryParameters().parameters(xyParams);
-        /*
-         * FIXME: Remove try/catch after fixing issue:
-         * https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator/issues/236
-         */
-        try {
-            XYResponse xyModelResponse = sfXyApi.getGenericXY(exp.getUUID(), CALL_STACK_FUNCTION_DENSITY_DATAPROVIDER_ID, xyQueryParams);
+        XYResponse xyModelResponse = sfXyApi.getGenericXY(exp.getUUID(), CALL_STACK_FUNCTION_DENSITY_DATAPROVIDER_ID, xyQueryParams);
+        assertNotNull(xyModelResponse);
+        // Make sure the analysis ran enough and we have a fully executed model
+        iteration = 0;
+        while (xyModelResponse.getStatus().equals(XYResponse.StatusEnum.RUNNING) && iteration < MAX_ITER) {
+            Thread.sleep(100);
+            xyModelResponse = sfXyApi.getGenericXY(exp.getUUID(), CALL_STACK_FUNCTION_DENSITY_DATAPROVIDER_ID, xyQueryParams);
             assertNotNull(xyModelResponse);
-            // Make sure the analysis ran enough and we have a fully executed model
-            iteration = 0;
-            while (xyModelResponse.getStatus().equals(XYResponse.StatusEnum.RUNNING) && iteration < MAX_ITER) {
-                Thread.sleep(100);
-                xyModelResponse = sfXyApi.getGenericXY(exp.getUUID(), CALL_STACK_FUNCTION_DENSITY_DATAPROVIDER_ID, xyQueryParams);
-                assertNotNull(xyModelResponse);
-                iteration++;
-            }
-
-            XYModel xyModel = xyModelResponse.getModel();
-            List<SeriesModel> xySeries = xyModel.getSeries();
-            assertFalse(xySeries.isEmpty());
-            assertEquals("Number of series mismatch", 1, xySeries.size());
-            SeriesModel seriesStub = xySeries.iterator().next();
-
-            // Validate fields
-            assertEquals("Name mismatch", "UNKNOWN_PID", seriesStub.getSeriesName());
-
-            // Validate xValues
-            Sampling xValues = seriesStub.getxValues();
-            assertTrue("xValues should be a RangesStub", xValues.getActualInstance() instanceof RangeSampling);
-            List<StartEndRange> expectedRanges = Arrays.asList(
-                    new StartEndRange().start(0L).end(1195708549L),
-                    new StartEndRange().start(1195708550L).end(2391417098L),
-                    new StartEndRange().start(2391417099L).end(3587125647L),
-                    new StartEndRange().start(3587125648L).end(4782834196L),
-                    new StartEndRange().start(4782834197L).end(5978542746L));
-            List<StartEndRange> actualRanges = ((RangeSampling) xValues.getActualInstance()).getSampling();
-            assertEquals("Range size mismatch", expectedRanges.size(), actualRanges.size());
-            assertEquals("Range size mismatch", expectedRanges.size(), actualRanges.size());
-            for (int i = 0; i < expectedRanges.size(); i++) {
-                assertEquals("Range mismatch at index " + i, expectedRanges.get(i), actualRanges.get(i));
-            }
-
-            // Validate yValues
-            List<Double> actualYValues = seriesStub.getyValues();
-            List<Double> expectedYValues = Arrays.asList(1943.0, 1.0, 2.0, 1.0, 1.0);
-            assertEquals("Y values size mismatch", expectedYValues.size(), actualYValues.size());
-            assertEquals("Y values size mismatch", expectedYValues.size(), actualYValues.size());
-            for (int i = 0; i < expectedYValues.size(); i++) {
-                assertEquals("Y value mismatch at index " + i, expectedYValues.get(i), actualYValues.get(i), 0.000001);
-            }
-
-            // Validate axis descriptions (fully)
-            XYAxisDescription xAxis = seriesStub.getxValuesDescription();
-            XYAxisDescription yAxis = seriesStub.getyValuesDescription();
-
-            assertNotNull("X axis description should not be null", xAxis);
-            assertNotNull("Y axis description should not be null", yAxis);
-
-            // X axis
-            assertEquals("X axis label mismatch", "Execution Time", xAxis.getLabel());
-            assertEquals("X axis unit mismatch", "ns", xAxis.getUnit());
-            assertEquals("X axis data type mismatch", "DURATION", xAxis.getDataType());
-            XYAxisDescriptionAxisDomain xDomain = xAxis.getAxisDomain();
-            assertNotNull("X axis domain should not be null", xDomain);
-            assertTrue("X axis domain should be TimeRange", xDomain.getActualInstance() instanceof AxisDomainRange);
-
-            // Y axis
-            assertEquals("Y axis label mismatch", "Number of Executions", yAxis.getLabel());
-            assertEquals("Y axis unit mismatch", "", yAxis.getUnit());
-            assertEquals("Y axis data type mismatch", "NUMBER", yAxis.getDataType());
-            XYAxisDescriptionAxisDomain yDomain = yAxis.getAxisDomain();
-            assertNull("Y axis domain should be null", yDomain);
-
-            // Validate style
-            assertNotNull("Style should not be null", seriesStub.getStyle());
-            assertEquals("Series type should be bar", "bar",
-                    seriesStub.getStyle().getValues().get(StyleProperties.SERIES_TYPE));
-        } catch (Exception ex) {
+            iteration++;
         }
+
+        XYModel xyModel = xyModelResponse.getModel();
+        List<SeriesModel> xySeries = xyModel.getSeries();
+        assertFalse(xySeries.isEmpty());
+        assertEquals("Number of series mismatch", 1, xySeries.size());
+        SeriesModel seriesStub = xySeries.iterator().next();
+
+        // Validate fields
+        assertEquals("Name mismatch", "UNKNOWN_PID", seriesStub.getSeriesName());
+
+        // Validate xValues
+        List<Range> actualRanges = seriesStub.getxRanges();
+        assertFalse("xValues should be not empty", actualRanges.isEmpty());
+        List<Range> expectedRanges = Arrays.asList(
+                new Range().start(0L).end(1195708549L),
+                new Range().start(1195708550L).end(2391417098L),
+                new Range().start(2391417099L).end(3587125647L),
+                new Range().start(3587125648L).end(4782834196L),
+                new Range().start(4782834197L).end(5978542746L));
+        assertEquals("Range size mismatch", expectedRanges.size(), actualRanges.size());
+        assertEquals("Range size mismatch", expectedRanges.size(), actualRanges.size());
+        for (int i = 0; i < expectedRanges.size(); i++) {
+            assertEquals("Range mismatch at index " + i, expectedRanges.get(i), actualRanges.get(i));
+        }
+
+        // Validate yValues
+        List<Double> actualYValues = seriesStub.getyValues();
+        List<Double> expectedYValues = Arrays.asList(1943.0, 1.0, 2.0, 1.0, 1.0);
+        assertEquals("Y values size mismatch", expectedYValues.size(), actualYValues.size());
+        assertEquals("Y values size mismatch", expectedYValues.size(), actualYValues.size());
+        for (int i = 0; i < expectedYValues.size(); i++) {
+            assertEquals("Y value mismatch at index " + i, expectedYValues.get(i), actualYValues.get(i), 0.000001);
+        }
+
+        // Validate axis descriptions (fully)
+        XYAxisDescription xAxis = seriesStub.getxValuesDescription();
+        XYAxisDescription yAxis = seriesStub.getyValuesDescription();
+
+        assertNotNull("X axis description should not be null", xAxis);
+        assertNotNull("Y axis description should not be null", yAxis);
+
+        // X axis
+        assertEquals("X axis label mismatch", "Execution Time", xAxis.getLabel());
+        assertEquals("X axis unit mismatch", "ns", xAxis.getUnit());
+        assertEquals("X axis data type mismatch", DataTypeEnum.DURATION, xAxis.getDataType());
+        XYAxisDescriptionAxisDomain xDomain = xAxis.getAxisDomain();
+        assertNotNull("X axis domain should not be null", xDomain);
+        assertTrue("X axis domain should be TimeRange", xDomain.getActualInstance() instanceof AxisDomainRange);
+
+        // Y axis
+        assertEquals("Y axis label mismatch", "Number of Executions", yAxis.getLabel());
+        assertEquals("Y axis unit mismatch", "", yAxis.getUnit());
+        assertEquals("Y axis data type mismatch", DataTypeEnum.NUMBER, yAxis.getDataType());
+        XYAxisDescriptionAxisDomain yDomain = yAxis.getAxisDomain();
+        assertNull("Y axis domain should be null", yDomain);
+
+        // Validate style
+        assertNotNull("Style should not be null", seriesStub.getStyle());
+        StyleValue styleValue = seriesStub.getStyle().getValues().get(StyleProperties.SERIES_TYPE);
+        assertNotNull(styleValue);
+        assertEquals("Series type should be bar", "bar", styleValue.getString());
     }
+
     /**
      * Tests error cases when querying arrows for a time graph data provider
      */
