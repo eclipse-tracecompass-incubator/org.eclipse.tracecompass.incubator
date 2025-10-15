@@ -2,7 +2,7 @@ lazy val root = (project in file(".")).
   settings(
     organization := "org.eclipse.tracecompass.incubator",
     name := "org.eclipse.tracecompass.incubator.tsp.client.core",
-    version := "0.5.0",
+    version := "0.6.0",
     scalaVersion := "2.11.12",
     scalacOptions ++= Seq("-feature"),
     Compile / javacOptions ++= Seq("-Xlint:deprecation"),
