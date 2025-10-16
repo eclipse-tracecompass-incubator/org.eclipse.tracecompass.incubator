@@ -144,7 +144,7 @@ public class DataTreeDataProviderServiceTest extends RestServerTest {
         return model;
     }
 
-    // FIXME: isFiltered should be part of the TSP
+    // FIXME isFiltered is out-of-spec (see https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator/issues/251)
     private static class FilteredTreeParameter extends TreeParameters {
         private boolean isFiltered;
         public FilteredTreeParameter isFiltered(boolean flag) {
