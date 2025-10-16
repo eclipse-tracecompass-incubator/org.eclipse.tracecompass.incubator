@@ -99,6 +99,7 @@ public final class EndpointConstants {
     static final String EXP = "Experiments"; //$NON-NLS-1$
     static final String GXY = "Generic XY"; //$NON-NLS-1$
     static final String IDF = "Identifier"; //$NON-NLS-1$
+    static final String OBJ = "Object"; //$NON-NLS-1$
     static final String OCG = "Output Configurations"; //$NON-NLS-1$
     static final String STY = "Styles"; //$NON-NLS-1$
     static final String TGR = "TimeGraph"; //$NON-NLS-1$
