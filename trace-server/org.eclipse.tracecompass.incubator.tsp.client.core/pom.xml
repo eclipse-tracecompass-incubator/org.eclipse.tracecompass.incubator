@@ -120,7 +120,9 @@
                            <developerOrganization>Eclipse Trace Compass Project</developerOrganization>
                            <developerOrganizationUrl>https://projects.eclipse.org/projects/tools.tracecompass</developerOrganizationUrl>
                            <developerEmail>tracecompass-dev@eclipse.org</developerEmail>
+                           <failOnUnknownProperties>true</failOnUnknownProperties>
                            <groupId>org.eclipse.tracecompass.incubator</groupId>
+                           <hideGenerationTimestamp>true</hideGenerationTimestamp>
                            <library>jersey2</library>
                            <licenseName>EPL-2.0</licenseName>
                            <licenseUrl>https://www.eclipse.org/legal/epl-2.0</licenseUrl>

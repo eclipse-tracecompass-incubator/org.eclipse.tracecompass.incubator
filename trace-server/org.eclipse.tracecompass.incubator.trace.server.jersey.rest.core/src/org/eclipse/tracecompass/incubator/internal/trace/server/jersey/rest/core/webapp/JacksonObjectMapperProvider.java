@@ -26,7 +26,6 @@ import org.eclipse.tracecompass.tmf.core.config.ITmfConfigurationSourceType;
 import org.eclipse.tracecompass.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.model.IAxisDomain;
 import org.eclipse.tracecompass.tmf.core.model.OutputElementStyle;
-import org.eclipse.tracecompass.tmf.core.model.ISampling;
 import org.eclipse.tracecompass.tmf.core.model.annotations.Annotation;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
@@ -65,7 +64,6 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
             module.addSerializer(DataProviderDescriptor.class, new DataProviderDescriptorSerializer());
             module.addSerializer(ITmfXyModel.class, new XYModelSerializer());
             module.addSerializer(ISeriesModel.class, new SeriesModelSerializer());
-            module.addSerializer(ISampling.class, new SamplingSerializer());
             module.addSerializer(TimeGraphState.class, new TimeGraphStateSerializer());
             module.addSerializer(ITimeGraphArrow.class, new TimeGraphArrowSerializer());
             module.addSerializer(TimeGraphRowModel.class, new TimeGraphRowModelSerializer());

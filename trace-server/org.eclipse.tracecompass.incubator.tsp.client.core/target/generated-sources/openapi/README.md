@@ -2,9 +2,7 @@
 
 Trace Server Protocol
 
-- API version: 0.5.0
-
-- Build date: 2025-09-19T10:33:13.979273368-04:00[America/Toronto]
+- API version: 0.6.0
 
 - Generator version: 7.15.0
 
@@ -44,7 +42,7 @@ Add this dependency to your project's POM:
 <dependency>
   <groupId>org.eclipse.tracecompass.incubator</groupId>
   <artifactId>org.eclipse.tracecompass.incubator.tsp.client.core</artifactId>
-  <version>0.5.0</version>
+  <version>0.6.0</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -60,7 +58,7 @@ Add this dependency to your project's build file:
   }
 
   dependencies {
-     implementation "org.eclipse.tracecompass.incubator:org.eclipse.tracecompass.incubator.tsp.client.core:0.5.0"
+     implementation "org.eclipse.tracecompass.incubator:org.eclipse.tracecompass.incubator.tsp.client.core:0.6.0"
   }
 ```
 
@@ -74,7 +72,7 @@ mvn clean package
 
 Then manually install the following JARs:
 
-- `target/org.eclipse.tracecompass.incubator.tsp.client.core-0.5.0.jar`
+- `target/org.eclipse.tracecompass.incubator.tsp.client.core-0.6.0.jar`
 - `target/lib/*.jar`
 
 ## Usage
@@ -205,7 +203,6 @@ Class | Method | HTTP request | Description
  - [Bookmark](docs/Bookmark.md)
  - [BookmarkParameters](docs/BookmarkParameters.md)
  - [BookmarkQueryParameters](docs/BookmarkQueryParameters.md)
- - [CategorySampling](docs/CategorySampling.md)
  - [ConfigurationParameterDescriptor](docs/ConfigurationParameterDescriptor.md)
  - [ConfigurationQueryParameters](docs/ConfigurationQueryParameters.md)
  - [ConfigurationSourceType](docs/ConfigurationSourceType.md)
@@ -234,15 +231,13 @@ Class | Method | HTTP request | Description
  - [OutputConfigurationQueryParameters](docs/OutputConfigurationQueryParameters.md)
  - [OutputElementStyle](docs/OutputElementStyle.md)
  - [OutputStyleModel](docs/OutputStyleModel.md)
- - [RangeSampling](docs/RangeSampling.md)
+ - [Range](docs/Range.md)
  - [RequestedFilterQueryParameters](docs/RequestedFilterQueryParameters.md)
  - [RequestedParameters](docs/RequestedParameters.md)
  - [RequestedQueryParameters](docs/RequestedQueryParameters.md)
- - [Sampling](docs/Sampling.md)
  - [SeriesModel](docs/SeriesModel.md)
  - [ServerInfoResponse](docs/ServerInfoResponse.md)
  - [ServerStatus](docs/ServerStatus.md)
- - [StartEndRange](docs/StartEndRange.md)
  - [StyleValue](docs/StyleValue.md)
  - [StylesResponse](docs/StylesResponse.md)
  - [TableColumnHeader](docs/TableColumnHeader.md)
@@ -258,7 +253,6 @@ Class | Method | HTTP request | Description
  - [TimeGraphTreeModel](docs/TimeGraphTreeModel.md)
  - [TimeGraphTreeResponse](docs/TimeGraphTreeResponse.md)
  - [TimeRange](docs/TimeRange.md)
- - [TimestampSampling](docs/TimestampSampling.md)
  - [TooltipParameters](docs/TooltipParameters.md)
  - [TooltipQueryParameters](docs/TooltipQueryParameters.md)
  - [Trace](docs/Trace.md)
