@@ -26,9 +26,13 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * Custom serializer for all Sampling subtypes.
- * - Timestamps → flat array: [1, 2, 3]
- * - Categories → array of strings: ["Read", "Write"]
- * - TimeRanges → array of arrays: [[1, 2], [2, 3]]
+ *
+ * Note: It serializes only the object content without JSON object start and end marker. Hence
+ * ISampling has to be embedded inside an outer JSON object
+ *
+ * - Timestamps → flat array → "xValues": [1, 2, 3]
+ * - Categories → array of strings → "xCategories": ["Read", "Write"]
+ * - Ranges → array of Range → "xRanges": [{ "start": 1, "end": 2 }, { "start": 3, "end": 4 }]
  */
 public class SamplingSerializer extends StdSerializer<ISampling> {
 
@@ -43,23 +47,20 @@ public class SamplingSerializer extends StdSerializer<ISampling> {
 
     @Override
     public void serialize(ISampling value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        // Note that ISampling is not serialized as a json object, but only as json field.
+        // Hence it has to be embedded in an outer JSON object
         if (value instanceof Timestamps timestamps) {
-            gen.writeArray(timestamps.timestamps(), 0, timestamps.timestamps().length);
-
+            gen.writeObjectField("xValues", timestamps.timestamps()); //$NON-NLS-1$
         } else if (value instanceof Categories categories) {
-            gen.writeStartArray();
-            for (String category : categories.categories()) {
-                gen.writeString(category);
-            }
-            gen.writeEndArray();
-
+            gen.writeObjectField("xCategories", categories.categories()); //$NON-NLS-1$
         } else if (value instanceof Ranges timeRanges) {
+            gen.writeFieldName("xRanges"); //$NON-NLS-1$
             gen.writeStartArray();
             for (Range<@NonNull Long> range : timeRanges.ranges()) {
-                gen.writeStartArray();
-                gen.writeNumber(range.start());
-                gen.writeNumber(range.end());
-                gen.writeEndArray();
+                gen.writeStartObject();
+                gen.writeNumberField("start", range.start()); //$NON-NLS-1$
+                gen.writeNumberField("end", range.end()); //$NON-NLS-1$
+                gen.writeEndObject();
             }
             gen.writeEndArray();
         } else {
