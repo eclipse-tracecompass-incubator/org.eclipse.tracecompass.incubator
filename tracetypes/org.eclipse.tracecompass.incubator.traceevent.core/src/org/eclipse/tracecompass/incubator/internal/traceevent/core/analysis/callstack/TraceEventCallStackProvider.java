@@ -61,7 +61,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     private static final String ASYNC_SUFFIX = "(async)"; //$NON-NLS-1$
-    private static final int VERSION_NUMBER = 8;
+    private static final int VERSION_NUMBER = 9;
     private static final int UNSET_ID = -1;
     static final String EDGES = "EDGES"; //$NON-NLS-1$
 
@@ -266,6 +266,9 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             return;
         }
         switch (ph) {
+        case TraceEventPhases.INSTANT:
+            handleInstant(event, ss, timestamp, processName);
+            break;
         case TraceEventPhases.NESTABLE_START:
             handleStart(event, ss, timestamp, processName + ASYNC_SUFFIX);
             break;
@@ -372,6 +375,31 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             Object edgeStateValue = new EdgeStateValue(fIdCache.computeIfAbsent(key, FUNCTION), srcHostThread, currHostThread);
             ss.modifyAttribute(startTime, edgeStateValue, edgeQuark);
             ss.modifyAttribute(ts, (Object) null, edgeQuark);
+        }
+    }
+
+    private void handleInstant(@NonNull ITmfEvent event, ITmfStateSystemBuilder ss, long timestamp, String processName) {
+        super.addMarker(event);
+        Map<String, Object> map = TraceEventAspects.ARGS_ASPECT.resolve(event);
+        String toStore ="null";
+        if (map != null) {
+            toStore = map.toString();
+        }
+        if (toStore != null) {
+            int processQuark = ss.getQuarkAbsoluteAndAdd(PROCESSES, processName);
+            int pid = getProcessId(event);
+            ss.modifyAttribute(timestamp, pid, processQuark);
+
+            String threadName = getThreadName(event);
+            long threadId = getThreadId(event);
+            if (threadName == null) {
+                threadName = Long.toString(threadId);
+            }
+            int threadQuark = ss.getQuarkRelativeAndAdd(processQuark, threadName);
+            ss.modifyAttribute(timestamp, threadId, threadQuark);
+
+            int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, InstrumentedCallStackAnalysis.ANNOTATIONS);
+            ss.modifyAttribute(timestamp, toStore, callStackQuark);
         }
     }
 
