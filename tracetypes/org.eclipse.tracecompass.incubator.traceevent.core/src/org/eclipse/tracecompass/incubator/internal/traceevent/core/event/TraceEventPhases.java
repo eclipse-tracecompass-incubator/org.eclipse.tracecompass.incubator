@@ -32,6 +32,8 @@ public final class TraceEventPhases {
 
     public static final String DURATION = "X"; //$NON-NLS-1$
 
+    public static final String INSTANT = "i"; //$NON-NLS-1$
+
     public static final String COUNTER = "C"; //$NON-NLS-1$
 
     public static final String NESTABLE_START = "b"; //$NON-NLS-1$
