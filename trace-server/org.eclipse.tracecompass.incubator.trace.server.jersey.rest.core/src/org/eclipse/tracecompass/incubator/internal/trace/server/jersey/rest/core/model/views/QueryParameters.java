@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.Hidden;
  * @author Simon Delisle
  */
 public class QueryParameters {
-    private @NonNull Map<String, Object> parameters;
+    private @Nullable Map<String, Object> parameters;
     private List<Filter> filters;
 
     /**
@@ -55,7 +55,13 @@ public class QueryParameters {
      */
     @Hidden
     public @NonNull Map<String, Object> getParameters() {
-        return parameters;
+        // Treat null parameters sent by the client as empty parameters map
+        Map<String, Object> params = parameters;
+        if (params == null) {
+            params = new HashMap<>();
+            parameters = params;
+        }
+        return params ;
     }
 
     /**

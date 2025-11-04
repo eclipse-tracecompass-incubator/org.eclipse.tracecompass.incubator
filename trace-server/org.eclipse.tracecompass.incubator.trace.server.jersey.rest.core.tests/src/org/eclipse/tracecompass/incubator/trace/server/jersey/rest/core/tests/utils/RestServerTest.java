@@ -119,9 +119,19 @@ public abstract class RestServerTest {
     protected static final Comparator<DataProvider> DP_COMPARATOR = (p1, p2) -> p1.getName().compareTo(p2.getName());
 
     /**
+     * the Query parameters key for "parameters"
+     */
+    protected static final String PARAMETER_KEY = "parameters";
+
+    /**
      * No parameter string
      */
     protected static final String NO_PARAMETERS = "no-parameters";
+
+    /**
+     * Parameters with null parameter value
+     */
+    protected static final Map<String, Object> NULL_PARAMETERS = Collections.singletonMap(PARAMETER_KEY, null);
 
     /**
      * Invalid experiment UUID
@@ -1133,9 +1143,23 @@ public abstract class RestServerTest {
         if (hasParameters) {
             // Missing parameters
             endpoint = resolver.getEndpoint(expUuid.toString(), dpId);
+            try (Response response = endpoint.request().post(Entity.json(NULL_PARAMETERS))) {
+                assertNotNull(response);
+                assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            }
+
+            // Missing parameters
+            endpoint = resolver.getEndpoint(expUuid.toString(), dpId);
             try (Response response = endpoint.request().post(Entity.json(new QueryParameters(parameters, Collections.emptyList())))) {
                 assertNotNull(response);
                 assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            }
+        } else {
+            // Test null parameters. Since endpoint doesn't require parameters, this should not cause an error reply
+            endpoint = resolver.getEndpoint(expUuid.toString(), dpId);
+            try (Response response = endpoint.request().post(Entity.json(NULL_PARAMETERS))) {
+                assertNotNull(response);
+                assertEquals(Status.OK.getStatusCode(), response.getStatus());
             }
         }
 
