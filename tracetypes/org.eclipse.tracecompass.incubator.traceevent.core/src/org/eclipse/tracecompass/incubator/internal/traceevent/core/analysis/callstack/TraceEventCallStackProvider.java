@@ -61,7 +61,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 public class TraceEventCallStackProvider extends CallStackStateProvider {
 
     private static final String ASYNC_SUFFIX = "(async)"; //$NON-NLS-1$
-    private static final int VERSION_NUMBER = 9;
+    private static final int VERSION_NUMBER = 10;
     private static final int UNSET_ID = -1;
     static final String EDGES = "EDGES"; //$NON-NLS-1$
 
@@ -266,6 +266,9 @@ public class TraceEventCallStackProvider extends CallStackStateProvider {
             return;
         }
         switch (ph) {
+        case TraceEventPhases.NESTABLE_INSTANT:
+            handleInstant(event, ss, timestamp, processName);
+            break;
         case TraceEventPhases.INSTANT:
             handleInstant(event, ss, timestamp, processName);
             break;
