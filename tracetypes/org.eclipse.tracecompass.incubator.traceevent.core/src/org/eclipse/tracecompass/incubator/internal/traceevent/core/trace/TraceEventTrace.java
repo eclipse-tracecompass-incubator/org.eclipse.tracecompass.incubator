@@ -18,9 +18,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -45,6 +47,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
+import org.json.JSONObject;
 
 import com.google.common.collect.Lists;
 
@@ -101,7 +104,10 @@ public class TraceEventTrace extends JsonTrace {
      */
     private static final String THREAD_SORT_INDEX = "thread_sort_index"; //$NON-NLS-1$
 
+    private static final Pattern TID_REGEX = Pattern.compile("\\d+"); //$NON-NLS-1$
+
     private final @NonNull Map<Object, String> fPidNames = new HashMap<>();
+    private final @NonNull Map<Object, Integer> fTidMap = new HashMap<>();
     private final @NonNull NavigableMap<Integer, String> fTidNames = new TreeMap<>();
     private final @NonNull Iterable<@NonNull ITmfEventAspect<?>> fEventAspects;
 
@@ -167,9 +173,30 @@ public class TraceEventTrace extends JsonTrace {
         super.initTrace(resource, path, type);
         fProperties.put("Type", "Trace-Event"); //$NON-NLS-1$ //$NON-NLS-2$
         String dir = TmfTraceManager.getSupplementaryFileDir(this);
+        long startOffset = 0;
+        try (RandomAccessFile raf = (new RandomAccessFile(new File(path), "r"))) {
+            goToCorrectStart(raf);
+            startOffset = raf.getFilePointer();
+            if (startOffset > 14) {
+                raf.seek(0);
+                byte[] data = new byte[(int) startOffset];
+                raf.read(data);
+                String jsonSoFar = new String(data);
+                jsonSoFar = jsonSoFar.substring(0, jsonSoFar.length()-14)+'}';
+                Map<String, Object> map = new JSONObject(jsonSoFar).toMap();
+                for (Entry<String, Object> entry : map.entrySet()) {
+                    if (!fProperties.containsKey(entry.getKey())) {
+                        fProperties.put(entry.getKey(), entry.getValue().toString());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new TmfTraceException(e.getMessage(), e);
+        }
+
         fFile = new File(dir + new File(path).getName());
         if (!fFile.exists()) {
-            Job sortJob = new TraceEventSortingJob(this, path);
+            Job sortJob = new TraceEventSortingJob(this, path, startOffset);
             sortJob.schedule();
             while (sortJob.getResult() == null) {
                 try {
@@ -216,25 +243,27 @@ public class TraceEventTrace extends JsonTrace {
         // skip start if it's {"traceEvents":
         String traceEventsKey = "\"traceEvents\""; //$NON-NLS-1$
         StringBuilder sb = new StringBuilder();
+        rafile.seek(0);
         int val = rafile.read();
         /*
          * Skip list contains all the odd control characters
          */
         Set<Integer> skipList = new HashSet<>();
-        skipList.add((int) ':');
         skipList.add((int) '\t');
         skipList.add((int) '\n');
         skipList.add((int) '\r');
         skipList.add((int) ' ');
         skipList.add((int) '\b');
         skipList.add((int) '\f');
-        while (val != -1 && val != ':' && sb.length() < 14) {
+        int maxLen = 4096;
+        while (val != -1 && sb.length() < maxLen && !sb.toString().endsWith(traceEventsKey)) {
             if (!skipList.contains(val)) {
                 sb.append((char) val);
             }
             val = rafile.read();
         }
-        if (!(sb.toString().startsWith('{' + traceEventsKey) && rafile.length() > 14)) {
+        String string = sb.toString();
+        if (!(string.endsWith(traceEventsKey) && string.length() < maxLen)) {
             // Trace does not start with {"TraceEvents", maybe it's the events
             // directly, go back to start of trace
             rafile.seek(0);
@@ -289,6 +318,7 @@ public class TraceEventTrace extends JsonTrace {
             return;
         }
         Map<@NonNull String, @NonNull String> properties = fProperties;
+        Object tid = field.getTid();
         switch (name) {
         case PROCESS_NAME:
             String procName = (String) args.get(NAME_ARG);
@@ -311,15 +341,17 @@ public class TraceEventTrace extends JsonTrace {
             break;
         case THREAD_NAME:
             String threadName = (String) args.get(NAME_ARG);
-            fTidNames.put(field.getTid(), threadName);
+            if (tid instanceof Integer) {
+                fTidNames.put((Integer) tid, threadName);
+            }
             if (threadName != null) {
-                properties.put(TID_PREFIX + field.getTid(), threadName);
+                properties.put(TID_PREFIX + tid, threadName);
             }
             break;
         case THREAD_SORT_INDEX:
             sortIndex = (String) args.get(SORT_INDEX);
             if (sortIndex != null) {
-                properties.put(name + '-' + field.getTid(), sortIndex);
+                properties.put(name + '-' + tid, sortIndex);
             }
             break;
         default:
@@ -355,11 +387,36 @@ public class TraceEventTrace extends JsonTrace {
         public @Nullable String resolve(@NonNull ITmfEvent event) {
             if (event instanceof TraceEventEvent) {
                 TraceEventField field = ((TraceEventEvent) event).getField();
-                if (field.getTid() != null) {
-                    return fTidNames.get(field.getTid());
+                Object tid = field.getTid();
+                if (tid instanceof String && TID_REGEX.matcher((String) tid).matches()) {
+                    tid = Integer.parseInt((String) tid);
                 }
+                if (tid instanceof Integer) {
+                    return fTidNames.get(tid);
+                }
+
             }
             return null;
         }
+    }
+
+    /**
+     * Register a TID, it is normally numerical, but a best effort is made for
+     * string TIDs.
+     *
+     * @param tid
+     *            the TID object
+     * @return an integer value
+     */
+    public @Nullable Integer registerTid(Object tid) {
+        if (tid instanceof Integer) {
+            fTidMap.put(tid, (Integer) tid);
+            return (Integer) tid;
+        }
+        if (tid instanceof String && TID_REGEX.matcher((String) tid).matches()) {
+            return Integer.parseInt((String) tid);
+        }
+
+        return null;
     }
 }

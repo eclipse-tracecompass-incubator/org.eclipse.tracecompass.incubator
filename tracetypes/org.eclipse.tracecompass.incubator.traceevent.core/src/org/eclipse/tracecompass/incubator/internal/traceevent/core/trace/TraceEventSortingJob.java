@@ -31,9 +31,11 @@ public class TraceEventSortingJob extends SortingJob {
      *            the trace to be sort
      * @param path
      *            the path to the trace file
+     * @param startOffset
+     *            to seek in bytes
      */
-    public TraceEventSortingJob(ITmfTrace trace, String path) {
-        super(trace, path, "\"ts\":", 1); //$NON-NLS-1$
+    public TraceEventSortingJob(ITmfTrace trace, String path, long startOffset) {
+        super(trace, path, "\"ts\":", 1, startOffset); //$NON-NLS-1$
     }
 
     @Override
