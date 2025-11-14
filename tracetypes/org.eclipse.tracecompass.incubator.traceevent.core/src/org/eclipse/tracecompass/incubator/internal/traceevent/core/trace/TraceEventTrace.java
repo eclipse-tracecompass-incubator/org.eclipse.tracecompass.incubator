@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.incubator.internal.traceevent.core.trace;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -101,6 +102,8 @@ public class TraceEventTrace extends JsonTrace {
      */
     private static final String THREAD_SORT_INDEX = "thread_sort_index"; //$NON-NLS-1$
 
+    private static final String EVENTS_ARRAY_KEY = "traceEvents"; //$NON-NLS-1$
+
     private final @NonNull Map<Object, String> fPidNames = new HashMap<>();
     private final @NonNull NavigableMap<Integer, String> fTidNames = new TreeMap<>();
     private final @NonNull Iterable<@NonNull ITmfEventAspect<?>> fEventAspects;
@@ -168,22 +171,30 @@ public class TraceEventTrace extends JsonTrace {
         fProperties.put("Type", "Trace-Event"); //$NON-NLS-1$ //$NON-NLS-2$
         String dir = TmfTraceManager.getSupplementaryFileDir(this);
         fFile = new File(dir + new File(path).getName());
-        if (!fFile.exists()) {
-            Job sortJob = new TraceEventSortingJob(this, path);
-            sortJob.schedule();
-            while (sortJob.getResult() == null) {
-                try {
-                    sortJob.join();
-                } catch (InterruptedException e) {
-                    throw new TmfTraceException(e.getMessage(), e);
+
+        try {
+            if (!fFile.exists()) {
+                Job sortJob;
+                try (BufferedRandomAccessFile rafile = new BufferedRandomAccessFile(path, "r")) { //$NON-NLS-1$
+                    if (isArrayTrace(rafile)) {
+                        sortJob = new TraceEventSortingJob(this, path, Collections.emptyList());
+                    } else {
+                        sortJob = new TraceEventSortingJob(this, path, List.of(EVENTS_ARRAY_KEY));
+                    }
+                }
+                sortJob.schedule();
+                while (sortJob.getResult() == null) {
+                    try {
+                        sortJob.join();
+                    } catch (InterruptedException e) {
+                        throw new TmfTraceException(e.getMessage(), e);
+                    }
+                }
+                IStatus result = sortJob.getResult();
+                if (!result.isOK()) {
+                    throw new TmfTraceException("Job failed " + result.getMessage()); //$NON-NLS-1$
                 }
             }
-            IStatus result = sortJob.getResult();
-            if (!result.isOK()) {
-                throw new TmfTraceException("Job failed " + result.getMessage()); //$NON-NLS-1$
-            }
-        }
-        try {
             fFileInput = new BufferedRandomAccessFile(fFile, "r"); //$NON-NLS-1$
             goToCorrectStart(fFileInput);
             /* Set the start and (current) end times for this trace */
@@ -203,6 +214,15 @@ public class TraceEventTrace extends JsonTrace {
         }
     }
 
+    private static boolean isArrayTrace(RandomAccessFile rafile) throws IOException {
+        int val = ' ';
+        while(val == ' ') {
+            val = rafile.read();
+        }
+        rafile.seek(0);
+        return val == '[';
+    }
+
     /**
      * Update the file position to be at the actual start of events, after the
      * trace event header
@@ -213,31 +233,44 @@ public class TraceEventTrace extends JsonTrace {
      *             Exceptions reading the file
      */
     protected static void goToCorrectStart(RandomAccessFile rafile) throws IOException {
-        // skip start if it's {"traceEvents":
-        String traceEventsKey = "\"traceEvents\""; //$NON-NLS-1$
-        StringBuilder sb = new StringBuilder();
-        int val = rafile.read();
+        // The file either starts with [ and then all the subsequent objects are
+        // events
+        if (isArrayTrace(rafile)) {
+            return;
+        }
+        // or we have to skip to the key EVENTS_ARRAY_KEY to get the array of
+        // events
+        StringBuilder stringBuffer = new StringBuilder();
         /*
          * Skip list contains all the odd control characters
          */
         Set<Integer> skipList = new HashSet<>();
-        skipList.add((int) ':');
         skipList.add((int) '\t');
         skipList.add((int) '\n');
         skipList.add((int) '\r');
         skipList.add((int) ' ');
         skipList.add((int) '\b');
         skipList.add((int) '\f');
-        while (val != -1 && val != ':' && sb.length() < 14) {
+        int maxBufferSize = 200;
+        int maxOffset = 50000;
+        int offset = 1;
+        int val = 0;
+        while (val != -1 && offset < maxOffset) {
             if (!skipList.contains(val)) {
-                sb.append((char) val);
+                stringBuffer.append((char) val);
+                if (stringBuffer.length() > maxBufferSize) {
+                    String trailingEnd = stringBuffer.substring(maxBufferSize - EVENTS_ARRAY_KEY.length(), stringBuffer.length());
+                    stringBuffer = new StringBuilder(trailingEnd);
+                }
+            }
+            if (stringBuffer.toString().endsWith(EVENTS_ARRAY_KEY)) {
+                while (val != ':') {
+                    val = rafile.read();
+                }
+                return;
             }
             val = rafile.read();
-        }
-        if (!(sb.toString().startsWith('{' + traceEventsKey) && rafile.length() > 14)) {
-            // Trace does not start with {"TraceEvents", maybe it's the events
-            // directly, go back to start of trace
-            rafile.seek(0);
+            offset += 1;
         }
     }
 

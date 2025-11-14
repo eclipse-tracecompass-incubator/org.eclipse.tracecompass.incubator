@@ -201,6 +201,28 @@ public class TraceEventTraceTest {
         assertEquals(expectedProperties, properties);
     }
 
+    /**
+     * Test a chromeOs system trace
+     *
+     * @throws TmfTraceException
+     *             should not happen
+     */
+    @Test
+    public void testPytorchTrace() throws TmfTraceException {
+        String[] env = { "Type", "Trace-Event"};
+        Map<String, String> expectedProperties = new LinkedHashMap<>();
+        for (int i = 0; i < env.length; i += 2) {
+            expectedProperties.put(env[i], env[i + 1]);
+        }
+        String path = "traces/stable-diffusion.json";
+        int nbEvents = 12;
+        ITmfTimestamp startTime = TmfTimestamp.fromNanos(5624160250199160L);
+        ITmfTimestamp endTime = TmfTimestamp.fromNanos(5624160263891443L);
+        Map<String, String> properties = testTrace(path, nbEvents, startTime, endTime);
+        assertNotNull(properties);
+        assertEquals(expectedProperties, properties);
+    }
+
     private static Map<String, String> testTrace(String path, int nbEvents, ITmfTimestamp startTime, ITmfTimestamp endTime) throws TmfTraceException {
         ITmfTrace trace = new TraceEventTrace();
         try {

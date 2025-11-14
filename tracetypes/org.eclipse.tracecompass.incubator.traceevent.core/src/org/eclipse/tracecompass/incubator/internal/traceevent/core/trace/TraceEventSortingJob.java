@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.traceevent.core.trace;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.eclipse.tracecompass.internal.jsontrace.core.job.SortingJob;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -31,9 +32,11 @@ public class TraceEventSortingJob extends SortingJob {
      *            the trace to be sort
      * @param path
      *            the path to the trace file
+     * @param pathToEvents
+     *            the json key to the events array
      */
-    public TraceEventSortingJob(ITmfTrace trace, String path) {
-        super(trace, path, "\"ts\":", 1); //$NON-NLS-1$
+    public TraceEventSortingJob(ITmfTrace trace, String path, List<String> pathToEvents) {
+        super(trace, path, "\"ts\":", pathToEvents); //$NON-NLS-1$
     }
 
     @Override
