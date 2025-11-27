@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-SymbolicName: org.eclipse.tracecompass.incubator.traceevent.core;singleton:=true
-Bundle-Version: 0.1.6.qualifier
+Bundle-Version: 0.1.7.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.eclipse.tracecompass.incubator.internal.traceevent.core.Activator
 Bundle-ActivationPolicy: lazy

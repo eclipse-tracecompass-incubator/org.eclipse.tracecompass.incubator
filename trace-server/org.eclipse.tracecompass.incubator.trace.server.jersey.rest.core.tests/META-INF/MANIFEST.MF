@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-SymbolicName: org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests;singleton:=true
-Bundle-Version: 0.1.13.qualifier
+Bundle-Version: 0.1.14.qualifier
 Bundle-Localization: plugin
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17

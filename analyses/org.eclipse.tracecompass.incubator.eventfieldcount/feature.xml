@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.tracecompass.incubator.eventfieldcount"
       label="%featureName"
-      version="0.15.0.qualifier"
+      version="0.16.0.qualifier"
       provider-name="%featureProvider"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">

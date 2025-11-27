@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Trace Compass Trace Server (Jersey Rest)" uid="traceserver" id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" application="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" version="0.15.0.qualifier" type="bundles" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="Trace Compass Trace Server (Jersey Rest)" uid="traceserver" id="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" application="org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.id" version="0.16.0.qualifier" type="bundles" includeLaunchers="true" autoIncludeRequirements="true">
 
    <configIni use="default">
    </configIni>
