@@ -117,7 +117,7 @@
    <bundle id="jakarta.ws.rs-api"/>
    <bundle id="jakarta.xml.bind-api" version="2.3.3"/>
    <bundle id="javax.inject"/>
-   <bundle id="org.apache.commons.lang"/>
+   <bundle id="org.apache.commons.lang3"/>
    <bundle id="org.eclipse.lsp4j"/>
    <bundle id="org.eclipse.lsp4j.jsonrpc"/>
    <bundle id="org.eclipse.nebula.widgets.opal.commons"/>
