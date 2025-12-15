@@ -54,7 +54,7 @@ mvn validate -PdownloadTsp
 The generation of the trace server client code from the specification (API.yaml) is done using the maven plugin of the [OpenAPI Generator][openapi-codegen]. To re-generate the TSP client execute the following command:
 
 ```bash
-mvn generated-resources -PdownloadTsp -PbuildTsp
+mvn generate-sources -PdownloadTsp -PbuildTsp
 ```
 
 Notes:

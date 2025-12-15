@@ -33,7 +33,7 @@
       <import plugin="org.eclipse.tracecompass.tmf.filter.parser"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.tracecompass.tmf.ui"/>
-      <import plugin="org.apache.commons.lang"/>
+      <import plugin="org.apache.commons.lang3"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.help"/>
    </requires>

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-Vendor: %Bundle-Vendor
 Bundle-SymbolicName: org.eclipse.tracecompass.incubator.filters.ui;singleton:=true
-Bundle-Version: 0.1.2.qualifier
+Bundle-Version: 0.1.3.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.eclipse.tracecompass.incubator.internal.filters.ui.Activator
 Bundle-ActivationPolicy: lazy
@@ -22,5 +22,5 @@ Export-Package: org.eclipse.tracecompass.incubator.internal.filters.ui;x-interna
  org.eclipse.tracecompass.incubator.internal.filters.ui.views.global;x-internal:=true
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.lsp.ui
 Import-Package: com.google.gson,
- org.apache.commons.lang,
+ org.apache.commons.lang3,
  org.eclipse.jface.text
