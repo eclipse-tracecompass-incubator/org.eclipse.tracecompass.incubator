@@ -192,6 +192,26 @@ public class FtraceFieldTest {
     }
 
     /**
+     * Testing of parse line with a line that starts with parentheses
+     */
+    @Test
+    public void testParseStartsWithParentheses() {
+        String line = "(udev-worker)-299   [000] d.h1.    73.294605: sched_stat_runtime:   comm=systemd-udevd pid=299 runtime=65790 [ns] vruntime=6269486605 [ns]";
+
+        GenericFtraceField field = GenericFtraceField.parseLine(line);
+
+        assertNotNull(field);
+        assertEquals(4, field.getContent().getFields().size());
+        assertEquals((Integer) 0, field.getCpu());
+        assertEquals((Integer) 299, field.getPid());
+        assertEquals("sched_stat_runtime", field.getName());
+
+        assertEquals("systemd-udevd", field.getContent().getFieldValue(String.class, "comm"));
+        assertEquals((Long) 65790L, field.getContent().getFieldValue(Long.class, "runtime"));
+        assertEquals((Long) 6269486605L, field.getContent().getFieldValue(Long.class, "vruntime"));
+    }
+
+    /**
      * Testing of parse line with odd comm names
      */
     @Test
