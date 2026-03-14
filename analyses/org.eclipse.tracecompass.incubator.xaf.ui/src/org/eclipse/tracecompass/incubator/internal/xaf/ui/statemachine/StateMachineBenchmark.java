@@ -40,7 +40,7 @@ public class StateMachineBenchmark {
         // Sort by appearing time
         ArrayList<Entry<String, Collection<StateMachineBenchmark>>> list = new ArrayList<>(benchmarks.asMap().entrySet());
         list.sort(new Comparator<Entry<String, Collection<StateMachineBenchmark>>>() {
-            Comparator<StateMachineBenchmark> smbComp = new Comparator<StateMachineBenchmark>() {
+            Comparator<StateMachineBenchmark> smbComp = new Comparator<>() {
                 @Override
                 public int compare(StateMachineBenchmark smb1, StateMachineBenchmark smb2) {
                     return smb1.startTime.compareTo(smb2.startTime);
