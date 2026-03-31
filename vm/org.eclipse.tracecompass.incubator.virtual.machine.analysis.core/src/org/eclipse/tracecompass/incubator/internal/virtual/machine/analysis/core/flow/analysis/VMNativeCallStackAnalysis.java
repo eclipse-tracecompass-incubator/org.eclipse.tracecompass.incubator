@@ -14,8 +14,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 /**
- *
- *
  * @author Francois Belias
  */
 public class VMNativeCallStackAnalysis extends InstrumentedCallStackAnalysis {

@@ -8,7 +8,9 @@ import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModul
 
 
 /**
+ * An example of state system analysis module
  *
+ * @author Francois Belias
  */
 public class StateSystemAnalysisModule extends TmfStateSystemAnalysisModule {
 

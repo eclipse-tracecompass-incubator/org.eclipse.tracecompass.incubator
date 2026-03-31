@@ -20,7 +20,7 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
- * provider for VM Native CallStack analysis - structures native flow for flame graph
+ * Provider for VM Native CallStack analysis - structures native flow for flame graph
  * Based on LttngUstCallStackProvider pattern
  *
  * @author Francois Belias

@@ -1,13 +1,45 @@
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis;
 
 /**
- * Represents a single event in the unified flow
+ * Represents a single event within a unified execution flow.
+ * <p>
+ * A {@code FlowEvent} wraps a {@link KernelEventInfo} and classifies it
+ * according to its role in the execution sequence (guest, hypervisor,
+ * VM transition, etc.).
+ * </p>
+ *
+ * @author Francois Belias
  */
 public class FlowEvent {
-    final KernelEventInfo kernelEvent;
-    final FlowEventType type;
-    long correlatedGuestTimestamp = -1; // For hypervisor events
 
+    /**
+     * The underlying kernel event associated with this flow event.
+     */
+    final KernelEventInfo kernelEvent;
+
+    /**
+     * The type of this flow event within the execution flow.
+     */
+    final FlowEventType type;
+
+    /**
+     * Timestamp of the corresponding guest event, used for correlating
+     * hypervisor events back to guest execution.
+     * <p>
+     * This value is primarily used for {@link FlowEventType#HYPERVISOR_EVENT}
+     * and is set to {@code -1} when not applicable.
+     * </p>
+     */
+    long correlatedGuestTimestamp = -1;
+
+    /**
+     * Constructs a {@code FlowEvent}.
+     *
+     * @param kernelEvent
+     *            the underlying kernel event
+     * @param type
+     *            the type of the flow event
+     */
     FlowEvent(KernelEventInfo kernelEvent, FlowEventType type) {
         this.kernelEvent = kernelEvent;
         this.type = type;
@@ -16,12 +48,36 @@ public class FlowEvent {
 
 
 /**
- * Types of events in the unified flow
+ * Enumerates the different types of events in a unified execution flow.
+ * <p>
+ * These types describe the role of each event in the interaction between
+ * guest execution and hypervisor activity.
+ * </p>
  */
 enum FlowEventType {
-    GUEST_EVENT,     // Normal guest process event
-    VM_EXIT,         // VM exit to hypervisor
-    HYPERVISOR_EVENT, // Host/hypervisor processing
-    VM_ENTRY,         // VM entry back to guest
-    NATIVE // Native system
+
+    /**
+     * A regular event occurring in the guest (virtual machine).
+     */
+    GUEST_EVENT,
+
+    /**
+     * A VM exit event, marking the transition from guest to hypervisor.
+     */
+    VM_EXIT,
+
+    /**
+     * An event occurring in the hypervisor (host) while handling a VM exit.
+     */
+    HYPERVISOR_EVENT,
+
+    /**
+     * A VM entry event, marking the transition from hypervisor back to guest.
+     */
+    VM_ENTRY,
+
+    /**
+     * An event occurring in a native (non-virtualized) environment.
+     */
+    NATIVE
 }

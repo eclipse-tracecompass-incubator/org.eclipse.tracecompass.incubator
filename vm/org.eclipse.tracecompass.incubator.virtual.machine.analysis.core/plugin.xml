@@ -59,6 +59,7 @@
             id="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.state.system.module"
             name="Exit analysis">
          <tracetype
+               applies="true"
                class="org.eclipse.tracecompass.tmf.core.trace.TmfTrace">
          </tracetype>
       </module>
@@ -72,8 +73,23 @@
       </module>
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.VMNativeCallStackAnalysis"
-            id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui.module3"
+            applies_experiment="true"
+            id="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.vm.native.callstack"
             name="VM Native CallStack">
+         <tracetype
+               class="org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace">
+         </tracetype>
       </module>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.core.data.provider.KvmExitDataProviderFactory"
+            id="org.eclipse.incubator.overhead.xy.rate.dataprovider">
+      </dataProviderFactory>
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.core.data.provider.VMNativeDataProviderFactory"
+            id="org.eclipse.incubator.overhead.timegraph.dataprovider">
+      </dataProviderFactory>
    </extension>
 </plugin>
