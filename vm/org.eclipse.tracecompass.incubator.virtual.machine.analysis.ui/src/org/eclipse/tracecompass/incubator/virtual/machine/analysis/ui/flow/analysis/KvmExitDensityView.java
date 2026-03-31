@@ -43,7 +43,7 @@ public class KvmExitDensityView extends TmfChartView {
      * Constructor
      */
     public KvmExitDensityView() {
-        super(TITLE);
+        super(ID);
     }
 
     @Override

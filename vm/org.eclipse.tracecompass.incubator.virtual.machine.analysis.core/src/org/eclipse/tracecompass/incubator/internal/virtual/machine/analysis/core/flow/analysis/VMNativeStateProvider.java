@@ -14,7 +14,8 @@ import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 /**
  * State provider for VM/Native comparison analysis
- *
+ * Here the reason why there a some variable in read is because this analysis does not
+ * take into account the host trace yet. It is a feature that I will add in the feature
  * @author Francois Belias
  *
  */
