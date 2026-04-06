@@ -1,8 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui.flow.analysis;
 
 import org.eclipse.swt.widgets.Composite;
-//import org.eclipse.tracecompass.internal.tmf.ui.viewers.eventdensity.EventDensityTreeViewer;
-//import org.eclipse.tracecompass.internal.tmf.ui.viewers.eventdensity.EventDensityViewer;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
@@ -13,6 +21,8 @@ import org.eclipse.tracecompass.tmf.ui.views.xychart.TmfChartView;
 
 /**
  * Histogram View based on TmfChartView.
+ *
+ * @author Francois Belias
  */
 public class EventDensityView extends TmfChartView {
     /** The view ID. */

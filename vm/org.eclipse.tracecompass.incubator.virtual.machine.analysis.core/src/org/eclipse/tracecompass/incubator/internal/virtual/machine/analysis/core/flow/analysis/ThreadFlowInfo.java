@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis;
 
 import java.util.ArrayList;
@@ -17,18 +27,18 @@ public class ThreadFlowInfo {
     /**
      * Thread ID (TID).
      */
-    final int tid;
+    final int fTid;
 
     /**
      * Name of the process to which the thread belongs.
      */
-    final String processName;
+    final String fProcessName;
 
     /**
      * List of kernel events associated with this thread.
      * Events are typically stored in chronological order.
      */
-    final List<KernelEventInfo> events = new ArrayList<>();
+    final List<KernelEventInfo> fEvents = new ArrayList<>();
 
     /**
      * Constructs a {@code ThreadFlowInfo} instance.
@@ -39,8 +49,8 @@ public class ThreadFlowInfo {
      *            the name of the process
      */
     ThreadFlowInfo(int tid, String processName) {
-        this.tid = tid;
-        this.processName = processName;
+        this.fTid = tid;
+        this.fProcessName = processName;
     }
 
     /**
@@ -49,21 +59,7 @@ public class ThreadFlowInfo {
      * @param evt
      *            the event to add
      */
-    void addEvent(KernelEventInfo evt) {
-        events.add(evt);
-    }
-
-    /**
-     * Prints the thread execution flow to the standard output.
-     * <p>
-     * Each event is displayed with its timestamp and name.
-     * </p>
-     */
-    void printFlow() {
-        System.out.printf("  Thread %d (%d events):\n", tid, events.size()); //$NON-NLS-1$
-
-        for (KernelEventInfo evt : events) {
-            System.out.printf("    [%d] %s\n", evt.timestamp, evt.name); //$NON-NLS-1$
-        }
+    public void addEvent(KernelEventInfo evt) {
+        fEvents.add(evt);
     }
 }
