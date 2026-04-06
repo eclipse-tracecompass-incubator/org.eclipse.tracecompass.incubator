@@ -1,8 +1,13 @@
 /*******************************************************************************
- * KVM Exit Rate Data Provider
- * This data provider analyzes KVM exit rates per CPU using the rate calculation pattern
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.core.data.provider;
 
 import java.util.ArrayList;
@@ -27,6 +32,7 @@ import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
 import org.eclipse.tracecompass.tmf.core.model.xy.TmfXYAxisDescription;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 
 /**
  * A data provider for KVM Exit rate visualization.
@@ -132,7 +138,7 @@ public class KvmExitRateDataProvider extends AbstractRateDataProvider<KvmExitAna
                         long reasonNodeId = getId(exitReasonQuark);
 
                         nodes.add(new TmfTreeDataModel(reasonNodeId, vcpuNodeId,
-                                Collections.singletonList(reasonName), false, null));
+                                Collections.singletonList(reasonName), true, null));
                     }
                 }
             }
@@ -145,6 +151,10 @@ public class KvmExitRateDataProvider extends AbstractRateDataProvider<KvmExitAna
                 Collections.singletonList("All VCPUs (Aggregated)"), true, null)); //$NON-NLS-1$
 
         TmfTreeModel<TmfTreeDataModel> treeModel = new TmfTreeModel<>(Collections.emptyList(), nodes);
+        if (ss.waitUntilBuilt(0)) {
+            fCached = new TmfModelResponse<>(treeModel,
+                    org.eclipse.tracecompass.tmf.core.response.ITmfResponse.Status.COMPLETED, ""); //$NON-NLS-1$
+        }
         return treeModel;
     }
 
@@ -205,7 +215,6 @@ public class KvmExitRateDataProvider extends AbstractRateDataProvider<KvmExitAna
                 if ("kvm_exits".equals(attributeName)) { //$NON-NLS-1$
                     // Skip this VCPU if any of its exit reasons are selected
                     if (parentVcpuQuarks.contains(quark)) {
-                        //System.out.println("DEBUG: Skipping VCPU " + quark + " because its exit reasons are selected"); //$NON-NLS-1$ //$NON-NLS-2$
                         continue;
                     }
 
@@ -296,7 +305,7 @@ public class KvmExitRateDataProvider extends AbstractRateDataProvider<KvmExitAna
                     // Update previous count for next iteration
                     fPrevCpuCounts.put(cpuId, currentCpuCount);
 
-                } catch (Exception e) {
+                } catch (StateSystemDisposedException e) {
                     // Skip this CPU if there's an error
                     continue;
                 }

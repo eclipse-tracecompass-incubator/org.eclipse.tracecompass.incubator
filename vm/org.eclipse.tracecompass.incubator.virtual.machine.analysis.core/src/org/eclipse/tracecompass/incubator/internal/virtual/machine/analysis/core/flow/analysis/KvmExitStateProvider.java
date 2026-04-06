@@ -1,17 +1,19 @@
-
 /*******************************************************************************
- * KVM Exit State Provider
- * This state provider processes trace events related to KVM exits
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-
-
-
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis;
 
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
+import org.eclipse.tracecompass.statesystem.core.StateSystemBuilderUtils;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
@@ -28,17 +30,14 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 public class KvmExitStateProvider extends AbstractTmfStateProvider {
 
     private static final int VERSION = 1;
+
+    /**
+     * The ID of this analysis module
+     */
     private static final String ID = "org.eclipse.tracecompass.incubator.internal.overhead.core.analysis"; //$NON-NLS-1$
 
-    // Event names that we're interested in
-    private static final String KVM_EXIT = "kvm_x86_exit"; //$NON-NLS-1$
-    private static final String KVM_ENTRY = "kvm_x86_entry"; //$NON-NLS-1$
-
-
-    // Field names in the KVM exit event
-    private static final String EXIT_REASON = "exit_reason"; //$NON-NLS-1$
-    private static final String VCPU_ID = "vcpu_id"; //$NON-NLS-1$
-    private static final String CPU_ID = "context.cpu_id"; //$NON-NLS-1$
+    /** Singleton providing VM (e.g., KVM) event layout definitions */
+    private static final VMNativeEventLayout fLayout = VMNativeEventLayout.getInstance();
 
     /**
      * Constructor
@@ -72,19 +71,11 @@ public class KvmExitStateProvider extends AbstractTmfStateProvider {
         final ITmfEventField content = event.getContent();
 
         // Process KVM exit events
-        if (eventName.equals(KVM_EXIT)) {
+        if (eventName.equals(fLayout.eventsKVMExit().iterator().next())) {
             // Get the CPU ID and exit reason
-            Object cpuObj = getFieldValue(content, CPU_ID);
-            Object exitReasonObj = getFieldValue(content, EXIT_REASON);
-            Object vcpuIdObj = getFieldValue(content, VCPU_ID);
-
-            if (cpuObj == null) {
-                return;
-            }
-
-            Integer cpuId = getIntegerValue(cpuObj);
-            Integer exitReason = getIntegerValue(exitReasonObj);
-            Integer vcpuId = getIntegerValue(vcpuIdObj);
+            Integer cpuId = content.getFieldValue(Integer.class, fLayout.contextCpuid());
+            Integer exitReason = content.getFieldValue(Integer.class, fLayout.contextExitReason());
+            Integer vcpuId = content.getFieldValue(Integer.class, fLayout.contextVcpuid());
 
             if (cpuId == null) {
                 return;
@@ -95,7 +86,7 @@ public class KvmExitStateProvider extends AbstractTmfStateProvider {
 
             // Create and increment the KVM exits counter for this CPU
             int exitCountQuark = ss.getQuarkRelativeAndAdd(cpuQuark, "kvm_exits"); //$NON-NLS-1$
-            incrementExitCounter(ss, exitCountQuark, timestamp);
+            StateSystemBuilderUtils.incrementAttributeLong(ss, timestamp, exitCountQuark, 1);
 
             // Track the VCPU if available
             if (vcpuId != null) {
@@ -106,12 +97,12 @@ public class KvmExitStateProvider extends AbstractTmfStateProvider {
                 int vcpusQuark = ss.getQuarkAbsoluteAndAdd("VCPUs"); //$NON-NLS-1$
                 int specificVcpuQuark = ss.getQuarkRelativeAndAdd(vcpusQuark, String.valueOf(vcpuId));
                 int vcpuExitCountQuark = ss.getQuarkRelativeAndAdd(specificVcpuQuark, "kvm_exits"); //$NON-NLS-1$
-                incrementExitCounter(ss, vcpuExitCountQuark, timestamp);
+                StateSystemBuilderUtils.incrementAttributeLong(ss, timestamp, vcpuExitCountQuark, 1);
 
                 // If we have exit reason information, track it
                 if (exitReason != null) {
                     int reasonQuark = ss.getQuarkRelativeAndAdd(specificVcpuQuark, "exit_reasons", ExitReasonMap.getExitReasonName(exitReason)); //$NON-NLS-1$
-                    incrementExitCounter(ss, reasonQuark, timestamp);
+                    StateSystemBuilderUtils.incrementAttributeLong(ss, timestamp, reasonQuark, 1);
                 }
 
 
@@ -124,62 +115,14 @@ public class KvmExitStateProvider extends AbstractTmfStateProvider {
             int stateQuark = ss.getQuarkRelativeAndAdd(cpuQuark, "kvm_state"); //$NON-NLS-1$
             ss.modifyAttribute(timestamp, "exit", stateQuark); //$NON-NLS-1$
 
-        } else if (eventName.equals(KVM_ENTRY)) {
+        } else if (eventName.equals(fLayout.eventsKVMEntry().iterator().next())) {
             // Get the CPU ID
-            Object cpuObj = getFieldValue(content, CPU_ID);
-            if (cpuObj == null) {
-                return;
-            }
-
-            Integer cpuId = getIntegerValue(cpuObj);
-            if (cpuId == null) {
-                return;
-            }
+            Integer cpuId = content.getFieldValue(Integer.class, fLayout.contextCpuid());
 
             // Update the CPU state to show it's back in guest mode
             int cpuQuark = ss.getQuarkAbsoluteAndAdd("CPUs", String.valueOf(cpuId)); //$NON-NLS-1$
             int stateQuark = ss.getQuarkRelativeAndAdd(cpuQuark, "kvm_state"); //$NON-NLS-1$
             ss.modifyAttribute(timestamp, "entry", stateQuark); //$NON-NLS-1$
         }
-    }
-
-    /**
-     * Increment a counter in the state system, handling the case where it doesn't exist yet
-     */
-    private static void incrementExitCounter(ITmfStateSystemBuilder ss, int quark, long timestamp) {
-        Object currentValue = ss.queryOngoing(quark);
-        int newValue = 1;
-
-        if (currentValue instanceof Integer) {
-            newValue = ((Integer) currentValue) + 1;
-        }
-
-        ss.modifyAttribute(timestamp, newValue, quark);
-    }
-
-    /**
-     * Safely get a field value from the event content
-     */
-    private static @Nullable Object getFieldValue(ITmfEventField content, String fieldName) {
-        ITmfEventField field = content.getField(fieldName);
-        return (field != null) ? field.getValue() : null;
-    }
-
-    /**
-     * Convert an object to Integer if possible
-     */
-    private static @Nullable Integer getIntegerValue(@Nullable Object obj) {
-        if (obj instanceof Integer) {
-            return (Integer) obj;
-        } else if (obj instanceof Long) {
-            return ((Long) obj).intValue();
-        } else if (obj instanceof String) {
-            try {
-                return Integer.parseInt((String) obj);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        return null;
     }
 }

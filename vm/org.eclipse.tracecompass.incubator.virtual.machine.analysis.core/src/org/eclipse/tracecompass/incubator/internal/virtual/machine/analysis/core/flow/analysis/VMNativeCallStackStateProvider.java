@@ -1,14 +1,22 @@
+/*******************************************************************************
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.profiling.core.callstack.CallStackAnalysis;
@@ -17,6 +25,7 @@ import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
@@ -25,37 +34,41 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  *
  * @author Francois Belias
  */
-
 public class VMNativeCallStackStateProvider extends CallStackStateProvider {
 
     private static final int VERSION = 1;
 
-    // Field names
-    private static final String PID = "context._vpid"; //$NON-NLS-1$
-    private static final String TID = "context._vtid"; //$NON-NLS-1$
-    private static final String VCPUID = "vcpu_id"; //$NON-NLS-1$
-    private static final String CPUID = "context.cpu_id"; //$NON-NLS-1$
-    private static final String PROCESS_NAME = "context._procname"; //$NON-NLS-1$
+    /**
+     * Trace markers injected via user-space (e.g., echo) to delimit phases
+     * and identify the execution environment within the trace.
+     */
     private static final String EVENT_MARKER = "syscall_entry_openat"; //$NON-NLS-1$
-    private static final String MARKER = "./VM_ANALYSIS.txt"; //$NON-NLS-1$
+    private static final String MARKER_VIRTUALIZED = "./VM_VIRTUALIZED_ANALYSIS.txt"; //$NON-NLS-1$
+    private static final String MARKER_NATIVE = "./VM_NATIVE_ANALYSIS.txt"; //$NON-NLS-1$
+    private static final String MARKER_WORKLOAD = "./VM_ANALYSIS.txt"; //$NON-NLS-1$
 
-    // Tracking state
-    private SyncPoint nativeStart = null;
-    private SyncPoint nativeEnd = null;
-    private boolean beginNative = true;
-    private String processName = ""; //$NON-NLS-1$
-    private String threadName = ""; //$NON-NLS-1$
+    /** Singleton providing VM event layout definitions */
+    private static VMNativeEventLayout fLayout = VMNativeEventLayout.getInstance();
 
+    /** Start and end synchronization points delimiting the analysis window */
+    private SyncPoint fStart = null;
+    private SyncPoint fEnd = null;
 
-    // Process Tree tracker
-    private ProcessTree processTree = new ProcessTree();
+    /** Current process and thread identifiers associated with the trace */
+    private String fProcessName = ""; //$NON-NLS-1$
+    private String fThreadName = ""; //$NON-NLS-1$
 
-    // Tracking state of the vm
-    private VMExecutionState vmState = new VMExecutionState();
+    /** Maintains the hierarchy of processes observed in the trace */
+    private ProcessTree fProcessTree = new ProcessTree();
 
-    // Detect automatically which process flow to build
-    private EnvironmentType environmentType = null;
+    /** Tracks the current execution state of the VM (host vs guest, etc.) */
+    private VMExecutionState fVmState = new VMExecutionState();
 
+    /**
+     * Detected execution environment (native, virtualized, workload),
+     * inferred automatically from trace markers.
+     */
+    private @Nullable EnvironmentType fEnvironmentType = null;
 
     /**
      * Constructor
@@ -78,57 +91,71 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
 
     @Override
     protected boolean considerEvent(@NonNull ITmfEvent event) {
-        String traceName = event.getTrace().getName();
-
-        // Auto detect environment type on first event
-        if (this.environmentType == null) {
-            if (traceName.contains("vm/guest") || traceName.contains("vm/host")) { //$NON-NLS-1$ //$NON-NLS-2$
-                this.environmentType = EnvironmentType.VIRTUALIZED;
-            } else if (traceName.contains("native/kernel")) { //$NON-NLS-1$
-                this.environmentType = EnvironmentType.NATIVE;
-            } else {
-                return false; // Unknown trace type
-            }
+        // If the marker has not been seen yet, check the current event.
+        if (this.fEnvironmentType == null) {
+            detectEnvironmentFromMarker(event);
+            return false; // Never process the marker itself as a call stack event
         }
 
-        // Filter by environment type
-        if (this.environmentType == EnvironmentType.VIRTUALIZED) {
-            return this.considerVirtualizedEvent(event, traceName);
+        if (this.fEnvironmentType == EnvironmentType.VIRTUALIZED ||
+                this.fEnvironmentType == EnvironmentType.HOST) {
+            return this.considerVirtualizedEvent(event);
+        } else if (this.fEnvironmentType == EnvironmentType.NATIVE) {
+            return this.considerNativeEvent(event);
         }
-        return this.considerNativeEvent(event, traceName);
+
+        return false;
+    }
+
+    /**
+     * Reads a single event and sets environmentType if it matches an environment marker.
+     * The marker is a syscall_entry_openat injected by `echo ./VM_*_ANALYSIS.txt`
+     * during the tracing session.
+     */
+    private void detectEnvironmentFromMarker(@NonNull ITmfEvent event) {
+        String eventName = event.getName();
+        if (!eventName.equals(EVENT_MARKER)) {
+            return;
+        }
+
+        ITmfEventField content = event.getContent();
+        String filename = content.getFieldValue(String.class, fLayout.fieldFilename());
+
+        if (filename == null) {
+            return;
+        }
+
+        if (filename.contains(MARKER_VIRTUALIZED)) {
+            this.fEnvironmentType = EnvironmentType.VIRTUALIZED;
+        } else if (filename.contains(MARKER_NATIVE)) {
+            this.fEnvironmentType = EnvironmentType.NATIVE;
+        }
     }
 
     @Override
     protected int getProcessId(@NonNull ITmfEvent event) {
-        Integer pid = getIntField(event, PID);
+        Integer pid = getIntField(event, fLayout.contextVPid());
         return pid != null ? pid : UNKNOWN_PID;
     }
 
     @Override
     protected long getThreadId(@NonNull ITmfEvent event) {
-        Integer tid = getIntField(event, TID);
+        Integer tid = getIntField(event, fLayout.contextVTid());
         return tid != null ? tid.longValue() : UNKNOWN_PID;
     }
 
     @Override
     public @Nullable String getThreadName(@NonNull ITmfEvent event) {
-        String traceName = event.getTrace().getName();
-
         // For host events, use guest thread name
-        if (traceName.toLowerCase().contains("vm/host") && vmState.isInHypervisorOverhead()) { //$NON-NLS-1$
-            return threadName;
+        if (this.fEnvironmentType == EnvironmentType.HOST && fVmState.isInHypervisorOverhead()) {
+            return fThreadName;
         }
 
         // For events in our process tree, show individual threads
         // but they'll be grouped under the same process name
-        Integer pid = getIntField(event, PID);
-        if (pid != null && nativeStart != null && processTree.isInTree(pid)) {
+        Integer pid = getIntField(event, fLayout.contextVPid());
+        if (pid != null && fStart != null && fProcessTree.isInTree(pid)) {
             long tid = getThreadId(event);
-
-            // Label parent vs child
-            if (pid == nativeStart.pid) {
-                return getProcessName(event) + "-" + Long.toString(tid); //$NON-NLS-1$
-            }
             return getProcessName(event) + "-" + Long.toString(tid); //$NON-NLS-1$
         }
 
@@ -143,182 +170,248 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
         String eventName = event.getName();
 
         if (isSystemCallEntry(eventName)) {
-            // System call entry - push syscall name
             String syscallName = extractSyscallName(eventName);
 
-            // For now i am not going to push special events on the pile
             if (isSpecialSyscall(syscallName)) {
-                return null; // Pas de push
+                return null;
             }
 
             return TmfStateValue.newValueString(syscallName);
 
         } else if (isInterruptEntry(eventName)) {
-            // Interrupt entry - push interrupt info
-            String interruptName = "IRQ_" + extractInterruptInfo(event); //$NON-NLS-1$
+            String interruptName = fLayout.fieldIrq().toUpperCase() + "_" + extractInterruptInfo(event); //$NON-NLS-1$
             return TmfStateValue.newValueString(interruptName);
-
         }
 
-        // remove the handling of punctual event for now
         return null;
     }
-
 
     @Override
     public @Nullable ITmfStateValue functionExit(@NonNull ITmfEvent event) {
         String eventName = event.getName();
 
         if (isSystemCallExit(eventName)) {
-            // System call exit - pop (return null to indicate pop)
+            String syscallName = extractSyscallName(eventName.replace(fLayout.eventSyscallExitPrefix(), fLayout.eventSyscallEntryPrefix()));
+            if (isSpecialSyscall(syscallName)) {
+                return null;
+            }
             return TmfStateValue.nullValue();
 
         } else if (isInterruptExit(eventName)) {
-            // Interrupt exit - pop
             return TmfStateValue.nullValue();
-
         }
 
         return null;
     }
 
+    /**
+     * Processes VM entry/exit events and updates the call stack accordingly.
+     *
+     * <p>
+     * VM Exit → push hypervisor event<br>
+     * VM Entry → pop (return to guest)
+     */
     private void processHypervisorEvent(@NonNull ITmfEvent event) {
-        // we will treat entry/exit as punctual event because we want to see them and the
-        // events in between
         String eventName = event.getName();
         long timestamp = event.getTimestamp().toNanos();
-        Integer vcpuid = getIntField(event, VCPUID);
-        getIntField(event, PID);
+        Integer vcpuid = getIntField(event, fLayout.contextVcpuid());
 
-        if (vcpuid == null || vcpuid != this.vmState.getCurrentVirtualCpu()) {
+        if (vcpuid == null || vcpuid != this.fVmState.getCurrentVirtualCpu()) {
             return;
         }
 
-        if (isVMEntry(eventName)) {
-            this.vmState.enterGuest(vcpuid);
-        } else if (isVMExit(eventName)) {
-            this.vmState.exitGuest(vcpuid, timestamp);
-        }
-
-        // push the event
         ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
-
-        int processQuark = ss.getQuarkAbsoluteAndAdd(PROCESSES, this.nativeStart.procName);
-        ss.updateOngoingState(TmfStateValue.newValueInt(this.nativeStart.pid), processQuark);
-
-        int threadQuark = ss.getQuarkRelativeAndAdd(processQuark, threadName);
-        ss.updateOngoingState(TmfStateValue.newValueLong(this.nativeStart.tid), threadQuark);
-
+        int processQuark = ss.getQuarkAbsoluteAndAdd(PROCESSES, this.fStart.procName);
+        ss.updateOngoingState(TmfStateValue.newValueInt(this.fStart.pid), processQuark);
+        int threadQuark = ss.getQuarkRelativeAndAdd(processQuark, fThreadName);
+        ss.updateOngoingState(TmfStateValue.newValueLong(this.fStart.tid), threadQuark);
         int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, CallStackAnalysis.CALL_STACK);
-        ss.pushAttribute(timestamp, eventName, callStackQuark);
+
+        if (isVMEntry(eventName)) {
+            this.fVmState.enterGuest(vcpuid);
+            ss.popAttribute(timestamp, callStackQuark);
+        } else if (isVMExit(eventName)) {
+            this.fVmState.exitGuest(vcpuid, timestamp);
+            ss.pushAttribute(timestamp, eventName, callStackQuark);
+        }
     }
 
-    // Helper methods for event classification
+    /**
+     * Detects workload boundary markers.
+     *
+     * <p>
+     * These markers define the region of interest.
+     */
     private static boolean isWorkloadMarker(ITmfEvent event) {
         String eventName = event.getName();
         if (eventName.equals(EVENT_MARKER)) {
-            Object filenameField = event.getContent().getField("filename"); //$NON-NLS-1$
-            if (filenameField != null) {
-                String value = filenameField.toString();
-                String[] words = value.split("="); //$NON-NLS-1$
-                return words.length == 2 && words[1].contains(MARKER);
+            ITmfEventField content = event.getContent();
+            String filename = content.getFieldValue(String.class, fLayout.fieldFilename());
+            if (filename != null) {
+                return filename.contains(MARKER_WORKLOAD);
             }
         }
         return false;
     }
 
+    /**
+     * Check if the system call name is a variant of sigreturn
+     *
+     * @param syscallName
+     * @return
+     */
     private static boolean isSpecialSyscall(String syscallName) {
         return syscallName.equals("rt_sigreturn") || //$NON-NLS-1$
                 syscallName.equals("sigreturn"); //$NON-NLS-1$
     }
 
+    /**
+     * Handles workload markers to initialize start and end synchronization points.
+     */
     private void handleWorkloadMarker(@NonNull ITmfEvent event) {
-        Integer pid = getIntField(event, PID);
+        Integer pid = getIntField(event, fLayout.contextVPid());
         long tid = getThreadId(event);
-        processName = getProcessName(event);
-        threadName = getThreadName(event);
+        fProcessName = getProcessName(event);
+        fThreadName = getThreadName(event);
         long timestamp = event.getTimestamp().toNanos();
 
+        if (fStart == null) {
+            Integer vcpuid = getIntField(event, fLayout.contextCpuid());
 
-        if (beginNative) {
-            Integer vcpuid = getIntField(event, CPUID);
-            nativeStart = new SyncPoint(timestamp,  //$NON-NLS-1$
-                    pid != null ? pid : -1,  tid,
-                            processName);
+            fStart = new SyncPoint(timestamp,
+                    pid != null ? pid : -1, tid,
+                    fProcessName);
 
-            // Register this as the root PID of our workload
             if (pid != null) {
-                processTree.SetRootPid(pid);
+                fProcessTree.SetRootPid(pid);
             }
 
-            beginNative = false;
-            this.vmState.enterGuest(vcpuid != null ? vcpuid : -1);
+            this.fVmState.enterGuest(vcpuid != null ? vcpuid : -1);
         } else {
-            nativeEnd = new SyncPoint(timestamp,  //$NON-NLS-1$
+            fEnd = new SyncPoint(timestamp,
                     pid != null ? pid : -1, tid,
-                    processName);
+                    fProcessName);
         }
     }
 
+    /**
+     * Check if the event is a syscall entry
+     * @param eventName the name of the event
+     * @return True if the event is a syscall entry
+     */
     private static boolean isSystemCallEntry(String eventName) {
-        return eventName.startsWith("syscall_entry_"); //$NON-NLS-1$
+        return eventName.startsWith(fLayout.eventSyscallEntryPrefix());
     }
 
+    /**
+     * Check if the event is a syscall exit
+     * @param eventName the name of the event
+     * @return True if the event is a syscall exit
+     */
     private static boolean isSystemCallExit(String eventName) {
-        return eventName.startsWith("syscall_exit_"); //$NON-NLS-1$
+        return eventName.startsWith(fLayout.eventSyscallExitPrefix());
     }
 
+    /**
+     * Checks whether an event corresponds to an interrupt entry.
+     *
+     * <p>
+     * This includes both:
+     * <ul>
+     *   <li>Hardware IRQ entry</li>
+     *   <li>Soft IRQ entry</li>
+     * </ul>
+     *
+     * @param eventName The name of the event
+     * @return True if the event represents an interrupt entry
+     */
     private static boolean isInterruptEntry(String eventName) {
-        return eventName.contains("irq_handler_entry") || eventName.contains("softirq_entry"); //$NON-NLS-1$ //$NON-NLS-2$
+        return eventName.contains(fLayout.eventIrqEntry()) || eventName.contains(fLayout.eventSoftIrqEntry());
     }
 
+    /**
+     * Checks whether an event corresponds to an interrupt exit.
+     *
+     * @param eventName The name of the event
+     * @return True if the event represents an interrupt exit
+     */
     private static boolean isInterruptExit(String eventName) {
-        return eventName.contains("irq_handler_exit") || eventName.contains("softirq_exit"); //$NON-NLS-1$ //$NON-NLS-2$
+        return eventName.contains(fLayout.eventIrqExit()) || eventName.contains(fLayout.eventSoftIrqExit());
     }
 
+    /**
+     * Extracts the system call name from an event name.
+     *
+     * <p>
+     * Example:
+     * <pre>
+     * syscall_entry_open → open
+     * </pre>
+     *
+     * @param eventName The full event name
+     * @return The extracted syscall name
+     */
     private static String extractSyscallName(String eventName) {
-        if (eventName.startsWith("syscall_entry_")) { //$NON-NLS-1$
-            return eventName.substring("syscall_entry_".length()); //$NON-NLS-1$
+        if (eventName.startsWith(fLayout.eventSyscallEntryPrefix())) {
+            return eventName.substring(fLayout.eventSyscallEntryPrefix().length());
         }
         return eventName;
     }
 
     /**
-     * Check if an event is a VM entry
+     * Checks whether an event corresponds to a VM entry (guest resume).
+     *
+     * @param eventName The name of the event
+     * @return True if it is a VM entry event
      */
     private static boolean isVMEntry(String eventName) {
-        return eventName.contains("kvm_x86_entry"); //$NON-NLS-1$
-
+        return eventName.contains(fLayout.eventsKVMEntry().iterator().next());
     }
 
+    /**
+     * Checks whether an event corresponds to a VM exit (transition to hypervisor).
+     *
+     * @param eventName The name of the event
+     * @return True if it is a VM exit event
+     */
     private static boolean isVMExit(String eventName) {
-        return eventName.contains("kvm_x86_exit"); //$NON-NLS-1$
+        return eventName.contains(fLayout.eventsKVMExit().iterator().next());
     }
 
+    /**
+     * Extracts interrupt information (IRQ number) from an event.
+     *
+     * <p>
+     * If the information cannot be parsed, returns "unknown".
+     *
+     * @param event The event containing IRQ information
+     * @return The IRQ identifier as a string
+     */
     private static String extractInterruptInfo(ITmfEvent event) {
-        // Try to get IRQ number or other interrupt info from the event
-        Object irqField = event.getContent().getField("irq"); //$NON-NLS-1$
-        if (irqField != null) {
-            String value = irqField.toString();
-            String[] words = value.split("="); //$NON-NLS-1$
-            return words.length == 2 ? words[1] : "unknown"; //$NON-NLS-1$
-        }
-        return "unknown"; //$NON-NLS-1$
+        ITmfEventField content = event.getContent();
+        String value = content.getFieldValue(String.class, fLayout.fieldIrq());
+        return value == null ? "unknown" : value; //$NON-NLS-1$
     }
 
-
-    private static Integer extractVcpuFromProcName(ITmfEvent event) {
-        Object commField = event.getContent().getField(PROCESS_NAME);
+    /**
+     * Extracts the vCPU ID from the process name.
+     *
+     * <p>
+     * Expected format:
+     * <pre>
+     * "CPU X/KVM"
+     * </pre>
+     *
+     * @param event The event containing process name
+     * @return The vCPU ID, or null if not found
+     */
+    private static @Nullable Integer extractVcpuFromProcName(ITmfEvent event) {
+        Object commField = event.getContent().getField(fLayout.contextProcessName());
         if (commField == null) {
             return null;
         }
 
         String procName = commField.toString();
-
-        if (procName == null) {
-            return null;
-        }
-
         Pattern p = Pattern.compile("CPU (\\d+)/KVM"); //$NON-NLS-1$
         Matcher m = p.matcher(procName);
 
@@ -329,146 +422,139 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
         return null;
     }
 
-    // Utility methods (same as your main state provider)
-    private static @Nullable Integer getIntField(ITmfEvent event, String fieldName) {
-
-        if (event.getType().getName().equals("kvm_x86_entry") && fieldName.equals(VCPUID)) { //$NON-NLS-1$
+    /**
+     * Extracts an integer field from an event.
+     *
+     * <p>
+     * Special case:
+     * For KVM entry events, the vCPU ID is extracted from the process name
+     * instead of the standard field.
+     *
+     * @param event The event
+     * @param fieldName The field name to extract
+     * @return The integer value, or null if parsing fails
+     */
+    private static @Nullable Integer getIntField(ITmfEvent event, @NonNull String fieldName) {
+        if (event.getType().getName().equals(fLayout.eventsKVMEntry().iterator().next()) && fieldName.equals(fLayout.contextVcpuid())) {
             return extractVcpuFromProcName(event);
         }
 
-
-        Object obj = event.getContent().getField(fieldName);
-        if (obj == null) {
-            return null;
-        }
-        String value = obj.toString();
-
-        // standard field format: "field=value"
-        String[] words = value.split("="); //$NON-NLS-1$
-        if (words.length != 2) {
-            return null;
-        }
-        try {
-            return Integer.parseInt(words[1]);
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        ITmfEventField content = event.getContent();
+        Integer value = content.getFieldValue(Integer.class, fieldName);
+        return value;
     }
 
-    private static String getProcessName_(ITmfEvent event) {
-
-        Object commField = event.getContent().getField(PROCESS_NAME);
-        if (commField == null) {
-            return "unknown"; //$NON-NLS-1$
-        }
-        String value = commField.toString();
-        String[] words = value.split("="); //$NON-NLS-1$
-        if (words.length != 2) {
-            return "unknown"; //$NON-NLS-1$
-        }
-        return words[1];
+    /**
+     * Extracts the process name from an event.
+     *
+     * <p>
+     * Returns "unknown" if the field is missing or malformed.
+     *
+     * @param event The event
+     * @return The process name
+     */
+    private static String getProcessNameFromEvent(ITmfEvent event) {
+        ITmfEventField content = event.getContent();
+        String value = content.getFieldValue(String.class, fLayout.contextProcessName());
+        return value == null ? "unknown" : value; //$NON-NLS-1$
     }
 
+    /**
+     * Determines whether a host event is relevant to the current VM execution.
+     *
+     * <p>
+     * Only events from the correct KVM vCPU thread are considered.
+     *
+     * @param event The event
+     * @return True if the event should be considered
+     */
     private boolean isRelevantHostEvent(@NonNull ITmfEvent event) {
-        // Check if this host event belongs to our VM's vcPU thread
-        String procName = getProcessName_(event);
-
-        // cleaning
-        if (procName == null) {
-            return false;
-        }
+        String procName = getProcessNameFromEvent(event);
 
         procName = procName.trim().replaceAll("\"", ""); //$NON-NLS-1$ //$NON-NLS-2$
 
-        // KVM threads are named like "CPU X/KVM" where is the vCPU number
         if (procName.matches("CPU \\d+/KVM")) { //$NON-NLS-1$
-            // Extract vCPU number and compare with current vCPU
             Integer vcpu = extractVcpuFromProcName(event);
-            return vcpu != null && vcpu == vmState.getCurrentVirtualCpu();
+            return vcpu != null && vcpu == fVmState.getCurrentVirtualCpu();
         }
 
         return false;
     }
 
-    private boolean considerVirtualizedEvent(@NonNull ITmfEvent event, String traceName) {
-        if (!traceName.toLowerCase().contains("vm/guest")  //$NON-NLS-1$
-        && !traceName.toLowerCase().contains("vm/host")) { //$NON-NLS-1$
-                return false;
-        }
-
-
-        // Handle workload markers first
+    /**
+     * Filters events in virtualized or host environments.
+     *
+     * <p>
+     * Behavior depends on environment:
+     * <ul>
+     *   <li><b>Guest (VIRTUALIZED)</b>: track events from the process tree</li>
+     *   <li><b>Host</b>: track only hypervisor overhead related to the VM</li>
+     * </ul>
+     *
+     * @param event The event to evaluate
+     * @return True if the event should be included in the call stack
+     */
+    private boolean considerVirtualizedEvent(@NonNull ITmfEvent event) {
         if (isWorkloadMarker(event)) {
             handleWorkloadMarker(event);
-            return false; // Don't process markers as call stack events
+            return false;
         }
 
-        // Only process events within the analysis window and for the target PID
-        if (nativeStart != null) {
-
-            // Always track clone events to build the tree
-            if (traceName.toLowerCase().contains("vm/guest")) { //$NON-NLS-1$
-                trackCloneEvent(event);
-            }
-
-            Integer pid = getIntField(event, PID);
+        if (fStart != null) {
+            Integer pid = getIntField(event, fLayout.contextVPid());
             long timestamp = event.getTimestamp().toNanos();
 
-            // Guest events - filter by PID
-            if (traceName.toLowerCase().contains("vm/guest")) { //$NON-NLS-1$
-                if (pid != null && processTree.isInTree(pid)) {
-                    return (nativeEnd == null || timestamp <= nativeEnd.timestamp);
+            if (this.fEnvironmentType == EnvironmentType.VIRTUALIZED) {
+                trackCloneEvent(event);
+                if (pid != null && fProcessTree.isInTree(pid)) {
+                    Integer guestCpu = getIntField(event, fLayout.contextCpuid());
+                    if (guestCpu != null) {
+                        fVmState.enterGuest(guestCpu);
+                    }
+                    return (fEnd == null || timestamp <= fEnd.timestamp);
                 }
-
-                return false;
-            }
-
-            // Host events - accept if we are in hypervisor overhead
-            if (traceName.toLowerCase().contains("vm/host")) { //$NON-NLS-1$
-                if (nativeEnd == null || timestamp <= nativeEnd.timestamp) {
-
-                    // always proces kvm_entry/exit
+            } else if (this.fEnvironmentType == EnvironmentType.HOST) {
+                if (fEnd == null || timestamp <= fEnd.timestamp) {
                     String eventName = event.getName();
                     if (isVMEntry(eventName) || isVMExit(eventName)) {
                         this.processHypervisorEvent(event);
                         return false;
                     }
 
-                    // Accept host events between kvm_exit and kvm_entry
-                    if (vmState.isInHypervisorOverhead() && isRelevantHostEvent(event)) {
+                    if (fVmState.isInHypervisorOverhead() && isRelevantHostEvent(event)) {
                         return true;
                     }
                 }
-                return false;
             }
         }
 
         return false;
     }
 
-    private boolean considerNativeEvent(@NonNull ITmfEvent event, String traceName) {
-        if (!traceName.contains("native/kernel")) { //$NON-NLS-1$
-            return false;
-        }
-
-        // Handle workload markers
+    /**
+     * Filters events in native execution mode.
+     *
+     * <p>
+     * Only events from the tracked process tree are kept,
+     * within the workload time window.
+     *
+     * @param event The event
+     * @return True if the event should be included
+     */
+    private boolean considerNativeEvent(@NonNull ITmfEvent event) {
         if (isWorkloadMarker(event)) {
             handleWorkloadMarker(event);
             return false;
         }
 
-        // Process events within analysis window
-        if (nativeStart != null) {
-
-         // Always track clone events to build the tree
+        if (fStart != null) {
             trackCloneEvent(event);
 
-            Integer pid = getIntField(event, PID);
+            Integer pid = getIntField(event, fLayout.contextVPid());
             long timestamp = event.getTimestamp().toNanos();
 
-            // Accept all events for our target PID
-            if (pid != null && processTree.isInTree(pid)) {
-                return (nativeEnd == null || timestamp <= nativeEnd.timestamp);
+            if (pid != null && fProcessTree.isInTree(pid)) {
+                return (fEnd == null || timestamp <= fEnd.timestamp);
             }
         }
 
@@ -477,57 +563,46 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
 
     @Override
     protected String getProcessName(ITmfEvent event) {
-        String traceName = event.getTrace().getName();
-
-        // Use the guest process name for host events
-        if (traceName.toLowerCase().contains("vm/host") && vmState.isInHypervisorOverhead()) { //$NON-NLS-1$
-            return processName;
+        if (this.fEnvironmentType == EnvironmentType.HOST && fVmState.isInHypervisorOverhead()) {
+            return fProcessName;
         }
 
-        // NEW: For events in our process tree, use the root process name
-        Integer pid = getIntField(event, PID);
-        if (pid != null && nativeStart != null && processTree.isInTree(pid)) {
-            // All processes in the tree use the root process name
-            return nativeStart.procName;
+        Integer pid = getIntField(event, fLayout.contextVcpuid());
+        if (pid != null && fStart != null && fProcessTree.isInTree(pid)) {
+            return fStart.procName;
         }
 
-        // Fallback: standard naming
-        Object commField = event.getContent().getField(PROCESS_NAME);
-        if (commField == null) {
-            return "unknown"; //$NON-NLS-1$
-        }
-        String value = commField.toString();
-        String[] words = value.split("="); //$NON-NLS-1$
-        if (words.length != 2) {
-            return "unknown"; //$NON-NLS-1$
-        }
-        return words[1];
+        return getProcessNameFromEvent(event);
     }
 
     /**
-     * Track clone/fork events to build process tree
-     * Only tracks clones where the parent is already in our tree
+     * Tracks process hierarchy using clone/fork system calls.
+     *
+     * <p>
+     * Only children of tracked processes are included.
      */
     private void trackCloneEvent(@NonNull ITmfEvent event) {
         String eventName = event.getName();
 
-        // Handle both clone() and clone3()
         if (eventName.equals("syscall_exit_clone") || //$NON-NLS-1$
-            eventName.equals("syscall_exit_clone3")) { //$NON-NLS-1$
+            eventName.equals("syscall_exit_clone3") || //$NON-NLS-1$
+            eventName.equals("syscall_exit_fork") || //$NON-NLS-1$
+            eventName.equals("syscall_exit_vfork")) { //$NON-NLS-1$
 
-            Integer parentPid = getIntField(event, PID);
-            Integer childPid = getIntField(event, "ret"); //$NON-NLS-1$
+            Integer parentPid = getIntField(event, fLayout.contextVPid());
+            Integer childPid = getIntField(event, fLayout.fieldSyscallRet());
 
             if (parentPid != null && childPid != null && childPid > 0) {
-
-                // Only register if parent is already in our tree
-                if (processTree.isInTree(parentPid)) {
-                    processTree.registerClone(parentPid, childPid);
+                if (fProcessTree.isInTree(parentPid)) {
+                    fProcessTree.registerClone(parentPid, childPid);
                 }
             }
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Inner classes
+    // -------------------------------------------------------------------------
 
     private static class SyncPoint {
         final long timestamp;
@@ -543,9 +618,7 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
         }
     }
 
-
-
-    // Helper class to track VM execution state with migration awareness
+    /** Tracks VM execution state with migration awareness */
     private static class VMExecutionState {
         private boolean inGuest = false;
         private long lastExitTimestamp = -1;
@@ -562,11 +635,9 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
             this.currentVirtualCpu = cpuid;
         }
 
-
         boolean isInHypervisorOverhead() {
             return !inGuest && this.lastExitTimestamp != -1;
         }
-
 
         int getCurrentVirtualCpu() {
             return this.currentVirtualCpu;
@@ -575,59 +646,44 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
 
     private enum EnvironmentType {
         VIRTUALIZED,
+        HOST,
         NATIVE
     }
 
-
-    /**
-     * Tracks process hierachy through clone/fork events
-     */
+    /** Tracks process hierarchy through clone/fork events */
     private static class ProcessTree {
         private final Map<Integer, Integer> childToParent = new HashMap<>();
         private final Map<Integer, Set<Integer>> parentToChildren = new HashMap<>();
         private int rootPid = -1;
 
-        /**
-         * Register a clone/fork event
-         */
         void registerClone(int parentPid, int childPid) {
             childToParent.put(childPid, parentPid);
             parentToChildren.computeIfAbsent(parentPid, k -> new HashSet<>()).add(childPid);
         }
 
-        /**
-         * Set root
-         */
         void SetRootPid(int pid) {
             this.rootPid = pid;
         }
 
-        /**
-         * Check if a PID belongs to the process tree
-         */
         boolean isInTree(int pid) {
             if (rootPid == -1) {
                 return false;
             }
-
             if (pid == rootPid) {
                 return true;
             }
-
             return isDescendant(pid, rootPid);
         }
 
         private boolean isDescendant(int pid, int ancestorPid) {
-            Integer parent = childToParent.get(pid);
-            if (parent == null) {
-                return false;
+            Integer current = childToParent.get(pid);
+            while (current != null) {
+                if (current == ancestorPid) {
+                    return true;
+                }
+                current = childToParent.get(current);
             }
-
-            if (parent == ancestorPid) {
-                return true;
-            }
-
-            return isDescendant(parent, ancestorPid);
+            return false;
         }
     }
 }
