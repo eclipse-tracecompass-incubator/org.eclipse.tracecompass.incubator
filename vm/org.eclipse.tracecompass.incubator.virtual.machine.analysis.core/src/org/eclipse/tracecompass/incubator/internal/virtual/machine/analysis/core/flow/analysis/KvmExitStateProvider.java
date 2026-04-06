@@ -1,11 +1,13 @@
-
 /*******************************************************************************
- * KVM Exit State Provider
- * This state provider processes trace events related to KVM exits
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-
-
-
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis;
 
 
@@ -148,10 +150,10 @@ public class KvmExitStateProvider extends AbstractTmfStateProvider {
      */
     private static void incrementExitCounter(ITmfStateSystemBuilder ss, int quark, long timestamp) {
         Object currentValue = ss.queryOngoing(quark);
-        int newValue = 1;
+        long newValue = 1;
 
-        if (currentValue instanceof Integer) {
-            newValue = ((Integer) currentValue) + 1;
+        if (currentValue instanceof Number) {
+            newValue = ((Number) currentValue).longValue() + 1L;
         }
 
         ss.modifyAttribute(timestamp, newValue, quark);
@@ -172,7 +174,11 @@ public class KvmExitStateProvider extends AbstractTmfStateProvider {
         if (obj instanceof Integer) {
             return (Integer) obj;
         } else if (obj instanceof Long) {
-            return ((Long) obj).intValue();
+            long value = ((Long) obj).longValue();
+            if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+                return null;
+            }
+            return (int) value;
         } else if (obj instanceof String) {
             try {
                 return Integer.parseInt((String) obj);

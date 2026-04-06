@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis;
 
 
@@ -82,12 +92,12 @@ public class KernelEventInfo {
      */
     public KernelEventInfo(String name, long timestamp, int pid, int tid, String processName,
             TraceType source, int cpuid, int vcpuid, String exitReason) {
-        this.name = name;
+        this.name = java.util.Objects.requireNonNull(name, "name cannot be null"); //$NON-NLS-1$
         this.timestamp = timestamp;
         this.pid = pid;
         this.tid = tid;
-        this.processName = processName;
-        this.source = source;
+        this.processName = java.util.Objects.requireNonNull(processName, "processName cannot be null"); //$NON-NLS-1$
+        this.source = java.util.Objects.requireNonNull(source, "source cannot be null"); //$NON-NLS-1$
         this.cpuid = cpuid;
         this.vcpuid = vcpuid;
         this.exitReason = exitReason;

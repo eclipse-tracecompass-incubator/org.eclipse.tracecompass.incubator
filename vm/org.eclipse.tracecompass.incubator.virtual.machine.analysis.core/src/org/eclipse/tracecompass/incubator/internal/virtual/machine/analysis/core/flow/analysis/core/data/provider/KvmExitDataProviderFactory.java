@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.core.data.provider;
 
 
@@ -21,6 +31,8 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * Factory for the KVM exit data provider
+ *
+ * @author Francois Belias
  */
 public class KvmExitDataProviderFactory implements IDataProviderFactory {
 
@@ -35,7 +47,7 @@ public class KvmExitDataProviderFactory implements IDataProviderFactory {
             .build();
 
     @Override
-    public @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> createProvider(ITmfTrace trace) {
+    public @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> createDataProvider(ITmfTrace trace) {
         Collection<@NonNull ITmfTrace> traces = TmfTraceManager.getTraceSet(trace);
         if (traces.size() == 1) {
             KvmExitAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, KvmExitAnalysisModule.class, KvmExitAnalysisModule.ID);
@@ -43,15 +55,18 @@ public class KvmExitDataProviderFactory implements IDataProviderFactory {
                 return null;
             }
             module.schedule();
-            //return new KvmExitDataProvider(trace, module);
             return new KvmExitRateDataProvider(trace, module);
         }
-        //return TmfTreeXYCompositeDataProvider.create(traces, "KVM Exit time graph", KvmExitDataProvider.ID); //$NON-NLS-1$
         return TmfTreeXYCompositeDataProvider.create(traces, "KVM Exit time graph", KvmExitRateDataProvider.ID); //$NON-NLS-1$
     }
 
     @Override
     public Collection<IDataProviderDescriptor> getDescriptors(ITmfTrace trace) {
+        Collection<@NonNull ITmfTrace> traces = TmfTraceManager.getTraceSet(trace);
+        if (traces.size() > 1) {
+            return Collections.singletonList(DESCRIPTOR);
+        }
+
         KvmExitAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, KvmExitAnalysisModule.class, KvmExitAnalysisModule.ID);
         return module != null ? Collections.singletonList(DESCRIPTOR) : Collections.emptyList();
     }

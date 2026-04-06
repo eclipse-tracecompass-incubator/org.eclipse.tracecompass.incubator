@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
@@ -25,7 +35,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  *
  * @author Francois Belias
  */
-
 public class VMNativeCallStackStateProvider extends CallStackStateProvider {
 
     private static final int VERSION = 1;
@@ -124,11 +133,6 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
         Integer pid = getIntField(event, PID);
         if (pid != null && nativeStart != null && processTree.isInTree(pid)) {
             long tid = getThreadId(event);
-
-            // Label parent vs child
-            if (pid == nativeStart.pid) {
-                return getProcessName(event) + "-" + Long.toString(tid); //$NON-NLS-1$
-            }
             return getProcessName(event) + "-" + Long.toString(tid); //$NON-NLS-1$
         }
 
@@ -148,7 +152,7 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
 
             // For now i am not going to push special events on the pile
             if (isSpecialSyscall(syscallName)) {
-                return null; // Pas de push
+                return null; // No push
             }
 
             return TmfStateValue.newValueString(syscallName);
@@ -170,6 +174,12 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
         String eventName = event.getName();
 
         if (isSystemCallExit(eventName)) {
+
+            String syscallName = extractSyscallName(eventName.replace("syscall_exit_", "syscall_entry_")); //$NON-NLS-1$ //$NON-NLS-2$
+            if (isSpecialSyscall(syscallName)) {
+                return null; // No pop
+            }
+
             // System call exit - pop (return null to indicate pop)
             return TmfStateValue.nullValue();
 
@@ -183,34 +193,28 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
     }
 
     private void processHypervisorEvent(@NonNull ITmfEvent event) {
-        // we will treat entry/exit as punctual event because we want to see them and the
-        // events in between
         String eventName = event.getName();
         long timestamp = event.getTimestamp().toNanos();
         Integer vcpuid = getIntField(event, VCPUID);
-        getIntField(event, PID);
 
         if (vcpuid == null || vcpuid != this.vmState.getCurrentVirtualCpu()) {
             return;
         }
 
-        if (isVMEntry(eventName)) {
-            this.vmState.enterGuest(vcpuid);
-        } else if (isVMExit(eventName)) {
-            this.vmState.exitGuest(vcpuid, timestamp);
-        }
-
-        // push the event
         ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
-
         int processQuark = ss.getQuarkAbsoluteAndAdd(PROCESSES, this.nativeStart.procName);
         ss.updateOngoingState(TmfStateValue.newValueInt(this.nativeStart.pid), processQuark);
-
         int threadQuark = ss.getQuarkRelativeAndAdd(processQuark, threadName);
         ss.updateOngoingState(TmfStateValue.newValueLong(this.nativeStart.tid), threadQuark);
-
         int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, CallStackAnalysis.CALL_STACK);
-        ss.pushAttribute(timestamp, eventName, callStackQuark);
+
+        if (isVMEntry(eventName)) {
+            this.vmState.enterGuest(vcpuid);
+            ss.popAttribute(timestamp, callStackQuark);
+        } else if (isVMExit(eventName)) {
+            this.vmState.exitGuest(vcpuid, timestamp);
+            ss.pushAttribute(timestamp, eventName, callStackQuark);
+        }
     }
 
     // Helper methods for event classification
@@ -242,7 +246,7 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
 
         if (beginNative) {
             Integer vcpuid = getIntField(event, CPUID);
-            nativeStart = new SyncPoint(timestamp,  //$NON-NLS-1$
+            nativeStart = new SyncPoint(timestamp,
                     pid != null ? pid : -1,  tid,
                             processName);
 
@@ -254,7 +258,7 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
             beginNative = false;
             this.vmState.enterGuest(vcpuid != null ? vcpuid : -1);
         } else {
-            nativeEnd = new SyncPoint(timestamp,  //$NON-NLS-1$
+            nativeEnd = new SyncPoint(timestamp,
                     pid != null ? pid : -1, tid,
                     processName);
         }
@@ -417,6 +421,10 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
             // Guest events - filter by PID
             if (traceName.toLowerCase().contains("vm/guest")) { //$NON-NLS-1$
                 if (pid != null && processTree.isInTree(pid)) {
+                    Integer guestCpu = getIntField(event, CPUID);
+                    if (guestCpu != null) {
+                        vmState.enterGuest(guestCpu);
+                    }
                     return (nativeEnd == null || timestamp <= nativeEnd.timestamp);
                 }
 
@@ -484,7 +492,7 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
             return processName;
         }
 
-        // NEW: For events in our process tree, use the root process name
+        // For events in our process tree, use the root process name
         Integer pid = getIntField(event, PID);
         if (pid != null && nativeStart != null && processTree.isInTree(pid)) {
             // All processes in the tree use the root process name
@@ -511,9 +519,11 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
     private void trackCloneEvent(@NonNull ITmfEvent event) {
         String eventName = event.getName();
 
-        // Handle both clone() and clone3()
+        // Handle cloning operations
         if (eventName.equals("syscall_exit_clone") || //$NON-NLS-1$
-            eventName.equals("syscall_exit_clone3")) { //$NON-NLS-1$
+            eventName.equals("syscall_exit_clone3") || //$NON-NLS-1$
+            eventName.equals("syscall_exit_fork") || //$NON-NLS-1$
+            eventName.equals("syscall_exit_vfork")) { //$NON-NLS-1$
 
             Integer parentPid = getIntField(event, PID);
             Integer childPid = getIntField(event, "ret"); //$NON-NLS-1$
@@ -618,16 +628,14 @@ public class VMNativeCallStackStateProvider extends CallStackStateProvider {
         }
 
         private boolean isDescendant(int pid, int ancestorPid) {
-            Integer parent = childToParent.get(pid);
-            if (parent == null) {
-                return false;
+            Integer current = childToParent.get(pid);
+            while (current != null) {
+                if (current == ancestorPid) {
+                    return true;
+                }
+                current = childToParent.get(current);
             }
-
-            if (parent == ancestorPid) {
-                return true;
-            }
-
-            return isDescendant(parent, ancestorPid);
+            return false;
         }
     }
 }

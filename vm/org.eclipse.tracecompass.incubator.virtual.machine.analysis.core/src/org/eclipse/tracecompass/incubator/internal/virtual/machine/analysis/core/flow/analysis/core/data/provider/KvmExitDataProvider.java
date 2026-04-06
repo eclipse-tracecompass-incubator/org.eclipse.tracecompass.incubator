@@ -1,16 +1,19 @@
 /*******************************************************************************
- * KVM Exit Density Data Provider
- * This data provider analyzes KVM exit events per CPU
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.core.data.provider;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -18,7 +21,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.KvmExitAnalysisModule;
-import org.eclipse.tracecompass.internal.tmf.core.model.TmfXyResponseFactory;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
@@ -37,9 +39,17 @@ import org.eclipse.tracecompass.tmf.core.response.ITmfResponse;
 import org.eclipse.tracecompass.tmf.core.response.TmfModelResponse;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.Lists;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.tracecompass.tmf.core.model.SeriesModel.SeriesModelBuilder;
+import org.eclipse.tracecompass.tmf.core.model.TmfXyModel;
+import org.eclipse.tracecompass.tmf.core.model.xy.ISeriesModel;
+import org.eclipse.tracecompass.tmf.core.model.xy.TmfXYAxisDescription;
 
 /**
  * A data provider for KVM Exit events histogram.
@@ -51,6 +61,7 @@ import com.google.common.collect.Lists;
  * @author Francois Belias
  */
 @NonNullByDefault
+@SuppressWarnings("restriction")
 public class KvmExitDataProvider extends AbstractTmfTraceDataProvider implements ITmfTreeXYDataProvider<TmfTreeDataModel> {
 
     /**
@@ -63,7 +74,6 @@ public class KvmExitDataProvider extends AbstractTmfTraceDataProvider implements
     private final KvmExitAnalysisModule fmodule;
     private @Nullable TmfModelResponse<TmfTreeModel<TmfTreeDataModel>> fCached = null;
     private final long fTraceId = TRACE_IDS.getAndIncrement();
-    private final Map<Integer, Long> fCpuIdToSeriesId = new HashMap<>();
 
     /**
      * Constructor
@@ -78,23 +88,12 @@ public class KvmExitDataProvider extends AbstractTmfTraceDataProvider implements
         fmodule = analysisModule;
     }
 
-    /**
-     * Create the KVM exit data provider
-     *
-     * @param trace
-     *            The trace for which to create the data provider
-     * @return The data provider
-     */
-    /*public static @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> create(ITmfTrace trace) {
-        KvmExitAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, KvmExitAnalysisModule.class, KvmExitAnalysisModule.ID);
-        return module != null ? new KvmExitDataProvider(trace, module) : null;
-    }*/
-
     @Override
     public String getId() {
         return ID;
     }
 
+    @SuppressWarnings("null")
     @Override
     public TmfModelResponse<TmfTreeModel<TmfTreeDataModel>> fetchTree(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         if (this.fCached != null) {
@@ -109,41 +108,22 @@ public class KvmExitDataProvider extends AbstractTmfTraceDataProvider implements
 
         Builder<TmfTreeDataModel> builder = ImmutableList.builder();
 
-        // Add the trace as root
+        // Root: the trace itself
         builder.add(new TmfTreeDataModel(fTraceId, -1, Collections.singletonList(getTrace().getName())));
 
-        // Get all the CPUs with KVM exit data
-        for (Integer cpuQuark : ss.getQuarks("CPUs", "*")) { //$NON-NLS-1$ //$NON-NLS-2$
-            // Get the CPU ID from the attribute name
-            String cpuName = ss.getAttributeName(cpuQuark);
-            int cpuId;
+        Map<Integer, Long> cpuMap = buildCpuIdToSeriesId(ss);
+        for (Map.Entry<Integer, Long> entry : cpuMap.entrySet()) {
+            int cpuId = entry.getKey();
+            long seriesId = entry.getValue();
 
-            try {
-                cpuId = Integer.parseInt(cpuName);
-            } catch (NumberFormatException e ) {
-                continue;  // Just in case an entry is not a CPU number;
-            }
-
-            // Get or Create the exit count quark for this CPU
-            int exitCountQuark = ss.optQuarkRelative(cpuQuark, "kvm_exits"); //$NON-NLS-1$
-            if (exitCountQuark != ITmfStateSystem.INVALID_ATTRIBUTE) {
-                // create an unique ID for this CPU's exit events
-                Long seriesId = TRACE_IDS.getAndIncrement();
-                this.fCpuIdToSeriesId.put(cpuId, seriesId);
+            if (cpuId == -1) {
                 builder.add(new TmfXyTreeDataModel(seriesId, fTraceId,
-                        Collections.singletonList("CPU " + cpuName), true, null, true)); //$NON-NLS-1$
-
+                        Collections.singletonList("All CPUs"), true, null, true)); //$NON-NLS-1$
+            } else {
+                builder.add(new TmfXyTreeDataModel(seriesId, fTraceId,
+                        Collections.singletonList("CPU " + cpuId), true, null, true)); //$NON-NLS-1$
             }
         }
-
-        // TODO see other dataprovider
-
-        // Create an "All CPUs" entry to show aggregated data
-        Long allCpusId = TRACE_IDS.getAndIncrement();
-        this.fCpuIdToSeriesId.put(-1, allCpusId);  // I use -1 as Id to represent "All CPUs"
-        builder.add(new TmfXyTreeDataModel(allCpusId, fTraceId,
-                Collections.singletonList("All CPUs"), true, null, true)); //$NON-NLS-1$
-
 
         if (ss.waitUntilBuilt(0)) {
             TmfModelResponse<TmfTreeModel<TmfTreeDataModel>> response = new TmfModelResponse<>(
@@ -156,9 +136,7 @@ public class KvmExitDataProvider extends AbstractTmfTraceDataProvider implements
         return new TmfModelResponse<>(
                 new TmfTreeModel<>(Collections.emptyList(), builder.build()),
                 ITmfResponse.Status.RUNNING, CommonStatusMessage.RUNNING);
-
     }
-
 
     @Override
     public TmfModelResponse<ITmfXyModel> fetchXY(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
@@ -166,28 +144,27 @@ public class KvmExitDataProvider extends AbstractTmfTraceDataProvider implements
         ITmfStateSystem ss = fmodule.getStateSystem();
         if (ss == null) {
             return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.ANALYSIS_INITIALIZATION_FAILED);
-            //return TmfXyResponseFactory.createFailedResponse(CommonStatusMessage.ANALYSIS_INITIALIZATION_FAILED);
         }
 
         SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(fetchParameters);
         long[] xValues = new long[0];
         if (filter == null) {
-            return TmfXyResponseFactory.create(TITLE, xValues, Collections.emptyList(), true);
+            return createXyResponse(TITLE, xValues, Collections.emptyList(), true);
         }
-        xValues = filter.getTimesRequested();  // times
+        xValues = filter.getTimesRequested();
 
-        Collection<Long> selected = filter.getSelectedItems();  // CPU selected
+        Collection<Long> selected = filter.getSelectedItems();
         if (selected.isEmpty()) {
-         // If nothing is selected, return empty series
-            return TmfXyResponseFactory.create(TITLE, xValues, Collections.emptyList(), true);
+            return createXyResponse(TITLE, xValues, Collections.emptyList(), true);
         }
+
+        Map<Integer, Long> localCpuIdToSeriesId = buildCpuIdToSeriesId(ss);
 
         int numPoints = xValues.length;
         ImmutableList.Builder<IYModel> builder = ImmutableList.builder();
 
         try {
-            // Process each selected CPU
-            for (Map.Entry<Integer, Long> entry: this.fCpuIdToSeriesId.entrySet()) {
+            for (Map.Entry<Integer, Long> entry : localCpuIdToSeriesId.entrySet()) {
                 int cpuId = entry.getKey();
                 long seriesId = entry.getValue();
 
@@ -199,28 +176,71 @@ public class KvmExitDataProvider extends AbstractTmfTraceDataProvider implements
                 Arrays.fill(values, 0.0);
 
                 if (cpuId == -1) {
-                    // "All CPUs" *  aggregate data from all CPUs
                     aggregateAllCpuData(ss, xValues, values);
                 } else {
-                    // individual CPU
                     fillCpuExitData(ss, cpuId, xValues, values);
                 }
 
-                String name;
-                if (cpuId == -1) {
-                    name = getTrace().getName() + "/All CPUs"; //$NON-NLS-1$
-                } else {
-                    name = getTrace().getName() + "/CPU " + cpuId; //$NON-NLS-1$
-                }
+                String name = cpuId == -1
+                        ? getTrace().getName() + "/All CPUs"  //$NON-NLS-1$
+                        : getTrace().getName() + "/CPU " + cpuId;  //$NON-NLS-1$
 
                 builder.add(new YModel(seriesId, name, values));
             }
         } catch (StateSystemDisposedException e) {
-            return TmfXyResponseFactory.createFailedResponse(CommonStatusMessage.STATE_SYSTEM_FAILED);
+            return createFailedXyResponse(CommonStatusMessage.STATE_SYSTEM_FAILED);
         }
 
         boolean completed = ss.waitUntilBuilt(0) || ss.getCurrentEndTime() >= filter.getEnd();
-        return TmfXyResponseFactory.create(TITLE, xValues, builder.build(), completed);
+        return createXyResponse(TITLE, xValues, builder.build(), completed);
+    }
+
+    private static TmfModelResponse<ITmfXyModel> createXyResponse(String title, long[] xValues,
+            Collection<IYModel> yModels, boolean isComplete) {
+
+        List<ISeriesModel> series = new ArrayList<>(yModels.size());
+        for (IYModel model : yModels) {
+            SeriesModelBuilder builder = new SeriesModelBuilder(model.getId(), model.getName(), xValues, model.getData());
+            TmfXYAxisDescription yAxis = model.getYAxisDescription();
+            if (yAxis != null) {
+                builder.yAxisDescription(yAxis);
+            }
+            series.add(builder.build());
+        }
+
+        ITmfXyModel xyModel = new TmfXyModel(title, series);
+        if (isComplete) {
+            return new TmfModelResponse<>(xyModel, ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        }
+        return new TmfModelResponse<>(xyModel, ITmfResponse.Status.RUNNING, CommonStatusMessage.RUNNING);
+    }
+
+    private static TmfModelResponse<ITmfXyModel> createFailedXyResponse(String message) {
+        return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, message);
+    }
+
+    private Map<Integer, Long> buildCpuIdToSeriesId(ITmfStateSystem ss) {
+        Map<Integer, Long> map = new HashMap<>();
+
+        for (Integer cpuQuark : ss.getQuarks("CPUs", "*")) { //$NON-NLS-1$ //$NON-NLS-2$
+            String cpuName = ss.getAttributeName(cpuQuark);
+            int cpuId;
+            try {
+                cpuId = Integer.parseInt(cpuName);
+            } catch (NumberFormatException e) {
+                continue;
+            }
+
+            int exitCountQuark = ss.optQuarkRelative(cpuQuark, "kvm_exits"); //$NON-NLS-1$
+            if (exitCountQuark != ITmfStateSystem.INVALID_ATTRIBUTE) {
+                map.put(cpuId, fTraceId * 1000 + cpuId + 2);  // même formule que fetchTree()
+            }
+        }
+
+        // All CPUs
+        map.put(-1, fTraceId * 1000 + 1);
+
+        return map;
     }
 
     /**
@@ -232,8 +252,9 @@ public class KvmExitDataProvider extends AbstractTmfTraceDataProvider implements
      * @param values The array to fill with values
      * @throws StateSystemDisposedException If the state system is disposed
      */
-    private static void fillCpuExitData(ITmfStateSystem ss, int cpuId, long[] times, double[] values) throws StateSystemDisposedException {
-        // Find the quark for this CPU's KVM exits
+    private static void fillCpuExitData(ITmfStateSystem ss, int cpuId, long[] times, double[] values)
+            throws StateSystemDisposedException {
+
         int cpuQuark = ss.optQuarkAbsolute("CPUs", String.valueOf(cpuId)); //$NON-NLS-1$
         if (cpuQuark == ITmfStateSystem.INVALID_ATTRIBUTE) {
             return;
@@ -244,28 +265,36 @@ public class KvmExitDataProvider extends AbstractTmfTraceDataProvider implements
             return;
         }
 
-        // Get all intervals for this CPU's KVM exits
-        List<ITmfStateInterval> intervals = Lists.newArrayList(
-                ss.query2D(Collections.singleton(exitQuark), times[0], times[times.length - 1]));
-        intervals.sort(Comparator.comparing(ITmfStateInterval::getStartTime));
-
-        // Fill the values array
         for (int i = 0; i < times.length - 1; i++) {
-            long start = times[i];
-            long end = times[i + 1];
-            double count = countExitsInRange(intervals, start, end);
+            long bucketStart = times[i];
+            long bucketEnd   = times[i + 1];
 
-            // Normalize by time to get exits per second
-            long duration = end - start;
-            if (duration > 0) {
-                values[i] = count * 1_000_000_000 / duration; // exits per second
+            long startCount = queryCumulativeCount(ss, exitQuark, bucketStart);
+            long endCount   = queryCumulativeCount(ss, exitQuark, bucketEnd);
+
+            long delta    = endCount - startCount;           // exits in this interval
+            long duration = bucketEnd - bucketStart;         // in nanoseconds
+
+            if (duration > 0 && delta >= 0) {
+                // exits per seconds
+                values[i] = delta / (duration / 1_000_000_000.0);
             }
         }
 
-        // Copy last point for continuity
+
         if (values.length > 1) {
             values[values.length - 1] = values[values.length - 2];
         }
+    }
+
+    private static long queryCumulativeCount(ITmfStateSystem ss, int quark, long timestamp) throws StateSystemDisposedException {
+        long clampedTs = Math.max(ss.getStartTime(), Math.min(ss.getCurrentEndTime(), timestamp));
+        ITmfStateInterval interval = ss.querySingleState(clampedTs, quark);
+        Object value = interval.getValue();
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        return 0L;
     }
 
     /**
@@ -300,40 +329,5 @@ public class KvmExitDataProvider extends AbstractTmfTraceDataProvider implements
                 continue; // Skip entries that aren't CPU numbers
             }
         }
-    }
-
-    /**
-     * Count the number of KVM exits in a specific time range
-     *
-     * @param intervals The list of state intervals
-     * @param start The start time
-     * @param end The end time
-     * @return The count of KVM exits in the range
-     */
-    private static double countExitsInRange(List<ITmfStateInterval> intervals, long start, long end) {
-        double count = 0;
-
-        for (ITmfStateInterval interval : intervals) {
-            // Check if the interval intersects with our time range
-            if (interval.getEndTime() < start || interval.getStartTime() > end) {
-                continue;
-            }
-
-            // Calculate the portion of the interval that's within our range
-            long intervalStart = Math.max(interval.getStartTime(), start);
-            long intervalEnd = Math.min(interval.getEndTime(), end);
-
-            // Get the exit count from the interval
-            Object value = interval.getValue();
-            if (value instanceof Number) {
-                double exitCount = ((Number) value).doubleValue();
-
-                // Scale the count based on how much of the interval is in our range
-                double portion = (double) (intervalEnd - intervalStart) / (interval.getEndTime() - interval.getStartTime());
-                count += exitCount * portion;
-            }
-        }
-
-        return count;
     }
 }

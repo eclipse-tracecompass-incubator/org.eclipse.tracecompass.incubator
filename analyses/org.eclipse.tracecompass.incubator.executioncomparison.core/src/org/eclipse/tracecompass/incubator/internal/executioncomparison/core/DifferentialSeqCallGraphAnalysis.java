@@ -97,9 +97,6 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
         // Adding VM/Native analysis
         fCallStackAnalysisMap.put("org.eclipse.linuxtools.lttng2.kernel.tracetype",  //$NON-NLS-1$
                 "org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.vm.native.callstack"); //$NON-NLS-1$
-
-        /*fCallStackAnalysisMap.put("org.eclipse.tracecompass.tmf.core.experiment",  //$NON-NLS-1$
-                "org.eclipse.tracecompass.incubator.overhead.core.analysis.vm.native.callstack"); //$NON-NLS-1$*/
     }
 
     /**

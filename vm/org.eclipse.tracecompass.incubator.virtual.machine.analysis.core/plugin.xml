@@ -64,16 +64,9 @@
          </tracetype>
       </module>
       <module
-            analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.VMNativeComparisonAnalysis"
-            id="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.vmcomparison"
-            name="VM vs Native Comparison">
-         <tracetype
-               class="org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment">
-         </tracetype>
-      </module>
-      <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.VMNativeCallStackAnalysis"
             applies_experiment="true"
+            automatic="false"
             id="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.vm.native.callstack"
             name="VM Native CallStack">
          <tracetype

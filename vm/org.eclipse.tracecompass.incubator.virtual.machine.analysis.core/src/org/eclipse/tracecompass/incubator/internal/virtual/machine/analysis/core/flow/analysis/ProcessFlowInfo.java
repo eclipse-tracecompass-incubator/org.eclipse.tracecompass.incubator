@@ -1,9 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -11,6 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.Activator;
 
 /**
  * Flow analysis of a specific thread in a process. Tracks the complete execution
@@ -35,9 +43,6 @@ public class ProcessFlowInfo {
     private final Set<String> seenTransitions = new HashSet<>();
     private boolean currentlyInHost = false;
 
-    // Store execution sequences for analysis
-    private List<ExecutionSequence> executionSequences = new ArrayList<>();
-
     // Constructor for non-virtualized environments
     ProcessFlowInfo(String phase, String processName) {
         this(phase, processName, false, null);
@@ -53,8 +58,9 @@ public class ProcessFlowInfo {
 
     /**
      * Add a guest process event - only accepts events from our target thread
+     * @param evt the event to add
      */
-    void addGuestEvent(KernelEventInfo evt) {
+    public void addGuestEvent(KernelEventInfo evt) {
         if (!evt.processName.equals(this.processName)) {
             return;
         }
@@ -67,7 +73,7 @@ public class ProcessFlowInfo {
         // If this is the first event and we don't have a target thread, use this thread
         if (targetThreadId == null && trackHypervisor) {
             // This shouldn't happen with the new constructor, but just in case
-            System.err.println("Warning: No target thread specified for hypervisor tracking"); //$NON-NLS-1$
+            Activator.getInstance().logWarning("No target thread specified for hypervisor tracking"); //$NON-NLS-1$
             return;
         }
 
@@ -78,7 +84,6 @@ public class ProcessFlowInfo {
         // Establish vCPU mapping if we haven't already
         if (targetVcpuId == null && evt.cpuid >= 0) {
             targetVcpuId = evt.cpuid;
-            System.out.printf("Established vCPU mapping: Thread %d -> vCPU %d\n", evt.tid, evt.cpuid); //$NON-NLS-1$
         }
 
         // Add to unified flow
@@ -88,8 +93,11 @@ public class ProcessFlowInfo {
 
     /**
      * Add a VM exit/entry event - only accepts transitions for our target vCPU
+     * @param evt the event to add
+     * @param isExit the type of transition
+     * @return whether or not the transition was successfully added
      */
-    boolean addVMTransition(KernelEventInfo evt, boolean isExit) {
+    public boolean addVMTransition(KernelEventInfo evt, boolean isExit) {
         if (!trackHypervisor) {
             return false;
         }
@@ -119,17 +127,17 @@ public class ProcessFlowInfo {
         FlowEvent flowEvent = new FlowEvent(evt, type);
         unifiedFlow.add(flowEvent);
 
-        System.out.printf("Added VM %s for vCPU %d at timestamp %d\n", //$NON-NLS-1$
-                         isExit ? "EXIT" : "ENTRY", evt.vcpuid, evt.timestamp); //$NON-NLS-1$ //$NON-NLS-2$
-
         return true;
     }
 
     /**
      * Add a hypervisor event - only accepts events on the CPU that received
      * the vCPU exit for our target thread
+     * @param hypervisorEvt the hypervisor event
+     * @param vmExitTimestamp the timestamp of the kvm exit
+     * @return whether or not the hypervisor event was added
      */
-    boolean addHypervisorEvent(KernelEventInfo hypervisorEvt, long vmExitTimestamp) {
+    public boolean addHypervisorEvent(KernelEventInfo hypervisorEvt, long vmExitTimestamp) {
         if (!trackHypervisor) {
             return false;
         }
@@ -159,16 +167,25 @@ public class ProcessFlowInfo {
 
     /**
      * Use this function when you want to add native events
+     * @param evt the event to add
      */
     public void addEvent(KernelEventInfo evt) {
         if (trackHypervisor) {
             return;  // we don't want to track the hypervisor because we are on the native system
         }
 
+        if (!processName.equals(evt.processName)) {
+            return;
+        }
+
         // For native systems, if we have a target thread, only track that thread
         if (targetThreadId != null && !targetThreadId.equals(evt.tid)) {
             return;
         }
+
+        ThreadFlowInfo threadInfo = threadsByTid.computeIfAbsent(evt.tid,
+                k -> new ThreadFlowInfo(k, processName));
+        threadInfo.addEvent(evt);
 
         String key = "NATIVE" + "_" + evt.timestamp + "_" + evt.cpuid + "_" + evt.tid; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
@@ -183,8 +200,10 @@ public class ProcessFlowInfo {
 
     /**
      * Check if this ProcessFlowInfo should accept a VM transition based on vCPU correlation
+     * @param vmTransition the vm transition
+     * @return whether or not the vm transition should be accepted
      */
-    boolean shouldAcceptVMTransition(KernelEventInfo vmTransition) {
+    public boolean shouldAcceptVMTransition(KernelEventInfo vmTransition) {
         if (!trackHypervisor) {
             return false;
         }
@@ -200,27 +219,35 @@ public class ProcessFlowInfo {
 
     /**
      * Check if this ProcessFlowInfo is tracking the specified thread
+     * @param threadId the Id of the thread
+     * @return whether or not this thread is tracked
      */
-    boolean isTrackingThread(int threadId) {
+    public boolean isTrackingThread(int threadId) {
         return targetThreadId == null || targetThreadId.equals(threadId);
     }
 
     /**
      * Get the target vCPU ID for this process flow
+     * @return the target VCPU ID
      */
-    Integer getTargetVcpuId() {
+    public Integer getTargetVcpuId() {
         return targetVcpuId;
     }
 
     /**
      * Get the target thread ID for this process flow
+     * @return the target thread ID
      */
-    Integer getTargetThreadId() {
+    public Integer getTargetThreadId() {
         return targetThreadId;
     }
 
-    void SetTargetVcpuId(int value) {
-        targetVcpuId = value;
+    /**
+     * Set the target VCPUID
+     * @param id the vcpu id
+     */
+    public void setTargetVcpuId(int id) {
+        targetVcpuId = id;
     }
 
     /**
@@ -233,7 +260,7 @@ public class ProcessFlowInfo {
     /**
      * Finalize the flow analysis by sorting events chronologically
      */
-    void finalizeFlow() {
+    public void finalizeFlow() {
         // Sort unified flow by timestamp - this is crucial for correct chronological order
         unifiedFlow.sort(Comparator.comparing(fe -> fe.kernelEvent.timestamp));
 
@@ -255,6 +282,9 @@ public class ProcessFlowInfo {
         for (FlowEvent flowEvent : unifiedFlow) {
             switch (flowEvent.type) {
                 case VM_ENTRY:
+                    if (currentSequence != null) {
+                        sequences.add(currentSequence);
+                    }
                     currentSequence = new ExecutionSequence();
                     currentSequence.setVmEntry(flowEvent);
                     break;
@@ -287,119 +317,25 @@ public class ProcessFlowInfo {
                 default:
                     break;
             }
-
-            // Close sequence after VM_ENTRY (which comes after hypervisor events)
-            // Actually, let's close it when we see the next VM_ENTRY or at the end
         }
 
         // Add any remaining sequence
         if (currentSequence != null) {
             sequences.add(currentSequence);
         }
-
-        this.executionSequences = sequences;
     }
 
     /**
-     * Print the unified execution flow
+     * @return whether or not the process has multiple threads
      */
-    void printUnifiedFlow() throws IOException {
-        System.out.printf("\n=== Unified Flow for Process %s (Phase: %s) ===\n", //$NON-NLS-1$
-            processName, phase);
-
-        if (targetThreadId != null) {
-            System.out.printf("Tracking Thread: %d", targetThreadId); //$NON-NLS-1$
-            if (targetVcpuId != null) {
-                System.out.printf(" (vCPU: %d)", targetVcpuId); //$NON-NLS-1$
-            }
-            System.out.println();
-        }
-
-        if (!trackHypervisor) {
-            printSimpleFlow();
-            return;
-        }
-
-        printVirtualizedFlow();
-    }
-
-    private void printSimpleFlow() throws IOException {
-        System.out.printf("Events: %d, Threads: %d\n", unifiedFlow.size(), threadsByTid.size()); //$NON-NLS-1$
-
-        FileOutputStream fos = new FileOutputStream(new File("/home/philippe/Desktop/natif_flow.txt"), true); //$NON-NLS-1$
-        try (PrintWriter writer = new PrintWriter(fos)) {
-            for (FlowEvent flowEvent : unifiedFlow) {
-                KernelEventInfo evt = flowEvent.kernelEvent;
-                String output = String.format("  [%d] %s (TID:%d)\n", //$NON-NLS-1$
-                    evt.timestamp, evt.name, evt.tid);
-                System.out.print(output);
-                writer.print(output);
-            }
-        }
-    }
-
-    private void printVirtualizedFlow() throws IOException {
-        System.out.printf("Execution Sequences: %d\n", executionSequences.size()); //$NON-NLS-1$
-
-        int sequenceNum = 1;
-        for (ExecutionSequence seq : executionSequences) {
-            System.out.printf("\n--- Sequence %d ---\n", sequenceNum++); //$NON-NLS-1$
-            seq.printSequence();
-        }
-
-        // Also print raw chronological flow
-        System.out.println("\n--- Raw Chronological Flow ---"); //$NON-NLS-1$
-        FileOutputStream fos = new FileOutputStream(new File("/home/philippe/Desktop/virtualized_flow_raw.txt"), true); //$NON-NLS-1$
-        try (PrintWriter writer = new PrintWriter(fos)) {
-            for (FlowEvent flowEvent : unifiedFlow) {
-                printFlowEvent(flowEvent, writer);
-            }
-        }
-    }
-
-    private static void printFlowEvent(FlowEvent flowEvent, PrintWriter writer) {
-        KernelEventInfo evt = flowEvent.kernelEvent;
-        String prefix = getEventPrefix(flowEvent.type);
-
-        String output = String.format("  [%d] %s%s", evt.timestamp, prefix, evt.name); //$NON-NLS-1$
-
-        if (evt.tid >= 0) {
-            output += String.format(" (TID:%d", evt.tid); //$NON-NLS-1$
-            if (evt.cpuid >= 0) {
-                output += String.format(", CPU:%d", evt.cpuid); //$NON-NLS-1$
-            }
-            if (evt.vcpuid >= 0) {
-                output += String.format(", VCPU:%d", evt.vcpuid); //$NON-NLS-1$
-            }
-            if (!evt.exitReason.equals("UNKNOWN_EXIT_REASON")) { //$NON-NLS-1$
-                output += String.format(", exit_reason:%s", evt.exitReason); //$NON-NLS-1$
-            }
-            output += ")"; //$NON-NLS-1$
-        }
-        output += "\n"; //$NON-NLS-1$
-
-        System.out.print(output);
-        if (writer != null) {
-            writer.print(output);
-        }
-    }
-
-    private static String getEventPrefix(FlowEventType type) {
-        switch (type) {
-            case GUEST_EVENT: return "[GUEST] "; //$NON-NLS-1$
-            case VM_EXIT: return "[VM_EXIT] "; //$NON-NLS-1$
-            case HYPERVISOR_EVENT: return "[HOST] "; //$NON-NLS-1$
-            case VM_ENTRY: return "[VM_ENTRY] "; //$NON-NLS-1$
-            case NATIVE: return "[NATIVE] "; //$NON-NLS-1$
-            default: return ""; //$NON-NLS-1$
-        }
-    }
-
-    boolean isMultiThreaded() {
+    public boolean isMultiThreaded() {
         return threadsByTid.size() > 1;
     }
 
-    boolean isVirtualized() {
+    /**
+     * @return check whether the environment is virtualized or not
+     */
+    public boolean isVirtualized() {
         return trackHypervisor && unifiedFlow.stream()
             .anyMatch(fe -> fe.type == FlowEventType.HYPERVISOR_EVENT ||
                            fe.type == FlowEventType.VM_EXIT ||

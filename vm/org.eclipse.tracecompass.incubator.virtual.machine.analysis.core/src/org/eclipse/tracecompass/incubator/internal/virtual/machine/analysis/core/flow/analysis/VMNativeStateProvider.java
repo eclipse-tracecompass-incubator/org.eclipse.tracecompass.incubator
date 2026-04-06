@@ -1,21 +1,31 @@
+/*******************************************************************************
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.Activator;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 
 /**
  * State provider for VM/Native comparison analysis
- * Here the reason why there a some variable in read is because this analysis does not
- * take into account the host trace yet. It is a feature that I will add in the feature
+ *
  * @author Francois Belias
  *
  */
@@ -23,18 +33,7 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
     private static final int VERSION = 1;
     private static final String ID = "org.eclipse.tracecompass.incubator.vm.state.provider"; //$NON-NLS-1$
 
-    /** State system attributes */
-    public static final String NATIVE_ROOT = "Native"; //$NON-NLS-1$
-    @SuppressWarnings("javadoc")
-    public static final String VM_ROOT = "VM";  //$NON-NLS-1$
-    @SuppressWarnings("javadoc")
-    public static final String SYNC_POINTS = "SyncPoints"; //$NON-NLS-1$
-    @SuppressWarnings("javadoc")
-    public static final String PERFORMANCE_DELTA = "PerformanceDelta"; //$NON-NLS-1$
-
-    private final static Map<String, TraceContext> traceContexts = new HashMap<>();
-
-    private static final String WORKLOAD_UST_PROVIDER = "workload_provider"; //$NON-NLS-1$
+    /** State system attribute */
 
     private static final String PID = "context._vpid"; //$NON-NLS-1$
     private static final String TID = "context._vtid"; //$NON-NLS-1$
@@ -48,9 +47,7 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
     private boolean begin_vm = true;
 
     private SyncPoint nativeStart = null;
-    private SyncPoint nativeEnd = null;
     private SyncPoint vmStart = null;
-    private SyncPoint vmEnd = null;
     private Map<TraceType, Map<Integer, ProcessFlowInfo>> flows = new HashMap<>();
 
     private VMExecutionState vmState = new VMExecutionState();
@@ -62,22 +59,11 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
      */
     public VMNativeStateProvider(@NonNull TmfExperiment experiment) {
         super(experiment, ID);
-        initializeTraceContexts(experiment);
     }
 
     @Override
     public int getVersion() {
         return VERSION;
-    }
-
-    private static void initializeTraceContexts(TmfExperiment experiment) {
-        for (ITmfTrace trace: experiment.getTraces()) {
-            String traceName = trace.getName();
-            TraceType type  = determineTraceType(traceName);
-
-            TraceContext context = new TraceContext(trace, type);
-            traceContexts.put(traceName, context);
-        }
     }
 
     private static TraceType determineTraceType(String traceName) {
@@ -111,67 +97,38 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
             String traceName = event.getTrace().getName();
             TraceType source = determineTraceType(traceName);
 
-            long ts = event.getTimestamp().toNanos();
-
-            if  (this.nativeEnd != null && this.nativeEnd.timestamp == ts) {
-                Integer pid = getIntField(event, PID);
-                Map<Integer, ProcessFlowInfo> typeFlows = flows.get(source);
-                if (typeFlows != null) {
-                    ProcessFlowInfo flow = typeFlows.get(pid);
-                    if (flow != null) {
-                        flow.finalizeFlow();
-                        flow.printUnifiedFlow();
-                    }
-                }
-
-            } else if (this.vmEnd != null && this.vmEnd.timestamp == ts) {
-                Integer pid = getIntField(event, PID);
-                Map<Integer, ProcessFlowInfo> typeFlows = flows.get(source);
-                if (typeFlows != null) {
-                    ProcessFlowInfo flow = typeFlows.get(pid);
-                    if (flow != null) {
-                        flow.finalizeFlow();
-                        flow.printUnifiedFlow();
-                    }
-                }
-            }
-
-
             if (isWorkloadEvent(event)) {
-                handleWorkloadEvent(event, source, ss);
+                handleWorkloadEvent(event, source);
             } else {
                 handleKernelEvent(event, source, ss);
             }
 
-        } catch (Exception a) {
-            System.err.println("Error processing event: " + a.getMessage()); //$NON-NLS-1$
+        } catch (RuntimeException e) {
+            // Log or handle specific exceptions appropriately
+            org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.Activator.getInstance().logError("Error processing event", e); //$NON-NLS-1$
         }
     }
 
 
     private static boolean isWorkloadEvent(ITmfEvent event) {
-        String eventName = event.getType().getName();
-
-        if (eventName.equals(EVENT_MARKER)) {
-            Object filenameField = event.getContent().getField("filename"); //$NON-NLS-1$
-            if (filenameField == null) {
-                return false;
-            }
-
-            String value = filenameField.toString();
-            String[] words = value.split("="); //$NON-NLS-1$
-            if (words.length == 0 || words.length > 2) {
-                return false;
-            }
-
-            if (words[1].contains(MARKER)) {
-                return true;
-            }
-
+        if (!EVENT_MARKER.equals(event.getType().getName())) {
             return false;
         }
 
-        return eventName.startsWith(WORKLOAD_UST_PROVIDER + ":"); //$NON-NLS-1$
+        Object filenameField = event.getContent().getField("filename"); //$NON-NLS-1$
+        if (filenameField == null) {
+            return false;
+        }
+
+        String value = filenameField.toString();
+        int idx = value.indexOf('=');
+
+        if (idx == -1 || idx == value.length() - 1) {
+            return false;
+        }
+
+        String rightPart = value.substring(idx + 1);
+        return rightPart.contains(MARKER);
     }
 
 
@@ -183,11 +140,16 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
 
         String value = exitField.toString();
         String[] words = value.split("="); //$NON-NLS-1$
-        if (words.length == 0 || words.length > 2) {
-            return null;
+        if (words.length != 2) {
+            return "UNKNOWN_EXIT_REASON"; //$NON-NLS-1$
         }
-        int code = Integer.parseInt(words[1]);
-        return ExitReasonMap.getExitReasonName(code);
+
+        try {
+                int code = Integer.parseInt(words[1]);
+                return ExitReasonMap.getExitReasonName(code);
+            } catch (NumberFormatException e) {
+                return "UNKNOWN_EXIT_REASON"; //$NON-NLS-1$
+            }
 
     }
 
@@ -230,7 +192,7 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
 
         String value = obj.toString();
         String[] words = value.split("="); //$NON-NLS-1$
-        if (words.length == 0 || words.length > 2) {
+        if (words.length != 2) {
             return null;
         }
 
@@ -251,20 +213,15 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
 
         String value = commField.toString();
         String[] words = value.split("="); //$NON-NLS-1$
-        if (words.length == 0 || words.length > 2) {
+        if (words.length != 2) {
             return "unknown"; //$NON-NLS-1$
         }
 
         return words[1];
     }
 
-    private void handleWorkloadEvent(ITmfEvent event, TraceType source, ITmfStateSystemBuilder ss) {
+    private void handleWorkloadEvent(ITmfEvent event, TraceType source) {
         try {
-
-            if (ss == null) {
-
-            }
-
             String eventName = event.getType().getName();
             Integer pid = getIntField(event, PID);
             String procName = getProcessName(event);
@@ -272,151 +229,135 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
 
             if (eventName.equals(EVENT_MARKER) && source.equals(TraceType.NATIVE_KERNEL)) {
                 if (this.begin_native) {
-                    this.nativeStart = new SyncPoint("workload_start", timestamp, //$NON-NLS-1$
-                            source, 0,
-                            pid != null ? pid : -1, procName);
-
+                    this.nativeStart = new SyncPoint(timestamp,
+                            pid != null ? pid : -1);
                     this.begin_native = false;
-
-                } else {
-                    this.nativeEnd = new SyncPoint("workload_end", timestamp, //$NON-NLS-1$
-                            source, 0,
-                            pid != null ? pid : -1, procName);
-
                     String phase = "workload"; //$NON-NLS-1$
                     flows.computeIfAbsent(source, t -> new HashMap<>())
                             .computeIfAbsent(pid, p -> new ProcessFlowInfo(phase, procName));
+
+                } else {
+
+                    // finalizeFlow()
+                    Map<Integer, ProcessFlowInfo> typeFlows = flows.get(source);
+                    if (typeFlows != null && pid != null) {
+                        ProcessFlowInfo flow = typeFlows.get(pid);
+                        if (flow != null) {
+                            flow.finalizeFlow();
+                        }
+                    }
+                    this.nativeStart = null;
                 }
-                return;
 
             } else if (eventName.equals(EVENT_MARKER) && source.equals(TraceType.VM_GUEST_KERNEL)) {
                 if (this.begin_vm) {
-                    this.vmStart = new SyncPoint("workload_start", timestamp, //$NON-NLS-1$
-                            source, 0,
-                            pid != null ? pid : -1, procName);
-
+                    this.vmStart = new SyncPoint(timestamp,
+                            pid != null ? pid : -1);
                     this.begin_vm = false;
+
                     String phase = "workload"; //$NON-NLS-1$
                     flows.computeIfAbsent(source, t -> new HashMap<>())
                             .computeIfAbsent(pid, p -> new ProcessFlowInfo(phase, procName));
+
                 } else {
-                    this.vmEnd = new SyncPoint("workload_end", timestamp, //$NON-NLS-1$
-                            source, 0,
-                            pid != null ? pid : -1, procName);
+
+                    // finalizeFlow()
+                    Map<Integer, ProcessFlowInfo> typeFlows = flows.get(source);
+                    if (typeFlows != null && pid != null) {
+                        ProcessFlowInfo flow = typeFlows.get(pid);
+                        if (flow != null) {
+                            flow.finalizeFlow();
+                        }
+                    }
+                    this.vmStart = null;
                 }
-                return;
             }
 
-
         } catch (Exception e) {
-            System.err.println("Error handling workload event: " + e.getMessage()); //$NON-NLS-1$
+            Activator.getInstance().logError("Error handling workload event", e); //$NON-NLS-1$
         }
     }
 
 
     private void handleKernelEvent(ITmfEvent event, TraceType source, ITmfStateSystemBuilder ss) {
         try {
+            if (ss == null) {
+                return;
+            }
 
-                if (ss == null ) {
-                    return;
-                }
-                String name = event.getType().getName();
-                @NonNull
-                Integer pid = getIntField(event, PID);
-                Integer tid = getIntField(event, TID);
-                Integer cpuid = getIntField(event, CPUID);
-                Integer vcpuid = getIntField(event, VCPUID);
-                String processName = getProcessName(event);
-                String exitReason = getExitReason(event);
-                long ts = event.getTimestamp().toNanos();
+            String name = event.getType().getName();
+            Integer pid = getIntField(event, PID);
+            Integer tid = getIntField(event, TID);
+            Integer cpuid = getIntField(event, CPUID);
+            Integer vcpuid = getIntField(event, VCPUID);
+            String processName = getProcessName(event);
+            String exitReason = getExitReason(event);
+            long ts = event.getTimestamp().toNanos();
 
-                //System.out.println("DEBUG: source=" + source + " (class=" + (source == null ? "null" : source.getClass().getName()) + "), TraceType.VM_HOST=" + TraceType.VM_HOST + ", source==VM_HOST? " + (source == TraceType.VM_HOST));
+            KernelEventInfo evt = new KernelEventInfo(
+                    name,
+                    ts,
+                    pid != null ? pid : -1,
+                    tid != null ? tid : -1,
+                    processName,
+                    source,
+                    cpuid != null ? cpuid : -1,
+                    vcpuid != null ? vcpuid : -1,
+                    exitReason
+            );
 
-                KernelEventInfo evt = new KernelEventInfo(
-                        name,
-                        ts,
-                        pid != null ? pid : -1,
-                        tid != null ? tid : -1,
-                        processName,
-                        source,
-                        cpuid != null ? cpuid : -1,
-                        vcpuid != null ? vcpuid : -1,
-                        exitReason
-                    );
+            if (pid == null) {
+                return;
+            }
 
-                if (source == TraceType.NATIVE_KERNEL) {
-                    if (this.nativeStart != null) {
-                        if (pid == this.nativeStart.pid) {
-                            Map<Integer, ProcessFlowInfo> typeFlows = flows.get(source);
-                            if (typeFlows != null) {
-                                ProcessFlowInfo flow = typeFlows.get(pid);
-                                if (flow != null) {
-                                    flow.addEvent(evt);
-                                    int natffFlowQuark = ss.getQuarkAbsoluteAndAdd("natif_flow", pid.toString()); //$NON-NLS-1$
-                                    int lastEventQuark = ss.getQuarkRelativeAndAdd(natffFlowQuark, "event"); //$NON-NLS-1$
-                                    int eventCountQuark = ss.getQuarkRelativeAndAdd(natffFlowQuark, "event_count"); //$NON-NLS-1$
-
-                                    ss.modifyAttribute(ts, name, lastEventQuark);
-
-                                    // Keep track of event count
-                                    Object currentCount = ss.queryOngoingState(eventCountQuark);
-                                    int newCount = (currentCount instanceof Integer) ? ((Integer) currentCount) + 1 : 1;
-                                    ss.modifyAttribute(ts, newCount, eventCountQuark);
-                                }
-                            }
-                        }
-                    }
-                } else if (source == TraceType.VM_GUEST_KERNEL) {
-                    if (this.vmStart != null) {
-                        if (pid == this.vmStart.pid) {
-                            Map<Integer, ProcessFlowInfo> typeFlows = flows.get(source);
-                            if (typeFlows != null) {
-                                ProcessFlowInfo flow = typeFlows.get(pid);
-                                if (flow != null) {
-                                    flow.addGuestEvent(evt);
-
-                                    int vmFlowQuark = ss.getQuarkAbsoluteAndAdd("vm_flow", pid.toString()); //$NON-NLS-1$
-                                    int lastEventQuark = ss.getQuarkRelativeAndAdd(vmFlowQuark, "event"); //$NON-NLS-1$
-                                    int eventCountQuark = ss.getQuarkRelativeAndAdd(vmFlowQuark, "event_count"); //$NON-NLS-1$
-
-                                    ss.modifyAttribute(ts, name, lastEventQuark);
-
-                                    // Keep track of event count
-                                    Object currentCount = ss.queryOngoingState(eventCountQuark);
-                                    int newCount = (currentCount instanceof Integer) ? ((Integer) currentCount) + 1 : 1;
-                                    ss.modifyAttribute(ts, newCount, eventCountQuark);
-                                }
-                            }
-                        }
-                    }
-                } else if (source == TraceType.VM_HOST) {
-                    if (this.vmStart != null && this.vmStart.timestamp < ts) {
-                        Map<Integer, ProcessFlowInfo> typeFlows = flows.get(TraceType.VM_GUEST_KERNEL);
-                        if (typeFlows != null) {
-                            ProcessFlowInfo flow = typeFlows.get(this.vmStart.pid);
-                            if (flow != null) {
-                                EventType type = getEventType(evt);
-                                processHypervisorEvents(flow, type, evt);
-
-
-                                int vmFlowQuark = ss.getQuarkAbsoluteAndAdd("vm_flow", Integer.toString(this.vmStart.pid)); //$NON-NLS-1$
-                                int lastEventQuark = ss.getQuarkRelativeAndAdd(vmFlowQuark, "event"); //$NON-NLS-1$
-                                int eventCountQuark = ss.getQuarkRelativeAndAdd(vmFlowQuark, "event_count"); //$NON-NLS-1$
-
-                                ss.modifyAttribute(ts, name, lastEventQuark);
-
-                                // Keep track of event count
-                                Object currentCount = ss.queryOngoingState(eventCountQuark);
-                                int newCount = (currentCount instanceof Integer) ? ((Integer) currentCount) + 1 : 1;
-                                ss.modifyAttribute(ts, newCount, eventCountQuark);
-                        }
-                       }
+            if (source == TraceType.NATIVE_KERNEL && this.nativeStart != null && pid == this.nativeStart.pid) {
+                Map<Integer, ProcessFlowInfo> typeFlows = flows.get(source);
+                if (typeFlows != null) {
+                    ProcessFlowInfo flow = typeFlows.get(pid);
+                    if (flow != null) {
+                        flow.addEvent(evt);
+                        updateFlowStateSystem(ss, "native_flow", pid, ts, name); //$NON-NLS-1$
                     }
                 }
+
+            } else if (source == TraceType.VM_GUEST_KERNEL && this.vmStart != null && pid == this.vmStart.pid) {
+                Map<Integer, ProcessFlowInfo> typeFlows = flows.get(source);
+                if (typeFlows != null) {
+                    ProcessFlowInfo flow = typeFlows.get(pid);
+                    if (flow != null) {
+                        flow.addGuestEvent(evt);
+                        updateFlowStateSystem(ss, "vm_flow", pid, ts, name); //$NON-NLS-1$
+                    }
+                }
+
+            } else if (source == TraceType.VM_HOST && this.vmStart != null && this.vmStart.timestamp < ts) {
+                Map<Integer, ProcessFlowInfo> typeFlows = flows.get(TraceType.VM_GUEST_KERNEL);
+                if (typeFlows != null) {
+                    ProcessFlowInfo flow = typeFlows.get(this.vmStart.pid);
+                    if (flow != null) {
+                        EventType type = getEventType(evt);
+                        if (processHypervisorEvents(flow, type, evt)) {
+                            updateFlowStateSystem(ss, "vm_flow", this.vmStart.pid, ts, name); //$NON-NLS-1$
+                        }
+                    }
+                }
+            }
 
         } catch (Exception e) {
-            System.err.println("Error handling kernel event: " + e.getMessage()); //$NON-NLS-1$
+            Activator.getInstance().logError("Error handling workload event", e); //$NON-NLS-1$
         }
+    }
+
+    private static void updateFlowStateSystem(ITmfStateSystemBuilder ss, String flowRoot, int pid, long ts, String eventName) {
+        int flowQuark = ss.getQuarkAbsoluteAndAdd(flowRoot, Integer.toString(pid));
+        int lastEventQuark = ss.getQuarkRelativeAndAdd(flowQuark, "event"); //$NON-NLS-1$
+        int eventCountQuark = ss.getQuarkRelativeAndAdd(flowQuark, "event_count"); //$NON-NLS-1$
+
+        ss.modifyAttribute(ts, eventName, lastEventQuark);
+
+        Object currentCount = ss.queryOngoingState(eventCountQuark);
+        int newCount = (currentCount instanceof Integer) ? ((Integer) currentCount) + 1 : 1;
+        ss.modifyAttribute(ts, newCount, eventCountQuark);
     }
 
     private static EventType getEventType(KernelEventInfo event) {
@@ -433,7 +374,7 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
 
             switch (evtType) {
             case VM_ENTRY:
-                vmState.enterGuest(event);
+                vmState.enterGuest();
                 return processFlow.addVMTransition(event, false);
 
             case VM_EXIT:
@@ -465,11 +406,8 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
     // Check if a host event is relevant during hypervisor overhead
     private boolean isHostEventRelevant(KernelEventInfo hostEvent) {
         // Accept events on the CPU that handled the VM exit
-        if (hostEvent.cpuid == this.vmState.getLastExitCpuId()) {
-            return true;
-        }
+        return hostEvent.cpuid == this.vmState.getLastExitCpuId();
 
-        return false;
     }
 
     /**
@@ -489,36 +427,14 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
     }
 
     /**
-     * Context information for each trace
-     */
-    private static class TraceContext {
-        final ITmfTrace trace;
-        final TraceType type;
-
-        TraceContext(ITmfTrace trace, TraceType type) {
-            this.trace = trace;
-            this.type =  type;
-        }
-    }
-
-    /**
      * Represent a synchronization point in the trace
      */
     private static class SyncPoint {
-        final String eventType;
         final long timestamp;
-        final TraceType traceType;
-        final Integer dataValue;
         final int pid;
-        final String procName;
-
-        SyncPoint(String eventType, long timestamp, TraceType traceType, Integer dataValue, int pid, String procName) {
-            this.eventType = eventType;
+        SyncPoint(long timestamp, int pid) {
             this.timestamp = timestamp;
-            this.traceType = traceType;
-            this.dataValue = dataValue;
             this.pid = pid;
-            this.procName = procName;
         }
     }
 
@@ -532,23 +448,14 @@ public class VMNativeStateProvider extends AbstractTmfStateProvider{
         private boolean inGuest = false;
         private long lastExitTimestamp = -1;
         private int lastExitCpuId = -1;
-        private int currentPhysicalCpu = -1;
-
-        void enterGuest(KernelEventInfo vmEntry) {
+        void enterGuest() {
             inGuest = true;
-            currentPhysicalCpu = vmEntry.cpuid;
-            // Note: Physical CPU may have changed since last exit
         }
 
         void exitGuest(KernelEventInfo vmExit) {
             inGuest = false;
             lastExitTimestamp = vmExit.timestamp;
             lastExitCpuId = vmExit.cpuid;
-            currentPhysicalCpu = vmExit.cpuid;
-        }
-
-        boolean isInGuest() {
-            return inGuest;
         }
 
         boolean isInHypervisorOverhead() {

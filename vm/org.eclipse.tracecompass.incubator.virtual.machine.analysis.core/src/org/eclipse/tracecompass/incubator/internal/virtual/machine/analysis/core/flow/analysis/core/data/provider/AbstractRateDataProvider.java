@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2026 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.core.data.provider;
 
 import java.util.ArrayList;
@@ -118,6 +128,7 @@ public abstract class AbstractRateDataProvider<T extends @NonNull TmfStateSystem
          * @param yAxisDescription Description for the Y axis
          * @return The completed IYModel
          */
+        @SuppressWarnings("null")
         public IYModel build(TmfXYAxisDescription yAxisDescription) {
             return new YModel(fId, fName, fValues, yAxisDescription);
         }
@@ -130,10 +141,16 @@ public abstract class AbstractRateDataProvider<T extends @NonNull TmfStateSystem
             return fMetricQuark;
         }
 
+        /**
+         * @return the previous time
+         */
         public long getPrevTime() {
             return fPrevTime;
         }
 
+        /**
+         * @param prevTime the previous time
+         */
         public void setPrevTime(long prevTime) {
             fPrevTime = prevTime;
         }
@@ -154,18 +171,20 @@ public abstract class AbstractRateDataProvider<T extends @NonNull TmfStateSystem
             Map<String, Object> fetchParameters,
             @Nullable IProgressMonitor monitor) throws StateSystemDisposedException {
 
-        SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(fetchParameters);
+        @Nullable SelectionTimeQueryFilter filter = FetchParametersUtils.createSelectionTimeQuery(fetchParameters);
         if (filter == null) {
             return null;
         }
 
-        long[] xValues = filter.getTimesRequested();
+        SelectionTimeQueryFilter queryFilter = filter;
+
+        long[] xValues = queryFilter.getTimesRequested();
         if (xValues.length <= 1) {
             return Collections.emptyList();
         }
 
         // Initialize builders for each selected data series
-        Map<Integer, RateSeriesBuilder> builderByQuark = initBuilders(ss, filter);
+        Map<Integer, RateSeriesBuilder> builderByQuark = initBuilders(ss, queryFilter);
         if (builderByQuark.isEmpty()) {
             return Collections.emptyList();
         }
@@ -178,7 +197,7 @@ public abstract class AbstractRateDataProvider<T extends @NonNull TmfStateSystem
         // This is crucial for rate calculation - we need a baseline
         for (RateSeriesBuilder builder : builderByQuark.values()) {
             ITmfStateInterval iv = ss.querySingleState(startTime, builder.getQuark());
-            Object v = iv.getValue();
+            @Nullable Object v = iv.getValue();
             long count = extractCountFromValue(v);
             builder.setPrevObservation(count, startTime);
         }
@@ -212,7 +231,7 @@ public abstract class AbstractRateDataProvider<T extends @NonNull TmfStateSystem
             to = (to >= 0) ? to + 1 : -1 - to;
 
             if (from < to) {
-                Object value = interval.getValue();
+                @Nullable Object value = interval.getValue();
                 long count = extractCountFromValue(value);
                 RateSeriesBuilder builder = builderByQuark.get(interval.getAttribute());
                 if (builder != null) {
@@ -238,7 +257,7 @@ public abstract class AbstractRateDataProvider<T extends @NonNull TmfStateSystem
      * @param value The value from the state system
      * @return The count as a long value
      */
-    protected long extractCountFromValue(Object value) {
+    protected long extractCountFromValue(@Nullable Object value) {
         return (value instanceof Number) ? ((Number) value).longValue() : 0L;
     }
 
