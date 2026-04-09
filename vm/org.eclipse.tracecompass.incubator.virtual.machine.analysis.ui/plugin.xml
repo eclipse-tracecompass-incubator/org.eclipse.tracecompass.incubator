@@ -17,6 +17,13 @@
             name="%vcpuview.name"
             restorable="true">
       </view>
+      <view
+            category="org.eclipse.linuxtools.tmf.ui.views.category"
+            class="org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui.flow.analysis.KvmExitDensityView"
+            id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui.flow.analysis.kvm.density.view"
+            name="Kvm Exit Density View"
+            restorable="true">
+      </view>
    </extension>
       <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
@@ -32,6 +39,13 @@
             id="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.ui.views.virtualresources">
          <analysisId
                id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.FusedVirtualMachineAnalysis">
+         </analysisId>
+      </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui.flow.analysis.kvm.density.view">
+         <analysisId
+               id="org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.state.system.module">
          </analysisId>
       </output>
    </extension>
