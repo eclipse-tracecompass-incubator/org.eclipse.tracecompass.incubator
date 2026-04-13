@@ -46,7 +46,7 @@ import org.eclipse.tracecompass.incubator.internal.filters.core.shared.LspObserv
 /**
  * The LanguageFilterClient implementation for the FilterBox
  *
- * See LSP specifications for more informations.
+ * See LSP specifications for more information.
  *
  * @author Maxime Thibault
  *
@@ -97,7 +97,7 @@ public class LanguageFilterClient implements LanguageClient, LspObservable {
 
     /**
      * Task to ask the server for autocompletion hints. Then update the dropdown
-     * sugestions
+     * suggestions
      *
      * @param uri
      *            For a text document this would be a path to the file. In order
@@ -180,7 +180,7 @@ public class LanguageFilterClient implements LanguageClient, LspObservable {
     }
 
     /**
-     * Tell the server that the document at uri has been open
+     * Tell the server that the document at uri has been opened
      *
      * @param uri
      */
@@ -193,7 +193,7 @@ public class LanguageFilterClient implements LanguageClient, LspObservable {
     }
 
     /**
-     * Tell the server that the document at uri as change.
+     * Tell the server that the document at uri has changed.
      *
      * @param uri
      * @param input
@@ -211,7 +211,7 @@ public class LanguageFilterClient implements LanguageClient, LspObservable {
         Position p1 = new Position(0, min);
         Position p2 = new Position(0, max);
         Range r = new Range(p1, p2);
-        TextDocumentContentChangeEvent change = new TextDocumentContentChangeEvent(r, max + 1, input);
+        TextDocumentContentChangeEvent change = new TextDocumentContentChangeEvent(r, input);
         List<TextDocumentContentChangeEvent> changelist = new ArrayList<>();
         changelist.add(change);
         VersionedTextDocumentIdentifier filterBoxId = new VersionedTextDocumentIdentifier();
