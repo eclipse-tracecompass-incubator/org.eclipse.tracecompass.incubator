@@ -11,9 +11,10 @@
 
 package org.eclipse.tracecompass.incubator.internal.perf.core.trace;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.perf.core.PerfConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
@@ -25,7 +26,7 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
  */
 public final class PerfEventType {
 
-    private static final Map<Integer, ITmfEventType> TYPES = new HashMap<>();
+    private static final Map<Integer, ITmfEventType> TYPES = new ConcurrentHashMap<>();
 
     static {
         put(PerfConstants.PERF_RECORD_MMAP, "MMAP"); //$NON-NLS-1$
@@ -57,7 +58,7 @@ public final class PerfEventType {
         // utility class
     }
 
-    private static void put(int type, String name) {
+    private static void put(int type, @NonNull String name) {
         TYPES.put(type, new TmfEventType(name, null));
     }
 
@@ -69,11 +70,6 @@ public final class PerfEventType {
      * @return the matching {@link ITmfEventType}
      */
     public static ITmfEventType lookup(int type) {
-        ITmfEventType t = TYPES.get(type);
-        if (t == null) {
-            t = new TmfEventType("PERF_RECORD_" + type, null); //$NON-NLS-1$
-            TYPES.put(type, t);
-        }
-        return t;
+        return TYPES.computeIfAbsent(type, k -> new TmfEventType("PERF_RECORD_" + k, null)); //$NON-NLS-1$
     }
 }

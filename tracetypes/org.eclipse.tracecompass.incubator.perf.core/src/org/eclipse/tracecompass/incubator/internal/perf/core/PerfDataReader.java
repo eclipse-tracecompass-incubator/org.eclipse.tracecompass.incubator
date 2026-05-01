@@ -80,19 +80,11 @@ public final class PerfDataReader implements Closeable {
         fHeader = parseHeader();
         if (fHeader.isPiped()) {
             fAttrs = List.of();
-            Map.of();
             fDefaultAttr = null;
             fFeatures = Map.of();
             fMetadata = Map.of();
         } else {
             fAttrs = parseAttrs(fHeader);
-            Map<Long, PerfEventAttr> byId = new LinkedHashMap<>();
-            for (PerfEventAttr attr : fAttrs) {
-                for (Long id : attr.getIds()) {
-                    byId.put(id, attr);
-                }
-            }
-            Collections.unmodifiableMap(byId);
             fDefaultAttr = fAttrs.isEmpty() ? null : fAttrs.get(0);
             fFeatures = parseFeatures(fHeader);
             fMetadata = extractMetadata(fFeatures, fHeader.getOrder());
@@ -174,7 +166,7 @@ public final class PerfDataReader implements Closeable {
         }
 
         ByteBuffer hdr = readBytes(offset, PerfConstants.PERF_EVENT_HEADER_SIZE).order(fHeader.getOrder());
-        int type = hdr.getInt() & 0xffffffff;
+        int type = hdr.getInt();
         int misc = hdr.getShort() & 0xffff;
         int size = hdr.getShort() & 0xffff;
         if (size < PerfConstants.PERF_EVENT_HEADER_SIZE || size > MAX_RECORD_SIZE) {
