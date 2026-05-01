@@ -275,35 +275,13 @@ public class PerfDataTrace extends TmfTrace
         TmfEventField[] out = new TmfEventField[m.size()];
         int i = 0;
         for (Map.Entry<String, Object> e : m.entrySet()) {
-            Object value = e.getValue();
-            if (value instanceof byte[]) {
-                // Byte arrays are not displayed well; report their length.
-                value = "<" + ((byte[]) value).length + " bytes>"; //$NON-NLS-1$ //$NON-NLS-2$
-            } else if (value instanceof long[]) {
-                value = longArrayToString((long[]) value);
-            }
-            out[i++] = new TmfEventField(e.getKey(), value, null);
+            // Preserve native array types (byte[], long[]) as-is so
+            // analyses can consume them directly. The Contents aspect
+            // calls toString() on non-primitive values; the primitive
+            // array toString is ugly but acceptable for debugging.
+            out[i++] = new TmfEventField(e.getKey(), e.getValue(), null);
         }
         return out;
-    }
-
-    private static String longArrayToString(long[] arr) {
-        if (arr.length == 0) {
-            return "[]"; //$NON-NLS-1$
-        }
-        StringBuilder sb = new StringBuilder("["); //$NON-NLS-1$
-        int max = Math.min(arr.length, 32);
-        for (int i = 0; i < max; i++) {
-            if (i > 0) {
-                sb.append(", "); //$NON-NLS-1$
-            }
-            sb.append("0x").append(Long.toHexString(arr[i])); //$NON-NLS-1$
-        }
-        if (arr.length > max) {
-            sb.append(", ..."); //$NON-NLS-1$
-        }
-        sb.append(']');
-        return sb.toString();
     }
 
     // ---------------------------------------------------------------------
