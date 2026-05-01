@@ -89,9 +89,14 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
      */
     public DifferentialSeqCallGraphAnalysis() {
         super();
+
         // TODO: Make a way to register tracetype->callstack IDs.
         fCallStackAnalysisMap.put("org.eclipse.tracecompass.incubator.traceevent.core.trace", "org.eclipse.tracecompass.incubator.traceevent.analysis.callstack"); //$NON-NLS-1$ //$NON-NLS-2$
         fCallStackAnalysisMap.put("org.eclipse.linuxtools.lttng2.ust.tracetype", "org.eclipse.tracecompass.lttng2.ust.core.analysis.callstack"); //$NON-NLS-1$ //$NON-NLS-2$
+
+        // Adding VM/Native analysis
+        fCallStackAnalysisMap.put("org.eclipse.linuxtools.lttng2.kernel.tracetype",  //$NON-NLS-1$
+                "org.eclipse.tracecompass.incubator.internal.virtual.machine.analysis.core.flow.analysis.vm.native.callstack"); //$NON-NLS-1$
     }
 
     /**
