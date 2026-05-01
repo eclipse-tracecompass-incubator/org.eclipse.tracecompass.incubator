@@ -114,6 +114,16 @@ public final class PerfConstants {
     public static final int HEADER_CLOCK_DATA = 29;
     /** Hybrid-core layout. */
     public static final int HEADER_HYBRID_TOPOLOGY = 30;
+    /** PMU capabilities. */
+    public static final int HEADER_PMU_CAPS = 31;
+    /** CPU domain info. */
+    public static final int HEADER_CPU_DOMAIN_INFO = 32;
+    /** ELF e_machine value. */
+    public static final int HEADER_E_MACHINE = 33;
+    /** CLN size. */
+    public static final int HEADER_CLN_SIZE = 34;
+    /** Sentinel — last valid feature + 1. */
+    public static final int HEADER_LAST_FEATURE = 35;
 
     // ---------------------------------------------------------------------
     // Record types — kernel (perf_event_type)
@@ -151,12 +161,12 @@ public final class PerfConstants {
     public static final int PERF_RECORD_SWITCH_CPU_WIDE = 15;
     /** Namespaces. */
     public static final int PERF_RECORD_NAMESPACES = 16;
-    /** Cgroup path. */
-    public static final int PERF_RECORD_CGROUP = 17;
     /** Kernel symbol load/unload. */
-    public static final int PERF_RECORD_KSYMBOL = 18;
+    public static final int PERF_RECORD_KSYMBOL = 17;
     /** BPF prog load/unload. */
-    public static final int PERF_RECORD_BPF_EVENT = 19;
+    public static final int PERF_RECORD_BPF_EVENT = 18;
+    /** Cgroup path. */
+    public static final int PERF_RECORD_CGROUP = 19;
     /** Kernel text patch. */
     public static final int PERF_RECORD_TEXT_POKE = 20;
     /** AUX output HW id mapping. */

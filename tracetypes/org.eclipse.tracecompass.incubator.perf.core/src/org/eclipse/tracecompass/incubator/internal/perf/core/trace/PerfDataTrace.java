@@ -84,7 +84,7 @@ public class PerfDataTrace extends TmfTrace
     // Aspects
     // ---------------------------------------------------------------------
 
-    private static final Collection<ITmfEventAspect<?>> ASPECTS = ImmutableList.of(
+    private static final @NonNull Collection<ITmfEventAspect<?>> ASPECTS = ImmutableList.of(
             TmfBaseAspects.getTimestampAspect(),
             TmfBaseAspects.getEventTypeAspect(),
             new PerfFieldAspect("pid", "PID"), //$NON-NLS-1$ //$NON-NLS-2$
@@ -97,7 +97,7 @@ public class PerfDataTrace extends TmfTrace
             TmfBaseAspects.getContentsAspect());
 
     @Override
-    public Iterable<ITmfEventAspect<?>> getEventAspects() {
+    public @NonNull Iterable<ITmfEventAspect<?>> getEventAspects() {
         return ASPECTS;
     }
 
@@ -224,7 +224,7 @@ public class PerfDataTrace extends TmfTrace
     @Override
     public ITmfContext seekEvent(double ratio) {
         long span = fDataEnd - fDataStart;
-        long offset = fDataStart + (long) Math.max(0.0, Math.min(1.0, ratio)) * span;
+        long offset = fDataStart + (long) (Math.max(0.0, Math.min(1.0, ratio)) * span);
         return seekEvent(new TmfLongLocation(offset));
     }
 
@@ -275,35 +275,13 @@ public class PerfDataTrace extends TmfTrace
         TmfEventField[] out = new TmfEventField[m.size()];
         int i = 0;
         for (Map.Entry<String, Object> e : m.entrySet()) {
-            Object value = e.getValue();
-            if (value instanceof byte[]) {
-                // Byte arrays are not displayed well; report their length.
-                value = "<" + ((byte[]) value).length + " bytes>"; //$NON-NLS-1$ //$NON-NLS-2$
-            } else if (value instanceof long[]) {
-                value = longArrayToString((long[]) value);
-            }
-            out[i++] = new TmfEventField(e.getKey(), value, null);
+            // Preserve native array types (byte[], long[]) as-is so
+            // analyses can consume them directly. The Contents aspect
+            // calls toString() on non-primitive values; the primitive
+            // array toString is ugly but acceptable for debugging.
+            out[i++] = new TmfEventField(e.getKey(), e.getValue(), null);
         }
         return out;
-    }
-
-    private static String longArrayToString(long[] arr) {
-        if (arr.length == 0) {
-            return "[]"; //$NON-NLS-1$
-        }
-        StringBuilder sb = new StringBuilder("["); //$NON-NLS-1$
-        int max = Math.min(arr.length, 32);
-        for (int i = 0; i < max; i++) {
-            if (i > 0) {
-                sb.append(", "); //$NON-NLS-1$
-            }
-            sb.append("0x").append(Long.toHexString(arr[i])); //$NON-NLS-1$
-        }
-        if (arr.length > max) {
-            sb.append(", ..."); //$NON-NLS-1$
-        }
-        sb.append(']');
-        return sb.toString();
     }
 
     // ---------------------------------------------------------------------
@@ -330,7 +308,7 @@ public class PerfDataTrace extends TmfTrace
         if (reader == null) {
             return Collections.emptyMap();
         }
-        Map<String, String> props = new LinkedHashMap<>();
+        Map<@NonNull String, @NonNull String> props = new LinkedHashMap<>();
         props.put("file", reader.getFile().getAbsolutePath()); //$NON-NLS-1$
         props.put("file_size", Long.toString(fFileSize)); //$NON-NLS-1$
         props.put("byte_order", reader.getHeader().getOrder().toString()); //$NON-NLS-1$
@@ -358,10 +336,10 @@ public class PerfDataTrace extends TmfTrace
      */
     private static final class PerfFieldAspect implements ITmfEventAspect<Object> {
 
-        private final String fField;
-        private final String fName;
+        private final @NonNull String fField;
+        private final @NonNull String fName;
 
-        PerfFieldAspect(String field, String name) {
+        PerfFieldAspect(@NonNull String field, @NonNull String name) {
             fField = field;
             fName = name;
         }

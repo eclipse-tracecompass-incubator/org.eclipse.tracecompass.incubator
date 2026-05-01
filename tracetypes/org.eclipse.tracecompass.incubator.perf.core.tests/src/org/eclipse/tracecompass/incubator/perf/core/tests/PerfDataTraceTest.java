@@ -41,6 +41,9 @@ public class PerfDataTraceTest {
     /** Relative path to the sample perf.data file inside this bundle. */
     public static final String TRACE_PATH = "traces/perf.data"; //$NON-NLS-1$
 
+    /** Relative path to a perf.data captured with call graphs. */
+    public static final String CALLGRAPH_TRACE_PATH = "traces/perf-callgraph.data"; //$NON-NLS-1$
+
     private PerfDataTrace fTrace;
 
     /**
@@ -123,9 +126,10 @@ public class PerfDataTraceTest {
                 }
                 if (rec.getType() == 10 /* PERF_RECORD_MMAP2 */) {
                     mmap2++;
-                    assertNotNull("filename", rec.getField("filename")); //$NON-NLS-1$ //$NON-NLS-2$
+                    Object field = rec.getField("filename");
+                    assertNotNull("filename", field); //$NON-NLS-1$ //$NON-NLS-2$
                     assertTrue("filename non-empty", //$NON-NLS-1$
-                            !((String) rec.getField("filename")).isEmpty()); //$NON-NLS-1$
+                            !((String) field).isEmpty()); //$NON-NLS-1$
                     // prot should fit in a few bits (e.g. PROT_READ|WRITE|EXEC).
                     Object prot = rec.getField("prot"); //$NON-NLS-1$
                     assertTrue("prot must be a small integer", //$NON-NLS-1$
@@ -169,19 +173,38 @@ public class PerfDataTraceTest {
         assertTrue("expected at least one event, got " + count, count > 0); //$NON-NLS-1$
     }
 
+    /**
+     * Resolve the bundled trace file. Exposed package-visible so sibling
+     * tests can reuse the lookup.
+     *
+     * @return the sample perf.data path
+     */
+    static File resolveTraceFile() {
+        return resolveTrace();
+    }
+
+    /**
+     * Resolve the bundled perf.data that was recorded with {@code -g}.
+     *
+     * @return the path to the callgraph-enabled sample perf.data
+     */
+    static File resolveCallgraphTraceFile() {
+        return resolvePath(CALLGRAPH_TRACE_PATH);
+    }
+
     private static File resolveTrace() {
-        // When running inside the OSGi runtime, the bundle activator resolves
-        // resource URLs. Outside of it (plain mvn-surefire), walk up from the
-        // current working directory to locate the bundle folder.
-        File direct = new File(TRACE_PATH);
+        return resolvePath(TRACE_PATH);
+    }
+
+    private static File resolvePath(String rel) {
+        File direct = new File(rel);
         if (direct.isFile()) {
             return direct;
         }
-        File bundleRel = new File("org.eclipse.tracecompass.incubator.perf.core.tests", TRACE_PATH); //$NON-NLS-1$
+        File bundleRel = new File("org.eclipse.tracecompass.incubator.perf.core.tests", rel); //$NON-NLS-1$
         if (bundleRel.isFile()) {
             return bundleRel;
         }
-        File fallback = new File("../org.eclipse.tracecompass.incubator.perf.core.tests", TRACE_PATH); //$NON-NLS-1$
-        return fallback;
+        return new File("../org.eclipse.tracecompass.incubator.perf.core.tests", rel); //$NON-NLS-1$
     }
 }
