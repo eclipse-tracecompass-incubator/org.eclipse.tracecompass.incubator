@@ -38,7 +38,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   GenericXYRequestedParameters.JSON_PROPERTY_REQUESTED_ITEMS,
   GenericXYRequestedParameters.JSON_PROPERTY_FILTER_QUERY_PARAMETERS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class GenericXYRequestedParameters {
   public static final String JSON_PROPERTY_REQUESTED_TIMERANGE = "requested_timerange";
   @javax.annotation.Nonnull

@@ -34,7 +34,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   TreeColumnHeader.JSON_PROPERTY_TOOLTIP,
   TreeColumnHeader.JSON_PROPERTY_NAME
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class TreeColumnHeader {
   /**
    * Data type of column. Optional, data type STRING is applied if absent. Possible strings are defined by the DataType enum.

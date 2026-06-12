@@ -57,7 +57,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
 
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 @JsonDeserialize(using = XYAxisDescriptionAxisDomain.XYAxisDescriptionAxisDomainDeserializer.class)
 @JsonSerialize(using = XYAxisDescriptionAxisDomain.XYAxisDescriptionAxisDomainSerializer.class)
 public class XYAxisDescriptionAxisDomain extends AbstractOpenApiSchema {

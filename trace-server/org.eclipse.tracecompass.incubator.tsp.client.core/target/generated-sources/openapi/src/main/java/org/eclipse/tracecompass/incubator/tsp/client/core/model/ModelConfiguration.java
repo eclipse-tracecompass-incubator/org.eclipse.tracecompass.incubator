@@ -39,7 +39,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   ModelConfiguration.JSON_PROPERTY_PARAMETERS
 })
 @JsonTypeName("Configuration")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class ModelConfiguration {
   public static final String JSON_PROPERTY_SOURCE_TYPE_ID = "sourceTypeId";
   @javax.annotation.Nonnull

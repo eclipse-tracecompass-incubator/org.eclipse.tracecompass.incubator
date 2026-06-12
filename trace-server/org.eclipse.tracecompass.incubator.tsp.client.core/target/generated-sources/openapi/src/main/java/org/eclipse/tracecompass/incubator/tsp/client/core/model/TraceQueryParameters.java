@@ -33,7 +33,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
 @JsonPropertyOrder({
   TraceQueryParameters.JSON_PROPERTY_PARAMETERS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class TraceQueryParameters {
   public static final String JSON_PROPERTY_PARAMETERS = "parameters";
   @javax.annotation.Nonnull

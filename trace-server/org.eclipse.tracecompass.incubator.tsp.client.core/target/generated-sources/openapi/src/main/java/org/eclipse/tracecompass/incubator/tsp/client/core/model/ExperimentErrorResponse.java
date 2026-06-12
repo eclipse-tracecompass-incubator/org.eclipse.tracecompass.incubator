@@ -35,7 +35,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   ExperimentErrorResponse.JSON_PROPERTY_TITLE,
   ExperimentErrorResponse.JSON_PROPERTY_EXPERIMENT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class ExperimentErrorResponse {
   public static final String JSON_PROPERTY_DETAIL = "detail";
   @javax.annotation.Nullable

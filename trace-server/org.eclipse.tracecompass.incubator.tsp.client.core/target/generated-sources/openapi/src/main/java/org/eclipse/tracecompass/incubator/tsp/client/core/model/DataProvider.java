@@ -40,7 +40,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   DataProvider.JSON_PROPERTY_CONFIGURATION,
   DataProvider.JSON_PROPERTY_CAPABILITIES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class DataProvider {
   public static final String JSON_PROPERTY_PARENT_ID = "parentId";
   @javax.annotation.Nullable

@@ -37,7 +37,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   TooltipParameters.JSON_PROPERTY_REQUESTED_ITEMS,
   TooltipParameters.JSON_PROPERTY_REQUESTED_TIMES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class TooltipParameters {
   public static final String JSON_PROPERTY_REQUESTED_ELEMENT = "requested_element";
   @javax.annotation.Nonnull

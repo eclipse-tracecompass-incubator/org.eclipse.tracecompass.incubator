@@ -33,7 +33,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
 @JsonPropertyOrder({
   ArrowsParameters.JSON_PROPERTY_REQUESTED_TIMERANGE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class ArrowsParameters {
   public static final String JSON_PROPERTY_REQUESTED_TIMERANGE = "requested_timerange";
   @javax.annotation.Nonnull
