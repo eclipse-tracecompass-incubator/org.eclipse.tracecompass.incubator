@@ -38,7 +38,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   AnnotationsParameters.JSON_PROPERTY_REQUESTED_MARKER_SET,
   AnnotationsParameters.JSON_PROPERTY_REQUESTED_MARKER_CATEGORIES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class AnnotationsParameters {
   public static final String JSON_PROPERTY_REQUESTED_TIMERANGE = "requested_timerange";
   @javax.annotation.Nonnull

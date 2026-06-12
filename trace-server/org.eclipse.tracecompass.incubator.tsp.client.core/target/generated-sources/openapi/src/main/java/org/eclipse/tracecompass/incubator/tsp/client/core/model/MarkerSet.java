@@ -33,7 +33,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   MarkerSet.JSON_PROPERTY_NAME,
   MarkerSet.JSON_PROPERTY_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class MarkerSet {
   public static final String JSON_PROPERTY_NAME = "name";
   @javax.annotation.Nonnull

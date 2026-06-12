@@ -37,7 +37,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   VirtualTableLine.JSON_PROPERTY_CELLS,
   VirtualTableLine.JSON_PROPERTY_INDEX
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class VirtualTableLine {
   public static final String JSON_PROPERTY_TAGS = "tags";
   @javax.annotation.Nullable

@@ -33,7 +33,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   OutputCapabilities.JSON_PROPERTY_CAN_DELETE,
   OutputCapabilities.JSON_PROPERTY_CAN_CREATE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class OutputCapabilities {
   public static final String JSON_PROPERTY_CAN_DELETE = "canDelete";
   @javax.annotation.Nullable

@@ -36,7 +36,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   Bookmark.JSON_PROPERTY_START,
   Bookmark.JSON_PROPERTY_UUID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class Bookmark {
   public static final String JSON_PROPERTY_END = "end";
   @javax.annotation.Nonnull

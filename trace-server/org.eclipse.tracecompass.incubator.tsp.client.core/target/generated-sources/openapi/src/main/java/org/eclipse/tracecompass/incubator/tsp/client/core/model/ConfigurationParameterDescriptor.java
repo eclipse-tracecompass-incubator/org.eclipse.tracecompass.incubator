@@ -35,7 +35,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   ConfigurationParameterDescriptor.JSON_PROPERTY_REQUIRED,
   ConfigurationParameterDescriptor.JSON_PROPERTY_DESCRIPTION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class ConfigurationParameterDescriptor {
   public static final String JSON_PROPERTY_DATA_TYPE = "dataType";
   @javax.annotation.Nullable

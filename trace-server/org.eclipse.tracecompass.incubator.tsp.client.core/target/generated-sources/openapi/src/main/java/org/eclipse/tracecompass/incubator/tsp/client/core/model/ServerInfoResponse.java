@@ -41,7 +41,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   ServerInfoResponse.JSON_PROPERTY_TSP_VERSION,
   ServerInfoResponse.JSON_PROPERTY_VERSION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class ServerInfoResponse {
   public static final String JSON_PROPERTY_PRODUCT_ID = "productId";
   @javax.annotation.Nonnull

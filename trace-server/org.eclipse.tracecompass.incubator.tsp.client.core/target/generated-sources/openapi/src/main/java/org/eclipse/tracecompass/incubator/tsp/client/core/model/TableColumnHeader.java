@@ -35,7 +35,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   TableColumnHeader.JSON_PROPERTY_ID,
   TableColumnHeader.JSON_PROPERTY_TYPE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class TableColumnHeader {
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
   @javax.annotation.Nonnull

@@ -36,7 +36,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   Element.JSON_PROPERTY_DURATION,
   Element.JSON_PROPERTY_ELEMENT_TYPE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class Element {
   public static final String JSON_PROPERTY_ENTRY_ID = "entryId";
   @javax.annotation.Nullable

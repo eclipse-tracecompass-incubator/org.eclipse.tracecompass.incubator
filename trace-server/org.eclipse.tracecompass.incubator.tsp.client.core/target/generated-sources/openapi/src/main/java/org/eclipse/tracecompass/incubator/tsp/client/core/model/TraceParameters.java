@@ -34,7 +34,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   TraceParameters.JSON_PROPERTY_NAME,
   TraceParameters.JSON_PROPERTY_URI
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class TraceParameters {
   public static final String JSON_PROPERTY_TYPE_I_D = "typeID";
   @javax.annotation.Nullable

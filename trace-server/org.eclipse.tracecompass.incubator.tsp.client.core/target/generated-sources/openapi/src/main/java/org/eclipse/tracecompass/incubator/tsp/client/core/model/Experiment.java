@@ -42,7 +42,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   Experiment.JSON_PROPERTY_START,
   Experiment.JSON_PROPERTY_U_U_I_D
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class Experiment {
   public static final String JSON_PROPERTY_TRACES = "traces";
   @javax.annotation.Nonnull

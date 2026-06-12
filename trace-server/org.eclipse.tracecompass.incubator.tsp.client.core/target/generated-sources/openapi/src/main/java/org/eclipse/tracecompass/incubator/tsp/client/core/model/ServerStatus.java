@@ -32,7 +32,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
 @JsonPropertyOrder({
   ServerStatus.JSON_PROPERTY_STATUS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class ServerStatus {
   /**
    * The status of the server

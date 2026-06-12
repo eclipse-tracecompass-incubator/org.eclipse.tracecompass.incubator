@@ -45,7 +45,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   SeriesModel.JSON_PROPERTY_X_VALUES_DESCRIPTION,
   SeriesModel.JSON_PROPERTY_Y_VALUES_DESCRIPTION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class SeriesModel {
   public static final String JSON_PROPERTY_SERIES_ID = "seriesId";
   @javax.annotation.Nonnull

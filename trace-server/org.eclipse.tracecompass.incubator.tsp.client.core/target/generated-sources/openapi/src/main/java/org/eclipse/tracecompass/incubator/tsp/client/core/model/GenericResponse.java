@@ -33,7 +33,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   GenericResponse.JSON_PROPERTY_STATUS_MESSAGE,
   GenericResponse.JSON_PROPERTY_STATUS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class GenericResponse {
   public static final String JSON_PROPERTY_STATUS_MESSAGE = "statusMessage";
   @javax.annotation.Nonnull

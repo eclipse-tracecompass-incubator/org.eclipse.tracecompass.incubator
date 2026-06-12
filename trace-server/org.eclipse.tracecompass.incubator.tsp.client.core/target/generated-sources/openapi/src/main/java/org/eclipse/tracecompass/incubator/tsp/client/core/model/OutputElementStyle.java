@@ -36,7 +36,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   OutputElementStyle.JSON_PROPERTY_PARENT_KEY,
   OutputElementStyle.JSON_PROPERTY_VALUES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class OutputElementStyle {
   public static final String JSON_PROPERTY_PARENT_KEY = "parentKey";
   @javax.annotation.Nullable

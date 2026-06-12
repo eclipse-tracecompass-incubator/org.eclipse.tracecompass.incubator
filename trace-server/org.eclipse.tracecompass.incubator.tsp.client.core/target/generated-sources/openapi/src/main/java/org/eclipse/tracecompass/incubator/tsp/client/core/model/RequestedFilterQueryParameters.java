@@ -36,7 +36,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   RequestedFilterQueryParameters.JSON_PROPERTY_FILTER_EXPRESSIONS_MAP,
   RequestedFilterQueryParameters.JSON_PROPERTY_STRATEGY
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class RequestedFilterQueryParameters {
   public static final String JSON_PROPERTY_FILTER_EXPRESSIONS_MAP = "filter_expressions_map";
   @javax.annotation.Nonnull

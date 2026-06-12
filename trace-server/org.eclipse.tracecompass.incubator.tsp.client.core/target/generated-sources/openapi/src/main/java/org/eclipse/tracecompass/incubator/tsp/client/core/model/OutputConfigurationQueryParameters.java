@@ -37,7 +37,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   OutputConfigurationQueryParameters.JSON_PROPERTY_PARAMETERS,
   OutputConfigurationQueryParameters.JSON_PROPERTY_SOURCE_TYPE_ID
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class OutputConfigurationQueryParameters {
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
   @javax.annotation.Nullable

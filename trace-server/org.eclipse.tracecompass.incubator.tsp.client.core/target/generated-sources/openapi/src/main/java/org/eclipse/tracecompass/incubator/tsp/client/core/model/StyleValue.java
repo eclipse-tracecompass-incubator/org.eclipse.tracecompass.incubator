@@ -46,7 +46,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
 
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 @JsonDeserialize(using = StyleValue.StyleValueDeserializer.class)
 @JsonSerialize(using = StyleValue.StyleValueSerializer.class)
 public class StyleValue extends AbstractOpenApiSchema {

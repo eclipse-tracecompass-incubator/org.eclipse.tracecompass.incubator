@@ -41,7 +41,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   LinesParameters.JSON_PROPERTY_TABLE_SEARCH_EXPRESSIONS,
   LinesParameters.JSON_PROPERTY_TABLE_SEARCH_DIRECTION
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class LinesParameters {
   public static final String JSON_PROPERTY_REQUESTED_TABLE_INDEX = "requested_table_index";
   @javax.annotation.Nullable

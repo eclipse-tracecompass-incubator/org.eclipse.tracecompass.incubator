@@ -38,7 +38,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   TreeEntryModel.JSON_PROPERTY_ENTRIES,
   TreeEntryModel.JSON_PROPERTY_HEADERS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class TreeEntryModel {
   public static final String JSON_PROPERTY_AUTO_EXPAND_LEVEL = "autoExpandLevel";
   @javax.annotation.Nullable

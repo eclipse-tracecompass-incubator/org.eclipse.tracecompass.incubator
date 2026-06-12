@@ -40,7 +40,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   XYTreeEntry.JSON_PROPERTY_LABELS,
   XYTreeEntry.JSON_PROPERTY_IS_DEFAULT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class XYTreeEntry {
   public static final String JSON_PROPERTY_HAS_DATA = "hasData";
   @javax.annotation.Nullable

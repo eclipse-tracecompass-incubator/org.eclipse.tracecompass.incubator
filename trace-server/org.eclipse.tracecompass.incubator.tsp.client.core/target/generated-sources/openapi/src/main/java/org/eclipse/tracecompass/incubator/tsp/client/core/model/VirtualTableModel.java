@@ -38,7 +38,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   VirtualTableModel.JSON_PROPERTY_LINES,
   VirtualTableModel.JSON_PROPERTY_SIZE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class VirtualTableModel {
   public static final String JSON_PROPERTY_COLUMN_IDS = "columnIds";
   @javax.annotation.Nonnull

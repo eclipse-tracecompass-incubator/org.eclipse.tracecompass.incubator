@@ -36,7 +36,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
 @JsonPropertyOrder({
   AnnotationModel.JSON_PROPERTY_ANNOTATIONS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class AnnotationModel {
   public static final String JSON_PROPERTY_ANNOTATIONS = "annotations";
   @javax.annotation.Nullable

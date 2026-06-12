@@ -45,7 +45,7 @@ import org.eclipse.tracecompass.incubator.tsp.client.core.JSON;
   TimeGraphEntry.JSON_PROPERTY_METADATA,
   TimeGraphEntry.JSON_PROPERTY_START
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
+@javax.annotation.processing.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.15.0")
 public class TimeGraphEntry {
   public static final String JSON_PROPERTY_HAS_DATA = "hasData";
   @javax.annotation.Nullable
