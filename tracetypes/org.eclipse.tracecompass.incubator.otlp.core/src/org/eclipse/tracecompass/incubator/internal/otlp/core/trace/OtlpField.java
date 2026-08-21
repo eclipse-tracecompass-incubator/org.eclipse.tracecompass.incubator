@@ -172,6 +172,9 @@ public class OtlpField {
         String scopeName = optString(root, "instrumentationScopeName"); //$NON-NLS-1$
         String scopeVersion = optString(root, "instrumentationScopeVersion"); //$NON-NLS-1$
 
+        // Parse resource attributes
+        Map<@NonNull String, @NonNull String> resourceAttributes = parseAttributes(optJSONArray(root, "resourceAttributes")); //$NON-NLS-1$
+
         return new OtlpSpan.Builder()
                 .traceId(traceId)
                 .spanId(spanId)
@@ -183,6 +186,7 @@ public class OtlpField {
                 .kind(OtlpSpanKind.fromValue(kindValue))
                 .status(status)
                 .attributes(attributes)
+                .resourceAttributes(resourceAttributes)
                 .events(events)
                 .links(links)
                 .instrumentationScopeName(scopeName)
@@ -220,8 +224,8 @@ public class OtlpField {
 
         // Tags from OTLP attributes
         JsonArray attributes = optJSONArray(otlpRoot, "attributes"); //$NON-NLS-1$
+        JsonArray tags = new JsonArray();
         if (attributes != null) {
-            JsonArray tags = new JsonArray();
             for (int i = 0; i < attributes.size(); i++) {
                 JsonObject attr = attributes.get(i).getAsJsonObject();
                 String key = attr.get("key").getAsString(); //$NON-NLS-1$
@@ -232,13 +236,29 @@ public class OtlpField {
                 tag.addProperty(IOpenTracingConstants.VALUE, value);
                 tags.add(tag);
             }
-            // Add service.name as a tag
-            if (!serviceName.isEmpty()) {
-                JsonObject svcTag = new JsonObject();
-                svcTag.addProperty(IOpenTracingConstants.KEY, "service.name"); //$NON-NLS-1$
-                svcTag.addProperty(IOpenTracingConstants.VALUE, serviceName);
-                tags.add(svcTag);
+        }
+        // Add resource attributes as resource.* tags
+        JsonArray resourceAttributes = optJSONArray(otlpRoot, "resourceAttributes"); //$NON-NLS-1$
+        if (resourceAttributes != null) {
+            for (int i = 0; i < resourceAttributes.size(); i++) {
+                JsonObject attr = resourceAttributes.get(i).getAsJsonObject();
+                String key = attr.get("key").getAsString(); //$NON-NLS-1$
+                JsonObject valueObj = attr.getAsJsonObject("value"); //$NON-NLS-1$
+                String value = extractAttributeValue(valueObj);
+                JsonObject tag = new JsonObject();
+                tag.addProperty(IOpenTracingConstants.KEY, "resource." + key); //$NON-NLS-1$
+                tag.addProperty(IOpenTracingConstants.VALUE, value);
+                tags.add(tag);
             }
+        }
+        // Add service.name as a tag
+        if (!serviceName.isEmpty()) {
+            JsonObject svcTag = new JsonObject();
+            svcTag.addProperty(IOpenTracingConstants.KEY, "service.name"); //$NON-NLS-1$
+            svcTag.addProperty(IOpenTracingConstants.VALUE, serviceName);
+            tags.add(svcTag);
+        }
+        if (tags.size() > 0) {
             jaeger.add(IOpenTracingConstants.TAGS, tags);
         }
 
