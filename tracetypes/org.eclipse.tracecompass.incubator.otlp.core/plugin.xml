@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <category
+            id="org.eclipse.tracecompass.incubator.otlp.core"
+            name="OTLP Format">
+      </category>
+      <type
+            category="org.eclipse.tracecompass.incubator.otlp.core"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.otlp.core"
+            isDirectory="false"
+            name="OTLP Trace"
+            trace_type="org.eclipse.tracecompass.incubator.internal.otlp.core.trace.OtlpTrace">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.otlp.analysis.spanlife"
+            name="Spans Life">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.otlp.core.trace.OtlpTrace">
+         </tracetype>
+      </module>
+   </extension>
+</plugin>
