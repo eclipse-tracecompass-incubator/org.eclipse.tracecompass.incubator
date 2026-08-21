@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.otlp.core.trace;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -71,7 +72,12 @@ public class OtlpTrace extends JsonTrace {
         String dir = TmfTraceManager.getSupplementaryFileDir(this);
         fFile = new File(dir + new File(path).getName());
         if (!fFile.exists()) {
-            Job sortJob = new OtlpSortingJob(this, path);
+            Job sortJob;
+            if (isProtobufFile(path)) {
+                sortJob = new OtlpProtobufSortingJob(this, path);
+            } else {
+                sortJob = new OtlpSortingJob(this, path);
+            }
             sortJob.schedule();
             while (sortJob.getResult() == null) {
                 try {
@@ -102,13 +108,20 @@ public class OtlpTrace extends JsonTrace {
         if (!file.isFile()) {
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Not a file. It's a directory: " + path); //$NON-NLS-1$
         }
+        boolean isText;
         try {
-            if (!TmfTraceUtils.isText(file)) {
-                return new TraceValidationStatus(0, Activator.PLUGIN_ID);
-            }
+            isText = TmfTraceUtils.isText(file);
         } catch (IOException e) {
             Activator.getInstance().logError("Error validating file: " + path, e); //$NON-NLS-1$
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "IOException validating file: " + path, e); //$NON-NLS-1$
+        }
+        if (!isText) {
+            // Check for protobuf format: first byte should be 0x0A
+            // (field 1, wire type LENGTH_DELIMITED)
+            if (isProtobufFile(path)) {
+                return new TraceValidationStatus(MAX_CONFIDENCE - 5, Activator.PLUGIN_ID);
+            }
+            return new TraceValidationStatus(0, Activator.PLUGIN_ID);
         }
         // Check if this is an OTLP format file by looking for "resourceSpans"
         try (FileReader fileReader = new FileReader(path);
@@ -124,6 +137,20 @@ public class OtlpTrace extends JsonTrace {
             // Not valid JSON or not OTLP
         }
         return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Not an OTLP trace"); //$NON-NLS-1$
+    }
+
+    /**
+     * Check if a file looks like an OTLP protobuf file. The first byte of an
+     * ExportTraceServiceRequest should be 0x0A (field 1, wire type 2 =
+     * LENGTH_DELIMITED).
+     */
+    private static boolean isProtobufFile(String path) {
+        try (FileInputStream fis = new FileInputStream(path)) {
+            int firstByte = fis.read();
+            return firstByte == 0x0A;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     /**
