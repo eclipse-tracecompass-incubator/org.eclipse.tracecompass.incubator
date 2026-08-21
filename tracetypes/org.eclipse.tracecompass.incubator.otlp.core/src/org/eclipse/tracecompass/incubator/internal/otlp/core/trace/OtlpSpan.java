@@ -43,6 +43,7 @@ public class OtlpSpan {
     private final @Nullable String fInstrumentationScopeName;
     private final @Nullable String fInstrumentationScopeVersion;
     private final @NonNull Map<@NonNull String, @NonNull String> fAttributes;
+    private final @NonNull Map<@NonNull String, @NonNull String> fResourceAttributes;
     private final int fDroppedAttributesCount;
     private final int fDroppedEventsCount;
     private final int fDroppedLinksCount;
@@ -68,6 +69,7 @@ public class OtlpSpan {
         fInstrumentationScopeName = builder.fInstrumentationScopeName;
         fInstrumentationScopeVersion = builder.fInstrumentationScopeVersion;
         fAttributes = Collections.unmodifiableMap(builder.fAttributes);
+        fResourceAttributes = Collections.unmodifiableMap(builder.fResourceAttributes);
         fDroppedAttributesCount = builder.fDroppedAttributesCount;
         fDroppedEventsCount = builder.fDroppedEventsCount;
         fDroppedLinksCount = builder.fDroppedLinksCount;
@@ -200,6 +202,15 @@ public class OtlpSpan {
     }
 
     /**
+     * Get the resource attributes
+     *
+     * @return an unmodifiable map of resource attributes
+     */
+    public @NonNull Map<@NonNull String, @NonNull String> getResourceAttributes() {
+        return fResourceAttributes;
+    }
+
+    /**
      * Get the number of dropped attributes
      *
      * @return the dropped attributes count
@@ -244,6 +255,7 @@ public class OtlpSpan {
         private @Nullable String fInstrumentationScopeName;
         private @Nullable String fInstrumentationScopeVersion;
         private @NonNull Map<@NonNull String, @NonNull String> fAttributes = Collections.emptyMap();
+        private @NonNull Map<@NonNull String, @NonNull String> fResourceAttributes = Collections.emptyMap();
         private int fDroppedAttributesCount;
         private int fDroppedEventsCount;
         private int fDroppedLinksCount;
@@ -413,6 +425,18 @@ public class OtlpSpan {
          */
         public Builder attributes(@NonNull Map<@NonNull String, @NonNull String> attributes) {
             fAttributes = attributes;
+            return this;
+        }
+
+        /**
+         * Set the resource attributes
+         *
+         * @param resourceAttributes
+         *            the resource attributes map
+         * @return this builder
+         */
+        public Builder resourceAttributes(@NonNull Map<@NonNull String, @NonNull String> resourceAttributes) {
+            fResourceAttributes = resourceAttributes;
             return this;
         }
 

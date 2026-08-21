@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.otlp.core.Activator;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
@@ -76,6 +77,7 @@ public class OtlpSortingJob extends Job {
                 for (JsonElement rsElement : resourceSpans) {
                     JsonObject rs = rsElement.getAsJsonObject();
                     String serviceName = extractServiceName(rs);
+                    JsonArray resourceAttributes = extractResourceAttributes(rs);
                     JsonArray scopeSpans = rs.getAsJsonArray("scopeSpans"); //$NON-NLS-1$
                     if (scopeSpans == null) {
                         continue;
@@ -90,6 +92,10 @@ public class OtlpSortingJob extends Job {
                             JsonObject span = spanElement.getAsJsonObject();
                             // Inject service name into the span for later use
                             span.addProperty("serviceName", serviceName); //$NON-NLS-1$
+                            // Inject all resource attributes
+                            if (resourceAttributes != null && resourceAttributes.size() > 0) {
+                                span.add("resourceAttributes", resourceAttributes); //$NON-NLS-1$
+                            }
                             allSpans.add(span);
                         }
                     }
@@ -144,5 +150,13 @@ public class OtlpSortingJob extends Job {
             }
         }
         return ""; //$NON-NLS-1$
+    }
+
+    private static @Nullable JsonArray extractResourceAttributes(JsonObject resourceSpan) {
+        JsonObject resource = resourceSpan.getAsJsonObject("resource"); //$NON-NLS-1$
+        if (resource == null) {
+            return null;
+        }
+        return resource.getAsJsonArray("attributes"); //$NON-NLS-1$
     }
 }
