@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.otlp.core.trace;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -134,7 +135,16 @@ public class OtlpTrace extends JsonTrace {
                 }
             }
         } catch (Exception e) {
-            // Not valid JSON or not OTLP
+            // Not valid JSON or not OTLP - try JSONL format
+        }
+        // Check for JSONL format (one JSON object per line)
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            String firstLine = br.readLine();
+            if (firstLine != null && firstLine.trim().contains("\"resourceSpans\"")) { //$NON-NLS-1$
+                return new TraceValidationStatus(MAX_CONFIDENCE - 1, Activator.PLUGIN_ID);
+            }
+        } catch (Exception e) {
+            // Not valid JSONL
         }
         return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Not an OTLP trace"); //$NON-NLS-1$
     }

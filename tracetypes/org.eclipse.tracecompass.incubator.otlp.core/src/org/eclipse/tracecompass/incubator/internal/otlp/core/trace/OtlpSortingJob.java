@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.incubator.internal.otlp.core.trace;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -32,11 +33,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 
 /**
  * Sorting job for OTLP traces. Flattens the nested resourceSpans/scopeSpans
  * structure into individual span JSON objects sorted by startTimeUnixNano.
+ * Supports both single JSON file and JSONL (one ExportTraceServiceRequest per
+ * line) formats.
  *
  * @author Matthew Khouzam
  */
@@ -66,40 +70,16 @@ public class OtlpSortingJob extends Job {
         try {
             List<JsonObject> allSpans = new ArrayList<>();
 
-            try (FileReader fileReader = new FileReader(fPath);
-                 JsonReader reader = new JsonReader(fileReader)) {
-                JsonObject root = G_SON.fromJson(reader, JsonObject.class);
-                JsonArray resourceSpans = root.getAsJsonArray("resourceSpans"); //$NON-NLS-1$
-                if (resourceSpans == null) {
-                    return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "No resourceSpans found"); //$NON-NLS-1$
-                }
+            // Try single JSON parse first
+            boolean singleJsonParsed = tryParseSingleJson(allSpans);
+            if (!singleJsonParsed) {
+                // Fall back to JSONL line-by-line parsing
+                allSpans.clear();
+                tryParseJsonl(allSpans);
+            }
 
-                for (JsonElement rsElement : resourceSpans) {
-                    JsonObject rs = rsElement.getAsJsonObject();
-                    String serviceName = extractServiceName(rs);
-                    JsonArray resourceAttributes = extractResourceAttributes(rs);
-                    JsonArray scopeSpans = rs.getAsJsonArray("scopeSpans"); //$NON-NLS-1$
-                    if (scopeSpans == null) {
-                        continue;
-                    }
-                    for (JsonElement ssElement : scopeSpans) {
-                        JsonObject ss = ssElement.getAsJsonObject();
-                        JsonArray spans = ss.getAsJsonArray("spans"); //$NON-NLS-1$
-                        if (spans == null) {
-                            continue;
-                        }
-                        for (JsonElement spanElement : spans) {
-                            JsonObject span = spanElement.getAsJsonObject();
-                            // Inject service name into the span for later use
-                            span.addProperty("serviceName", serviceName); //$NON-NLS-1$
-                            // Inject all resource attributes
-                            if (resourceAttributes != null && resourceAttributes.size() > 0) {
-                                span.add("resourceAttributes", resourceAttributes); //$NON-NLS-1$
-                            }
-                            allSpans.add(span);
-                        }
-                    }
-                }
+            if (allSpans.isEmpty()) {
+                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "No spans found in OTLP trace"); //$NON-NLS-1$
             }
 
             // Sort by startTimeUnixNano
@@ -128,6 +108,90 @@ public class OtlpSortingJob extends Job {
             return Status.OK_STATUS;
         } catch (IOException e) {
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Error sorting OTLP trace", e); //$NON-NLS-1$
+        }
+    }
+
+    /**
+     * Try to parse the file as a single JSON ExportTraceServiceRequest.
+     *
+     * @return true if parsing succeeded, false otherwise
+     */
+    private boolean tryParseSingleJson(List<JsonObject> allSpans) {
+        try (FileReader fileReader = new FileReader(fPath);
+             JsonReader reader = new JsonReader(fileReader)) {
+            JsonObject root = G_SON.fromJson(reader, JsonObject.class);
+            if (root == null) {
+                return false;
+            }
+            JsonArray resourceSpans = root.getAsJsonArray("resourceSpans"); //$NON-NLS-1$
+            if (resourceSpans == null) {
+                return false;
+            }
+            extractSpansFromResourceSpans(resourceSpans, allSpans);
+            return true;
+        } catch (JsonSyntaxException | IOException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Parse the file as JSONL (one ExportTraceServiceRequest per line).
+     */
+    private void tryParseJsonl(List<JsonObject> allSpans) throws IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(fPath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+                try {
+                    JsonObject root = G_SON.fromJson(line, JsonObject.class);
+                    if (root == null) {
+                        continue;
+                    }
+                    JsonArray resourceSpans = root.getAsJsonArray("resourceSpans"); //$NON-NLS-1$
+                    if (resourceSpans == null) {
+                        continue;
+                    }
+                    extractSpansFromResourceSpans(resourceSpans, allSpans);
+                } catch (JsonSyntaxException e) {
+                    // Skip malformed lines
+                }
+            }
+        }
+    }
+
+    /**
+     * Extract individual spans from a resourceSpans array and add them to the
+     * allSpans list.
+     */
+    private static void extractSpansFromResourceSpans(JsonArray resourceSpans, List<JsonObject> allSpans) {
+        for (JsonElement rsElement : resourceSpans) {
+            JsonObject rs = rsElement.getAsJsonObject();
+            String serviceName = extractServiceName(rs);
+            JsonArray resourceAttributes = extractResourceAttributes(rs);
+            JsonArray scopeSpans = rs.getAsJsonArray("scopeSpans"); //$NON-NLS-1$
+            if (scopeSpans == null) {
+                continue;
+            }
+            for (JsonElement ssElement : scopeSpans) {
+                JsonObject ss = ssElement.getAsJsonObject();
+                JsonArray spans = ss.getAsJsonArray("spans"); //$NON-NLS-1$
+                if (spans == null) {
+                    continue;
+                }
+                for (JsonElement spanElement : spans) {
+                    JsonObject span = spanElement.getAsJsonObject();
+                    // Inject service name into the span for later use
+                    span.addProperty("serviceName", serviceName); //$NON-NLS-1$
+                    // Inject all resource attributes
+                    if (resourceAttributes != null && resourceAttributes.size() > 0) {
+                        span.add("resourceAttributes", resourceAttributes); //$NON-NLS-1$
+                    }
+                    allSpans.add(span);
+                }
+            }
         }
     }
 
