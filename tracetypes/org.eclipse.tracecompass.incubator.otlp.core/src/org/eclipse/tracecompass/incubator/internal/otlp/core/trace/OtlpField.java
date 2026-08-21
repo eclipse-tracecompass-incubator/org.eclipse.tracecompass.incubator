@@ -11,6 +11,12 @@
 
 package org.eclipse.tracecompass.incubator.internal.otlp.core.trace;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.IOpenTracingConstants;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.OpenTracingField;
@@ -99,6 +105,95 @@ public class OtlpField {
     }
 
     /**
+     * Parse an OTLP span JSON string into a native {@link OtlpSpan} model that
+     * preserves all OTLP-specific fields.
+     *
+     * @param jsonString
+     *            the OTLP span JSON
+     * @return an OtlpSpan, or null if parsing fails
+     */
+    public static @Nullable OtlpSpan parseOtlpSpan(String jsonString) {
+        JsonObject root = G_SON.fromJson(jsonString, JsonObject.class);
+        if (root == null) {
+            return null;
+        }
+
+        String name = optString(root, "name"); //$NON-NLS-1$
+        if (name == null) {
+            return null;
+        }
+        String traceId = optString(root, "traceId"); //$NON-NLS-1$
+        String spanId = optString(root, "spanId"); //$NON-NLS-1$
+        if (traceId == null || spanId == null) {
+            return null;
+        }
+
+        String startTimeStr = optString(root, "startTimeUnixNano"); //$NON-NLS-1$
+        String endTimeStr = optString(root, "endTimeUnixNano"); //$NON-NLS-1$
+        if (startTimeStr == null || endTimeStr == null) {
+            return null;
+        }
+
+        long startTimeNanos = Long.parseLong(startTimeStr);
+        long endTimeNanos = Long.parseLong(endTimeStr);
+        long durationNanos = endTimeNanos - startTimeNanos;
+
+        String parentSpanId = optString(root, "parentSpanId"); //$NON-NLS-1$
+        String serviceName = optString(root, "serviceName"); //$NON-NLS-1$
+        if (serviceName == null) {
+            serviceName = ""; //$NON-NLS-1$
+        }
+
+        // Parse kind
+        int kindValue = 0;
+        JsonElement kindEl = root.get("kind"); //$NON-NLS-1$
+        if (kindEl != null && !kindEl.isJsonNull()) {
+            kindValue = kindEl.getAsInt();
+        }
+
+        // Parse status
+        OtlpSpanStatus status = parseStatus(root);
+
+        // Parse attributes
+        Map<@NonNull String, @NonNull String> attributes = parseAttributes(optJSONArray(root, "attributes")); //$NON-NLS-1$
+
+        // Parse events
+        List<@NonNull OtlpSpanEvent> events = parseSpanEvents(optJSONArray(root, "events")); //$NON-NLS-1$
+
+        // Parse links
+        List<@NonNull OtlpSpanLink> links = parseSpanLinks(optJSONArray(root, "links")); //$NON-NLS-1$
+
+        // Parse dropped counts
+        int droppedAttributesCount = optInt(root, "droppedAttributesCount"); //$NON-NLS-1$
+        int droppedEventsCount = optInt(root, "droppedEventsCount"); //$NON-NLS-1$
+        int droppedLinksCount = optInt(root, "droppedLinksCount"); //$NON-NLS-1$
+
+        // Parse instrumentation scope (if injected)
+        String scopeName = optString(root, "instrumentationScopeName"); //$NON-NLS-1$
+        String scopeVersion = optString(root, "instrumentationScopeVersion"); //$NON-NLS-1$
+
+        return new OtlpSpan.Builder()
+                .traceId(traceId)
+                .spanId(spanId)
+                .parentSpanId(parentSpanId)
+                .operationName(name)
+                .startTimeNanos(startTimeNanos)
+                .durationNanos(durationNanos)
+                .serviceName(serviceName)
+                .kind(OtlpSpanKind.fromValue(kindValue))
+                .status(status)
+                .attributes(attributes)
+                .events(events)
+                .links(links)
+                .instrumentationScopeName(scopeName)
+                .instrumentationScopeVersion(scopeVersion)
+                .droppedAttributesCount(droppedAttributesCount)
+                .droppedEventsCount(droppedEventsCount)
+                .droppedLinksCount(droppedLinksCount)
+                .build();
+    }
+
+    /**
      * Convert OTLP span data to Jaeger-compatible JSON string that
      * OpenTracingField.parseJson can handle.
      */
@@ -153,6 +248,95 @@ public class OtlpField {
         return G_SON.toJson(jaeger);
     }
 
+    private static OtlpSpanStatus parseStatus(JsonObject root) {
+        JsonElement statusEl = root.get("status"); //$NON-NLS-1$
+        if (statusEl == null || !statusEl.isJsonObject()) {
+            return new OtlpSpanStatus(OtlpSpanStatus.STATUS_CODE_UNSET, null);
+        }
+        JsonObject statusObj = statusEl.getAsJsonObject();
+        int code = OtlpSpanStatus.STATUS_CODE_UNSET;
+        JsonElement codeEl = statusObj.get("code"); //$NON-NLS-1$
+        if (codeEl != null && !codeEl.isJsonNull()) {
+            code = codeEl.getAsInt();
+        }
+        String message = null;
+        JsonElement msgEl = statusObj.get("message"); //$NON-NLS-1$
+        if (msgEl != null && !msgEl.isJsonNull()) {
+            message = msgEl.getAsString();
+        }
+        return new OtlpSpanStatus(code, message);
+    }
+
+    private static @NonNull Map<@NonNull String, @NonNull String> parseAttributes(@Nullable JsonArray attributes) {
+        if (attributes == null || attributes.size() == 0) {
+            return new HashMap<>();
+        }
+        Map<@NonNull String, @NonNull String> result = new HashMap<>();
+        for (int i = 0; i < attributes.size(); i++) {
+            JsonObject attr = attributes.get(i).getAsJsonObject();
+            JsonElement keyEl = attr.get("key"); //$NON-NLS-1$
+            if (keyEl == null) {
+                continue;
+            }
+            String key = keyEl.getAsString();
+            JsonObject valueObj = attr.getAsJsonObject("value"); //$NON-NLS-1$
+            String value = extractAttributeValue(valueObj);
+            result.put(key, value);
+        }
+        return result;
+    }
+
+    private static @NonNull List<@NonNull OtlpSpanEvent> parseSpanEvents(@Nullable JsonArray events) {
+        if (events == null || events.size() == 0) {
+            return new ArrayList<>();
+        }
+        List<@NonNull OtlpSpanEvent> result = new ArrayList<>();
+        for (int i = 0; i < events.size(); i++) {
+            JsonObject eventObj = events.get(i).getAsJsonObject();
+            String eventName = ""; //$NON-NLS-1$
+            JsonElement nameEl = eventObj.get("name"); //$NON-NLS-1$
+            if (nameEl != null && !nameEl.isJsonNull()) {
+                eventName = nameEl.getAsString();
+            }
+            long timeUnixNano = 0;
+            JsonElement timeEl = eventObj.get("timeUnixNano"); //$NON-NLS-1$
+            if (timeEl != null && !timeEl.isJsonNull()) {
+                timeUnixNano = Long.parseLong(timeEl.getAsString());
+            }
+            Map<@NonNull String, @NonNull String> attrs = parseAttributes(optJSONArray(eventObj, "attributes")); //$NON-NLS-1$
+            result.add(new OtlpSpanEvent(eventName, timeUnixNano, attrs));
+        }
+        return result;
+    }
+
+    private static @NonNull List<@NonNull OtlpSpanLink> parseSpanLinks(@Nullable JsonArray links) {
+        if (links == null || links.size() == 0) {
+            return new ArrayList<>();
+        }
+        List<@NonNull OtlpSpanLink> result = new ArrayList<>();
+        for (int i = 0; i < links.size(); i++) {
+            JsonObject linkObj = links.get(i).getAsJsonObject();
+            String linkTraceId = ""; //$NON-NLS-1$
+            JsonElement traceIdEl = linkObj.get("traceId"); //$NON-NLS-1$
+            if (traceIdEl != null && !traceIdEl.isJsonNull()) {
+                linkTraceId = traceIdEl.getAsString();
+            }
+            String linkSpanId = ""; //$NON-NLS-1$
+            JsonElement spanIdEl = linkObj.get("spanId"); //$NON-NLS-1$
+            if (spanIdEl != null && !spanIdEl.isJsonNull()) {
+                linkSpanId = spanIdEl.getAsString();
+            }
+            String traceState = null;
+            JsonElement stateEl = linkObj.get("traceState"); //$NON-NLS-1$
+            if (stateEl != null && !stateEl.isJsonNull()) {
+                traceState = stateEl.getAsString();
+            }
+            Map<@NonNull String, @NonNull String> attrs = parseAttributes(optJSONArray(linkObj, "attributes")); //$NON-NLS-1$
+            result.add(new OtlpSpanLink(linkTraceId, linkSpanId, attrs, traceState));
+        }
+        return result;
+    }
+
     private static String extractAttributeValue(JsonObject valueObj) {
         if (valueObj == null) {
             return ""; //$NON-NLS-1$
@@ -178,6 +362,11 @@ public class OtlpField {
     private static @Nullable String optString(JsonObject root, String key) {
         JsonElement el = root.get(key);
         return el != null && !el.isJsonNull() ? el.getAsString() : null;
+    }
+
+    private static int optInt(JsonObject root, String key) {
+        JsonElement el = root.get(key);
+        return el != null && !el.isJsonNull() ? el.getAsInt() : 0;
     }
 
     private static @Nullable JsonArray optJSONArray(JsonObject root, String key) {
