@@ -265,6 +265,54 @@ public class OtlpField {
         // Process ID - use service name
         jaeger.addProperty(IOpenTracingConstants.PROCESS_ID, serviceName);
 
+        // Map OTLP span events to Jaeger logs
+        JsonArray events = optJSONArray(otlpRoot, "events"); //$NON-NLS-1$
+        if (events != null && events.size() > 0) {
+            JsonArray logs = new JsonArray();
+            for (int i = 0; i < events.size(); i++) {
+                JsonObject eventObj = events.get(i).getAsJsonObject();
+                JsonObject log = new JsonObject();
+
+                // Convert timeUnixNano to microseconds for Jaeger
+                long timeNano = 0;
+                JsonElement timeEl = eventObj.get("timeUnixNano"); //$NON-NLS-1$
+                if (timeEl != null && !timeEl.isJsonNull()) {
+                    timeNano = Long.parseLong(timeEl.getAsString());
+                }
+                log.addProperty(IOpenTracingConstants.TIMESTAMP, timeNano / 1000);
+
+                // Build fields array: first field is always "event" -> name
+                JsonArray fields = new JsonArray();
+                JsonObject eventField = new JsonObject();
+                eventField.addProperty(IOpenTracingConstants.KEY, "event"); //$NON-NLS-1$
+                String eventName = ""; //$NON-NLS-1$
+                JsonElement nameEl = eventObj.get("name"); //$NON-NLS-1$
+                if (nameEl != null && !nameEl.isJsonNull()) {
+                    eventName = nameEl.getAsString();
+                }
+                eventField.addProperty(IOpenTracingConstants.VALUE, eventName);
+                fields.add(eventField);
+
+                // Add event attributes as additional fields
+                JsonArray eventAttrs = optJSONArray(eventObj, "attributes"); //$NON-NLS-1$
+                if (eventAttrs != null) {
+                    for (int j = 0; j < eventAttrs.size(); j++) {
+                        JsonObject attr = eventAttrs.get(j).getAsJsonObject();
+                        String key = attr.get("key").getAsString(); //$NON-NLS-1$
+                        JsonObject valueObj = attr.getAsJsonObject("value"); //$NON-NLS-1$
+                        String value = extractAttributeValue(valueObj);
+                        JsonObject field = new JsonObject();
+                        field.addProperty(IOpenTracingConstants.KEY, key);
+                        field.addProperty(IOpenTracingConstants.VALUE, value);
+                        fields.add(field);
+                    }
+                }
+                log.add(IOpenTracingConstants.FIELDS, fields);
+                logs.add(log);
+            }
+            jaeger.add(IOpenTracingConstants.LOGS, logs);
+        }
+
         return G_SON.toJson(jaeger);
     }
 
