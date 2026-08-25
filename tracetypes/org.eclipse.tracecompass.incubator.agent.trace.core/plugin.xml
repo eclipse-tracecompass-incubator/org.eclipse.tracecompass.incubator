@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <category id="org.eclipse.tracecompass.incubator.agent.trace.core" name="Agent Trace Format"/>
+      <type
+            category="org.eclipse.tracecompass.incubator.agent.trace.core"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.agent.trace.core.trace"
+            isDirectory="false"
+            name="Agent Trace (JSONL)"
+            trace_type="org.eclipse.tracecompass.incubator.internal.agent.trace.core.trace.AgentTraceTrace">
+      </type>
+   </extension>
+</plugin>
