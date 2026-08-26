@@ -13,9 +13,11 @@ package org.eclipse.tracecompass.incubator.internal.otlp.core.trace;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -48,6 +50,14 @@ public class OtlpSortingJob extends Job {
 
     private static final Gson G_SON = new Gson();
 
+    /**
+     * Maximum file size (in bytes) for which the whole file is parsed in one
+     * pass as a single JSON {@code ExportTraceServiceRequest}. Larger files are
+     * only read line-by-line as JSONL to avoid loading a very large document
+     * fully into memory.
+     */
+    private static final long MAX_SINGLE_JSON_SIZE = 256L * 1024 * 1024;
+
     private final ITmfTrace fTrace;
     private final String fPath;
 
@@ -70,8 +80,14 @@ public class OtlpSortingJob extends Job {
         try {
             List<JsonObject> allSpans = new ArrayList<>();
 
-            // Try single JSON parse first
-            boolean singleJsonParsed = tryParseSingleJson(allSpans);
+            // For very large files, skip the whole-file single-JSON parse to
+            // avoid loading the entire document into memory, and rely on the
+            // streaming JSONL parser instead.
+            boolean singleJsonParsed = false;
+            if (new File(fPath).length() <= MAX_SINGLE_JSON_SIZE) {
+                // Try single JSON parse first
+                singleJsonParsed = tryParseSingleJson(allSpans);
+            }
             if (!singleJsonParsed) {
                 // Fall back to JSONL line-by-line parsing
                 allSpans.clear();
@@ -85,7 +101,7 @@ public class OtlpSortingJob extends Job {
             // Sort by startTimeUnixNano
             allSpans.sort(Comparator.comparingLong(span -> {
                 JsonElement el = span.get("startTimeUnixNano"); //$NON-NLS-1$
-                return el != null ? Long.parseLong(el.getAsString()) : 0L;
+                return el != null && !el.isJsonNull() ? parseLongSafe(el.getAsString()) : 0L;
             }));
 
             // Write sorted spans as a JSON array (one object per line)
@@ -103,6 +119,9 @@ public class OtlpSortingJob extends Job {
                     }
                 }
                 writer.println(']');
+                if (writer.checkError()) {
+                    return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Error writing sorted OTLP trace"); //$NON-NLS-1$
+                }
             }
 
             return Status.OK_STATUS;
@@ -117,7 +136,7 @@ public class OtlpSortingJob extends Job {
      * @return true if parsing succeeded, false otherwise
      */
     private boolean tryParseSingleJson(List<JsonObject> allSpans) {
-        try (FileReader fileReader = new FileReader(fPath);
+        try (InputStreamReader fileReader = new InputStreamReader(new FileInputStream(fPath), StandardCharsets.UTF_8);
              JsonReader reader = new JsonReader(fileReader)) {
             JsonObject root = G_SON.fromJson(reader, JsonObject.class);
             if (root == null) {
@@ -128,6 +147,9 @@ public class OtlpSortingJob extends Job {
                 return false;
             }
             extractSpansFromResourceSpans(resourceSpans, allSpans);
+            if (reader.peek() != com.google.gson.stream.JsonToken.END_DOCUMENT) {
+                return false;
+            }
             return true;
         } catch (JsonSyntaxException | IOException e) {
             return false;
@@ -138,7 +160,7 @@ public class OtlpSortingJob extends Job {
      * Parse the file as JSONL (one ExportTraceServiceRequest per line).
      */
     private void tryParseJsonl(List<JsonObject> allSpans) throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(fPath))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fPath), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
@@ -155,7 +177,7 @@ public class OtlpSortingJob extends Job {
                         continue;
                     }
                     extractSpansFromResourceSpans(resourceSpans, allSpans);
-                } catch (JsonSyntaxException e) {
+                } catch (JsonSyntaxException | IllegalStateException e) {
                     // Skip malformed lines
                 }
             }
@@ -268,61 +290,6 @@ public class OtlpSortingJob extends Job {
         }
     }
 
-    /**
-     * Extract OTLP span events (logs) from a span and add them as
-     * individual zero-duration span entries. Each event inherits the
-     * parent span's traceId, spanId, and service context.
-     */
-    private static void extractSpanEvents(JsonObject span, String serviceName,
-            @Nullable JsonArray resourceAttributes, List<JsonObject> allSpans) {
-        JsonArray events = span.getAsJsonArray("events"); //$NON-NLS-1$
-        if (events == null || events.size() == 0) {
-            return;
-        }
-        String traceId = ""; //$NON-NLS-1$
-        JsonElement traceIdEl = span.get("traceId"); //$NON-NLS-1$
-        if (traceIdEl != null && !traceIdEl.isJsonNull()) {
-            traceId = traceIdEl.getAsString();
-        }
-        String spanId = ""; //$NON-NLS-1$
-        JsonElement spanIdEl = span.get("spanId"); //$NON-NLS-1$
-        if (spanIdEl != null && !spanIdEl.isJsonNull()) {
-            spanId = spanIdEl.getAsString();
-        }
-
-        for (int i = 0; i < events.size(); i++) {
-            JsonObject event = events.get(i).getAsJsonObject();
-            String timeStr = "0"; //$NON-NLS-1$
-            JsonElement timeEl = event.get("timeUnixNano"); //$NON-NLS-1$
-            if (timeEl != null && !timeEl.isJsonNull()) {
-                timeStr = timeEl.getAsString();
-            }
-            String eventName = ""; //$NON-NLS-1$
-            JsonElement nameEl = event.get("name"); //$NON-NLS-1$
-            if (nameEl != null && !nameEl.isJsonNull()) {
-                eventName = nameEl.getAsString();
-            }
-
-            // Build a synthetic span entry for this event
-            JsonObject synth = new JsonObject();
-            synth.addProperty("traceId", traceId); //$NON-NLS-1$
-            synth.addProperty("spanId", spanId); //$NON-NLS-1$
-            synth.addProperty("name", eventName); //$NON-NLS-1$
-            synth.addProperty("startTimeUnixNano", timeStr); //$NON-NLS-1$
-            synth.addProperty("endTimeUnixNano", timeStr); //$NON-NLS-1$
-            synth.addProperty("serviceName", serviceName); //$NON-NLS-1$
-            // Carry the event's own attributes as span attributes
-            JsonArray eventAttrs = event.getAsJsonArray("attributes"); //$NON-NLS-1$
-            if (eventAttrs != null && eventAttrs.size() > 0) {
-                synth.add("attributes", eventAttrs); //$NON-NLS-1$
-            }
-            if (resourceAttributes != null && resourceAttributes.size() > 0) {
-                synth.add("resourceAttributes", resourceAttributes); //$NON-NLS-1$
-            }
-            allSpans.add(synth);
-        }
-    }
-
     private static String extractServiceName(JsonObject resourceSpan) {
         JsonObject resource = resourceSpan.getAsJsonObject("resource"); //$NON-NLS-1$
         if (resource == null) {
@@ -334,7 +301,11 @@ public class OtlpSortingJob extends Job {
         }
         for (JsonElement attrElement : attributes) {
             JsonObject attr = attrElement.getAsJsonObject();
-            if ("service.name".equals(attr.get("key").getAsString())) { //$NON-NLS-1$ //$NON-NLS-2$
+            JsonElement keyEl = attr.get("key"); //$NON-NLS-1$
+            if (keyEl == null || keyEl.isJsonNull()) {
+                continue;
+            }
+            if ("service.name".equals(keyEl.getAsString())) { //$NON-NLS-1$
                 JsonObject value = attr.getAsJsonObject("value"); //$NON-NLS-1$
                 if (value != null && value.has("stringValue")) { //$NON-NLS-1$
                     return value.get("stringValue").getAsString(); //$NON-NLS-1$
@@ -350,5 +321,13 @@ public class OtlpSortingJob extends Job {
             return null;
         }
         return resource.getAsJsonArray("attributes"); //$NON-NLS-1$
+    }
+
+    private static long parseLongSafe(String s) {
+        try {
+            return Long.parseLong(s);
+        } catch (NumberFormatException e) {
+            return 0L;
+        }
     }
 }

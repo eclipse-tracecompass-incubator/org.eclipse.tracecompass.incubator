@@ -61,7 +61,6 @@ public class OtlpTrace extends JsonTrace {
     /**
      * Constructor
      */
-    @SuppressWarnings("null")
     public OtlpTrace() {
         fEventAspects = Lists.newArrayList(OpenTracingAspects.getAspects());
     }
@@ -84,6 +83,7 @@ public class OtlpTrace extends JsonTrace {
                 try {
                     sortJob.join();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     throw new TmfTraceException(e.getMessage(), e);
                 }
             }
@@ -152,12 +152,35 @@ public class OtlpTrace extends JsonTrace {
     /**
      * Check if a file looks like an OTLP protobuf file. The first byte of an
      * ExportTraceServiceRequest should be 0x0A (field 1, wire type 2 =
-     * LENGTH_DELIMITED).
+     * LENGTH_DELIMITED). Additionally validates that the length varint does not
+     * exceed the remaining file size.
      */
     private static boolean isProtobufFile(String path) {
-        try (FileInputStream fis = new FileInputStream(path)) {
+        File file = new File(path);
+        try (FileInputStream fis = new FileInputStream(file)) {
             int firstByte = fis.read();
-            return firstByte == 0x0A;
+            if (firstByte != 0x0A) {
+                return false;
+            }
+            // Read length varint
+            long length = 0;
+            int bytesConsumed = 1; // first byte already consumed
+            int shift = 0;
+            int b;
+            do {
+                b = fis.read();
+                if (b == -1) {
+                    return false;
+                }
+                bytesConsumed++;
+                length |= (long) (b & 0x7F) << shift;
+                shift += 7;
+                if (shift > 35) {
+                    return false; // varint too long
+                }
+            } while ((b & 0x80) != 0);
+            // Verify declared length doesn't exceed remaining file size
+            return length <= file.length() - bytesConsumed;
         } catch (IOException e) {
             return false;
         }

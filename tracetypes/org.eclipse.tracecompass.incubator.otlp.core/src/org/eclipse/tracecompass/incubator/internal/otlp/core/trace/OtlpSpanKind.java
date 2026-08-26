@@ -18,16 +18,18 @@ package org.eclipse.tracecompass.incubator.internal.otlp.core.trace;
  */
 public enum OtlpSpanKind {
 
+    /** Unspecified span kind */
+    UNSPECIFIED(0),
     /** Internal span (default) */
-    INTERNAL(0),
+    INTERNAL(1),
     /** Server span */
-    SERVER(1),
+    SERVER(2),
     /** Client span */
-    CLIENT(2),
+    CLIENT(3),
     /** Producer span */
-    PRODUCER(3),
+    PRODUCER(4),
     /** Consumer span */
-    CONSUMER(4);
+    CONSUMER(5);
 
     private final int fValue;
 
@@ -48,10 +50,13 @@ public enum OtlpSpanKind {
      * Get the span kind from its numeric value
      *
      * @param value
-     *            the numeric value (0-4)
+     *            the numeric value (0-5)
      * @return the corresponding span kind, or INTERNAL if not recognized
      */
     public static OtlpSpanKind fromValue(int value) {
+        if (value == 0) {
+            return INTERNAL;
+        }
         for (OtlpSpanKind kind : values()) {
             if (kind.fValue == value) {
                 return kind;
