@@ -17,8 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.CodedInputStream;
@@ -571,7 +573,7 @@ public class OtlpProtobufParser {
     /**
      * Parse KeyValue message: key=1 (string), value=2 (AnyValue)
      */
-    private static JsonObject parseKeyValue(CodedInputStream cis) throws IOException {
+    private static @Nullable JsonObject parseKeyValue(CodedInputStream cis) throws IOException {
         String key = null;
         JsonObject value = null;
 
@@ -747,7 +749,11 @@ public class OtlpProtobufParser {
     private static String extractServiceName(JsonArray resourceAttributes) {
         for (int i = 0; i < resourceAttributes.size(); i++) {
             JsonObject attr = resourceAttributes.get(i).getAsJsonObject();
-            if ("service.name".equals(attr.get("key").getAsString())) { //$NON-NLS-1$ //$NON-NLS-2$
+            JsonElement keyEl = attr.get("key"); //$NON-NLS-1$
+            if (keyEl == null || keyEl.isJsonNull()) {
+                continue;
+            }
+            if ("service.name".equals(keyEl.getAsString())) { //$NON-NLS-1$
                 JsonObject value = attr.getAsJsonObject("value"); //$NON-NLS-1$
                 if (value != null && value.has("stringValue")) { //$NON-NLS-1$
                     return value.get("stringValue").getAsString(); //$NON-NLS-1$

@@ -13,9 +13,11 @@ package org.eclipse.tracecompass.incubator.internal.otlp.core.trace;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -85,7 +87,7 @@ public class OtlpSortingJob extends Job {
             // Sort by startTimeUnixNano
             allSpans.sort(Comparator.comparingLong(span -> {
                 JsonElement el = span.get("startTimeUnixNano"); //$NON-NLS-1$
-                return el != null ? Long.parseLong(el.getAsString()) : 0L;
+                return el != null && !el.isJsonNull() ? parseLongSafe(el.getAsString()) : 0L;
             }));
 
             // Write sorted spans as a JSON array (one object per line)
@@ -103,6 +105,9 @@ public class OtlpSortingJob extends Job {
                     }
                 }
                 writer.println(']');
+                if (writer.checkError()) {
+                    return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Error writing sorted OTLP trace"); //$NON-NLS-1$
+                }
             }
 
             return Status.OK_STATUS;
@@ -117,7 +122,7 @@ public class OtlpSortingJob extends Job {
      * @return true if parsing succeeded, false otherwise
      */
     private boolean tryParseSingleJson(List<JsonObject> allSpans) {
-        try (FileReader fileReader = new FileReader(fPath);
+        try (InputStreamReader fileReader = new InputStreamReader(new FileInputStream(fPath), StandardCharsets.UTF_8);
              JsonReader reader = new JsonReader(fileReader)) {
             JsonObject root = G_SON.fromJson(reader, JsonObject.class);
             if (root == null) {
@@ -128,6 +133,9 @@ public class OtlpSortingJob extends Job {
                 return false;
             }
             extractSpansFromResourceSpans(resourceSpans, allSpans);
+            if (reader.peek() != com.google.gson.stream.JsonToken.END_DOCUMENT) {
+                return false;
+            }
             return true;
         } catch (JsonSyntaxException | IOException e) {
             return false;
@@ -138,7 +146,7 @@ public class OtlpSortingJob extends Job {
      * Parse the file as JSONL (one ExportTraceServiceRequest per line).
      */
     private void tryParseJsonl(List<JsonObject> allSpans) throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(fPath))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fPath), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
@@ -146,8 +154,8 @@ public class OtlpSortingJob extends Job {
                     continue;
                 }
                 try {
-                    JsonObject root = G_SON.fromJson(line, JsonObject.class);
-                    if (root == null) {
+                    var root = G_SON.fromJson(line, JsonObject.class);
+                    if (root != null) {
                         continue;
                     }
                     JsonArray resourceSpans = root.getAsJsonArray("resourceSpans"); //$NON-NLS-1$
@@ -155,7 +163,7 @@ public class OtlpSortingJob extends Job {
                         continue;
                     }
                     extractSpansFromResourceSpans(resourceSpans, allSpans);
-                } catch (JsonSyntaxException e) {
+                } catch (JsonSyntaxException | IllegalStateException e) {
                     // Skip malformed lines
                 }
             }
@@ -334,7 +342,11 @@ public class OtlpSortingJob extends Job {
         }
         for (JsonElement attrElement : attributes) {
             JsonObject attr = attrElement.getAsJsonObject();
-            if ("service.name".equals(attr.get("key").getAsString())) { //$NON-NLS-1$ //$NON-NLS-2$
+            JsonElement keyEl = attr.get("key"); //$NON-NLS-1$
+            if (keyEl == null || keyEl.isJsonNull()) {
+                continue;
+            }
+            if ("service.name".equals(keyEl.getAsString())) { //$NON-NLS-1$
                 JsonObject value = attr.getAsJsonObject("value"); //$NON-NLS-1$
                 if (value != null && value.has("stringValue")) { //$NON-NLS-1$
                     return value.get("stringValue").getAsString(); //$NON-NLS-1$
@@ -350,5 +362,13 @@ public class OtlpSortingJob extends Job {
             return null;
         }
         return resource.getAsJsonArray("attributes"); //$NON-NLS-1$
+    }
+
+    private static long parseLongSafe(String s) {
+        try {
+            return Long.parseLong(s);
+        } catch (NumberFormatException e) {
+            return 0L;
+        }
     }
 }

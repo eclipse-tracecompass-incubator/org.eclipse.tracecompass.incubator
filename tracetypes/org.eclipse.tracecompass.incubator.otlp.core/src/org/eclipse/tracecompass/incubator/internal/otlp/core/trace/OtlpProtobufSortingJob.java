@@ -76,7 +76,7 @@ public class OtlpProtobufSortingJob extends Job {
             // Sort by startTimeUnixNano
             allEntries.sort(Comparator.comparingLong(span -> {
                 JsonElement el = span.get("startTimeUnixNano"); //$NON-NLS-1$
-                return el != null ? Long.parseLong(el.getAsString()) : 0L;
+                return el != null && !el.isJsonNull() ? parseLongSafe(el.getAsString()) : 0L;
             }));
 
             // Write sorted spans as a JSON array (one object per line)
@@ -94,11 +94,22 @@ public class OtlpProtobufSortingJob extends Job {
                     }
                 }
                 writer.println(']');
+                if (writer.checkError()) {
+                    return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Error writing sorted OTLP protobuf trace"); //$NON-NLS-1$
+                }
             }
 
             return Status.OK_STATUS;
         } catch (IOException e) {
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Error parsing OTLP protobuf trace", e); //$NON-NLS-1$
+        }
+    }
+
+    private static long parseLongSafe(String s) {
+        try {
+            return Long.parseLong(s);
+        } catch (NumberFormatException e) {
+            return 0L;
         }
     }
 }
