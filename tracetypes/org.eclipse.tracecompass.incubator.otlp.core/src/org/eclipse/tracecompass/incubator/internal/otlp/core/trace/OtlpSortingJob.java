@@ -163,8 +163,11 @@ public class OtlpSortingJob extends Job {
     }
 
     /**
-     * Extract individual spans from a resourceSpans array and add them to the
-     * allSpans list.
+     * Extract individual spans and span events from a resourceSpans array.
+     * Each OTLP span becomes one entry. Each OTLP span event (log) also
+     * becomes its own entry so it appears as a separate row in the events
+     * table. Span events are represented as zero-duration spans at the
+     * event's timestamp, inheriting the parent span's context.
      */
     private static void extractSpansFromResourceSpans(JsonArray resourceSpans, List<JsonObject> allSpans) {
         for (JsonElement rsElement : resourceSpans) {
@@ -190,8 +193,133 @@ public class OtlpSortingJob extends Job {
                         span.add("resourceAttributes", resourceAttributes); //$NON-NLS-1$
                     }
                     allSpans.add(span);
+
+                    // Extract span events as individual entries
+                    extractSpanEvents(span, allSpans);
                 }
             }
+        }
+    }
+
+    /**
+     * Extract OTLP span events (logs) from a span and add them as
+     * individual zero-duration span entries. Each event inherits the
+     * parent span's traceId, spanId, and service context. The span must
+     * already have {@code serviceName} and optionally
+     * {@code resourceAttributes} injected.
+     *
+     * @param span
+     *            the span to extract events from
+     * @param allSpans
+     *            the list to add extracted events to
+     */
+    static void extractSpanEvents(JsonObject span, List<JsonObject> allSpans) {
+        JsonArray events = span.getAsJsonArray("events"); //$NON-NLS-1$
+        if (events == null || events.size() == 0) {
+            return;
+        }
+        String traceId = ""; //$NON-NLS-1$
+        JsonElement traceIdEl = span.get("traceId"); //$NON-NLS-1$
+        if (traceIdEl != null && !traceIdEl.isJsonNull()) {
+            traceId = traceIdEl.getAsString();
+        }
+        String spanId = ""; //$NON-NLS-1$
+        JsonElement spanIdEl = span.get("spanId"); //$NON-NLS-1$
+        if (spanIdEl != null && !spanIdEl.isJsonNull()) {
+            spanId = spanIdEl.getAsString();
+        }
+        String serviceName = ""; //$NON-NLS-1$
+        JsonElement svcEl = span.get("serviceName"); //$NON-NLS-1$
+        if (svcEl != null && !svcEl.isJsonNull()) {
+            serviceName = svcEl.getAsString();
+        }
+        @Nullable JsonArray resourceAttributes = span.getAsJsonArray("resourceAttributes"); //$NON-NLS-1$
+
+        for (int i = 0; i < events.size(); i++) {
+            JsonObject event = events.get(i).getAsJsonObject();
+            String timeStr = "0"; //$NON-NLS-1$
+            JsonElement timeEl = event.get("timeUnixNano"); //$NON-NLS-1$
+            if (timeEl != null && !timeEl.isJsonNull()) {
+                timeStr = timeEl.getAsString();
+            }
+            String eventName = ""; //$NON-NLS-1$
+            JsonElement nameEl = event.get("name"); //$NON-NLS-1$
+            if (nameEl != null && !nameEl.isJsonNull()) {
+                eventName = nameEl.getAsString();
+            }
+
+            // Build a synthetic span entry for this event
+            JsonObject synth = new JsonObject();
+            synth.addProperty("traceId", traceId); //$NON-NLS-1$
+            synth.addProperty("spanId", spanId); //$NON-NLS-1$
+            synth.addProperty("name", eventName); //$NON-NLS-1$
+            synth.addProperty("startTimeUnixNano", timeStr); //$NON-NLS-1$
+            synth.addProperty("endTimeUnixNano", timeStr); //$NON-NLS-1$
+            synth.addProperty("serviceName", serviceName); //$NON-NLS-1$
+            // Carry the event's own attributes as span attributes
+            JsonArray eventAttrs = event.getAsJsonArray("attributes"); //$NON-NLS-1$
+            if (eventAttrs != null && eventAttrs.size() > 0) {
+                synth.add("attributes", eventAttrs); //$NON-NLS-1$
+            }
+            if (resourceAttributes != null && resourceAttributes.size() > 0) {
+                synth.add("resourceAttributes", resourceAttributes); //$NON-NLS-1$
+            }
+            allSpans.add(synth);
+        }
+    }
+
+    /**
+     * Extract OTLP span events (logs) from a span and add them as
+     * individual zero-duration span entries. Each event inherits the
+     * parent span's traceId, spanId, and service context.
+     */
+    private static void extractSpanEvents(JsonObject span, String serviceName,
+            @Nullable JsonArray resourceAttributes, List<JsonObject> allSpans) {
+        JsonArray events = span.getAsJsonArray("events"); //$NON-NLS-1$
+        if (events == null || events.size() == 0) {
+            return;
+        }
+        String traceId = ""; //$NON-NLS-1$
+        JsonElement traceIdEl = span.get("traceId"); //$NON-NLS-1$
+        if (traceIdEl != null && !traceIdEl.isJsonNull()) {
+            traceId = traceIdEl.getAsString();
+        }
+        String spanId = ""; //$NON-NLS-1$
+        JsonElement spanIdEl = span.get("spanId"); //$NON-NLS-1$
+        if (spanIdEl != null && !spanIdEl.isJsonNull()) {
+            spanId = spanIdEl.getAsString();
+        }
+
+        for (int i = 0; i < events.size(); i++) {
+            JsonObject event = events.get(i).getAsJsonObject();
+            String timeStr = "0"; //$NON-NLS-1$
+            JsonElement timeEl = event.get("timeUnixNano"); //$NON-NLS-1$
+            if (timeEl != null && !timeEl.isJsonNull()) {
+                timeStr = timeEl.getAsString();
+            }
+            String eventName = ""; //$NON-NLS-1$
+            JsonElement nameEl = event.get("name"); //$NON-NLS-1$
+            if (nameEl != null && !nameEl.isJsonNull()) {
+                eventName = nameEl.getAsString();
+            }
+
+            // Build a synthetic span entry for this event
+            JsonObject synth = new JsonObject();
+            synth.addProperty("traceId", traceId); //$NON-NLS-1$
+            synth.addProperty("spanId", spanId); //$NON-NLS-1$
+            synth.addProperty("name", eventName); //$NON-NLS-1$
+            synth.addProperty("startTimeUnixNano", timeStr); //$NON-NLS-1$
+            synth.addProperty("endTimeUnixNano", timeStr); //$NON-NLS-1$
+            synth.addProperty("serviceName", serviceName); //$NON-NLS-1$
+            // Carry the event's own attributes as span attributes
+            JsonArray eventAttrs = event.getAsJsonArray("attributes"); //$NON-NLS-1$
+            if (eventAttrs != null && eventAttrs.size() > 0) {
+                synth.add("attributes", eventAttrs); //$NON-NLS-1$
+            }
+            if (resourceAttributes != null && resourceAttributes.size() > 0) {
+                synth.add("resourceAttributes", resourceAttributes); //$NON-NLS-1$
+            }
+            allSpans.add(synth);
         }
     }
 

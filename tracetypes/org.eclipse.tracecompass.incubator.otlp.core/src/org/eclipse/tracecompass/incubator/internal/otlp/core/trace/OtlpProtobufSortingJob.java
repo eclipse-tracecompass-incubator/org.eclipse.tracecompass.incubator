@@ -67,8 +67,14 @@ public class OtlpProtobufSortingJob extends Job {
                 return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "No spans found in protobuf file"); //$NON-NLS-1$
             }
 
+            // Extract span events as individual entries
+            List<@NonNull JsonObject> allEntries = new java.util.ArrayList<>(allSpans);
+            for (JsonObject span : allSpans) {
+                OtlpSortingJob.extractSpanEvents(span, allEntries);
+            }
+
             // Sort by startTimeUnixNano
-            allSpans.sort(Comparator.comparingLong(span -> {
+            allEntries.sort(Comparator.comparingLong(span -> {
                 JsonElement el = span.get("startTimeUnixNano"); //$NON-NLS-1$
                 return el != null ? Long.parseLong(el.getAsString()) : 0L;
             }));
@@ -79,9 +85,9 @@ public class OtlpProtobufSortingJob extends Job {
             outFile.getParentFile().mkdirs();
             try (PrintWriter writer = new PrintWriter(outFile)) {
                 writer.println('[');
-                for (int i = 0; i < allSpans.size(); i++) {
-                    writer.print(G_SON.toJson(allSpans.get(i)));
-                    if (i < allSpans.size() - 1) {
+                for (int i = 0; i < allEntries.size(); i++) {
+                    writer.print(G_SON.toJson(allEntries.get(i)));
+                    if (i < allEntries.size() - 1) {
                         writer.println(',');
                     } else {
                         writer.println();
