@@ -37,7 +37,7 @@ import com.google.common.collect.Iterables;
  */
 public class SpanLifeDataProviderFactory implements IDataProviderFactory {
 
-    private static final Predicate<? super ITmfTrace> PREDICATE = t -> TmfTraceUtils.getAnalysisModuleOfClass(t, SpanLifeAnalysis.class, SpanLifeAnalysis.ID) != null;
+    private static final Predicate<? super ITmfTrace> PREDICATE = t -> TmfTraceUtils.getAnalysisModulesOfClass(t, SpanLifeAnalysis.class).iterator().hasNext();
 
     private static final IDataProviderDescriptor DESCRIPTOR = new DataProviderDescriptor.Builder()
             .setId(SpanLifeDataProvider.ID)
@@ -48,8 +48,10 @@ public class SpanLifeDataProviderFactory implements IDataProviderFactory {
 
     @Override
     public @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> createProvider(@NonNull ITmfTrace trace) {
-        SpanLifeAnalysis module = TmfTraceUtils.getAnalysisModuleOfClass(trace, SpanLifeAnalysis.class, SpanLifeAnalysis.ID);
-        if (module != null) {
+        // Look up any SpanLifeAnalysis module regardless of its registered ID,
+        // so the data provider works for both OpenTracing and OTLP traces
+        // (which register the same analysis class under different IDs).
+        for (SpanLifeAnalysis module : TmfTraceUtils.getAnalysisModulesOfClass(trace, SpanLifeAnalysis.class)) {
             module.schedule();
             return new SpanLifeDataProvider(trace, module);
         }

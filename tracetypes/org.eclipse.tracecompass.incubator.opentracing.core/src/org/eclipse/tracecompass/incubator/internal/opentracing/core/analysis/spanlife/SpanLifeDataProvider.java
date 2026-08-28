@@ -89,11 +89,6 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
     private static final String OTHER = "other"; //$NON-NLS-1$
 
     /**
-     * Suffix for dataprovider ID
-     */
-    public static final String SUFFIX = ".dataprovider"; //$NON-NLS-1$
-
-    /**
      * Constructor
      *
      * @param trace
@@ -169,7 +164,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
 
     @Override
     public @NonNull String getId() {
-        return getAnalysisModule().getId() + SUFFIX;
+        return ID;
     }
 
     @Override
