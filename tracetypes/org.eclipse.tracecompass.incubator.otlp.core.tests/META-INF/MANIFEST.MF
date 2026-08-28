@@ -14,6 +14,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.junit,
  org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.jsontrace.core,
+ org.eclipse.tracecompass.statesystem.core,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.otlp.core.tests
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.otlp.core.tests
