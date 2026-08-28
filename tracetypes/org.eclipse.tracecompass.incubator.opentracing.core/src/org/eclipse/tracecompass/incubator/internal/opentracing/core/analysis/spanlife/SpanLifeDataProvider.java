@@ -169,7 +169,7 @@ public class SpanLifeDataProvider extends AbstractTimeGraphDataProvider<@NonNull
 
     @Override
     public @NonNull String getId() {
-        return getAnalysisModule().getId() + SUFFIX;
+        return ID;
     }
 
     @Override
