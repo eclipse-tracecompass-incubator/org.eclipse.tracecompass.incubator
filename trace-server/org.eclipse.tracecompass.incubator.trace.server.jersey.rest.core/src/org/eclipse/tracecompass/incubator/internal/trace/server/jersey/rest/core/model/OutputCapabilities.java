@@ -33,4 +33,11 @@ public interface OutputCapabilities {
     @Schema(description = "Optional, whether this output (data provider) can be deleted. 'false' if absent.")
     @JsonProperty("canDelete")
     boolean canDelete();
+
+    /**
+     * @return whether this output (data provider) uses the selection range. 'false' if absent.
+     */
+    @Schema(description = "Optional, whether this output (data provider) uses the selection range. 'false' if absent.")
+    @JsonProperty("selectionRange")
+    boolean selectionRange();
 }

@@ -23,7 +23,7 @@ public interface DataProvider {
      * The provider types.
      */
     enum ProviderType {
-        TABLE, TREE_TIME_XY, TIME_GRAPH, DATA_TREE, NONE, GANTT_CHART, TREE_GENERIC_XY
+        TABLE, TREE_TIME_XY, TIME_GRAPH, DATA_TREE, GANTT_CHART, TREE_GENERIC_XY, DATA, NONE
     }
 
     /**
@@ -47,6 +47,7 @@ public interface DataProvider {
             "Providers of type DATA_TREE only provide a tree with columns and don't have any XY nor time graph data associated with it. " +
             "Providers of type GANTT_CHART use the same endpoint as TIME_GRAPH, but have a different x-axis (duration, page faults, etc.), with their own separate ranges. " +
             "Providers of type TREE_GENERIC_XY supports XY view with non-time x-axis. " +
+            "Providers of type DATA provide an object with unspecified content. " +
             "Providers of type NONE have no data to visualize. Can be used for grouping purposes and/or as data provider configurator.",
             requiredMode = RequiredMode.REQUIRED)
     ProviderType getType();

@@ -60,8 +60,15 @@ public class DataProviderDescriptorSerializer extends StdSerializer<IDataProvide
         IDataProviderCapabilities cap = value.getCapabilities();
         if (cap != DataProviderCapabilities.NULL_INSTANCE) {
             gen.writeObjectFieldStart("capabilities"); //$NON-NLS-1$
-            gen.writeBooleanField("canCreate", cap.canCreate()); //$NON-NLS-1$
-            gen.writeBooleanField("canDelete", cap.canDelete()); //$NON-NLS-1$
+            if (cap.canCreate()) {
+                gen.writeBooleanField("canCreate", cap.canCreate()); //$NON-NLS-1$
+            }
+            if (cap.canDelete()) {
+                gen.writeBooleanField("canDelete", cap.canDelete()); //$NON-NLS-1$
+            }
+            if (cap.selectionRange()) {
+                gen.writeBooleanField("selectionRange", cap.selectionRange()); //$NON-NLS-1$
+            }
             gen.writeEndObject();
         }
         gen.writeEndObject();

@@ -56,6 +56,7 @@ import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.re
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_DERIVED_PROVIDER;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_PROVIDER;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.NO_SUCH_TRACE;
+import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.OBJ;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.OCG;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.ONE_OF;
 import static org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.services.EndpointConstants.OUTPUT_ID;
@@ -85,6 +86,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -116,6 +118,8 @@ import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.GenericXYQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.LinesQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.MarkerSetsResponse;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ObjectQueryParameters;
+import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.ObjectResponse;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.OptionalQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.RequestedQueryParameters;
 import org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.StylesResponse;
@@ -161,6 +165,8 @@ import org.eclipse.tracecompass.tmf.core.model.annotations.AnnotationCategoriesM
 import org.eclipse.tracecompass.tmf.core.model.annotations.AnnotationModel;
 import org.eclipse.tracecompass.tmf.core.model.annotations.IOutputAnnotationProvider;
 import org.eclipse.tracecompass.tmf.core.model.annotations.TraceAnnotationProvider;
+import org.eclipse.tracecompass.tmf.core.model.object.IObjectDataProvider;
+import org.eclipse.tracecompass.tmf.core.model.object.ObjectModel;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphArrow;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.ITimeGraphEntryModel;
@@ -286,6 +292,61 @@ public class DataProviderService {
             return Response.ok(provider).build();
         }
         return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_PROVIDER);
+    }
+
+    /**
+     * Query the provider for a result object.
+     *
+     * @param expUUID
+     *            desired experiment UUID
+     * @param outputId
+     *            Output ID for the data provider to query
+     * @param queryParameters
+     *            Parameters to fetch a data tree as described by
+     *            {@link QueryParameters}
+     * @return a {@link Response} with the result, if successful a
+     *         {@link TmfModelResponse} with a {@link ObjectModel}
+     */
+    @POST
+    @Path("/data/{outputId}/obj")
+    @Tag(name = OBJ)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "API to get a result object", description = "Unique entry point to get a result object", responses = {
+            @ApiResponse(responseCode = "200", description = "Returns a result object.", content = @Content(schema = @Schema(implementation = ObjectResponse.class))),
+            @ApiResponse(responseCode = "400", description = INVALID_PARAMETERS, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = PROVIDER_NOT_FOUND, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "405", description = NO_PROVIDER, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response getObject(
+            @Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID,
+            @Parameter(description = OUTPUT_ID) @PathParam("outputId") String outputId,
+            @RequestBody(description = "Query parameters to fetch a result object", content = {
+                    @Content(examples = @ExampleObject("{\"parameters\":{}}"), schema = @Schema(implementation = ObjectQueryParameters.class))
+            }, required = true) QueryParameters queryParameters) {
+        Response errorResponse = validateParameters(outputId, queryParameters);
+        if (errorResponse != null) {
+            return errorResponse;
+        }
+        Map<String, Object> params = queryParameters.getParameters();
+        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getObject") //$NON-NLS-1$
+                .setCategory(outputId).build()) {
+            TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
+            if (experiment == null) {
+                return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
+            }
+
+            IObjectDataProvider provider = manager.fetchOrCreateDataProvider(experiment,
+                    outputId, IObjectDataProvider.class);
+
+            if (provider == null) {
+                // The analysis cannot be run on this trace
+                return ErrorResponseUtil.newErrorResponse(Status.METHOD_NOT_ALLOWED, NO_PROVIDER);
+            }
+
+            TmfModelResponse<ObjectModel> modelResponse = provider.fetchData(params, null);
+            return Response.ok(modelResponse).build();
+        }
     }
 
     /**
@@ -1473,7 +1534,7 @@ public class DataProviderService {
         if (outputId == null) {
             return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_OUTPUTID);
         }
-        if (queryParameters == null) {
+        if (queryParameters == null || Objects.equals(queryParameters.getParameters(), null)) {
             return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_PARAMETERS);
         }
         return null;
