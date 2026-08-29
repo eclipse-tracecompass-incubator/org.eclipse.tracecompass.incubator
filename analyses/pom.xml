@@ -62,6 +62,9 @@
     <module>org.eclipse.tracecompass.incubator.gpu</module>
     <module>org.eclipse.tracecompass.incubator.gpu.core</module>
     <module>org.eclipse.tracecompass.incubator.gpu.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.perfetto</module>
+    <module>org.eclipse.tracecompass.incubator.perfetto.core</module>
+    <module>org.eclipse.tracecompass.incubator.perfetto.core.tests</module>
     <!-- insert modules here -->
   </modules>
 
