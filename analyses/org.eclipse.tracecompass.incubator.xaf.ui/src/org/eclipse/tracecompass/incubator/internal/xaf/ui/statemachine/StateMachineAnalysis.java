@@ -91,11 +91,10 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
     public static final String ANALYSIS_ID = "org.eclipse.tracecompass.xaf.core.statemachine"; //$NON-NLS-1$
 
     private static Image XAF = Activator.getImage("icons/xaf@4x.png"); //$NON-NLS-1$
-    private static final @NonNull Collection<ISegmentAspect> BASE_ASPECTS =
-            ImmutableList.of(
-                    StateMachineSegment.TidAspect.INSTANCE,
-                    StateMachineSegment.StatusAspect.INSTANCE,
-                    StateMachineSegment.InvalidConstraintsAspect.INSTANCE);
+    private static final @NonNull Collection<ISegmentAspect> BASE_ASPECTS = ImmutableList.of(
+            StateMachineSegment.TidAspect.INSTANCE,
+            StateMachineSegment.StatusAspect.INSTANCE,
+            StateMachineSegment.InvalidConstraintsAspect.INSTANCE);
 
     @Override
     public Iterable<ISegmentAspect> getSegmentAspects() {
@@ -125,8 +124,8 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                 otherTraces.add(t);
             }
         }
-        TmfExperiment expKernel = new TmfExperiment(CtfTmfEvent.class, trace.getName()+" (Kernel only)", kernelTraces.toArray(new CtfTmfTrace[kernelTraces.size()]), TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, null);
-        TmfExperiment expOther = new TmfExperiment(CtfTmfEvent.class, trace.getName()+" (No kernel)", otherTraces.toArray(new CtfTmfTrace[otherTraces.size()]), TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, null);
+        TmfExperiment expKernel = new TmfExperiment(CtfTmfEvent.class, trace.getName() + " (Kernel only)", kernelTraces.toArray(new CtfTmfTrace[kernelTraces.size()]), TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, null);
+        TmfExperiment expOther = new TmfExperiment(CtfTmfEvent.class, trace.getName() + " (No kernel)", otherTraces.toArray(new CtfTmfTrace[otherTraces.size()]), TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, null);
 
         // Get the environment variables
         Map<String, String> env = System.getenv();
@@ -158,7 +157,6 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
             // No available properties, or the user cancelled
             return false;
         }
-
 
         for (ITmfTrace kernelTrace : expKernel.getTraces()) {
             KernelAnalysisModule kernelAnalysisModule = TmfTraceUtils.getAnalysisModuleOfClass(kernelTrace, KernelAnalysisModule.class, KernelAnalysisModule.ID);
@@ -210,8 +208,8 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
 
         benchmarkObject.stop();
 
-
-        // Either load the initial transitions from the file or generate them from the trace
+        // Either load the initial transitions from the file or generate them
+        // from the trace
         List<StateMachineTransition> initialTransitions = null;
         BuilderInstanceGroup builderInstanceGroup = null;
         boolean modelProvided = Boolean.parseBoolean(xafproperties.getProperty(XaFParameterProvider.PROPERTY_MODEL_PROVIDED, Boolean.TRUE.toString()));
@@ -222,7 +220,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
 
             Set<String> variablesTypes = new HashSet<>(Arrays.asList(
                     xafproperties.getProperty(XaFParameterProvider.PROPERTY_SELECTED_VARIABLES)
-                                 .split(XaFParameterProvider.PROPERTY_SEPARATOR)));
+                            .split(XaFParameterProvider.PROPERTY_SEPARATOR)));
 
             Set<TimestampInterval> timestampIntervals = null;
             String timestampIntervalsStr = xafproperties.getProperty(XaFParameterProvider.PROPERTY_SELECTED_TIMERANGES);
@@ -244,30 +242,18 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
             try {
                 initialTransitions = StateMachineUtils.getModelFromXML(model);
                 if (initialTransitions == null) {
-                    throw new RuntimeException("No initial transition found");
+                    throw new IllegalStateException("No initial transition found");
                 }
             } catch (SAXException | IOException | ParserConfigurationException e) {
                 Activator.logError(e.getMessage(), e);
-                System.exit(1);
             }
         }
-
-
 
         benchmarkObject = new StateMachineBenchmark("Instances construction and constraint verification");
 
         StateMachineInstanceGroup smig = new StateMachineInstanceGroup(initialTransitions, stateMachineBackendAnalysisList, criticalPathModulesList, allInstancesAsValid);
 
         smig.buildOn(expOther);
-        /*ITmfContext ctx = expOther.seekEvent(0);
-        ITmfEvent event = null;
-
-        event = expOther.getNext(ctx);
-        while (event != null) {
-            smig.receivedEvent(event);
-            event = expOther.getNext(ctx);
-        }*/
-
         benchmarkObject.stop();
 
         if (builderInstanceGroup != null) {
@@ -275,12 +261,11 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
             builderInstanceGroup.cleanUnusedVariablesAndConstraints(initialTransitions);
             benchmarkObject.stop();
 
-            try (PrintWriter writer = new PrintWriter("/tmp/sm.dot", "UTF-8")) { // FIXME: DEBUG PRINT SM
-                Display.getDefault().asyncExec(()->
-                Notifier.notify(XAF, "Saving the completed state machine...", ""));
+            try (PrintWriter writer = new PrintWriter("/tmp/sm.dot", "UTF-8")) {
+                // FIXME: DEBUG PRINT SM
+                Display.getDefault().asyncExec(() -> Notifier.notify(XAF, "Saving the completed state machine...", ""));
                 writer.write(StateMachineUtils.StateMachineToDot.drawStateMachine(initialTransitions));
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
-                // TODO Auto-generated catch block
                 Activator.logError(e.getMessage(), e);
             }
 
@@ -296,7 +281,8 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                 if (!checkModel) {
                     smig.cleanUpAdaptive();
                 } else {
-                    // Open the editor so the user can change stuff in the generated state machine
+                    // Open the editor so the user can change stuff in the
+                    // generated state machine
                     Display.getDefault().syncExec(new Runnable() {
                         @Override
                         public void run() {
@@ -326,59 +312,65 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                                     editorPart.addPropertyListener(new IPropertyListener() {
                                         @Override
                                         public void propertyChanged(@Nullable Object source, int propId) {
-                                            if (ISaveablePart.PROP_DIRTY == propId) {
-                                                if (!editorPart.isDirty()) {
-                                                    try {
-                                                        List<StateMachineTransition> trans = StateMachineUtils.getModelFromXML(model);
-                                                        if (trans == null) {
-                                                            MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR);
-                                                            messageBox.setMessage("No initial transition found");
-                                                            messageBox.open();
-                                                        }
-                                                    } catch (SAXException | IOException | ParserConfigurationException e) {
+                                            if (ISaveablePart.PROP_DIRTY == propId && (!editorPart.isDirty())) {
+                                                try {
+                                                    List<StateMachineTransition> trans = StateMachineUtils.getModelFromXML(model);
+                                                    if (trans == null) {
                                                         MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR);
-                                                        messageBox.setMessage(e.getMessage());
+                                                        messageBox.setMessage("No initial transition found");
                                                         messageBox.open();
                                                     }
-                                                    contentEdited = true;
+                                                } catch (SAXException | IOException | ParserConfigurationException e) {
+                                                    MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR);
+                                                    messageBox.setMessage(e.getMessage());
+                                                    messageBox.open();
                                                 }
+                                                contentEdited = true;
+
                                             }
                                         }
                                     });
                                     page.addPartListener(new IPartListener2() {
                                         @Override
                                         public void partVisible(@Nullable IWorkbenchPartReference partRef) {
+                                          // Do nothing
                                         }
 
                                         @Override
                                         public void partOpened(@Nullable IWorkbenchPartReference partRef) {
+                                            // Do nothing
                                         }
 
                                         @Override
                                         public void partInputChanged(@Nullable IWorkbenchPartReference partRef) {
+                                            // Do nothing
                                         }
 
                                         @Override
                                         public void partHidden(@Nullable IWorkbenchPartReference partRef) {
+                                            // Do nothing
                                         }
 
                                         @Override
                                         public void partDeactivated(@Nullable IWorkbenchPartReference partRef) {
+                                            // Do nothing
                                         }
 
                                         @Override
                                         public void partClosed(@Nullable IWorkbenchPartReference partRef) {
                                             if (partRef instanceof IEditorReference) {
-                                                IEditorPart ieditorPart = ((IEditorReference)partRef).getEditor(true);
+                                                IEditorPart ieditorPart = ((IEditorReference) partRef).getEditor(true);
                                                 if (ieditorPart != null && ieditorPart.equals(editorPart)) {
-                                                    // Signal that we finished editing the XML file
-                                                    synchronized(finishedEditingLock) {
+                                                    // Signal that we finished
+                                                    // editing the XML file
+                                                    synchronized (finishedEditingLock) {
                                                         finishedEditing = true;
                                                         finishedEditingLock.notifyAll();
                                                     }
                                                 }
 
-                                                // Delete the temporary project we created to edit this file
+                                                // Delete the temporary project
+                                                // we created to edit this file
                                                 try {
                                                     modelProject.delete(true, true, null);
                                                 } catch (CoreException e) {
@@ -389,14 +381,15 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
 
                                         @Override
                                         public void partBroughtToTop(@Nullable IWorkbenchPartReference partRef) {
+                                            // Do nothing
                                         }
 
                                         @Override
                                         public void partActivated(@Nullable IWorkbenchPartReference partRef) {
+                                            // Do nothing
                                         }
                                     });
                                 } catch (CoreException e) {
-                                    // TODO Auto-generated catch block
                                     Activator.logError(e.getMessage(), e);
                                 }
                             }
@@ -404,12 +397,13 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                     });
 
                     // Wait that the user finishes editing the model
-                    synchronized(finishedEditingLock) {
-                        while(!finishedEditing) {
+                    synchronized (finishedEditingLock) {
+                        while (!finishedEditing) {
                             try {
                                 finishedEditingLock.wait();
                             } catch (InterruptedException e) {
                                 Activator.logError(e.getMessage(), e);
+                                Thread.currentThread().interrupt();
                                 return false;
                             }
                         }
@@ -426,7 +420,8 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
                                 return false;
                             }
 
-                            // We need to rebuild the state machine instance group as everything could have changed...
+                            // We need to rebuild the state machine instance
+                            // group as everything could have changed...
                             smig = new StateMachineInstanceGroup(initialTransitions, stateMachineBackendAnalysisList, criticalPathModulesList, allInstancesAsValid);
                             smig.buildOn(expOther);
                         } catch (SAXException | IOException | ParserConfigurationException e) {
@@ -495,7 +490,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
         Set<ITmfTrace> traces = new HashSet<>();
 
         if (trace instanceof TmfExperiment) {
-            TmfExperiment exp = (TmfExperiment)trace;
+            TmfExperiment exp = (TmfExperiment) trace;
             traces.addAll(exp.getTraces());
         } else {
             traces.add(trace);
@@ -521,8 +516,7 @@ public class StateMachineAnalysis extends AbstractSegmentStoreAnalysisModule {
 
     @Override
     protected void canceling() {
-        // TODO Auto-generated method stub
-
+        // Do nothing for now
     }
 
 }

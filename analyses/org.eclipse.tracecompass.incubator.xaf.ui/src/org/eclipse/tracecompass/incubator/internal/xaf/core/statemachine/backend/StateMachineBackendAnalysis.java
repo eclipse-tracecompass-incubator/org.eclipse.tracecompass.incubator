@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.xaf.core.statemachine.backend;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,12 +40,12 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
- * TODO: StateMachineBackendAnalysis improvements list
- *  - wake_up latency (sched_waking -> sched_switch or sched_wakeup -> sched_switch for kernels < 4.3 but less precision)
- *  - preemptions (DONE)
- *  - IRQ/NMI preemption (irq_handler_entry / irq_handler_exit)
- *  - syscalls latency (syscall_entry / syscall_exit)
- *  - Add a "State" entry for the SS, that allows following what is the state of a process at a given time
+ * TODO: StateMachineBackendAnalysis improvements list - wake_up latency
+ * (sched_waking -> sched_switch or sched_wakeup -> sched_switch for kernels <
+ * 4.3 but less precision) - preemptions (DONE) - IRQ/NMI preemption
+ * (irq_handler_entry / irq_handler_exit) - syscalls latency (syscall_entry /
+ * syscall_exit) - Add a "State" entry for the SS, that allows following what is
+ * the state of a process at a given time
  *
  * @author Raphaël Beamonte
  */
@@ -80,12 +81,14 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value of a timer for a thread at a
-     * given timestamp
+     * Allows to get the value of a timer for a thread at a given timestamp
      *
-     * @param tid The thread ID
-     * @param ts The timestamp
-     * @param timer The name of the timer (from {@link Attributes}
+     * @param tid
+     *            The thread ID
+     * @param ts
+     *            The timestamp
+     * @param timer
+     *            The name of the timer (from {@link Attributes}
      * @return The value of the timer
      */
     public Long getTimer(long tid, long ts, String timer) {
@@ -104,7 +107,7 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
 
             intvl = ss.querySingleState(timestamp, quark);
             value = intvl.getStateValue().unboxLong();
-        } catch (AttributeNotFoundException|TimeRangeException e) {
+        } catch (AttributeNotFoundException | TimeRangeException e) {
             // If we end up here, it's that we don't have any run, we
             // can thus return 0 !
             return 0L;
@@ -115,8 +118,8 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
 
         ITmfStateInterval intvlend;
         try {
-            intvlend = ss.querySingleState(intvl.getEndTime()+1, quark);
-        } catch (IndexOutOfBoundsException|TimeRangeException e) {
+            intvlend = ss.querySingleState(intvl.getEndTime() + 1, quark);
+        } catch (IndexOutOfBoundsException | TimeRangeException e) {
             // If we end up here, it's that we don't have any next run
             // we thus can return value
             return value;
@@ -125,23 +128,27 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
             return null;
         }
         Long value2 = intvlend.getStateValue().unboxLong();
-        long nextRunStart = intvlend.getStartTime()-(value2-value);
+        long nextRunStart = intvlend.getStartTime() - (value2 - value);
 
         if (nextRunStart > timestamp) {
             return value;
         }
 
-        return value + (ts-nextRunStart);
+        return value + (ts - nextRunStart);
     }
 
     /**
-     * Allows to get the value evolution of a timer for a thread
-     * during a given interval
+     * Allows to get the value evolution of a timer for a thread during a given
+     * interval
      *
-     * @param tid The thread ID
-     * @param start The timestamp of the start of the interval
-     * @param end The timestamp of the end of the interval
-     * @param timer The name of the timer (from {@link Attributes}
+     * @param tid
+     *            The thread ID
+     * @param start
+     *            The timestamp of the start of the interval
+     * @param end
+     *            The timestamp of the end of the interval
+     * @param timer
+     *            The name of the timer (from {@link Attributes}
      * @return The value difference of the timer for the interval
      */
     public Long getTimerIntvl(long tid, long start, long end, String timer) {
@@ -152,11 +159,13 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value of a WAIT_BLOCKED timer for a
-     * thread at a given timestamp
+     * Allows to get the value of a WAIT_BLOCKED timer for a thread at a given
+     * timestamp
      *
-     * @param tid The thread ID
-     * @param ts The timestamp
+     * @param tid
+     *            The thread ID
+     * @param ts
+     *            The timestamp
      * @return The value of the timer
      */
     public Long getWaitBlocked(long tid, long ts) {
@@ -164,12 +173,15 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value evolution of a WAIT_BLOCKED timer
-     * for a thread during a given interval
+     * Allows to get the value evolution of a WAIT_BLOCKED timer for a thread
+     * during a given interval
      *
-     * @param tid The thread ID
-     * @param start The timestamp of the start of the interval
-     * @param end The timestamp of the end of the interval
+     * @param tid
+     *            The thread ID
+     * @param start
+     *            The timestamp of the start of the interval
+     * @param end
+     *            The timestamp of the end of the interval
      * @return The value difference of the timer for the interval
      */
     public Long getWaitBlockedIntvl(long tid, long start, long end) {
@@ -177,11 +189,13 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value of a WAIT_FOR_CPU timer for a
-     * thread at a given timestamp
+     * Allows to get the value of a WAIT_FOR_CPU timer for a thread at a given
+     * timestamp
      *
-     * @param tid The thread ID
-     * @param ts The timestamp
+     * @param tid
+     *            The thread ID
+     * @param ts
+     *            The timestamp
      * @return The value of the timer
      */
     public Long getWaitForCPU(long tid, long ts) {
@@ -189,12 +203,15 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value evolution of a WAIT_FOR_CPU timer
-     * for a thread during a given interval
+     * Allows to get the value evolution of a WAIT_FOR_CPU timer for a thread
+     * during a given interval
      *
-     * @param tid The thread ID
-     * @param start The timestamp of the start of the interval
-     * @param end The timestamp of the end of the interval
+     * @param tid
+     *            The thread ID
+     * @param start
+     *            The timestamp of the start of the interval
+     * @param end
+     *            The timestamp of the end of the interval
      * @return The value difference of the timer for the interval
      */
     public Long getWaitForCPUIntvl(long tid, long start, long end) {
@@ -202,11 +219,13 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value of a CPU_USAGE timer for a
-     * thread at a given timestamp
+     * Allows to get the value of a CPU_USAGE timer for a thread at a given
+     * timestamp
      *
-     * @param tid The thread ID
-     * @param ts The timestamp
+     * @param tid
+     *            The thread ID
+     * @param ts
+     *            The timestamp
      * @return The value of the timer
      */
     public Long getCpuUsage(long tid, long ts) {
@@ -214,12 +233,15 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value evolution of a CPU_USAGE timer
-     * for a thread during a given interval
+     * Allows to get the value evolution of a CPU_USAGE timer for a thread
+     * during a given interval
      *
-     * @param tid The thread ID
-     * @param start The timestamp of the start of the interval
-     * @param end The timestamp of the end of the interval
+     * @param tid
+     *            The thread ID
+     * @param start
+     *            The timestamp of the start of the interval
+     * @param end
+     *            The timestamp of the end of the interval
      * @return The value difference of the timer for the interval
      */
     public Long getCpuUsageIntvl(long tid, long start, long end) {
@@ -227,11 +249,13 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value of a SCHED_PI timer for a
-     * thread at a given timestamp
+     * Allows to get the value of a SCHED_PI timer for a thread at a given
+     * timestamp
      *
-     * @param tid The thread ID
-     * @param ts The timestamp
+     * @param tid
+     *            The thread ID
+     * @param ts
+     *            The timestamp
      * @return The value of the timer
      */
     public Long getSchedPi(long tid, long ts) {
@@ -239,12 +263,15 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value evolution of a SCHED_PI timer
-     * for a thread during a given interval
+     * Allows to get the value evolution of a SCHED_PI timer for a thread during
+     * a given interval
      *
-     * @param tid The thread ID
-     * @param start The timestamp of the start of the interval
-     * @param end The timestamp of the end of the interval
+     * @param tid
+     *            The thread ID
+     * @param start
+     *            The timestamp of the start of the interval
+     * @param end
+     *            The timestamp of the end of the interval
      * @return The value difference of the timer for the interval
      */
     public Long getSchedPiIntvl(long tid, long start, long end) {
@@ -252,12 +279,15 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the stateInterval of an attribute for a thread at a
-     * given timestamp
+     * Allows to get the stateInterval of an attribute for a thread at a given
+     * timestamp
      *
-     * @param tid The thread ID
-     * @param ts The timestamp
-     * @param attribute The name of the attribute (from {@link Attributes}
+     * @param tid
+     *            The thread ID
+     * @param ts
+     *            The timestamp
+     * @param attribute
+     *            The name of the attribute (from {@link Attributes}
      * @return The state interval of the attribute
      */
     public ITmfStateInterval getStateInterval(long tid, long ts, String attribute) {
@@ -271,13 +301,7 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
             intvl = ss.querySingleState(ts, quark);
 
             return intvl;
-        } catch (AttributeNotFoundException e) {
-            return null;
-        } catch (StateSystemDisposedException|TimeRangeException e) {
-            //e.printStackTrace();
-            return null;
-        } catch (RuntimeException e) { // For debugging purposes...
-            Activator.logError(e.getMessage(), e);
+        } catch (AttributeNotFoundException | StateSystemDisposedException | TimeRangeException e) {
             return null;
         }
     }
@@ -317,41 +341,20 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
      *             If timestamp are out of range
      */
     public List<ITmfStateInterval> getAllStateIntervalInPeriod(long start, long end, String... attributePath) throws TimeRangeException {
-        // List<ITmfStateInterval> stateIntervalList = new LinkedList<>();
 
         ITmfStateSystem ss = Objects.requireNonNull(getStateSystem());
         int quark;
-        // ITmfStateInterval intvl;
 
         try {
             quark = ss.getQuarkAbsolute(attributePath);
             return StateSystemUtils.queryHistoryRange(ss, quark, Math.max(ss.getStartTime(), start), Math.min(ss.getCurrentEndTime(), end));
-            // intvl = ss.querySingleState(start, quark);
         } catch (AttributeNotFoundException | TimeRangeException e) {
-            return new LinkedList<>();
-            // return stateIntervalList;
+            return Collections.emptyList();
         } catch (StateSystemDisposedException e) {
             Activator.logError(e.getMessage(), e);
-            return new LinkedList<>();
-            // return stateIntervalList;
-        } catch (RuntimeException e) { // For debugging purposes...
-            Activator.logError(e.getMessage(), e);
-            return new LinkedList<>();
-            // return stateIntervalList;
+            return Collections.emptyList();
         }
 
-        /*
-         * while (intvl != null && intvl.getStartTime() < end) {
-         * stateIntervalList.add(intvl);
-         *
-         * try { intvl = ss.querySingleState(intvl.getEndTime() + 1, quark); }
-         * catch (AttributeNotFoundException|TimeRangeException e) { intvl =
-         * null; } catch (StateSystemDisposedException e) { e.printStackTrace();
-         * intvl = null; } catch (RuntimeException e) { // For debugging
-         * purposes... e.printStackTrace(); intvl = null; } }
-         *
-         * return stateIntervalList;
-         */
     }
 
     /**
@@ -409,9 +412,12 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * @param tiCollection The collection of time intervals in which to search
-     * @param quarkPath The path to the quark
-     * @return a unique set of all the state value which have a value in at least one of the given time interval
+     * @param tiCollection
+     *            The collection of time intervals in which to search
+     * @param quarkPath
+     *            The path to the quark
+     * @return a unique set of all the state value which have a value in at
+     *         least one of the given time interval
      */
     public Collection<ITmfStateValue> getAllKernelStateValueInPeriods(Collection<TimestampInterval> tiCollection, String... quarkPath) {
         Collection<ITmfStateValue> stateValueCollection = new TreeSet<>();
@@ -427,37 +433,17 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value of a counter for a thread at a
-     * given timestamp
+     * Allows to get the value of a counter for a thread at a given timestamp
      *
-     * @param tid The thread ID
-     * @param ts The timestamp
-     * @param counter The name of the counter (from {@link Attributes}
+     * @param tid
+     *            The thread ID
+     * @param ts
+     *            The timestamp
+     * @param counter
+     *            The name of the counter (from {@link Attributes}
      * @return The value of the counter
      */
     public Integer getCounter(long tid, long ts, String counter) {
-        /*
-        ITmfStateSystem ss = Objects.requireNonNull(getStateSystem());
-        int quark, value;
-        ITmfStateInterval intvl;
-
-        try {
-            quark = ss.getQuarkAbsolute(Attributes.TID, Long.toString(tid), counter);
-
-            intvl = ss.querySingleState(ts, quark);
-            value = intvl.getStateValue().unboxInt();
-
-            return value;
-        } catch (AttributeNotFoundException e) {
-            return 0;
-        } catch (StateSystemDisposedException e) {
-            e.printStackTrace();
-            return null;
-        } catch (RuntimeException e) { // For debugging purposes...
-            e.printStackTrace();
-            return null;
-        }
-        */
 
         long timestamp = ts;
         if (getTrace() != null && ts > Objects.requireNonNull(getTrace()).getEndTime().toNanos()) {
@@ -475,13 +461,17 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value evolution of a counter for a thread
-     * during a given interval
+     * Allows to get the value evolution of a counter for a thread during a
+     * given interval
      *
-     * @param tid The thread ID
-     * @param start The timestamp of the start of the interval
-     * @param end The timestamp of the end of the interval
-     * @param counter The name of the counter (from {@link Attributes}
+     * @param tid
+     *            The thread ID
+     * @param start
+     *            The timestamp of the start of the interval
+     * @param end
+     *            The timestamp of the end of the interval
+     * @param counter
+     *            The name of the counter (from {@link Attributes}
      * @return The value difference of the counter for the interval
      */
     public Integer getCounterIntvl(long tid, long start, long end, String counter) {
@@ -492,11 +482,13 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value of a SYSCALLS counter for a
-     * thread at a given timestamp
+     * Allows to get the value of a SYSCALLS counter for a thread at a given
+     * timestamp
      *
-     * @param tid The thread ID
-     * @param ts The timestamp
+     * @param tid
+     *            The thread ID
+     * @param ts
+     *            The timestamp
      * @return The value of the counter
      */
     public Integer getSyscalls(long tid, long ts) {
@@ -504,12 +496,15 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value evolution of a SYSCALLS counter
-     * for a thread during a given interval
+     * Allows to get the value evolution of a SYSCALLS counter for a thread
+     * during a given interval
      *
-     * @param tid The thread ID
-     * @param start The timestamp of the start of the interval
-     * @param end The timestamp of the end of the interval
+     * @param tid
+     *            The thread ID
+     * @param start
+     *            The timestamp of the start of the interval
+     * @param end
+     *            The timestamp of the end of the interval
      * @return The value difference of the counter for the interval
      */
     public Integer getSyscallsIntvl(long tid, long start, long end) {
@@ -517,11 +512,13 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value of a PREEMPT counter for a
-     * thread at a given timestamp
+     * Allows to get the value of a PREEMPT counter for a thread at a given
+     * timestamp
      *
-     * @param tid The thread ID
-     * @param ts The timestamp
+     * @param tid
+     *            The thread ID
+     * @param ts
+     *            The timestamp
      * @return The value of the counter
      */
     public Integer getPreempt(long tid, long ts) {
@@ -529,12 +526,15 @@ public class StateMachineBackendAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     /**
-     * Allows to get the value evolution of a PREEMPT counter
-     * for a thread during a given interval
+     * Allows to get the value evolution of a PREEMPT counter for a thread
+     * during a given interval
      *
-     * @param tid The thread ID
-     * @param start The timestamp of the start of the interval
-     * @param end The timestamp of the end of the interval
+     * @param tid
+     *            The thread ID
+     * @param start
+     *            The timestamp of the start of the interval
+     * @param end
+     *            The timestamp of the end of the interval
      * @return The value difference of the counter for the interval
      */
     public Integer getPreemptIntvl(long tid, long start, long end) {

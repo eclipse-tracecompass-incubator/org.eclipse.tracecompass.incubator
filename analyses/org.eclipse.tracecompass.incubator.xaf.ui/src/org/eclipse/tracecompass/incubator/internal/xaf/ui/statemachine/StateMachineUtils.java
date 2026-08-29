@@ -62,7 +62,8 @@ public final class StateMachineUtils {
     private static final @NonNull Pattern TIMESTAMP_PATTERN = Pattern.compile("^(?<value>(?<int>[0-9]+)?(?:\\.(?<dec>[0-9]+))?|\\?)(?<unit>ns|us|ms|s|m|h|)$"); //$NON-NLS-1$
 
     /**
-     * @param value The value to check
+     * @param value
+     *            The value to check
      * @return Whether the value is adaptive or not
      */
     public static boolean isValueAdaptive(String value) {
@@ -102,7 +103,7 @@ public final class StateMachineUtils {
             String targetNode = targetAttribute.getNodeValue();
             StateMachineNode nextNode = nodeList.get(targetNode);
             if (nextNode == null) {
-                Activator.logWarning("Transition to unknown node: "+targetNode); //$NON-NLS-1$
+                Activator.logWarning("Transition to unknown node: " + targetNode); //$NON-NLS-1$
                 continue;
             }
 
@@ -117,7 +118,7 @@ public final class StateMachineUtils {
 
                     Matcher m = CONDITION_PATTERN.matcher(condition);
                     if (!m.find()) {
-                        Activator.logWarning("Unmatching condition: "+condition); //$NON-NLS-1$
+                        Activator.logWarning("Unmatching condition: " + condition); //$NON-NLS-1$
                         continue;
                     }
 
@@ -145,13 +146,20 @@ public final class StateMachineUtils {
     }
 
     /**
-     * Returns the initial transition for a state machine model built from a given SCXML file
-     * @param xmlPath The path to the file
+     * Returns the initial transition for a state machine model built from a
+     * given SCXML file
+     *
+     * @param xmlPath
+     *            The path to the file
      * @return The initial transition
-     * @throws FileNotFoundException If the file is not found
-     * @throws SAXException If there is an error while parsing
-     * @throws IOException If there is an IO exception
-     * @throws ParserConfigurationException If there is a parser configuration exception
+     * @throws FileNotFoundException
+     *             If the file is not found
+     * @throws SAXException
+     *             If there is an error while parsing
+     * @throws IOException
+     *             If there is an IO exception
+     * @throws ParserConfigurationException
+     *             If there is a parser configuration exception
      */
     public static List<StateMachineTransition> getModelFromXML(String xmlPath) throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
         Document xml = null;
@@ -160,18 +168,16 @@ public final class StateMachineUtils {
         }
 
         NodeList scxmlList = xml.getElementsByTagName("scxml"); //$NON-NLS-1$
-        Element scxml = (Element)scxmlList.item(0);
+        Element scxml = (Element) scxmlList.item(0);
 
         HashMap<String, StateMachineNode> nodeList = new HashMap<>();
 
-        /* Get the list of states.
-         * Three tags possible for the states:
-         *  - state
-         *  - final
-         *  - and initial
+        /*
+         * Get the list of states. Three tags possible for the states: - state -
+         * final - and initial
          */
         List<Element> statesList = new ArrayList<>();
-        for (String tagName : new String[]{"state", "final", "initial"}) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        for (String tagName : new String[] { "state", "final", "initial" }) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             NodeList states = scxml.getElementsByTagName(tagName);
             for (int i = 0; i < states.getLength(); i++) {
                 Node id = states.item(i).getAttributes().getNamedItem("id"); //$NON-NLS-1$
@@ -182,11 +188,11 @@ public final class StateMachineUtils {
 
                 String name = id.getNodeValue();
                 if (nodeList.containsKey(name)) {
-                    Activator.logWarning("Node "+name+" already exists"); //$NON-NLS-1$ //$NON-NLS-2$
+                    Activator.logWarning("Node " + name + " already exists"); //$NON-NLS-1$ //$NON-NLS-2$
                 }
 
                 nodeList.put(name, new StateMachineNode(name));
-                statesList.add((Element)states.item(i));
+                statesList.add((Element) states.item(i));
             }
         }
 
@@ -199,7 +205,7 @@ public final class StateMachineUtils {
             // Variables
             NodeList onentryList = s.getElementsByTagName("onentry"); //$NON-NLS-1$
             for (int j = 0; j < onentryList.getLength(); j++) {
-                Element onentry = (Element)onentryList.item(j);
+                Element onentry = (Element) onentryList.item(j);
 
                 NodeList assignList = onentry.getElementsByTagName("assign"); //$NON-NLS-1$
                 for (int k = 0; k < assignList.getLength(); k++) {
@@ -224,7 +230,7 @@ public final class StateMachineUtils {
                     StateMachineVariable stateMachineVariable = null;
                     try {
                         variableConstructor = variableClass.getConstructor(String.class, Comparable.class);
-                        stateMachineVariable = (StateMachineVariable)variableConstructor.newInstance(varName, varValue);
+                        stateMachineVariable = (StateMachineVariable) variableConstructor.newInstance(varName, varValue);
                     } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         Activator.logError(e.getMessage(), e);
                     }
@@ -239,11 +245,12 @@ public final class StateMachineUtils {
             stateMachineNode.addTransitions(getTransitionsFromXMLState(s, nodeList));
         }
 
-        // And now get the initial transition that allows to enter the state machine
+        // And now get the initial transition that allows to enter the state
+        // machine
         List<StateMachineTransition> initialTransitions = new ArrayList<>();
         NodeList initialList = scxml.getElementsByTagName("initial"); //$NON-NLS-1$
         for (int i = 0; i < initialList.getLength(); i++) {
-            Element initial = (Element)initialList.item(i);
+            Element initial = (Element) initialList.item(i);
             initialTransitions.addAll(getTransitionsFromXMLState(initial, nodeList));
 
             // If we found an initial state with transitions, we can stop there
@@ -252,7 +259,8 @@ public final class StateMachineUtils {
             }
         }
 
-        // If we didn't find any "initial" state, just look at the scxml header to
+        // If we didn't find any "initial" state, just look at the scxml header
+        // to
         // verify if an initial state was declared
         if (initialTransitions.isEmpty()) {
             Node initial = scxml.getAttributes().getNamedItem("initial"); //$NON-NLS-1$
@@ -270,9 +278,11 @@ public final class StateMachineUtils {
     }
 
     /**
-     * Function that allows to return the XML version of the state machine in order to save it for
-     * future usage.
-     * @param initialTransitions The list of initial transitions of the state machine
+     * Function that allows to return the XML version of the state machine in
+     * order to save it for future usage.
+     *
+     * @param initialTransitions
+     *            The list of initial transitions of the state machine
      * @return The string representing the XML version of the state machine
      */
     public static String getXMLFromModel(List<StateMachineTransition> initialTransitions) {
@@ -327,22 +337,18 @@ public final class StateMachineUtils {
                 sb.append(String.format("\t\t<transition event=\"%s\" target=\"%s\"%s/>\n", //$NON-NLS-1$
                         fullEvent,
                         transition.getNextNode().getName(),
-                        (transition.getConstraints().isEmpty()) ?
-                                "" //$NON-NLS-1$
+                        (transition.getConstraints().isEmpty()) ? "" //$NON-NLS-1$
                                 : String.format(" cond=\"%s\"", //$NON-NLS-1$
                                         Joiner.on("; ").join( //$NON-NLS-1$
                                                 transition.getConstraints()
-                                                .stream()
-                                                .map(a -> String.format("%s %s %s", //$NON-NLS-1$
-                                                        a.getVarName(),
-                                                        a.getOperator().toString()
-                                                         .replace("<", "&lt;") //$NON-NLS-1$ //$NON-NLS-2$
-                                                         .replace(">", "&gt;"), //$NON-NLS-1$ //$NON-NLS-2$
-                                                        a.getValue()))
-                                                .collect(Collectors.toList())
-                                                )
-                                              )
-                        ));
+                                                        .stream()
+                                                        .map(a -> String.format("%s %s %s", //$NON-NLS-1$
+                                                                a.getVarName(),
+                                                                a.getOperator().toString()
+                                                                        .replace("<", "&lt;") //$NON-NLS-1$ //$NON-NLS-2$
+                                                                        .replace(">", "&gt;"), //$NON-NLS-1$ //$NON-NLS-2$
+                                                                a.getValue()))
+                                                        .collect(Collectors.toList())))));
             }
 
             sb.append("\t</state>\n\n"); //$NON-NLS-1$
@@ -354,8 +360,10 @@ public final class StateMachineUtils {
     }
 
     /**
-     * Allows to convert a state machine in our internal Java class format
-     * into a graphviz state machine in order to print it with dot -Tpdf -O /tmp/sm.dot
+     * Allows to convert a state machine in our internal Java class format into
+     * a graphviz state machine in order to print it with dot -Tpdf -O
+     * /tmp/sm.dot
+     *
      * @author Raphaël Beamonte
      */
     public static class StateMachineToDot {
@@ -382,9 +390,11 @@ public final class StateMachineUtils {
         }
 
         /**
-         * Uses the StateMachineToDot class to draw the state machine
-         * from the initial transition
-         * @param initialTransition the initial transition
+         * Uses the StateMachineToDot class to draw the state machine from the
+         * initial transition
+         *
+         * @param initialTransition
+         *            the initial transition
          * @return the string representation of the state machine
          */
         public static String drawStateMachine(StateMachineTransition initialTransition) {
@@ -394,9 +404,11 @@ public final class StateMachineUtils {
         }
 
         /**
-         * Uses the StateMachineToDot class to draw the state machine
-         * from the initial transition
-         * @param initialTransitions the list of the initial transitions
+         * Uses the StateMachineToDot class to draw the state machine from the
+         * initial transition
+         *
+         * @param initialTransitions
+         *            the list of the initial transitions
          * @return the string representation of the state machine
          */
         public static String drawStateMachine(List<StateMachineTransition> initialTransitions) {
@@ -411,8 +423,7 @@ public final class StateMachineUtils {
             // Add that transition to the list
             transitionsToPrint.add(new TransitionString(
                     previousNode,
-                    transition
-                ));
+                    transition));
 
             // Add the node
             if (!nodesToPrint.containsKey(transition.getNextNode())) {
@@ -430,22 +441,23 @@ public final class StateMachineUtils {
             StringBuilder sb = new StringBuilder();
 
             sb.append("digraph SM {\n"); //$NON-NLS-1$
-            //sb.append("\trankdir = LR;\n"); //$NON-NLS-1$
+            // sb.append("\trankdir = LR;\n"); //$NON-NLS-1$
             sb.append("\tforcelabels=true;\n"); //$NON-NLS-1$
             sb.append("\tedge [arrowsize=0.4,fontsize=10]\n"); //$NON-NLS-1$
             sb.append("\t//------nodes and variables------\n"); //$NON-NLS-1$
-            for (@NonNull Entry<StateMachineNode, Integer> entry : nodesToPrint.entrySet()) {
+            for (@NonNull
+            Entry<StateMachineNode, Integer> entry : nodesToPrint.entrySet()) {
                 sb.append(String.format("\tnode%d [label=\"%s\",style=filled,fillcolor=lightgrey,shape=circle%s];\n", //$NON-NLS-1$
                         entry.getValue(),
                         (entry.getKey() == null) ? "" : entry.getKey().getName(), //$NON-NLS-1$
                         (entry.getKey() == null) ? ",width=.1,height=.1" : "" //$NON-NLS-1$ //$NON-NLS-2$
-                        ));
+                ));
                 if (entry.getKey() != null && entry.getKey().getVariables().size() > 0) {
                     sb.append(String.format("\tnode%d -> node%d [label=<<FONT COLOR=\"blue\">%s</FONT>>,weight=100,penwidth=0.0,arrowhead=none];\n", //$NON-NLS-1$
                             entry.getValue(),
                             entry.getValue(),
                             Joiner.on("<BR/>").join(entry.getKey().getVariables()) //$NON-NLS-1$
-                            ));
+                    ));
                 }
             }
             sb.append("\t//------transitions------\n"); //$NON-NLS-1$
@@ -454,18 +466,14 @@ public final class StateMachineUtils {
                         nodesToPrint.get(ts.from),
                         nodesToPrint.get(ts.to),
                         ts.event,
-                        (ts.constraints.isEmpty()) ?
-                                "" //$NON-NLS-1$
+                        (ts.constraints.isEmpty()) ? "" //$NON-NLS-1$
                                 : String.format("<BR/><FONT POINT-SIZE=\"8\" COLOR=\"red\">%s</FONT>", //$NON-NLS-1$
                                         Joiner.on("<BR/>").join( //$NON-NLS-1$
                                                 ts.constraints
-                                                .stream()
-                                                .map(a -> a.replace("<", "&lt;") //$NON-NLS-1$ //$NON-NLS-2$
-                                                           .replace(">", "&gt;")) //$NON-NLS-1$ //$NON-NLS-2$
-                                                .collect(Collectors.toList())
-                                                )
-                                              )
-                        ));
+                                                        .stream()
+                                                        .map(a -> a.replace("<", "&lt;") //$NON-NLS-1$ //$NON-NLS-2$
+                                                                .replace(">", "&gt;")) //$NON-NLS-1$ //$NON-NLS-2$
+                                                        .collect(Collectors.toList())))));
             }
             sb.append("}\n"); //$NON-NLS-1$
 
@@ -474,14 +482,16 @@ public final class StateMachineUtils {
     }
 
     /**
-     * @param value the value
-     * @param total the total
+     * @param value
+     *            the value
+     * @param total
+     *            the total
      * @return the numeric value to compare to
      */
     public static double getValueFromPercent(String value, double total) {
         double numval;
         if (value.endsWith("%")) { //$NON-NLS-1$
-            numval = total *  Double.parseDouble(value.substring(0, value.length()-1)) / 100.0;
+            numval = total * Double.parseDouble(value.substring(0, value.length() - 1)) / 100.0;
         } else if (UNIT_PATTERN.matcher(value).matches()) {
             ITmfTimestamp tv = strToTimestamp(value);
             numval = tv.normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
@@ -492,7 +502,8 @@ public final class StateMachineUtils {
     }
 
     /**
-     * @param value A string value representing a timestamp
+     * @param value
+     *            A string value representing a timestamp
      * @return The timestamp generated from the string value
      */
     public static ITmfTimestamp strToTimestamp(String value) {
@@ -507,7 +518,7 @@ public final class StateMachineUtils {
 
                 if (m.group("dec") != null) { //$NON-NLS-1$
                     mult = Math.pow(10, m.group("dec").length()); //$NON-NLS-1$
-                    numval = numval * (long)mult + Long.parseLong(m.group("dec")); //$NON-NLS-1$
+                    numval = numval * (long) mult + Long.parseLong(m.group("dec")); //$NON-NLS-1$
                 }
             }
 
@@ -530,7 +541,7 @@ public final class StateMachineUtils {
                 break;
             case "h": //$NON-NLS-1$
                 scale = ITmfTimestamp.SECOND_SCALE;
-                numval *= 60*60;
+                numval *= 60 * 60;
                 break;
             default:
                 break;
@@ -569,16 +580,20 @@ public final class StateMachineUtils {
      */
     public static class TimestampInterval extends TmfTimeRange implements Comparable<TimestampInterval> {
         /**
-         * @param start The start timestamp as an ITmfTimestamp object
-         * @param end The end timestamp as an ITmfTimestamp object
+         * @param start
+         *            The start timestamp as an ITmfTimestamp object
+         * @param end
+         *            The end timestamp as an ITmfTimestamp object
          */
         public TimestampInterval(ITmfTimestamp start, ITmfTimestamp end) {
             super(Objects.requireNonNull(start), Objects.requireNonNull(end));
         }
 
         /**
-         * @param startTime The start timestamp as a long
-         * @param endTime The end timestamp as a long
+         * @param startTime
+         *            The start timestamp as a long
+         * @param endTime
+         *            The end timestamp as a long
          */
         public TimestampInterval(long startTime, long endTime) {
             super(TmfTimestamp.create(Objects.requireNonNull(startTime), ITmfTimestamp.NANOSECOND_SCALE),
@@ -600,8 +615,10 @@ public final class StateMachineUtils {
         }
 
         /**
-         * @param tiCollection A collection of TimestampInterval
-         * @return The tiniest interval grouping all the intervals being in the collection
+         * @param tiCollection
+         *            A collection of TimestampInterval
+         * @return The tiniest interval grouping all the intervals being in the
+         *         collection
          */
         public static TimestampInterval maxTsInterval(Collection<TimestampInterval> tiCollection) {
             ITmfTimestamp minTs = null, maxTs = null;

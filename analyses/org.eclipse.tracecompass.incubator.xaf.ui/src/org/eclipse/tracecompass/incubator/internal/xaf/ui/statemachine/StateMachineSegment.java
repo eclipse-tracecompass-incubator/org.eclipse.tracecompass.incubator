@@ -21,6 +21,7 @@ import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.tmf.core.segment.ISegmentAspect;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 
 /**
  * @author Raphaël Beamonte
@@ -104,8 +105,11 @@ public class StateMachineSegment implements ISegment {
     }
 
     /**
-     * Verify if a given segment matches the current one (except for the constraints)
-     * @param segment The segment for which to verify
+     * Verify if a given segment matches the current one (except for the
+     * constraints)
+     *
+     * @param segment
+     *            The segment for which to verify
      * @return Whether or not the given segment matches the current one
      */
     public boolean matches(ISegment segment) {
@@ -115,18 +119,16 @@ public class StateMachineSegment implements ISegment {
             return false;
         }
 
-        StateMachineSegment sms = (StateMachineSegment)segment;
-        if (sms.getTid() != getTid()
-                || sms.getStatus() != getStatus()) {
-            return false;
-        }
-
-        return true;
+        StateMachineSegment sms = (StateMachineSegment) segment;
+        return sms.getTid() == getTid()
+                && Objects.equal(sms.getStatus(), getStatus());
     }
 
     /**
      * Add an invalid constraint to the local list
-     * @param invalidConstraint The constraint to add
+     *
+     * @param invalidConstraint
+     *            The constraint to add
      */
     public void addInvalidConstraint(String invalidConstraint) {
         fInvalidConstraints.add(invalidConstraint);
@@ -134,7 +136,9 @@ public class StateMachineSegment implements ISegment {
 
     /**
      * Add a list of invalid constraints to the local list
-     * @param invalidConstraints The list of constraints to add
+     *
+     * @param invalidConstraints
+     *            The list of constraints to add
      */
     public void addInvalidConstraints(List<String> invalidConstraints) {
         fInvalidConstraints.addAll(invalidConstraints);
@@ -142,6 +146,7 @@ public class StateMachineSegment implements ISegment {
 
     /**
      * Get the list of constraints of that segment as a comma separated list
+     *
      * @return A string representing the list of constraints
      */
     public String getInvalidConstraints() {
@@ -150,6 +155,7 @@ public class StateMachineSegment implements ISegment {
 
     /**
      * Get the list of constraints of that segment
+     *
      * @return The list of constraints
      */
     public List<String> getInvalidConstraintsList() {
@@ -159,7 +165,9 @@ public class StateMachineSegment implements ISegment {
     /**
      * Get the status of that segment (VALID or INVALID) depending on the
      * content of the list of constraints.
-     * @return VALID if there is no invalid constraint on that segment, INVALID else
+     *
+     * @return VALID if there is no invalid constraint on that segment, INVALID
+     *         else
      */
     public String getStatus() {
         return fInvalidConstraints.isEmpty() ? "VALID" : "INVALID"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -167,6 +175,7 @@ public class StateMachineSegment implements ISegment {
 
     /**
      * Get the TID of the instance on which that segment applies
+     *
      * @return The TID
      */
     public long getTid() {
@@ -192,8 +201,6 @@ public class StateMachineSegment implements ISegment {
                 ((fInvalidConstraints.isEmpty()) ? "" : "; Invalid Constraints = " + getInvalidConstraints()); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-
-
     /**
      * Aspect for the representation of the TID of the state machine instance
      *
@@ -205,20 +212,24 @@ public class StateMachineSegment implements ISegment {
          */
         public static final @NonNull ISegmentAspect INSTANCE = new TidAspect();
 
-        private TidAspect() { }
+        private TidAspect() {
+        }
 
         @Override
         public String getHelpText() {
             return "Instance TID"; //$NON-NLS-1$
         }
+
         @Override
         public String getName() {
             return "Instance TID"; //$NON-NLS-1$
         }
+
         @Override
         public @Nullable Comparator<?> getComparator() {
             return null;
         }
+
         @Override
         public @Nullable String resolve(ISegment segment) {
             if (segment instanceof StateMachineSegment) {
@@ -239,20 +250,24 @@ public class StateMachineSegment implements ISegment {
          */
         public static final @NonNull ISegmentAspect INSTANCE = new StatusAspect();
 
-        private StatusAspect() { }
+        private StatusAspect() {
+        }
 
         @Override
         public String getHelpText() {
             return "Instance status"; //$NON-NLS-1$
         }
+
         @Override
         public String getName() {
             return "Instance status"; //$NON-NLS-1$
         }
+
         @Override
         public @Nullable Comparator<?> getComparator() {
             return null;
         }
+
         @Override
         public @Nullable String resolve(ISegment segment) {
             if (segment instanceof StateMachineSegment) {
@@ -263,7 +278,8 @@ public class StateMachineSegment implements ISegment {
     }
 
     /**
-     * Aspect for the representation of the invalid constraints of the state machine instance
+     * Aspect for the representation of the invalid constraints of the state
+     * machine instance
      *
      * @author Raphaël Beamonte
      */
@@ -273,20 +289,24 @@ public class StateMachineSegment implements ISegment {
          */
         public static final @NonNull ISegmentAspect INSTANCE = new InvalidConstraintsAspect();
 
-        private InvalidConstraintsAspect() { }
+        private InvalidConstraintsAspect() {
+        }
 
         @Override
         public String getHelpText() {
             return "Invalid constraints"; //$NON-NLS-1$
         }
+
         @Override
         public String getName() {
             return "Invalid constraints"; //$NON-NLS-1$
         }
+
         @Override
         public @Nullable Comparator<?> getComparator() {
             return null;
         }
+
         @Override
         public @Nullable String resolve(ISegment segment) {
             if (segment instanceof StateMachineSegment) {
