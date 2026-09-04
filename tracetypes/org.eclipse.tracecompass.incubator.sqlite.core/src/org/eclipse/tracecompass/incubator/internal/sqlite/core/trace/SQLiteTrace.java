@@ -23,8 +23,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -40,6 +42,7 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
+import org.eclipse.tracecompass.tmf.core.event.aspect.MultiAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -77,6 +80,8 @@ public class SQLiteTrace extends TmfTrace {
 
     private final List<@NonNull SqliteEvent> fEvents = new ArrayList<>();
     private final Map<@NonNull String, @NonNull TmfEventType> fEventTypes = new HashMap<>();
+    /** Union of all column names across all event tables, deduplicated. */
+    private final Set<@NonNull String> fColumns = new LinkedHashSet<>();
     private long fFileSize = 0;
 
     @Override
@@ -135,6 +140,9 @@ public class SQLiteTrace extends TmfTrace {
                 String eventName = schema.getEventName(tableName);
                 SqliteSchema.TableSchema tableSchema = schema.getTableSchema(tableName);
                 fEventTypes.computeIfAbsent(eventName, name -> new TmfEventType(name, null));
+                // Every column of every event table becomes an events-table
+                // aspect; the set deduplicates columns shared across tables.
+                fColumns.addAll(columns);
                 for (Map<@NonNull String, @Nullable Object> row : reader.readTableRows(table.getRootPage(), columns)) {
                     Object time = row.get(TIME_COLUMN);
                     if (!(time instanceof String)) {
@@ -241,8 +249,19 @@ public class SQLiteTrace extends TmfTrace {
         aspects.add(TmfBaseAspects.getTimestampAspect());
         aspects.add(TmfBaseAspects.getEventTypeAspect());
         aspects.add(new SeverityAspect());
-        aspects.add(new CellIdAspect());
-        aspects.add(new TraceIdAspect());
+        // One aspect per distinct column across all event tables. Because
+        // fColumns is a LinkedHashSet, columns shared by several tables (id,
+        // time, cellid, traceid, ...) appear once, in first-seen order. Each
+        // per-column aspect is wrapped in a MultiAspect: this is the TMF
+        // idiom for presenting same-named aspects as a single, deduplicated
+        // events-table column.
+        for (String column : fColumns) {
+            ITmfEventAspect<?> columnAspect = new ColumnAspect(column);
+            ITmfEventAspect<?> multi = MultiAspect.create(Collections.singletonList(columnAspect), ColumnAspect.class);
+            if (multi != null) {
+                aspects.add(multi);
+            }
+        }
         return Collections.unmodifiableList(aspects);
     }
 
@@ -269,40 +288,27 @@ public class SQLiteTrace extends TmfTrace {
         }
     }
 
-    /** Aspect exposing the {@code cellid} column. */
-    private static final class CellIdAspect implements ITmfEventAspect<Object> {
+    /** Aspect exposing a single SQLite column by name. */
+    private static final class ColumnAspect implements ITmfEventAspect<Object> {
+        private final String fColumn;
+
+        ColumnAspect(String column) {
+            fColumn = column;
+        }
+
         @Override
         public String getName() {
-            return "Cell ID"; //$NON-NLS-1$
+            return fColumn;
         }
 
         @Override
         public String getHelpText() {
-            return "The cell identifier of the trace event"; //$NON-NLS-1$
+            return "Value of the '" + fColumn + "' column"; //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         @Override
         public @Nullable Object resolve(ITmfEvent event) {
-            ITmfEventField field = event.getContent().getField("cellid"); //$NON-NLS-1$
-            return field == null ? null : field.getValue();
-        }
-    }
-
-    /** Aspect exposing the {@code traceid} column. */
-    private static final class TraceIdAspect implements ITmfEventAspect<Object> {
-        @Override
-        public String getName() {
-            return "Trace ID"; //$NON-NLS-1$
-        }
-
-        @Override
-        public String getHelpText() {
-            return "The trace point identifier of the trace event"; //$NON-NLS-1$
-        }
-
-        @Override
-        public @Nullable Object resolve(ITmfEvent event) {
-            ITmfEventField field = event.getContent().getField("traceid"); //$NON-NLS-1$
+            ITmfEventField field = event.getContent().getField(fColumn);
             return field == null ? null : field.getValue();
         }
     }
