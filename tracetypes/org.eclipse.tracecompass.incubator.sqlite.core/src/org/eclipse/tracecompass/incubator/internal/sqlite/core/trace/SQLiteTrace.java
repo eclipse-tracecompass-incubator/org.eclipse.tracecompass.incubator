@@ -64,8 +64,7 @@ import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 public class SQLiteTrace extends TmfTrace {
 
     private static final int BASE_CONFIDENCE = 5;
-    private static final int META_CONFIDENCE = 20;
-    private static final String META_TRACE_TABLE = "_meta_trace"; //$NON-NLS-1$
+    private static final int SCHEMA_CONFIDENCE = 20;
     private static final String TIME_COLUMN = "time"; //$NON-NLS-1$
 
     /** Parses "2024-07-23 16:30:04.623340" (optional fractional seconds). */
@@ -99,11 +98,12 @@ public class SQLiteTrace extends TmfTrace {
         if (!SqliteReader.hasMagic(header)) {
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Not a SQLite 3 database"); //$NON-NLS-1$
         }
-        // It is a SQLite file. Boost confidence if it has a _meta_trace table.
+        // It is a SQLite file. Boost confidence if it declares an external
+        // schema table (a table whose name ends in "trace").
         try (SqliteReader reader = new SqliteReader(path)) {
             for (TableDescriptor table : reader.readTables()) {
-                if (META_TRACE_TABLE.equals(table.getName())) {
-                    return new TraceValidationStatus(META_CONFIDENCE, Activator.class.getCanonicalName());
+                if (SqliteSchema.isSchemaTable(table.getName())) {
+                    return new TraceValidationStatus(SCHEMA_CONFIDENCE, Activator.class.getCanonicalName());
                 }
             }
         } catch (IOException e) {
@@ -119,10 +119,12 @@ public class SQLiteTrace extends TmfTrace {
         File file = new File(path);
         fFileSize = file.length();
         try (SqliteReader reader = new SqliteReader(path)) {
-            Map<@NonNull String, @NonNull String> tableToEventName = readMetaTrace(reader);
+            SqliteSchema schema = SqliteSchema.read(reader);
             for (TableDescriptor table : reader.readTables()) {
                 String tableName = table.getName();
-                if (tableName.startsWith("_meta") || tableName.startsWith("sqlite_")) { //$NON-NLS-1$ //$NON-NLS-2$
+                // Skip the internal SQLite tables and the external schema
+                // table(s) (any table whose name ends in "trace").
+                if (tableName.startsWith("sqlite_") || SqliteSchema.isSchemaTable(tableName)) { //$NON-NLS-1$
                     continue;
                 }
                 List<@NonNull String> columns = table.getColumns();
@@ -130,7 +132,8 @@ public class SQLiteTrace extends TmfTrace {
                     // Not an event table (no timestamp column).
                     continue;
                 }
-                String eventName = tableToEventName.getOrDefault(tableName, tableName);
+                String eventName = schema.getEventName(tableName);
+                SqliteSchema.TableSchema tableSchema = schema.getTableSchema(tableName);
                 fEventTypes.computeIfAbsent(eventName, name -> new TmfEventType(name, null));
                 for (Map<@NonNull String, @Nullable Object> row : reader.readTableRows(table.getRootPage(), columns)) {
                     Object time = row.get(TIME_COLUMN);
@@ -138,7 +141,7 @@ public class SQLiteTrace extends TmfTrace {
                         continue;
                     }
                     long nanos = parseTimestamp((String) time);
-                    fEvents.add(new SqliteEvent(nanos, eventName, row));
+                    fEvents.add(new SqliteEvent(nanos, eventName, row, tableSchema));
                 }
             }
         } catch (IOException e) {
@@ -147,27 +150,6 @@ public class SQLiteTrace extends TmfTrace {
         // Stable sort by timestamp; events with equal timestamps keep their
         // per-table insertion order.
         fEvents.sort(Comparator.comparingLong(SqliteEvent::getTimestamp));
-    }
-
-    /**
-     * Read {@code _meta_trace} to map each event table name to its dotted
-     * trace-point name.
-     */
-    private static Map<@NonNull String, @NonNull String> readMetaTrace(SqliteReader reader) throws IOException {
-        Map<@NonNull String, @NonNull String> map = new HashMap<>();
-        for (TableDescriptor table : reader.readTables()) {
-            if (!META_TRACE_TABLE.equals(table.getName())) {
-                continue;
-            }
-            for (Map<@NonNull String, @Nullable Object> row : reader.readTableRows(table.getRootPage(), table.getColumns())) {
-                Object tableName = row.get("table_name"); //$NON-NLS-1$
-                Object name = row.get("name"); //$NON-NLS-1$
-                if (tableName instanceof String && name instanceof String) {
-                    map.put((String) tableName, (String) name);
-                }
-            }
-        }
-        return map;
     }
 
     /**
@@ -248,7 +230,9 @@ public class SQLiteTrace extends TmfTrace {
             Object value = entry.getValue();
             fields.add(new TmfEventField(entry.getKey(), value == null ? "" : value, null)); //$NON-NLS-1$
         }
-        return new TmfEventField(ITmfEventField.ROOT_FIELD_ID, null, fields.toArray(new ITmfEventField[0]));
+        // The root value carries the SqliteEvent so schema-derived aspects
+        // (severity, source) can be resolved without a dedicated column.
+        return new TmfEventField(ITmfEventField.ROOT_FIELD_ID, event, fields.toArray(new ITmfEventField[0]));
     }
 
     @Override
@@ -256,9 +240,33 @@ public class SQLiteTrace extends TmfTrace {
         List<@NonNull ITmfEventAspect<?>> aspects = new ArrayList<>();
         aspects.add(TmfBaseAspects.getTimestampAspect());
         aspects.add(TmfBaseAspects.getEventTypeAspect());
+        aspects.add(new SeverityAspect());
         aspects.add(new CellIdAspect());
         aspects.add(new TraceIdAspect());
         return Collections.unmodifiableList(aspects);
+    }
+
+    /** Aspect exposing the severity declared in the external schema. */
+    private static final class SeverityAspect implements ITmfEventAspect<String> {
+        @Override
+        public String getName() {
+            return "Severity"; //$NON-NLS-1$
+        }
+
+        @Override
+        public String getHelpText() {
+            return "The severity declared for the event's table in the schema table"; //$NON-NLS-1$
+        }
+
+        @Override
+        public @Nullable String resolve(ITmfEvent event) {
+            Object value = event.getContent().getValue();
+            if (value instanceof SqliteEvent) {
+                SqliteSchema.TableSchema schema = ((SqliteEvent) value).getSchema();
+                return schema == null ? null : schema.getSeverity();
+            }
+            return null;
+        }
     }
 
     /** Aspect exposing the {@code cellid} column. */
