@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.tracecompass.incubator.internal.sqlite.core.trace.SQLiteTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
@@ -142,6 +143,41 @@ public class SQLiteTraceTest {
 
             // The event type should be the dotted trace-point name.
             assertFalse(first.getName().isEmpty());
+        } finally {
+            trace.dispose();
+        }
+    }
+
+    /**
+     * The external schema table (name ending in "trace") is applied: events are
+     * named with the dotted trace-point name and carry the declared severity.
+     *
+     * @throws TmfTraceException
+     *             on trace initialization failure
+     */
+    @Test
+    public void testSchemaApplied() throws TmfTraceException {
+        SQLiteTrace trace = new SQLiteTrace();
+        try {
+            trace.initTrace(null, samplePath(), ITmfEvent.class);
+
+            ITmfEventAspect<?> severityAspect = null;
+            for (ITmfEventAspect<?> aspect : trace.getEventAspects()) {
+                if ("Severity".equals(aspect.getName())) { //$NON-NLS-1$
+                    severityAspect = aspect;
+                }
+            }
+            assertNotNull("Severity aspect should be present", severityAspect); //$NON-NLS-1$
+
+            ITmfContext context = trace.seekEvent(0L);
+            ITmfEvent event = trace.getNext(context);
+            assertNotNull(event);
+            // Event name is the dotted trace-point name from the schema table,
+            // e.g. "BFCNRMDBF.365" (contains a dot, not the "_" table name).
+            assertTrue("Expected a dotted schema name, got: " + event.getName(), //$NON-NLS-1$
+                    event.getName().contains(".")); //$NON-NLS-1$
+            // Severity is declared as TRACE3 for every row in the sample.
+            assertEquals("TRACE3", severityAspect.resolve(event)); //$NON-NLS-1$
         } finally {
             trace.dispose();
         }
