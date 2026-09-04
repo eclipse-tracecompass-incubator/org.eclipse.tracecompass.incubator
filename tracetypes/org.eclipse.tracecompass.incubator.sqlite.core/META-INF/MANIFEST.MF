@@ -12,7 +12,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.tracecompass.common.core,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional,
- org.eclipse.tracecompass.tmf.core
+ org.eclipse.tracecompass.tmf.core,
+ org.eclipse.tracecompass.statesystem.core,
+ org.eclipse.tracecompass.analysis.counters.core
 Export-Package: org.eclipse.tracecompass.incubator.internal.sqlite.core;x-friends:="org.eclipse.tracecompass.incubator.sqlite.core.tests",
+ org.eclipse.tracecompass.incubator.internal.sqlite.core.analysis;x-friends:="org.eclipse.tracecompass.incubator.sqlite.core.tests",
  org.eclipse.tracecompass.incubator.internal.sqlite.core.trace;x-friends:="org.eclipse.tracecompass.incubator.sqlite.core.tests"
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.sqlite.core
