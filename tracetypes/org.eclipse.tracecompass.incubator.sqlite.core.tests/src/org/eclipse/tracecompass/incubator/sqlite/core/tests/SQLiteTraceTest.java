@@ -218,6 +218,35 @@ public class SQLiteTraceTest {
     }
 
     /**
+     * Only the {@code time} column aspect is visible by default; every other
+     * column aspect is hidden.
+     *
+     * @throws TmfTraceException
+     *             on trace initialization failure
+     */
+    @Test
+    public void testColumnsHiddenExceptTime() throws TmfTraceException {
+        SQLiteTrace trace = new SQLiteTrace();
+        try {
+            trace.initTrace(null, samplePath(), ITmfEvent.class);
+            boolean sawTime = false;
+            for (ITmfEventAspect<?> aspect : trace.getEventAspects()) {
+                String name = aspect.getName();
+                if ("time".equals(name)) { //$NON-NLS-1$
+                    sawTime = true;
+                    assertFalse("'time' column must be visible", aspect.isHiddenByDefault()); //$NON-NLS-1$
+                } else if ("cellid".equals(name) || "traceid".equals(name) || "bfn".equals(name) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                        || "numberofsrsues".equals(name)) { //$NON-NLS-1$
+                    assertTrue("column '" + name + "' must be hidden", aspect.isHiddenByDefault()); //$NON-NLS-1$ //$NON-NLS-2$
+                }
+            }
+            assertTrue("'time' column aspect should exist", sawTime); //$NON-NLS-1$
+        } finally {
+            trace.dispose();
+        }
+    }
+
+    /**
      * Reading past the end returns {@code null}.
      *
      * @throws TmfTraceException
