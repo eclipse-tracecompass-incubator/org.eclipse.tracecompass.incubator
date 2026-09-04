@@ -1,0 +1,168 @@
+/*******************************************************************************
+ * Copyright (c) 2026 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
+
+package org.eclipse.tracecompass.incubator.sqlite.core.tests;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.tracecompass.incubator.internal.sqlite.core.trace.SQLiteTrace;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
+import org.junit.Test;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+
+/**
+ * Tests for {@link SQLiteTrace} using the {@code array_ue_name.sqlite} sample.
+ *
+ * @author Matthew Khouzam
+ */
+public class SQLiteTraceTest {
+
+    private static final String SAMPLE = "res/synthetic_trace.sqlite"; //$NON-NLS-1$
+
+    /** Number of event rows across all trace tables in the sample. */
+    private static final int EXPECTED_EVENTS = 22;
+    /** First (smallest) timestamp in nanoseconds since the Unix epoch. */
+    private static final long FIRST_TIMESTAMP = 1721752204623337000L;
+    /** Last (largest) timestamp in nanoseconds since the Unix epoch. */
+    private static final long LAST_TIMESTAMP = 1721752204638385000L;
+
+    private static String samplePath() {
+        Bundle bundle = FrameworkUtil.getBundle(SQLiteTraceTest.class);
+        assertNotNull("Test bundle not found", bundle); //$NON-NLS-1$
+        URL url = FileLocator.find(bundle, new Path(SAMPLE), null);
+        assertNotNull("Sample trace not found in bundle", url); //$NON-NLS-1$
+        try {
+            return new Path(FileLocator.toFileURL(url).getPath()).toOSString();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * The sample validates with a positive confidence.
+     */
+    @Test
+    public void testValidateSample() {
+        SQLiteTrace trace = new SQLiteTrace();
+        IStatus status = trace.validate(null, samplePath());
+        assertTrue("Expected OK status, got: " + status, status.isOK()); //$NON-NLS-1$
+        assertTrue(status instanceof TraceValidationStatus);
+        int confidence = ((TraceValidationStatus) status).getConfidence();
+        assertTrue("Expected positive confidence, got " + confidence, confidence > 0); //$NON-NLS-1$
+        trace.dispose();
+    }
+
+    /**
+     * A non-existent path yields an ERROR status.
+     */
+    @Test
+    public void testValidateMissing() {
+        SQLiteTrace trace = new SQLiteTrace();
+        IStatus status = trace.validate(null, "/this/does/not/exist.sqlite"); //$NON-NLS-1$
+        assertEquals(IStatus.ERROR, status.getSeverity());
+        trace.dispose();
+    }
+
+    /**
+     * A non-SQLite file yields an ERROR status.
+     *
+     * @throws Exception
+     *             on I/O error
+     */
+    @Test
+    public void testValidateNonSqlite() throws Exception {
+        File tmp = File.createTempFile("not-a", ".sqlite"); //$NON-NLS-1$ //$NON-NLS-2$
+        try {
+            java.nio.file.Files.write(tmp.toPath(), "this is not a sqlite database".getBytes()); //$NON-NLS-1$
+            SQLiteTrace trace = new SQLiteTrace();
+            IStatus status = trace.validate(null, tmp.getAbsolutePath());
+            assertEquals(IStatus.ERROR, status.getSeverity());
+            trace.dispose();
+        } finally {
+            assertTrue(tmp.delete());
+        }
+    }
+
+    /**
+     * Reading the sample yields the expected number of events, ordered by
+     * timestamp, with the expected first and last timestamps.
+     *
+     * @throws TmfTraceException
+     *             on trace initialization failure
+     */
+    @Test
+    public void testReadEvents() throws TmfTraceException {
+        SQLiteTrace trace = new SQLiteTrace();
+        try {
+            trace.initTrace(null, samplePath(), ITmfEvent.class);
+
+            ITmfContext context = trace.seekEvent(0L);
+            ITmfEvent first = trace.getNext(context);
+            assertNotNull("Expected at least one event", first); //$NON-NLS-1$
+            assertEquals(FIRST_TIMESTAMP, first.getTimestamp().toNanos());
+
+            int count = 1;
+            long previous = first.getTimestamp().toNanos();
+            ITmfEvent last = first;
+            ITmfEvent event = trace.getNext(context);
+            while (event != null) {
+                long ts = event.getTimestamp().toNanos();
+                assertTrue("Events must be in non-decreasing timestamp order", ts >= previous); //$NON-NLS-1$
+                previous = ts;
+                last = event;
+                count++;
+                event = trace.getNext(context);
+            }
+
+            assertEquals(EXPECTED_EVENTS, count);
+            assertEquals(LAST_TIMESTAMP, last.getTimestamp().toNanos());
+
+            // The event type should be the dotted trace-point name.
+            assertFalse(first.getName().isEmpty());
+        } finally {
+            trace.dispose();
+        }
+    }
+
+    /**
+     * Reading past the end returns {@code null}.
+     *
+     * @throws TmfTraceException
+     *             on trace initialization failure
+     */
+    @Test
+    public void testReadPastEnd() throws TmfTraceException {
+        SQLiteTrace trace = new SQLiteTrace();
+        try {
+            trace.initTrace(null, samplePath(), ITmfEvent.class);
+            long endIndex = EXPECTED_EVENTS;
+            ITmfContext context = trace.seekEvent(endIndex);
+            assertNull(trace.getNext(context));
+        } finally {
+            trace.dispose();
+        }
+    }
+}
