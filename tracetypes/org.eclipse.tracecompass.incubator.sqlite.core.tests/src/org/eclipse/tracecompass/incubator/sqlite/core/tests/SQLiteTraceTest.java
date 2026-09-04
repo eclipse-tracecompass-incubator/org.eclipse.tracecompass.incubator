@@ -26,6 +26,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.tracecompass.analysis.counters.core.aspects.ITmfCounterAspect;
 import org.eclipse.tracecompass.incubator.internal.sqlite.core.trace.SQLiteTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
@@ -37,7 +38,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
 /**
- * Tests for {@link SQLiteTrace} using the {@code array_ue_name.sqlite} sample.
+ * Tests for {@link SQLiteTrace} using the {@code synthetic_trace.sqlite} sample
+ * produced by {@code res/generate_synthetic_trace.py}.
  *
  * @author Matthew Khouzam
  */
@@ -50,7 +52,7 @@ public class SQLiteTraceTest {
     /** First (smallest) timestamp in nanoseconds since the Unix epoch. */
     private static final long FIRST_TIMESTAMP = 1721752204623337000L;
     /** Last (largest) timestamp in nanoseconds since the Unix epoch. */
-    private static final long LAST_TIMESTAMP = 1721752204638385000L;
+    private static final long LAST_TIMESTAMP = 1721752204639108000L;
 
     private static String samplePath() {
         Bundle bundle = FrameworkUtil.getBundle(SQLiteTraceTest.class);
@@ -175,7 +177,7 @@ public class SQLiteTraceTest {
             ITmfEvent event = trace.getNext(context);
             assertNotNull(event);
             // Event name is the dotted trace-point name from the schema table,
-            // e.g. "BFCNRMDBF.365" (contains a dot, not the "_" table name).
+            // e.g. "sensor.alpha" (contains a dot, not the "_" table name).
             assertTrue("Expected a dotted schema name, got: " + event.getName(), //$NON-NLS-1$
                     event.getName().contains(".")); //$NON-NLS-1$
             // Severity is declared as TRACE3 for every row in the sample.
@@ -187,8 +189,8 @@ public class SQLiteTraceTest {
 
     /**
      * Every column of every event table is exposed as a deduplicated events-
-     * table aspect: shared columns (time, cellid, traceid, ...) appear exactly
-     * once, and a table-specific column appears too.
+     * table aspect: shared columns (time, flag, counter1, counter2) appear
+     * exactly once, and a table-specific column appears too.
      *
      * @throws TmfTraceException
      *             on trace initialization failure
@@ -203,11 +205,11 @@ public class SQLiteTraceTest {
                 byName.merge(aspect.getName(), 1, Integer::sum);
             }
             // Shared columns are present and appear exactly once (deduplicated).
-            assertEquals("cellid should be deduplicated", Integer.valueOf(1), byName.get("cellid")); //$NON-NLS-1$ //$NON-NLS-2$
-            assertEquals("traceid should be deduplicated", Integer.valueOf(1), byName.get("traceid")); //$NON-NLS-1$ //$NON-NLS-2$
-            assertEquals(Integer.valueOf(1), byName.get("bfn")); //$NON-NLS-1$
+            assertEquals("flag should be deduplicated", Integer.valueOf(1), byName.get("flag")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals("counter1 should be deduplicated", Integer.valueOf(1), byName.get("counter1")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals(Integer.valueOf(1), byName.get("counter2")); //$NON-NLS-1$
             // A column specific to a single table is also exposed.
-            assertTrue("expected a table-specific column aspect", byName.containsKey("numberofsrsues")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertTrue("expected a table-specific column aspect", byName.containsKey("counter3")); //$NON-NLS-1$ //$NON-NLS-2$
             // No aspect name is duplicated.
             for (Map.Entry<String, Integer> entry : byName.entrySet()) {
                 assertEquals("aspect '" + entry.getKey() + "' duplicated", Integer.valueOf(1), entry.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -235,12 +237,42 @@ public class SQLiteTraceTest {
                 if ("time".equals(name)) { //$NON-NLS-1$
                     sawTime = true;
                     assertFalse("'time' column must be visible", aspect.isHiddenByDefault()); //$NON-NLS-1$
-                } else if ("cellid".equals(name) || "traceid".equals(name) || "bfn".equals(name) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                        || "numberofsrsues".equals(name)) { //$NON-NLS-1$
+                } else if ("flag".equals(name) || "counter1".equals(name) || "counter2".equals(name) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                        || "counter3".equals(name)) { //$NON-NLS-1$
                     assertTrue("column '" + name + "' must be hidden", aspect.isHiddenByDefault()); //$NON-NLS-1$ //$NON-NLS-2$
                 }
             }
             assertTrue("'time' column aspect should exist", sawTime); //$NON-NLS-1$
+        } finally {
+            trace.dispose();
+        }
+    }
+
+    /**
+     * Numeric columns are exposed as counter aspects; non-numeric columns are
+     * not. All remain hidden by default except {@code time}.
+     *
+     * @throws TmfTraceException
+     *             on trace initialization failure
+     */
+    @Test
+    public void testNumericColumnsAreCounterAspects() throws TmfTraceException {
+        SQLiteTrace trace = new SQLiteTrace();
+        try {
+            trace.initTrace(null, samplePath(), ITmfEvent.class);
+            boolean sawNumericCounter = false;
+            for (ITmfEventAspect<?> aspect : trace.getEventAspects()) {
+                String name = aspect.getName();
+                if ("counter1".equals(name) || "counter2".equals(name) || "counter3".equals(name)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                    assertTrue("numeric column '" + name + "' must be a counter aspect", //$NON-NLS-1$ //$NON-NLS-2$
+                            aspect instanceof ITmfCounterAspect);
+                    sawNumericCounter = true;
+                } else if ("flag".equals(name)) { //$NON-NLS-1$
+                    assertFalse("text column 'flag' must not be a counter aspect", //$NON-NLS-1$
+                            aspect instanceof ITmfCounterAspect);
+                }
+            }
+            assertTrue("expected at least one numeric counter aspect", sawNumericCounter); //$NON-NLS-1$
         } finally {
             trace.dispose();
         }

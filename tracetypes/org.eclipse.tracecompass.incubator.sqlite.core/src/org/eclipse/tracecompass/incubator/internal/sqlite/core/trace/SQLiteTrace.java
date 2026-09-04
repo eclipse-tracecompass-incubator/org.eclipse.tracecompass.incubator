@@ -23,9 +23,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -33,6 +35,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.counters.core.aspects.ITmfCounterAspect;
 import org.eclipse.tracecompass.incubator.internal.sqlite.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.sqlite.core.trace.SqliteReader.TableDescriptor;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -53,11 +56,11 @@ import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 
 /**
- * Trace type for SQLite 3 trace databases such as {@code array_ue_name.sqlite}.
+ * Trace type for SQLite 3 trace databases.
  * <p>
  * These traces are single SQLite files. A {@code _meta_trace} table maps each
- * event table (e.g. {@code BFCNRMDBF_365}) to a dotted trace-point name (e.g.
- * {@code BFCNRMDBF.365}). Every event table shares a {@code time} column (ISO
+ * event table (e.g. {@code sensor_alpha}) to a dotted trace-point name (e.g.
+ * {@code sensor.alpha}). Every event table shares a {@code time} column (ISO
  * timestamp with microsecond precision) plus event-specific columns. Events
  * from all tables are merged in timestamp order.
  *
@@ -86,6 +89,8 @@ public class SQLiteTrace extends TmfTrace {
      * appearance) is preserved.
      */
     private final Map<@NonNull String, @NonNull List<@NonNull ITmfEventAspect<?>>> fColumnAspects = new LinkedHashMap<>();
+    /** Names of columns whose values are numeric (candidates for counters). */
+    private final Set<@NonNull String> fNumericColumns = new HashSet<>();
     private long fFileSize = 0;
 
     @Override
@@ -154,6 +159,13 @@ public class SQLiteTrace extends TmfTrace {
                     Object time = row.get(TIME_COLUMN);
                     if (!(time instanceof String)) {
                         continue;
+                    }
+                    // Track which columns carry numeric values; those become
+                    // counter aspects.
+                    for (Map.Entry<@NonNull String, @Nullable Object> cell : row.entrySet()) {
+                        if (cell.getValue() instanceof Number) {
+                            fNumericColumns.add(cell.getKey());
+                        }
                     }
                     long nanos = parseTimestamp((String) time);
                     fEvents.add(new SqliteEvent(nanos, eventName, row, tableSchema));
@@ -256,18 +268,74 @@ public class SQLiteTrace extends TmfTrace {
         aspects.add(TmfBaseAspects.getTimestampAspect());
         aspects.add(TmfBaseAspects.getEventTypeAspect());
         aspects.add(new SeverityAspect());
-        // Merge the per-table aspects that share a column name into a single
-        // events-table column with MultiAspect (the TMF idiom for multiple
-        // same-named aspects). Every column but 'time' is hidden by default;
-        // MultiAspect does not carry the hidden state, so wrap its result.
+        // Build one events-table column per column name. Numeric columns are
+        // exposed as counter aspects (ITmfCounterAspect) so the Counters view
+        // recognizes them directly; non-numeric columns merge their per-table
+        // aspects with MultiAspect (the TMF idiom for multiple same-named
+        // aspects). Every column but 'time' is hidden by default; since neither
+        // MultiAspect nor the counter aspect base carries the hidden state, the
+        // result is wrapped.
         for (Map.Entry<@NonNull String, @NonNull List<@NonNull ITmfEventAspect<?>>> entry : fColumnAspects.entrySet()) {
             String column = entry.getKey();
+            boolean hidden = !TIME_COLUMN.equals(column);
+            if (fNumericColumns.contains(column)) {
+                // A counter aspect resolves by column name uniformly across
+                // tables, so a single instance already covers every table.
+                aspects.add(new SqliteCounterAspect(column, hidden));
+                continue;
+            }
             ITmfEventAspect<?> merged = MultiAspect.create(entry.getValue(), ColumnAspect.class);
             if (merged != null) {
-                aspects.add(new HideableAspect(merged, !TIME_COLUMN.equals(column)));
+                aspects.add(new HideableAspect(merged, hidden));
             }
         }
         return Collections.unmodifiableList(aspects);
+    }
+
+    /**
+     * Counter aspect for a numeric column. Marking the aspect as an
+     * {@link ITmfCounterAspect} lets the Counters view plot the column's value
+     * over time. Values are non-cumulative gauges (the stored reading, not a
+     * running total).
+     */
+    private static final class SqliteCounterAspect implements ITmfCounterAspect {
+        private final String fColumn;
+        private final boolean fHidden;
+
+        SqliteCounterAspect(String column, boolean hidden) {
+            fColumn = column;
+            fHidden = hidden;
+        }
+
+        @Override
+        public String getName() {
+            return fColumn;
+        }
+
+        @Override
+        public String getHelpText() {
+            return "Counter for the '" + fColumn + "' column"; //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        @Override
+        public @Nullable Long resolve(ITmfEvent event) {
+            ITmfEventField field = event.getContent().getField(fColumn);
+            Object value = field == null ? null : field.getValue();
+            if (value instanceof Number) {
+                return Long.valueOf(((Number) value).longValue());
+            }
+            return null;
+        }
+
+        @Override
+        public boolean isCumulative() {
+            return false;
+        }
+
+        @Override
+        public boolean isHiddenByDefault() {
+            return fHidden;
+        }
     }
 
     /**
