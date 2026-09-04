@@ -1,0 +1,432 @@
+/*******************************************************************************
+ * Copyright (c) 2026 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
+
+package org.eclipse.tracecompass.incubator.internal.sqlite.core.trace;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.counters.core.aspects.ITmfCounterAspect;
+import org.eclipse.tracecompass.incubator.internal.sqlite.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.sqlite.core.trace.SqliteReader.TableDescriptor;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
+import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
+import org.eclipse.tracecompass.tmf.core.event.aspect.MultiAspect;
+import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
+import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
+import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
+import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
+
+/**
+ * Trace type for SQLite 3 trace databases.
+ * <p>
+ * These traces are single SQLite files. A {@code _meta_trace} table maps each
+ * event table (e.g. {@code sensor_alpha}) to a dotted trace-point name (e.g.
+ * {@code sensor.alpha}). Every event table shares a {@code time} column (ISO
+ * timestamp with microsecond precision) plus event-specific columns. Events
+ * from all tables are merged in timestamp order.
+ *
+ * @author Matthew Khouzam
+ */
+public class SQLiteTrace extends TmfTrace {
+
+    private static final int BASE_CONFIDENCE = 5;
+    private static final int SCHEMA_CONFIDENCE = 20;
+    private static final String TIME_COLUMN = "time"; //$NON-NLS-1$
+
+    /** Parses "2024-07-23 16:30:04.623340" (optional fractional seconds). */
+    private static final DateTimeFormatter TIME_FORMAT = new DateTimeFormatterBuilder()
+            .appendPattern("yyyy-MM-dd HH:mm:ss") //$NON-NLS-1$
+            .optionalStart()
+            .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
+            .optionalEnd()
+            .toFormatter();
+
+    private final List<@NonNull SqliteEvent> fEvents = new ArrayList<>();
+    private final Map<@NonNull String, @NonNull TmfEventType> fEventTypes = new HashMap<>();
+    /**
+     * Column name to the per-table aspects that read it. A column shared by
+     * several tables maps to several aspects, which are later merged into one
+     * events-table column with {@link MultiAspect}. Insertion order (first
+     * appearance) is preserved.
+     */
+    private final Map<@NonNull String, @NonNull List<@NonNull ITmfEventAspect<?>>> fColumnAspects = new LinkedHashMap<>();
+    /** Names of columns whose values are numeric (candidates for counters). */
+    private final Set<@NonNull String> fNumericColumns = new HashSet<>();
+    private long fFileSize = 0;
+
+    @Override
+    public IStatus validate(IProject project, String path) {
+        File file = new File(path);
+        if (!file.exists() || !file.isFile()) {
+            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Not a file: " + path); //$NON-NLS-1$
+        }
+        // Cheaply check the magic header before opening the database.
+        byte[] header = new byte[SqliteReader.MAGIC.length];
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) { //$NON-NLS-1$
+            if (raf.length() < header.length) {
+                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "File too small"); //$NON-NLS-1$
+            }
+            raf.readFully(header);
+        } catch (IOException e) {
+            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Cannot read file", e); //$NON-NLS-1$
+        }
+        if (!SqliteReader.hasMagic(header)) {
+            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Not a SQLite 3 database"); //$NON-NLS-1$
+        }
+        // It is a SQLite file. Boost confidence if it declares an external
+        // schema table (a table whose name ends in "trace").
+        try (SqliteReader reader = new SqliteReader(path)) {
+            for (TableDescriptor table : reader.readTables()) {
+                if (SqliteSchema.isSchemaTable(table.getName())) {
+                    return new TraceValidationStatus(SCHEMA_CONFIDENCE, Activator.class.getCanonicalName());
+                }
+            }
+        } catch (IOException e) {
+            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Cannot read SQLite schema", e); //$NON-NLS-1$
+        }
+        // Valid SQLite, but not obviously one of our trace databases.
+        return new TraceValidationStatus(BASE_CONFIDENCE, Activator.class.getCanonicalName());
+    }
+
+    @Override
+    public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
+        super.initTrace(resource, path, type);
+        File file = new File(path);
+        fFileSize = file.length();
+        try (SqliteReader reader = new SqliteReader(path)) {
+            SqliteSchema schema = SqliteSchema.read(reader);
+            for (TableDescriptor table : reader.readTables()) {
+                String tableName = table.getName();
+                // Skip the internal SQLite tables and the external schema
+                // table(s) (any table whose name ends in "trace").
+                if (tableName.startsWith("sqlite_") || SqliteSchema.isSchemaTable(tableName)) { //$NON-NLS-1$
+                    continue;
+                }
+                List<@NonNull String> columns = table.getColumns();
+                if (!columns.contains(TIME_COLUMN)) {
+                    // Not an event table (no timestamp column).
+                    continue;
+                }
+                String eventName = schema.getEventName(tableName);
+                SqliteSchema.TableSchema tableSchema = schema.getTableSchema(tableName);
+                fEventTypes.computeIfAbsent(eventName, name -> new TmfEventType(name, null));
+                // Every column of every event table contributes a per-table
+                // aspect, grouped by column name so that columns shared across
+                // tables are merged into one deduplicated events-table column.
+                for (String column : columns) {
+                    fColumnAspects.computeIfAbsent(column, c -> new ArrayList<>()).add(new ColumnAspect(column));
+                }
+                for (Map<@NonNull String, @Nullable Object> row : reader.readTableRows(table.getRootPage(), columns)) {
+                    Object time = row.get(TIME_COLUMN);
+                    if (!(time instanceof String)) {
+                        continue;
+                    }
+                    // Track which columns carry numeric values; those become
+                    // counter aspects.
+                    for (Map.Entry<@NonNull String, @Nullable Object> cell : row.entrySet()) {
+                        if (cell.getValue() instanceof Number) {
+                            fNumericColumns.add(cell.getKey());
+                        }
+                    }
+                    long nanos = parseTimestamp((String) time);
+                    fEvents.add(new SqliteEvent(nanos, eventName, row, tableSchema));
+                }
+            }
+        } catch (IOException e) {
+            throw new TmfTraceException("Error reading SQLite trace: " + e.getMessage(), e); //$NON-NLS-1$
+        }
+        // Stable sort by timestamp; events with equal timestamps keep their
+        // per-table insertion order.
+        fEvents.sort(Comparator.comparingLong(SqliteEvent::getTimestamp));
+    }
+
+    /**
+     * Parse an ISO timestamp "yyyy-MM-dd HH:mm:ss[.ffffff]" (assumed UTC) into
+     * nanoseconds since the Unix epoch.
+     */
+    private static long parseTimestamp(String time) {
+        LocalDateTime ldt = LocalDateTime.parse(time.trim(), TIME_FORMAT);
+        long seconds = ldt.toEpochSecond(ZoneOffset.UTC);
+        return seconds * 1_000_000_000L + ldt.getNano();
+    }
+
+    @Override
+    public ITmfLocation getCurrentLocation() {
+        return new TmfLongLocation(getNbEvents());
+    }
+
+    @Override
+    public double getLocationRatio(ITmfLocation location) {
+        if (fEvents.isEmpty()) {
+            return 0.0;
+        }
+        if (location instanceof TmfLongLocation) {
+            long index = ((TmfLongLocation) location).getLocationInfo();
+            return (double) index / fEvents.size();
+        }
+        return 0.0;
+    }
+
+    @Override
+    public ITmfContext seekEvent(ITmfLocation location) {
+        long index = 0;
+        if (location instanceof TmfLongLocation) {
+            index = ((TmfLongLocation) location).getLocationInfo();
+        }
+        if (index < 0) {
+            index = 0;
+        }
+        return new SqliteContext(fEvents, index);
+    }
+
+    @Override
+    public ITmfContext seekEvent(double ratio) {
+        long index = (long) Math.floor(ratio * fEvents.size());
+        return seekEvent(new TmfLongLocation(index));
+    }
+
+    @Override
+    public @Nullable ITmfEvent parseEvent(ITmfContext context) {
+        if (!(context instanceof SqliteContext)) {
+            return null;
+        }
+        SqliteContext sqliteContext = (SqliteContext) context;
+        SqliteEvent event = sqliteContext.current();
+        if (event == null) {
+            return null;
+        }
+        ITmfTimestamp timestamp = TmfTimestamp.fromNanos(event.getTimestamp());
+        TmfEventType eventType = fEventTypes.computeIfAbsent(event.getName(), name -> new TmfEventType(name, null));
+        return new TmfEvent(this, sqliteContext.getIndex(), timestamp, eventType, buildContent(event));
+    }
+
+    @Override
+    public synchronized @Nullable ITmfEvent getNext(ITmfContext context) {
+        if (!(context instanceof SqliteContext)) {
+            return null;
+        }
+        ITmfEvent event = super.getNext(context);
+        if (event != null) {
+            ((SqliteContext) context).advance();
+        }
+        return event;
+    }
+
+    private static ITmfEventField buildContent(SqliteEvent event) {
+        List<ITmfEventField> fields = new ArrayList<>();
+        for (Map.Entry<@NonNull String, @Nullable Object> entry : event.getFields().entrySet()) {
+            Object value = entry.getValue();
+            fields.add(new TmfEventField(entry.getKey(), value == null ? "" : value, null)); //$NON-NLS-1$
+        }
+        // The root value carries the SqliteEvent so schema-derived aspects
+        // (severity, source) can be resolved without a dedicated column.
+        return new TmfEventField(ITmfEventField.ROOT_FIELD_ID, event, fields.toArray(new ITmfEventField[0]));
+    }
+
+    @Override
+    public Iterable<@NonNull ITmfEventAspect<?>> getEventAspects() {
+        List<@NonNull ITmfEventAspect<?>> aspects = new ArrayList<>();
+        aspects.add(TmfBaseAspects.getTimestampAspect());
+        aspects.add(TmfBaseAspects.getEventTypeAspect());
+        aspects.add(new SeverityAspect());
+        // Build one events-table column per column name. Numeric columns are
+        // exposed as counter aspects (ITmfCounterAspect) so the Counters view
+        // recognizes them directly; non-numeric columns merge their per-table
+        // aspects with MultiAspect (the TMF idiom for multiple same-named
+        // aspects). Every column but 'time' is hidden by default; since neither
+        // MultiAspect nor the counter aspect base carries the hidden state, the
+        // result is wrapped.
+        for (Map.Entry<@NonNull String, @NonNull List<@NonNull ITmfEventAspect<?>>> entry : fColumnAspects.entrySet()) {
+            String column = entry.getKey();
+            boolean hidden = !TIME_COLUMN.equals(column);
+            if (fNumericColumns.contains(column)) {
+                // A counter aspect resolves by column name uniformly across
+                // tables, so a single instance already covers every table.
+                aspects.add(new SqliteCounterAspect(column, hidden));
+                continue;
+            }
+            ITmfEventAspect<?> merged = MultiAspect.create(entry.getValue(), ColumnAspect.class);
+            if (merged != null) {
+                aspects.add(new HideableAspect(merged, hidden));
+            }
+        }
+        return Collections.unmodifiableList(aspects);
+    }
+
+    /**
+     * Counter aspect for a numeric column. Marking the aspect as an
+     * {@link ITmfCounterAspect} lets the Counters view plot the column's value
+     * over time. Values are non-cumulative gauges (the stored reading, not a
+     * running total).
+     */
+    private static final class SqliteCounterAspect implements ITmfCounterAspect {
+        private final String fColumn;
+        private final boolean fHidden;
+
+        SqliteCounterAspect(String column, boolean hidden) {
+            fColumn = column;
+            fHidden = hidden;
+        }
+
+        @Override
+        public String getName() {
+            return fColumn;
+        }
+
+        @Override
+        public String getHelpText() {
+            return "Counter for the '" + fColumn + "' column"; //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        @Override
+        public @Nullable Long resolve(ITmfEvent event) {
+            ITmfEventField field = event.getContent().getField(fColumn);
+            Object value = field == null ? null : field.getValue();
+            if (value instanceof Number) {
+                return Long.valueOf(((Number) value).longValue());
+            }
+            return null;
+        }
+
+        @Override
+        public boolean isCumulative() {
+            return false;
+        }
+
+        @Override
+        public boolean isHiddenByDefault() {
+            return fHidden;
+        }
+    }
+
+    /**
+     * Wraps another aspect, delegating resolution but overriding the
+     * hidden-by-default state, which {@link MultiAspect} does not propagate.
+     */
+    private static final class HideableAspect implements ITmfEventAspect<Object> {
+        private final ITmfEventAspect<?> fDelegate;
+        private final boolean fHidden;
+
+        HideableAspect(ITmfEventAspect<?> delegate, boolean hidden) {
+            fDelegate = delegate;
+            fHidden = hidden;
+        }
+
+        @Override
+        public String getName() {
+            return fDelegate.getName();
+        }
+
+        @Override
+        public String getHelpText() {
+            return fDelegate.getHelpText();
+        }
+
+        @Override
+        public @Nullable Object resolve(ITmfEvent event) {
+            return fDelegate.resolve(event);
+        }
+
+        @Override
+        public boolean isHiddenByDefault() {
+            return fHidden;
+        }
+    }
+
+    /** Aspect exposing the severity declared in the external schema. */
+    private static final class SeverityAspect implements ITmfEventAspect<String> {
+        @Override
+        public String getName() {
+            return "Severity"; //$NON-NLS-1$
+        }
+
+        @Override
+        public String getHelpText() {
+            return "The severity declared for the event's table in the schema table"; //$NON-NLS-1$
+        }
+
+        @Override
+        public @Nullable String resolve(ITmfEvent event) {
+            Object value = event.getContent().getValue();
+            if (value instanceof SqliteEvent) {
+                SqliteSchema.TableSchema schema = ((SqliteEvent) value).getSchema();
+                return schema == null ? null : schema.getSeverity();
+            }
+            return null;
+        }
+    }
+
+    /** Aspect exposing a single SQLite column by name. */
+    private static final class ColumnAspect implements ITmfEventAspect<Object> {
+        private final String fColumn;
+
+        ColumnAspect(String column) {
+            fColumn = column;
+        }
+
+        @Override
+        public String getName() {
+            return fColumn;
+        }
+
+        @Override
+        public String getHelpText() {
+            return "Value of the '" + fColumn + "' column"; //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        @Override
+        public @Nullable Object resolve(ITmfEvent event) {
+            ITmfEventField field = event.getContent().getField(fColumn);
+            return field == null ? null : field.getValue();
+        }
+    }
+
+    /** @return the number of events read from the trace */
+    long getEventCount() {
+        return fEvents.size();
+    }
+
+    /** @return the trace file size in bytes */
+    long getFileSize() {
+        return fFileSize;
+    }
+}
