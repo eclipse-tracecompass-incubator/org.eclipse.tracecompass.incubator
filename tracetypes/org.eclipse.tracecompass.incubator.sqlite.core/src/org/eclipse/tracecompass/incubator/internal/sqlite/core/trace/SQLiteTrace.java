@@ -23,10 +23,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -80,8 +79,13 @@ public class SQLiteTrace extends TmfTrace {
 
     private final List<@NonNull SqliteEvent> fEvents = new ArrayList<>();
     private final Map<@NonNull String, @NonNull TmfEventType> fEventTypes = new HashMap<>();
-    /** Union of all column names across all event tables, deduplicated. */
-    private final Set<@NonNull String> fColumns = new LinkedHashSet<>();
+    /**
+     * Column name to the per-table aspects that read it. A column shared by
+     * several tables maps to several aspects, which are later merged into one
+     * events-table column with {@link MultiAspect}. Insertion order (first
+     * appearance) is preserved.
+     */
+    private final Map<@NonNull String, @NonNull List<@NonNull ITmfEventAspect<?>>> fColumnAspects = new LinkedHashMap<>();
     private long fFileSize = 0;
 
     @Override
@@ -140,9 +144,12 @@ public class SQLiteTrace extends TmfTrace {
                 String eventName = schema.getEventName(tableName);
                 SqliteSchema.TableSchema tableSchema = schema.getTableSchema(tableName);
                 fEventTypes.computeIfAbsent(eventName, name -> new TmfEventType(name, null));
-                // Every column of every event table becomes an events-table
-                // aspect; the set deduplicates columns shared across tables.
-                fColumns.addAll(columns);
+                // Every column of every event table contributes a per-table
+                // aspect, grouped by column name so that columns shared across
+                // tables are merged into one deduplicated events-table column.
+                for (String column : columns) {
+                    fColumnAspects.computeIfAbsent(column, c -> new ArrayList<>()).add(new ColumnAspect(column));
+                }
                 for (Map<@NonNull String, @Nullable Object> row : reader.readTableRows(table.getRootPage(), columns)) {
                     Object time = row.get(TIME_COLUMN);
                     if (!(time instanceof String)) {
@@ -249,20 +256,52 @@ public class SQLiteTrace extends TmfTrace {
         aspects.add(TmfBaseAspects.getTimestampAspect());
         aspects.add(TmfBaseAspects.getEventTypeAspect());
         aspects.add(new SeverityAspect());
-        // One aspect per distinct column across all event tables. Because
-        // fColumns is a LinkedHashSet, columns shared by several tables (id,
-        // time, cellid, traceid, ...) appear once, in first-seen order. Each
-        // per-column aspect is wrapped in a MultiAspect: this is the TMF
-        // idiom for presenting same-named aspects as a single, deduplicated
-        // events-table column.
-        for (String column : fColumns) {
-            ITmfEventAspect<?> columnAspect = new ColumnAspect(column);
-            ITmfEventAspect<?> multi = MultiAspect.create(Collections.singletonList(columnAspect), ColumnAspect.class);
-            if (multi != null) {
-                aspects.add(multi);
+        // Merge the per-table aspects that share a column name into a single
+        // events-table column with MultiAspect (the TMF idiom for multiple
+        // same-named aspects). Every column but 'time' is hidden by default;
+        // MultiAspect does not carry the hidden state, so wrap its result.
+        for (Map.Entry<@NonNull String, @NonNull List<@NonNull ITmfEventAspect<?>>> entry : fColumnAspects.entrySet()) {
+            String column = entry.getKey();
+            ITmfEventAspect<?> merged = MultiAspect.create(entry.getValue(), ColumnAspect.class);
+            if (merged != null) {
+                aspects.add(new HideableAspect(merged, !TIME_COLUMN.equals(column)));
             }
         }
         return Collections.unmodifiableList(aspects);
+    }
+
+    /**
+     * Wraps another aspect, delegating resolution but overriding the
+     * hidden-by-default state, which {@link MultiAspect} does not propagate.
+     */
+    private static final class HideableAspect implements ITmfEventAspect<Object> {
+        private final ITmfEventAspect<?> fDelegate;
+        private final boolean fHidden;
+
+        HideableAspect(ITmfEventAspect<?> delegate, boolean hidden) {
+            fDelegate = delegate;
+            fHidden = hidden;
+        }
+
+        @Override
+        public String getName() {
+            return fDelegate.getName();
+        }
+
+        @Override
+        public String getHelpText() {
+            return fDelegate.getHelpText();
+        }
+
+        @Override
+        public @Nullable Object resolve(ITmfEvent event) {
+            return fDelegate.resolve(event);
+        }
+
+        @Override
+        public boolean isHiddenByDefault() {
+            return fHidden;
+        }
     }
 
     /** Aspect exposing the severity declared in the external schema. */
