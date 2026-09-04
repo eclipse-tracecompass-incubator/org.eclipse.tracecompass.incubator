@@ -16,4 +16,17 @@
             name="SQLite">
       </category>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.sqlite.core.analysis.SqliteCounterAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.sqlite.core.analysis.counter"
+            name="SQLite Counters">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.sqlite.core.trace.SQLiteTrace">
+         </tracetype>
+      </module>
+   </extension>
 </plugin>
