@@ -20,6 +20,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
@@ -178,6 +180,38 @@ public class SQLiteTraceTest {
                     event.getName().contains(".")); //$NON-NLS-1$
             // Severity is declared as TRACE3 for every row in the sample.
             assertEquals("TRACE3", severityAspect.resolve(event)); //$NON-NLS-1$
+        } finally {
+            trace.dispose();
+        }
+    }
+
+    /**
+     * Every column of every event table is exposed as a deduplicated events-
+     * table aspect: shared columns (time, cellid, traceid, ...) appear exactly
+     * once, and a table-specific column appears too.
+     *
+     * @throws TmfTraceException
+     *             on trace initialization failure
+     */
+    @Test
+    public void testColumnAspects() throws TmfTraceException {
+        SQLiteTrace trace = new SQLiteTrace();
+        try {
+            trace.initTrace(null, samplePath(), ITmfEvent.class);
+            Map<String, Integer> byName = new HashMap<>();
+            for (ITmfEventAspect<?> aspect : trace.getEventAspects()) {
+                byName.merge(aspect.getName(), 1, Integer::sum);
+            }
+            // Shared columns are present and appear exactly once (deduplicated).
+            assertEquals("cellid should be deduplicated", Integer.valueOf(1), byName.get("cellid")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals("traceid should be deduplicated", Integer.valueOf(1), byName.get("traceid")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals(Integer.valueOf(1), byName.get("bfn")); //$NON-NLS-1$
+            // A column specific to a single table is also exposed.
+            assertTrue("expected a table-specific column aspect", byName.containsKey("numberofsrsues")); //$NON-NLS-1$ //$NON-NLS-2$
+            // No aspect name is duplicated.
+            for (Map.Entry<String, Integer> entry : byName.entrySet()) {
+                assertEquals("aspect '" + entry.getKey() + "' duplicated", Integer.valueOf(1), entry.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
+            }
         } finally {
             trace.dispose();
         }
