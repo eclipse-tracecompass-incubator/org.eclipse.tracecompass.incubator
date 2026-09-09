@@ -273,8 +273,8 @@ public class BuilderInstanceGroup {
     private Collection<List<BuilderEventInfo>> getModelFlows() {
         Collection<List<BuilderEventInfo>> eventListPerGroup = new ArrayList<>();
         if (eventsPerTid.size() == 1) {
-            SuffixTree<BuilderEventInfo> st = new SuffixTree<>(eventsPerTid.values().iterator().next());
-            eventListPerGroup.add(st.getLongestNonOverlappingRepeatedSubstringWithoutRepeat());
+            /*SuffixTree<BuilderEventInfo> st = new SuffixTree<>(eventsPerTid.values().iterator().next());
+            eventListPerGroup.add(st.getLongestNonOverlappingRepeatedSubstringWithoutRepeat());*/
         } else {
             Collection<List<BuilderEventInfo>> lcsGroups = getLCSgroups();
             Activator.logInfo("DEBUG: Group NB = " + lcsGroups.size()); //$NON-NLS-1$ //
@@ -356,10 +356,10 @@ public class BuilderInstanceGroup {
                                                                                     // OUTPUT
             }
 
-            for (List<BuilderEventInfo> lcsGroup : lcsGroups) {
+            /*for (List<BuilderEventInfo> lcsGroup : lcsGroups) {
                 SuffixTree<BuilderEventInfo> st = new SuffixTree<>(lcsGroup);
                 eventListPerGroup.add(st.getLongestNonOverlappingRepeatedSubstringWithoutRepeat());
-            }
+            }*/
         }
         return eventListPerGroup;
     }
