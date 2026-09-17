@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="org.eclipse.tracecompass.incubator.tracex.ui.views"
+            name="%view.category">
+      </category>
+      <view
+            category="org.eclipse.tracecompass.incubator.tracex.ui.views"
+            class="org.eclipse.tracecompass.incubator.internal.tracex.ui.view.TraceXView"
+            id="org.eclipse.tracecompass.incubator.tracex.ui.view"
+            name="%view.name"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.tracex.ui.view">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXAnalysis">
+         </analysisModuleClass>
+      </output>
+   </extension>
+</plugin>
