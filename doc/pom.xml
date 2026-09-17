@@ -54,6 +54,7 @@
     <module>org.eclipse.tracecompass.incubator.system.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.inandout.doc.user</module>
     <module>org.eclipse.tracecompass.incubator.gpu.doc.user</module>
+    <module>org.eclipse.tracecompass.incubator.tracex.doc.user</module>
     <!-- insert modules here -->
   </modules>
 

@@ -1,0 +1,8 @@
+
+= TraceX =
+
+TraceX integration is under development. This initial feature contributes the trace type, execution-analysis, data-provider, and view integration points, but it does not parse or analyze TraceX files yet.
+
+== Verifying the integration ==
+
+Install the TraceX feature from the Trace Types category. In the desktop application, confirm that '''TraceX Execution''' appears under '''Window > Show View > TraceX'''. The view displays an implementation-in-progress message. No trace output or supported behavior is expected in this version.
