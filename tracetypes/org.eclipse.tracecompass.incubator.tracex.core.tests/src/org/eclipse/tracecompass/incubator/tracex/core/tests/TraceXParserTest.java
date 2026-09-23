@@ -320,6 +320,12 @@ public class TraceXParserTest {
         assertFalse(source.isOpen());
         assertEquals(1, source.fCloseCount);
 
+        TrackingSource externallyClosed = new TrackingSource(fixture.fHeader, fixture.fFileSize);
+        try (TraceXFile file = TraceXFile.open(externallyClosed)) {
+            externallyClosed.fOpen = false;
+            assertFalse(file.isOpen());
+        }
+
         for (int i = 0; i < 2; i++) {
             TrackingSource repeated = new TrackingSource(fixture.fHeader, fixture.fFileSize);
             try (TraceXFile ignored = TraceXFile.open(repeated)) {
