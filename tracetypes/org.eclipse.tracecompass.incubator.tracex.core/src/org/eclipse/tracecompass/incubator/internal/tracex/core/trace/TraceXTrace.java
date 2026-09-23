@@ -55,8 +55,8 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider {
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "No path supplied"); //$NON-NLS-1$
         }
         File file = new File(path);
-        if (!file.isFile() || !file.canRead()) {
-            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Not a readable TraceX file"); //$NON-NLS-1$
+        if (!file.isFile()) {
+            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Not a TraceX file"); //$NON-NLS-1$
         }
         try (TraceXFile input = openTrace(file.toPath())) {
             return new TraceValidationStatus(CONFIDENCE, Activator.PLUGIN_ID);
