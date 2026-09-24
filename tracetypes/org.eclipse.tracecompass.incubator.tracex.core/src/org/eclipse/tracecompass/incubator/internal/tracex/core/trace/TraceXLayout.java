@@ -39,6 +39,7 @@ public final class TraceXLayout {
     private final long fFileSize;
     private final long fRegistryStartOffset;
     private final long fRegistryEndOffset;
+    private final int fRegistryNameSize;
     private final long fRegistryEntrySize;
     private final long fRegistryCapacity;
     private final long fEventStartOffset;
@@ -56,6 +57,7 @@ public final class TraceXLayout {
         fFileSize = fileSize;
         fRegistryStartOffset = registryStartOffset;
         fRegistryEndOffset = registryEndOffset;
+        fRegistryNameSize = header.getRegistryNameSize();
         fRegistryEntrySize = registryEntrySize;
         fRegistryCapacity = registryCapacity;
         fEventStartOffset = eventStartOffset;
@@ -211,6 +213,11 @@ public final class TraceXLayout {
         return fRegistryEndOffset;
     }
 
+    /** @return encoded object-name area size */
+    public int getRegistryNameSize() {
+        return fRegistryNameSize;
+    }
+
     /** @return validated size of one object-registry entry */
     public long getRegistryEntrySize() {
         return fRegistryEntrySize;
@@ -252,6 +259,7 @@ public final class TraceXLayout {
         properties.put("base_address", hex32(fBaseAddress)); //$NON-NLS-1$
         properties.put("timer_valid_mask", hex32(fTimerValidMask)); //$NON-NLS-1$
         properties.put("registry_capacity", Long.toString(fRegistryCapacity)); //$NON-NLS-1$
+        properties.put("registry_name_size", Integer.toString(fRegistryNameSize)); //$NON-NLS-1$
         properties.put("registry_entry_size", Long.toString(fRegistryEntrySize)); //$NON-NLS-1$
         properties.put("registry_start_offset", Long.toString(fRegistryStartOffset)); //$NON-NLS-1$
         properties.put("registry_end_offset", Long.toString(fRegistryEndOffset)); //$NON-NLS-1$

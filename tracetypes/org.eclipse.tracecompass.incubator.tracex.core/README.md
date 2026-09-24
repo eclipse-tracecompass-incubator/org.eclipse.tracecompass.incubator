@@ -29,6 +29,34 @@ constructs the region with `sizeof(TX_TRACE_OBJECT_ENTRY)`, so this parser uses
 this implementation therefore accepts only the documented 48-byte, 32-bit
 layout and does not infer wider variants.
 
+Registry records retain their complete encoded bytes, including unused slots and
+stale metadata left for historical event resolution. Event records likewise keep
+the raw ID, context, priority, timestamp, and four information words while a
+table-driven catalog adds names and typed aliases for the ThreadX, FileX, and
+NetX Duo events used by the bundled TraceX demonstrations. Uncataloged USBX,
+reserved, user-defined, and unknown IDs remain importable as generic events.
+
+To extend the catalog, add an entry to `TraceXMetadataCatalog` using the event ID,
+symbolic name, component category, and aliases from the corresponding current
+component header. An address alias enables registry-name resolution but never
+replaces the underlying unsigned information word.
+
+### Demo compatibility check
+
+The decoder output matches independently captured legacy summaries for the four
+bundled demonstrations:
+
+| Demonstration | Registry objects (legacy/new) | Valid events (legacy/new) | Distinct event types (legacy/cataloged) | Unresolved contexts |
+| --- | ---: | ---: | ---: | ---: |
+| FileX | 6 / 6 | 950 / 950 | 25 / 25 | 0 |
+| NetX Duo TCP | 18 / 18 | 950 / 950 | 36 / 36 | 0 |
+| NetX Duo UDP | 16 / 16 | 950 / 950 | 23 / 23 | 0 |
+| ThreadX | 15 / 15 | 974 / 974 | 11 / 11 | 0 |
+
+The NetX Duo UDP trace also contains 27 ISR contexts and the ThreadX trace
+contains 8. Those sentinels and their interrupted threads resolve separately
+from ordinary object addresses and are not counted as unresolved contexts.
+
 The TraceX integration effort originated in
 [Eclipse Trace Compass Incubator pull request #212][origin]. That earlier
 implementation was consulted only to corroborate the 48-byte header and

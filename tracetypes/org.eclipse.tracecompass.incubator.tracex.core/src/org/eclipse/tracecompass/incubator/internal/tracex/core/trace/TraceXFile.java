@@ -18,6 +18,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Owned TraceX input resource and its validated immutable layout.
  */
@@ -25,6 +27,7 @@ public final class TraceXFile implements AutoCloseable {
 
     private final TraceXDataSource fSource;
     private final TraceXLayout fLayout;
+    private @Nullable TraceXRegistry fRegistry;
     private boolean fClosed;
 
     private TraceXFile(TraceXDataSource source, TraceXLayout layout) {
@@ -90,6 +93,61 @@ public final class TraceXFile implements AutoCloseable {
     /** @return validated immutable layout */
     public TraceXLayout getLayout() {
         return fLayout;
+    }
+
+    /**
+     * Decode and cache the complete object registry.
+     *
+     * @return immutable registry
+     * @throws IOException
+     *             if the file is closed or a registry record is truncated
+     */
+    public synchronized TraceXRegistry getRegistry() throws IOException {
+        requireOpen();
+        TraceXRegistry registry = fRegistry;
+        if (registry == null) {
+            registry = TraceXRegistry.decode(fSource, fLayout);
+            fRegistry = registry;
+        }
+        return registry;
+    }
+
+    /**
+     * Decode an event at its physical buffer index.
+     *
+     * @param physicalIndex
+     *            zero-based physical event index
+     * @return immutable lossless event
+     * @throws IOException
+     *             if the index is invalid or the record cannot be read
+     */
+    public synchronized TraceXEvent readEvent(long physicalIndex) throws IOException {
+        requireOpen();
+        if (physicalIndex < 0 || physicalIndex >= fLayout.getEventCapacity()) {
+            throw new IllegalArgumentException("Physical event index is outside the event area"); //$NON-NLS-1$
+        }
+        long relative = TraceXCheckedMath.multiply(physicalIndex,
+                TraceXLayout.EVENT_RECORD_SIZE, "Physical event index"); //$NON-NLS-1$
+        long offset = TraceXCheckedMath.add(fLayout.getEventStartOffset(),
+                relative, "Physical event offset"); //$NON-NLS-1$
+        ByteBuffer record = ByteBuffer.allocate(TraceXLayout.EVENT_RECORD_SIZE);
+        long position = offset;
+        while (record.hasRemaining()) {
+            int count = fSource.read(record, position);
+            if (count <= 0) {
+                throw new TraceXFormatException("Truncated TraceX event record"); //$NON-NLS-1$
+            }
+            position = TraceXCheckedMath.add(position, count,
+                    "Event read position"); //$NON-NLS-1$
+        }
+        record.flip();
+        return TraceXEvent.decode(record, fLayout.getByteOrder(), getRegistry());
+    }
+
+    private void requireOpen() throws IOException {
+        if (!isOpen()) {
+            throw new IOException("TraceX file is closed"); //$NON-NLS-1$
+        }
     }
 
     /** @return whether the owned source remains open */
