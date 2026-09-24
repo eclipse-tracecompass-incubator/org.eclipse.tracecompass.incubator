@@ -289,6 +289,7 @@ public class TraceXParserTest {
         assertEquals("0xF0000000", properties.get("base_address")); //$NON-NLS-1$ //$NON-NLS-2$
         assertEquals("0x0000FFFF", properties.get("timer_valid_mask")); //$NON-NLS-1$ //$NON-NLS-2$
         assertEquals("1", properties.get("registry_capacity")); //$NON-NLS-1$ //$NON-NLS-2$
+        assertEquals("32", properties.get("registry_name_size")); //$NON-NLS-1$ //$NON-NLS-2$
         assertEquals("48", properties.get("registry_entry_size")); //$NON-NLS-1$ //$NON-NLS-2$
         assertEquals("48", properties.get("registry_start_offset")); //$NON-NLS-1$ //$NON-NLS-2$
         assertEquals("96", properties.get("registry_end_offset")); //$NON-NLS-1$ //$NON-NLS-2$
