@@ -36,6 +36,21 @@ table-driven catalog adds names and typed aliases for the ThreadX, FileX, and
 NetX Duo events used by the bundled TraceX demonstrations. Uncataloged USBX,
 reserved, user-defined, and unknown IDs remain importable as generic events.
 
+At initialization, the reader scans each physical event slot once. ThreadX
+marks an unused slot by clearing its first word, so a partial buffer consists
+of the contiguous non-empty prefix before that marker. A non-empty record
+after an empty one is rejected as an inconsistent snapshot. When every slot is
+occupied, the control header's current pointer identifies the oldest event and
+logical rank zero begins there, wrapping once at the physical end. Logical
+ordering never depends on timestamps.
+
+Trace locations are logical ranks in the inclusive-start, exclusive-end range
+from zero through the event count. Each indexed event retains both that rank
+and its physical file offset. Rank and ratio seeks clamp to the same range;
+ratio zero selects the first event and ratio one selects the end context.
+Reads use positional file access, so separate contexts do not share channel
+position or iteration state.
+
 To extend the catalog, add an entry to `TraceXMetadataCatalog` using the event ID,
 symbolic name, component category, and aliases from the corresponding current
 component header. An address alias enables registry-name resolution but never

@@ -122,6 +122,19 @@ public final class TraceXFile implements AutoCloseable {
      *             if the index is invalid or the record cannot be read
      */
     public synchronized TraceXEvent readEvent(long physicalIndex) throws IOException {
+        ByteBuffer record = readEventBytes(physicalIndex,
+                TraceXLayout.EVENT_RECORD_SIZE);
+        return TraceXEvent.decode(record, fLayout.getByteOrder(), getRegistry());
+    }
+
+    synchronized long readEventContext(long physicalIndex) throws IOException {
+        ByteBuffer context = readEventBytes(physicalIndex, Integer.BYTES)
+                .order(fLayout.getByteOrder());
+        return Integer.toUnsignedLong(context.getInt());
+    }
+
+    private ByteBuffer readEventBytes(long physicalIndex, int size)
+            throws IOException {
         requireOpen();
         if (physicalIndex < 0 || physicalIndex >= fLayout.getEventCapacity()) {
             throw new IllegalArgumentException("Physical event index is outside the event area"); //$NON-NLS-1$
@@ -130,7 +143,7 @@ public final class TraceXFile implements AutoCloseable {
                 TraceXLayout.EVENT_RECORD_SIZE, "Physical event index"); //$NON-NLS-1$
         long offset = TraceXCheckedMath.add(fLayout.getEventStartOffset(),
                 relative, "Physical event offset"); //$NON-NLS-1$
-        ByteBuffer record = ByteBuffer.allocate(TraceXLayout.EVENT_RECORD_SIZE);
+        ByteBuffer record = ByteBuffer.allocate(size);
         long position = offset;
         while (record.hasRemaining()) {
             int count = fSource.read(record, position);
@@ -141,7 +154,7 @@ public final class TraceXFile implements AutoCloseable {
                     "Event read position"); //$NON-NLS-1$
         }
         record.flip();
-        return TraceXEvent.decode(record, fLayout.getByteOrder(), getRegistry());
+        return record;
     }
 
     private void requireOpen() throws IOException {

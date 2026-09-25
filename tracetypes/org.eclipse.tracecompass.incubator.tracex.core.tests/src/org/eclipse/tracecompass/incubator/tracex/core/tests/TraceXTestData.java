@@ -102,6 +102,20 @@ final class TraceXTestData {
             return file;
         }
 
+        void putEvent(byte[] file, int physicalIndex, long context,
+                long eventId, long timestamp) {
+            int offset = (int) fEventStart + physicalIndex * 32;
+            ByteBuffer record = ByteBuffer.wrap(file).order(fOrder);
+            record.putInt(offset, (int) context);
+            record.putInt(offset + 4, 0x80010002);
+            record.putInt(offset + 8, (int) eventId);
+            record.putInt(offset + 12, (int) timestamp);
+            record.putInt(offset + 16, physicalIndex + 1);
+            record.putInt(offset + 20, physicalIndex + 2);
+            record.putInt(offset + 24, physicalIndex + 3);
+            record.putInt(offset + 28, physicalIndex + 4);
+        }
+
         Fixture putInt(int offset, long value) {
             ByteBuffer.wrap(fHeader).order(fOrder).putInt(offset, (int) value);
             return this;
