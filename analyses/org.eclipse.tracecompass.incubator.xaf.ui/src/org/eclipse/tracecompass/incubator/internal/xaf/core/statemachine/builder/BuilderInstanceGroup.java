@@ -199,13 +199,14 @@ public class BuilderInstanceGroup {
 
         // read the substring out from the matrix
         List<T> lcs = new ArrayList<>();
-        for (int x = l0.size(), y = l1.size(); x != 0 && y != 0;) {
+        int x = l0.size();
+        int y = l1.size();
+        while (x != 0 && y != 0) {
             if (lengths[x][y] == lengths[x - 1][y]) {
                 x--;
             } else if (lengths[x][y] == lengths[x][y - 1]) {
                 y--;
             } else {
-                assert eq.isEqual(l0.get(x - 1), l1.get(y - 1));
                 lcs.add(eq.commonValue(l0.get(x - 1), l1.get(y - 1)));
                 x--;
                 y--;
@@ -372,48 +373,8 @@ public class BuilderInstanceGroup {
         Activator.logInfo("DEBUG: Number of instances: " + eventsPerTid.size()); //$NON-NLS-1$
         for (Entry<Integer, List<BuilderEventInfo>> entry : eventsPerTid.entrySet()) {
             Activator.logInfo("DEBUG:    - instance " + entry.getKey() + ": " + entry.getValue().size() + " events"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            /*
-             * for (int i = 0; i < entry.getValue().size(); i++) {
-             * System.out.println("        - event "+i+": " +
-             * entry.getValue().get(i)); //$NON-NLS-1$ //$NON-NLS-2$ }
-             */
         }
 
-        // if (eventsPerTid.size() == 1) {
-        // SuffixTree<BuilderEventInfo> st = new
-        // SuffixTree<>(eventsPerTid.values().iterator().next());
-
-        /*
-         * List<BuilderEventInfo> lrs = st.getLongestRepeatedSubsequence();
-         * System.out.println("Longest Repeated Subsequence: " + lrs.size());
-         * for (BuilderEventInfo bei : lrs) { System.out.println("    - event: "
-         * + bei); }
-         */
-
-        // SuffixTree<String> st2 = new
-        // SuffixTree<>(eventsPerTid.values().iterator().next().stream().map(a
-        // ->
-        // a.getEventName()).collect(Collectors.toCollection(ArrayList::new)));
-        /*
-         * Multiset<List<BuilderEventInfo>> multiset = HashMultiset.create();
-         * List<BuilderEventInfo> list =
-         * eventsPerTid.values().iterator().next(); for (int i = 0; i <
-         * list.size(); i++) { for (int j = i + 1; j < list.size() + 1; j++) {
-         * multiset.add(list.subList(i, j)); } } int maximumValue =
-         * Integer.MIN_VALUE; List<List<BuilderEventInfo>> maxList = new
-         * ArrayList<>(); for (List<BuilderEventInfo> elementList :
-         * multiset.elementSet()) { if (elementList.size() == 2) {
-         * System.out.println("SET: " + elementList + " FOR " +
-         * multiset.count(elementList)); } if (maxList.isEmpty() ||
-         * multiset.count(elementList) > maximumValue ||
-         * (multiset.count(elementList) == maximumValue && elementList.size() >
-         * maxList.get(0).size())) { maxList.clear(); maximumValue =
-         * multiset.count(elementList); maxList.add(elementList); } else if
-         * (multiset.count(elementList) == maximumValue && elementList.size() ==
-         * maxList.get(0).size()) { maxList.add(elementList); } }
-         * System.out.println(maxList);
-         */
-        // }
 
         List<StateMachineTransition> initialTransitions = getBasicInitialTransitions();
 
@@ -422,15 +383,6 @@ public class BuilderInstanceGroup {
 
         Activator.logInfo(
                 StateMachineToDot.drawStateMachine(initialTransitions));
-        System.exit(0);
-
-        /*
-         * List<BuilderEventInfo> lcs = getLCS(); System.out.println("LCS: " +
-         * lcs.size()); for (int i = 0; i < lcs.size(); i++) {
-         * System.out.println("    - event "+i+": " + lcs.get(i)); }
-         */
-
-        // UNCOMMENT System.out.println("Finished.");
     }
 
     /**
@@ -557,32 +509,4 @@ public class BuilderInstanceGroup {
             }
         }
     }
-
-    /*
-     * public List<BuilderEventInfo> getLCS() { return new
-     * LongestCommonSubsequence<BuilderEventInfo>().lcs(new
-     * ArrayList<>(eventsPerTid.values())); }
-     */
-
-    /*
-     * public void test() { List<List<String>> objects = new ArrayList<>();
-     * objects.add(new ArrayList<>(Arrays.asList(new String[]{"A", "B", "C",
-     * "D"}))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-     * objects.add(new ArrayList<>(Arrays.asList(new String[]{"A", "B", "X",
-     * "D"}))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-     * objects.add(new ArrayList<>(Arrays.asList(new String[]{"A", "F", "B",
-     * "E", "D"}))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-     * //$NON-NLS-5$ objects.add(new ArrayList<>(Arrays.asList(new String[]{"X",
-     * "A", "B", "E", "D"}))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-     * //$NON-NLS-4$ //$NON-NLS-5$ objects.add(new ArrayList<>(Arrays.asList(new
-     * String[]{"A", "B", "D", "C"}))); //$NON-NLS-1$ //$NON-NLS-2$
-     * //$NON-NLS-3$ //$NON-NLS-4$
-     *
-     * StateMachineBenchmark bb = new StateMachineBenchmark("LCS");
-     * //$NON-NLS-1$ List<String> common = new
-     * LongestCommonSubsequence<String>().lcs(objects); bb.stop(); for (int i =
-     * 0; i < common.size(); i++) { System.out.println(i + ": " +
-     * common.get(i).toString()); //$NON-NLS-1$ } }
-     */
-
 }

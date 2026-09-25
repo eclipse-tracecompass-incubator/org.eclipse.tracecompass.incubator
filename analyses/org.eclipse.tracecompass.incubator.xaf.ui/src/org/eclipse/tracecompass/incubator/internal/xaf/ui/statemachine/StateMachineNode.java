@@ -25,9 +25,9 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
  */
 public class StateMachineNode {
 
-    private String name = "Unnamed node"; //$NON-NLS-1$
+    private String fName = "Unnamed node"; //$NON-NLS-1$
     private List<StateMachineVariable> fVariables = new ArrayList<>();
-    private Map<String, List<StateMachineTransition>> transitions = new HashMap<>();
+    private Map<String, List<StateMachineTransition>> fTransitions = new HashMap<>();
 
     /**
      *
@@ -41,7 +41,7 @@ public class StateMachineNode {
      */
     public StateMachineNode(String name) {
         super();
-        this.name = name;
+        this.fName = name;
     }
 
     /**
@@ -51,7 +51,7 @@ public class StateMachineNode {
      */
     public StateMachineNode(String name, List<StateMachineVariable> variables, List<StateMachineTransition> transitionsList) {
         super();
-        this.name = name;
+        this.fName = name;
         fVariables = variables;
         addTransitions(transitionsList);
     }
@@ -70,14 +70,14 @@ public class StateMachineNode {
      * @return the name
      */
     public String getName() {
-        return name;
+        return fName;
     }
 
     /**
      * @param name the name to set
      */
     public void setName(String name) {
-        this.name = name;
+        this.fName = name;
     }
 
     /**
@@ -113,7 +113,7 @@ public class StateMachineNode {
      */
     public Collection<StateMachineTransition> getTransitions() {
         List<StateMachineTransition> listTransitions = new ArrayList<>();
-        for (List<StateMachineTransition> list : transitions.values()) {
+        for (List<StateMachineTransition> list : fTransitions.values()) {
             listTransitions.addAll(list);
         }
         return listTransitions;
@@ -124,7 +124,7 @@ public class StateMachineNode {
      * @return the list of transitions matching the event name or null if not found
      */
     public List<StateMachineTransition> getTransitions(String eventName) {
-        return transitions.get(eventName);
+        return fTransitions.get(eventName);
     }
 
     /**
@@ -132,7 +132,7 @@ public class StateMachineNode {
      * @return the transition matching the event or null if not found
      */
     public StateMachineTransition getTransition(ITmfEvent event) {
-        List<StateMachineTransition> transitionsList = transitions.get(event.getType().getName());
+        List<StateMachineTransition> transitionsList = fTransitions.get(event.getType().getName());
         if (transitionsList != null) {
             for (StateMachineTransition smt : transitionsList) {
                 if (smt.matches(event)) {
@@ -147,10 +147,10 @@ public class StateMachineNode {
      * @param transition the transition to add
      */
     public void addTransition(StateMachineTransition transition) {
-        List<StateMachineTransition> list = transitions.get(transition.getEventName());
+        List<StateMachineTransition> list = fTransitions.get(transition.getEventName());
         if (list == null) {
             list = new ArrayList<>();
-            transitions.put(transition.getEventName(), list);
+            fTransitions.put(transition.getEventName(), list);
         }
         list.add(transition);
     }
@@ -160,10 +160,10 @@ public class StateMachineNode {
      */
     public void addTransitions(List<StateMachineTransition> transitionsList) {
         for (StateMachineTransition smt : transitionsList) {
-            List<StateMachineTransition> list = transitions.get(smt.getEventName());
+            List<StateMachineTransition> list = fTransitions.get(smt.getEventName());
             if (list == null) {
                 list = new ArrayList<>();
-                transitions.put(smt.getEventName(), list);
+                fTransitions.put(smt.getEventName(), list);
             }
             list.add(smt);
         }

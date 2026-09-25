@@ -12,7 +12,6 @@
 package org.eclipse.tracecompass.incubator.internal.xaf.ui.statemachine;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -290,16 +289,13 @@ public class StateMachineInstance implements Cloneable {
                 path.append("["); //$NON-NLS-1$
                 path.append(Joiner.on(", ").join( //$NON-NLS-1$
                         content.getFields().stream()
-                            .sorted(new Comparator<ITmfEventField>() {
-                                @Override
-                                public int compare(ITmfEventField field0, ITmfEventField field1) {
-                                    if (field0.getName().startsWith("_") && !field1.getName().startsWith("_")) { //$NON-NLS-1$ //$NON-NLS-2$
-                                        return 1;
-                                    } else if (!field0.getName().startsWith("_") && field1.getName().startsWith("_")) { //$NON-NLS-1$ //$NON-NLS-2$
-                                        return -1;
-                                    }
-                                    return field0.getName().compareTo(field1.getName());
+                            .sorted((field0, field1) -> {
+                                if (field0.getName().startsWith("_") && !field1.getName().startsWith("_")) { //$NON-NLS-1$ //$NON-NLS-2$
+                                    return 1;
+                                } else if (!field0.getName().startsWith("_") && field1.getName().startsWith("_")) { //$NON-NLS-1$ //$NON-NLS-2$
+                                    return -1;
                                 }
+                                return field0.getName().compareTo(field1.getName());
                             })
                             .filter(f -> f != null)
                             .filter(f -> !Objects.requireNonNull(f).getName().startsWith("context.")) //$NON-NLS-1$
@@ -312,11 +308,6 @@ public class StateMachineInstance implements Cloneable {
             }
             path.append(" at "); //$NON-NLS-1$
             path.append(isi.event.getTimestamp());
-            /*if (i > 0) {
-                path.append("("); //$NON-NLS-1$
-                path.append(usedPathEvents.get(i).getTimestamp().getDelta(usedPathEvents.get(i-1).getTimestamp()));
-                path.append(" since previous)"); //$NON-NLS-1$
-            }*/
             path.append("\n\tEntering state: "); //$NON-NLS-1$
             path.append(isi.node.getName());
             if (!isi.node.getVariables().isEmpty()) {
