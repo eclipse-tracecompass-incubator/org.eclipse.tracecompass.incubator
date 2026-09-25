@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
@@ -26,27 +27,33 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.Activator;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.project.model.ITmfPropertiesProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceKnownSize;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 
 /**
- * TraceX trace type backed by a validated 32-bit binary layout.
- *
- * Event-record decoding is intentionally deferred. This class owns the input
- * resource opened with the trace and exposes only control-header properties.
+ * TraceX trace type backed by a validated 32-bit binary layout and immutable
+ * logical event index.
  */
-public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider {
+public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
+        ITmfTraceKnownSize {
 
     private static final int CONFIDENCE = 100;
 
     private @NonNull TmfLongLocation fLocation = new TmfLongLocation(0L);
     private @Nullable TraceXFile fInput;
+    private @Nullable TraceXEventIndex fEventIndex;
     private @NonNull Map<@NonNull String, @NonNull String> fProperties = Collections.emptyMap();
 
     @Override
@@ -77,14 +84,35 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider {
             throw new TmfTraceException("No path supplied"); //$NON-NLS-1$
         }
         super.initTrace(resource, path, type);
+        TraceXFile input = null;
         try {
-            TraceXFile input = openTrace(new File(path).toPath());
-            fInput = input;
+            input = openTrace(new File(path).toPath());
+            TraceXEventIndex index = TraceXEventIndex.build(input,
+                    this::isCancelled);
             TraceXLayout layout = input.getLayout();
-            fProperties = layout.getProperties();
-            fLocation = new TmfLongLocation(layout.getEventStartOffset());
+            Map<@NonNull String, @NonNull String> properties = new LinkedHashMap<>(
+                    layout.getProperties());
+            properties.put("event_count", Long.toString(index.getEventCount())); //$NON-NLS-1$
+            properties.put("event_order", "oldest-to-newest"); //$NON-NLS-1$ //$NON-NLS-2$
+            fInput = input;
+            fEventIndex = index;
+            fProperties = Collections.unmodifiableMap(properties);
+            fLocation = new TmfLongLocation(0L);
+            setNbEvents(index.getEventCount());
         } catch (IOException e) {
-            throw new TmfTraceException("Failed to parse TraceX control header", e); //$NON-NLS-1$
+            closeFailedInput(input, e);
+            throw new TmfTraceException("Failed to initialize TraceX trace", e); //$NON-NLS-1$
+        }
+    }
+
+    private static void closeFailedInput(@Nullable TraceXFile input,
+            IOException failure) {
+        if (input != null) {
+            try {
+                input.close();
+            } catch (IOException closeFailure) {
+                failure.addSuppressed(closeFailure);
+            }
         }
     }
 
@@ -92,6 +120,7 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider {
     public synchronized void dispose() {
         TraceXFile input = fInput;
         fInput = null;
+        fEventIndex = null;
         if (input != null) {
             try {
                 input.close();
@@ -109,25 +138,104 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider {
 
     @Override
     public double getLocationRatio(@Nullable ITmfLocation location) {
-        return 0.0;
+        TraceXEventIndex index = fEventIndex;
+        if (index == null || index.getEventCount() == 0) {
+            return 0.0;
+        }
+        long rank = locationRank(location, 0);
+        return (double) index.clampRank(rank) / index.getEventCount();
     }
 
     @Override
     public ITmfContext seekEvent(@Nullable ITmfLocation location) {
+        TraceXEventIndex index = fEventIndex;
+        long rank = index == null ? 0
+                : index.clampRank(locationRank(location, 0));
         TmfContext context = new TmfContext();
-        context.setLocation(fLocation);
-        context.setRank(0);
+        context.setLocation(new TmfLongLocation(rank));
+        context.setRank(rank);
         return context;
     }
 
     @Override
     public ITmfContext seekEvent(double ratio) {
-        return seekEvent(fLocation);
+        TraceXEventIndex index = fEventIndex;
+        long rank = index == null ? 0 : index.rankForRatio(ratio);
+        return seekEvent(new TmfLongLocation(rank));
     }
 
     @Override
     public @Nullable ITmfEvent parseEvent(@Nullable ITmfContext context) {
-        return null;
+        TraceXFile input = fInput;
+        TraceXEventIndex index = fEventIndex;
+        if (context == null || input == null || index == null || isCancelled()) {
+            return null;
+        }
+        long rank = locationRank(context.getLocation(), context.getRank());
+        if (rank < 0 || rank >= index.getEventCount()) {
+            fLocation = new TmfLongLocation(index.getEventCount());
+            return null;
+        }
+        try {
+            TraceXEvent event = index.readEvent(input, rank);
+            fLocation = new TmfLongLocation(rank + 1);
+            return toTmfEvent(event, rank);
+        } catch (IOException e) {
+            Activator.getInstance().logError(
+                    "Failed to read TraceX event at logical rank " + rank, e); //$NON-NLS-1$
+            return null;
+        }
+    }
+
+    private static long locationRank(@Nullable ITmfLocation location,
+            long defaultRank) {
+        if (location instanceof TmfLongLocation) {
+            Long value = ((TmfLongLocation) location).getLocationInfo();
+            if (value != null) {
+                return value.longValue();
+            }
+        }
+        return defaultRank;
+    }
+
+    private ITmfEvent toTmfEvent(TraceXEvent event, long rank) {
+        Map<String, Object> fields = event.getFields();
+        TmfEventField[] children = new TmfEventField[fields.size()];
+        int position = 0;
+        for (Map.Entry<String, Object> field : fields.entrySet()) {
+            children[position++] = new TmfEventField(field.getKey(),
+                    field.getValue(), null);
+        }
+        TmfEventField content = new TmfEventField(ITmfEventField.ROOT_FIELD_ID,
+                event, children);
+        return new TmfEvent(this, rank,
+                TmfTimestamp.fromNanos(event.getRawTimestamp()),
+                new TmfEventType(event.getMetadata().getName(), null), content);
+    }
+
+    @Override
+    public synchronized @Nullable ITmfEvent getNext(
+            @Nullable ITmfContext context) {
+        if (context == null || isCancelled()) {
+            return null;
+        }
+        return super.getNext(context);
+    }
+
+    @Override
+    public int size() {
+        TraceXEventIndex index = fEventIndex;
+        return index == null ? 0 : (int) index.getEventCount();
+    }
+
+    @Override
+    public int progress() {
+        TraceXEventIndex index = fEventIndex;
+        if (index == null) {
+            return 0;
+        }
+        Long rank = fLocation.getLocationInfo();
+        return (int) index.clampRank(rank == null ? 0 : rank.longValue());
     }
 
     @Override
@@ -146,5 +254,10 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider {
      */
     protected TraceXFile openTrace(Path path) throws IOException {
         return TraceXFile.open(path);
+    }
+
+    /** @return whether initialization or iteration should stop */
+    protected boolean isCancelled() {
+        return Thread.currentThread().isInterrupted();
     }
 }

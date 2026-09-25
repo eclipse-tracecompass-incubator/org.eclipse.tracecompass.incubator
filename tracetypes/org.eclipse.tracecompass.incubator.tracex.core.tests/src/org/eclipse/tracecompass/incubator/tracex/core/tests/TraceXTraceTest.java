@@ -13,6 +13,7 @@ package org.eclipse.tracecompass.incubator.tracex.core.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -23,11 +24,22 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXDataSource;
+import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXEvent;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXFile;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 import org.junit.Test;
 
 /**
@@ -86,7 +98,7 @@ public class TraceXTraceTest {
         expectInitFailure(trace, null);
 
         Path invalid = writeTemp(new byte[48]);
-        Path valid = writeTemp(TraceXTestData.standard(ByteOrder.BIG_ENDIAN).fileBytes());
+        Path valid = writeTemp(oneEventData(ByteOrder.BIG_ENDIAN));
         try {
             expectInitFailure(new TraceXTrace(), invalid.toString());
             expectInitFailure(new FailingOpenTrace(), valid.toString());
@@ -96,15 +108,125 @@ public class TraceXTraceTest {
             assertEquals("BIG_ENDIAN", properties.get("byte_order")); //$NON-NLS-1$ //$NON-NLS-2$
             assertEquals("0xF0000000", properties.get("base_address")); //$NON-NLS-1$ //$NON-NLS-2$
             assertEquals("2", properties.get("event_capacity")); //$NON-NLS-1$ //$NON-NLS-2$
-            assertTrue(trace.getCurrentLocation().toString().contains("96")); //$NON-NLS-1$
+            assertEquals("1", properties.get("event_count")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals("oldest-to-newest", properties.get("event_order")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals(Long.valueOf(0),
+                    ((TmfLongLocation) trace.getCurrentLocation()).getLocationInfo());
             assertEquals(0.0, trace.getLocationRatio(null), 0.0);
-            assertTrue(trace.seekEvent(0.5).toString().contains("96")); //$NON-NLS-1$
+            assertEquals(0, trace.seekEvent(0.5).getRank());
             assertNull(trace.parseEvent(null));
+            ITmfContext context = trace.seekEvent((TmfLongLocation) null);
+            ITmfEvent event = trace.getNext(context);
+            assertNotNull(event);
+            assertEquals(0, event.getRank());
+            assertEquals(1, context.getRank());
+            assertEquals(1, trace.size());
+            assertEquals(1, trace.progress());
+            assertEquals(1.0, trace.getLocationRatio(context.getLocation()), 0.0);
+            assertNull(trace.getNext(context));
         } finally {
             trace.dispose();
             trace.dispose();
             Files.deleteIfExists(valid);
             Files.deleteIfExists(invalid);
+        }
+    }
+
+    /** Tests rank/ratio seeking and independent interleaved contexts. */
+    @Test
+    public void testSeekingAndConcurrentContexts() throws Exception {
+        TraceXTestData.Fixture fixture = TraceXTestData.create(
+                ByteOrder.LITTLE_ENDIAN, 0x80000000L, 8, 1, 4, 2);
+        byte[] data = fixture.fileBytes();
+        long[] timestamps = { 30, 40, 10, 20 };
+        for (int physical = 0; physical < timestamps.length; physical++) {
+            fixture.putEvent(data, physical, 0x1000 + physical, 1,
+                    timestamps[physical]);
+        }
+        Path path = writeTemp(data);
+        TraceXTrace trace = new TraceXTrace();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            trace.initTrace(null, path.toString(), null);
+            assertEquals(4, trace.getNbEvents());
+            assertEquals(0, trace.seekEvent(Double.NaN).getRank());
+            assertEquals(0, trace.seekEvent(Double.NEGATIVE_INFINITY).getRank());
+            assertEquals(0, trace.seekEvent(-1).getRank());
+            assertEquals(2, trace.seekEvent(0.5).getRank());
+            assertEquals(4, trace.seekEvent(1.0).getRank());
+            assertEquals(4, trace.seekEvent(Double.POSITIVE_INFINITY).getRank());
+            assertEquals(0, trace.seekEvent(new TmfLongLocation(-1)).getRank());
+            assertEquals(3, trace.seekEvent(new TmfLongLocation(3)).getRank());
+            assertEquals(4, trace.seekEvent(new TmfLongLocation(5)).getRank());
+
+            for (int iteration = 0; iteration < 100; iteration++) {
+                ITmfContext first = trace.seekEvent(new TmfLongLocation(0));
+                ITmfContext second = trace.seekEvent(new TmfLongLocation(2));
+                CountDownLatch start = new CountDownLatch(1);
+                Callable<long[]> firstRead = () -> readTwo(trace, first, start);
+                Callable<long[]> secondRead = () -> readTwo(trace, second, start);
+                Future<long[]> firstResult = executor.submit(firstRead);
+                Future<long[]> secondResult = executor.submit(secondRead);
+                start.countDown();
+                assertArrayEquals(new long[] { 10, 20 },
+                        firstResult.get(5, TimeUnit.SECONDS));
+                assertArrayEquals(new long[] { 30, 40 },
+                        secondResult.get(5, TimeUnit.SECONDS));
+                assertEquals(2, first.getRank());
+                assertEquals(4, second.getRank());
+            }
+
+            ITmfContext repeated = trace.seekEvent(new TmfLongLocation(1));
+            assertEquals(20, rawEvent(trace.getNext(repeated)).getRawTimestamp());
+            repeated = trace.seekEvent(new TmfLongLocation(1));
+            assertEquals(20, rawEvent(trace.getNext(repeated)).getRawTimestamp());
+            trace.dispose();
+            assertNull(trace.parseEvent(repeated));
+        } finally {
+            executor.shutdownNow();
+            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+            trace.dispose();
+            Files.deleteIfExists(path);
+        }
+    }
+
+    /** Tests cancellation closes a partially initialized owned source. */
+    @Test
+    public void testInitializationCancellation() throws Exception {
+        TraceXTestData.Fixture fixture = TraceXTestData.standard(
+                ByteOrder.LITTLE_ENDIAN);
+        byte[] data = fixture.fileBytes();
+        fixture.putEvent(data, 0, 0x1000, 1, 1);
+        ByteArraySource source = new ByteArraySource(data, false);
+        TraceXTrace trace = new CancelledTrace(source);
+        Path placeholder = writeTemp(data);
+        try {
+            expectInitFailure(trace, placeholder.toString());
+            assertFalse(source.isOpen());
+        } finally {
+            trace.dispose();
+            Files.deleteIfExists(placeholder);
+        }
+    }
+
+    /** Tests cancellation during iteration without consuming the context. */
+    @Test
+    public void testIterationCancellation() throws Exception {
+        byte[] data = oneEventData(ByteOrder.LITTLE_ENDIAN);
+        Path path = writeTemp(data);
+        AtomicBoolean cancelled = new AtomicBoolean();
+        ToggleCancellationTrace trace = new ToggleCancellationTrace(cancelled);
+        try {
+            trace.initTrace(null, path.toString(), null);
+            ITmfContext context = trace.seekEvent(0);
+            cancelled.set(true);
+            assertNull(trace.getNext(context));
+            assertEquals(0, context.getRank());
+            cancelled.set(false);
+            assertEquals(1, rawEvent(trace.getNext(context)).getRawTimestamp());
+        } finally {
+            trace.dispose();
+            Files.deleteIfExists(path);
         }
     }
 
@@ -127,7 +249,7 @@ public class TraceXTraceTest {
             trace.initTrace(null, path, null);
             fail("Expected TmfTraceException"); //$NON-NLS-1$
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains(path == null ? "No path" : "Failed to parse")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertTrue(e.getMessage().contains(path == null ? "No path" : "Failed to initialize")); //$NON-NLS-1$ //$NON-NLS-2$
         } finally {
             trace.dispose();
         }
@@ -137,6 +259,29 @@ public class TraceXTraceTest {
         Path path = Files.createTempFile("tracex-", ".trx"); //$NON-NLS-1$ //$NON-NLS-2$
         Files.write(path, data);
         return path;
+    }
+
+    private static byte[] oneEventData(ByteOrder order) {
+        TraceXTestData.Fixture fixture = TraceXTestData.standard(order);
+        byte[] data = fixture.fileBytes();
+        fixture.putEvent(data, 0, 0x1000, 1, 1);
+        return data;
+    }
+
+    private static long[] readTwo(TraceXTrace trace, ITmfContext context,
+            CountDownLatch start) throws Exception {
+        assertTrue(start.await(5, TimeUnit.SECONDS));
+        return new long[] {
+                rawEvent(trace.getNext(context)).getRawTimestamp(),
+                rawEvent(trace.getNext(context)).getRawTimestamp() };
+    }
+
+    private static TraceXEvent rawEvent(ITmfEvent event) {
+        return (TraceXEvent) event.getContent().getValue();
+    }
+
+    private static void assertArrayEquals(long[] expected, long[] actual) {
+        org.junit.Assert.assertArrayEquals(expected, actual);
     }
 
     private static class FailingOpenTrace extends TraceXTrace {
@@ -158,27 +303,63 @@ public class TraceXTraceTest {
 
     private static final class CloseFailingSource implements TraceXDataSource {
 
-        private final byte[] fHeader;
-        private final long fSize;
-        private boolean fOpen = true;
+        private final ByteArraySource fDelegate;
 
         private CloseFailingSource(TraceXTestData.Fixture fixture) {
-            fHeader = fixture.fHeader.clone();
-            fSize = fixture.fFileSize;
+            byte[] data = fixture.fileBytes();
+            fixture.putEvent(data, 0, 0x1000, 1, 1);
+            fDelegate = new ByteArraySource(data, true);
         }
 
         @Override
         public long size() {
-            return fSize;
+            return fDelegate.size();
         }
 
         @Override
         public int read(ByteBuffer destination, long position) {
-            if (position >= fHeader.length) {
+            return fDelegate.read(destination, position);
+        }
+
+        @Override
+        public boolean isOpen() {
+            return fDelegate.isOpen();
+        }
+
+        @Override
+        public void close() throws IOException {
+            fDelegate.close();
+            throw new IOException("synthetic close failure"); //$NON-NLS-1$
+        }
+    }
+
+    private static class ByteArraySource implements TraceXDataSource {
+
+        private final byte[] fData;
+        private final boolean fPartialReads;
+        private boolean fOpen = true;
+
+        private ByteArraySource(byte[] data, boolean partialReads) {
+            fData = data.clone();
+            fPartialReads = partialReads;
+        }
+
+        @Override
+        public long size() {
+            return fData.length;
+        }
+
+        @Override
+        public int read(ByteBuffer destination, long position) {
+            if (!fOpen || position >= fData.length) {
                 return -1;
             }
-            int count = Math.min(destination.remaining(), fHeader.length - (int) position);
-            destination.put(fHeader, (int) position, count);
+            int count = Math.min(destination.remaining(),
+                    fData.length - (int) position);
+            if (fPartialReads) {
+                count = Math.min(count, 3);
+            }
+            destination.put(fData, (int) position, count);
             return count;
         }
 
@@ -188,9 +369,41 @@ public class TraceXTraceTest {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
             fOpen = false;
-            throw new IOException("synthetic close failure"); //$NON-NLS-1$
+        }
+    }
+
+    private static final class CancelledTrace extends TraceXTrace {
+
+        private final TraceXDataSource fSource;
+
+        private CancelledTrace(TraceXDataSource source) {
+            fSource = source;
+        }
+
+        @Override
+        protected TraceXFile openTrace(Path path) throws IOException {
+            return TraceXFile.open(fSource);
+        }
+
+        @Override
+        protected boolean isCancelled() {
+            return true;
+        }
+    }
+
+    private static final class ToggleCancellationTrace extends TraceXTrace {
+
+        private final AtomicBoolean fCancelled;
+
+        private ToggleCancellationTrace(AtomicBoolean cancelled) {
+            fCancelled = cancelled;
+        }
+
+        @Override
+        protected boolean isCancelled() {
+            return fCancelled.get();
         }
     }
 }

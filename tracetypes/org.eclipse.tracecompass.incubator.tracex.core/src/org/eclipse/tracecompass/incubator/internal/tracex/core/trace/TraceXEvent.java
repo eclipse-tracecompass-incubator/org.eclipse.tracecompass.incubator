@@ -43,6 +43,10 @@ public final class TraceXEvent {
     public static final String FIELD_RAW_TIMESTAMP = "raw_timestamp"; //$NON-NLS-1$
     /** Stable relative-tick placeholder field name. */
     public static final String FIELD_RELATIVE_TICKS = "relative_ticks"; //$NON-NLS-1$
+    /** Stable logical-rank field name. */
+    public static final String FIELD_LOGICAL_RANK = "logical_rank"; //$NON-NLS-1$
+    /** Stable physical-file-offset field name. */
+    public static final String FIELD_PHYSICAL_OFFSET = "physical_offset"; //$NON-NLS-1$
 
     private static final int RECORD_SIZE = 32;
     private static final long INVALID_EVENT = 0xFFFFFFFFL;
@@ -58,6 +62,8 @@ public final class TraceXEvent {
     private final Map<String, TraceXEventField> fAliases;
     private final Map<String, Object> fFields;
     private final OptionalLong fRelativeTicks;
+    private final OptionalLong fLogicalRank;
+    private final OptionalLong fPhysicalOffset;
 
     private TraceXEvent(long rawContextAddress, long rawPriority,
             long rawEventId, long rawTimestamp, long[] informationWords,
@@ -69,12 +75,34 @@ public final class TraceXEvent {
         fRawTimestamp = rawTimestamp;
         fInformationWords = informationWords;
         fRelativeTicks = relativeTicks;
+        fLogicalRank = OptionalLong.empty();
+        fPhysicalOffset = OptionalLong.empty();
         boolean unused = rawEventId == INVALID_EVENT;
         fContext = TraceXContext.decode(rawContextAddress, rawPriority, unused, registry);
         fMetadata = unused ? TraceXMetadataCatalog.invalid()
                 : TraceXMetadataCatalog.lookup(fNormalizedEventId);
         fAliases = createAliases(registry);
         fFields = createFields();
+    }
+
+    private TraceXEvent(TraceXEvent event, long logicalRank, long physicalOffset) {
+        fRawContextAddress = event.fRawContextAddress;
+        fRawPriority = event.fRawPriority;
+        fRawEventId = event.fRawEventId;
+        fNormalizedEventId = event.fNormalizedEventId;
+        fRawTimestamp = event.fRawTimestamp;
+        fInformationWords = event.fInformationWords;
+        fContext = event.fContext;
+        fMetadata = event.fMetadata;
+        fAliases = event.fAliases;
+        fRelativeTicks = event.fRelativeTicks;
+        fLogicalRank = OptionalLong.of(logicalRank);
+        fPhysicalOffset = OptionalLong.of(physicalOffset);
+        fFields = createFields();
+    }
+
+    TraceXEvent withPosition(long logicalRank, long physicalOffset) {
+        return new TraceXEvent(this, logicalRank, physicalOffset);
     }
 
     /**
@@ -135,6 +163,12 @@ public final class TraceXEvent {
         fields.put(FIELD_EVENT_ID, fNormalizedEventId);
         fields.put(FIELD_RAW_TIMESTAMP, fRawTimestamp);
         fields.put(FIELD_RELATIVE_TICKS, fRelativeTicks);
+        if (fLogicalRank.isPresent()) {
+            fields.put(FIELD_LOGICAL_RANK, fLogicalRank.getAsLong());
+        }
+        if (fPhysicalOffset.isPresent()) {
+            fields.put(FIELD_PHYSICAL_OFFSET, fPhysicalOffset.getAsLong());
+        }
         for (int i = 0; i < fInformationWords.length; i++) {
             fields.put("raw_info_" + (i + 1), fInformationWords[i]); //$NON-NLS-1$
         }
@@ -197,6 +231,16 @@ public final class TraceXEvent {
     /** @return relative ticks, deliberately unset until time normalization */
     public OptionalLong getRelativeTicks() {
         return fRelativeTicks;
+    }
+
+    /** @return logical event rank when read through an event index */
+    public OptionalLong getLogicalRank() {
+        return fLogicalRank;
+    }
+
+    /** @return physical file offset when read through an event index */
+    public OptionalLong getPhysicalOffset() {
+        return fPhysicalOffset;
     }
 
     /**
