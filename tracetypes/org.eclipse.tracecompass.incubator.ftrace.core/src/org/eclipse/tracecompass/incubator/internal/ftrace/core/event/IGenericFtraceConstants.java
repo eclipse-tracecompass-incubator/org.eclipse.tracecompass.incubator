@@ -67,7 +67,7 @@ public interface IGenericFtraceConstants {
      * Pattern to match the rest of the event (event name, event fields), like:
      * sched_switch: prev_comm=kworker/u16:6 prev_pid=214 prev_prio=120 prev_state=R+ ==> next_comm=swapper/2 next_pid=0 next_prio=120
      */
-    "(?<name>\\w+)(?<separator>:\\s+|\\(|\\s+->\\s+)(?<data>[^\\)]*)(\\))?" //$NON-NLS-1$
+    "(?<name>\\w+)(?<separator>:\\s+|\\(|\\s+->\\s+)(?<data>.*)$" //$NON-NLS-1$
     );
     /**
      * comm group in {@link IGenericFtraceConstants#FTRACE_PATTERN}
