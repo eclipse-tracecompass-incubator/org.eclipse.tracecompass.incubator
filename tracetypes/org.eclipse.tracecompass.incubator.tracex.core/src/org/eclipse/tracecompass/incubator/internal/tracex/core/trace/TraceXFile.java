@@ -133,6 +133,13 @@ public final class TraceXFile implements AutoCloseable {
         return Integer.toUnsignedLong(context.getInt());
     }
 
+    synchronized long readEventTimestamp(long physicalIndex) throws IOException {
+        ByteBuffer timestamp = readEventBytes(physicalIndex,
+                Integer.BYTES * 4).order(fLayout.getByteOrder());
+        timestamp.position(Integer.BYTES * 3);
+        return Integer.toUnsignedLong(timestamp.getInt());
+    }
+
     private ByteBuffer readEventBytes(long physicalIndex, int size)
             throws IOException {
         requireOpen();

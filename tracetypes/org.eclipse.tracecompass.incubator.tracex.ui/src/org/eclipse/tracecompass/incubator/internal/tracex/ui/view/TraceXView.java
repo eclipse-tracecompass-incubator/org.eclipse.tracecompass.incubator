@@ -35,7 +35,7 @@ public class TraceXView extends TmfView {
         super.createPartControl(parent);
         if (parent != null) {
             Label label = new Label(parent, SWT.WRAP);
-            label.setText("TraceX execution analysis is under development."); //$NON-NLS-1$
+            label.setText("TraceX time is shown in nanoseconds when ticks per second is configured; otherwise values are relative ordering ticks and physical time is unavailable."); //$NON-NLS-1$
         }
     }
 

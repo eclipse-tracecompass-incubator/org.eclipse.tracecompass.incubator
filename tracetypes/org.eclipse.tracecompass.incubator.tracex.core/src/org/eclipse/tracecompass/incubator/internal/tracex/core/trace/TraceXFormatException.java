@@ -29,4 +29,16 @@ public class TraceXFormatException extends IOException {
     public TraceXFormatException(String message) {
         super(message);
     }
+
+    /**
+     * Construct a format exception with its arithmetic cause.
+     *
+     * @param message
+     *            concise description of the invalid invariant
+     * @param cause
+     *            arithmetic failure
+     */
+    public TraceXFormatException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
