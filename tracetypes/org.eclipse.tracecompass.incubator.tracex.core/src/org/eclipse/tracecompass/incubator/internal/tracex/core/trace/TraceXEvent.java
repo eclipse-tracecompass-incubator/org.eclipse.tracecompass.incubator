@@ -85,7 +85,8 @@ public final class TraceXEvent {
         fFields = createFields();
     }
 
-    private TraceXEvent(TraceXEvent event, long logicalRank, long physicalOffset) {
+    private TraceXEvent(TraceXEvent event, long relativeTicks, long logicalRank,
+            long physicalOffset) {
         fRawContextAddress = event.fRawContextAddress;
         fRawPriority = event.fRawPriority;
         fRawEventId = event.fRawEventId;
@@ -95,14 +96,15 @@ public final class TraceXEvent {
         fContext = event.fContext;
         fMetadata = event.fMetadata;
         fAliases = event.fAliases;
-        fRelativeTicks = event.fRelativeTicks;
+        fRelativeTicks = OptionalLong.of(relativeTicks);
         fLogicalRank = OptionalLong.of(logicalRank);
         fPhysicalOffset = OptionalLong.of(physicalOffset);
         fFields = createFields();
     }
 
-    TraceXEvent withPosition(long logicalRank, long physicalOffset) {
-        return new TraceXEvent(this, logicalRank, physicalOffset);
+    TraceXEvent withTimeAndPosition(long relativeTicks, long logicalRank,
+            long physicalOffset) {
+        return new TraceXEvent(this, relativeTicks, logicalRank, physicalOffset);
     }
 
     /**
@@ -162,7 +164,9 @@ public final class TraceXEvent {
         fields.put(FIELD_RAW_EVENT_ID, fRawEventId);
         fields.put(FIELD_EVENT_ID, fNormalizedEventId);
         fields.put(FIELD_RAW_TIMESTAMP, fRawTimestamp);
-        fields.put(FIELD_RELATIVE_TICKS, fRelativeTicks);
+        if (fRelativeTicks.isPresent()) {
+            fields.put(FIELD_RELATIVE_TICKS, fRelativeTicks.getAsLong());
+        }
         if (fLogicalRank.isPresent()) {
             fields.put(FIELD_LOGICAL_RANK, fLogicalRank.getAsLong());
         }
@@ -228,7 +232,7 @@ public final class TraceXEvent {
         return fRawTimestamp;
     }
 
-    /** @return relative ticks, deliberately unset until time normalization */
+    /** @return normalized relative ticks when read through an event index */
     public OptionalLong getRelativeTicks() {
         return fRelativeTicks;
     }

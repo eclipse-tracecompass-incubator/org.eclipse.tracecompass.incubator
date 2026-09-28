@@ -157,7 +157,7 @@ public class TraceXEventMetadataTest {
             assertEquals(TraceXContext.Kind.THREAD.name(), fields.get(TraceXEvent.FIELD_CONTEXT));
             assertEquals("lock", fields.get("mutex_name")); //$NON-NLS-1$ //$NON-NLS-2$
             assertEquals(mutex, fields.get("raw_info_1")); //$NON-NLS-1$
-            assertEquals(event.getRelativeTicks(), fields.get(TraceXEvent.FIELD_RELATIVE_TICKS));
+            assertFalse(fields.containsKey(TraceXEvent.FIELD_RELATIVE_TICKS));
             assertThrows(UnsupportedOperationException.class,
                     () -> fields.put("x", 1)); //$NON-NLS-1$
         }

@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.internal.tracex.core.analysis;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
 import org.eclipse.tracecompass.tmf.core.model.ITmfDataProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -26,6 +27,8 @@ public class TraceXDataProviderFactory implements IDataProviderFactory {
 
     @Override
     public @Nullable ITmfDataProvider createDataProvider(ITmfTrace trace) {
-        return null;
+        return trace instanceof TraceXTrace
+                ? new TraceXDataProvider((TraceXTrace) trace)
+                : null;
     }
 }

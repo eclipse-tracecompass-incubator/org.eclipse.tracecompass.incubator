@@ -94,6 +94,10 @@ public class TraceXEventIndexTest {
             TraceXEvent last = index.readEvent(opened.fInput, 3);
             assertEquals(0xfffffffeL, first.getRawTimestamp());
             assertEquals(9, last.getRawTimestamp());
+            assertEquals(0, first.getRelativeTicks().getAsLong());
+            assertEquals(11, last.getRelativeTicks().getAsLong());
+            assertEquals(11L,
+                    last.getFields().get(TraceXEvent.FIELD_RELATIVE_TICKS));
             assertEquals(0, first.getLogicalRank().getAsLong());
             assertEquals(fixture.fEventStart + 2 * 32,
                     first.getPhysicalOffset().getAsLong());

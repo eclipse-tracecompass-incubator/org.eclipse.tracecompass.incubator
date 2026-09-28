@@ -51,6 +51,34 @@ ratio zero selects the first event and ratio one selects the end context.
 Reads use positional file access, so separate contexts do not share channel
 position or iteration state.
 
+## Time normalization
+
+The raw unsigned timer word is retained on every event. Logical event order is
+authoritative: rank zero has relative tick zero, and later ranks accumulate
+modular deltas. The timer direction is one trace-wide setting backed by the
+target configuration; it is never inferred independently from adjacent event
+values. The control header's contiguous low-bit timer mask defines the modular
+range. Equal masked values have a zero delta. Increasing timers use
+`(current - previous) mod range`; decreasing timers use
+`(previous - current) mod range`. Checked arithmetic rejects a trace rather
+than allowing accumulated ticks to exceed the signed 64-bit timestamp domain.
+
+Trace Compass timestamps use one ordering unit per relative tick until a clock
+frequency is configured. Those values preserve event order but do not claim to
+be nanoseconds. A configured frequency is a positive decimal integer no greater
+than 1,000,000,000 ticks per second. Nanoseconds are calculated as
+`(ticks / frequency) * 1,000,000,000 +
+(ticks % frequency) * 1,000,000,000 / frequency`, with checked intermediate
+arithmetic. Fractional nanoseconds are rounded down. Frequencies whose converted
+trace endpoint cannot fit the timestamp domain are rejected.
+
+Clock settings are stored as persistent properties of an imported trace
+resource. Core callers, including headless and server integrations, may set or
+inspect the same configuration through `TraceXTrace`; no UI service is needed.
+Changing a setting validates and builds the replacement time base before it is
+committed, then resets the framework index, analysis data, supplementary data,
+TraceX data-provider instance, and interested views.
+
 To extend the catalog, add an entry to `TraceXMetadataCatalog` using the event ID,
 symbolic name, component category, and aliases from the corresponding current
 component header. An address alias enables registry-name resolution but never

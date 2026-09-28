@@ -26,10 +26,13 @@ public final class TraceXEventIndex {
 
     private final TraceXLayout fLayout;
     private final int[] fPhysicalIndices;
+    private final long[] fRelativeTicks;
 
-    private TraceXEventIndex(TraceXLayout layout, int[] physicalIndices) {
+    private TraceXEventIndex(TraceXLayout layout, int[] physicalIndices,
+            long[] relativeTicks) {
         fLayout = layout;
         fPhysicalIndices = physicalIndices;
+        fRelativeTicks = relativeTicks;
     }
 
     /**
@@ -43,7 +46,8 @@ public final class TraceXEventIndex {
      *             inconsistent, or the operation is interrupted
      */
     public static TraceXEventIndex build(TraceXFile input) throws IOException {
-        return build(input, () -> Thread.currentThread().isInterrupted());
+        return build(input, TraceXTimerDirection.INCREASING,
+                () -> Thread.currentThread().isInterrupted());
     }
 
     /**
@@ -60,7 +64,28 @@ public final class TraceXEventIndex {
      */
     public static TraceXEventIndex build(TraceXFile input,
             BooleanSupplier cancelled) throws IOException {
+        return build(input, TraceXTimerDirection.INCREASING, cancelled);
+    }
+
+    /**
+     * Build an index and normalized time base with explicit configuration.
+     *
+     * @param input
+     *            validated TraceX input
+     * @param direction
+     *            trace-wide target timer direction
+     * @param cancelled
+     *            cancellation predicate checked around every physical record
+     * @return immutable logical event index
+     * @throws IOException
+     *             if an event cannot be read, normalization fails, or the
+     *             operation is cancelled
+     */
+    public static TraceXEventIndex build(TraceXFile input,
+            TraceXTimerDirection direction, BooleanSupplier cancelled)
+            throws IOException {
         Objects.requireNonNull(input);
+        Objects.requireNonNull(direction);
         Objects.requireNonNull(cancelled);
         TraceXLayout layout = input.getLayout();
         int capacity = Math.toIntExact(layout.getEventCapacity());
@@ -90,14 +115,29 @@ public final class TraceXEventIndex {
             for (int rank = 0; rank < firstEmpty; rank++) {
                 partial[rank] = rank;
             }
-            return new TraceXEventIndex(layout, partial);
+            return create(input, layout, partial, direction, cancelled);
         }
 
         int[] circular = new int[capacity];
         for (int rank = 0; rank < capacity; rank++) {
             circular[rank] = (current + rank) % capacity;
         }
-        return new TraceXEventIndex(layout, circular);
+        return create(input, layout, circular, direction, cancelled);
+    }
+
+    private static TraceXEventIndex create(TraceXFile input,
+            TraceXLayout layout, int[] physicalIndices,
+            TraceXTimerDirection direction, BooleanSupplier cancelled)
+            throws IOException {
+        long[] rawTimestamps = new long[physicalIndices.length];
+        for (int rank = 0; rank < physicalIndices.length; rank++) {
+            checkCancelled(cancelled);
+            rawTimestamps[rank] = input.readEventTimestamp(physicalIndices[rank]);
+        }
+        checkCancelled(cancelled);
+        long[] relativeTicks = TraceXTimeNormalizer.normalize(rawTimestamps,
+                layout.getTimerValidMask(), direction);
+        return new TraceXEventIndex(layout, physicalIndices, relativeTicks);
     }
 
     private static void checkCancelled(BooleanSupplier cancelled)
@@ -172,6 +212,18 @@ public final class TraceXEventIndex {
     }
 
     /**
+     * Return normalized relative ticks for a logical event.
+     *
+     * @param rank
+     *            logical event rank
+     * @return monotonically nondecreasing relative ticks
+     */
+    public long getRelativeTicks(long rank) {
+        getPhysicalIndex(rank);
+        return fRelativeTicks[(int) rank];
+    }
+
+    /**
      * Read one indexed event without changing any shared channel position.
      *
      * @param input
@@ -185,6 +237,7 @@ public final class TraceXEventIndex {
     public TraceXEvent readEvent(TraceXFile input, long rank) throws IOException {
         Objects.requireNonNull(input);
         int physical = getPhysicalIndex(rank);
-        return input.readEvent(physical).withPosition(rank, getPhysicalOffset(rank));
+        return input.readEvent(physical).withTimeAndPosition(
+                fRelativeTicks[(int) rank], rank, getPhysicalOffset(rank));
     }
 }

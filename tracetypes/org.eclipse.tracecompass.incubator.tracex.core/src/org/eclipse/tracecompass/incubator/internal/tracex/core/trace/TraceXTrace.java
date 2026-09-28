@@ -17,15 +17,22 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.OptionalLong;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXDataProviderFactory;
+import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
@@ -33,14 +40,18 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.project.model.ITmfPropertiesProvider;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceKnownSize;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 
 /**
  * TraceX trace type backed by a validated 32-bit binary layout and immutable
@@ -50,11 +61,20 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
         ITmfTraceKnownSize {
 
     private static final int CONFIDENCE = 100;
+    private static final String PROPERTY_TICKS_PER_SECOND = "ticks_per_second"; //$NON-NLS-1$
+    private static final String PROPERTY_TIMER_DIRECTION = "timer_direction"; //$NON-NLS-1$
+    private static final QualifiedName PERSISTED_TICKS_PER_SECOND = new QualifiedName(
+            Activator.PLUGIN_ID, PROPERTY_TICKS_PER_SECOND);
+    private static final QualifiedName PERSISTED_TIMER_DIRECTION = new QualifiedName(
+            Activator.PLUGIN_ID, PROPERTY_TIMER_DIRECTION);
 
     private @NonNull TmfLongLocation fLocation = new TmfLongLocation(0L);
+    private final Object fClockConfigurationLock = new Object();
     private @Nullable TraceXFile fInput;
     private @Nullable TraceXEventIndex fEventIndex;
     private @NonNull Map<@NonNull String, @NonNull String> fProperties = Collections.emptyMap();
+    private @NonNull TraceXTimerDirection fTimerDirection = TraceXTimerDirection.INCREASING;
+    private @Nullable Long fTicksPerSecond;
 
     @Override
     public IStatus validate(@Nullable IProject project, @Nullable String path) {
@@ -83,30 +103,98 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
         if (path == null) {
             throw new TmfTraceException("No path supplied"); //$NON-NLS-1$
         }
+        loadConfiguration(resource);
         super.initTrace(resource, path, type);
         TraceXFile input = null;
         try {
             input = openTrace(new File(path).toPath());
-            TraceXEventIndex index = TraceXEventIndex.build(input,
-                    this::isCancelled);
-            TraceXLayout layout = input.getLayout();
-            Map<@NonNull String, @NonNull String> properties = new LinkedHashMap<>(
-                    layout.getProperties());
-            properties.put("event_count", Long.toString(index.getEventCount())); //$NON-NLS-1$
-            properties.put("event_order", "oldest-to-newest"); //$NON-NLS-1$ //$NON-NLS-2$
+            TraceXEventIndex index = buildTimeBase(input, fTimerDirection,
+                    fTicksPerSecond);
             fInput = input;
-            fEventIndex = index;
-            fProperties = Collections.unmodifiableMap(properties);
-            fLocation = new TmfLongLocation(0L);
-            setNbEvents(index.getEventCount());
-        } catch (IOException e) {
+            installTimeBase(index);
+        } catch (IOException | IllegalArgumentException e) {
             closeFailedInput(input, e);
             throw new TmfTraceException("Failed to initialize TraceX trace", e); //$NON-NLS-1$
         }
     }
 
+    private void loadConfiguration(@Nullable IResource resource)
+            throws TmfTraceException {
+        fTimerDirection = TraceXTimerDirection.INCREASING;
+        fTicksPerSecond = null;
+        if (resource == null) {
+            return;
+        }
+        try {
+            String direction = resource.getPersistentProperty(
+                    PERSISTED_TIMER_DIRECTION);
+            if (direction != null) {
+                fTimerDirection = TraceXTimerDirection.parse(direction);
+            }
+            String frequency = resource.getPersistentProperty(
+                    PERSISTED_TICKS_PER_SECOND);
+            if (frequency != null) {
+                fTicksPerSecond = TraceXTimeNormalizer.parseTicksPerSecond(
+                        frequency);
+            }
+        } catch (CoreException | IllegalArgumentException e) {
+            throw new TmfTraceException("Invalid persisted TraceX clock configuration", e); //$NON-NLS-1$
+        }
+    }
+
+    private TraceXEventIndex buildTimeBase(TraceXFile input,
+            TraceXTimerDirection direction, @Nullable Long ticksPerSecond)
+            throws IOException {
+        TraceXEventIndex index = TraceXEventIndex.build(input, direction,
+                this::isCancelled);
+        if (ticksPerSecond != null && index.getEventCount() > 0) {
+            TraceXTimeNormalizer.toNanoseconds(
+                    index.getRelativeTicks(index.getEventCount() - 1),
+                    ticksPerSecond.longValue());
+        }
+        return index;
+    }
+
+    private void installTimeBase(TraceXEventIndex index) {
+        fEventIndex = index;
+        fLocation = new TmfLongLocation(0L);
+        setNbEvents(index.getEventCount());
+        setStartTime(TmfTimestamp.fromNanos(0));
+        long end = index.getEventCount() == 0 ? 0
+                : timestamp(index.getRelativeTicks(index.getEventCount() - 1));
+        setEndTime(TmfTimestamp.fromNanos(end));
+        rebuildProperties(index);
+    }
+
+    private void rebuildProperties(TraceXEventIndex index) {
+        TraceXFile input = fInput;
+        if (input == null) {
+            fProperties = Collections.emptyMap();
+            return;
+        }
+        Map<@NonNull String, @NonNull String> properties = new LinkedHashMap<>(
+                input.getLayout().getProperties());
+        properties.put("event_count", Long.toString(index.getEventCount())); //$NON-NLS-1$
+        properties.put("event_order", "oldest-to-newest"); //$NON-NLS-1$ //$NON-NLS-2$
+        properties.put(PROPERTY_TIMER_DIRECTION,
+                fTimerDirection.getPropertyValue());
+        properties.put("raw_time_status", "preserved-unsigned-32-bit"); //$NON-NLS-1$ //$NON-NLS-2$
+        Long frequency = fTicksPerSecond;
+        if (frequency == null) {
+            properties.put(PROPERTY_TICKS_PER_SECOND, "unavailable"); //$NON-NLS-1$
+            properties.put("time_unit", "ordering-ticks"); //$NON-NLS-1$ //$NON-NLS-2$
+            properties.put("physical_time", "unavailable"); //$NON-NLS-1$ //$NON-NLS-2$
+        } else {
+            properties.put(PROPERTY_TICKS_PER_SECOND,
+                    Long.toString(frequency.longValue()));
+            properties.put("time_unit", "nanoseconds"); //$NON-NLS-1$ //$NON-NLS-2$
+            properties.put("physical_time", "available-rounded-down"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        fProperties = Collections.unmodifiableMap(properties);
+    }
+
     private static void closeFailedInput(@Nullable TraceXFile input,
-            IOException failure) {
+            Throwable failure) {
         if (input != null) {
             try {
                 input.close();
@@ -209,8 +297,16 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
         TmfEventField content = new TmfEventField(ITmfEventField.ROOT_FIELD_ID,
                 event, children);
         return new TmfEvent(this, rank,
-                TmfTimestamp.fromNanos(event.getRawTimestamp()),
+                TmfTimestamp.fromNanos(timestamp(
+                        event.getRelativeTicks().orElseThrow())),
                 new TmfEventType(event.getMetadata().getName(), null), content);
+    }
+
+    private long timestamp(long relativeTicks) {
+        Long frequency = fTicksPerSecond;
+        return frequency == null ? relativeTicks
+                : TraceXTimeNormalizer.toNanoseconds(relativeTicks,
+                        frequency.longValue());
     }
 
     @Override
@@ -241,6 +337,132 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
     @Override
     public @NonNull Map<@NonNull String, @NonNull String> getProperties() {
         return fProperties;
+    }
+
+    /** @return configured target clock frequency, or empty when unknown */
+    public OptionalLong getTicksPerSecond() {
+        Long frequency = fTicksPerSecond;
+        return frequency == null ? OptionalLong.empty()
+                : OptionalLong.of(frequency.longValue());
+    }
+
+    /** @return configured trace-wide target timer direction */
+    public TraceXTimerDirection getTimerDirection() {
+        return fTimerDirection;
+    }
+
+    /**
+     * Set and persist the target clock frequency, then rebuild time-dependent
+     * trace state.
+     *
+     * @param value
+     *            positive decimal ticks per second
+     * @throws TmfTraceException
+     *             if validation, persistence, or rebuilding fails
+     * @throws IllegalArgumentException
+     *             if the value is not a supported positive decimal frequency
+     */
+    public void setTicksPerSecond(String value)
+            throws TmfTraceException {
+        long frequency = TraceXTimeNormalizer.parseTicksPerSecond(value);
+        synchronized (fClockConfigurationLock) {
+            synchronized (this) {
+                if (Long.valueOf(frequency).equals(fTicksPerSecond)) {
+                    return;
+                }
+                replaceClockConfiguration(fTimerDirection,
+                        Long.valueOf(frequency), PERSISTED_TICKS_PER_SECOND,
+                        Long.toString(frequency));
+            }
+            invalidateTimeDependentData();
+        }
+    }
+
+    /**
+     * Clear the target clock frequency and restore ordering-tick timestamps.
+     *
+     * @throws TmfTraceException
+     *             if persistence or rebuilding fails
+     */
+    public void clearTicksPerSecond() throws TmfTraceException {
+        synchronized (fClockConfigurationLock) {
+            synchronized (this) {
+                if (fTicksPerSecond == null) {
+                    return;
+                }
+                replaceClockConfiguration(fTimerDirection, null,
+                        PERSISTED_TICKS_PER_SECOND, null);
+            }
+            invalidateTimeDependentData();
+        }
+    }
+
+    /**
+     * Set and persist the documented target timer direction.
+     *
+     * @param direction
+     *            trace-wide timer direction
+     * @throws TmfTraceException
+     *             if persistence or rebuilding fails
+     */
+    public void setTimerDirection(TraceXTimerDirection direction)
+            throws TmfTraceException {
+        Objects.requireNonNull(direction);
+        synchronized (fClockConfigurationLock) {
+            synchronized (this) {
+                if (direction == fTimerDirection) {
+                    return;
+                }
+                replaceClockConfiguration(direction, fTicksPerSecond,
+                        PERSISTED_TIMER_DIRECTION,
+                        direction.getPropertyValue());
+            }
+            invalidateTimeDependentData();
+        }
+    }
+
+    private void replaceClockConfiguration(TraceXTimerDirection direction,
+            @Nullable Long frequency, QualifiedName persistedName,
+            @Nullable String persistedValue) throws TmfTraceException {
+        TraceXFile input = fInput;
+        if (input == null) {
+            throw new TmfTraceException("TraceX trace is not initialized"); //$NON-NLS-1$
+        }
+        try {
+            TraceXEventIndex replacement = buildTimeBase(input, direction,
+                    frequency);
+            IResource resource = getResource();
+            if (resource != null) {
+                resource.setPersistentProperty(persistedName, persistedValue);
+            }
+            fTimerDirection = direction;
+            fTicksPerSecond = frequency;
+            installTimeBase(replacement);
+        } catch (IOException | CoreException | IllegalArgumentException e) {
+            throw new TmfTraceException(
+                    "Failed to apply TraceX clock configuration: " + e.getMessage(), e); //$NON-NLS-1$
+        }
+    }
+
+    /** Reset all artifacts whose contents depend on the trace time base. */
+    protected void invalidateTimeDependentData() {
+        for (IAnalysisModule module : getAnalysisModules()) {
+            module.cancel();
+            module.waitForCompletion();
+            module.clearPersistentData();
+        }
+        DataProviderManager.getInstance().removeDataProvider(this,
+                TraceXDataProviderFactory.ID);
+        TmfTraceManager.deleteSupplementaryFiles(this);
+        resetIndexer();
+        indexTrace(true);
+        for (IAnalysisModule module : getAnalysisModules()) {
+            if (module.isAutomatic()) {
+                module.schedule();
+            }
+        }
+        TmfSignalManager.dispatchSignal(new TmfTraceUpdatedSignal(this, this,
+                new TmfTimeRange(getStartTime(), getEndTime()), getNbEvents()));
     }
 
     /**
