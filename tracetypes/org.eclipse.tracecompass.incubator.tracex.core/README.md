@@ -79,6 +79,37 @@ Changing a setting validates and builds the replacement time base before it is
 committed, then resets the framework index, analysis data, supplementary data,
 TraceX data-provider instance, and interested views.
 
+## Execution analysis
+
+The execution analysis builds one CPU timeline plus per-context activity rows.
+Thread names and addresses come from the object registry, interrupt rows use the
+recorded interrupt number, and initialization, idle, and unresolved contexts
+remain explicit. Nested interrupts are maintained as a stack; a scheduler
+change during an interrupt becomes visible when the outermost interrupt exits.
+An unmatched interrupt exit increments a diagnostic attribute without damaging
+the active stack. Interrupt exits pop by nesting order; the recorded interrupt
+number is descriptive rather than a correlation key.
+
+The transition table is intentionally limited to events whose information-word
+contract identifies the next running context. Other ThreadX service events do
+not imply a context switch.
+
+| Event | ID | Next scheduler context | Active CPU context |
+| --- | ---: | --- | --- |
+| Thread resume | 1 | Information word 4 | Scheduler, unless in an ISR |
+| Thread suspend | 2 | Information word 4 | Scheduler, unless in an ISR |
+| ISR enter | 3 | Unchanged | Push ISR from information word 2 |
+| ISR exit | 4 | Unchanged | Pop innermost ISR, then restore stack/scheduler |
+| Time slice | 5 | Information word 1 | Scheduler, unless in an ISR |
+| Running | 6 | Event context | Scheduler, unless in an ISR |
+| Thread relinquish | 109 | Information word 2 | Scheduler, unless in an ISR |
+
+Events with equal timestamps are processed in trace rank order. Consequently,
+the final transition at that timestamp is the state visible to a point query.
+The shared data provider exposes this model to both the desktop time-graph view
+and headless/server clients, including requested-time sampling, regex filters,
+styles, tooltips, selection, zoom, and cancellation.
+
 To extend the catalog, add an entry to `TraceXMetadataCatalog` using the event ID,
 symbolic name, component category, and aliases from the corresponding current
 component header. An address alias enables registry-name resolution but never

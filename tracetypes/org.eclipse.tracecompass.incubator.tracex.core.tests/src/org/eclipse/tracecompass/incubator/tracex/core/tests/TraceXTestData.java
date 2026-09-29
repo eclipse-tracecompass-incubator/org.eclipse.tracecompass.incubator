@@ -104,16 +104,40 @@ final class TraceXTestData {
 
         void putEvent(byte[] file, int physicalIndex, long context,
                 long eventId, long timestamp) {
+            putEvent(file, physicalIndex, context, 0x80010002L, eventId,
+                    timestamp, physicalIndex + 1, physicalIndex + 2,
+                    physicalIndex + 3, physicalIndex + 4);
+        }
+
+        void putEvent(byte[] file, int physicalIndex, long context,
+                long priority, long eventId, long timestamp, long info1,
+                long info2, long info3, long info4) {
             int offset = (int) fEventStart + physicalIndex * 32;
             ByteBuffer record = ByteBuffer.wrap(file).order(fOrder);
             record.putInt(offset, (int) context);
-            record.putInt(offset + 4, 0x80010002);
+            record.putInt(offset + 4, (int) priority);
             record.putInt(offset + 8, (int) eventId);
             record.putInt(offset + 12, (int) timestamp);
-            record.putInt(offset + 16, physicalIndex + 1);
-            record.putInt(offset + 20, physicalIndex + 2);
-            record.putInt(offset + 24, physicalIndex + 3);
-            record.putInt(offset + 28, physicalIndex + 4);
+            record.putInt(offset + 16, (int) info1);
+            record.putInt(offset + 20, (int) info2);
+            record.putInt(offset + 24, (int) info3);
+            record.putInt(offset + 28, (int) info4);
+        }
+
+        void putThread(byte[] file, int registryIndex, long address,
+                String name) {
+            int offset = (int) (fRegistryStart
+                    + registryIndex * fRegistryEntrySize);
+            ByteBuffer record = ByteBuffer.wrap(file).order(fOrder);
+            record.put(offset, (byte) 0);
+            record.put(offset + 1, (byte) 1);
+            record.put(offset + 2, (byte) 0x80);
+            record.put(offset + 3, (byte) 5);
+            record.putInt(offset + 4, (int) address);
+            byte[] nameBytes = name.getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+            int count = Math.min(nameBytes.length,
+                    (int) fRegistryEntrySize - 16);
+            System.arraycopy(nameBytes, 0, file, offset + 16, count);
         }
 
         Fixture putInt(int offset, long value) {

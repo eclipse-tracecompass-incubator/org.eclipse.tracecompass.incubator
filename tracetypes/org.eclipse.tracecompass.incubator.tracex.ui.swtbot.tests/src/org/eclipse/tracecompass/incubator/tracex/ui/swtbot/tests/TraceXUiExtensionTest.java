@@ -28,7 +28,7 @@ public class TraceXUiExtensionTest {
     private static final String BUNDLE_ID = "org.eclipse.tracecompass.incubator.tracex.ui"; //$NON-NLS-1$
     private static final String VIEW_ID = "org.eclipse.tracecompass.incubator.tracex.ui.view"; //$NON-NLS-1$
 
-    /** Tests that the UI bundle and its placeholder view are discoverable. */
+    /** Tests that the UI bundle and its execution view are discoverable. */
     @Test
     public void testViewExtension() throws BundleException {
         Bundle bundle = Platform.getBundle(BUNDLE_ID);

@@ -11,25 +11,27 @@
 
 package org.eclipse.tracecompass.incubator.internal.tracex.core.analysis;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
+import java.util.Objects;
+
+import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace;
+import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
+import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 
 /**
- * Placeholder for the TraceX execution analysis.
+ * TraceX single-core execution state-system analysis.
  */
-public class TraceXAnalysis extends TmfAbstractAnalysisModule {
+public class TraceXAnalysis extends TmfStateSystemAnalysisModule {
 
     /** Analysis extension identifier. */
     public static final String ID = "org.eclipse.tracecompass.incubator.tracex.core.analysis"; //$NON-NLS-1$
 
     @Override
-    protected boolean executeAnalysis(IProgressMonitor monitor) {
-        monitor.done();
-        return !monitor.isCanceled();
+    protected ITmfStateProvider createStateProvider() {
+        return new TraceXStateProvider((TraceXTrace) Objects.requireNonNull(getTrace()));
     }
 
     @Override
-    protected void canceling() {
-        // There is no analysis work to cancel while the implementation is pending.
+    protected String getSsFileName() {
+        return ID + ".v" + TraceXStateProvider.VERSION + ".ht"; //$NON-NLS-1$ //$NON-NLS-2$
     }
 }

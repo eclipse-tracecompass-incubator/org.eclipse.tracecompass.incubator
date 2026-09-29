@@ -109,6 +109,11 @@ public class TraceXTraceTest {
             assertEquals("0xF0000000", properties.get("base_address")); //$NON-NLS-1$ //$NON-NLS-2$
             assertEquals("2", properties.get("event_capacity")); //$NON-NLS-1$ //$NON-NLS-2$
             assertEquals("1", properties.get("event_count")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals("partial", properties.get("event_buffer_status")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals("1", properties.get("registry_record_count")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals("0", properties.get("registry_valid_count")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals("0", properties.get("registry_in_use_count")); //$NON-NLS-1$ //$NON-NLS-2$
+            assertEquals("0", properties.get("registry_diagnostic_count")); //$NON-NLS-1$ //$NON-NLS-2$
             assertEquals("oldest-to-newest", properties.get("event_order")); //$NON-NLS-1$ //$NON-NLS-2$
             assertEquals(Long.valueOf(0),
                     ((TmfLongLocation) trace.getCurrentLocation()).getLocationInfo());
