@@ -152,6 +152,11 @@ public final class TraceXEventIndex {
         return fPhysicalIndices.length;
     }
 
+    /** @return whether every physical event slot contains a valid event */
+    public boolean isCircular() {
+        return fPhysicalIndices.length == fLayout.getEventCapacity();
+    }
+
     /**
      * Clamp an arbitrary requested rank to the inclusive start/exclusive end
      * context range.

@@ -37,6 +37,7 @@ public final class TraceXMetadataCatalog {
                 a(1, "stack"), v(2, "isr_number"), v(3, "system_state"), v(4, "preempt_disable")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         add(events, 5, "TX_TRACE_TIME_SLICE", t(), //$NON-NLS-1$
                 a(1, "next_thread"), v(2, "system_state"), v(3, "preempt_disable"), a(4, "stack")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        add(events, 6, "TX_TRACE_RUNNING", t()); //$NON-NLS-1$
         add(events, 32, "TX_TRACE_EVENT_FLAGS_GET", t(), //$NON-NLS-1$
                 a(1, "event_flags"), v(2, "requested_flags"), v(3, "current_flags"), v(4, "get_option")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         add(events, 36, "TX_TRACE_EVENT_FLAGS_SET", t(), //$NON-NLS-1$

@@ -175,6 +175,23 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
         Map<@NonNull String, @NonNull String> properties = new LinkedHashMap<>(
                 input.getLayout().getProperties());
         properties.put("event_count", Long.toString(index.getEventCount())); //$NON-NLS-1$
+        properties.put("event_buffer_status", //$NON-NLS-1$
+                index.isCircular() ? "circular-full" : "partial"); //$NON-NLS-1$ //$NON-NLS-2$
+        try {
+            TraceXRegistry registry = input.getRegistry();
+            long valid = registry.getRecords().stream()
+                    .filter(TraceXRegistryRecord::isValid).count();
+            long inUse = registry.getRecords().stream()
+                    .filter(TraceXRegistryRecord::isInUse).count();
+            properties.put("registry_record_count", //$NON-NLS-1$
+                    Long.toString(registry.getRecords().size()));
+            properties.put("registry_valid_count", Long.toString(valid)); //$NON-NLS-1$
+            properties.put("registry_in_use_count", Long.toString(inUse)); //$NON-NLS-1$
+            properties.put("registry_diagnostic_count", //$NON-NLS-1$
+                    Integer.toString(registry.getDiagnostics().size()));
+        } catch (IOException e) {
+            Activator.getInstance().logError("Failed to read TraceX registry properties", e); //$NON-NLS-1$
+        }
         properties.put("event_order", "oldest-to-newest"); //$NON-NLS-1$ //$NON-NLS-2$
         properties.put(PROPERTY_TIMER_DIRECTION,
                 fTimerDirection.getPropertyValue());
@@ -349,6 +366,21 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
     /** @return configured trace-wide target timer direction */
     public TraceXTimerDirection getTimerDirection() {
         return fTimerDirection;
+    }
+
+    /**
+     * Get the immutable decoded registry used by execution analyses.
+     *
+     * @return decoded registry
+     * @throws IOException
+     *             if the trace was disposed or the registry cannot be read
+     */
+    public synchronized TraceXRegistry getRegistry() throws IOException {
+        TraceXFile input = fInput;
+        if (input == null) {
+            throw new IOException("TraceX trace is not initialized"); //$NON-NLS-1$
+        }
+        return input.getRegistry();
     }
 
     /**

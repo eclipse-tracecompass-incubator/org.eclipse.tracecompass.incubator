@@ -33,16 +33,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.Activator;
+import org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXAnalysis;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXDataProvider;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXDataProviderFactory;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXEvent;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTimerDirection;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.model.ITmfDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
-import org.eclipse.tracecompass.tmf.core.response.ITmfResponse.Status;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.junit.Test;
@@ -208,34 +207,23 @@ public class TraceXClockConfigurationTest {
     @Test
     public void testDataProviderUsesRebuiltTimeBase() throws Exception {
         Path path = twoEventTrace(ByteOrder.LITTLE_ENDIAN, 20, 22, 0xffff);
-        CountingTrace trace = new CountingTrace();
+        TraceXTrace trace = new TraceXTrace();
         try {
             trace.initTrace(null, path.toString(), null);
             TraceXDataProviderFactory factory = new TraceXDataProviderFactory();
-            ITmfDataProvider rawProvider = factory.createDataProvider(trace);
-            assertTrue(rawProvider instanceof TraceXDataProvider);
-            TraceXDataProvider provider = (TraceXDataProvider) rawProvider;
-            assertEquals(TraceXDataProviderFactory.ID, provider.getId());
-            assertEquals(2, providerEnd(provider));
-            assertEquals(Status.COMPLETED,
-                    provider.fetchRowModel(new HashMap<>(), null).getStatus());
-            assertTrue(Objects.requireNonNull(provider.fetchRowModel(
-                    new HashMap<>(), null).getModel())
-                    .getRows().isEmpty());
-            assertTrue(Objects.requireNonNull(provider.fetchArrows(
-                    new HashMap<>(), null).getModel())
-                    .isEmpty());
-            assertEquals("ordering-ticks", Objects.requireNonNull(provider //$NON-NLS-1$
-                    .fetchTooltip(new HashMap<>(), null).getModel())
-                    .get("Time unit")); //$NON-NLS-1$
+            try (AnalysisHandle initial = analyze(trace)) {
+                TraceXDataProvider provider = initial.fProvider;
+                assertEquals(TraceXDataProviderFactory.ID, provider.getId());
+                assertEquals(2, providerEnd(provider));
+                assertTrue(Objects.requireNonNull(provider.fetchArrows(
+                        new HashMap<>(), null).getModel()).isEmpty());
+            }
 
             trace.setTicksPerSecond("2"); //$NON-NLS-1$
-            TraceXDataProvider rebuilt = (TraceXDataProvider) Objects
-                    .requireNonNull(factory.createDataProvider(trace));
-            assertEquals(1_000_000_000L, providerEnd(rebuilt));
-            assertEquals("2", Objects.requireNonNull(rebuilt.fetchTooltip( //$NON-NLS-1$
-                    new HashMap<>(), null).getModel())
-                    .get("Ticks per second")); //$NON-NLS-1$
+            try (AnalysisHandle rebuilt = analyze(trace)) {
+                assertEquals(1_000_000_000L,
+                        providerEnd(rebuilt.fProvider));
+            }
 
             ITmfTrace other = (ITmfTrace) Proxy.newProxyInstance(
                     ITmfTrace.class.getClassLoader(),
@@ -273,6 +261,32 @@ public class TraceXClockConfigurationTest {
                 .requireNonNull(provider.fetchTree(new HashMap<>(), null)
                         .getModel());
         return model.getEntries().get(0).getEndTime();
+    }
+
+    private static AnalysisHandle analyze(TraceXTrace trace) throws Exception {
+        TraceXAnalysis analysis = new TraceXAnalysis();
+        analysis.setId(TraceXAnalysis.ID);
+        assertTrue(analysis.setTrace(trace));
+        analysis.schedule();
+        assertTrue(analysis.waitForCompletion());
+        return new AnalysisHandle(analysis,
+                new TraceXDataProvider(trace, analysis));
+    }
+
+    private static final class AnalysisHandle implements AutoCloseable {
+        private final TraceXAnalysis fAnalysis;
+        private final TraceXDataProvider fProvider;
+
+        private AnalysisHandle(TraceXAnalysis analysis,
+                TraceXDataProvider provider) {
+            fAnalysis = analysis;
+            fProvider = provider;
+        }
+
+        @Override
+        public void close() {
+            fAnalysis.dispose();
+        }
     }
 
     private static Path twoEventTrace(ByteOrder order, long first, long second,

@@ -16,6 +16,7 @@ import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderFactory;
 import org.eclipse.tracecompass.tmf.core.model.ITmfDataProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
 /**
  * Integration point for the shared TraceX execution data provider.
@@ -27,8 +28,15 @@ public class TraceXDataProviderFactory implements IDataProviderFactory {
 
     @Override
     public @Nullable ITmfDataProvider createDataProvider(ITmfTrace trace) {
-        return trace instanceof TraceXTrace
-                ? new TraceXDataProvider((TraceXTrace) trace)
-                : null;
+        if (!(trace instanceof TraceXTrace)) {
+            return null;
+        }
+        TraceXAnalysis analysis = TmfTraceUtils.getAnalysisModuleOfClass(trace,
+                TraceXAnalysis.class, TraceXAnalysis.ID);
+        if (analysis == null) {
+            return null;
+        }
+        analysis.schedule();
+        return new TraceXDataProvider(trace, analysis);
     }
 }

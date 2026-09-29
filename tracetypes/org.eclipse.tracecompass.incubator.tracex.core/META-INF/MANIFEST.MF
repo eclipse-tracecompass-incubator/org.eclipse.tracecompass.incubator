@@ -11,7 +11,9 @@ Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.tracecompass.common.core,
+ org.eclipse.tracecompass.statesystem.core,
  org.eclipse.tracecompass.tmf.core,
+ com.google.guava,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.internal.tracex.core;x-friends:="org.eclipse.tracecompass.incubator.tracex.core.tests",
  org.eclipse.tracecompass.incubator.internal.tracex.core.analysis;x-friends:="org.eclipse.tracecompass.incubator.tracex.core.tests",

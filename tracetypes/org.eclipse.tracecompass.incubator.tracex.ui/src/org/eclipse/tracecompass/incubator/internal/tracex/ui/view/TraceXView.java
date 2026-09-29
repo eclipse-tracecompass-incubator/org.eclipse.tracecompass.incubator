@@ -11,36 +11,22 @@
 
 package org.eclipse.tracecompass.incubator.internal.tracex.ui.view;
 
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.tracecompass.tmf.ui.views.TmfView;
+import org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXDataProviderFactory;
+import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
+import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
 
 /**
- * Placeholder view for the TraceX execution analysis.
+ * TraceX execution time-graph view.
  */
-public class TraceXView extends TmfView {
+@SuppressWarnings("restriction")
+public class TraceXView extends BaseDataProviderTimeGraphView {
 
     /** View extension identifier. */
     public static final String ID = "org.eclipse.tracecompass.incubator.tracex.ui.view"; //$NON-NLS-1$
 
     /** Constructor. */
     public TraceXView() {
-        super("TraceX Execution"); //$NON-NLS-1$
-    }
-
-    @Override
-    public void createPartControl(@Nullable Composite parent) {
-        super.createPartControl(parent);
-        if (parent != null) {
-            Label label = new Label(parent, SWT.WRAP);
-            label.setText("TraceX time is shown in nanoseconds when ticks per second is configured; otherwise values are relative ordering ticks and physical time is unavailable."); //$NON-NLS-1$
-        }
-    }
-
-    @Override
-    public void setFocus() {
-        // The placeholder view has no interactive control yet.
+        super(ID, new BaseDataProviderTimeGraphPresentationProvider(),
+                TraceXDataProviderFactory.ID);
     }
 }
