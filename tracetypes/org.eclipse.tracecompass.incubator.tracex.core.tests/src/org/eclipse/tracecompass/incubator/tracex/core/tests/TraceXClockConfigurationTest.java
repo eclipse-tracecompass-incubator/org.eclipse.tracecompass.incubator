@@ -23,6 +23,8 @@ import java.lang.reflect.Proxy;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -39,11 +41,18 @@ import org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXDa
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXEvent;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTimerDirection;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.model.ITmfDataProvider;
 import org.eclipse.tracecompass.tmf.core.model.timegraph.TimeGraphEntryModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.TmfTreeModel;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
+import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.junit.Test;
 
 /** Tests per-trace clock configuration, persistence, and rebuilt consumers. */
@@ -209,7 +218,9 @@ public class TraceXClockConfigurationTest {
         Path path = twoEventTrace(ByteOrder.LITTLE_ENDIAN, 20, 22, 0xffff);
         TraceXTrace trace = new TraceXTrace();
         try {
-            trace.initTrace(null, path.toString(), null);
+            trace.initTrace(null, path.toString(), ITmfEvent.class,
+                    "server.trx", //$NON-NLS-1$
+                    "org.eclipse.tracecompass.incubator.tracex.core.trace"); //$NON-NLS-1$
             TraceXDataProviderFactory factory = new TraceXDataProviderFactory();
             try (AnalysisHandle initial = analyze(trace)) {
                 TraceXDataProvider provider = initial.fProvider;
@@ -228,8 +239,41 @@ public class TraceXClockConfigurationTest {
             ITmfTrace other = (ITmfTrace) Proxy.newProxyInstance(
                     ITmfTrace.class.getClassLoader(),
                     new Class<?>[] { ITmfTrace.class },
-                    (proxy, method, arguments) -> null);
+                    (proxy, method, arguments) -> "getChildren" //$NON-NLS-1$
+                            .equals(method.getName()) ? Collections.emptyList()
+                                    : null);
             assertNull(factory.createDataProvider(other));
+            assertTrue(factory.getDescriptors(other).isEmpty());
+
+            TraceXAnalysis serverAnalysis = new TraceXAnalysis();
+            serverAnalysis.setId(TraceXAnalysis.ID);
+            assertTrue(serverAnalysis.setTrace(trace));
+            assertNull(trace.addAnalysisModule(serverAnalysis));
+            TmfExperiment experiment = new TmfExperiment(ITmfEvent.class,
+                    "TraceX server experiment", new ITmfTrace[] { trace }, //$NON-NLS-1$
+                    TmfExperiment.DEFAULT_INDEX_PAGE_SIZE, null);
+            TmfTraceOpenedSignal opened = new TmfTraceOpenedSignal(this,
+                    experiment, null);
+            try {
+                experiment.traceOpened(opened);
+                TmfTraceManager.getInstance().traceOpened(opened);
+                Collection<IDataProviderDescriptor> descriptors = factory
+                        .getDescriptors(experiment);
+                assertEquals(1, descriptors.size());
+                IDataProviderDescriptor descriptor = descriptors.iterator().next();
+                assertEquals(TraceXDataProviderFactory.ID, descriptor.getId());
+                assertEquals("TraceX Execution", descriptor.getName()); //$NON-NLS-1$
+                assertEquals(ProviderType.TIME_GRAPH, descriptor.getType());
+
+                ITmfDataProvider provider = factory.createDataProvider(experiment);
+                assertNotNull(provider);
+                assertEquals(TraceXDataProviderFactory.ID, provider.getId());
+                provider.dispose();
+            } finally {
+                TmfTraceManager.getInstance().traceClosed(
+                        new TmfTraceClosedSignal(this, experiment));
+                experiment.dispose();
+            }
         } finally {
             trace.dispose();
             Files.deleteIfExists(path);
