@@ -12,12 +12,14 @@
 package org.eclipse.tracecompass.incubator.tracex.core.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.junit.Test;
+import org.osgi.framework.Bundle;
 
 /**
  * Tests the TraceX core extension registrations.
@@ -36,6 +38,20 @@ public class ExtensionRegistrationTest {
         assertExtension("org.eclipse.tracecompass.tmf.core.dataprovider", "dataProviderFactory", //$NON-NLS-1$ //$NON-NLS-2$
                 "org.eclipse.tracecompass.incubator.tracex.core.dataprovider", "class", //$NON-NLS-1$ //$NON-NLS-2$
                 "org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXDataProviderFactory"); //$NON-NLS-1$
+    }
+
+    /** Tests that the server-facing core bundle has no UI dependencies. */
+    @Test
+    public void testCoreBundleIsHeadless() {
+        Bundle bundle = Platform.getBundle(
+                "org.eclipse.tracecompass.incubator.tracex.core"); //$NON-NLS-1$
+        assertNotNull(bundle);
+        String dependencies = bundle.getHeaders("").get("Require-Bundle"); //$NON-NLS-1$ //$NON-NLS-2$
+        assertNotNull(dependencies);
+        assertFalse(dependencies.contains("org.eclipse.ui")); //$NON-NLS-1$
+        assertFalse(dependencies.contains("org.eclipse.swt")); //$NON-NLS-1$
+        assertFalse(dependencies.contains("org.eclipse.jface")); //$NON-NLS-1$
+        assertFalse(dependencies.contains("org.eclipse.tracecompass.tmf.ui")); //$NON-NLS-1$
     }
 
     private static void assertExtension(String extensionPoint, String elementName, String id,

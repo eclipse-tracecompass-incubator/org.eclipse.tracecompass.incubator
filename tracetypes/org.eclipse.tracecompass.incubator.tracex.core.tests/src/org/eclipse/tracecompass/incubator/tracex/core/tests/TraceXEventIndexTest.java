@@ -46,6 +46,8 @@ public class TraceXEventIndexTest {
             try (OpenedIndex opened = open(data)) {
                 TraceXEventIndex index = opened.fIndex;
                 assertEquals(count, index.getEventCount());
+                assertEquals(count, TraceXEventIndex
+                        .build(opened.fInput, () -> false).getEventCount());
                 for (int rank = 0; rank < count; rank++) {
                     assertEquals(rank, index.getPhysicalIndex(rank));
                 }
