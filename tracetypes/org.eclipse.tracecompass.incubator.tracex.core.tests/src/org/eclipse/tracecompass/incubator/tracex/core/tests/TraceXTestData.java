@@ -17,9 +17,15 @@ import java.nio.ByteOrder;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXControlHeader;
 
 /**
- * Compact generated TraceX fixtures used by the parser tests.
+ * Compact generated TraceX fixtures used by the parser and UI tests.
+ *
+ * The encoded control, registry, and event records follow the public
+ * <a href="https://github.com/eclipse-threadx/rtos-docs-asciidoc/blob/main/rtos-docs/tracex/modules/ROOT/pages/chapter11.adoc">TraceX
+ * event-trace format</a>. Tests mutate individual encoded fields when they
+ * intentionally need malformed input; this builder does not call production
+ * parser code.
  */
-final class TraceXTestData {
+public final class TraceXTestData {
 
     static final int TIMER_MASK = 0x0000FFFF;
     static final int BASE_OFFSET = 8;
@@ -37,11 +43,11 @@ final class TraceXTestData {
     private TraceXTestData() {
     }
 
-    static Fixture standard(ByteOrder order) {
+    public static Fixture standard(ByteOrder order) {
         return create(order, 0xF0000000L, 32, 1, 2, 1);
     }
 
-    static Fixture create(ByteOrder order, long base, int nameSize,
+    public static Fixture create(ByteOrder order, long base, int nameSize,
             long registryCapacity, long eventCapacity, long currentIndex) {
         long entrySize = (16L + nameSize + 3L) & -4L;
         long registryStart = TraceXControlHeader.SIZE;
@@ -68,7 +74,7 @@ final class TraceXTestData {
                 registryEnd, entrySize, eventStart, eventEnd, eventCurrent);
     }
 
-    static final class Fixture {
+    public static final class Fixture {
 
         final ByteOrder fOrder;
         final byte[] fHeader;
@@ -96,20 +102,20 @@ final class TraceXTestData {
             fEventCurrent = eventCurrent;
         }
 
-        byte[] fileBytes() {
+        public byte[] fileBytes() {
             byte[] file = new byte[(int) fFileSize];
             System.arraycopy(fHeader, 0, file, 0, fHeader.length);
             return file;
         }
 
-        void putEvent(byte[] file, int physicalIndex, long context,
+        public void putEvent(byte[] file, int physicalIndex, long context,
                 long eventId, long timestamp) {
             putEvent(file, physicalIndex, context, 0x80010002L, eventId,
                     timestamp, physicalIndex + 1, physicalIndex + 2,
                     physicalIndex + 3, physicalIndex + 4);
         }
 
-        void putEvent(byte[] file, int physicalIndex, long context,
+        public void putEvent(byte[] file, int physicalIndex, long context,
                 long priority, long eventId, long timestamp, long info1,
                 long info2, long info3, long info4) {
             int offset = (int) fEventStart + physicalIndex * 32;
@@ -124,13 +130,18 @@ final class TraceXTestData {
             record.putInt(offset + 28, (int) info4);
         }
 
-        void putThread(byte[] file, int registryIndex, long address,
+        public void putThread(byte[] file, int registryIndex, long address,
                 String name) {
+            putObject(file, registryIndex, 1, address, name);
+        }
+
+        public void putObject(byte[] file, int registryIndex, int type,
+                long address, String name) {
             int offset = (int) (fRegistryStart
                     + registryIndex * fRegistryEntrySize);
             ByteBuffer record = ByteBuffer.wrap(file).order(fOrder);
             record.put(offset, (byte) 0);
-            record.put(offset + 1, (byte) 1);
+            record.put(offset + 1, (byte) type);
             record.put(offset + 2, (byte) 0x80);
             record.put(offset + 3, (byte) 5);
             record.putInt(offset + 4, (int) address);
@@ -140,12 +151,12 @@ final class TraceXTestData {
             System.arraycopy(nameBytes, 0, file, offset + 16, count);
         }
 
-        Fixture putInt(int offset, long value) {
+        public Fixture putInt(int offset, long value) {
             ByteBuffer.wrap(fHeader).order(fOrder).putInt(offset, (int) value);
             return this;
         }
 
-        Fixture putShort(int offset, int value) {
+        public Fixture putShort(int offset, int value) {
             ByteBuffer.wrap(fHeader).order(fOrder).putShort(offset, (short) value);
             return this;
         }
