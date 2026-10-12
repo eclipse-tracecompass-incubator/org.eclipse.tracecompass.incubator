@@ -75,8 +75,9 @@ trace endpoint cannot fit the timestamp domain are rejected.
 Clock settings are stored as persistent properties of an imported trace
 resource. Core callers, including headless and server integrations, may set or
 inspect the same configuration through `TraceXTrace`; no UI service is needed.
-Changing a setting validates and builds the replacement time base before it is
-committed, then resets the framework index, analysis data, supplementary data,
+The complete direction/frequency pair uses one atomic resource property, with
+backward-compatible reads of older separate properties. Changing a setting
+validates and builds the replacement time base before it is committed, then resets the framework index, analysis data, supplementary data,
 TraceX data-provider instance, and interested views.
 
 ## Execution analysis
@@ -125,7 +126,7 @@ and registry names, addresses, types, and parameters. The
 contains source-pinned capture tools, a summary schema, derived golden and current
 summaries, and differential reports. The
 [acceptance status](../org.eclipse.tracecompass.incubator.tracex.core.tests/acceptance/ACCEPTANCE.md)
-records outstanding desktop, clock-workflow, platform, and review gates.
+records the current desktop, server, platform, and review evidence and gaps.
 
 | Demonstration | Objects | Input events | Event types | Direction | Last relative tick |
 | --- | ---: | ---: | ---: | --- | ---: |
@@ -144,20 +145,37 @@ and interrupted threads resolve separately from object addresses; UDP contains
 
 ## Configuring a core caller
 
-After `initTrace`, use `setTimerDirection(TraceXTimerDirection.DECREASING)` for a
-known decreasing target and `setTicksPerSecond("1000000")` only for a known
-1 MHz counter. Inspect `getTimerDirection()`, `getTicksPerSecond()`, and
+After `initTrace`, use `configureClock(TraceXTimerDirection.DECREASING, null)`
+for a known decreasing target with unknown frequency, or pass `"1000000"` only
+for a known 1 MHz counter. The pair is validated and persisted together before
+installation. The existing direction/frequency setters delegate to the same
+operation. Inspect `getTimerDirection()`, `getTicksPerSecond()`, and
 `getProperties()` when recording evidence. `clearTicksPerSecond()` restores
 ordering ticks. Callers must handle `TmfTraceException` and rejected frequency
 values. These are Incubator internal APIs, not a stable public API contract.
 
 Workspace trace resources persist settings; resource-free inputs do not. Clock
 changes rebuild the logical index and invalidate analysis, supplementary data,
-provider instances, and views. A server integration must configure the actual
-trace before comparing physical or decreasing-counter time. The current desktop
-has no clock editor, and TSP has no TraceX clock-setting endpoint. The automated
-persistence check uses the setters directly and does not establish a user-facing
-configuration workflow.
+provider instances, and views. The desktop Clock dialog labels the timestamp
+domain and rebuilds cached time-graph entries after a change. State-system tree
+endpoints are inclusive; the generic time-graph view extends their drawing bound
+by one timestamp unit.
+
+`TraceXClockConfigurationSource` registers with the existing TMF configuration
+extension. Its type ID is `org.eclipse.tracecompass.incubator.tracex.core.clock`.
+The server's existing `/config/types/{typeId}/configs` routes expose it without
+UI or REST dependencies in this bundle. Parameters are `trace_uri` (the imported
+file location), `timer_direction` (`increasing` or `decreasing`), and optional
+`ticks_per_second` (a decimal string). Omitting frequency clears physical time.
+A stable resource-based configuration ID survives source disposal and restart;
+only customized clocks are listed, and deleting one restores default settings.
+
+Close all experiments containing the trace before applying server clock changes,
+then reopen them. The source rejects resources owned by open traces or experiment
+members because a merged experiment cannot safely retain its previous time
+domain. It also rejects ambiguous imported locations, invalid fields, unsupported
+keys, and updates with a mismatched configuration ID. See the user guide for
+complete REST requests and the configuration-source tests for these contracts.
 
 ## Extending metadata and analysis
 

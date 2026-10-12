@@ -16,8 +16,9 @@ files or another working tree.
 | Timer masks, directions, wraps, equal ticks, conversion limits, persistence, and invalidation | `TraceXTimeNormalizerTest`, `TraceXClockConfigurationTest` |
 | Execution identities, every transition, nested/incomplete interrupts, equal times, and diagnostics | `TraceXExecutionContextTest`, `TraceXExecutionAnalysisTest` |
 | Provider identifiers, trees, rows, filtering, styles, tooltips, selection, and cancellation | `TraceXExecutionAnalysisTest`, `TraceXClockConfigurationTest` |
+| Configuration-source discovery, atomic clock updates, imported-resource CRUD, reopen/reset, and active-trace rejection | `TraceXClockConfigurationSourceTest`, `TraceXClockConfigurationTest` |
 | Core extension registration, headless dependencies, and bundle lifecycle | `ExtensionRegistrationTest`, `ActivatorTest` |
-| Import, event selection/filtering, clock persistence, execution view, and cross-selection | `TraceXUiWorkflowTest` |
+| Import, event selection/filtering, dialog validation, unknown-time clearing, clock persistence, refreshed execution view, and cross-selection | `TraceXUiWorkflowTest` |
 
 ## Coverage gate
 
@@ -27,7 +28,8 @@ The aggregate report reads the same execution data produced by the Tycho test
 runtime.
 
 The gate excludes `TraceXTrace`, `TraceXDataProvider`,
-`TraceXDataProviderFactory`, bundle activators, and the SWT view. These classes
+`TraceXDataProviderFactory`, `TraceXClockConfigurationSource`, bundle activators,
+and the SWT view/dialog. These classes
 adapt the covered logic to Trace Compass lifecycle, data-provider, extension,
 and widget APIs. Their observable contracts are exercised by the core
 integration tests, server-product builds, and SWTBot workflow test instead of by

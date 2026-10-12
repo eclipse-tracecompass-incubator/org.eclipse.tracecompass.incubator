@@ -36,4 +36,7 @@
             id="org.eclipse.tracecompass.incubator.tracex.core.dataprovider">
       </dataProviderFactory>
    </extension>
+   <extension point="org.eclipse.tracecompass.tmf.core.config">
+      <source class="org.eclipse.tracecompass.incubator.internal.tracex.core.config.TraceXClockConfigurationSource"/>
+   </extension>
 </plugin>

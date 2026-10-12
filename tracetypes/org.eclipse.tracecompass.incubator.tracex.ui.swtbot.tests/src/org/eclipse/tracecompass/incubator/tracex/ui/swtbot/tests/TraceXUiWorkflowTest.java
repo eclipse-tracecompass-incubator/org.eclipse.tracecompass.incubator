@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.incubator.tracex.ui.swtbot.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
@@ -21,7 +22,10 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
@@ -35,8 +39,10 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace;
+import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTimerDirection;
 import org.eclipse.tracecompass.incubator.internal.tracex.ui.view.TraceXView;
 import org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXTestData;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.ConditionHelpers;
@@ -44,6 +50,8 @@ import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.SWTBotTimeGraph;
 import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.SWTBotUtils;
 import org.eclipse.tracecompass.tmf.ui.tests.shared.WaitUtils;
 import org.eclipse.tracecompass.tmf.ui.views.filter.FilterView;
+import org.eclipse.tracecompass.tmf.ui.viewers.events.TmfEventsTable;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -121,7 +129,9 @@ public class TraceXUiWorkflowTest {
     @Test
     public void testDesktopWorkflow() throws Exception {
         TraceXTrace configured = activeTrace();
-        configured.setTicksPerSecond("2"); //$NON-NLS-1$
+        SWTBotUtils.openView(VIEW_ID);
+        editClock("Increasing", "2"); //$NON-NLS-1$ //$NON-NLS-2$
+        fBot.waitUntil(new ClockReached(4_000_000_000L, true));
         assertEquals(2, configured.getTicksPerSecond().getAsLong());
         assertEquals(4_000_000_000L, configured.getEndTime().toNanos());
 
@@ -164,6 +174,47 @@ public class TraceXUiWorkflowTest {
         assertEquals(4_000_000_000L, reopened.getEndTime().toNanos());
     }
 
+    /** Tests the clock dialog, rejected input, unknown time, and refreshed view bounds. */
+    @Test
+    public void testClockControlsAndRefresh() {
+        SWTBotUtils.openView(VIEW_ID);
+        TraceXView view = (TraceXView) fBot.viewById(VIEW_ID).getReference().getView(true);
+        fBot.waitUntil(new ClockReached(8, false));
+        fBot.viewById(VIEW_ID).toolbarButton("Configure TraceX clock").click(); //$NON-NLS-1$
+        SWTBot dialog = fBot.shell("TraceX clock").bot(); //$NON-NLS-1$
+        dialog.checkBox("Clock frequency is known").select(); //$NON-NLS-1$
+        dialog.textWithLabel("Ticks per second").setText("0"); //$NON-NLS-1$
+        assertFalse(dialog.button("OK").isEnabled()); //$NON-NLS-1$
+        assertFalse(activeTrace().getTicksPerSecond().isPresent());
+        dialog.textWithLabel("Ticks per second").setText("2"); //$NON-NLS-1$
+        dialog.comboBox().setSelection("Decreasing"); //$NON-NLS-1$
+        dialog.button("OK").click(); //$NON-NLS-1$
+        fBot.waitUntil(new ClockReached(131_068_000_000_000L, true));
+        assertEquals(TraceXTimerDirection.DECREASING, activeTrace().getTimerDirection());
+        editClock("Increasing", null); //$NON-NLS-1$
+        fBot.waitUntil(new ClockReached(8, false));
+        assertTrue(view.getContentDescription().contains("physical time unknown")); //$NON-NLS-1$
+        fBot.closeAllEditors();
+        WaitUtils.waitForJobs();
+        openEditor();
+        assertEquals(TraceXTimerDirection.INCREASING, activeTrace().getTimerDirection());
+        assertFalse(activeTrace().getTicksPerSecond().isPresent());
+    }
+
+    /** Apply clock settings through the same controls used by desktop users. */
+    private static void editClock(String direction, String frequency) {
+        fBot.viewById(VIEW_ID).toolbarButton("Configure TraceX clock").click(); //$NON-NLS-1$
+        SWTBot dialog = fBot.shell("TraceX clock").bot(); //$NON-NLS-1$
+        dialog.comboBox().setSelection(direction);
+        if (frequency == null) {
+            dialog.checkBox("Clock frequency is known").deselect(); //$NON-NLS-1$
+        } else {
+            dialog.checkBox("Clock frequency is known").select(); //$NON-NLS-1$
+            dialog.textWithLabel("Ticks per second").setText(frequency);
+        }
+        dialog.button("OK").click(); //$NON-NLS-1$
+    }
+
     private static SWTBotTreeItem createAndApplyFilter(SWTBotTable events) {
         SWTBotUtils.openView(FilterView.ID);
         SWTBotView viewBot = fBot.viewById(FilterView.ID);
@@ -174,8 +225,8 @@ public class TraceXUiWorkflowTest {
         viewBot.toolbarButton("Add new filter").click(); //$NON-NLS-1$
         tree.getTreeItem("FILTER <name>").select(); //$NON-NLS-1$
         SWTBotText text = filterBot.text();
-        text.setFocus();
-        text.setText(FILTER_NAME);
+        setFilterText(text, FILTER_NAME);
+        tree.setFocus();
         SWTBotTreeItem filterNode = tree.getTreeItem("FILTER " + FILTER_NAME); //$NON-NLS-1$
         filterNode.contextMenu("TRACETYPE").click(); //$NON-NLS-1$
         filterNode.expand();
@@ -194,22 +245,26 @@ public class TraceXUiWorkflowTest {
         andNode.expand();
         filterBot.ccomboBox(1).setSelection("Event type"); //$NON-NLS-1$
         text = filterBot.text();
-        text.setFocus();
-        text.setText("TIME_SLICE"); //$NON-NLS-1$
+        setFilterText(text, "TIME_SLICE"); //$NON-NLS-1$
 
         andNode.contextMenu("MATCHES").click(); //$NON-NLS-1$
         andNode.getNode(1).select();
         filterBot.ccomboBox(1).setSelection("Contents"); //$NON-NLS-1$
         text = filterBot.text(0);
-        text.setFocus();
-        text.setText("context_name"); //$NON-NLS-1$
+        setFilterText(text, "context_name"); //$NON-NLS-1$
         text = filterBot.text(1);
-        text.setFocus();
-        text.setText("alpha"); //$NON-NLS-1$
+        setFilterText(text, "alpha"); //$NON-NLS-1$
         viewBot.toolbarButton("Save filters").click(); //$NON-NLS-1$
 
         events.getTableItem(2).contextMenu(FILTER_NAME).click();
         return filterNode;
+    }
+
+    /** Deliver the focus event that clears filter hints, even without a window manager. */
+    private static void setFilterText(SWTBotText text, String value) {
+        text.setFocus();
+        text.widget.getDisplay().syncExec(() -> text.widget.notifyListeners(SWT.FocusIn, new Event()));
+        text.setText(value);
     }
 
     private static TraceXTrace activeTrace() {
@@ -238,6 +293,60 @@ public class TraceXUiWorkflowTest {
         fixture.putEvent(data, index, context, 0x80010002L, eventId,
                 timestamp, first, eventId == 3 || eventId == 4 ? first : 0,
                 0, fourth);
+    }
+
+    /** Wait until both the trace and its visible time graph reflect the new clock. */
+    private static final class ClockReached extends DefaultCondition {
+        private final long fEnd;
+        private final boolean fKnown;
+        private long fEntryEnd = Long.MIN_VALUE;
+        private final AtomicLong fTableEnd = new AtomicLong(Long.MIN_VALUE);
+
+        private ClockReached(long end, boolean known) {
+            fEnd = end;
+            fKnown = known;
+        }
+
+        @Override
+        public boolean test() {
+            TraceXTrace trace = activeTrace();
+            TraceXView view = (TraceXView) fBot.viewById(VIEW_ID).getReference().getView(true);
+            Object input = view.getTimeGraphViewer().getInput();
+            if (input instanceof Iterable<?>) {
+                for (Object entry : (Iterable<?>) input) {
+                    if (entry instanceof ITimeGraphEntry && ((ITimeGraphEntry) entry).getName().equals(trace.getName())) {
+                        fEntryEnd = ((ITimeGraphEntry) entry).getEndTime();
+                        break;
+                    }
+                }
+            }
+            SWTBotTable table = SWTBotUtils.activeEventsEditor(fBot).bot().table();
+            if (table.rowCount() <= 5) {
+                return false;
+            }
+            table.cell(5, 1);
+            table.widget.getDisplay().syncExec(() -> {
+                Object value = table.widget.getItem(5).getData(TmfEventsTable.Key.TIMESTAMP);
+                fTableEnd.set(value instanceof ITmfTimestamp ? ((ITmfTimestamp) value).toNanos() : Long.MIN_VALUE);
+            });
+            long viewEnd = view.getTimeGraphViewer().getEndTime();
+            return trace.getEndTime().toNanos() == fEnd
+                    && trace.getTicksPerSecond().isPresent() == fKnown
+                    && fEntryEnd == fEnd && fTableEnd.get() == fEnd
+                    // Generic drawing bounds may include the final state's exclusive end.
+                    && (viewEnd == fEnd || viewEnd == fEnd + 1)
+                    && view.getContentDescription().contains(fKnown ? "Nanoseconds" : "Ordering ticks"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        @Override
+        public String getFailureMessage() {
+            TraceXTrace trace = activeTrace();
+            TraceXView view = (TraceXView) fBot.viewById(VIEW_ID).getReference().getView(true);
+            return "Expected clock endpoint " + fEnd + ", trace " + trace.getEndTime().toNanos() //$NON-NLS-1$ //$NON-NLS-2$
+                    + ", frequency " + trace.getTicksPerSecond() + ", view " //$NON-NLS-1$ //$NON-NLS-2$
+                    + view.getTimeGraphViewer().getEndTime() + ", entry " + fEntryEnd //$NON-NLS-1$
+                    + ", table " + fTableEnd.get() + ", label " + view.getContentDescription(); //$NON-NLS-1$
+        }
     }
 
     private static final class TableHasRows extends DefaultCondition {

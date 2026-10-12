@@ -155,8 +155,8 @@ public class TraceXClockConfigurationTest {
             first.initTrace(resource, path.toString(), null);
             first.setTicksPerSecond("4"); //$NON-NLS-1$
             first.setTimerDirection(TraceXTimerDirection.DECREASING);
-            assertTrue(properties.containsValue("4")); //$NON-NLS-1$
-            assertTrue(properties.containsValue("decreasing")); //$NON-NLS-1$
+            assertEquals("decreasing:4", properties.get(new QualifiedName( //$NON-NLS-1$
+                    Activator.PLUGIN_ID, "clock_configuration"))); //$NON-NLS-1$
             first.dispose();
 
             second.initTrace(resource, path.toString(), null);
@@ -280,6 +280,37 @@ public class TraceXClockConfigurationTest {
         }
     }
 
+    /** Tests reuse of an attached analysis without caching its previous state system. */
+    @Test
+    public void testRegisteredAnalysisRefresh() throws Exception {
+        Path path = twoEventTrace(ByteOrder.LITTLE_ENDIAN, 20, 22, 0xffff);
+        TraceXTrace trace = new TraceXTrace();
+        TraceXAnalysis analysis = new TraceXAnalysis();
+        try {
+            trace.initTrace(null, path.toString(), null);
+            analysis.setId(TraceXAnalysis.ID);
+            assertTrue(analysis.setTrace(trace));
+            assertNull(trace.addAnalysisModule(analysis));
+            analysis.schedule();
+            assertTrue(analysis.waitForCompletion());
+            TraceXDataProviderFactory factory = new TraceXDataProviderFactory();
+            ITmfDataProvider initial = Objects.requireNonNull(factory.createDataProvider(trace));
+            assertEquals(2, providerEnd((TraceXDataProvider) initial));
+            initial.dispose();
+            trace.configureClock(TraceXTimerDirection.INCREASING, "2"); //$NON-NLS-1$
+            ITmfDataProvider known = Objects.requireNonNull(factory.createDataProvider(trace));
+            assertEquals(1_000_000_000L, providerEnd((TraceXDataProvider) known));
+            known.dispose();
+            trace.clearTicksPerSecond();
+            ITmfDataProvider unknown = Objects.requireNonNull(factory.createDataProvider(trace));
+            assertEquals(2, providerEnd((TraceXDataProvider) unknown));
+            unknown.dispose();
+        } finally {
+            trace.dispose();
+            Files.deleteIfExists(path);
+        }
+    }
+
     /** Tests the framework index and supplementary-data invalidation path. */
     @Test
     public void testFrameworkInvalidation() throws Exception {
@@ -294,6 +325,87 @@ public class TraceXClockConfigurationTest {
             ITmfEvent event = trace.getNext(context);
             assertNotNull(event);
             assertEquals(1_000_000_000L, event.getTimestamp().toNanos());
+        } finally {
+            trace.dispose();
+            Files.deleteIfExists(path);
+        }
+    }
+
+    /** Tests pair validation, one persisted write, and rejection without a partial clock. */
+    @Test
+    public void testAtomicClockPair() throws Exception {
+        Map<QualifiedName, String> properties = new HashMap<>();
+        Path path = twoEventTrace(ByteOrder.LITTLE_ENDIAN, 8, 4, 0xffff);
+        CountingTrace trace = new CountingTrace();
+        try {
+            trace.initTrace(resource(properties, false), path.toString(), null);
+            assertThrows(IllegalArgumentException.class,
+                    () -> trace.configureClock(TraceXTimerDirection.DECREASING, "0")); //$NON-NLS-1$
+            assertEquals(TraceXTimerDirection.INCREASING, trace.getTimerDirection());
+            assertFalse(trace.getTicksPerSecond().isPresent());
+            assertTrue(properties.isEmpty());
+            assertEquals(0, trace.fInvalidations);
+            trace.configureClock(TraceXTimerDirection.DECREASING, "2"); //$NON-NLS-1$
+            assertEquals(1, properties.size());
+            assertEquals(1, trace.fInvalidations);
+            assertEquals(2_000_000_000L, trace.getEndTime().toNanos());
+            trace.configureClock(TraceXTimerDirection.DECREASING, "2"); //$NON-NLS-1$
+            assertEquals(1, trace.fInvalidations);
+            trace.configureClock(TraceXTimerDirection.INCREASING, null);
+            assertEquals(65_532, trace.getEndTime().toNanos());
+            assertEquals(2, trace.fInvalidations);
+        } finally {
+            trace.dispose();
+            Files.deleteIfExists(path);
+        }
+        CountingTrace failing = new CountingTrace();
+        path = twoEventTrace(ByteOrder.LITTLE_ENDIAN, 8, 4, 0xffff);
+        try {
+            failing.initTrace(resource(new HashMap<>(), true), path.toString(), null);
+            assertThrows(Exception.class,
+                    () -> failing.configureClock(TraceXTimerDirection.DECREASING, "2")); //$NON-NLS-1$
+            assertEquals(TraceXTimerDirection.INCREASING, failing.getTimerDirection());
+            assertFalse(failing.getTicksPerSecond().isPresent());
+            assertEquals(0, failing.fInvalidations);
+        } finally {
+            failing.dispose();
+            Files.deleteIfExists(path);
+        }
+    }
+
+    /** Tests legacy-property migration and malformed atomic clock values. */
+    @Test
+    public void testClockPropertyMigration() throws Exception {
+        Map<QualifiedName, String> properties = new HashMap<>();
+        properties.put(new QualifiedName(Activator.PLUGIN_ID, DIRECTION_PROPERTY), "decreasing"); //$NON-NLS-1$
+        properties.put(new QualifiedName(Activator.PLUGIN_ID, TICKS_PROPERTY), "4"); //$NON-NLS-1$
+        QualifiedName pair = new QualifiedName(Activator.PLUGIN_ID, "clock_configuration"); //$NON-NLS-1$
+        Path path = twoEventTrace(ByteOrder.LITTLE_ENDIAN, 8, 4, 0xffff);
+        CountingTrace trace = new CountingTrace();
+        try {
+            trace.initTrace(resource(properties, false), path.toString(), null);
+            assertEquals(TraceXTimerDirection.DECREASING, trace.getTimerDirection());
+            trace.configureClock(TraceXTimerDirection.INCREASING, null);
+            assertEquals("increasing:", properties.get(pair)); //$NON-NLS-1$
+            trace.dispose();
+            CountingTrace reopened = new CountingTrace();
+            try {
+                reopened.initTrace(resource(properties, false), path.toString(), null);
+                assertEquals(TraceXTimerDirection.INCREASING, reopened.getTimerDirection());
+                assertFalse(reopened.getTicksPerSecond().isPresent());
+            } finally {
+                reopened.dispose();
+            }
+            for (String value : new String[] { "increasing", "bad:4", "increasing:0", "increasing:4:5" }) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+                properties.put(pair, value);
+                CountingTrace malformed = new CountingTrace();
+                try {
+                    assertThrows(Exception.class,
+                            () -> malformed.initTrace(resource(properties, false), path.toString(), null));
+                } finally {
+                    malformed.dispose();
+                }
+            }
         } finally {
             trace.dispose();
             Files.deleteIfExists(path);
