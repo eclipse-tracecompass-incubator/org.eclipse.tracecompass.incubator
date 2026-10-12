@@ -1,0 +1,307 @@
+{
+  "verification_commit": "b4b50aa02db6ae98187ff00a0782e88fa2be76ae",
+  "scope": "Reused existing reports; no core, UI or root test rerun.",
+  "coverage": {
+    "classes": 25,
+    "missed_lines": 0,
+    "missed_branches": 0
+  },
+  "tests": [
+    {
+      "name": "org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXExecutionContextTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.03",
+      "report_sha256": "81bded5ef8e132e6eb3ed8eaa8e9389982bc266a62e4db298dd365d213cbd91d"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.ActivatorTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.001",
+      "report_sha256": "2dbf3282e686f52c7afac1ad0b3cf55b3a77a9e600fcaf7ac898e398986a440e"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.ExtensionRegistrationTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.035",
+      "report_sha256": "e2fc73219e92ae911826bac4a9840d200489692bdf7ef180953ac4e7d5cb7d75"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXClockConfigurationTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "5.088",
+      "report_sha256": "02f3b41d74230c2a3efb38dfe433332bbcc33d6e37c4e64f41fb391021d4186c"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXEventIndexTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.01",
+      "report_sha256": "a6074963c57b31107acef9f2d34f52c955b3e90b5c8d11a1696e536f5f36a061"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXEventMetadataTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.01",
+      "report_sha256": "be16e6b60a833201db94751aedd7ba2f40f70d6422f2730675c6c8af39baf2e9"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXExecutionAnalysisTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "5.332",
+      "report_sha256": "6e6e6095f68251e9db8ca0551a9a8fc3ec0fd86cb3c1417401d7efccf284230b"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXParserTest",
+      "tests": "15",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.087",
+      "report_sha256": "87641f70b7f246018882ecd7417d8b9a2345ad45a3bdf3537a8ff0b77acc750e"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXRegistryTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.017",
+      "report_sha256": "7bd60038f8793dbb29007a0ebe77747d173812ec47a47b90a7936f05e89db1c6"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXTimeNormalizerTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.037",
+      "report_sha256": "4fef9371adc817e3ebd396c4239a3fefdf14c7b7be65c9828163398ce35b8e10"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXTraceTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.097",
+      "report_sha256": "dcd81b6554c3417ea797ae7ef6a7d1e733ec2df1f1b40669a3d21791a6440d95"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.ui.swtbot.tests.TraceXUiExtensionTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.002",
+      "report_sha256": "7e1a439158076c91f789f4a5f7bc35b2a6f40c2e631ef974268b2099ab9a0304"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.tracex.ui.swtbot.tests.TraceXUiWorkflowTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "41.438",
+      "report_sha256": "588f802afc1c20aa98509a73018c2dae03e773456236e8db45c516ed6ee22a15"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.ActivatorTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.001",
+      "report_sha256": "4a43686070d69193e4c1a8bf54bc651f06c6aef4ce984d3424d8f8e284c42441"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.gen.services.TraceManagerServiceTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "2.226",
+      "report_sha256": "b5167d392639276814e83eacf846c3c1a7019f678283476a9ffe8b6936effccb"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.BookmarkManagerServiceTest",
+      "tests": "9",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "12.565",
+      "report_sha256": "a83281da5cb5ee21d3529557833041b0b564361133d0fad2deacc63af5769e54"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.ConfigurationManagerServiceTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "2.392",
+      "report_sha256": "53af4dbc1862d5437a976bfc648566ec4aa5359fbd9b69e7104761d9abaa43d7"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.DataProviderConfigurationServiceTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "7.724",
+      "report_sha256": "bb127d819540318e3c716946d68835bb3bb0417dac9efb11d6dcd62e1b666af0"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.DataProviderServiceTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "3.992",
+      "report_sha256": "abafc692162270a40ce2d30abae0acab7b0ead081ea13490debe61604c09c28a"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.DataTreeDataProviderServiceTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "3.25",
+      "report_sha256": "0e7cc46c0934c129a52b03fbae478c8f4d44956f2037bcc249f5baf00d80660c"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.ExperimentManagerServiceTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "10.641",
+      "report_sha256": "4fa7350468f94278960ab17535ed7c884c5d464c7883b6b202ed8c050cceb9d8"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.GenericXYDataProviderServiceTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "6.478",
+      "report_sha256": "6aae08d980a930a45e5012b9c15bdb4658014db44193e1de378fe4bf50f7b6a1"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.HealthServiceTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.09",
+      "report_sha256": "6b14fe5323e3527230f54c0bc8a7168f0e3468b24a62c2712db1ca698324e0c4"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.IdentifierServiceTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.099",
+      "report_sha256": "60e33254d9bc42dcbf518884873601db4a0e19742c9999db3bafd1620b1d1ebc"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.QueryParametersUtilTest",
+      "tests": "9",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.011",
+      "report_sha256": "70c80cdf4341655e7cad58268afaadb463e31f2610ecb8d5f3c7b4f6e1ee2ce6"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.TableDataProviderServiceTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "7.583",
+      "report_sha256": "c2d3f09bf421825e09279120ab30a9f1c45a29a1c9deffde557191fa66ca4aa1"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.TimeGraphDataProviderServiceTest",
+      "tests": "13",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "23.636",
+      "report_sha256": "e159476a8b1db5638681fb96843e001643129ef9584d608bca4d20a286a71593"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.TraceManagerServiceTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "2.387",
+      "report_sha256": "0953c334e40c7be862f3376b540ba1b19d1b1c42309a02a4d6930c634ba38bbb"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.XyDataProviderServiceTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "5.92",
+      "report_sha256": "702248a8d9202ee92478c6cc11e8c4a16efedcb9538ce619b21af68170d8022d"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.TraceServerConfigurationTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.01",
+      "report_sha256": "157a30eb4a78477d356c52edffd93dfe7af6866998b887d7acb9272fbd3c7cc5"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.webapp.OutputElementStyleSerializerTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.028",
+      "report_sha256": "02ebc6f27ebcda5a3f28e2bcbb30a9a7b1623aba6aa5721f8b2627cbc07ddb49"
+    },
+    {
+      "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.webapp.SeriesModelSerializerTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.063",
+      "report_sha256": "d11b6dc39f15adacf797daacba85be0c41389e1f5c957f40ee4be46e61be7418"
+    }
+  ],
+  "additional_acceptance": {
+    "help_generation": "Existing build.xml build target passed; generated HTML passed XML validation.",
+    "help_source_sha256": "c3546b60902f9e62341740d5aebe1be74fdef424ccc92f208d8eca638415387d",
+    "summary_schema": "All eight golden/current summaries passed JSON Schema and timestamp/histogram length constraints.",
+    "decoder_comparison": "3824 original records matched; one documented legacy-only UDP event retained.",
+    "endian": "Seven complete logical events and registry matched across both byte orders.",
+    "server": "All four demos and both generated fixtures returned completed trees/states; fixture interval labels and bounds matched expectations."
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "method": "POST",
+  "endpoint": "/traces",
+  "request": {
+    "parameters": {
+      "name": "demo_netx_tcp.trx",
+      "uri": "TRACE_URI/demo_netx_tcp.trx",
+      "typeID": "org.eclipse.tracecompass.incubator.tracex.core.trace"
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "name": "demo_netx_tcp.trx",
+    "path": "TRACE_URI/demo_netx_tcp.trx",
+    "UUID": "9465785d-ae2e-3341-910a-6cbf4d9be122",
+    "nbEvents": 0,
+    "start": 0,
+    "end": 0,
+    "properties": {},
+    "indexingStatus": "CLOSED"
+  }
+}

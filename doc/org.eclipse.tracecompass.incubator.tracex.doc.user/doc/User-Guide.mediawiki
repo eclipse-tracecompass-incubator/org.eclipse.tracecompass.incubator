@@ -1,8 +1,70 @@
-
 = TraceX =
 
-TraceX integration is under development. This initial feature contributes the trace type, execution-analysis, data-provider, and view integration points, but it does not parse or analyze TraceX files yet.
+TraceX imports binary event buffers recorded by Eclipse ThreadX and displays events, registered objects, and a single CPU execution timeline. Both little-endian and big-endian 32-bit buffers are supported. The file does not identify the timer direction or clock frequency: confirm the target configuration before interpreting elapsed time.
 
-== Verifying the integration ==
+== Installation and import ==
 
-Install the TraceX feature from the Trace Types category. In the desktop application, confirm that '''TraceX Execution''' appears under '''Window > Show View > TraceX'''. The view displays an implementation-in-progress message. No trace output or supported behavior is expected in this version.
+In a compatible Trace Compass desktop, select '''Help > Install New Software''', add the Incubator update site, and install '''Trace Compass TraceX (Incubation)''' from '''Trace Types'''. Accept the installation prompts and restart. For a local build, select the repository produced in '''common/org.eclipse.tracecompass.incubator.releng-site/target/repository'''. Compatibility with an unmodified Trace Compass 12.1 release still requires a separate clean-install acceptance pass.
+
+Create a tracing project, then use '''File > Import > Tracing > Traces''' to import a binary '''.trx''' file. Open the imported trace. If automatic detection does not select TraceX, use '''Select Trace Type > TraceX > TraceX Trace''' on the trace resource. The Properties view lists byte order, event count, registry counts, buffer status, timer direction, and physical-time availability.
+
+== Clock configuration ==
+
+The default direction is '''increasing'''. Without a frequency, timestamps are relative ordering ticks, even when a generic Trace Compass widget formats them as time. They must not be interpreted as physical nanoseconds. Relative tick zero is the first logical event. Counters wrap according to the header's valid-bit mask; equal timer values retain event rank order.
+
+Clock settings currently require the core API: '''TraceXTrace.setTimerDirection(TraceXTimerDirection.DECREASING)''' selects a decreasing counter, '''setTicksPerSecond("1000000")''' sets a known frequency, and '''clearTicksPerSecond()''' restores ordering ticks. A configured frequency must be a positive decimal integer at most 1,000,000,000 ticks per second. Conversion to nanoseconds rounds down. Settings persist on imported workspace resources and rebuild indexing and analysis data. There is currently no desktop clock editor or TraceX clock-setting REST endpoint; a core caller must configure the trace. A trace opened without a workspace resource has no persistent settings.
+
+Do not infer the frequency from the demo timestamps. The bundled ThreadX demo requires a decreasing timer; the FileX and NetX Duo demos use increasing timers. With the correct direction their last relative ticks are 156206 and 949000 respectively.
+
+== Event fields and table workflows ==
+
+Events appear oldest to newest, including full circular buffers. '''logical_rank''' is the event's position in that order; '''physical_offset''' is its byte offset in the file. '''raw_event_id''', '''raw_priority''', '''raw_timestamp''', and '''raw_info_1''' through '''raw_info_4''' retain unsigned input words. '''event_id''' is the low 16 bits of the raw ID. The separate '''relative_ticks''' field reflects the configured timer direction.
+
+Known events add typed aliases such as '''thread''', '''next_thread''', '''media''', and '''packet_pool'''. Address aliases have an '''_address''' field and, when the registry resolves the address, an '''_name''' field. Contexts distinguish threads, interrupts, initialization, idle scheduler state, and unresolved addresses. Unknown, reserved, user, and uncataloged component events retain their raw fields and stable generic names.
+
+Use the standard Events table search and filter controls to find an event type or content value. For example, search for '''TX_TRACE_ISR_ENTER''' in the ThreadX demo or filter FileX events for '''RAM DISK'''. Selecting an event updates the selected time in time-based views; inspect its Contents column for the raw words and aliases. Table navigation follows logical rank. Column sorting, searching, and field inspection on a clean release require the reviewer checks below.
+
+== Execution view ==
+
+Select '''Window > Show View > Other > TraceX > TraceX Execution'''. The view runs '''TraceX Execution Analysis''' and shows '''CPU 0 > Execution''' plus per-context activity rows. Thread rows include registry names and hexadecimal addresses. Initialization, idle, unknown contexts, and ISR numbers remain explicit. Nested interrupts restore the enclosing interrupt and then the scheduler context; resume or suspend activity inside an ISR affects the scheduler after the outermost ISR exits.
+
+Select an interval to synchronize the Events table, zoom to inspect boundaries, and use time-graph filters to locate a context. Missing interrupt entries or exits in a truncated capture can leave an incomplete interval; this is not evidence of an additional CPU. Ordinary API service events do not imply a scheduling switch.
+
+== Trace Server ==
+
+Use the locally built Trace Server product, which includes the TraceX core bundle. Its default API base is '''http://localhost:8080/tsp/api'''. Start '''tracecompass-server -data workspace''' from the extracted product directory. Trace file URIs must identify files accessible to the server.
+
+# '''GET /health''' returns '''{"status":"UP"}'''.
+# '''POST /traces''' accepts '''{"parameters":{"name":"demo_filex.trx","uri":"TRACE_URI","typeID":"org.eclipse.tracecompass.incubator.tracex.core.trace"}}'''. Retain the returned trace UUID.
+# '''POST /experiments''' accepts '''{"parameters":{"name":"filex","traces":["TRACE_UUID"]}}'''. Poll '''GET /experiments/EXPERIMENT_UUID''' until indexing completes.
+# '''GET /experiments/EXPERIMENT_UUID/outputs''' advertises '''org.eclipse.tracecompass.incubator.tracex.core.dataprovider'''.
+# '''POST /experiments/EXPERIMENT_UUID/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree''' accepts '''{"parameters":{"requested_times":[0,949000]}}'''.
+# Query the corresponding '''/states''' endpoint with '''{"parameters":{"requested_times":[0,1000,949000],"requested_items":[ENTRY_ID]}}'''. Select entry IDs from the tree and verify the response status is '''COMPLETED'''.
+
+The server and desktop share the provider and state analysis. Endpoint values use the configured trace timestamp domain. The default ThreadX-demo endpoint of 63610322 is an increasing-counter ordering value; configure decreasing direction through a core caller before comparing its elapsed ticks with legacy TraceX.
+
+== Reviewer reproduction ==
+
+Obtain the four [https://github.com/eclipse-threadx/tracex/tree/b1af4decb38d48958ce3fa5c70d403f0d48aa25b/src/MsixPackageProject/TraceFiles public bundled demos] from the pinned TraceX revision. The repository acceptance report records their SHA-256 hashes. Import each into a fresh workspace and verify:
+
+{| class="wikitable"
+! Demo !! Events !! Registry objects !! Event types !! Direction !! Last relative tick
+|-
+| demo_filex.trx || 950 || 6 || 25 || increasing || 949000
+|-
+| demo_netx_tcp.trx || 950 || 18 || 36 || increasing || 949000
+|-
+| demo_netx_udp.trx || 950 || 16 || 23 || increasing || 949000
+|-
+| demo_threadx.trx || 974 || 15 || 11 || decreasing || 156206
+|}
+
+Compare the first and last event, complete registry, histogram, raw and relative timestamp arrays, and selected aliases with the machine-readable acceptance summaries. The UDP legacy library inserts one extra synthetic '''Running''' event at legacy rank 538; it is not a binary input record. The TraceX reader preserves the 950 input events, and the acceptance report retains that difference for maintainer review.
+
+For a compact fixture, run '''python3 tracetypes/org.eclipse.tracecompass.incubator.tracex.core.tests/acceptance/generate_fixtures.py fixtures'''. Import '''little-execution.trx''' and '''big-execution.trx'''. Each has seven events and one thread named '''worker'''. At relative ticks 0 through 6, the execution states are Initialization, worker, ISR 7, ISR 8, ISR 7, worker, Idle. Check both table and view selection, filter and clear the ISR events, inspect the raw fields, and restart to check resource persistence after a core caller configures the clock. Capture screenshots of the event table and nested ISR timeline. Repeat sorting, searching, filtering, selection, and field inspection in the clean installed release.
+
+== Limitations ==
+
+Only binary 32-bit input is supported. Single-core execution semantics are supported; no SMP interpretation is claimed. Physical time is unknown until a frequency is configured. Timer direction requires target knowledge. USBX, reserved, future, and user events can be imported losslessly but do not all have semantic aliases. Registry addresses can outlive their object names in incomplete or reused captures. Missing capture history cannot establish a context's earlier execution state.
+
+Clean-release installation, a complete interactive Linux acceptance pass with screenshots, and native Windows and macOS smoke tests remain acceptance work. Product compilation and generated-fixture tests do not establish those results. The [https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator/pull/212 original TraceX proposal by Matthew Khouzam] is the credited origin of this integration.

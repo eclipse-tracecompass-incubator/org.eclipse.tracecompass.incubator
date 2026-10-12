@@ -1,0 +1,22 @@
+{
+  "method": "POST",
+  "endpoint": "/traces",
+  "request": {
+    "parameters": {
+      "name": "big-execution.trx",
+      "uri": "TRACE_URI/big-execution.trx",
+      "typeID": "org.eclipse.tracecompass.incubator.tracex.core.trace"
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "name": "big-execution.trx",
+    "path": "TRACE_URI/big-execution.trx",
+    "UUID": "5e62d6a0-7897-3897-8a72-43cf84343f8f",
+    "nbEvents": 0,
+    "start": 0,
+    "end": 0,
+    "properties": {},
+    "indexingStatus": "CLOSED"
+  }
+}
