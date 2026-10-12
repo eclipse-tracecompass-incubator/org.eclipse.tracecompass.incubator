@@ -18,6 +18,8 @@ import static org.junit.Assert.assertNotNull;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.tracecompass.incubator.internal.tracex.core.config.TraceXClockConfigurationSource;
+import org.eclipse.tracecompass.tmf.core.config.TmfConfigurationSourceManager;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
@@ -38,6 +40,13 @@ public class ExtensionRegistrationTest {
         assertExtension("org.eclipse.tracecompass.tmf.core.dataprovider", "dataProviderFactory", //$NON-NLS-1$ //$NON-NLS-2$
                 "org.eclipse.tracecompass.incubator.tracex.core.dataprovider", "class", //$NON-NLS-1$ //$NON-NLS-2$
                 "org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXDataProviderFactory"); //$NON-NLS-1$
+    }
+
+    /** Tests discovery through the same registry used by the server config service. */
+    @Test
+    public void testClockConfigurationSource() {
+        assertNotNull(TmfConfigurationSourceManager.getInstance()
+                .getConfigurationSource(TraceXClockConfigurationSource.ID));
     }
 
     /** Tests that the server-facing core bundle has no UI dependencies. */
