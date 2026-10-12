@@ -1,0 +1,222 @@
+{
+  "method": "POST",
+  "endpoint": "/experiments/53851e16-390f-3213-bd3c-f0306594e50c/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+  "request": {
+    "parameters": {
+      "requested_times": [
+        0,
+        63610322
+      ]
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "model": {
+      "autoExpandLevel": -1,
+      "headers": [
+        {
+          "name": "Context",
+          "tooltip": "",
+          "dataType": "STRING"
+        }
+      ],
+      "entries": [
+        {
+          "id": 39,
+          "parentId": -1,
+          "labels": [
+            "demo_threadx.trx"
+          ],
+          "start": 0,
+          "end": 63610322
+        },
+        {
+          "id": 40,
+          "parentId": 39,
+          "labels": [
+            "Contexts"
+          ],
+          "start": 0,
+          "end": 63610322
+        },
+        {
+          "id": 41,
+          "parentId": 40,
+          "labels": [
+            "Initialization"
+          ],
+          "start": 0,
+          "end": 63610322
+        },
+        {
+          "id": 42,
+          "parentId": 41,
+          "labels": [
+            "Initialization"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 43,
+          "parentId": 40,
+          "labels": [
+            "Idle"
+          ],
+          "start": 0,
+          "end": 63610322
+        },
+        {
+          "id": 44,
+          "parentId": 43,
+          "labels": [
+            "Idle"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 45,
+          "parentId": 40,
+          "labels": [
+            "Thread"
+          ],
+          "start": 0,
+          "end": 63610322
+        },
+        {
+          "id": 46,
+          "parentId": 45,
+          "labels": [
+            "System Timer Thread [0x0000EEA4]"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 47,
+          "parentId": 45,
+          "labels": [
+            "thread 0 [0x00006644]"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 48,
+          "parentId": 45,
+          "labels": [
+            "thread 1 [0x000066EC]"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 49,
+          "parentId": 45,
+          "labels": [
+            "thread 2 [0x00006794]"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 50,
+          "parentId": 45,
+          "labels": [
+            "thread 3 [0x0000683C]"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 51,
+          "parentId": 45,
+          "labels": [
+            "thread 4 [0x000068E4]"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 52,
+          "parentId": 45,
+          "labels": [
+            "thread 5 [0x0000698C]"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 53,
+          "parentId": 45,
+          "labels": [
+            "thread 6 [0x00006A34]"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 54,
+          "parentId": 45,
+          "labels": [
+            "thread 7 [0x00006ADC]"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 55,
+          "parentId": 40,
+          "labels": [
+            "ISR"
+          ],
+          "start": 0,
+          "end": 63610322
+        },
+        {
+          "id": 56,
+          "parentId": 55,
+          "labels": [
+            "ISR 0"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        },
+        {
+          "id": 57,
+          "parentId": 39,
+          "labels": [
+            "CPU 0"
+          ],
+          "start": 0,
+          "end": 63610322
+        },
+        {
+          "id": 58,
+          "parentId": 57,
+          "labels": [
+            "Execution"
+          ],
+          "start": 0,
+          "end": 63610322,
+          "hasData": true
+        }
+      ]
+    },
+    "statusMessage": "Completed",
+    "status": "COMPLETED"
+  }
+}

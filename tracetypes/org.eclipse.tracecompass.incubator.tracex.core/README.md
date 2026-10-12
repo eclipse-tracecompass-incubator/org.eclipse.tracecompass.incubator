@@ -115,21 +115,68 @@ symbolic name, component category, and aliases from the corresponding current
 component header. An address alias enables registry-name resolution but never
 replaces the underlying unsigned information word.
 
-### Demo compatibility check
+### Demo compatibility and reproducible acceptance
 
-The decoder output matches independently captured legacy summaries for the four
-bundled demonstrations:
+All 3,824 original records across the four bundled demonstrations match the
+independent legacy Trace Management Library capture, including unsigned raw
+words, masked timestamps, configured relative ticks, endpoints, histograms,
+and registry names, addresses, types, and parameters. The
+[acceptance directory](../org.eclipse.tracecompass.incubator.tracex.core.tests/acceptance/README.md)
+contains source-pinned capture tools, a summary schema, derived golden and current
+summaries, and differential reports. The
+[acceptance status](../org.eclipse.tracecompass.incubator.tracex.core.tests/acceptance/ACCEPTANCE.md)
+records outstanding desktop, clock-workflow, platform, and review gates.
 
-| Demonstration | Registry objects (legacy/new) | Valid events (legacy/new) | Distinct event types (legacy/cataloged) | Unresolved contexts |
-| --- | ---: | ---: | ---: | ---: |
-| FileX | 6 / 6 | 950 / 950 | 25 / 25 | 0 |
-| NetX Duo TCP | 18 / 18 | 950 / 950 | 36 / 36 | 0 |
-| NetX Duo UDP | 16 / 16 | 950 / 950 | 23 / 23 | 0 |
-| ThreadX | 15 / 15 | 974 / 974 | 11 / 11 | 0 |
+| Demonstration | Objects | Input events | Event types | Direction | Last relative tick |
+| --- | ---: | ---: | ---: | --- | ---: |
+| FileX | 6 | 950 | 25 | increasing | 949000 |
+| NetX Duo TCP | 18 | 950 | 36 | increasing | 949000 |
+| NetX Duo UDP | 16 | 950 | 23 | increasing | 949000 |
+| ThreadX | 15 | 974 | 11 | decreasing | 156206 |
 
-The NetX Duo UDP trace also contains 27 ISR contexts and the ThreadX trace
-contains 8. Those sentinels and their interrupted threads resolve separately
-from ordinary object addresses and are not counted as unresolved contexts.
+The legacy library inserts one synthetic Running event into the UDP demonstration,
+so its displayed count is 951. The binary reader returns the 950 input records.
+That difference is retained for maintainer review. The ThreadX demo has a 16-bit
+mask and a decreasing timer; the default increasing direction does not reproduce
+its elapsed tick values. Frequency is unknown for every demo. Interrupt sentinels
+and interrupted threads resolve separately from object addresses; UDP contains
+27 ISR-context records and ThreadX contains 8. Neither has unresolved contexts.
+
+## Configuring a core caller
+
+After `initTrace`, use `setTimerDirection(TraceXTimerDirection.DECREASING)` for a
+known decreasing target and `setTicksPerSecond("1000000")` only for a known
+1 MHz counter. Inspect `getTimerDirection()`, `getTicksPerSecond()`, and
+`getProperties()` when recording evidence. `clearTicksPerSecond()` restores
+ordering ticks. Callers must handle `TmfTraceException` and rejected frequency
+values. These are Incubator internal APIs, not a stable public API contract.
+
+Workspace trace resources persist settings; resource-free inputs do not. Clock
+changes rebuild the logical index and invalidate analysis, supplementary data,
+provider instances, and views. A server integration must configure the actual
+trace before comparing physical or decreasing-counter time. The current desktop
+has no clock editor, and TSP has no TraceX clock-setting endpoint. The automated
+persistence check uses the setters directly and does not establish a user-facing
+configuration workflow.
+
+## Extending metadata and analysis
+
+Pin the component header revision and its information-word contract before adding
+an event. Add a catalog entry with its normalized ID, symbolic name, category,
+and value/address aliases. Preserve raw information words and unknown-event
+fallback behavior. Add a generated record to `TraceXEventMetadataTest` that
+checks alias types, unresolved addresses, registry-name resolution, high raw-ID
+flags, and the expected symbolic name. Catalog coverage is intentionally limited
+to the events exercised by the demos; importing a generic event does not imply
+semantic coverage for its component.
+
+A scheduling transition additionally requires a documented next-context contract
+and a state-system test, including equal timestamps and ISR nesting. Do not infer
+a transition from an ordinary service name. The analysis is single-core and uses
+stack order to match ISR exits, not an ISR-number correlation key. The factory
+composes per-trace providers for experiments, retaining the same desktop/server
+semantics. Broader pointer-width or SMP support requires a proven input contract
+rather than reinterpretation of the existing 32-bit fields.
 
 The TraceX integration effort originated in
 [Eclipse Trace Compass Incubator pull request #212][origin]. That earlier

@@ -1,0 +1,47 @@
+{
+  "oracle_source": "https://github.com/eclipse-threadx/tracex/blob/b1af4decb38d48958ce3fa5c70d403f0d48aa25b/src/ELTMLManaged/tml_library.cpp",
+  "reports": {
+    "demo_filex": {
+      "legacy_event_count": 950,
+      "current_event_count": 950,
+      "matched_original_records": 950,
+      "differences": []
+    },
+    "demo_netx_tcp": {
+      "legacy_event_count": 950,
+      "current_event_count": 950,
+      "matched_original_records": 950,
+      "differences": []
+    },
+    "demo_netx_udp": {
+      "legacy_event_count": 951,
+      "current_event_count": 950,
+      "matched_original_records": 950,
+      "differences": [
+        {
+          "field": "legacy_only_event",
+          "legacy_rank": 538,
+          "before_current_rank": 538,
+          "event": {
+            "context": 63472,
+            "event_id": 6,
+            "masked_timestamp": 50902012,
+            "relative_ticks": 537012,
+            "info": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      ]
+    },
+    "demo_threadx": {
+      "legacy_event_count": 974,
+      "current_event_count": 974,
+      "matched_original_records": 974,
+      "differences": []
+    }
+  }
+}

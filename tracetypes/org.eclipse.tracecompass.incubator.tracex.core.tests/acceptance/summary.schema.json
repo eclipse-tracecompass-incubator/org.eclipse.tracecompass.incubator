@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TraceX acceptance summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "sample",
+    "input_sha256",
+    "source_url",
+    "byte_order",
+    "timer_mask",
+    "timer_direction",
+    "event_count",
+    "registry",
+    "first_event",
+    "last_event",
+    "histogram",
+    "raw_timestamps",
+    "masked_timestamps",
+    "relative_ticks",
+    "selected_fields",
+    "logical_records_sha256",
+    "diagnostics",
+    "legacy_only_events"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "sample": {
+      "type": "string",
+      "pattern": "^demo_[a-z_]+\\.trx$"
+    },
+    "input_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "byte_order": {
+      "enum": [
+        "LITTLE_ENDIAN",
+        "BIG_ENDIAN"
+      ]
+    },
+    "timer_mask": {
+      "$ref": "#/$defs/word"
+    },
+    "timer_direction": {
+      "enum": [
+        "increasing",
+        "decreasing"
+      ]
+    },
+    "event_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "registry": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/object"
+      }
+    },
+    "first_event": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/event"
+        }
+      ]
+    },
+    "last_event": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/event"
+        }
+      ]
+    },
+    "histogram": {
+      "type": "object",
+      "patternProperties": {
+        "^[0-9]+$": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "raw_timestamps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/word"
+      }
+    },
+    "masked_timestamps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/word"
+      }
+    },
+    "relative_ticks": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "selected_fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rank",
+          "event_id",
+          "name",
+          "fields"
+        ],
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "event_id": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "name": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "integer",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "logical_records_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "legacy_only_events": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "word": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "object": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "address",
+        "parameter1",
+        "parameter2",
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "address": {
+          "$ref": "#/$defs/word"
+        },
+        "parameter1": {
+          "$ref": "#/$defs/word"
+        },
+        "parameter2": {
+          "$ref": "#/$defs/word"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "context",
+        "raw_priority",
+        "raw_event_id",
+        "event_id",
+        "raw_timestamp",
+        "masked_timestamp",
+        "relative_ticks",
+        "info"
+      ],
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/word"
+        },
+        "raw_priority": {
+          "$ref": "#/$defs/word"
+        },
+        "raw_event_id": {
+          "$ref": "#/$defs/word"
+        },
+        "event_id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "raw_timestamp": {
+          "$ref": "#/$defs/word"
+        },
+        "masked_timestamp": {
+          "$ref": "#/$defs/word"
+        },
+        "relative_ticks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "info": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/word"
+          }
+        }
+      }
+    }
+  }
+}
