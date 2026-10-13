@@ -5,7 +5,7 @@
     "parameters": {
       "name": "demo_netx_udp",
       "traces": [
-        "11bec5f3-ef76-3f27-8556-887212919de2"
+        "16f6665e-6447-3746-8f3c-108fd2daffbf"
       ]
     }
   },
@@ -13,15 +13,15 @@
   "response": {
     "name": "demo_netx_udp",
     "UUID": "24307b89-7b2c-3b4d-8afb-67da741bf563",
-    "nbEvents": 950,
+    "nbEvents": 1,
     "start": 0,
-    "end": 949000,
-    "indexingStatus": "COMPLETED",
+    "end": 0,
+    "indexingStatus": "RUNNING",
     "traces": [
       {
         "name": "demo_netx_udp.trx",
         "path": "TRACE_URI/demo_netx_udp.trx",
-        "UUID": "11bec5f3-ef76-3f27-8556-887212919de2",
+        "UUID": "16f6665e-6447-3746-8f3c-108fd2daffbf",
         "nbEvents": 950,
         "start": 0,
         "end": 949000,

@@ -13,12 +13,12 @@
         6
       ],
       "requested_items": [
-        62,
-        64,
-        66,
-        68,
-        69,
-        71
+        3,
+        5,
+        7,
+        9,
+        10,
+        12
       ]
     }
   },
@@ -27,7 +27,21 @@
     "model": {
       "rows": [
         {
-          "entryId": 64,
+          "entryId": 3,
+          "states": [
+            {
+              "start": 0,
+              "end": 1,
+              "label": "Running",
+              "style": {
+                "parentKey": "initialization",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 5,
           "states": [
             {
               "start": 6,
@@ -41,7 +55,7 @@
           ]
         },
         {
-          "entryId": 66,
+          "entryId": 7,
           "states": [
             {
               "start": 1,
@@ -64,7 +78,7 @@
           ]
         },
         {
-          "entryId": 68,
+          "entryId": 9,
           "states": [
             {
               "start": 2,
@@ -87,7 +101,7 @@
           ]
         },
         {
-          "entryId": 69,
+          "entryId": 10,
           "states": [
             {
               "start": 3,
@@ -101,7 +115,7 @@
           ]
         },
         {
-          "entryId": 71,
+          "entryId": 12,
           "states": [
             {
               "start": 0,
@@ -163,20 +177,6 @@
               "label": "Idle",
               "style": {
                 "parentKey": "idle",
-                "values": {}
-              }
-            }
-          ]
-        },
-        {
-          "entryId": 62,
-          "states": [
-            {
-              "start": 0,
-              "end": 1,
-              "label": "Running",
-              "style": {
-                "parentKey": "initialization",
                 "values": {}
               }
             }

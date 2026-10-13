@@ -5,7 +5,7 @@
     "parameters": {
       "name": "big-execution",
       "traces": [
-        "5e62d6a0-7897-3897-8a72-43cf84343f8f"
+        "19ae56fc-4861-3178-9389-039e6caaa713"
       ]
     }
   },
@@ -13,15 +13,15 @@
   "response": {
     "name": "big-execution",
     "UUID": "a17d52e9-db80-3cc6-ab40-87f4263b7688",
-    "nbEvents": 7,
+    "nbEvents": 1,
     "start": 0,
-    "end": 6,
-    "indexingStatus": "COMPLETED",
+    "end": 0,
+    "indexingStatus": "RUNNING",
     "traces": [
       {
         "name": "big-execution.trx",
         "path": "TRACE_URI/big-execution.trx",
-        "UUID": "5e62d6a0-7897-3897-8a72-43cf84343f8f",
+        "UUID": "19ae56fc-4861-3178-9389-039e6caaa713",
         "nbEvents": 7,
         "start": 0,
         "end": 6,

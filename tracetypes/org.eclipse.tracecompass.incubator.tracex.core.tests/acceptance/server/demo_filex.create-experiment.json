@@ -5,7 +5,7 @@
     "parameters": {
       "name": "demo_filex",
       "traces": [
-        "28efd3f1-7c49-3a18-bd29-1c8cc97ff27b"
+        "368117dd-6895-30c6-8ee9-04a49b4cc749"
       ]
     }
   },
@@ -13,15 +13,15 @@
   "response": {
     "name": "demo_filex",
     "UUID": "d9546a4f-26e1-3cdc-9057-0a7dae79776a",
-    "nbEvents": 950,
+    "nbEvents": 1,
     "start": 0,
-    "end": 949000,
-    "indexingStatus": "COMPLETED",
+    "end": 0,
+    "indexingStatus": "RUNNING",
     "traces": [
       {
         "name": "demo_filex.trx",
         "path": "TRACE_URI/demo_filex.trx",
-        "UUID": "28efd3f1-7c49-3a18-bd29-1c8cc97ff27b",
+        "UUID": "368117dd-6895-30c6-8ee9-04a49b4cc749",
         "nbEvents": 950,
         "start": 0,
         "end": 949000,
