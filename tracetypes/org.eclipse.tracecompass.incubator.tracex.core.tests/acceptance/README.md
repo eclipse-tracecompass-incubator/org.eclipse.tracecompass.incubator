@@ -78,14 +78,26 @@ server workspace and pass a directory containing only those inputs:
 python3 "$ACCEPTANCE/server_check.py" --base-url http://localhost:8080/tsp/api "$OUT/fixtures" "$OUT/server-evidence"
 ```
 
-Run it again with the demo directory. Retained server responses reflect default
-increasing-direction ordering ticks, including the ThreadX endpoint of 63610322.
-That endpoint is not its decreasing-counter elapsed time. REST clock configuration
-is still an acceptance gap. The server and core models agree for the configured
-increasing-direction fixtures.
+Run it again with the demo directory. The utility discovers the shared clock
+configuration source, applies increasing direction to FileX/TCP/UDP and decreasing
+direction to ThreadX before opening experiments, verifies their endpoints, and
+closes each experiment after capture. All frequencies remain unknown. The
+ThreadX endpoint is 156206 ordering ticks after configuration.
+
+Exercise known frequency, clearing it, rejected active/invalid edits, reset,
+and reloaded provider states with the same generated fixture:
+
+```sh
+python3 "$ACCEPTANCE/clock_check.py" --base-url http://localhost:8080/tsp/api "$OUT/fixtures/little-execution.trx" "$OUT/clock-evidence"
+```
+
+Both utilities retain portable request/response evidence and fail on unexpected
+status, event count, endpoint, or fixture-state results. Use distinct fixture
+locations if a server workspace already imports an input under another name;
+clock configuration rejects ambiguous imported locations.
 
 For desktop checks, follow the installed user guide. Capture installation,
-restart, import, event counts and endpoints, registry fields, sorting, searching,
+restart, import, event counts and endpoints, registry fields, chronological ordering, searching,
 filtering, table/view selection, field inspection, and nested-ISR screenshots.
 Read `ACCEPTANCE.md` before claiming a complete acceptance pass.
 
@@ -93,3 +105,7 @@ Read `ACCEPTANCE.md` before claiming a complete acceptance pass.
 [threadx]: https://github.com/eclipse-threadx/threadx/blob/e73752681bd405deddf247d1cf2b899d502dceaa/common/inc/tx_trace.h
 [filex]: https://github.com/eclipse-threadx/filex/blob/cdc7a593d0555cdfcfb6181341daad2df1524b23/common/inc/fx_api.h
 [netx]: https://github.com/eclipse-threadx/netxduo/blob/20046b12214490541d3090ff840bec4b78e67382/common/inc/nx_api.h
+
+The supplied release has no arbitrary column-sort action. That interpretation,
+interactive help launch, and native platform smoke checks are recorded explicitly
+in `ACCEPTANCE.md`; they must not be silently counted as passed.

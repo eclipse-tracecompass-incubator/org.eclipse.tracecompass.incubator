@@ -21,7 +21,7 @@ FIXTURE_STATES = ['Initialization', 'worker [0x20001000]', 'ISR 7', 'ISR 8',
 def portable(value):
     """Remove deployment-specific trace URIs from evidence, preserving their basenames."""
     if isinstance(value, dict):
-        return {key: 'TRACE_URI/' + Path(item).name if key in ('path', 'uri') and isinstance(item, str)
+        return {key: 'TRACE_URI/' + Path(item).name if key in ('path', 'uri', 'trace_uri') and isinstance(item, str)
                 else portable(item) for key, item in value.items()}
     if isinstance(value, list):
         return [portable(item) for item in value]
@@ -49,6 +49,10 @@ def run(base_url, traces, output):
     health = request('GET', '/health')
     assert health['response']['status'] == 'UP', health
     save('health.json', health)
+    clock_type = 'org.eclipse.tracecompass.incubator.tracex.core.clock'
+    types = request('GET', '/config/types')
+    assert any(item['id'] == clock_type for item in types['response']), types
+    save('configuration-types.json', types)
     inputs = sorted(p for p in traces.glob('*.trx') if p.stem in COUNTS or p.name in ('little-execution.trx', 'big-execution.trx'))
     if not inputs:
         raise ValueError('No public demos or generated execution fixtures found')
@@ -57,6 +61,11 @@ def run(base_url, traces, output):
         opened = request('POST', '/traces', {'parameters': {'name': trace.name, 'uri': str(trace.resolve()),
                          'typeID': 'org.eclipse.tracecompass.incubator.tracex.core.trace'}})
         save(name + '.trace.json', opened)
+        clock = request('POST', '/config/types/' + clock_type + '/configs', {
+            'name': name + ' clock', 'parameters': {
+                'trace_uri': str(trace.resolve()),
+                'timer_direction': 'decreasing' if name == 'demo_threadx' else 'increasing'}})
+        save(name + '.clock.json', clock)
         created = request('POST', '/experiments', {'parameters': {'name': name,
                            'traces': [opened['response']['UUID']]}})
         save(name + '.create-experiment.json', created)
@@ -68,6 +77,8 @@ def run(base_url, traces, output):
             time.sleep(0.1)
         assert experiment['response']['indexingStatus'] == 'COMPLETED', experiment
         assert experiment['response']['nbEvents'] == COUNTS.get(name, 7), experiment
+        assert experiment['response']['end'] == (156206 if name == 'demo_threadx'
+                else 949000 if name in COUNTS else 6), experiment
         save(name + '.experiment.json', experiment)
         outputs = request('GET', '/experiments/' + uid + '/outputs')
         assert any(item['id'] == PROVIDER for item in outputs['response']), outputs
@@ -94,6 +105,7 @@ def run(base_url, traces, output):
         if name not in COUNTS:
             assert [state['label'] for state in cpu_states] == FIXTURE_STATES, states
             assert [(state['start'], state['end']) for state in cpu_states] == [(i, i + 1) for i in range(7)], states
+        save(name + '.close-experiment.json', request('DELETE', '/experiments/' + uid))
         print(name, experiment['response']['nbEvents'], 'events; tree/states COMPLETED')
 
 

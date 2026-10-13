@@ -1,0 +1,22 @@
+{
+  "method": "POST",
+  "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs",
+  "request": {
+    "name": "big-execution clock",
+    "parameters": {
+      "trace_uri": "TRACE_URI/big-execution.trx",
+      "timer_direction": "increasing"
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "id": "a947e525-a3fb-308b-b988-1a1217a72d2e",
+    "name": "big-execution.trx",
+    "description": "",
+    "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+    "parameters": {
+      "trace_uri": "TRACE_URI/big-execution.trx",
+      "timer_direction": "increasing"
+    }
+  }
+}

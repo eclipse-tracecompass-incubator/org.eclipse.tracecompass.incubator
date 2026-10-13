@@ -1,29 +1,34 @@
 # TraceX acceptance status
 
-Acceptance is incomplete. The retained build/test results and new differential
-and REST checks establish the behavior below. They do not establish installation
-into an unmodified supplied release or a complete interactive desktop pass.
+Acceptance remains incomplete for the gaps below. The evidence records a clean
+supplied-release installation, interactive Linux workflows, independent demo
+comparisons, shared desktop/server clock controls, and all platform builds.
 
 ## Verified evidence
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| Root verification and products | Reused successful 147-module Maven verify; Linux, Windows, and macOS desktop/server archives contain the intended TraceX bundles | `products.json`, verification commit `b4b50aa02db6ae98187ff00a0782e88fa2be76ae` |
-| Core tests | 58 passed, zero failures/errors/skips | `verification.json` |
-| SWTBot | Both tests passed, including generated import, filters, cross-selection, and API-configured clock persistence | `verification.json` |
-| Server regression tests | 79 passed, zero failures/errors/skips | `verification.json` |
-| Scoped coverage | 25 classes; zero missed lines and branches, with the exclusions documented in `TESTING.md` | `verification.json` |
-| Four binary demos | 3,824 original records decoded; no registry diagnostics; all registry and record fields matched independent legacy TML output | `golden/`, `summaries/`, `differential.json` |
-| Selected aliases | Independently specified information-word contracts and registry names matched on all four demos | `golden/`, component links in `README.md` |
-| Equivalent endian fixtures | Complete seven-event logical models, decoded fields, and registry matched | `generate_fixtures.py`, `server/` |
-| Live server products | Health UP; four demos and both fixtures opened; experiments indexed; shared provider advertised; trees and states COMPLETED | `server/` |
-| Execution semantics | Fixture states include initialization, thread execution, nested ISR entry/exit, restoration, and idle; direct provider tests cover scheduler changes within ISR, equal timestamps, boundary contexts, and diagnostics | `server/`, retained `TraceXExecutionAnalysisTest` results |
+| Root verification and products | Complete 147-module verification passed; all six Linux, Windows, and macOS desktop/server archives built | `verification.json`, `products.json` |
+| Core, SWTBot, server tests | 66 core, 3 SWTBot, and 79 server tests passed; zero failures/errors/skips | `verification.json` |
+| Scoped coverage | 25 classes; zero missed lines and branches; adapter exclusions are documented in `TESTING.md` | `verification.json` |
+| Four binary demos | All 3,824 original records, registry objects, raw/masked/relative timestamps, histograms, and selected aliases matched independent legacy output | `golden/`, `summaries/`, `differential.json` |
+| Equivalent endian fixtures | Complete logical models matched; both render initialization, worker, nested ISR, restored worker, and idle | `generate_fixtures.py`, `desktop/`, `server/` |
+| Clean Linux release | Supplied Trace Compass 12.1 archive hashed; rebuilt TraceX feature installed successfully; application launched and restarted with the same workspace | `desktop.json` |
+| Interactive desktop | Four demos and both fixtures imported; event contents inspected and fixture fields exported; endpoints, searching, filtering/clearing, selection, and execution rendering checked | `desktop.json`, `desktop/` |
+| Desktop demo metadata | Statistics showed 950/950/950/974 records; complete Events table exports matched every decoded field and all event-type counts in the verified models | `desktop-comparison.json`, `desktop/*-statistics.png` |
+| Desktop clock | Zero frequency rejected; two ticks per second gives a three-second fixture endpoint; clearing returns six ordering ticks; known frequency and ThreadX decreasing direction survived application restart | `desktop.json`, `desktop/` |
+| Live server | Health UP; six inputs opened/indexed; shared provider discovered; tree/state requests COMPLETED; configured ThreadX ends at 156206 ticks | `server/` |
+| Server clock | Known/unknown endpoints and all seven fixture states verified; active and invalid edits rejected; reset verified; decreasing ThreadX configuration survived server restart | `server/clock-workflow.json`, `server/restart.json` |
+| Execution boundary tooltip | Before/after-bound requests return empty completed tooltips; final valid timestamp retains its context; rebuilt server requests and supplied-release hover at tick 7 passed | `TraceXExecutionAnalysisTest`, `server/tooltip-bounds.json`, `desktop/final-fixture.png` |
+| Updated help delivered | Installed bundle contains generated installation/import/clock/server guidance | `desktop.json` |
 
-The product archives and runtime TraceX core use the same production sources as
-the starting verification commit. New acceptance utilities run outside the Maven
-source folders. User-help generation is checked separately after the prose edit;
-retained product archives still contain the earlier help bundle. No new complete
-product build is claimed for the updated documentation.
+The full root verification is reused when repository changes only update
+acceptance utilities and recorded evidence. Build provenance and report hashes
+are recorded in `verification.json`; product hashes and bundle inventories are
+recorded in `products.json`. Screenshots are original captures of the supplied
+release with the installed feature. They show Trace Compass's standard timestamp
+format; an ordering-ticks domain is explicitly identified by the execution view.
+Demo frequency remains unknown and those displayed values are not physical time.
 
 ## Differential interpretation
 
@@ -34,39 +39,32 @@ product build is claimed for the updated documentation.
 | NetX Duo UDP | 950 | 951 | 16 | 23 | increasing | 949000 |
 | ThreadX | 974 | 974 | 15 | 11 | decreasing | 156206 |
 
-The legacy [TML implementation][legacy] synthesizes a `Running` event for
-sequential display when a predicted next context differs from the following
-record. For UDP it inserts that event at legacy rank 538, context 63472, timestamp
-50902012, relative tick 537012. It has four zero information words and no input
-raw ID/priority/timestamp. The original 950 records all match. TraceX core emits
-input records only. The insertion is retained in the golden summary and the
-comparison exits nonzero; maintainer acceptance of this difference is pending.
+The legacy [TML implementation][legacy] inserts one synthetic UDP `Running` event
+at legacy rank 538, context 63472, timestamp 50902012, relative tick 537012, with
+four zero information words and no binary input record. All original records
+match. The maintainer accepted input-record-only behavior on 2026-10-12 and asked
+to retain the documented difference. The insertion remains in the golden capture
+and the comparator still exits nonzero; approval does not erase the difference.
 
-The ThreadX mask is 65535. Core preserves unsigned raw timer words while the
-legacy library exposes masked values; the capture adapter observes raw words
-before masking, so both representations are compared independently. Legacy
-infers decreasing direction for this demo. Core defaults to increasing and
-requires explicit configuration, which yields the same 156206 elapsed ticks.
-Its unconfigured increasing endpoint is 63610322; the server responses retain
-that value and do not claim legacy timing equivalence. Frequency is unavailable
-for every demo, so no physical-duration claim is made.
+The ThreadX mask is 65535. Core preserves unsigned raw timer words while legacy
+also exposes masked values; the capture adapter observes words before masking.
+Legacy infers decreasing direction. Core requires that explicit setting, producing
+the same 156206 elapsed ticks. Its unconfigured increasing endpoint is 63610322.
+The current server evidence applies decreasing direction before opening ThreadX.
+No physical-duration claim is made for any demo.
 
 ## Acceptance gaps
 
 | Required evidence or behavior | Status and closure |
 | --- | --- |
-| Clean supplied Linux 12.1 RCP install/restart | The exact clean release was not available in this run. Install the p2 repository into it and verify compatibility; a built Incubator product is separate evidence. |
-| Full interactive Linux workflow | Retained SWTBot results cover generated import/filter/selection/view behavior. Clean-release sorting, searching, field inspection, all-demo interactive verification, restart, and screenshots remain pending. |
-| Clock configuration workflow | Core setters and persistence are tested. A desktop clock editor and TraceX REST clock-setting endpoint are absent; the SWTBot clock check calls the API directly. Complete the user-facing workflow before claiming this gate. |
-| ThreadX server timing equivalence | Default increasing-domain requests succeeded. Configure decreasing direction through a core caller and record the correct server endpoint and state responses. |
-| Legacy differential decision | Review the synthetic UDP event and explicit-direction policy; record maintainer acceptance. No unexplained record difference remains. |
-| Windows/macOS runtime smoke | Product builds are retained; native launches/import/view checks are pending and owners are unassigned. |
-| Screenshots and reviewer attachments | Earlier screenshots were not retained in the available artifacts. Capture current images and attach them with the acceptance evidence before publication. |
-| Updated-help delivery | Documentation generation is verified separately; rebuild the p2 repository/products when preparing an installable contribution with the new help. |
-| Human review | Two committer reviews and maintainer acceptance remain required. |
+| Arbitrary event-table column sorting | The supplied release keeps chronological event-rank order and exposes column management, search, and filter controls. Arbitrary column sorting is unavailable. A decision to accept chronological ordering as this criterion's interpretation remains pending. |
+| Interactive installed help | Help Contents could not launch because the environment has no configured web browser. Updated generated HTML is installed and inspected; opening it through the Help UI on a browser-equipped host remains pending. |
+| Windows native smoke | Desktop/server products built; native launch/import/execution-view checks pending; owner unassigned. |
+| macOS native smoke | Desktop/server products built; native launch/import/execution-view checks pending; owner unassigned. |
+| Human review | Request two committer reviews when the contribution is authorized. No review approval is claimed by this evidence. |
 
-Expanded pointer-width support, SMP semantics, comprehensive USBX catalogs,
-configurable user-event metadata, and additional performance analyses are future
-work. They do not replace the outstanding acceptance checks above.
+Binary 32-bit input and single-core execution semantics are supported. Wider
+pointer formats, SMP, comprehensive component catalogs, configurable user-event
+metadata, and additional performance analyses remain future work.
 
 [legacy]: https://github.com/eclipse-threadx/tracex/blob/b1af4decb38d48958ce3fa5c70d403f0d48aa25b/src/ELTMLManaged/tml_library.cpp

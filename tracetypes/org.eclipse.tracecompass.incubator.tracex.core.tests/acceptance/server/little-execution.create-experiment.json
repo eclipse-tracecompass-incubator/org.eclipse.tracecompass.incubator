@@ -5,7 +5,7 @@
     "parameters": {
       "name": "little-execution",
       "traces": [
-        "6a8f2b43-6ff7-3f79-8a2c-11791a47dc5b"
+        "d5231b43-059b-3aaa-bf42-5befbd11f341"
       ]
     }
   },
@@ -13,15 +13,15 @@
   "response": {
     "name": "little-execution",
     "UUID": "8b34cb26-668f-3b2b-983b-7be585061fcb",
-    "nbEvents": 7,
+    "nbEvents": 1,
     "start": 0,
-    "end": 6,
-    "indexingStatus": "COMPLETED",
+    "end": 0,
+    "indexingStatus": "RUNNING",
     "traces": [
       {
         "name": "little-execution.trx",
         "path": "TRACE_URI/little-execution.trx",
-        "UUID": "6a8f2b43-6ff7-3f79-8a2c-11791a47dc5b",
+        "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
         "nbEvents": 7,
         "start": 0,
         "end": 6,

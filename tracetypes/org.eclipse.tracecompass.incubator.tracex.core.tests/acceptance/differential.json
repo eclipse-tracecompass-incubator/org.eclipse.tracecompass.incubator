@@ -43,5 +43,10 @@
       "matched_original_records": 974,
       "differences": []
     }
+  },
+  "acceptance_decision": {
+    "date": "2026-10-12",
+    "status": "accepted-input-record-only",
+    "explanation": "The maintainer accepted preserving the 950 original UDP records while retaining the legacy-only synthetic Running event in the golden capture and nonzero comparison result."
   }
 }
