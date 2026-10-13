@@ -109,7 +109,9 @@ public final class TraceXDataProvider
             return completed(Collections.emptyMap());
         }
         Map<Long, Integer> selected = getSelectedEntries(filter);
-        if (selected.size() != 1 || !getAnalysisModule().isQueryable(filter.getStart())) {
+        if (selected.size() != 1 || filter.getStart() < ss.getStartTime()
+                || filter.getStart() > ss.getCurrentEndTime()
+                || !getAnalysisModule().isQueryable(filter.getStart())) {
             return completed(Collections.emptyMap());
         }
         try {

@@ -241,6 +241,22 @@ public class TraceXExecutionAnalysisTest {
             assertEquals("ISR", Objects.requireNonNull(tooltip.getModel()) //$NON-NLS-1$
                     .get("Category")); //$NON-NLS-1$
 
+            for (long outsideTime : new long[] { -1, 5, Long.MAX_VALUE }) {
+                SelectionTimeQueryFilter outsideFilter = new SelectionTimeQueryFilter(
+                        outsideTime, outsideTime, 1, Collections.singleton(cpu.getId()));
+                TmfModelResponse<Map<String, String>> outsideTooltip = provider.fetchTooltip(
+                        FetchParametersUtils.selectionTimeQueryToMap(outsideFilter), null);
+                assertEquals(Status.COMPLETED, outsideTooltip.getStatus());
+                assertEquals(Collections.emptyMap(), outsideTooltip.getModel());
+            }
+            SelectionTimeQueryFilter lastFilter = new SelectionTimeQueryFilter(
+                    4, 4, 1, Collections.singleton(cpu.getId()));
+            TmfModelResponse<Map<String, String>> lastTooltip = provider.fetchTooltip(
+                    FetchParametersUtils.selectionTimeQueryToMap(lastFilter), null);
+            assertEquals(Status.COMPLETED, lastTooltip.getStatus());
+            assertEquals("Idle", Objects.requireNonNull(lastTooltip.getModel()) //$NON-NLS-1$
+                    .get("Category")); //$NON-NLS-1$
+
             TmfModelResponse<OutputStyleModel> styles = provider.fetchStyle(
                     Collections.emptyMap(), null);
             assertNotNull(styles.getModel());
