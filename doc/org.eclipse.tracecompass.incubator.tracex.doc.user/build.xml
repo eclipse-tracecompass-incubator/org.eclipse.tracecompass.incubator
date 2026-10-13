@@ -21,7 +21,7 @@
             <fileset dir="doc">
                 <include name="User-Guide.mediawiki" />
             </fileset>
-            <stylesheet url="book.css" />
+            <stylesheet url="../book.css" />
         </wikitext-to-eclipse-help>
         <antcall target="test" />
     </target>
