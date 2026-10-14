@@ -106,6 +106,7 @@ Read `ACCEPTANCE.md` before claiming a complete acceptance pass.
 [filex]: https://github.com/eclipse-threadx/filex/blob/cdc7a593d0555cdfcfb6181341daad2df1524b23/common/inc/fx_api.h
 [netx]: https://github.com/eclipse-threadx/netxduo/blob/20046b12214490541d3090ff840bec4b78e67382/common/inc/nx_api.h
 
-The supplied release has no arbitrary column-sort action. That interpretation,
-interactive help launch, and native platform smoke checks are recorded explicitly
-in `ACCEPTANCE.md`; they must not be silently counted as passed.
+The supplied release has no arbitrary column-sort action. Chronological ordering is accepted by the maintainer; the limitation remains
+documented. Installed Help launch is verified with a configured external browser.
+Native Windows/macOS smoke checks remain pending in `ACCEPTANCE.md`; follow
+`WINDOWS.md` for the Windows procedure and evidence comparison.

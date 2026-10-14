@@ -1,6 +1,6 @@
 # TraceX acceptance status
 
-Acceptance remains incomplete for the gaps below. The evidence records a clean
+Native platform acceptance remains incomplete for the gaps below. The evidence records a clean
 supplied-release installation, interactive Linux workflows, independent demo
 comparisons, shared desktop/server clock controls, and all platform builds.
 
@@ -20,10 +20,16 @@ comparisons, shared desktop/server clock controls, and all platform builds.
 | Live server | Health UP; six inputs opened/indexed; shared provider discovered; tree/state requests COMPLETED; configured ThreadX ends at 156206 ticks | `server/` |
 | Server clock | Known/unknown endpoints and all seven fixture states verified; active and invalid edits rejected; reset verified; decreasing ThreadX configuration survived server restart | `server/clock-workflow.json`, `server/restart.json` |
 | Execution boundary tooltip | Before/after-bound requests return empty completed tooltips; final valid timestamp retains its context; rebuilt server requests and supplied-release hover at tick 7 passed | `TraceXExecutionAnalysisTest`, `server/tooltip-bounds.json`, `desktop/final-fixture.png` |
-| Updated help delivered | Installed bundle contains generated installation/import/clock/server guidance | `desktop.json` |
+| Installed help | Help Contents launched an external browser; styled TraceX topic rendered; topic and CSS returned HTTP 200 | `desktop.json`, `desktop/help.png` |
+| Event ordering interpretation | Maintainer accepted chronological logical-rank ordering and standard search/filter controls on 2026-10-13; arbitrary column sorting remains unavailable | `desktop.json` |
+| Windows handoff | Detailed native test procedure and comparison utility prepared; Windows ownership arranged by the maintainer, runtime results pending | `WINDOWS.md`, `check_windows_exports.ps1` |
 
-The full root verification is reused when repository changes only update
-acceptance utilities and recorded evidence. Build provenance and report hashes
+The full root verification is reused for the parser/UI/server implementation.
+Subsequent changes corrected generated Help and accepted-ordering documentation;
+focused Help verification and the complete product assembly passed. They did not
+change the tested Java implementation. Windows handoff artifacts include the
+updated Help; product hashes and documentation-build provenance are recorded.
+The acceptance utilities and recorded evidence do not change runtime bundles. Build provenance and report hashes
 are recorded in `verification.json`; product hashes and bundle inventories are
 recorded in `products.json`. Screenshots are original captures of the supplied
 release with the installed feature. They show Trace Compass's standard timestamp
@@ -57,9 +63,7 @@ No physical-duration claim is made for any demo.
 
 | Required evidence or behavior | Status and closure |
 | --- | --- |
-| Arbitrary event-table column sorting | The supplied release keeps chronological event-rank order and exposes column management, search, and filter controls. Arbitrary column sorting is unavailable. A decision to accept chronological ordering as this criterion's interpretation remains pending. |
-| Interactive installed help | Help Contents could not launch because the environment has no configured web browser. Updated generated HTML is installed and inspected; opening it through the Help UI on a browser-equipped host remains pending. |
-| Windows native smoke | Desktop/server products built; native launch/import/execution-view checks pending; owner unassigned. |
+| Windows native smoke | Desktop/server products built; native checks pending; owner maintainer-arranged; follow `WINDOWS.md`. |
 | macOS native smoke | Desktop/server products built; native launch/import/execution-view checks pending; owner unassigned. |
 | Human review | Request two committer reviews when the contribution is authorized. No review approval is claimed by this evidence. |
 

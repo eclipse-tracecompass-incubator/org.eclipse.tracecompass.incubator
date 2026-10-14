@@ -309,6 +309,13 @@
   "additional_acceptance": {
     "decoder_comparison": "All 3824 original records matched independent legacy capture; the UDP synthetic insertion is retained and input-record-only behavior was accepted on 2026-10-12.",
     "tooltip_regression": "New bounds assertions failed with TimeRangeException before the fix; all 66 core tests and coverage passed after it.",
-    "help_generation": "Updated help generated and included in all desktop products."
+    "help_generation": "Updated help generated and included in all desktop products.",
+    "help_closure": {
+      "source_commit": "03ca59016aeee2f4913b047dffe96676934b8e86",
+      "focused_verification": "Maven Help generation and XML validation passed; generated stylesheet resolves to the packaged CSS.",
+      "assembly": "Full reactor package passed with existing test evidence reused; all six products include the documentation correction.",
+      "runtime": "Configured external browser launched from Help Contents, styled topic rendered, and topic/CSS returned HTTP 200.",
+      "windows_procedure": "All PowerShell blocks parsed with Windows PowerShell 5.1. Export comparison passed 3824 retained Linux desktop records and rejected a deliberately corrupted timestamp; native Windows Trace Compass acceptance remains pending."
+    }
   }
 }
