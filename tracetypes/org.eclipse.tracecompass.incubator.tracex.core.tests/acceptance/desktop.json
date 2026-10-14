@@ -4,9 +4,9 @@
     "url": "https://download.eclipse.org/tracecompass/releases/12.1.0/rcp/trace-compass-12.1.0-20260909-1515-linux.gtk.x86_64.tar.gz",
     "sha256": "1d2f959d83cc80ec44e2ed5d673341e89dc838eabc38ad2fbc7091ce0491a53b"
   },
-  "final_feature_version": "0.19.0.202610131503",
-  "final_source_commit": "8271366bd301bf3e4a86c69b1efe830fdf8d2a3a",
-  "final_installation": "p2 update succeeded, application launched, persisted unknown clock and fixture rendering remained correct, and hover at tick 7 produced no range exception.",
+  "final_feature_version": "0.19.0.202610132127",
+  "final_source_commit": "03ca59016aeee2f4913b047dffe96676934b8e86",
+  "final_installation": "Rebuilt feature installed; Help Contents launched the external browser and styled TraceX topic rendered. Topic and stylesheet returned HTTP 200. The tested Java implementation is unchanged from the complete verification commit.",
   "initial_feature_version": "0.19.0.202610122008",
   "initial_source_commit": "cea92a6bcdb638f24f35294b460d048c68cddad1",
   "installation": "p2 director succeeded; clean supplied release launched, imported six inputs, and restarted with its saved workspace.",
@@ -24,8 +24,8 @@
     "clock": "Zero frequency disabled OK; 2 ticks per second gave endpoint 3000000000 ns; clearing frequency restored endpoint 6 and unknown-time label.",
     "restart": "Known frequency and decreasing ThreadX direction survived a full application exit/relaunch.",
     "help_delivery": "Generated doc/User-Guide.html in the installed documentation bundle contains the desktop clock and REST configuration workflows.",
-    "help_launch": "Pending: Help Contents could not open because no web browser is configured.",
-    "column_sorting": "Chronological event-rank order verified. Arbitrary column sorting unavailable; acceptance interpretation pending.",
+    "help_launch": "Passed: Help > Help Contents launched the configured external Windows Chrome browser; the TraceX topic rendered with its corrected stylesheet and the installed clock/server guide.",
+    "column_sorting": "Accepted by the maintainer on 2026-10-13: chronological event-rank ordering with standard search/filter controls. Arbitrary column sorting remains unavailable and documented.",
     "demo_metadata_desktop": "Statistics showed all four demo counts; complete Events table exports matched every decoded field and event histogram in the independently verified core models. See desktop-comparison.json."
   },
   "screenshots": [
@@ -104,13 +104,18 @@
     {
       "file": "desktop/final-fixture.png",
       "sha256": "4a53b712ad50b4d0549b7d000f87638353db91504dff9a28bc14c74853635d83"
+    },
+    {
+      "file": "desktop/help.png",
+      "sha256": "d15fa4e90e31bf2b4b51190ecf21737f08c1a046e7fbaef687bacec6a843aba8"
     }
   ],
   "platform_smoke": {
     "linux": "Interactive workflows verified with the documented gaps.",
     "windows": {
       "status": "pending-native-runtime",
-      "owner": "unassigned"
+      "owner": "maintainer-arranged",
+      "instructions": "WINDOWS.md"
     },
     "macos": {
       "status": "pending-native-runtime",
@@ -118,9 +123,13 @@
     }
   },
   "installed_help": {
-    "bundle": "org.eclipse.tracecompass.incubator.tracex.doc.user_0.19.0.202610131503.jar",
-    "bundle_sha256": "b86a2ec18604ebe4fdee4966061df9ddc06b11e1dd3085ce94c1150ea1b718b5",
-    "html_sha256": "001e5ac4b3d0f5088e12e1cfd7f871ab8c410270b35356024869387812dbe031",
+    "bundle": "org.eclipse.tracecompass.incubator.tracex.doc.user_0.19.0.202610132127.jar",
+    "bundle_sha256": "edee8ed3290762962396b9ed5c9d9d0e73fcbf2b95c6704363fc2824bf725778",
+    "html_sha256": "78b7a43b570341266df21d14dd0f2f1da07f7d013a53ce93e17f873790bac803",
+    "css_sha256": "4de97c84ba6d11fc91da87444fd9858561b6093c37819fd69d623c30352b8265",
     "clock_and_server_content_present": true
-  }
+  },
+  "documentation_build_commit": "03ca59016aeee2f4913b047dffe96676934b8e86",
+  "tooltip_verification_feature_version": "0.19.0.202610131503",
+  "tooltip_verification_source_commit": "8271366bd301bf3e4a86c69b1efe830fdf8d2a3a"
 }
