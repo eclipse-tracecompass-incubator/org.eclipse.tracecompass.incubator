@@ -1,0 +1,418 @@
+[
+  {
+    "method": "POST",
+    "endpoint": "/experiments",
+    "request": {
+      "parameters": {
+        "name": "tooltip-bounds",
+        "traces": [
+          "d5231b43-059b-3aaa-bf42-5befbd11f341"
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "name": "tooltip-bounds",
+      "UUID": "182fce3b-7165-39f2-8427-91db6a8cfc1f",
+      "nbEvents": 7,
+      "start": 0,
+      "end": 6,
+      "indexingStatus": "COMPLETED",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/182fce3b-7165-39f2-8427-91db6a8cfc1f",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "tooltip-bounds",
+      "UUID": "182fce3b-7165-39f2-8427-91db6a8cfc1f",
+      "nbEvents": 7,
+      "start": 0,
+      "end": 6,
+      "indexingStatus": "COMPLETED",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/182fce3b-7165-39f2-8427-91db6a8cfc1f/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {
+        "autoExpandLevel": -1,
+        "headers": [
+          {
+            "name": "Context",
+            "tooltip": "",
+            "dataType": "STRING"
+          }
+        ],
+        "entries": [
+          {
+            "id": 144,
+            "parentId": -1,
+            "labels": [
+              "little-execution.trx"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 145,
+            "parentId": 144,
+            "labels": [
+              "Contexts"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 146,
+            "parentId": 145,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 147,
+            "parentId": 146,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 148,
+            "parentId": 145,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 149,
+            "parentId": 148,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 150,
+            "parentId": 145,
+            "labels": [
+              "Thread"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 151,
+            "parentId": 150,
+            "labels": [
+              "worker [0x20001000]"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 152,
+            "parentId": 145,
+            "labels": [
+              "ISR"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 153,
+            "parentId": 152,
+            "labels": [
+              "ISR 7"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 154,
+            "parentId": 152,
+            "labels": [
+              "ISR 8"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 155,
+            "parentId": 144,
+            "labels": [
+              "CPU 0"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 156,
+            "parentId": 155,
+            "labels": [
+              "Execution"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          }
+        ]
+      },
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/182fce3b-7165-39f2-8427-91db6a8cfc1f/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tooltip",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          -1
+        ],
+        "requested_items": [
+          156
+        ],
+        "requested_element": {
+          "elementType": "state",
+          "time": -1,
+          "duration": 1
+        }
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {},
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/182fce3b-7165-39f2-8427-91db6a8cfc1f/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tooltip",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          6
+        ],
+        "requested_items": [
+          156
+        ],
+        "requested_element": {
+          "elementType": "state",
+          "time": 6,
+          "duration": 1
+        }
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {
+        "Context": "Idle",
+        "Category": "Idle",
+        "Address": "0x00000000"
+      },
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/182fce3b-7165-39f2-8427-91db6a8cfc1f/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tooltip",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          7
+        ],
+        "requested_items": [
+          156
+        ],
+        "requested_element": {
+          "elementType": "state",
+          "time": 7,
+          "duration": 1
+        }
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {},
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/182fce3b-7165-39f2-8427-91db6a8cfc1f/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tooltip",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          9223372036854775807
+        ],
+        "requested_items": [
+          156
+        ],
+        "requested_element": {
+          "elementType": "state",
+          "time": 9223372036854775807,
+          "duration": 1
+        }
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {},
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "DELETE",
+    "endpoint": "/experiments/182fce3b-7165-39f2-8427-91db6a8cfc1f",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "tooltip-bounds",
+      "UUID": "182fce3b-7165-39f2-8427-91db6a8cfc1f",
+      "nbEvents": 7,
+      "start": 0,
+      "end": 6,
+      "indexingStatus": "COMPLETED",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  }
+]

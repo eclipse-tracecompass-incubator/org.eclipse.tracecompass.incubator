@@ -1,0 +1,22 @@
+{
+  "method": "POST",
+  "endpoint": "/traces",
+  "request": {
+    "parameters": {
+      "name": "little-execution.trx",
+      "uri": "TRACE_URI/little-execution.trx",
+      "typeID": "org.eclipse.tracecompass.incubator.tracex.core.trace"
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "name": "little-execution.trx",
+    "path": "TRACE_URI/little-execution.trx",
+    "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+    "nbEvents": 0,
+    "start": 0,
+    "end": 0,
+    "properties": {},
+    "indexingStatus": "CLOSED"
+  }
+}

@@ -3,6 +3,10 @@
    <description>
       Nightly builds of Trace Compass project.
    </description>
+   <feature url="features/org.eclipse.tracecompass.incubator.tracex_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.tracex" version="0.0.0">
+      <category name="trace-types"/>
+   </feature>
+   <feature url="features/org.eclipse.tracecompass.incubator.tracex.source_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.tracex.source" version="0.0.0"/>
    <feature url="features/org.eclipse.tracecompass.incubator.traceevent_0.0.0.qualifier.jar" id="org.eclipse.tracecompass.incubator.traceevent" version="0.0.0">
       <category name="trace-types"/>
    </feature>

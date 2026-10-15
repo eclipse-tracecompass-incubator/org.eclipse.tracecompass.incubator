@@ -1,0 +1,136 @@
+{
+  "date": "2026-10-13",
+  "release": {
+    "url": "https://download.eclipse.org/tracecompass/releases/12.1.0/rcp/trace-compass-12.1.0-20260909-1515-linux.gtk.x86_64.tar.gz",
+    "sha256": "1d2f959d83cc80ec44e2ed5d673341e89dc838eabc38ad2fbc7091ce0491a53b"
+  },
+  "final_feature_version": "0.19.0.202610132127",
+  "final_source_commit": "03ca59016aeee2f4913b047dffe96676934b8e86",
+  "final_installation": "Rebuilt feature installed; Help Contents launched the external browser and styled TraceX topic rendered. Topic and stylesheet returned HTTP 200. The tested Java implementation is unchanged from the complete verification commit.",
+  "initial_feature_version": "0.19.0.202610122008",
+  "initial_source_commit": "cea92a6bcdb638f24f35294b460d048c68cddad1",
+  "installation": "p2 director succeeded; clean supplied release launched, imported six inputs, and restarted with its saved workspace.",
+  "checks": {
+    "demo_endpoints": {
+      "demo_filex": 949000,
+      "demo_netx_tcp": 949000,
+      "demo_netx_udp": 949000,
+      "demo_threadx_decreasing": 156206
+    },
+    "fixture_execution": "Both byte orders rendered Initialization, worker, ISR 7, ISR 8, ISR 7, worker, Idle.",
+    "search": "TX_TRACE_ISR_ENTER highlighted both matches and selected the matching interval.",
+    "filter": "Search added as filter showed the two ISR_ENTER events; clear restored all seven.",
+    "field_inspection": "Contents inspected; standard Export To Text retained all seven fixture records including raw words and ISR aliases. Show Raw displays the default object representation.",
+    "clock": "Zero frequency disabled OK; 2 ticks per second gave endpoint 3000000000 ns; clearing frequency restored endpoint 6 and unknown-time label.",
+    "restart": "Known frequency and decreasing ThreadX direction survived a full application exit/relaunch.",
+    "help_delivery": "Generated doc/User-Guide.html in the installed documentation bundle contains the desktop clock and REST configuration workflows.",
+    "help_launch": "Passed: Help > Help Contents launched the configured external Windows Chrome browser; the TraceX topic rendered with its corrected stylesheet and the installed clock/server guide.",
+    "column_sorting": "Accepted by the maintainer on 2026-10-13: chronological event-rank ordering with standard search/filter controls. Arbitrary column sorting remains unavailable and documented.",
+    "demo_metadata_desktop": "Statistics showed all four demo counts; complete Events table exports matched every decoded field and event histogram in the independently verified core models. See desktop-comparison.json."
+  },
+  "screenshots": [
+    {
+      "file": "desktop/filex-endpoint.png",
+      "sha256": "a2befc827bc0b6b1c1c71c1f75015d668cd305ed0c2790616b51163fc526bcb1"
+    },
+    {
+      "file": "desktop/tcp-endpoint.png",
+      "sha256": "8161a58c6b097ea1b60223c05e1562914f026d9a365c813d208c668d41188e00"
+    },
+    {
+      "file": "desktop/udp-endpoint.png",
+      "sha256": "749e7a8bedbe663a8b450a0cfe70b13f0f429a164f92a7d6d0985510b57d0f88"
+    },
+    {
+      "file": "desktop/threadx-endpoint.png",
+      "sha256": "dc42821a67ee24eccc430053c69734282c1527492ab99791482357269457cd46"
+    },
+    {
+      "file": "desktop/little-execution.png",
+      "sha256": "a589ff4df3b0f18a95d68ebd343dcd5f92502ce6ef457338b7fab430d31f54fc"
+    },
+    {
+      "file": "desktop/big-execution.png",
+      "sha256": "8458bf1b5b6cd6c9ad925f17221b6676cbe5e759cb5e6ba43231d618d8aadd25"
+    },
+    {
+      "file": "desktop/search-selection.png",
+      "sha256": "bdda90568439a67bafc560259e327e21a678cc8613164f51a013e93585814a4a"
+    },
+    {
+      "file": "desktop/filter.png",
+      "sha256": "087952ebd92d331692abfe0e5af6edf2d8b2dd4c8cb50d6f0e4834da60fc7b25"
+    },
+    {
+      "file": "desktop/filter-cleared.png",
+      "sha256": "848872359b2c8714c7562e8f859647e2f0be0047b6c67feeee7492a07de80e4d"
+    },
+    {
+      "file": "desktop/clock-invalid.png",
+      "sha256": "2fdf4f5250c29bd9e7b9b0ca2f0996fd4369444665f41a38d46dd7a70a2c13dd"
+    },
+    {
+      "file": "desktop/clock-known.png",
+      "sha256": "28a6915179bea25ef1192cb7edc5865f50c9d9daee0587b817d5e67ee47d7897"
+    },
+    {
+      "file": "desktop/clock-restarted.png",
+      "sha256": "febde89f36c468cf4ae16fa3deb030bfe33e8891e090dc1fe4e68a9468d384a7"
+    },
+    {
+      "file": "desktop/clock-cleared.png",
+      "sha256": "465ae2b13155deb9724f5fb02368b49eeae9c3c6c5b07a2d7cd9c9a4274ff526"
+    },
+    {
+      "file": "desktop/threadx-restarted.png",
+      "sha256": "b370942b46db5eb69f35d6f5c9e789d05819544b5965c48ca33a28027c3b27e3"
+    },
+    {
+      "file": "desktop/filex-statistics.png",
+      "sha256": "e02685203736d80cd8a41a27e07708d1221ab18b7dfd9929890d0eda59155d5b"
+    },
+    {
+      "file": "desktop/tcp-statistics.png",
+      "sha256": "5828f63d442cf21767dcd0dbfc12496fb4f358a4d55f1f496c37f19c54973423"
+    },
+    {
+      "file": "desktop/udp-statistics.png",
+      "sha256": "a4a0ddc08db057d5266d7cc38914b322c1339eedfb10d8b272a3c92cc16fa0ba"
+    },
+    {
+      "file": "desktop/threadx-statistics.png",
+      "sha256": "b1ed359a8b45c17afafa50eea8a2d5238740a4bbf2173a2299311511c5d1e79a"
+    },
+    {
+      "file": "desktop/final-fixture.png",
+      "sha256": "4a53b712ad50b4d0549b7d000f87638353db91504dff9a28bc14c74853635d83"
+    },
+    {
+      "file": "desktop/help.png",
+      "sha256": "d15fa4e90e31bf2b4b51190ecf21737f08c1a046e7fbaef687bacec6a843aba8"
+    }
+  ],
+  "platform_smoke": {
+    "linux": "Interactive workflows verified with the documented gaps.",
+    "windows": {
+      "status": "passed-with-retained-diagnostics",
+      "tested_head": "b65e0a8d89fb440967d8db7df24f666bf33eb9de",
+      "evidence": "windows.json",
+      "known_diagnostic": "Three open Statistics supplementary-file cleanup errors during clock changes; required workflows passed."
+    },
+    "macos": {
+      "status": "pending-native-runtime",
+      "owner": "unassigned"
+    }
+  },
+  "installed_help": {
+    "bundle": "org.eclipse.tracecompass.incubator.tracex.doc.user_0.19.0.202610132127.jar",
+    "bundle_sha256": "edee8ed3290762962396b9ed5c9d9d0e73fcbf2b95c6704363fc2824bf725778",
+    "html_sha256": "78b7a43b570341266df21d14dd0f2f1da07f7d013a53ce93e17f873790bac803",
+    "css_sha256": "4de97c84ba6d11fc91da87444fd9858561b6093c37819fd69d623c30352b8265",
+    "clock_and_server_content_present": true
+  },
+  "documentation_build_commit": "03ca59016aeee2f4913b047dffe96676934b8e86",
+  "tooltip_verification_feature_version": "0.19.0.202610131503",
+  "tooltip_verification_source_commit": "8271366bd301bf3e4a86c69b1efe830fdf8d2a3a"
+}
