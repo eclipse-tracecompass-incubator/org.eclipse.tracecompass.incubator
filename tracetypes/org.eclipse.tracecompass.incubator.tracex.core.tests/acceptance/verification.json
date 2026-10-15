@@ -316,6 +316,13 @@
       "assembly": "Full reactor package passed with existing test evidence reused; all six products include the documentation correction.",
       "runtime": "Configured external browser launched from Help Contents, styled topic rendered, and topic/CSS returned HTTP 200.",
       "windows_procedure": "All PowerShell blocks parsed with Windows PowerShell 5.1. Export comparison passed 3824 retained Linux desktop records and rejected a deliberately corrupted timestamp; native Windows Trace Compass acceptance remains pending."
+    },
+    "windows_native": {
+      "tested_head": "b65e0a8d89fb440967d8db7df24f666bf33eb9de",
+      "result": "passed-with-retained-diagnostics",
+      "evidence": "windows.json",
+      "validation": "All four artifact hashes, all 3824 complete event-field exports, six server workflows, and restart responses checked. No runtime/product changes or repeat application/build run.",
+      "known_issue": "Three Windows file-lock errors deleting open Statistics supplementary files; required workflows passed, cleanup not established."
     }
   }
 }

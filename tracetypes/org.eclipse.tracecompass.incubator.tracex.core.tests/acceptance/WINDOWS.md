@@ -1,5 +1,10 @@
 # Native Windows TraceX acceptance
 
+The run at `b65e0a8d` passed on 2026-10-14 through 2026-10-15 with retained
+Statistics cleanup diagnostics. See [the results](windows/RESULTS.md) and
+[the portable record](windows.json). This procedure remains available for
+reproduction; do not repeat a verified run for evidence-only documentation edits.
+
 Run this procedure in Windows PowerShell and native Windows applications. It
 checks Windows launch, p2 installation, file handling, widgets, clock persistence,
 help, and the server. Linux/WSL results do not substitute for these checks.

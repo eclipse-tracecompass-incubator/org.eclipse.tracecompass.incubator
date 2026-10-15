@@ -1,0 +1,46 @@
+[
+  {
+    "sample": "demo_filex",
+    "events": 950,
+    "eventTypes": 25,
+    "selectedContracts": 25,
+    "firstTick": 0,
+    "lastTick": 949000,
+    "exportSha256": "cc1a49ad458c3992347c56f3173d4cbed7a421446a9aaebd3343c80e4e29d2c8",
+    "status": "passed",
+    "reviewed_full_event_field_models": 950
+  },
+  {
+    "sample": "demo_netx_tcp",
+    "events": 950,
+    "eventTypes": 36,
+    "selectedContracts": 36,
+    "firstTick": 0,
+    "lastTick": 949000,
+    "exportSha256": "fd91590adf2d25367314b5c1d47f9f062bbc18f674752d5a2eb21a4d995bd9b5",
+    "status": "passed",
+    "reviewed_full_event_field_models": 950
+  },
+  {
+    "sample": "demo_netx_udp",
+    "events": 950,
+    "eventTypes": 23,
+    "selectedContracts": 23,
+    "firstTick": 0,
+    "lastTick": 949000,
+    "exportSha256": "213eda701f3e3f28b33285eaf93e97d6f09d19ccfbb57d48e7ca3fd8bb37971b",
+    "status": "passed",
+    "reviewed_full_event_field_models": 950
+  },
+  {
+    "sample": "demo_threadx",
+    "events": 974,
+    "eventTypes": 11,
+    "selectedContracts": 11,
+    "firstTick": 0,
+    "lastTick": 156206,
+    "exportSha256": "dbb022084f2cc97ab41f83d510bf18196a0edb62f9857b30e4401636673149aa",
+    "status": "passed",
+    "reviewed_full_event_field_models": 974
+  }
+]

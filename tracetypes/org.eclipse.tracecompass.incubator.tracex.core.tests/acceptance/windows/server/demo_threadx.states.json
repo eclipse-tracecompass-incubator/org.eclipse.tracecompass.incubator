@@ -1,0 +1,534 @@
+{
+  "method": "POST",
+  "endpoint": "/experiments/53851e16-390f-3213-bd3c-f0306594e50c/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/states",
+  "request": {
+    "parameters": {
+      "requested_times": [
+        0,
+        1562,
+        3124,
+        4686,
+        6248,
+        7810,
+        9372,
+        10934,
+        12496,
+        14058,
+        15620,
+        17182,
+        18744,
+        20306,
+        21868,
+        23430,
+        24992,
+        26555,
+        28117,
+        29679,
+        31241,
+        32803,
+        34365,
+        35927,
+        37489,
+        39051,
+        40613,
+        42175,
+        43737,
+        45299,
+        46861,
+        48423,
+        49985,
+        51547,
+        53110,
+        54672,
+        56234,
+        57796,
+        59358,
+        60920,
+        62482,
+        64044,
+        65606,
+        67168,
+        68730,
+        70292,
+        71854,
+        73416,
+        74978,
+        76540,
+        78103,
+        79665,
+        81227,
+        82789,
+        84351,
+        85913,
+        87475,
+        89037,
+        90599,
+        92161,
+        93723,
+        95285,
+        96847,
+        98409,
+        99971,
+        101533,
+        103095,
+        104658,
+        106220,
+        107782,
+        109344,
+        110906,
+        112468,
+        114030,
+        115592,
+        117154,
+        118716,
+        120278,
+        121840,
+        123402,
+        124964,
+        126526,
+        128088,
+        129650,
+        131213,
+        132775,
+        134337,
+        135899,
+        137461,
+        139023,
+        140585,
+        142147,
+        143709,
+        145271,
+        146833,
+        148395,
+        149957,
+        151519,
+        153081,
+        154643,
+        156206
+      ],
+      "requested_items": [
+        55,
+        57,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        69,
+        71
+      ]
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "model": {
+      "rows": [
+        {
+          "entryId": 64,
+          "states": []
+        },
+        {
+          "entryId": 65,
+          "states": []
+        },
+        {
+          "entryId": 66,
+          "states": [
+            {
+              "start": 24634,
+              "end": 25181,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 67,
+          "states": []
+        },
+        {
+          "entryId": 69,
+          "states": []
+        },
+        {
+          "entryId": 71,
+          "states": [
+            {
+              "start": 0,
+              "end": 3194,
+              "label": "thread 2 [0x00006794]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 3605,
+              "end": 19588,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 20042,
+              "end": 22916,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 23231,
+              "end": 23977,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 24634,
+              "end": 25181,
+              "label": "thread 6 [0x00006A34]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 26396,
+              "end": 40182,
+              "label": "thread 2 [0x00006794]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 40593,
+              "end": 56575,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 57029,
+              "end": 73415,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 73415,
+              "end": 73826,
+              "label": "thread 1 [0x000066EC]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 73826,
+              "end": 88408,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 88534,
+              "end": 90102,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 90556,
+              "end": 106942,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 107353,
+              "end": 123335,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 123335,
+              "end": 123789,
+              "label": "thread 2 [0x00006794]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 123789,
+              "end": 140175,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 140175,
+              "end": 140586,
+              "label": "thread 1 [0x000066EC]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 140586,
+              "end": 153941,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 154256,
+              "end": 155002,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 156206,
+              "end": 156207,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 55,
+          "states": []
+        },
+        {
+          "entryId": 57,
+          "states": [
+            {
+              "start": 3605,
+              "end": 19588,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 20042,
+              "end": 22916,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 23231,
+              "end": 23977,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 40593,
+              "end": 56575,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 57029,
+              "end": 73415,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 73826,
+              "end": 88408,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 88534,
+              "end": 90102,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 90556,
+              "end": 106942,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 107353,
+              "end": 123335,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 123789,
+              "end": 140175,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 140586,
+              "end": 153941,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 154256,
+              "end": 155002,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 156206,
+              "end": 156207,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 59,
+          "states": []
+        },
+        {
+          "entryId": 60,
+          "states": []
+        },
+        {
+          "entryId": 61,
+          "states": [
+            {
+              "start": 73415,
+              "end": 73826,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 140175,
+              "end": 140586,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 62,
+          "states": [
+            {
+              "start": 0,
+              "end": 3194,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 26396,
+              "end": 40182,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 123335,
+              "end": 123789,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 63,
+          "states": []
+        }
+      ]
+    },
+    "statusMessage": "Completed",
+    "status": "COMPLETED"
+  }
+}
