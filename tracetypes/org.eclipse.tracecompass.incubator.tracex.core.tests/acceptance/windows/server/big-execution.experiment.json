@@ -1,0 +1,51 @@
+{
+  "method": "GET",
+  "endpoint": "/experiments/a17d52e9-db80-3cc6-ab40-87f4263b7688",
+  "request": null,
+  "http_status": 200,
+  "response": {
+    "name": "big-execution",
+    "UUID": "a17d52e9-db80-3cc6-ab40-87f4263b7688",
+    "nbEvents": 7,
+    "start": 0,
+    "end": 6,
+    "indexingStatus": "COMPLETED",
+    "traces": [
+      {
+        "name": "big-execution.trx",
+        "path": "TRACE_URI/big-execution.trx",
+        "UUID": "df627469-4454-3df0-9fab-b43bf3849a10",
+        "nbEvents": 7,
+        "start": 0,
+        "end": 6,
+        "properties": {
+          "byte_order": "BIG_ENDIAN",
+          "base_address": "0xF0000000",
+          "timer_valid_mask": "0x0000FFFF",
+          "registry_capacity": "1",
+          "registry_name_size": "16",
+          "registry_entry_size": "32",
+          "registry_start_offset": "48",
+          "registry_end_offset": "80",
+          "event_capacity": "8",
+          "event_start_offset": "80",
+          "event_end_offset": "336",
+          "event_current_offset": "304",
+          "event_count": "7",
+          "event_buffer_status": "partial",
+          "registry_record_count": "1",
+          "registry_valid_count": "1",
+          "registry_in_use_count": "1",
+          "registry_diagnostic_count": "0",
+          "event_order": "oldest-to-newest",
+          "timer_direction": "increasing",
+          "raw_time_status": "preserved-unsigned-32-bit",
+          "ticks_per_second": "unavailable",
+          "time_unit": "ordering-ticks",
+          "physical_time": "unavailable"
+        },
+        "indexingStatus": "COMPLETED"
+      }
+    ]
+  }
+}

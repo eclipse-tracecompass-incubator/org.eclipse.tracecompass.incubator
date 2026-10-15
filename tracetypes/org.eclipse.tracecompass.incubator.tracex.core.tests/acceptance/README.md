@@ -108,5 +108,6 @@ Read `ACCEPTANCE.md` before claiming a complete acceptance pass.
 
 The supplied release has no arbitrary column-sort action. Chronological ordering is accepted by the maintainer; the limitation remains
 documented. Installed Help launch is verified with a configured external browser.
-Native Windows/macOS smoke checks remain pending in `ACCEPTANCE.md`; follow
-`WINDOWS.md` for the Windows procedure and evidence comparison.
+Native Windows passed with the retained Statistics cleanup diagnostic; see
+`windows.json` and `windows/RESULTS.md`. Native macOS remains pending in
+`ACCEPTANCE.md`. `WINDOWS.md` retains the Windows reproduction procedure.

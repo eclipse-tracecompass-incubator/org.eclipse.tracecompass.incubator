@@ -1,7 +1,8 @@
 # TraceX acceptance status
 
-Native platform acceptance remains incomplete for the gaps below. The evidence records a clean
-supplied-release installation, interactive Linux workflows, independent demo
+Native Windows acceptance passed with the retained diagnostic below. Native
+macOS acceptance and human review remain open. The evidence covers clean-release
+installation, interactive Linux and Windows workflows, independent demo
 comparisons, shared desktop/server clock controls, and all platform builds.
 
 ## Verified evidence
@@ -22,7 +23,9 @@ comparisons, shared desktop/server clock controls, and all platform builds.
 | Execution boundary tooltip | Before/after-bound requests return empty completed tooltips; final valid timestamp retains its context; rebuilt server requests and supplied-release hover at tick 7 passed | `TraceXExecutionAnalysisTest`, `server/tooltip-bounds.json`, `desktop/final-fixture.png` |
 | Installed help | Help Contents launched an external browser; styled TraceX topic rendered; topic and CSS returned HTTP 200 | `desktop.json`, `desktop/help.png` |
 | Event ordering interpretation | Maintainer accepted chronological logical-rank ordering and standard search/filter controls on 2026-10-13; arbitrary column sorting remains unavailable | `desktop.json` |
-| Windows handoff | Detailed native test procedure and comparison utility prepared; Windows ownership arranged by the maintainer, runtime results pending | `WINDOWS.md`, `check_windows_exports.ps1` |
+| Native Windows | Clean-release installation, both desktop launchers, all inputs, search/filter/selection, clock and restart, Help, and native server workflows passed with retained diagnostics | `windows.json`, `windows/RESULTS.md` |
+| Windows desktop records | All 3,824 exported records matched complete event-field models, raw/relative timestamps, ranks, histograms, and selected aliases | `windows/desktop-comparison.json` |
+| Windows server restart | ThreadX retained decreasing/unknown clock, 974 events, endpoint 156206, and COMPLETED tree/state responses | `windows/server/restart.json` |
 
 The full root verification is reused for the parser/UI/server implementation.
 Subsequent changes corrected generated Help and accepted-ordering documentation;
@@ -59,11 +62,22 @@ the same 156206 elapsed ticks. Its unconfigured increasing endpoint is 63610322.
 The current server evidence applies decreasing direction before opening ThreadX.
 No physical-duration claim is made for any demo.
 
+## Retained Windows diagnostic
+
+The stock Windows workspace logged three failed deletions of open Statistics
+supplementary files during clock invalidation: `statistics-totals.ht` and
+`statistics-types.ht`. Required clock/table/execution refresh, endpoints,
+persistence, and subsequent complete exports passed; no `TimeRangeException`
+occurred. The native run reports PASS with this non-blocking diagnostic retained.
+Successful Statistics-file cleanup and its ownership/lifetime are not established;
+no correction is claimed. Keep this issue visible for review and separate
+follow-up. Unrelated CDT/uftrace, preference-category, detector, and SLF4J
+diagnostics are also recorded in `windows.json`. Raw logs remain private.
+
 ## Acceptance gaps
 
 | Required evidence or behavior | Status and closure |
 | --- | --- |
-| Windows native smoke | Desktop/server products built; native checks pending; owner maintainer-arranged; follow `WINDOWS.md`. |
 | macOS native smoke | Desktop/server products built; native launch/import/execution-view checks pending; owner unassigned. |
 | Human review | Request two committer reviews when the contribution is authorized. No review approval is claimed by this evidence. |
 

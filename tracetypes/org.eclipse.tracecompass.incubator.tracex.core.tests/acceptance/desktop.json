@@ -113,9 +113,10 @@
   "platform_smoke": {
     "linux": "Interactive workflows verified with the documented gaps.",
     "windows": {
-      "status": "pending-native-runtime",
-      "owner": "maintainer-arranged",
-      "instructions": "WINDOWS.md"
+      "status": "passed-with-retained-diagnostics",
+      "tested_head": "b65e0a8d89fb440967d8db7df24f666bf33eb9de",
+      "evidence": "windows.json",
+      "known_diagnostic": "Three open Statistics supplementary-file cleanup errors during clock changes; required workflows passed."
     },
     "macos": {
       "status": "pending-native-runtime",

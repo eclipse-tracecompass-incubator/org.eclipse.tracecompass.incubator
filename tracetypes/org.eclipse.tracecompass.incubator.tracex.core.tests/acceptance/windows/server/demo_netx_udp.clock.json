@@ -1,0 +1,22 @@
+{
+  "method": "POST",
+  "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs",
+  "request": {
+    "name": "demo_netx_udp clock",
+    "parameters": {
+      "trace_uri": "TRACE_URI/demo_netx_udp.trx",
+      "timer_direction": "increasing"
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "id": "e014b85d-075c-34f3-b7a0-5cebc3c5a177",
+    "name": "demo_netx_udp.trx",
+    "description": "",
+    "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+    "parameters": {
+      "trace_uri": "TRACE_URI/demo_netx_udp.trx",
+      "timer_direction": "increasing"
+    }
+  }
+}
