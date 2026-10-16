@@ -1,0 +1,144 @@
+{
+  "result": "passed-with-retained-diagnostics",
+  "tested_head": "b65e0a8d89fb440967d8db7df24f666bf33eb9de",
+  "verified_implementation_ancestor": "8271366bd301bf3e4a86c69b1efe830fdf8d2a3a",
+  "documentation_build_commit": "03ca59016aeee2f4913b047dffe96676934b8e86",
+  "platform": "Windows x86_64",
+  "execution_window": {
+    "from": "2026-10-14",
+    "through": "2026-10-15",
+    "timezone": "America/Toronto"
+  },
+  "feature_version": "0.19.0.202610132127",
+  "core_ui_version": "0.1.0.202610132127",
+  "artifacts": [
+    {
+      "file": "trace-compass-0.19.0-20261013-2127-win32.win32.x86_64.zip",
+      "bytes": 269724575,
+      "sha256": "4fe46f8b1f5fa9926d5227804b554171c189f6d10489c538304342f06b6cfc3b"
+    },
+    {
+      "file": "trace-compass-server0.19.0-20261013-2127-win32.win32.x86_64.zip",
+      "bytes": 103491817,
+      "sha256": "7de987076ef9385a949b351eb631b2892ba1ab3a92772497dbc2bd4829bbd50d"
+    },
+    {
+      "file": "tracex-p2-0.19.0.202610132127.zip",
+      "bytes": 37610913,
+      "sha256": "ce9f9f71d1635059aec938d2b4d3e7d25c4475b621ba81a7648018d707e5306d"
+    },
+    {
+      "file": "trace-compass-12.1.0-20260909-1515-win32.win32.x86_64.zip",
+      "sha256": "902788819b5cb30998174968099bd17ce1195c850533e06bcda4c0f1fd1dc2fe"
+    }
+  ],
+  "checks": {
+    "clean_release_install_and_restart": "passed",
+    "feature_and_bundle_versions": "passed",
+    "stock_native_launcher": "passed",
+    "bundled_native_launcher": "passed",
+    "four_demo_imports_and_exports": "passed",
+    "equivalent_endian_execution": "passed",
+    "search_filter_and_clear": "passed",
+    "cross_selection_and_ISR_fields": "passed",
+    "idle_and_exclusive_end_tooltips": "passed",
+    "clock_validation_known_unknown_and_reset": "passed",
+    "two_desktop_process_restarts": "passed",
+    "installed_and_bundled_help": "passed",
+    "native_server_import_provider_tree_and_states": "passed",
+    "native_server_clock_rejection_and_reset": "passed",
+    "native_server_restart_persistence": "passed"
+  },
+  "evidence_review": "Native Windows run reported PASS. Archive bytes were checked against all four hashes; all 3824 complete exported event-field models matched the retained verified core models; six captured server workflows and restart results were checked. The application run was not repeated.",
+  "desktop_comparison": "windows/desktop-comparison.json",
+  "server_evidence": "windows/server/",
+  "diagnostics": [
+    {
+      "id": "statistics-supplementary-file-lock",
+      "count": 3,
+      "source": "stock workspace log",
+      "operation": "TraceXTrace.invalidateTimeDependentData -> TmfTraceManager.deleteSupplementaryFiles",
+      "files": [
+        "statistics-totals.ht",
+        "statistics-types.ht"
+      ],
+      "observed_effect": "Windows rejected deletion because the Statistics files were in use. Required clock, table, execution, persistence, endpoints, and later full exports passed.",
+      "disposition": "Retained as a review-visible, non-blocking diagnostic for this run. Cleanup ownership and successful removal are not established; no fix is claimed."
+    },
+    {
+      "id": "unrelated-bundled-diagnostics",
+      "details": "CDT/uftrace c++filt/native-spawner warnings and two invalid preference-category warnings; required TraceX workflows passed."
+    },
+    {
+      "id": "unrelated-server-diagnostics",
+      "details": "Detector and SLF4J diagnostics retained; no provider, parsing, endpoint, or restart failure reported."
+    }
+  ],
+  "private_screenshot_hashes": [
+    {
+      "file": "installation.png",
+      "sha256": "c26a9168604f335946159cf2a6e67e769201bdd3ea2f7e396d3796551c9f4897"
+    },
+    {
+      "file": "little-execution.png",
+      "sha256": "bc3bb4f231e2407ee2446dd878a5754b482e05446f99d3d65d2a619aae29419c"
+    },
+    {
+      "file": "big-execution.png",
+      "sha256": "238db3e5587b5e8c04f0f87cfabab0015b1abc56c3f2929c02c4fb5ee49e544d"
+    },
+    {
+      "file": "filter.png",
+      "sha256": "0ea823ab4da7a49dc891a0fc9d39e4fece6db5b3366d2271b4fdacb9aaa15f6a"
+    },
+    {
+      "file": "selection-tooltip.png",
+      "sha256": "f35fbf76dc52e0267650bff8d417469873f58925f07861da9f842d9b67613675"
+    },
+    {
+      "file": "clock-invalid.png",
+      "sha256": "d756f58f2984931a7dc4b62edf40befc4278bbd5e9ffdd6e29cccb717fb63b43"
+    },
+    {
+      "file": "clock-known.png",
+      "sha256": "0caacc8cc32a17cdfbc0ac638723abb177384fb2c81c5c07404a91c25e42a608"
+    },
+    {
+      "file": "clock-restarted.png",
+      "sha256": "ff11253ac60831b00b6d771eea19554e07f3d1081dd2a8eff71b4b3d9fb61493"
+    },
+    {
+      "file": "clock-cleared.png",
+      "sha256": "cc8e7c9e8f84a879a699c18e45be55befaa9e3311912c58cbb792748cd87f06b"
+    },
+    {
+      "file": "help.png",
+      "sha256": "37767c2b889ab40612751e28fa9b958bc6bd3147f14101596773782e4f6e3d13"
+    },
+    {
+      "file": "incubator-help.png",
+      "sha256": "d2d5fcd47cbe2a797aeba07290970a9dfd8a2c8210e77121920450082a80a058"
+    },
+    {
+      "file": "incubator-little-execution.png",
+      "sha256": "e0338d2beec22afb066516d712efba406de1b95b95e245689ccc39c98a6ddf24"
+    },
+    {
+      "file": "demo_filex.png",
+      "sha256": "554f3240ae37e0d6759a1c01d1d91af18425ff8769eed42164c379ef4520fa84"
+    },
+    {
+      "file": "demo_netx_tcp.png",
+      "sha256": "b9551f1bfe3da985b6b86bbe590f3eb788995fa897f40698936cc65eb8ac05ed"
+    },
+    {
+      "file": "demo_netx_udp.png",
+      "sha256": "e4c8a90603d05f506410dd14d20d4bb9c2e520f8968debba8b3f8489c6912bea"
+    },
+    {
+      "file": "demo_threadx.png",
+      "sha256": "28255b7628df360a26876b9f2fd1b39f8af2b5ce04d8446348330320c2b7c6b8"
+    }
+  ],
+  "raw_evidence": "Original screenshots, workspace/server logs, and detailed handover remain private. Only derived summaries and URI-redacted server evidence are included here."
+}

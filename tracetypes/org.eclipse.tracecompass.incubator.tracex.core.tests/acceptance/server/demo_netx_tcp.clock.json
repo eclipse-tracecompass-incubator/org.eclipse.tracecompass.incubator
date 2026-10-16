@@ -1,0 +1,22 @@
+{
+  "method": "POST",
+  "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs",
+  "request": {
+    "name": "demo_netx_tcp clock",
+    "parameters": {
+      "trace_uri": "TRACE_URI/demo_netx_tcp.trx",
+      "timer_direction": "increasing"
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "id": "7470fabe-11ef-3acf-8fd5-d08c144a8e23",
+    "name": "demo_netx_tcp.trx",
+    "description": "",
+    "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+    "parameters": {
+      "trace_uri": "TRACE_URI/demo_netx_tcp.trx",
+      "timer_direction": "increasing"
+    }
+  }
+}

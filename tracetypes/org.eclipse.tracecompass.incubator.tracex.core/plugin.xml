@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <category
+            id="org.eclipse.tracecompass.incubator.tracex.core.category"
+            name="%trace.category">
+      </category>
+      <type
+            category="org.eclipse.tracecompass.incubator.tracex.core.category"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.tracex.core.trace"
+            isDirectory="false"
+            name="%trace.type"
+            trace_type="org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXAnalysis"
+            automatic="false"
+            id="org.eclipse.tracecompass.incubator.tracex.core.analysis"
+            name="%analysis.name">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace">
+         </tracetype>
+      </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXKernelAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.analysis.os.linux.kernel"
+            name="%analysis.kernel.name">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace">
+         </tracetype>
+      </module>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.tracex.core.dataprovider">
+      </dataProviderFactory>
+   </extension>
+   <extension point="org.eclipse.tracecompass.tmf.core.config">
+      <source id ="" class="org.eclipse.tracecompass.incubator.internal.tracex.core.config.TraceXClockConfigurationSource"/>
+   </extension>
+</plugin>

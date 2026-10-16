@@ -81,6 +81,11 @@
     <module>org.eclipse.tracecompass.incubator.dpdk.core</module>
     <module>org.eclipse.tracecompass.incubator.dpdk.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.dpdk.ui</module>
+    <module>org.eclipse.tracecompass.incubator.tracex</module>
+    <module>org.eclipse.tracecompass.incubator.tracex.core</module>
+    <module>org.eclipse.tracecompass.incubator.tracex.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.tracex.ui</module>
+    <module>org.eclipse.tracecompass.incubator.tracex.ui.swtbot.tests</module>
     <!-- insert modules here -->
   </modules>
 

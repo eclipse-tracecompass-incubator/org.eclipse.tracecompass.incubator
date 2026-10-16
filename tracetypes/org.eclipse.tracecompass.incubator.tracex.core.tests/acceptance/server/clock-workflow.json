@@ -1,0 +1,3911 @@
+[
+  {
+    "method": "POST",
+    "endpoint": "/traces",
+    "request": {
+      "parameters": {
+        "name": "little-execution.trx",
+        "uri": "TRACE_URI/little-execution.trx",
+        "typeID": "org.eclipse.tracecompass.incubator.tracex.core.trace"
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "name": "little-execution.trx",
+      "path": "TRACE_URI/little-execution.trx",
+      "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+      "nbEvents": 0,
+      "start": 0,
+      "end": 0,
+      "properties": {},
+      "indexingStatus": "CLOSED"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs",
+    "request": {
+      "name": "Execution clock",
+      "parameters": {
+        "trace_uri": "TRACE_URI/little-execution.trx",
+        "timer_direction": "increasing",
+        "ticks_per_second": "2"
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "id": "09c45d76-163e-317a-a879-b102db3ede1d",
+      "name": "little-execution.trx",
+      "description": "",
+      "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+      "parameters": {
+        "trace_uri": "TRACE_URI/little-execution.trx",
+        "ticks_per_second": "2",
+        "timer_direction": "increasing"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs/09c45d76-163e-317a-a879-b102db3ede1d",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "id": "09c45d76-163e-317a-a879-b102db3ede1d",
+      "name": "little-execution.trx",
+      "description": "",
+      "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+      "parameters": {
+        "trace_uri": "TRACE_URI/little-execution.trx",
+        "ticks_per_second": "2",
+        "timer_direction": "increasing"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments",
+    "request": {
+      "parameters": {
+        "name": "known-clock",
+        "traces": [
+          "d5231b43-059b-3aaa-bf42-5befbd11f341"
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 7,
+      "start": 0,
+      "end": 3000000000,
+      "indexingStatus": "COMPLETED",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs",
+    "request": null,
+    "http_status": 200,
+    "response": [
+      {
+        "id": "org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider",
+        "name": "Events Table",
+        "description": "Show the raw events in table form for a given trace",
+        "type": "TABLE"
+      },
+      {
+        "id": "org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
+        "name": "Histogram",
+        "description": "Show a histogram of number of events to time for a trace",
+        "type": "TREE_TIME_XY"
+      },
+      {
+        "id": "org.eclipse.tracecompass.incubator.inandout.core.analysis.inAndOutdataProviderFactory",
+        "name": "InAndOut Configurator",
+        "description": "Configure custom InAndOut analysis",
+        "type": "NONE",
+        "capabilities": {
+          "canCreate": true,
+          "canDelete": false
+        }
+      },
+      {
+        "id": "org.eclipse.tracecompass.internal.tmf.core.statesystem.provider.StateSystemDataProvider",
+        "name": "State System Explorer",
+        "description": "Displays the states of state system attributes over time",
+        "type": "TIME_GRAPH"
+      },
+      {
+        "id": "org.eclipse.tracecompass.incubator.tracex.core.dataprovider",
+        "name": "TraceX Execution",
+        "description": "Shows TraceX thread, idle, initialization, and interrupt execution",
+        "type": "TIME_GRAPH"
+      }
+    ]
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {
+        "autoExpandLevel": -1,
+        "headers": [
+          {
+            "name": "Context",
+            "tooltip": "",
+            "dataType": "STRING"
+          }
+        ],
+        "entries": [
+          {
+            "id": 85,
+            "parentId": -1,
+            "labels": [
+              "little-execution.trx"
+            ],
+            "start": 0,
+            "end": 0
+          },
+          {
+            "id": 86,
+            "parentId": 85,
+            "labels": [
+              "Contexts"
+            ],
+            "start": 0,
+            "end": 0
+          },
+          {
+            "id": 87,
+            "parentId": 86,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 0
+          },
+          {
+            "id": 88,
+            "parentId": 87,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 0,
+            "hasData": true
+          },
+          {
+            "id": 89,
+            "parentId": 86,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 0
+          },
+          {
+            "id": 90,
+            "parentId": 89,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 0,
+            "hasData": true
+          },
+          {
+            "id": 91,
+            "parentId": 86,
+            "labels": [
+              "Thread"
+            ],
+            "start": 0,
+            "end": 0
+          },
+          {
+            "id": 92,
+            "parentId": 91,
+            "labels": [
+              "worker [0x20001000]"
+            ],
+            "start": 0,
+            "end": 0,
+            "hasData": true
+          },
+          {
+            "id": 93,
+            "parentId": 85,
+            "labels": [
+              "CPU 0"
+            ],
+            "start": 0,
+            "end": 0
+          },
+          {
+            "id": 94,
+            "parentId": 93,
+            "labels": [
+              "Execution"
+            ],
+            "start": 0,
+            "end": 0,
+            "hasData": true
+          }
+        ]
+      },
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          3000000000
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {
+        "autoExpandLevel": -1,
+        "headers": [
+          {
+            "name": "Context",
+            "tooltip": "",
+            "dataType": "STRING"
+          }
+        ],
+        "entries": [
+          {
+            "id": 85,
+            "parentId": -1,
+            "labels": [
+              "little-execution.trx"
+            ],
+            "start": 0,
+            "end": 3000000000
+          },
+          {
+            "id": 86,
+            "parentId": 85,
+            "labels": [
+              "Contexts"
+            ],
+            "start": 0,
+            "end": 3000000000
+          },
+          {
+            "id": 87,
+            "parentId": 86,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 3000000000
+          },
+          {
+            "id": 88,
+            "parentId": 87,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 3000000000,
+            "hasData": true
+          },
+          {
+            "id": 89,
+            "parentId": 86,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 3000000000
+          },
+          {
+            "id": 90,
+            "parentId": 89,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 3000000000,
+            "hasData": true
+          },
+          {
+            "id": 91,
+            "parentId": 86,
+            "labels": [
+              "Thread"
+            ],
+            "start": 0,
+            "end": 3000000000
+          },
+          {
+            "id": 92,
+            "parentId": 91,
+            "labels": [
+              "worker [0x20001000]"
+            ],
+            "start": 0,
+            "end": 3000000000,
+            "hasData": true
+          },
+          {
+            "id": 95,
+            "parentId": 86,
+            "labels": [
+              "ISR"
+            ],
+            "start": 0,
+            "end": 3000000000
+          },
+          {
+            "id": 96,
+            "parentId": 95,
+            "labels": [
+              "ISR 7"
+            ],
+            "start": 0,
+            "end": 3000000000,
+            "hasData": true
+          },
+          {
+            "id": 97,
+            "parentId": 95,
+            "labels": [
+              "ISR 8"
+            ],
+            "start": 0,
+            "end": 3000000000,
+            "hasData": true
+          },
+          {
+            "id": 93,
+            "parentId": 85,
+            "labels": [
+              "CPU 0"
+            ],
+            "start": 0,
+            "end": 3000000000
+          },
+          {
+            "id": 94,
+            "parentId": 93,
+            "labels": [
+              "Execution"
+            ],
+            "start": 0,
+            "end": 3000000000,
+            "hasData": true
+          }
+        ]
+      },
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/states",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          500000000,
+          1000000000,
+          1500000000,
+          2000000000,
+          2500000000,
+          3000000000
+        ],
+        "requested_items": [
+          94
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {
+        "rows": [
+          {
+            "entryId": 94,
+            "states": [
+              {
+                "start": 0,
+                "end": 500000000,
+                "label": "Initialization",
+                "style": {
+                  "parentKey": "initialization",
+                  "values": {}
+                }
+              },
+              {
+                "start": 500000000,
+                "end": 1000000000,
+                "label": "worker [0x20001000]",
+                "style": {
+                  "parentKey": "thread",
+                  "values": {}
+                }
+              },
+              {
+                "start": 1000000000,
+                "end": 1500000000,
+                "label": "ISR 7",
+                "style": {
+                  "parentKey": "isr",
+                  "values": {}
+                }
+              },
+              {
+                "start": 1500000000,
+                "end": 2000000000,
+                "label": "ISR 8",
+                "style": {
+                  "parentKey": "isr",
+                  "values": {}
+                }
+              },
+              {
+                "start": 2000000000,
+                "end": 2500000000,
+                "label": "ISR 7",
+                "style": {
+                  "parentKey": "isr",
+                  "values": {}
+                }
+              },
+              {
+                "start": 2500000000,
+                "end": 3000000000,
+                "label": "worker [0x20001000]",
+                "style": {
+                  "parentKey": "thread",
+                  "values": {}
+                }
+              },
+              {
+                "start": 3000000000,
+                "end": 3000000001,
+                "label": "Idle",
+                "style": {
+                  "parentKey": "idle",
+                  "values": {}
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "PUT",
+    "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs/09c45d76-163e-317a-a879-b102db3ede1d",
+    "request": {
+      "name": "Rejected active clock",
+      "parameters": {
+        "trace_uri": "TRACE_URI/little-execution.trx",
+        "timer_direction": "increasing",
+        "ticks_per_second": "2"
+      }
+    },
+    "http_status": 400,
+    "response": {
+      "title": "Close the trace and its experiments before changing its clock",
+      "detail": null
+    }
+  },
+  {
+    "method": "DELETE",
+    "endpoint": "/experiments/22a5b38a-1b20-320f-a81b-112e97a1590a",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "known-clock",
+      "UUID": "22a5b38a-1b20-320f-a81b-112e97a1590a",
+      "nbEvents": 7,
+      "start": 0,
+      "end": 3000000000,
+      "indexingStatus": "COMPLETED",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 3000000000,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "2",
+            "time_unit": "nanoseconds",
+            "physical_time": "available-rounded-down"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "PUT",
+    "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs/09c45d76-163e-317a-a879-b102db3ede1d",
+    "request": {
+      "name": "Rejected frequency",
+      "parameters": {
+        "trace_uri": "TRACE_URI/little-execution.trx",
+        "timer_direction": "increasing",
+        "ticks_per_second": "0"
+      }
+    },
+    "http_status": 400,
+    "response": {
+      "title": "Ticks per second must be a positive decimal integer no greater than 1000000000",
+      "detail": null
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs/09c45d76-163e-317a-a879-b102db3ede1d",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "id": "09c45d76-163e-317a-a879-b102db3ede1d",
+      "name": "little-execution.trx",
+      "description": "",
+      "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+      "parameters": {
+        "trace_uri": "TRACE_URI/little-execution.trx",
+        "ticks_per_second": "2",
+        "timer_direction": "increasing"
+      }
+    }
+  },
+  {
+    "method": "PUT",
+    "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs/09c45d76-163e-317a-a879-b102db3ede1d",
+    "request": {
+      "name": "Unknown time",
+      "parameters": {
+        "trace_uri": "TRACE_URI/little-execution.trx",
+        "timer_direction": "increasing"
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "id": "09c45d76-163e-317a-a879-b102db3ede1d",
+      "name": "little-execution.trx",
+      "description": "",
+      "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+      "parameters": {
+        "trace_uri": "TRACE_URI/little-execution.trx",
+        "timer_direction": "increasing"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments",
+    "request": {
+      "parameters": {
+        "name": "unknown-clock",
+        "traces": [
+          "d5231b43-059b-3aaa-bf42-5befbd11f341"
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 7,
+      "start": 0,
+      "end": 6,
+      "indexingStatus": "COMPLETED",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs",
+    "request": null,
+    "http_status": 200,
+    "response": [
+      {
+        "id": "org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider",
+        "name": "Events Table",
+        "description": "Show the raw events in table form for a given trace",
+        "type": "TABLE"
+      },
+      {
+        "id": "org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
+        "name": "Histogram",
+        "description": "Show a histogram of number of events to time for a trace",
+        "type": "TREE_TIME_XY"
+      },
+      {
+        "id": "org.eclipse.tracecompass.incubator.inandout.core.analysis.inAndOutdataProviderFactory",
+        "name": "InAndOut Configurator",
+        "description": "Configure custom InAndOut analysis",
+        "type": "NONE",
+        "capabilities": {
+          "canCreate": true,
+          "canDelete": false
+        }
+      },
+      {
+        "id": "org.eclipse.tracecompass.internal.tmf.core.statesystem.provider.StateSystemDataProvider",
+        "name": "State System Explorer",
+        "description": "Displays the states of state system attributes over time",
+        "type": "TIME_GRAPH"
+      },
+      {
+        "id": "org.eclipse.tracecompass.incubator.tracex.core.dataprovider",
+        "name": "TraceX Execution",
+        "description": "Shows TraceX thread, idle, initialization, and interrupt execution",
+        "type": "TIME_GRAPH"
+      }
+    ]
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {
+        "autoExpandLevel": -1,
+        "headers": [
+          {
+            "name": "Context",
+            "tooltip": "",
+            "dataType": "STRING"
+          }
+        ],
+        "entries": [
+          {
+            "id": 98,
+            "parentId": -1,
+            "labels": [
+              "little-execution.trx"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 99,
+            "parentId": 98,
+            "labels": [
+              "Contexts"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 100,
+            "parentId": 99,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 101,
+            "parentId": 100,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 102,
+            "parentId": 99,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 103,
+            "parentId": 102,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 104,
+            "parentId": 99,
+            "labels": [
+              "Thread"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 105,
+            "parentId": 104,
+            "labels": [
+              "worker [0x20001000]"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 106,
+            "parentId": 99,
+            "labels": [
+              "ISR"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 107,
+            "parentId": 106,
+            "labels": [
+              "ISR 7"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 108,
+            "parentId": 106,
+            "labels": [
+              "ISR 8"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 109,
+            "parentId": 98,
+            "labels": [
+              "CPU 0"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 110,
+            "parentId": 109,
+            "labels": [
+              "Execution"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          }
+        ]
+      },
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/states",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "requested_items": [
+          110
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {
+        "rows": [
+          {
+            "entryId": 110,
+            "states": [
+              {
+                "start": 0,
+                "end": 1,
+                "label": "Initialization",
+                "style": {
+                  "parentKey": "initialization",
+                  "values": {}
+                }
+              },
+              {
+                "start": 1,
+                "end": 2,
+                "label": "worker [0x20001000]",
+                "style": {
+                  "parentKey": "thread",
+                  "values": {}
+                }
+              },
+              {
+                "start": 2,
+                "end": 3,
+                "label": "ISR 7",
+                "style": {
+                  "parentKey": "isr",
+                  "values": {}
+                }
+              },
+              {
+                "start": 3,
+                "end": 4,
+                "label": "ISR 8",
+                "style": {
+                  "parentKey": "isr",
+                  "values": {}
+                }
+              },
+              {
+                "start": 4,
+                "end": 5,
+                "label": "ISR 7",
+                "style": {
+                  "parentKey": "isr",
+                  "values": {}
+                }
+              },
+              {
+                "start": 5,
+                "end": 6,
+                "label": "worker [0x20001000]",
+                "style": {
+                  "parentKey": "thread",
+                  "values": {}
+                }
+              },
+              {
+                "start": 6,
+                "end": 7,
+                "label": "Idle",
+                "style": {
+                  "parentKey": "idle",
+                  "values": {}
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "DELETE",
+    "endpoint": "/experiments/ace0d376-6717-3adf-bb10-ed77390f4d2e",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "unknown-clock",
+      "UUID": "ace0d376-6717-3adf-bb10-ed77390f4d2e",
+      "nbEvents": 7,
+      "start": 0,
+      "end": 6,
+      "indexingStatus": "COMPLETED",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs",
+    "request": {
+      "name": "Decreasing clock",
+      "parameters": {
+        "trace_uri": "TRACE_URI/little-execution.trx",
+        "timer_direction": "decreasing"
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "id": "09c45d76-163e-317a-a879-b102db3ede1d",
+      "name": "little-execution.trx",
+      "description": "",
+      "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+      "parameters": {
+        "trace_uri": "TRACE_URI/little-execution.trx",
+        "timer_direction": "decreasing"
+      }
+    }
+  },
+  {
+    "method": "DELETE",
+    "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs/09c45d76-163e-317a-a879-b102db3ede1d",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "id": "09c45d76-163e-317a-a879-b102db3ede1d",
+      "name": "little-execution.trx",
+      "description": "",
+      "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+      "parameters": {
+        "trace_uri": "TRACE_URI/little-execution.trx",
+        "timer_direction": "decreasing"
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs",
+    "request": null,
+    "http_status": 200,
+    "response": [
+      {
+        "id": "4c1af52e-5d4e-34e0-9428-7c31fcc9175f",
+        "name": "demo_threadx.trx",
+        "description": "",
+        "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+        "parameters": {
+          "trace_uri": "TRACE_URI/demo_threadx.trx",
+          "timer_direction": "decreasing"
+        }
+      }
+    ]
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments",
+    "request": {
+      "parameters": {
+        "name": "reset-clock",
+        "traces": [
+          "d5231b43-059b-3aaa-bf42-5befbd11f341"
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 7,
+      "start": 0,
+      "end": 6,
+      "indexingStatus": "COMPLETED",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs",
+    "request": null,
+    "http_status": 200,
+    "response": [
+      {
+        "id": "org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider",
+        "name": "Events Table",
+        "description": "Show the raw events in table form for a given trace",
+        "type": "TABLE"
+      },
+      {
+        "id": "org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
+        "name": "Histogram",
+        "description": "Show a histogram of number of events to time for a trace",
+        "type": "TREE_TIME_XY"
+      },
+      {
+        "id": "org.eclipse.tracecompass.incubator.inandout.core.analysis.inAndOutdataProviderFactory",
+        "name": "InAndOut Configurator",
+        "description": "Configure custom InAndOut analysis",
+        "type": "NONE",
+        "capabilities": {
+          "canCreate": true,
+          "canDelete": false
+        }
+      },
+      {
+        "id": "org.eclipse.tracecompass.internal.tmf.core.statesystem.provider.StateSystemDataProvider",
+        "name": "State System Explorer",
+        "description": "Displays the states of state system attributes over time",
+        "type": "TIME_GRAPH"
+      },
+      {
+        "id": "org.eclipse.tracecompass.incubator.tracex.core.dataprovider",
+        "name": "TraceX Execution",
+        "description": "Shows TraceX thread, idle, initialization, and interrupt execution",
+        "type": "TIME_GRAPH"
+      }
+    ]
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": null,
+      "statusMessage": "Running",
+      "status": "RUNNING"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          6
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {
+        "autoExpandLevel": -1,
+        "headers": [
+          {
+            "name": "Context",
+            "tooltip": "",
+            "dataType": "STRING"
+          }
+        ],
+        "entries": [
+          {
+            "id": 111,
+            "parentId": -1,
+            "labels": [
+              "little-execution.trx"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 112,
+            "parentId": 111,
+            "labels": [
+              "Contexts"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 113,
+            "parentId": 112,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 114,
+            "parentId": 113,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 115,
+            "parentId": 112,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 116,
+            "parentId": 115,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 117,
+            "parentId": 112,
+            "labels": [
+              "Thread"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 118,
+            "parentId": 117,
+            "labels": [
+              "worker [0x20001000]"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 119,
+            "parentId": 112,
+            "labels": [
+              "ISR"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 120,
+            "parentId": 119,
+            "labels": [
+              "ISR 7"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 121,
+            "parentId": 119,
+            "labels": [
+              "ISR 8"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          },
+          {
+            "id": 122,
+            "parentId": 111,
+            "labels": [
+              "CPU 0"
+            ],
+            "start": 0,
+            "end": 6
+          },
+          {
+            "id": 123,
+            "parentId": 122,
+            "labels": [
+              "Execution"
+            ],
+            "start": 0,
+            "end": 6,
+            "hasData": true
+          }
+        ]
+      },
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/states",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "requested_items": [
+          123
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {
+        "rows": [
+          {
+            "entryId": 123,
+            "states": [
+              {
+                "start": 0,
+                "end": 1,
+                "label": "Initialization",
+                "style": {
+                  "parentKey": "initialization",
+                  "values": {}
+                }
+              },
+              {
+                "start": 1,
+                "end": 2,
+                "label": "worker [0x20001000]",
+                "style": {
+                  "parentKey": "thread",
+                  "values": {}
+                }
+              },
+              {
+                "start": 2,
+                "end": 3,
+                "label": "ISR 7",
+                "style": {
+                  "parentKey": "isr",
+                  "values": {}
+                }
+              },
+              {
+                "start": 3,
+                "end": 4,
+                "label": "ISR 8",
+                "style": {
+                  "parentKey": "isr",
+                  "values": {}
+                }
+              },
+              {
+                "start": 4,
+                "end": 5,
+                "label": "ISR 7",
+                "style": {
+                  "parentKey": "isr",
+                  "values": {}
+                }
+              },
+              {
+                "start": 5,
+                "end": 6,
+                "label": "worker [0x20001000]",
+                "style": {
+                  "parentKey": "thread",
+                  "values": {}
+                }
+              },
+              {
+                "start": 6,
+                "end": 7,
+                "label": "Idle",
+                "style": {
+                  "parentKey": "idle",
+                  "values": {}
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "DELETE",
+    "endpoint": "/experiments/e8f2d2ef-cab6-3755-b174-c006919f91d8",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "reset-clock",
+      "UUID": "e8f2d2ef-cab6-3755-b174-c006919f91d8",
+      "nbEvents": 7,
+      "start": 0,
+      "end": 6,
+      "indexingStatus": "COMPLETED",
+      "traces": [
+        {
+          "name": "little-execution.trx",
+          "path": "TRACE_URI/little-execution.trx",
+          "UUID": "d5231b43-059b-3aaa-bf42-5befbd11f341",
+          "nbEvents": 7,
+          "start": 0,
+          "end": 6,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0xF0000000",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "1",
+            "registry_name_size": "16",
+            "registry_entry_size": "32",
+            "registry_start_offset": "48",
+            "registry_end_offset": "80",
+            "event_capacity": "8",
+            "event_start_offset": "80",
+            "event_end_offset": "336",
+            "event_current_offset": "304",
+            "event_count": "7",
+            "event_buffer_status": "partial",
+            "registry_record_count": "1",
+            "registry_valid_count": "1",
+            "registry_in_use_count": "1",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "increasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  }
+]
