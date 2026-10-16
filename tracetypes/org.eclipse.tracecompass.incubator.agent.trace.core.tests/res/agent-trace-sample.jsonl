@@ -1,0 +1,6 @@
+{"type":"agent_start","timestamp":"2024-01-15T10:30:00.000Z","event_id":"evt-001","data":{"agent_name":"test-agent"}}
+{"type":"tool_call","timestamp":"2024-01-15T10:30:01.000Z","event_id":"evt-002","parent_id":"evt-001","data":{"tool_name":"search","arguments":{"query":"test"}}}
+{"type":"tool_result","timestamp":"2024-01-15T10:30:02.000Z","event_id":"evt-003","parent_id":"evt-002","data":{"result":"found 3 results"}}
+{"type":"llm_request","timestamp":"2024-01-15T10:30:03.000Z","event_id":"evt-004","parent_id":"evt-001","data":{"model":"gpt-4","messages":[{"role":"user","content":"hello"}]}}
+{"type":"llm_response","timestamp":"2024-01-15T10:30:04.500Z","event_id":"evt-005","parent_id":"evt-004","data":{"model":"gpt-4","content":"Hi there!","usage":{"prompt_tokens":10,"completion_tokens":5}}}
+{"type":"agent_end","timestamp":"2024-01-15T10:30:05.000Z","event_id":"evt-006","parent_id":"evt-001","data":{"status":"success"}}
