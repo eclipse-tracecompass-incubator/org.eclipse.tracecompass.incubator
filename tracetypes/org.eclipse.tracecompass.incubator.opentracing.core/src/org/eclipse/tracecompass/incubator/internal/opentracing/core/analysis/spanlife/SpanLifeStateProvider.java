@@ -15,9 +15,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.function.BiConsumer;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.event.IOpenTracingConstants;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -50,6 +52,20 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
     private final Map<String, BiConsumer<ITmfEvent, ITmfStateSystemBuilder>> fHandlers;
 
     /**
+     * A deferred state-system write. These are buffered in a priority queue
+     * sorted by timestamp so that they can be flushed in monotonically
+     * increasing order.
+     */
+    private record DeferredModification(long timestamp, @Nullable Object value, int quark) implements Comparable<DeferredModification> {
+        @Override
+        public int compareTo(DeferredModification o) {
+            return Long.compare(timestamp, o.timestamp);
+        }
+    }
+
+    private final PriorityQueue<DeferredModification> fDeferredQueue = new PriorityQueue<>();
+
+    /**
      * Constructor
      *
      * @param trace
@@ -67,7 +83,7 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
 
     @Override
     public int getVersion() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -87,12 +103,40 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
         }
     }
 
+    @Override
+    public void done() {
+        ITmfStateSystemBuilder ss = getStateSystemBuilder();
+        if (ss != null) {
+            flushDeferredModifications(Long.MAX_VALUE, ss);
+        }
+        super.done();
+    }
+
+    /**
+     * Flush all deferred modifications whose timestamp is &le; the given
+     * threshold. This maintains the monotonically non-decreasing timestamp
+     * invariant required by the state system.
+     */
+    private void flushDeferredModifications(long threshold, ITmfStateSystemBuilder ss) {
+        while (!fDeferredQueue.isEmpty() && fDeferredQueue.peek().timestamp() <= threshold) {
+            DeferredModification mod = fDeferredQueue.poll();
+            ss.modifyAttribute(mod.timestamp(), mod.value(), mod.quark());
+        }
+    }
+
     private void handleSpan(ITmfEvent event, ITmfStateSystemBuilder ss) {
         long timestamp = event.getTimestamp().toNanos();
         Long duration = event.getContent().getFieldValue(Long.class, IOpenTracingConstants.DURATION);
         if (duration == null) {
             return;
         }
+
+        /*
+         * Flush any deferred end/log events that should occur before this
+         * span's start time, so the state system sees monotonically
+         * non-decreasing timestamps.
+         */
+        flushDeferredModifications(timestamp, ss);
 
         String traceId = event.getContent().getFieldValue(String.class, IOpenTracingConstants.TRACE_ID);
         int traceQuark = ss.getQuarkAbsoluteAndAdd(traceId);
@@ -128,17 +172,19 @@ public class SpanLifeStateProvider extends AbstractTmfStateProvider {
                 for (Map.Entry<String, String> entry : log.getValue().entrySet()) {
                     logString.add(entry.getKey() + ':' + entry.getValue());
                 }
-                // One attribute for each span where each state value is the logs at the
-                // timestamp
-                // corresponding to the start time of the state
                 Integer logQuark = ss.getQuarkRelativeAndAdd(logsQuark, spanId);
                 Long logTimestamp = log.getKey();
-                ss.modifyAttribute(logTimestamp, String.join("~", logString), logQuark); //$NON-NLS-1$
-                ss.modifyAttribute(logTimestamp + 1, (Object) null, logQuark);
+                // Defer log writes since they may be after the next span's
+                // start
+                fDeferredQueue.add(new DeferredModification(logTimestamp, String.join("~", logString), logQuark)); //$NON-NLS-1$
+                fDeferredQueue.add(new DeferredModification(logTimestamp + 1, null, logQuark));
             }
         }
 
-        ss.modifyAttribute(timestamp + duration, (Object) null, spanQuark);
+        // Defer the span-close write since the end time may be after the next
+        // span's start time
+        fDeferredQueue.add(new DeferredModification(timestamp + duration, null, spanQuark));
+
         if (spanId != null) {
             fSpanMap.put(spanId, spanQuark);
         }
