@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
+import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXAnalysis;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXDataProviderFactory;
@@ -38,6 +40,7 @@ import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
@@ -61,7 +64,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
  * logical event index.
  */
 public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
-        ITmfTraceKnownSize {
+        ITmfTraceKnownSize, IKernelTrace {
 
     private static final int CONFIDENCE = 100;
     private static final String PROPERTY_TICKS_PER_SECOND = "ticks_per_second"; //$NON-NLS-1$
@@ -73,10 +76,21 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
     private static final QualifiedName PERSISTED_TIMER_DIRECTION = new QualifiedName(
             Activator.PLUGIN_ID, PROPERTY_TIMER_DIRECTION);
 
+    /** TID reserved for the idle context (ThreadX null current thread). */
+    public static final int IDLE_TID = 0;
+
     private @NonNull TmfLongLocation fLocation = new TmfLongLocation(0L);
     private final Object fClockConfigurationLock = new Object();
     private @Nullable TraceXFile fInput;
     private @Nullable TraceXEventIndex fEventIndex;
+    /**
+     * Stable mapping from a ThreadX thread object address to a small, dense
+     * thread id usable as a Linux-style TID in the kernel state system and the
+     * {@link org.eclipse.tracecompass.analysis.os.linux.core.event.aspect.LinuxTidAspect
+     * LinuxTidAspect}. Built from the registry so it is deterministic.
+     */
+    private @NonNull Map<@NonNull Long, @NonNull Integer> fThreadIds = Collections.emptyMap();
+    private @NonNull Map<@NonNull Integer, @NonNull String> fThreadNames = Collections.emptyMap();
     private @NonNull Map<@NonNull String, @NonNull String> fProperties = Collections.emptyMap();
     private @NonNull TraceXTimerDirection fTimerDirection = TraceXTimerDirection.INCREASING;
     private @Nullable Long fTicksPerSecond;
@@ -116,6 +130,7 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
             TraceXEventIndex index = buildTimeBase(input, fTimerDirection,
                     fTicksPerSecond);
             fInput = input;
+            buildThreadIds(input);
             installTimeBase(index);
         } catch (IOException | IllegalArgumentException e) {
             closeFailedInput(input, e);
@@ -319,20 +334,141 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
         return defaultRank;
     }
 
+    /**
+     * TraceX scheduling event ids (ThreadX trace event ids). These are the
+     * events {@link org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXKernelStateProvider
+     * TraceXKernelStateProvider} treats as context switches; the "next thread"
+     * is carried in a different information word per event.
+     */
+    private static final int EVT_THREAD_RESUME = 1;
+    private static final int EVT_THREAD_SUSPEND = 2;
+    private static final int EVT_TIME_SLICE = 5;
+    private static final int EVT_RUNNING = 6;
+    private static final int EVT_THREAD_RELINQUISH = 109;
+
     private ITmfEvent toTmfEvent(TraceXEvent event, long rank) {
         Map<String, Object> fields = event.getFields();
-        TmfEventField[] children = new TmfEventField[fields.size()];
-        int position = 0;
-        for (Map.Entry<String, Object> field : fields.entrySet()) {
-            children[position++] = new TmfEventField(field.getKey(),
-                    field.getValue(), null);
+        boolean schedSwitch = isSchedulingEvent(event);
+        TmfEventField[] children;
+        if (schedSwitch) {
+            children = buildSchedSwitchFields(event, fields);
+        } else {
+            children = new TmfEventField[fields.size()];
+            int position = 0;
+            for (Map.Entry<String, Object> field : fields.entrySet()) {
+                children[position++] = new TmfEventField(field.getKey(),
+                        field.getValue(), null);
+            }
         }
         TmfEventField content = new TmfEventField(ITmfEventField.ROOT_FIELD_ID,
                 event, children);
+        String eventName = schedSwitch
+                ? TraceXEventLayout.TRACEX_SCHED_SWITCH
+                : event.getMetadata().getName();
         return new TmfEvent(this, rank,
                 TmfTimestamp.fromNanos(timestamp(
                         event.getRelativeTicks().orElseThrow())),
-                new TmfEventType(event.getMetadata().getName(), null), content);
+                new TmfEventType(eventName, null), content);
+    }
+
+    /** @return whether this TraceX event represents a thread context switch */
+    private static boolean isSchedulingEvent(TraceXEvent event) {
+        switch (event.getNormalizedEventId()) {
+        case EVT_THREAD_RESUME:
+        case EVT_THREAD_SUSPEND:
+        case EVT_TIME_SLICE:
+        case EVT_THREAD_RELINQUISH:
+            return true;
+        case EVT_RUNNING:
+            TraceXContext context = event.getContext();
+            return context.getKind() == TraceXContext.Kind.THREAD
+                    || context.getKind() == TraceXContext.Kind.IDLE;
+        default:
+            return false;
+        }
+    }
+
+    /**
+     * Resolve the TID being scheduled in for a scheduling event, mirroring the
+     * word mapping used by the kernel state provider.
+     */
+    private int nextThreadTid(TraceXEvent event) {
+        switch (event.getNormalizedEventId()) {
+        case EVT_THREAD_RESUME:
+        case EVT_THREAD_SUSPEND:
+            return getThreadId(event.getInformationWord(4));
+        case EVT_TIME_SLICE:
+            return getThreadId(event.getInformationWord(1));
+        case EVT_THREAD_RELINQUISH:
+            return getThreadId(event.getInformationWord(2));
+        case EVT_RUNNING:
+            return getThreadId(event.getContext().getRawAddress());
+        default:
+            return -1;
+        }
+    }
+
+    /**
+     * Build the event-content fields for a synthetic {@code sched_switch}.
+     *
+     * <p>
+     * The stock kernel CPU-usage analysis credits the time elapsed since the
+     * previous switch to {@code prev_tid}. For TraceX, the thread running up to
+     * this event is the event context thread, and the thread scheduled in is
+     * derived from the event's information word. All original TraceX fields are
+     * preserved as additional children so the Events table is unaffected.
+     */
+    private TmfEventField[] buildSchedSwitchFields(TraceXEvent event,
+            Map<String, Object> fields) {
+        int prevTid = getThreadId(event.getContext().getRawAddress());
+        int nextTid = nextThreadTid(event);
+        String prevComm = getThreadName(prevTid);
+        String nextComm = getThreadName(nextTid);
+        Integer prevPrio = event.getContext().getPriority();
+
+        List<TmfEventField> children = new ArrayList<>(fields.size() + 7);
+        // Synthetic sched_switch fields consumed by the kernel analyses.
+        children.add(new TmfEventField(TraceXEventLayout.TRACEX_PREV_TID,
+                Long.valueOf(prevTid), null));
+        children.add(new TmfEventField(TraceXEventLayout.TRACEX_NEXT_TID,
+                Long.valueOf(nextTid), null));
+        children.add(new TmfEventField(TraceXEventLayout.TRACEX_PREV_COMM,
+                prevComm == null ? "" : prevComm, null)); //$NON-NLS-1$
+        children.add(new TmfEventField(TraceXEventLayout.TRACEX_NEXT_COMM,
+                nextComm == null ? "" : nextComm, null)); //$NON-NLS-1$
+        children.add(new TmfEventField(TraceXEventLayout.TRACEX_PREV_PRIO,
+                Long.valueOf(prevPrio == null ? -1 : prevPrio.intValue()), null));
+        children.add(new TmfEventField(TraceXEventLayout.TRACEX_NEXT_PRIO,
+                Long.valueOf(-1), null));
+        children.add(new TmfEventField(TraceXEventLayout.TRACEX_PREV_STATE,
+                Long.valueOf(0), null));
+        // Keep the original ThreadX event name visible even though the TMF
+        // event type is renamed to the synthetic sched_switch name.
+        children.add(new TmfEventField("tracex_event_name", //$NON-NLS-1$
+                event.getMetadata().getName(), null));
+        // Preserve the original TraceX fields (skip any that would collide).
+        for (Map.Entry<String, Object> field : fields.entrySet()) {
+            String key = field.getKey();
+            if (!isReservedSchedField(key)) {
+                children.add(new TmfEventField(key, field.getValue(), null));
+            }
+        }
+        return children.toArray(new TmfEventField[0]);
+    }
+
+    private static boolean isReservedSchedField(String key) {
+        return TraceXEventLayout.TRACEX_PREV_TID.equals(key)
+                || TraceXEventLayout.TRACEX_NEXT_TID.equals(key)
+                || TraceXEventLayout.TRACEX_PREV_COMM.equals(key)
+                || TraceXEventLayout.TRACEX_NEXT_COMM.equals(key)
+                || TraceXEventLayout.TRACEX_PREV_PRIO.equals(key)
+                || TraceXEventLayout.TRACEX_NEXT_PRIO.equals(key)
+                || TraceXEventLayout.TRACEX_PREV_STATE.equals(key);
+    }
+
+    @Override
+    public IKernelAnalysisEventLayout getKernelEventLayout() {
+        return TraceXEventLayout.getInstance();
     }
 
     private long timestamp(long relativeTicks) {
@@ -372,6 +508,11 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
         return fProperties;
     }
 
+    @Override
+    public Iterable<ITmfEventAspect<?>> getEventAspects() {
+        return TraceXAspects.getAspects();
+    }
+
     /** @return configured target clock frequency, or empty when unknown */
     public OptionalLong getTicksPerSecond() {
         Long frequency = fTicksPerSecond;
@@ -397,6 +538,70 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
             throw new IOException("TraceX trace is not initialized"); //$NON-NLS-1$
         }
         return input.getRegistry();
+    }
+
+    /**
+     * Build a stable, dense thread-id map from the registry so TraceX thread
+     * object addresses can be exposed as Linux-style TIDs. Idle keeps
+     * {@link #IDLE_TID}; every registered thread gets a positive id in registry
+     * order.
+     */
+    private void buildThreadIds(TraceXFile input) {
+        Map<@NonNull Long, @NonNull Integer> ids = new LinkedHashMap<>();
+        Map<@NonNull Integer, @NonNull String> names = new LinkedHashMap<>();
+        try {
+            int next = 1;
+            for (TraceXRegistryRecord record : input.getRegistry().getRecords()) {
+                if (record.isValid()
+                        && record.getType() == TraceXObjectType.THREAD
+                        && !ids.containsKey(Long.valueOf(record.getAddress()))) {
+                    Integer tid = Integer.valueOf(next++);
+                    ids.put(Long.valueOf(record.getAddress()), tid);
+                    names.put(tid, record.getName());
+                }
+            }
+        } catch (IOException e) {
+            Activator.getInstance().logError("Failed to read TraceX registry for thread ids", e); //$NON-NLS-1$
+        }
+        fThreadIds = Collections.unmodifiableMap(ids);
+        fThreadNames = Collections.unmodifiableMap(names);
+    }
+
+    /**
+     * Resolve a ThreadX thread object address to a stable Linux-style TID.
+     *
+     * @param address
+     *            unsigned 32-bit thread object address, or {@code 0} for idle
+     * @return a dense thread id, {@link #IDLE_TID} for the idle context, or
+     *         {@code -1} when the address is not a known registered thread
+     */
+    public int getThreadId(long address) {
+        if (address == 0) {
+            return IDLE_TID;
+        }
+        Integer tid = fThreadIds.get(Long.valueOf(address));
+        return tid == null ? -1 : tid.intValue();
+    }
+
+    /**
+     * Get the display name of a registered thread id.
+     *
+     * @param tid
+     *            thread id previously returned by {@link #getThreadId(long)}
+     * @return the thread name, or {@code null} when unknown
+     */
+    public @Nullable String getThreadName(int tid) {
+        return fThreadNames.get(Integer.valueOf(tid));
+    }
+
+    /**
+     * Get the immutable thread-id-to-name map used to seed the kernel state
+     * system threads.
+     *
+     * @return map from dense thread id to thread name
+     */
+    public @NonNull Map<@NonNull Integer, @NonNull String> getThreadNames() {
+        return fThreadNames;
     }
 
     /**

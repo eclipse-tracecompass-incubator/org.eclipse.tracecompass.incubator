@@ -28,6 +28,16 @@
                class="org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXKernelAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.analysis.os.linux.kernel"
+            name="%analysis.kernel.name">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
@@ -37,6 +47,6 @@
       </dataProviderFactory>
    </extension>
    <extension point="org.eclipse.tracecompass.tmf.core.config">
-      <source class="org.eclipse.tracecompass.incubator.internal.tracex.core.config.TraceXClockConfigurationSource"/>
+      <source id ="" class="org.eclipse.tracecompass.incubator.internal.tracex.core.config.TraceXClockConfigurationSource"/>
    </extension>
 </plugin>

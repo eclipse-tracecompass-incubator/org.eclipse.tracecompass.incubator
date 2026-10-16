@@ -255,22 +255,27 @@ public final class TraceXLayout {
      */
     public Map<String, String> getProperties() {
         Map<String, String> properties = new LinkedHashMap<>();
-        properties.put("byte_order", fByteOrder.toString()); //$NON-NLS-1$
+        properties.put("byte_order", String.valueOf(fByteOrder)); //$NON-NLS-1$
         properties.put("base_address", hex32(fBaseAddress)); //$NON-NLS-1$
         properties.put("timer_valid_mask", hex32(fTimerValidMask)); //$NON-NLS-1$
-        properties.put("registry_capacity", Long.toString(fRegistryCapacity)); //$NON-NLS-1$
+        properties.put("registry_capacity", dec64(fRegistryCapacity)); //$NON-NLS-1$
         properties.put("registry_name_size", Integer.toString(fRegistryNameSize)); //$NON-NLS-1$
-        properties.put("registry_entry_size", Long.toString(fRegistryEntrySize)); //$NON-NLS-1$
-        properties.put("registry_start_offset", Long.toString(fRegistryStartOffset)); //$NON-NLS-1$
-        properties.put("registry_end_offset", Long.toString(fRegistryEndOffset)); //$NON-NLS-1$
-        properties.put("event_capacity", Long.toString(fEventCapacity)); //$NON-NLS-1$
-        properties.put("event_start_offset", Long.toString(fEventStartOffset)); //$NON-NLS-1$
-        properties.put("event_end_offset", Long.toString(fEventEndOffset)); //$NON-NLS-1$
-        properties.put("event_current_offset", Long.toString(fEventCurrentOffset)); //$NON-NLS-1$
+        properties.put("registry_entry_size", dec64(fRegistryEntrySize)); //$NON-NLS-1$
+        properties.put("registry_start_offset", dec64(fRegistryStartOffset)); //$NON-NLS-1$
+        properties.put("registry_end_offset", dec64(fRegistryEndOffset)); //$NON-NLS-1$
+        properties.put("event_capacity", dec64(fEventCapacity)); //$NON-NLS-1$
+        properties.put("event_start_offset", dec64(fEventStartOffset)); //$NON-NLS-1$
+        properties.put("event_end_offset", dec64(fEventEndOffset)); //$NON-NLS-1$
+        properties.put("event_current_offset", dec64(fEventCurrentOffset)); //$NON-NLS-1$
         return Collections.unmodifiableMap(properties);
     }
 
     private static String hex32(long value) {
         return String.format("0x%08X", value); //$NON-NLS-1$
+    }
+
+    private static String dec64(Long value) {
+        // handles null
+        return String.valueOf(Long.toString(value));
     }
 }

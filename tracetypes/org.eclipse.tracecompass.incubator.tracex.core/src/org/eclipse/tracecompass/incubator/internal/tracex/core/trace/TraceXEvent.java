@@ -16,6 +16,7 @@ import java.nio.ByteOrder;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.OptionalLong;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -125,7 +126,7 @@ public final class TraceXEvent {
         if (bytes.remaining() < RECORD_SIZE) {
             throw new TraceXFormatException("Truncated TraceX event record"); //$NON-NLS-1$
         }
-        ByteBuffer record = bytes.slice().order(order);
+        ByteBuffer record = Objects.requireNonNull(bytes.slice().order(order));
         long context = unsignedInt(record);
         long priority = unsignedInt(record);
         long eventId = unsignedInt(record);
