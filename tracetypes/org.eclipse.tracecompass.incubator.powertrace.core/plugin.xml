@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <type
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.powertrace"
+            isDirectory="false"
+            name="PowerTrace"
+            trace_type="org.eclipse.tracecompass.incubator.internal.powertrace.core.trace.PowerTrace">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.analysis.counters.core.CounterAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.incubator.powertrace.core.counter"
+            name="PowerTrace25">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.powertrace.core.trace.PowerTrace">
+         </tracetype>
+      </module>
+   </extension>
+
+</plugin>
