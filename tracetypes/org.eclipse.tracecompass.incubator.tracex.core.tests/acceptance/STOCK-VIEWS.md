@@ -40,11 +40,18 @@ Headless GTK tests must select X11 explicitly. Inheriting a Wayland session can
 bypass Xvfb and make screenshots unreliable. The retained rendering check uses
 isolated X11; native platform rendering remains separate.
 
+The default build was subsequently verified with no target override: all 147
+modules passed `clean install`, including the final 77 core, four UI, and 79
+server tests and six product builds. Coverage remained complete across 36 scoped
+classes. CI now uses the same release target and fixed X11 scaling. The additive
+`default_build` record contains report and screenshot hashes; earlier archive
+hashes and live-server evidence still identify the separately verified products.
+
 Native Windows checks for this follow-up remain pending; the previous Windows
 record predates these changes. Follow the added stock-view procedure in
-`WINDOWS.md`. Native macOS remains untested. The default rolling master target
-now requires Java 25 while this repository selects Java 21; verification used
-`tracecompass-incubator-12.1`. No default-target pass is claimed. Critical-path
+`WINDOWS.md`. Native macOS remains untested. The explicit rolling master
+target requires Java 25 and remains unverified; the default now selects the
+verified Java 21 release target. Critical-path
 and wakeup/blocking-cause analyses remain unsupported.
 
 [proposal]: https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator/pull/284

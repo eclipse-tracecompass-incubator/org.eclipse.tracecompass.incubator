@@ -56,9 +56,9 @@ For a focused build in a fresh checkout, install the target definitions first:
 mvn -pl common/org.eclipse.tracecompass.incubator.target -am install -DskipTests
 ```
 
-The default rolling target follows Trace Compass master. Its current Java
-requirement can differ from the release baseline; record the selected target
-with build results.
+The default target is the Java 21 release baseline. The explicit rolling target
+`tracecompass-incubator-master` currently requires Java 25; record the selected
+target with build results.
 
 For reproducible headless GTK rendering, use an isolated X11 display and fixed
 scaling. This avoids inheriting a desktop Wayland session:

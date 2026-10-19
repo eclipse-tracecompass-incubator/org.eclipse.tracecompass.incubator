@@ -88,7 +88,7 @@ diagnostics are also recorded in `windows.json`. Raw logs remain private.
 | Required evidence or behavior | Status and closure |
 | --- | --- |
 | Windows stock-view follow-up | Pending on the new products; use the added procedure in `WINDOWS.md`. Earlier Windows acceptance does not cover these changes. |
-| Rolling master target | Java 25 requirement conflicts with the selected Java 21 environment; release-target verification passed. |
+| Default build | Closed: the default now selects the Java 21 release target; all 147 modules passed with no target override. The explicit rolling master target requires Java 25 and remains unverified. |
 | macOS native smoke | Desktop/server products built; native launch/import/execution-view checks pending; owner unassigned. |
 | Human review | Two committer approvals are not recorded here. No approval of the stock-view follow-up is claimed. |
 
