@@ -132,6 +132,13 @@ final class TraceXKernelState {
     }
 
     private static int interruptQuark(ITmfStateSystemBuilder ss, long number) {
-        return ss.getQuarkAbsoluteAndAdd(CPUS, CPU, IRQS, Long.toString(number));
+        String name = Long.toString(number);
+        if (number > Integer.MAX_VALUE) {
+            // Resources parses the prefix as a signed int and preserves the
+            // full attribute name as its label. Keep unsigned IDs distinct
+            // from the unknown interrupt (-1).
+            name = Integer.toString((int) number) + "/" + name; //$NON-NLS-1$
+        }
+        return ss.getQuarkAbsoluteAndAdd(CPUS, CPU, IRQS, name);
     }
 }

@@ -30,6 +30,8 @@ Use the standard Events table search and filter controls to find an event type o
 
 Select '''Window > Show View > Other''' and open '''Control Flow''', '''Resources''', or '''CPU Usage'''. These standard Trace Compass views support TraceX traces and experiments. Control Flow shows registered threads; Resources shows CPU 0 and interrupt activity. Thread IDs are assigned in registry order and are local to each trace. They are not target OS IDs; use the preserved context addresses to identify ThreadX objects.
 
+Resources uses a signed compatibility ID before a slash for IRQ numbers above 2147483647; the unsigned number remains after the slash. TraceX Execution and Contents preserve the original value.
+
 CPU Usage counts time spent executing registered threads. Interrupt, idle, initialization, and unresolved-context intervals are excluded from thread totals. A scheduler selection inside an ISR takes effect after the outermost ISR exits. The trace-specific execution view also displays initialization and unresolved contexts.
 
 The Events table provides typed context, thread ID, priority, preemption threshold, raw-word, and position columns. The Contents column retains every original field and resolved alias. Original ThreadX event names remain available for filtering and Statistics. Changing the clock through TraceX Execution refreshes open linked views, including pinned time graphs.

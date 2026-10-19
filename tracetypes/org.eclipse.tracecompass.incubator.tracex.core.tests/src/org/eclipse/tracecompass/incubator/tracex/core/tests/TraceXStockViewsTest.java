@@ -142,6 +142,23 @@ public class TraceXStockViewsTest {
         }
     }
 
+    /** Verifies Resources accepts unsigned IRQ IDs and retains their full labels. */
+    @Test
+    public void testUnsignedInterruptNumbers() throws Exception {
+        for (long number : new long[] { 0x80000000L, 0xffffffffL }) {
+            try (Fixture fixture = fixture(number)) {
+                var response = provider(fixture.trace, RESOURCES).fetchTree(parameters(0, 80), null);
+                assertEquals(Status.COMPLETED, response.getStatus());
+                assertTrue(Objects.requireNonNull(response.getModel()).getEntries().stream()
+                        .anyMatch(entry -> entry.getName().contains(Long.toString(number))));
+                var ss = Objects.requireNonNull(fixture.kernel.getStateSystem());
+                String key = Integer.toString((int) number) + "/" + number; //$NON-NLS-1$
+                assertEquals(0, state(ss, 20, "CPUs", "0", "IRQs", key)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                assertNull(state(ss, 50, "CPUs", "0", "IRQs", key)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            }
+        }
+    }
+
     /** Verifies names and full Contents survive the addition of typed columns. */
     @Test
     public void testOriginalEventsAndContents() throws Exception {
@@ -205,16 +222,20 @@ public class TraceXStockViewsTest {
     }
 
     private static Fixture fixture() throws Exception {
+        return fixture(7);
+    }
+
+    private static Fixture fixture(long interrupt) throws Exception {
         var input = TraceXTestData.create(ByteOrder.LITTLE_ENDIAN, 0x70000000L, 16, 2, 10, 9);
         byte[] data = input.fileBytes();
         input.putThread(data, 0, A, "alpha"); //$NON-NLS-1$
         input.putThread(data, 1, B, "beta"); //$NON-NLS-1$
         input.putEvent(data, 0, A, 2, 100, 0, 0, 0, 0, 0);
-        input.putEvent(data, 1, ISR, A, 3, 10, 0, 7, 0, 0);
-        input.putEvent(data, 2, ISR, A, 3, 20, 0, 7, 0, 0);
-        input.putEvent(data, 3, ISR, A, 4, 30, 0, 7, 0, 0);
+        input.putEvent(data, 1, ISR, A, 3, 10, 0, interrupt, 0, 0);
+        input.putEvent(data, 2, ISR, A, 3, 20, 0, interrupt, 0, 0);
+        input.putEvent(data, 3, ISR, A, 4, 30, 0, interrupt, 0, 0);
         input.putEvent(data, 4, ISR, A, 1, 40, 0, 0, 0, B);
-        input.putEvent(data, 5, ISR, A, 4, 50, 0, 7, 0, 0);
+        input.putEvent(data, 5, ISR, A, 4, 50, 0, interrupt, 0, 0);
         input.putEvent(data, 6, B, 3, 2, 60, 0, 0, 0, 0);
         input.putEvent(data, 7, B, 3, 1, 70, 0, 0, 0, A);
         input.putEvent(data, 8, A, 2, 100, 80, 0, 0, 0, 0);
