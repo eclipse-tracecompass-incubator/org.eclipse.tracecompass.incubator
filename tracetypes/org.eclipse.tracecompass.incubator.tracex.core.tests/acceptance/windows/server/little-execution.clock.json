@@ -1,0 +1,22 @@
+{
+  "method": "POST",
+  "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs",
+  "request": {
+    "name": "little-execution clock",
+    "parameters": {
+      "trace_uri": "TRACE_URI/little-execution.trx",
+      "timer_direction": "increasing"
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "id": "fd71a76f-3677-3493-b672-5b03f81421cf",
+    "name": "little-execution.trx",
+    "description": "",
+    "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+    "parameters": {
+      "trace_uri": "TRACE_URI/little-execution.trx",
+      "timer_direction": "increasing"
+    }
+  }
+}

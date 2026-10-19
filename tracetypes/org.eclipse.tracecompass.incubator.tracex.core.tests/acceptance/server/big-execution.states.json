@@ -1,0 +1,190 @@
+{
+  "method": "POST",
+  "endpoint": "/experiments/a17d52e9-db80-3cc6-ab40-87f4263b7688/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/states",
+  "request": {
+    "parameters": {
+      "requested_times": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "requested_items": [
+        3,
+        5,
+        7,
+        9,
+        10,
+        12
+      ]
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "model": {
+      "rows": [
+        {
+          "entryId": 3,
+          "states": [
+            {
+              "start": 0,
+              "end": 1,
+              "label": "Running",
+              "style": {
+                "parentKey": "initialization",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 5,
+          "states": [
+            {
+              "start": 6,
+              "end": 7,
+              "label": "Running",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 7,
+          "states": [
+            {
+              "start": 1,
+              "end": 2,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 5,
+              "end": 6,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 9,
+          "states": [
+            {
+              "start": 2,
+              "end": 3,
+              "label": "Running",
+              "style": {
+                "parentKey": "isr",
+                "values": {}
+              }
+            },
+            {
+              "start": 4,
+              "end": 5,
+              "label": "Running",
+              "style": {
+                "parentKey": "isr",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 10,
+          "states": [
+            {
+              "start": 3,
+              "end": 4,
+              "label": "Running",
+              "style": {
+                "parentKey": "isr",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 12,
+          "states": [
+            {
+              "start": 0,
+              "end": 1,
+              "label": "Initialization",
+              "style": {
+                "parentKey": "initialization",
+                "values": {}
+              }
+            },
+            {
+              "start": 1,
+              "end": 2,
+              "label": "worker [0x20001000]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 2,
+              "end": 3,
+              "label": "ISR 7",
+              "style": {
+                "parentKey": "isr",
+                "values": {}
+              }
+            },
+            {
+              "start": 3,
+              "end": 4,
+              "label": "ISR 8",
+              "style": {
+                "parentKey": "isr",
+                "values": {}
+              }
+            },
+            {
+              "start": 4,
+              "end": 5,
+              "label": "ISR 7",
+              "style": {
+                "parentKey": "isr",
+                "values": {}
+              }
+            },
+            {
+              "start": 5,
+              "end": 6,
+              "label": "worker [0x20001000]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 6,
+              "end": 7,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "statusMessage": "Completed",
+    "status": "COMPLETED"
+  }
+}

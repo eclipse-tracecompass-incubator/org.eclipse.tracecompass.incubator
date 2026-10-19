@@ -1,0 +1,53 @@
+{
+  "model": {
+    "rows": [
+      {
+        "entryId": 1,
+        "states": [
+          {
+            "start": 0,
+            "end": 1,
+            "style": {
+              "parentKey": "Wait",
+              "values": {}
+            }
+          },
+          {
+            "start": 1,
+            "end": 2,
+            "style": {
+              "parentKey": "Usermode",
+              "values": {}
+            }
+          },
+          {
+            "start": 2,
+            "end": 5,
+            "style": {
+              "parentKey": "Interrupt",
+              "values": {}
+            }
+          },
+          {
+            "start": 5,
+            "end": 6,
+            "style": {
+              "parentKey": "Usermode",
+              "values": {}
+            }
+          },
+          {
+            "start": 6,
+            "end": 7,
+            "style": {
+              "parentKey": "Wait for CPU",
+              "values": {}
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "statusMessage": "Completed",
+  "status": "COMPLETED"
+}

@@ -1,0 +1,58 @@
+{
+  "method": "POST",
+  "endpoint": "/experiments",
+  "request": {
+    "parameters": {
+      "name": "demo_threadx",
+      "traces": [
+        "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32"
+      ]
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "name": "demo_threadx",
+    "UUID": "53851e16-390f-3213-bd3c-f0306594e50c",
+    "nbEvents": 1,
+    "start": 0,
+    "end": 0,
+    "indexingStatus": "RUNNING",
+    "traces": [
+      {
+        "name": "demo_threadx.trx",
+        "path": "TRACE_URI/demo_threadx.trx",
+        "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+        "nbEvents": 974,
+        "start": 0,
+        "end": 156206,
+        "properties": {
+          "byte_order": "LITTLE_ENDIAN",
+          "base_address": "0x00006CA4",
+          "timer_valid_mask": "0x0000FFFF",
+          "registry_capacity": "32",
+          "registry_name_size": "32",
+          "registry_entry_size": "48",
+          "registry_start_offset": "48",
+          "registry_end_offset": "1584",
+          "event_capacity": "974",
+          "event_start_offset": "1584",
+          "event_end_offset": "32752",
+          "event_current_offset": "30000",
+          "event_count": "974",
+          "event_buffer_status": "circular-full",
+          "registry_record_count": "32",
+          "registry_valid_count": "15",
+          "registry_in_use_count": "15",
+          "registry_diagnostic_count": "0",
+          "event_order": "oldest-to-newest",
+          "timer_direction": "decreasing",
+          "raw_time_status": "preserved-unsigned-32-bit",
+          "ticks_per_second": "unavailable",
+          "time_unit": "ordering-ticks",
+          "physical_time": "unavailable"
+        },
+        "indexingStatus": "COMPLETED"
+      }
+    ]
+  }
+}

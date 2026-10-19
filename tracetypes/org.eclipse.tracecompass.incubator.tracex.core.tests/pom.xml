@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright (c) 2026 Eclipse Trace Compass Incubator contributors
+
+   All rights reserved. This program and the accompanying materials
+   are made available under the terms of the Eclipse Public License 2.0
+   which accompanies this distribution, and is available at
+   https://www.eclipse.org/legal/epl-2.0/
+
+   SPDX-License-Identifier: EPL-2.0
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>org.eclipse.tracecompass.incubator.tracetypes-parent</artifactId>
+    <groupId>org.eclipse.tracecompass.incubator</groupId>
+    <version>0.19.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>org.eclipse.tracecompass.incubator.tracex.core.tests</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>eclipse-test-plugin</packaging>
+  <name>Trace Compass Incubator TraceX Core Tests</name>
+
+  <properties>
+    <jacoco.destFile>${project.build.directory}/jacoco.exec</jacoco.destFile>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>tracex-coverage-check</id>
+      <activation>
+        <property>
+          <name>!skip-jacoco</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>check-tracex-logic-coverage</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <copy
+                        file="${project.reporting.outputDirectory}/jacoco-aggregate/jacoco.xml"
+                        tofile="${project.build.directory}/tracex-coverage.xml" />
+                    <replaceregexp
+                        file="${project.build.directory}/tracex-coverage.xml"
+                        match="&lt;!DOCTYPE[^&gt;]*&gt;"
+                        replace="" />
+                    <xslt
+                        in="${project.build.directory}/tracex-coverage.xml"
+                        out="${project.build.directory}/tracex-coverage.properties"
+                        style="${project.basedir}/coverage.xsl" />
+                    <loadproperties
+                        srcFile="${project.build.directory}/tracex-coverage.properties" />
+                    <condition property="tracex.coverage.complete">
+                      <and>
+                        <not>
+                          <equals arg1="${tracex.class.count}" arg2="0" />
+                        </not>
+                        <equals arg1="${tracex.line.missed}" arg2="0" />
+                        <equals arg1="${tracex.branch.missed}" arg2="0" />
+                      </and>
+                    </condition>
+                    <fail unless="tracex.coverage.complete"
+                        message="TraceX coverage report found ${tracex.class.count} scoped classes, ${tracex.line.missed} missed lines, and ${tracex.branch.missed} missed branches" />
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

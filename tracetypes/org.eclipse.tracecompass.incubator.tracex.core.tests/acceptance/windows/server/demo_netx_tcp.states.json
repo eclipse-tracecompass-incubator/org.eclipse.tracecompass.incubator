@@ -1,0 +1,1121 @@
+{
+  "method": "POST",
+  "endpoint": "/experiments/4e6488e9-7aae-38d3-b6e1-d6727cbbdb2e/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/states",
+  "request": {
+    "parameters": {
+      "requested_times": [
+        0,
+        9490,
+        18980,
+        28470,
+        37960,
+        47450,
+        56940,
+        66430,
+        75920,
+        85410,
+        94900,
+        104390,
+        113880,
+        123370,
+        132860,
+        142350,
+        151840,
+        161330,
+        170820,
+        180310,
+        189800,
+        199290,
+        208780,
+        218270,
+        227760,
+        237250,
+        246740,
+        256230,
+        265720,
+        275210,
+        284700,
+        294190,
+        303680,
+        313170,
+        322660,
+        332150,
+        341640,
+        351130,
+        360620,
+        370110,
+        379600,
+        389090,
+        398580,
+        408070,
+        417560,
+        427050,
+        436540,
+        446030,
+        455520,
+        465010,
+        474500,
+        483990,
+        493480,
+        502970,
+        512460,
+        521950,
+        531440,
+        540930,
+        550420,
+        559910,
+        569400,
+        578890,
+        588380,
+        597870,
+        607360,
+        616850,
+        626340,
+        635830,
+        645320,
+        654810,
+        664300,
+        673790,
+        683280,
+        692770,
+        702260,
+        711750,
+        721240,
+        730730,
+        740220,
+        749710,
+        759200,
+        768690,
+        778180,
+        787670,
+        797160,
+        806650,
+        816140,
+        825630,
+        835120,
+        844610,
+        854100,
+        863590,
+        873080,
+        882570,
+        892060,
+        901550,
+        911040,
+        920530,
+        930020,
+        939510,
+        949000
+      ],
+      "requested_items": [
+        27,
+        29,
+        31,
+        32,
+        33,
+        34,
+        35,
+        37
+      ]
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "model": {
+      "rows": [
+        {
+          "entryId": 32,
+          "states": [
+            {
+              "start": 11000,
+              "end": 33000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 60000,
+              "end": 77000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 92000,
+              "end": 126000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 163000,
+              "end": 216000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 225000,
+              "end": 228000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 262000,
+              "end": 284000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 311000,
+              "end": 328000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 343000,
+              "end": 377000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 414000,
+              "end": 467000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 513000,
+              "end": 535000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 562000,
+              "end": 579000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 594000,
+              "end": 628000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 665000,
+              "end": 718000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 764000,
+              "end": 786000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 813000,
+              "end": 830000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 845000,
+              "end": 879000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 916000,
+              "end": 949001,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 33,
+          "states": [
+            {
+              "start": 7000,
+              "end": 11000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 36000,
+              "end": 60000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 137000,
+              "end": 153000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 287000,
+              "end": 311000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 388000,
+              "end": 404000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 509000,
+              "end": 513000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 538000,
+              "end": 562000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 639000,
+              "end": 655000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 789000,
+              "end": 813000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 890000,
+              "end": 906000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 34,
+          "states": [
+            {
+              "start": 156000,
+              "end": 163000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 228000,
+              "end": 250000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 328000,
+              "end": 336000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 407000,
+              "end": 414000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 474000,
+              "end": 476000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 479000,
+              "end": 501000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 658000,
+              "end": 665000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 730000,
+              "end": 752000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 830000,
+              "end": 838000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 909000,
+              "end": 916000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 35,
+          "states": [
+            {
+              "start": 0,
+              "end": 7000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 85000,
+              "end": 92000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 126000,
+              "end": 135000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 216000,
+              "end": 223000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 250000,
+              "end": 258000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 284000,
+              "end": 287000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 336000,
+              "end": 343000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 377000,
+              "end": 386000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 501000,
+              "end": 509000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 587000,
+              "end": 594000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 628000,
+              "end": 637000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 718000,
+              "end": 725000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 752000,
+              "end": 760000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 786000,
+              "end": 789000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 838000,
+              "end": 845000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 879000,
+              "end": 888000,
+              "label": "Running",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 37,
+          "states": [
+            {
+              "start": 0,
+              "end": 7000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 7000,
+              "end": 11000,
+              "label": "thread 1 [0x0001426C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 11000,
+              "end": 33000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 36000,
+              "end": 60000,
+              "label": "thread 1 [0x0001426C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 60000,
+              "end": 77000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 85000,
+              "end": 92000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 92000,
+              "end": 126000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 126000,
+              "end": 135000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 137000,
+              "end": 153000,
+              "label": "thread 1 [0x0001426C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 156000,
+              "end": 163000,
+              "label": "NetX IP Instance 0 [0x00014514]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 163000,
+              "end": 216000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 216000,
+              "end": 223000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 225000,
+              "end": 228000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 228000,
+              "end": 250000,
+              "label": "NetX IP Instance 0 [0x00014514]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 250000,
+              "end": 258000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 262000,
+              "end": 284000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 284000,
+              "end": 287000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 287000,
+              "end": 311000,
+              "label": "thread 1 [0x0001426C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 311000,
+              "end": 328000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 328000,
+              "end": 336000,
+              "label": "NetX IP Instance 0 [0x00014514]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 336000,
+              "end": 343000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 343000,
+              "end": 377000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 377000,
+              "end": 386000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 388000,
+              "end": 404000,
+              "label": "thread 1 [0x0001426C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 407000,
+              "end": 414000,
+              "label": "NetX IP Instance 0 [0x00014514]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 414000,
+              "end": 467000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 474000,
+              "end": 476000,
+              "label": "NetX IP Instance 0 [0x00014514]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 479000,
+              "end": 501000,
+              "label": "NetX IP Instance 0 [0x00014514]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 501000,
+              "end": 509000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 509000,
+              "end": 513000,
+              "label": "thread 1 [0x0001426C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 513000,
+              "end": 535000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 538000,
+              "end": 562000,
+              "label": "thread 1 [0x0001426C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 562000,
+              "end": 579000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 587000,
+              "end": 594000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 594000,
+              "end": 628000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 628000,
+              "end": 637000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 639000,
+              "end": 655000,
+              "label": "thread 1 [0x0001426C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 658000,
+              "end": 665000,
+              "label": "NetX IP Instance 0 [0x00014514]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 665000,
+              "end": 718000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 718000,
+              "end": 725000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 730000,
+              "end": 752000,
+              "label": "NetX IP Instance 0 [0x00014514]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 752000,
+              "end": 760000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 764000,
+              "end": 786000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 786000,
+              "end": 789000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 789000,
+              "end": 813000,
+              "label": "thread 1 [0x0001426C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 813000,
+              "end": 830000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 830000,
+              "end": 838000,
+              "label": "NetX IP Instance 0 [0x00014514]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 838000,
+              "end": 845000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 845000,
+              "end": 879000,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 879000,
+              "end": 888000,
+              "label": "NetX IP Instance 1 [0x00014C4C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 890000,
+              "end": 906000,
+              "label": "thread 1 [0x0001426C]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 909000,
+              "end": 916000,
+              "label": "NetX IP Instance 0 [0x00014514]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 916000,
+              "end": 949001,
+              "label": "thread 0 [0x000141C0]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            }
+          ]
+        },
+        {
+          "entryId": 27,
+          "states": []
+        },
+        {
+          "entryId": 29,
+          "states": []
+        },
+        {
+          "entryId": 31,
+          "states": []
+        }
+      ]
+    },
+    "statusMessage": "Completed",
+    "status": "COMPLETED"
+  }
+}

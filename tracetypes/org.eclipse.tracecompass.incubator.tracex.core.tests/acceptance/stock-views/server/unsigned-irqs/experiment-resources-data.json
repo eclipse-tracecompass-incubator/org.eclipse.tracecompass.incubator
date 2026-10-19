@@ -1,0 +1,228 @@
+{
+  "model": {
+    "rows": [
+      {
+        "entryId": 33,
+        "states": [
+          {
+            "start": 0,
+            "end": 1
+          },
+          {
+            "start": 1,
+            "end": 6,
+            "label": "worker (1)",
+            "style": {
+              "parentKey": "thread",
+              "values": {
+                "background-color": "#295bcc",
+                "style-name": "1"
+              }
+            }
+          },
+          {
+            "start": 6,
+            "end": 7
+          }
+        ]
+      },
+      {
+        "entryId": 34,
+        "states": [
+          {
+            "start": 0,
+            "end": 1
+          },
+          {
+            "start": 1,
+            "end": 2,
+            "label": "worker",
+            "style": {
+              "parentKey": "Usermode",
+              "values": {}
+            }
+          },
+          {
+            "start": 2,
+            "end": 5,
+            "style": {
+              "parentKey": "Interrupt",
+              "values": {}
+            }
+          },
+          {
+            "start": 5,
+            "end": 6,
+            "label": "worker",
+            "style": {
+              "parentKey": "Usermode",
+              "values": {}
+            }
+          },
+          {
+            "start": 6,
+            "end": 7,
+            "style": {
+              "parentKey": "Idle",
+              "values": {}
+            }
+          }
+        ]
+      },
+      {
+        "entryId": 36,
+        "states": [
+          {
+            "start": 0,
+            "end": 2
+          },
+          {
+            "start": 2,
+            "end": 5,
+            "style": {
+              "parentKey": "Interrupt",
+              "values": {}
+            }
+          },
+          {
+            "start": 5,
+            "end": 7
+          }
+        ]
+      },
+      {
+        "entryId": 37,
+        "states": [
+          {
+            "start": 0,
+            "end": 3
+          },
+          {
+            "start": 3,
+            "end": 4,
+            "style": {
+              "parentKey": "Interrupt",
+              "values": {}
+            }
+          },
+          {
+            "start": 4,
+            "end": 7
+          }
+        ]
+      },
+      {
+        "entryId": 39,
+        "states": [
+          {
+            "start": 0,
+            "end": 1
+          },
+          {
+            "start": 1,
+            "end": 6,
+            "label": "worker (1)",
+            "style": {
+              "parentKey": "thread",
+              "values": {
+                "background-color": "#295bcc",
+                "style-name": "1"
+              }
+            }
+          },
+          {
+            "start": 6,
+            "end": 7
+          }
+        ]
+      },
+      {
+        "entryId": 40,
+        "states": [
+          {
+            "start": 0,
+            "end": 1
+          },
+          {
+            "start": 1,
+            "end": 2,
+            "label": "worker",
+            "style": {
+              "parentKey": "Usermode",
+              "values": {}
+            }
+          },
+          {
+            "start": 2,
+            "end": 5,
+            "style": {
+              "parentKey": "Interrupt",
+              "values": {}
+            }
+          },
+          {
+            "start": 5,
+            "end": 6,
+            "label": "worker",
+            "style": {
+              "parentKey": "Usermode",
+              "values": {}
+            }
+          },
+          {
+            "start": 6,
+            "end": 7,
+            "style": {
+              "parentKey": "Idle",
+              "values": {}
+            }
+          }
+        ]
+      },
+      {
+        "entryId": 42,
+        "states": [
+          {
+            "start": 0,
+            "end": 2
+          },
+          {
+            "start": 2,
+            "end": 5,
+            "style": {
+              "parentKey": "Interrupt",
+              "values": {}
+            }
+          },
+          {
+            "start": 5,
+            "end": 7
+          }
+        ]
+      },
+      {
+        "entryId": 43,
+        "states": [
+          {
+            "start": 0,
+            "end": 3
+          },
+          {
+            "start": 3,
+            "end": 4,
+            "style": {
+              "parentKey": "Interrupt",
+              "values": {}
+            }
+          },
+          {
+            "start": 4,
+            "end": 7
+          }
+        ]
+      }
+    ]
+  },
+  "statusMessage": "Completed",
+  "status": "COMPLETED"
+}
