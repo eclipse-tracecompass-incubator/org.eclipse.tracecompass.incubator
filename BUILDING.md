@@ -37,6 +37,21 @@ mvn clean package javadoc:aggregate
 
 The javadoc html files will be under `target/site/apidocs`.
 
+## Build against Trace Compass 12.1
+
+A release target is available for Java 21 and Trace Compass 12.1. Install the
+target definitions before selecting it in a fresh checkout:
+
+```bash
+mvn -pl common/org.eclipse.tracecompass.incubator.target -am install -DskipTests
+mvn -Dtarget-platform=tracecompass-incubator-12.1 clean verify
+```
+
+It uses the same platform and tooling as the main target, with the Trace Compass
+repositories fixed to release 12.1.0. The default target follows Trace Compass
+master and can require a newer Java execution environment as upstream changes.
+The scripting tests require Python 3 accessible as `python`.
+
 ## Generate Trace Server Protocol Client (in Java)
 
 The Trace Server test plug-in `trace-server/org.eclipse.tracecompass.incubator.jersey.rest.core.tests` uses a generated [Trace Server Protocol][trace-server-protocol] client written in Java to test the trace server TSP API. The client code is part of the plug-in `trace-server/org.eclipse.tracecompass.incubator.tsp.client.core` and can be found under `trace-server/org.eclipse.tracecompass.incubator.tsp.client.core/target/generated-sources/openapi`.
