@@ -35,6 +35,9 @@ public class TraceXUiExtensionTest {
         assertNotNull(bundle);
         bundle.start(Bundle.START_TRANSIENT);
         assertEquals(Bundle.ACTIVE, bundle.getState());
+        for (String icon : new String[] { "trx.png", "trx@2x.png", "trx@4x.png" }) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            assertNotNull("Missing trace icon " + icon, bundle.getEntry("ico/" + icon)); //$NON-NLS-1$ //$NON-NLS-2$
+        }
 
         IConfigurationElement match = null;
         for (IConfigurationElement element : Platform.getExtensionRegistry()

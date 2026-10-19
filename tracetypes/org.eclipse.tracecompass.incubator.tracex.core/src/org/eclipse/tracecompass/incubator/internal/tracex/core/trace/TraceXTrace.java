@@ -32,19 +32,23 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.Activator;
-import org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXAnalysis;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXDataProviderFactory;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.dataprovider.DataProviderManager;
+import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
+import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.project.model.ITmfPropertiesProvider;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceUpdatedSignal;
+import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceKnownSize;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
@@ -53,8 +57,6 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
-import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
-import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 
 /**
  * TraceX trace type backed by a validated 32-bit binary layout and immutable
@@ -77,6 +79,11 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
     private final Object fClockConfigurationLock = new Object();
     private @Nullable TraceXFile fInput;
     private @Nullable TraceXEventIndex fEventIndex;
+    /** TID reserved for the idle context. */
+    public static final int IDLE_TID = 0;
+    private Map<Long, Integer> fThreadIds = Collections.emptyMap();
+    private Map<Integer, String> fThreadNames = Collections.emptyMap();
+    private Map<Integer, Integer> fThreadPriorities = Collections.emptyMap();
     private @NonNull Map<@NonNull String, @NonNull String> fProperties = Collections.emptyMap();
     private @NonNull TraceXTimerDirection fTimerDirection = TraceXTimerDirection.INCREASING;
     private @Nullable Long fTicksPerSecond;
@@ -115,6 +122,7 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
             input = openTrace(new File(path).toPath());
             TraceXEventIndex index = buildTimeBase(input, fTimerDirection,
                     fTicksPerSecond);
+            buildThreadIds(input);
             fInput = input;
             installTimeBase(index);
         } catch (IOException | IllegalArgumentException e) {
@@ -242,6 +250,9 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
         TraceXFile input = fInput;
         fInput = null;
         fEventIndex = null;
+        fThreadIds = Collections.emptyMap();
+        fThreadNames = Collections.emptyMap();
+        fThreadPriorities = Collections.emptyMap();
         if (input != null) {
             try {
                 input.close();
@@ -372,6 +383,60 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
         return fProperties;
     }
 
+    @Override
+    public Iterable<ITmfEventAspect<?>> getEventAspects() {
+        return TraceXAspects.getAspects();
+    }
+
+    private void buildThreadIds(TraceXFile input) throws IOException {
+        Map<Long, Integer> ids = new LinkedHashMap<>();
+        Map<Integer, String> names = new LinkedHashMap<>();
+        Map<Integer, Integer> priorities = new LinkedHashMap<>();
+        for (TraceXRegistryRecord record : input.getRegistry().getRecords()) {
+            if (record.isValid() && record.getType() == TraceXObjectType.THREAD
+                    && !ids.containsKey(record.getAddress())) {
+                int tid = ids.size() + 1;
+                ids.put(record.getAddress(), tid);
+                names.put(tid, record.getName());
+                Integer priority = record.getInitialPriority();
+                if (priority != null) {
+                    priorities.put(tid, priority);
+                }
+            }
+        }
+        fThreadIds = Collections.unmodifiableMap(ids);
+        fThreadNames = Collections.unmodifiableMap(names);
+        fThreadPriorities = Collections.unmodifiableMap(priorities);
+    }
+
+    /**
+     * Resolve an unsigned ThreadX thread address to a trace-local TID.
+     *
+     * @param address thread address, or zero for idle
+     * @return positive registered TID, zero for idle, or minus one when unknown
+     */
+    public int getThreadId(long address) {
+        return address == 0 ? IDLE_TID : fThreadIds.getOrDefault(address, -1);
+    }
+
+    /**
+     * Get the immutable mapping of trace-local TIDs to registry names.
+     *
+     * @return registered thread names; names need not be unique
+     */
+    public Map<Integer, String> getThreadNames() {
+        return fThreadNames;
+    }
+
+    /**
+     * Get initial priorities by TID, resolved by object address rather than name.
+     *
+     * @return immutable priorities for records carrying initial-priority metadata
+     */
+    public Map<Integer, Integer> getThreadPriorities() {
+        return fThreadPriorities;
+    }
+
     /** @return configured target clock frequency, or empty when unknown */
     public OptionalLong getTicksPerSecond() {
         Long frequency = fTicksPerSecond;
@@ -493,10 +558,11 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
 
     /** Reset all artifacts whose contents depend on the trace time base. */
     protected void invalidateTimeDependentData() {
-        List<IAnalysisModule> usedExecution = new ArrayList<>();
+        List<IAnalysisModule> usedStateSystems = new ArrayList<>();
         for (IAnalysisModule module : getAnalysisModules()) {
-            if (module instanceof TraceXAnalysis && ((TraceXAnalysis) module).getStateSystem() != null) {
-                usedExecution.add(module);
+            if (module instanceof TmfStateSystemAnalysisModule
+                    && ((TmfStateSystemAnalysisModule) module).getStateSystem() != null) {
+                usedStateSystems.add(module);
             }
             module.waitForCompletion();
             module.cancel();
@@ -510,13 +576,16 @@ public class TraceXTrace extends TmfTrace implements ITmfPropertiesProvider,
                 module.schedule();
             }
         }
-        for (IAnalysisModule module : usedExecution) {
+        for (IAnalysisModule module : usedStateSystems) {
             module.schedule();
             // A reused state-system module retains its first initialization latch.
             module.waitForCompletion();
         }
-        DataProviderManager.getInstance().removeDataProvider(this,
-                TraceXDataProviderFactory.ID);
+        DataProviderManager manager = DataProviderManager.getInstance();
+        for (IDataProviderDescriptor descriptor : manager.getAvailableProviders(this)) {
+            manager.removeDataProvider(this, descriptor.getId());
+        }
+        manager.removeDataProvider(this, TraceXDataProviderFactory.ID);
         TmfSignalManager.dispatchSignal(new TmfTraceUpdatedSignal(this, this,
                 new TmfTimeRange(getStartTime(), getEndTime()), getNbEvents()));
     }

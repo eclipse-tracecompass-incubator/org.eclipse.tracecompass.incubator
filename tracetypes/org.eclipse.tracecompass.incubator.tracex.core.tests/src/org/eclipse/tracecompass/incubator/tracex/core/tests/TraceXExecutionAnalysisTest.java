@@ -98,7 +98,7 @@ public class TraceXExecutionAnalysisTest {
                     TraceXStateProvider.UNMATCHED_ISR_EXITS);
             assertEquals(Long.valueOf(1),
                     ss.querySingleState(10, diagnostics).getValue());
-            assertEquals(2, new TraceXStateProvider(execution.fTrace).getVersion());
+            assertEquals(3, new TraceXStateProvider(execution.fTrace).getVersion());
         }
     }
 
@@ -164,7 +164,7 @@ public class TraceXExecutionAnalysisTest {
 
         ExposedAnalysis exposed = new ExposedAnalysis();
         try {
-            assertEquals(TraceXAnalysis.ID + ".v2.ht", //$NON-NLS-1$
+            assertEquals(TraceXAnalysis.ID + ".v3.ht", //$NON-NLS-1$
                     exposed.stateSystemFileName());
         } finally {
             exposed.dispose();

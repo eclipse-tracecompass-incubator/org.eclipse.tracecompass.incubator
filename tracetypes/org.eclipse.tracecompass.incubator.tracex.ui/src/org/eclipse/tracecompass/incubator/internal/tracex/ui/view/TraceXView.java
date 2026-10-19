@@ -11,6 +11,9 @@
 
 package org.eclipse.tracecompass.incubator.internal.tracex.ui.view;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -23,6 +26,7 @@ import org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXDa
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTimerDirection;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace;
 import org.eclipse.tracecompass.incubator.internal.tracex.ui.Activator;
+import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
@@ -31,8 +35,10 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceUpdatedSignal;
-import org.eclipse.tracecompass.internal.provisional.tmf.ui.widgets.timegraph.BaseDataProviderTimeGraphPresentationProvider;
+import org.eclipse.tracecompass.tmf.ui.viewers.TmfTimeViewer;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
+import org.eclipse.tracecompass.tmf.ui.views.xychart.TmfChartView;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * TraceX execution time-graph view.
@@ -78,6 +84,8 @@ public class TraceXView extends BaseDataProviderTimeGraphView {
         }
         TraceXTimerDirection direction = dialog.getDirection();
         String frequency = dialog.getFrequency();
+        List<Runnable> resume = pauseLinkedViews(trace);
+        var display = getSite().getShell().getDisplay();
         Job job = new Job("Apply TraceX clock") { //$NON-NLS-1$
             @Override
             @NonNullByDefault({})
@@ -89,6 +97,16 @@ public class TraceXView extends BaseDataProviderTimeGraphView {
                 } catch (TmfTraceException | IllegalArgumentException e) {
                     return new Status(IStatus.ERROR, Activator.PLUGIN_ID,
                             "Failed to apply TraceX clock", e); //$NON-NLS-1$
+                } finally {
+                    if (!display.isDisposed()) {
+                        display.asyncExec(() -> {
+                            resume.forEach(Runnable::run);
+                            if (!getTimeGraphViewer().getControl().isDisposed()) {
+                                refreshClockStatus(false);
+                                TmfSignalManager.dispatchSignal(new TmfTimestampFormatUpdateSignal(this));
+                            }
+                        });
+                    }
                 }
             }
         };
@@ -114,6 +132,7 @@ public class TraceXView extends BaseDataProviderTimeGraphView {
                         : "Ordering ticks; physical time unknown; " + trace.getTimerDirection().getPropertyValue()); //$NON-NLS-1$
                 if (rebuildClock) {
                     rebuild();
+                    refreshLinkedViews(trace);
                     // Event editors must re-read cached timestamps on the UI thread.
                     TmfSignalManager.dispatchSignal(new TmfTimestampFormatUpdateSignal(this));
                 }
@@ -122,6 +141,58 @@ public class TraceXView extends BaseDataProviderTimeGraphView {
                 setContentDescription(""); //$NON-NLS-1$
             }
         });
+    }
+
+    /** Reload models held by stock views after replacing the trace time domain. */
+    private void refreshLinkedViews(TraceXTrace trace) {
+        pauseLinkedViews(trace).forEach(Runnable::run);
+    }
+
+    /** Stop view queries before removing histories, retaining each view's pin. */
+    private List<Runnable> pauseLinkedViews(TraceXTrace trace) {
+        List<Runnable> resume = new ArrayList<>();
+        TmfTraceClosedSignal closed = new TmfTraceClosedSignal(this, trace);
+        TmfTraceOpenedSignal opened = new TmfTraceOpenedSignal(this, trace, null);
+        for (var window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+            for (var page : window.getPages()) {
+                for (var reference : page.getViewReferences()) {
+                    var part = reference.getView(false);
+                    if (part instanceof BaseDataProviderTimeGraphView graph && graph.getTrace() == trace) {
+                        boolean pinned = graph.isPinned();
+                        if (pinned) {
+                            // Unpin before closing: closing a pinned view first
+                            // would reload the active trace during unpinning.
+                            graph.setPinned(null);
+                        }
+                        // Direct callbacks clear view models without closing
+                        // the trace or its editor in the workbench.
+                        graph.traceClosed(closed);
+                        resume.add(() -> {
+                            if (!graph.getTimeGraphViewer().getControl().isDisposed()) {
+                                graph.traceOpened(opened);
+                                if (pinned) {
+                                    graph.setPinned(trace);
+                                }
+                            }
+                        });
+                    } else if (part instanceof TmfChartView chart && chart.getTrace() == trace) {
+                        chart.getChartViewer().traceClosed(closed);
+                        if (chart.getLeftChildViewer() instanceof TmfTimeViewer viewer) {
+                            viewer.traceClosed(closed);
+                        }
+                        resume.add(() -> {
+                            if (!chart.getChartViewer().getControl().isDisposed()) {
+                                chart.getChartViewer().traceOpened(opened);
+                                if (chart.getLeftChildViewer() instanceof TmfTimeViewer viewer) {
+                                    viewer.traceOpened(opened);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        return resume;
     }
 
     @Override

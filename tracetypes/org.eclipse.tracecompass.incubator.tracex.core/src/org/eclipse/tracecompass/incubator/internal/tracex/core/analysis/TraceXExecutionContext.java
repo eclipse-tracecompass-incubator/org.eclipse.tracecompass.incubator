@@ -117,6 +117,10 @@ final class TraceXExecutionContext {
         return fType;
     }
 
+    long getAddress() {
+        return fAddress;
+    }
+
     String getName() {
         return fName;
     }

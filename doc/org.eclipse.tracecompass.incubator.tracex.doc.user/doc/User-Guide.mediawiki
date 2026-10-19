@@ -26,6 +26,16 @@ Known events add typed aliases such as '''thread''', '''next_thread''', '''media
 
 Use the standard Events table search and filter controls to find an event type or content value. For example, search for '''TX_TRACE_ISR_ENTER''' in the ThreadX demo or filter FileX events for '''RAM DISK'''. Selecting an event updates the selected time in time-based views; inspect its Contents column for the raw words and aliases. Table navigation follows logical rank. Use the column-header menu to choose displayed fields, and inspect event details in Contents or a complete Export To Text capture. Select the imported trace resource to inspect trace metadata in Properties. Arbitrary column sorting is unavailable; chronological logical-rank ordering with the standard search and filter controls is the accepted behavior.
 
+== Standard OS views ==
+
+Select '''Window > Show View > Other''' and open '''Control Flow''', '''Resources''', or '''CPU Usage'''. These standard Trace Compass views support TraceX traces and experiments. Control Flow shows registered threads; Resources shows CPU 0 and interrupt activity. Thread IDs are assigned in registry order and are local to each trace. They are not target OS IDs; use the preserved context addresses to identify ThreadX objects.
+
+CPU Usage counts time spent executing registered threads. Interrupt, idle, initialization, and unresolved-context intervals are excluded from thread totals. A scheduler selection inside an ISR takes effect after the outermost ISR exits. The trace-specific execution view also displays initialization and unresolved contexts.
+
+The Events table provides typed context, thread ID, priority, preemption threshold, raw-word, and position columns. The Contents column retains every original field and resolved alias. Original ThreadX event names remain available for filtering and Statistics. Changing the clock through TraceX Execution refreshes open linked views, including pinned time graphs.
+
+ThreadX scheduling records do not establish Linux process relationships or wakeup causes. Critical-path analysis is not supported by this integration.
+
 == Execution view ==
 
 Select '''Window > Show View > Other > TraceX > TraceX Execution'''. The view runs '''TraceX Execution Analysis''' and shows '''CPU 0 > Execution''' plus per-context activity rows. Thread rows include registry names and hexadecimal addresses. Initialization, idle, unknown contexts, and ISR numbers remain explicit. Nested interrupts restore the enclosing interrupt and then the scheduler context; resume or suspend activity inside an ISR affects the scheduler after the outermost ISR exits.
@@ -42,6 +52,8 @@ Use the locally built Trace Server product, which includes the TraceX core bundl
 # '''GET /experiments/EXPERIMENT_UUID/outputs''' advertises '''org.eclipse.tracecompass.incubator.tracex.core.dataprovider'''.
 # '''POST /experiments/EXPERIMENT_UUID/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree''' accepts '''{"parameters":{"requested_times":[0,949000]}}'''.
 # Query the corresponding '''/states''' endpoint with '''{"parameters":{"requested_times":[0,1000,949000],"requested_items":[ENTRY_ID]}}'''. Select entry IDs from the tree and verify the response status is '''COMPLETED'''.
+
+The server also advertises the stock Control Flow, Resources, and CPU Usage outputs for TraceX experiments. Discover their identifiers through the outputs list.
 
 The server and desktop share the provider and state analysis. Endpoint values use the configured trace timestamp domain. Configure imported traces through the existing configuration API before opening an experiment:
 
@@ -76,4 +88,4 @@ For a compact fixture, run '''python3 tracetypes/org.eclipse.tracecompass.incuba
 
 Only binary 32-bit input is supported. Single-core execution semantics are supported; no SMP interpretation is claimed. Physical time is unknown until a frequency is configured. Timer direction requires target knowledge. USBX, reserved, future, and user events can be imported losslessly but do not all have semantic aliases. Registry addresses can outlive their object names in incomplete or reused captures. Missing capture history cannot establish a context's earlier execution state.
 
-Consult the repository acceptance status for release installation, interactive checks, screenshots, and native platform smoke-test results. The [https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator/pull/212 original TraceX proposal by Matthew Khouzam] is the credited origin of this integration.
+Consult the repository acceptance status for release installation, interactive checks, screenshots, and native platform smoke-test results. The [https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator/pull/212 original TraceX proposal by Matthew Khouzam] is the credited origin of this integration. His [https://github.com/eclipse-tracecompass-incubator/org.eclipse.tracecompass.incubator/pull/284 stock-view proposal] supplied the event-aspect and kernel-analysis adapter design.

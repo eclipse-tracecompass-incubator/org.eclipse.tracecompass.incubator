@@ -17,13 +17,16 @@ files or another working tree.
 | Execution identities, every transition, nested/incomplete interrupts, equal times, and diagnostics | `TraceXExecutionContextTest`, `TraceXExecutionAnalysisTest` |
 | Provider identifiers, trees, rows, filtering, styles, tooltips, selection, and cancellation | `TraceXExecutionAnalysisTest`, `TraceXClockConfigurationTest` |
 | Configuration-source discovery, atomic clock updates, imported-resource CRUD, reopen/reset, and active-trace rejection | `TraceXClockConfigurationSourceTest`, `TraceXClockConfigurationTest` |
+| Typed aspects, trace-local TIDs, duplicate names, incomplete registries, and unchanged event fields | `TraceXAspectsTest`, `TraceXStockViewsTest` |
+| Stock view discovery, experiment composition, deferred IRQ switches, CPU usage, and clock refresh | `TraceXStockViewsTest`, `TraceXKernelStateTest` |
 | Core extension registration, headless dependencies, and bundle lifecycle | `ExtensionRegistrationTest`, `ActivatorTest` |
-| Import, event selection/filtering, dialog validation, unknown-time clearing, clock persistence, refreshed execution view, and cross-selection | `TraceXUiWorkflowTest` |
+| Import, event selection/filtering, dialog validation, unknown-time clearing, clock persistence, refreshed execution view, and cross-selection, stock views, and pinned-view clock refresh | `TraceXUiWorkflowTest` |
 
 ## Coverage gate
 
 The normal Maven `verify` phase fails unless the binary parser/model classes and
-the execution state provider have zero missed lines and zero missed branches.
+the shared execution state provider, kernel projection, stock-view adapters,
+and event aspects have zero missed lines and zero missed branches.
 The aggregate report reads the same execution data produced by the Tycho test
 runtime.
 
@@ -38,11 +41,36 @@ branch-forcing unit tests.
 Run the focused gate with:
 
 ```sh
-mvn -pl :org.eclipse.tracecompass.incubator.tracex.core,:org.eclipse.tracecompass.incubator.tracex.core.tests clean verify
+mvn -Dtarget-platform=tracecompass-incubator-12.1 -pl :org.eclipse.tracecompass.incubator.tracex.core,:org.eclipse.tracecompass.incubator.tracex.core.tests clean verify
 ```
 
-The complete CI-equivalent verification remains:
+The complete verification against the Java 21 release baseline is:
 
 ```sh
-mvn clean verify
+mvn -Dtarget-platform=tracecompass-incubator-12.1 clean verify
 ```
+
+For a focused build in a fresh checkout, install the target definitions first:
+
+```sh
+mvn -pl common/org.eclipse.tracecompass.incubator.target -am install -DskipTests
+```
+
+The default rolling target follows Trace Compass master. Its current Java
+requirement can differ from the release baseline; record the selected target
+with build results.
+
+For reproducible headless GTK rendering, use an isolated X11 display and fixed
+scaling. This avoids inheriting a desktop Wayland session:
+
+```sh
+env -u WAYLAND_DISPLAY GDK_BACKEND=x11 GDK_SCALE=1 GDK_DPI_SCALE=1 \
+  xvfb-run -a -s '-screen 0 1920x1080x24 -dpi 96' \
+  mvn -Dtarget-platform=tracecompass-incubator-12.1 \
+  '-Dbase.ui.test.vmargs=-Dorg.eclipse.swt.browser.DefaultType=mozilla -Dswt.autoScale=100' \
+  clean verify
+```
+
+The stock-view workflow retains screenshots under the SWTBot bundle's
+`screenshots` directory for inspection. A passing widget assertion alone does
+not establish correct rendering on another display or native platform.

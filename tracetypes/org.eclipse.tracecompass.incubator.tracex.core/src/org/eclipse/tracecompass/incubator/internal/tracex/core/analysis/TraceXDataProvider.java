@@ -208,8 +208,8 @@ public final class TraceXDataProvider
         for (Integer quark : ss.getSubAttributes(ITmfStateSystem.ROOT_ATTRIBUTE,
                 false)) {
             String name = ss.getAttributeName(quark);
-            if (TraceXStateProvider.INTERNAL.equals(name)
-                    || TraceXStateProvider.DIAGNOSTICS.equals(name)) {
+            if (!TraceXStateProvider.CPU.equals(name)
+                    && !TraceXStateProvider.CONTEXTS.equals(name)) {
                 continue;
             }
             addTree(ss, entries, quark, rootId, monitor);

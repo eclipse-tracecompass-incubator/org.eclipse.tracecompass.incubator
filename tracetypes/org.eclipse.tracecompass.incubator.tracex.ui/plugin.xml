@@ -25,4 +25,11 @@
          </analysisModuleClass>
       </output>
    </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
+      <type
+            icon="ico/trx.png"
+            tracetype="org.eclipse.tracecompass.incubator.tracex.core.trace">
+      </type>
+   </extension>
 </plugin>

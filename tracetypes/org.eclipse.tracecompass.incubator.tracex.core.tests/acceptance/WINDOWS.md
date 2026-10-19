@@ -197,6 +197,35 @@ Idle occupies `[6,7)` while the final event/state-system timestamp is 6.
 Capture `little-execution.png`, `big-execution.png`, `filter.png`, and
 `selection-tooltip.png` with legible state names and view labels.
 
+## Standard views and linked clock refresh
+
+Use newly built products when testing the stock-view integration; the earlier
+Windows acceptance record predates these changes.
+
+1. Open **Control Flow**, **Resources**, and **CPU Usage** through
+   **Window > Show View > Other**. Keep **TraceX Execution** open as well.
+2. For an imported demo, confirm named registered threads appear in Control
+   Flow, CPU 0 appears in Resources, and CPU Usage contains thread entries.
+   Trace-local numeric TIDs are assigned in registry order. They need not match
+   target addresses; the original hexadecimal addresses remain in Contents.
+3. Import either generated seven-event execution fixture. Resources must show
+   ISR 7 enclosing ISR 8 and then returning to the worker. Control Flow must
+   show the worker interrupted and then running. CPU Usage excludes ISR, idle,
+   initialization, and unresolved-context time from thread totals.
+4. Verify that Events still shows the original ThreadX event names and a
+   **Contents** column with raw fields and aliases. Export all columns and run
+   the existing complete-export comparison below.
+5. Pin Control Flow to the fixture. In **TraceX Execution > Clock...**, choose
+   Increasing and a known frequency of `2`. Verify all linked views refresh to
+   the new time range and Control Flow remains pinned. Clear the known-frequency
+   checkbox and confirm they shrink back to the six-tick fixture endpoint.
+6. Create an experiment containing two imported TraceX inputs and confirm all
+   three standard views show both member traces. Close the experiment before
+   changing a member's clock.
+7. Capture `stock-control-flow.png`, `stock-resources.png`, `stock-cpu-usage.png`,
+   and `stock-clock-refresh.png`. Record any missing rows, stale time ranges,
+   unexpected synthetic event names, or workspace log errors in the handoff.
+
 ## Clock validation and full process restart
 
 On the little-endian fixture, open **Clock...**:

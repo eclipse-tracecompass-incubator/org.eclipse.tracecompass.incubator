@@ -43,7 +43,7 @@ public final class TraceXStateProvider extends AbstractTmfStateProvider {
     /** Unmatched interrupt-exit diagnostic. */
     public static final String UNMATCHED_ISR_EXITS = "Unmatched ISR exits"; //$NON-NLS-1$
 
-    static final int VERSION = 2;
+    static final int VERSION = 3;
     private static final int THREAD_RESUME = 1;
     private static final int THREAD_SUSPEND = 2;
     private static final int ISR_ENTER = 3;
@@ -53,6 +53,7 @@ public final class TraceXStateProvider extends AbstractTmfStateProvider {
     private static final int THREAD_RELINQUISH = 109;
 
     private final TraceXRegistry fRegistry;
+    private final TraceXKernelState fKernel;
     private final Deque<TraceXExecutionContext> fIsrStack = new ArrayDeque<>();
     private @Nullable TraceXExecutionContext fSchedulerContext;
     private @Nullable TraceXExecutionContext fActiveContext;
@@ -67,6 +68,7 @@ public final class TraceXStateProvider extends AbstractTmfStateProvider {
      */
     public TraceXStateProvider(TraceXTrace trace) {
         super(trace, TraceXAnalysis.ID);
+        fKernel = new TraceXKernelState(trace);
         try {
             fRegistry = trace.getRegistry();
         } catch (IOException e) {
@@ -97,6 +99,7 @@ public final class TraceXStateProvider extends AbstractTmfStateProvider {
             initialize(ss, timestamp, event);
             fInitialized = true;
         }
+        fKernel.observePriority(ss, timestamp, event.getContext());
         switch (event.getNormalizedEventId()) {
         case THREAD_RESUME:
         case THREAD_SUSPEND:
@@ -125,6 +128,7 @@ public final class TraceXStateProvider extends AbstractTmfStateProvider {
     private void initialize(ITmfStateSystemBuilder ss, long timestamp,
             TraceXEvent event) {
         createKnownContextAttributes(ss);
+        fKernel.seed(ss, timestamp);
         TraceXContext context = event.getContext();
         if (context.getKind() == TraceXContext.Kind.ISR) {
             Long interrupted = context.getInterruptedThreadAddress();
@@ -134,6 +138,7 @@ public final class TraceXStateProvider extends AbstractTmfStateProvider {
             if (event.getNormalizedEventId() != ISR_ENTER) {
                 TraceXExecutionContext unknownIsr = TraceXExecutionContext.isr(-1);
                 fIsrStack.push(unknownIsr);
+                fKernel.enterInterrupt(ss, timestamp, 0, -1);
                 setStackSlot(ss, timestamp, 0, unknownIsr);
                 switchActive(ss, timestamp, unknownIsr);
             } else {
@@ -183,6 +188,7 @@ public final class TraceXStateProvider extends AbstractTmfStateProvider {
         TraceXExecutionContext isr = TraceXExecutionContext.isr(number);
         int depth = fIsrStack.size();
         fIsrStack.push(isr);
+        fKernel.enterInterrupt(ss, timestamp, depth, number);
         setStackSlot(ss, timestamp, depth, isr);
         switchActive(ss, timestamp, isr);
     }
@@ -198,6 +204,7 @@ public final class TraceXStateProvider extends AbstractTmfStateProvider {
         }
         int depth = fIsrStack.size() - 1;
         fIsrStack.pop();
+        fKernel.exitInterrupt(ss, timestamp, depth);
         setStackSlot(ss, timestamp, depth, null);
         TraceXExecutionContext restored = fIsrStack.peek();
         switchActive(ss, timestamp,
@@ -236,6 +243,7 @@ public final class TraceXStateProvider extends AbstractTmfStateProvider {
             ss.modifyAttribute(timestamp, serialized, contextQuark(ss, next));
             ss.modifyAttribute(timestamp, serialized, cpu);
         }
+        fKernel.switchActive(ss, timestamp, next, fSchedulerContext);
         fActiveContext = next;
     }
 

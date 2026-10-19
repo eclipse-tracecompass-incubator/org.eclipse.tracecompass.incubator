@@ -29,17 +29,17 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
-import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
+import org.eclipse.swtbot.swt.finder.utils.SWTUtils;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCCombo;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace;
 import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTimerDirection;
+import org.eclipse.tracecompass.incubator.internal.tracex.core.trace.TraceXTrace;
 import org.eclipse.tracecompass.incubator.internal.tracex.ui.view.TraceXView;
 import org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXTestData;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -49,8 +49,10 @@ import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.ConditionHelpers;
 import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.SWTBotTimeGraph;
 import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.SWTBotUtils;
 import org.eclipse.tracecompass.tmf.ui.tests.shared.WaitUtils;
-import org.eclipse.tracecompass.tmf.ui.views.filter.FilterView;
 import org.eclipse.tracecompass.tmf.ui.viewers.events.TmfEventsTable;
+import org.eclipse.tracecompass.tmf.ui.views.filter.FilterView;
+import org.eclipse.tracecompass.tmf.ui.views.timegraph.BaseDataProviderTimeGraphView;
+import org.eclipse.tracecompass.tmf.ui.views.xychart.TmfChartView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -69,6 +71,9 @@ public class TraceXUiWorkflowTest {
             "org.eclipse.tracecompass.incubator.tracex.core.trace"; //$NON-NLS-1$
     private static final String VIEW_ID =
             "org.eclipse.tracecompass.incubator.tracex.ui.view"; //$NON-NLS-1$
+    private static final String CONTROL_FLOW = "org.eclipse.tracecompass.analysis.os.linux.views.controlflow"; //$NON-NLS-1$
+    private static final String RESOURCES = "org.eclipse.tracecompass.analysis.os.linux.views.resources"; //$NON-NLS-1$
+    private static final String CPU_USAGE = "org.eclipse.tracecompass.analysis.os.linux.views.cpuusage"; //$NON-NLS-1$
     private static final String FILTER_NAME = "tracexTextAndField"; //$NON-NLS-1$
     private static final long THREAD_A = 0x10001000L;
     private static final long THREAD_B = 0x10002000L;
@@ -112,6 +117,9 @@ public class TraceXUiWorkflowTest {
     public void tearDown() {
         closeView(VIEW_ID);
         closeView(FilterView.ID);
+        closeView(CONTROL_FLOW);
+        closeView(RESOURCES);
+        closeView(CPU_USAGE);
         fBot.closeAllEditors();
         SWTBotUtils.deleteProject(PROJECT_NAME, fBot);
     }
@@ -201,6 +209,92 @@ public class TraceXUiWorkflowTest {
         assertFalse(activeTrace().getTicksPerSecond().isPresent());
     }
 
+    /** Tests real stock views and their live models across growing and shrinking clocks. */
+    @Test
+    public void testStockViewsAndClockRefresh() {
+        SWTBotUtils.openView(VIEW_ID);
+        SWTBotUtils.openView(CONTROL_FLOW);
+        SWTBotUtils.openView(RESOURCES);
+        SWTBotUtils.openView(CPU_USAGE);
+        fBot.waitUntil(new StockViewsReached(8));
+        captureStockViews("ticks"); //$NON-NLS-1$
+        SWTBotTable events = SWTBotUtils.activeEventsEditor(fBot).bot().table();
+        assertTrue(events.columns().toString(), events.columns().contains("Contents")); //$NON-NLS-1$
+        assertTrue(events.columns().toString(), events.columns().contains("Context")); //$NON-NLS-1$
+        var control = (BaseDataProviderTimeGraphView) fBot.viewById(CONTROL_FLOW).getReference().getView(true);
+        control.getTimeGraphViewer().getControl().getDisplay().syncExec(() -> control.setPinned(activeTrace()));
+        editClock("Increasing", "2"); //$NON-NLS-1$ //$NON-NLS-2$
+        fBot.waitUntil(new ClockReached(4_000_000_000L, true));
+        fBot.waitUntil(new StockViewsReached(4_000_000_000L));
+        captureStockViews("nanoseconds"); //$NON-NLS-1$
+        assertTrue(control.isPinned());
+        editClock("Increasing", null); //$NON-NLS-1$
+        fBot.waitUntil(new ClockReached(8, false));
+        fBot.waitUntil(new StockViewsReached(8));
+        assertTrue(control.isPinned());
+    }
+
+    /** Retain rendered stock-view evidence as normal SWTBot build artifacts. */
+    private static void captureStockViews(String domain) {
+        for (String id : new String[] { CONTROL_FLOW, RESOURCES, CPU_USAGE }) {
+            fBot.viewById(id).setFocus();
+            var shell = fBot.viewById(id).getReference().getView(false).getSite().getShell();
+            SWTUtils.captureScreenshot("screenshots/" + id + "-" + domain + ".png", shell); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        }
+    }
+
+    /** Wait for populated stock time graphs and a CPU Usage tree for this trace. */
+    private static final class StockViewsReached extends DefaultCondition {
+        private final long fEnd;
+        private String fDetails = ""; //$NON-NLS-1$
+
+        StockViewsReached(long end) {
+            fEnd = end;
+        }
+
+        @Override
+        public boolean test() {
+            TraceXTrace trace = activeTrace();
+            for (String id : new String[] { CONTROL_FLOW, RESOURCES }) {
+                var view = (BaseDataProviderTimeGraphView) fBot.viewById(id).getReference().getView(true);
+                Object input = view.getTimeGraphViewer().getInput();
+                boolean ready = false;
+                if (input instanceof Iterable<?> entries) {
+                    for (Object item : entries) {
+                        if (item instanceof ITimeGraphEntry entry && entry.getName().equals(trace.getName())) {
+                            ready = entry.getEndTime() == fEnd && !entry.getChildren().isEmpty();
+                        }
+                    }
+                }
+                if (!ready) {
+                    fDetails = id + ": " + input; //$NON-NLS-1$
+                    if (input instanceof Iterable<?> entries) {
+                        for (Object item : entries) {
+                            if (item instanceof ITimeGraphEntry entry) {
+                                fDetails += " [" + entry.getName() + ":" + entry.getEndTime() //$NON-NLS-1$ //$NON-NLS-2$
+                                        + ", children=" + entry.getChildren().size() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+                            }
+                        }
+                    }
+                    return false;
+                }
+            }
+            fDetails = CPU_USAGE;
+            var chart = (TmfChartView) fBot.viewById(CPU_USAGE).getReference().getView(true);
+            if (chart.getChartViewer().getEndTime() != fEnd) {
+                fDetails += ": " + chart.getChartViewer().getEndTime(); //$NON-NLS-1$
+                return false;
+            }
+            SWTBotTree tree = fBot.viewById(CPU_USAGE).bot().tree();
+            return Arrays.stream(tree.getAllItems()).anyMatch(item -> item.getText().equals(trace.getName()));
+        }
+
+        @Override
+        public String getFailureMessage() {
+            return "Stock views did not populate at the configured endpoint " + fEnd + ": " + fDetails; //$NON-NLS-1$
+        }
+    }
+
     /** Apply clock settings through the same controls used by desktop users. */
     private static void editClock(String direction, String frequency) {
         fBot.viewById(VIEW_ID).toolbarButton("Configure TraceX clock").click(); //$NON-NLS-1$
@@ -280,10 +374,10 @@ public class TraceXUiWorkflowTest {
     }
 
     private static void closeView(String id) {
-        try {
-            SWTBotUtils.closeViewById(id, fBot);
-        } catch (WidgetNotFoundException e) {
-            // The workflow can close this view before cleanup.
+        for (SWTBotView view : fBot.views()) {
+            if (view.getReference().getId().equals(id)) {
+                view.close();
+            }
         }
     }
 

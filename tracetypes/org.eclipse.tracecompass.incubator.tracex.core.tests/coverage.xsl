@@ -20,6 +20,8 @@
         or @name = 'org/eclipse/tracecompass/incubator/internal/tracex/core/analysis/TraceXAnalysis'
         or starts-with(@name, 'org/eclipse/tracecompass/incubator/internal/tracex/core/analysis/TraceXExecutionContext')
         or @name = 'org/eclipse/tracecompass/incubator/internal/tracex/core/analysis/TraceXStateProvider'
+        or starts-with(@name, 'org/eclipse/tracecompass/incubator/internal/tracex/core/analysis/TraceXKernel')
+        or @name = 'org/eclipse/tracecompass/incubator/internal/tracex/core/analysis/TraceXCpuUsageAnalysis'
         ]" />
     <xsl:text>tracex.class.count=</xsl:text>
     <xsl:value-of select="count($scope)" />
