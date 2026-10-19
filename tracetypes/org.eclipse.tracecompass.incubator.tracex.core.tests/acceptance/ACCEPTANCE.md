@@ -1,11 +1,20 @@
 # TraceX acceptance status
 
-Native Windows acceptance passed with the retained diagnostic below. Native
-macOS acceptance and human review remain open. The evidence covers clean-release
-installation, interactive Linux and Windows workflows, independent demo
-comparisons, shared desktop/server clock controls, and all platform builds.
+Native Windows acceptance passed for the original contribution, with the retained
+diagnostic below. The stock-view follow-up has separate Linux verification and
+still needs native Windows checks. Native macOS acceptance and human review remain
+open.
 
-## Verified evidence
+## Stock-view follow-up
+
+See [standard OS view verification](STOCK-VIEWS.md) and
+`stock-views-verification.json`: 77 core, four SWTBot, and 79 server tests passed;
+36 scoped classes have zero missed lines or branches. All six products assembled,
+fresh-release installation passed, and final packaged-server checks covered both
+ordinary and unsigned IRQs. Test reuse and the release-target limitation are
+recorded explicitly. Earlier demo/model comparisons remain unchanged evidence.
+
+## Original contribution evidence
 
 | Check | Result | Evidence |
 | --- | --- | --- |
@@ -78,8 +87,10 @@ diagnostics are also recorded in `windows.json`. Raw logs remain private.
 
 | Required evidence or behavior | Status and closure |
 | --- | --- |
+| Windows stock-view follow-up | Pending on the new products; use the added procedure in `WINDOWS.md`. Earlier Windows acceptance does not cover these changes. |
+| Rolling master target | Java 25 requirement conflicts with the selected Java 21 environment; release-target verification passed. |
 | macOS native smoke | Desktop/server products built; native launch/import/execution-view checks pending; owner unassigned. |
-| Human review | Request two committer reviews when the contribution is authorized. No review approval is claimed by this evidence. |
+| Human review | Two committer approvals are not recorded here. No approval of the stock-view follow-up is claimed. |
 
 Binary 32-bit input and single-core execution semantics are supported. Wider
 pointer formats, SMP, comprehensive component catalogs, configurable user-event

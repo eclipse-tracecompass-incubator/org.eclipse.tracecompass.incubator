@@ -1,0 +1,284 @@
+{
+  "verification_commit": "a7a87883ebfb11be3cb1ae26a790943cbc0d9900",
+  "target_platform": "tracecompass-incubator-12.1",
+  "java": "21",
+  "reactor_modules": 147,
+  "result": "All 147 reactor modules assembled successfully with tests skipped; passed test evidence is recorded separately below",
+  "root_test_log_sha256": "5e22f175f7990a6a1ecc488df13482f91c2edf974569b59c368622495aa0d022",
+  "final_core_test_log_sha256": "030fe3f3ec4766decabae04bdd9f8b87ac12823179e43a42794a5f7cadefbc66",
+  "resumed_test_log_sha256": "6f40ac38b20b87c80c81445ec177bfeab6e41ef77d1db8d4b6e4fc8d0f4d7eb4",
+  "assembly_log_sha256": "7dd35e033df3e10016b10f7660a2c71d6a0683ade219908261cf5a561fd86074",
+  "coverage": {
+    "classes": 36,
+    "missed_lines": 0,
+    "missed_branches": 0
+  },
+  "tests": {
+    "core": {
+      "tests": 77,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reports": [
+        {
+          "name": "org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXExecutionContextTest",
+          "sha256": "2a6d621f4866662eb130a2a5613e68bf276b73d8d394c1176ef84f2ff6cb753f"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.internal.tracex.core.analysis.TraceXKernelStateTest",
+          "sha256": "36a44a899da98f7014376b6d47cb8ab79148933ed0222057131de8e1d2dd8cf7"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.ActivatorTest",
+          "sha256": "527ceacff6fbe55a4d9a3a43ccb2a49c0982c7fb6b520761be8b1aac3b2b29b5"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.ExtensionRegistrationTest",
+          "sha256": "e5cde128bca22eaca730cec93db11028c8a457a2637ef8fa07532ba2ef69f213"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXAspectsTest",
+          "sha256": "1d590327c3b1f9136a1f2517dcde47cfdf338673509ce375146ab0250c13f492"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXClockConfigurationSourceTest",
+          "sha256": "6bb0f8c2c9126c3f065bd8ee73fed4ab8e271d2112cbe05f6eff030066f76dc5"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXClockConfigurationTest",
+          "sha256": "bb7f45b1df1d3baf179b4d61169b8ef53f0f902d13c1b37b58cbda5833b47b79"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXEventIndexTest",
+          "sha256": "99419ea1283738d7f5021d760abff3e9d48eb0762b6ca2d85a7420462fc8c6fd"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXEventMetadataTest",
+          "sha256": "9eafdbcbb43c22df623820bd8c3ec29e8315317da4f36d8945585c95c2c79498"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXExecutionAnalysisTest",
+          "sha256": "0f699ad8a55b1bd698f061ef2a93d6420c62461ad7c1bba9fd5b434f8fba483a"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXParserTest",
+          "sha256": "90d9ec6558d4414ec97df28cce1dbeb874d4e0ab1eb5e7aff3d15974cad33e11"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXRegistryTest",
+          "sha256": "cd1c7c89687927e9dd52eaa2b5c43be9dfee538a18da0d78e5935f98c095fe02"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXStockViewsTest",
+          "sha256": "f0317bb1638da4e4d951e87e01f30abe80289d8356fb3f492f744834d34425cc"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXTimeNormalizerTest",
+          "sha256": "58d778e1f205a452a5a279c73555286129687961696d6839f82ea78e1bc23d26"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.core.tests.TraceXTraceTest",
+          "sha256": "f7cca8c9f9e89a0a9b5a3854e0837a1903ccd870ab9c546e5ffeda70534c1e53"
+        }
+      ]
+    },
+    "desktop": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reports": [
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.ui.swtbot.tests.TraceXUiExtensionTest",
+          "sha256": "39cdd2405196bbeb5ba7094441b15b618e11b53514c62b1ace4a5b8a1dba69e6"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.tracex.ui.swtbot.tests.TraceXUiWorkflowTest",
+          "sha256": "ec5a050761587fa14616cc70efce1d4c5cff9c3d4411b71b844e1d49a3c49e4c"
+        }
+      ]
+    },
+    "server": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reports": [
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.ActivatorTest",
+          "sha256": "ed3afaeed517b45071ff1ebe38ea7c4d6de8211320f0b41489bef0fb433843f5"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.gen.services.TraceManagerServiceTest",
+          "sha256": "9097dfe11a293ace19c86b08a156dc7faad3a6dc68f3d778e42eb53096f1301b"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.BookmarkManagerServiceTest",
+          "sha256": "5c0b757303c4d701552fb70149c8781858712a6fae74b0064286c7338117436e"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.ConfigurationManagerServiceTest",
+          "sha256": "3c0ee3fd4f38dea03bcf03e0615f6c47a15e555d9992c23fa5a6ebdaf09119d0"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.DataProviderConfigurationServiceTest",
+          "sha256": "55a07ba84fc6e9bde7bfb0f274444d101ab87a55bf7d80ae77bfdd6d6b509584"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.DataProviderServiceTest",
+          "sha256": "a27ddc94d67d0b3d7ef3c9784464cd95dc86f762a8f386eded61484ab9145365"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.DataTreeDataProviderServiceTest",
+          "sha256": "a708f692283ec30ba3ac47797e36f107dd0f7525568189f34ea293db4a9daddc"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.ExperimentManagerServiceTest",
+          "sha256": "535976b3a796854cac70b9f2bb95101412ff395fdadf7a54825c50f9e48200b5"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.GenericXYDataProviderServiceTest",
+          "sha256": "8e1f99eef7c46423f39a4e27c9349a76439fcca1062441d3ce5253d9b9364a3d"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.HealthServiceTest",
+          "sha256": "4c1adc782430a242ad5bee1b59d4fe20951fe613bb291ef39f412aad59e6af7c"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.IdentifierServiceTest",
+          "sha256": "58ebc0dd7e6e9813dbae589f78bb05dd1d3cf6c8de510e13d3e1c4ae7e011221"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.QueryParametersUtilTest",
+          "sha256": "8f8b776933139c571ab67aabaeb59b67354bcfc1739c3b4fe6f2290542e2918f"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.TableDataProviderServiceTest",
+          "sha256": "cea003554ce02cb79df33633997c9a82f58f7da3f42e00c5fcbf86921c13958c"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.TimeGraphDataProviderServiceTest",
+          "sha256": "dba8d212f4fee216ca0c6c28ed207b57a810e3f90028690bcca09f79d196933e"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.TraceManagerServiceTest",
+          "sha256": "2202fe63b03dae853d160be3ec207e7d44bc4407e9060d97cbcba54ac56aeddc"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.services.XyDataProviderServiceTest",
+          "sha256": "17eeca8bd987544258eadbbe1fcb758920d16b50883f16c3aaf71c26fb6103df"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.utils.TraceServerConfigurationTest",
+          "sha256": "0a6a600f4fcb06f34a2fe63c91e401431e242c7e2d4bd4efc7bf7265ae4f4050"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.webapp.OutputElementStyleSerializerTest",
+          "sha256": "d1619a7003b688bd9ea84283ec3f56b13c7ae8654efb8899e680218d8f33f8ab"
+        },
+        {
+          "name": "org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests.webapp.SeriesModelSerializerTest",
+          "sha256": "9f50a58fc01cadd0844832ed8f4b862f865eccc4a9fdb6e70bbcf5efd272052e"
+        }
+      ]
+    }
+  },
+  "artifacts": [
+    {
+      "product": "desktop",
+      "file": "trace-compass-0.19.0-20261019-1801-linux.gtk.x86_64.tar.gz",
+      "bytes": 271262145,
+      "sha256": "1209250e137d52a50786eba1d193b4044e5929343c404fb9942dfea51ea83a25",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610191801.jar",
+        "org.eclipse.tracecompass.incubator.tracex.doc.user_0.19.0.202610191801.jar",
+        "org.eclipse.tracecompass.incubator.tracex.ui_0.1.0.202610191801.jar"
+      ]
+    },
+    {
+      "product": "desktop",
+      "file": "trace-compass-0.19.0-20261019-1801-macosx.cocoa.x86_64.tar.gz",
+      "bytes": 268826120,
+      "sha256": "6c5c0fbebec1c19830b636e56106d6a15826729b47c304208ad4f612b4b77cfa",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610191801.jar",
+        "org.eclipse.tracecompass.incubator.tracex.doc.user_0.19.0.202610191801.jar",
+        "org.eclipse.tracecompass.incubator.tracex.ui_0.1.0.202610191801.jar"
+      ]
+    },
+    {
+      "product": "desktop",
+      "file": "trace-compass-0.19.0-20261019-1801-win32.win32.x86_64.zip",
+      "bytes": 269746653,
+      "sha256": "a660bf13008485a6ac5bf329277833792cfc3717b0f3e147d4d3936dcd83fdb6",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610191801.jar",
+        "org.eclipse.tracecompass.incubator.tracex.doc.user_0.19.0.202610191801.jar",
+        "org.eclipse.tracecompass.incubator.tracex.ui_0.1.0.202610191801.jar"
+      ]
+    },
+    {
+      "product": "server",
+      "file": "trace-compass-server0.19.0-20261019-1801-linux.gtk.x86_64.tar.gz",
+      "bytes": 106448183,
+      "sha256": "2a7000e0345d8963eac8759751341026414ba8b756d598f2c45dc565e4aa71c7",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610191801.jar"
+      ]
+    },
+    {
+      "product": "server",
+      "file": "trace-compass-server0.19.0-20261019-1801-macosx.cocoa.x86_64.tar.gz",
+      "bytes": 103548776,
+      "sha256": "f3bc44e48a044c1150b54aaa54471055eb87819da417088c5b62f0168680a7cb",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610191801.jar"
+      ]
+    },
+    {
+      "product": "server",
+      "file": "trace-compass-server0.19.0-20261019-1801-win32.win32.x86_64.zip",
+      "bytes": 103508208,
+      "sha256": "0d21834dd65125d21e8afb97ffe9a5b3c330a5e940b572d39f89ca5027711e76",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610191801.jar"
+      ]
+    }
+  ],
+  "test_provenance": "The final 77-test core suite includes unsigned-IRQ regression coverage. The 4 desktop and 79 server tests exercised unchanged normal-range behavior before that boundary-only fix; their passing evidence is reused. Product assembly skipped tests.",
+  "live_server": {
+    "result": "All three stock outputs returned COMPLETED trees and populated states or XY series for single- and two-trace experiments",
+    "evidence": "stock-views/server/",
+    "product": "trace-compass-server0.19.0-20261019-1801-linux.gtk.x86_64.tar.gz",
+    "runtime_classes_match_final_build": true,
+    "unsigned_irqs": [
+      4294967295,
+      2147483648
+    ],
+    "unsigned_evidence": "stock-views/server/unsigned-irqs/"
+  },
+  "desktop_display": {
+    "backend": "X11",
+    "pixels": [
+      1920,
+      1080
+    ],
+    "dpi": 96,
+    "swt_autoScale": 100,
+    "inspection": "Stock-view screenshots inspected; consistent rendering. Earlier inherited Wayland display results are not used as rendering evidence."
+  },
+  "limitations": [
+    "Default rolling Trace Compass master target currently requires Java 25 while this repository selects Java 21; only the selectable 12.1 release target was verified.",
+    "Native Windows stock-view checks have not been rerun; previous Windows acceptance predates this integration.",
+    "Native macOS checks have not been run.",
+    "Critical-path and wakeup/blocking-cause analyses are unsupported."
+  ],
+  "binary_identity": "Every packaged TraceX core/UI class matches verified compiled classes; all three icon resolutions are present. The live server core classes also match.",
+  "clean_release_install": {
+    "release": "trace-compass-12.1.0-20260909-1515-linux.gtk.x86_64.tar.gz",
+    "release_sha256": "1d2f959d83cc80ec44e2ed5d673341e89dc838eabc38ad2fbc7091ce0491a53b",
+    "result": "Final feature and analysis-core dependency installed successfully into a fresh supplied release",
+    "feature_version": "0.19.0.202610191801",
+    "install_log_sha256": "c090bce9ab4707a3372a161562889b7765cc10f8d718beda7f9c35257eb453be"
+  }
+}

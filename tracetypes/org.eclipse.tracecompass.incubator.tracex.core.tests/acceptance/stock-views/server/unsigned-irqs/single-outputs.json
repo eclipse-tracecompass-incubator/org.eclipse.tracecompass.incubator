@@ -1,0 +1,54 @@
+[
+  {
+    "id": "org.eclipse.tracecompass.analysis.os.linux.core.cpuusage.CpuUsageDataProvider",
+    "name": "CPU Usage",
+    "description": "Show the CPU usage of a Linux kernel trace, returns the CPU usage per process and can be filtered by CPU core",
+    "type": "TREE_TIME_XY"
+  },
+  {
+    "id": "org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider",
+    "name": "Events Table",
+    "description": "Show the raw events in table form for a given trace",
+    "type": "TABLE"
+  },
+  {
+    "id": "org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
+    "name": "Histogram",
+    "description": "Show a histogram of number of events to time for a trace",
+    "type": "TREE_TIME_XY"
+  },
+  {
+    "id": "org.eclipse.tracecompass.incubator.inandout.core.analysis.inAndOutdataProviderFactory",
+    "name": "InAndOut Configurator",
+    "description": "Configure custom InAndOut analysis",
+    "type": "NONE",
+    "capabilities": {
+      "canCreate": true,
+      "canDelete": false
+    }
+  },
+  {
+    "id": "org.eclipse.tracecompass.internal.analysis.os.linux.core.threadstatus.ResourcesStatusDataProvider",
+    "name": "Resources Status",
+    "description": "Show the state of CPUs (SYSCALL, RUNNING, IRQ, SOFT_IRQ or IDLE) and its IRQs/SOFT_IRQs as well as its frequency.",
+    "type": "TIME_GRAPH"
+  },
+  {
+    "id": "org.eclipse.tracecompass.internal.tmf.core.statesystem.provider.StateSystemDataProvider",
+    "name": "State System Explorer",
+    "description": "Displays the states of state system attributes over time",
+    "type": "TIME_GRAPH"
+  },
+  {
+    "id": "org.eclipse.tracecompass.internal.analysis.os.linux.core.threadstatus.ThreadStatusDataProvider",
+    "name": "Thread Status",
+    "description": "Show the hierarchy of Linux threads and their status (RUNNING, SYSCALL, IRQ, IDLE)",
+    "type": "TIME_GRAPH"
+  },
+  {
+    "id": "org.eclipse.tracecompass.incubator.tracex.core.dataprovider",
+    "name": "TraceX Execution",
+    "description": "Shows TraceX thread, idle, initialization, and interrupt execution",
+    "type": "TIME_GRAPH"
+  }
+]

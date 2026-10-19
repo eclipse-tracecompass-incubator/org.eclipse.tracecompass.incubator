@@ -111,3 +111,7 @@ documented. Installed Help launch is verified with a configured external browser
 Native Windows passed with the retained Statistics cleanup diagnostic; see
 `windows.json` and `windows/RESULTS.md`. Native macOS remains pending in
 `ACCEPTANCE.md`. `WINDOWS.md` retains the Windows reproduction procedure.
+
+The stock-view follow-up has separate evidence in `STOCK-VIEWS.md` and
+`stock-views-verification.json`, including its test reuse, display setup, final
+products, and pending native platform checks.

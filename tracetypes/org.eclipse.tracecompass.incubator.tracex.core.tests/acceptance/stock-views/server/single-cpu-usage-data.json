@@ -1,0 +1,83 @@
+{
+  "model": {
+    "title": "CPU Usage",
+    "series": [
+      {
+        "seriesId": 6,
+        "seriesName": "total:fixtures-stock-single",
+        "xValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "yValues": [
+          0.0,
+          0.0,
+          100.0,
+          0.0,
+          0.0,
+          0.0,
+          100.0
+        ],
+        "style": {
+          "values": {
+            "series-type": "line"
+          }
+        },
+        "xValuesDescription": {
+          "label": "X Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        },
+        "yValuesDescription": {
+          "label": "Y Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        }
+      },
+      {
+        "seriesId": 7,
+        "seriesName": "fixtures-stock-single:1",
+        "xValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "yValues": [
+          0.0,
+          0.0,
+          100.0,
+          0.0,
+          0.0,
+          0.0,
+          100.0
+        ],
+        "style": {
+          "values": {
+            "series-type": "line"
+          }
+        },
+        "xValuesDescription": {
+          "label": "X Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        },
+        "yValuesDescription": {
+          "label": "Y Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        }
+      }
+    ]
+  },
+  "statusMessage": "Completed",
+  "status": "COMPLETED"
+}

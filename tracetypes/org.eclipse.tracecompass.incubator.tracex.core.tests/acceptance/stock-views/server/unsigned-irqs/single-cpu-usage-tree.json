@@ -1,0 +1,53 @@
+{
+  "model": {
+    "autoExpandLevel": -1,
+    "headers": [
+      {
+        "name": "Process",
+        "tooltip": "",
+        "dataType": "STRING"
+      },
+      {
+        "name": "TID",
+        "tooltip": "",
+        "dataType": "STRING"
+      },
+      {
+        "name": "%",
+        "tooltip": "",
+        "dataType": "STRING"
+      },
+      {
+        "name": "Time",
+        "tooltip": "",
+        "dataType": "STRING"
+      }
+    ],
+    "entries": [
+      {
+        "id": 30,
+        "parentId": -1,
+        "labels": [
+          "fixtures-high-stock-single",
+          "Total",
+          "33.333 %",
+          "2 ns"
+        ],
+        "hasData": true
+      },
+      {
+        "id": 31,
+        "parentId": 30,
+        "labels": [
+          "worker",
+          "1",
+          "33.333 %",
+          "2 ns"
+        ],
+        "hasData": true
+      }
+    ]
+  },
+  "statusMessage": "Completed",
+  "status": "COMPLETED"
+}
