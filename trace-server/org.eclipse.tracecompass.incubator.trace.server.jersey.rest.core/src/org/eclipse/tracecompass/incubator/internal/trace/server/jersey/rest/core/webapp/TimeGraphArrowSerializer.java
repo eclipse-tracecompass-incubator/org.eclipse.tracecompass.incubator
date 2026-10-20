@@ -46,7 +46,7 @@ public class TimeGraphArrowSerializer extends StdSerializer<@NonNull ITimeGraphA
 
     @Override
     public void serialize(@NonNull ITimeGraphArrow value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "TimeGraphArrowSerialize")) { //$NON-NLS-1$
+        try (ScopeLog _ = new ScopeLog(LOGGER, Level.FINE, "TimeGraphArrowSerialize")) { //$NON-NLS-1$
             gen.writeStartObject();
 
             gen.writeNumberField("start", value.getStartTime()); //$NON-NLS-1$

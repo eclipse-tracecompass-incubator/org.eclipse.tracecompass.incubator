@@ -277,7 +277,7 @@ public class DifferentialFlameGraphView extends TmfView {
      */
     @TmfSignalHandler
     public void traceSelected(final TmfTraceSelectedSignal signal) {
-        try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "DifferentialFlameGraphView::traceSelected")) { //$NON-NLS-1$
+        try (ScopeLog _ = new ScopeLog(LOGGER, Level.FINE, "DifferentialFlameGraphView::traceSelected")) { //$NON-NLS-1$
             ITmfTrace trace = signal.getTrace();
 
             fTrace = trace;
@@ -348,7 +348,7 @@ public class DifferentialFlameGraphView extends TmfView {
         }
 
         public void run(IProgressMonitor monitor) {
-            try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:BuildThread", "trace", fBuildTrace.getName()).setParentScope(fScope).build()) { //$NON-NLS-1$ //$NON-NLS-2$
+            try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:BuildThread", "trace", fBuildTrace.getName()).setParentScope(fScope).build()) { //$NON-NLS-1$ //$NON-NLS-2$
                 buildEntryList(fBuildTrace, fParentTrace, fParameters, Objects.requireNonNull(monitor));
                 synchronized (fBuildJobMap) {
                     fBuildJobMap.remove(fBuildTrace);
@@ -621,7 +621,7 @@ public class DifferentialFlameGraphView extends TmfView {
 
         @Override
         public final void run() {
-            try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:ZoomThread", "start", fZoomStartTime, "end", fZoomEndTime).setCategoryAndId(getViewId(), fScopeId).build()) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:ZoomThread", "start", fZoomStartTime, "end", fZoomEndTime).setCategoryAndId(getViewId(), fScopeId).build()) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                 if (fCurrentEntries.isEmpty()) {
                     // No rows to zoom on
                     return;
@@ -915,7 +915,7 @@ public class DifferentialFlameGraphView extends TmfView {
         try (FlowScopeLog parentLogger = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:RefreshRequested").setCategory(getViewId()).build()) { //$NON-NLS-1$
             final boolean isZoomThread = Thread.currentThread() instanceof ZoomThread;
             TmfUiRefreshHandler.getInstance().queueUpdate(this, () -> {
-                try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:Refresh").setParentScope(parentLogger).build()) { //$NON-NLS-1$
+                try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:Refresh").setParentScope(parentLogger).build()) { //$NON-NLS-1$
                     fDirty.incrementAndGet();
                     if (fTimeGraphViewer != null && fTimeGraphViewer.getControl().isDisposed()) {
                         return;
@@ -961,7 +961,7 @@ public class DifferentialFlameGraphView extends TmfView {
     private void redraw() {
         try (FlowScopeLog flowParent = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:RedrawRequested").setCategory(getViewId()).build()) { //$NON-NLS-1$
             Display.getDefault().asyncExec(() -> {
-                try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:Redraw").setParentScope(flowParent).build()) { //$NON-NLS-1$
+                try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "FlameGraphView:Redraw").setParentScope(flowParent).build()) { //$NON-NLS-1$
                     if (fTimeGraphViewer != null && fTimeGraphViewer.getControl().isDisposed()) {
                         return;
                     }

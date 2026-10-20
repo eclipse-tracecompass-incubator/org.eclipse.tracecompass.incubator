@@ -167,7 +167,7 @@ public class IoAccessDataProvider extends AbstractStateSystemAnalysisDataProvide
         if (monitor != null && monitor.isCanceled()) {
             return new TmfModelResponse<>(null, ITmfResponse.Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
         }
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "AbstractTimeGraphDataProvider#fetchRowModel") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "AbstractTimeGraphDataProvider#fetchRowModel") //$NON-NLS-1$
                 .setCategory(getClass().getSimpleName()).build()) {
 
             TimeGraphModel models = getRowModel(ss, fetchParameters, monitor, selectedItems);
@@ -270,7 +270,7 @@ public class IoAccessDataProvider extends AbstractStateSystemAnalysisDataProvide
         }
 
         boolean complete = ss.waitUntilBuilt(0);
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "AbstractTreeDataProvider#fetchTree") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "AbstractTreeDataProvider#fetchTree") //$NON-NLS-1$
                 .setCategory(getClass().getSimpleName()).build()) {
             TmfTreeModel<TimeGraphEntryModel> tree = getTree(ss, fetchParameters, monitor);
             if (monitor != null && monitor.isCanceled()) {
