@@ -45,7 +45,7 @@ public class TimeGraphRowModelSerializer extends StdSerializer<@NonNull TimeGrap
 
     @Override
     public void serialize(TimeGraphRowModel value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "RowModelSerialize")) { //$NON-NLS-1$
+        try (ScopeLog _ = new ScopeLog(LOGGER, Level.FINE, "RowModelSerialize")) { //$NON-NLS-1$
             gen.writeStartObject();
             gen.writeNumberField("entryId", value.getEntryID()); //$NON-NLS-1$
             gen.writeObjectField("states", value.getStates()); //$NON-NLS-1$

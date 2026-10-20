@@ -1419,7 +1419,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
         try (FlowScopeLog parentLogger = new FlowScopeLogBuilder(LOGGER, Level.FINE, "RefreshRequested").setCategory(getViewerId()).build()) { //$NON-NLS-1$
             final boolean isZoomThread = Thread.currentThread() instanceof ZoomThread;
             TmfUiRefreshHandler.getInstance().queueUpdate(this, () -> {
-                try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "MultiTimeGraphViewer:Refresh").setParentScope(parentLogger).build()) { //$NON-NLS-1$
+                try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "MultiTimeGraphViewer:Refresh").setParentScope(parentLogger).build()) { //$NON-NLS-1$
                     if (fTimeGraphViewer.getControl().isDisposed()) {
                         return;
                     }
@@ -1512,7 +1512,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
         }
         try (FlowScopeLog flowParent = new FlowScopeLogBuilder(LOGGER, Level.FINE, "RedrawRequested").setCategory(getViewerId()).build()) { //$NON-NLS-1$
             Display.getDefault().asyncExec(() -> {
-                try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "MultiTimeGraphViewer:Redraw").setParentScope(flowParent).build()) { //$NON-NLS-1$
+                try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "MultiTimeGraphViewer:Redraw").setParentScope(flowParent).build()) { //$NON-NLS-1$
                     if (fTimeGraphViewer.getControl().isDisposed()) {
                         return;
                     }
@@ -1740,7 +1740,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
         }
 
         public void run(IProgressMonitor monitor) {
-            try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "MultiTimeGraphViewer:BuildThread", "trace", fBuildTrace.getName()).setParentScope(fScope).build()) { //$NON-NLS-1$ //$NON-NLS-2$
+            try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "MultiTimeGraphViewer:BuildThread", "trace", fBuildTrace.getName()).setParentScope(fScope).build()) { //$NON-NLS-1$ //$NON-NLS-2$
                 buildEntryList(fBuildTrace, fParentTrace, Objects.requireNonNull(monitor));
                 synchronized (fBuildJobMap) {
                     fBuildJobMap.remove(fBuildTrace);
@@ -1814,7 +1814,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
 
         @Override
         public final void run() {
-            try (FlowScopeLog log = new FlowScopeLogBuilder(LOGGER, Level.FINE, "MultiTimeGraphViewer:ZoomThread", "start", fZoomStartTime, "end", fZoomEndTime).setCategoryAndId(getViewerId(), fScopeId).build()) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "MultiTimeGraphViewer:ZoomThread", "start", fZoomStartTime, "end", fZoomEndTime).setCategoryAndId(getViewerId(), fScopeId).build()) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                 doRun();
             } finally {
                 if (fDirty.decrementAndGet() < 0) {
@@ -1886,7 +1886,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
         public void doRun() {
             Sampling sampling = new Sampling(getZoomStartTime(), getZoomEndTime(), getResolution());
             boolean isFilterActive = !getRegexes().values().isEmpty();
-            try (ScopeLog log = new ScopeLog(LOGGER, Level.FINER, "ZoomThread:GettingStates")) { //$NON-NLS-1$
+            try (ScopeLog _ = new ScopeLog(LOGGER, Level.FINER, "ZoomThread:GettingStates")) { //$NON-NLS-1$
                 boolean isFilterCleared = !isFilterActive && getTimeGraphViewer().isTimeEventFilterActive();
                 getTimeGraphViewer().setTimeEventFilterApplied(isFilterActive);
 
@@ -1897,7 +1897,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
                 zoomEntries(incorrectSample, getZoomStartTime(), getZoomEndTime(), getResolution(), getMonitor());
             }
             List<ILinkEvent> computedLinks;
-            try (ScopeLog linkLog = new ScopeLog(LOGGER, Level.FINER, "ZoomThread:GettingLinks")) { //$NON-NLS-1$
+            try (ScopeLog _ = new ScopeLog(LOGGER, Level.FINER, "ZoomThread:GettingLinks")) { //$NON-NLS-1$
                 /* Refresh the arrows when zooming */
                 computedLinks = getLinkList(getZoomStartTime(), getZoomEndTime(), getResolution(), getMonitor());
                 TimeEventFilterDialog filterDialog = getTimeEventFilterDialog();
@@ -1911,7 +1911,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
             }
             List<ILinkEvent> links = computedLinks;
             /* Refresh the viewer-specific markers when zooming */
-            try (ScopeLog markerLoglog = new ScopeLog(LOGGER, Level.FINER, "ZoomThread:GettingMarkers")) { //$NON-NLS-1$
+            try (ScopeLog _ = new ScopeLog(LOGGER, Level.FINER, "ZoomThread:GettingMarkers")) { //$NON-NLS-1$
                 List<IMarkerEvent> markers = new ArrayList<>(getViewerMarkerList(getZoomStartTime(), getZoomEndTime(), getResolution(), getMonitor()));
                 /* Refresh the trace-specific markers when zooming */
                 markers.addAll(getTraceMarkerList(getZoomStartTime(), getZoomEndTime(), getResolution(), getMonitor()));
@@ -1931,7 +1931,7 @@ public abstract class AbstractTimeGraphMultiViewer extends TmfViewer implements 
 
             if (isFilterActive && Thread.currentThread() == fZoomThread) {
                 /* Do a full filter search as a second pass */
-                try (ScopeLog log = new ScopeLog(LOGGER, Level.FINER, "ZoomThread:GettingStatesFullSearch")) { //$NON-NLS-1$
+                try (ScopeLog _ = new ScopeLog(LOGGER, Level.FINER, "ZoomThread:GettingStatesFullSearch")) { //$NON-NLS-1$
                     for (TimeGraphEntry entry : fEntries) {
                         if (getMonitor().isCanceled()) {
                             return;

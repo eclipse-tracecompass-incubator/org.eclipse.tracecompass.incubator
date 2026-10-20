@@ -280,7 +280,7 @@ public abstract class GenericFtrace extends TmfTrace implements IKernelTrace {
     }
 
     private void setFileInput(RandomAccessFile newFileInput) {
-        try (RandomAccessFile fileInput = getFileInput()) {
+        try (RandomAccessFile _ = getFileInput()) {
             // do nothing
         } catch (IOException e) {
             Activator.getInstance().logError("Error disposing trace. File: " + getPath(), e); //$NON-NLS-1$

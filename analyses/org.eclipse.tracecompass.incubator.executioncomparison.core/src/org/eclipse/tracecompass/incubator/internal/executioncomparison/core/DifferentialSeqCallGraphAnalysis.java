@@ -107,7 +107,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
      * @return the differential call graph provider
      */
     public DifferentialCallGraphProvider refreshDiffCG(@Nullable IProgressMonitor monitor) {
-        try (ScopeLog sl = new ScopeLog(LOGGER, Level.CONFIG, "DifferentialSequenceCGA::refresh()")) { //$NON-NLS-1$
+        try (ScopeLog _ = new ScopeLog(LOGGER, Level.CONFIG, "DifferentialSequenceCGA::refresh()")) { //$NON-NLS-1$
             Collection<WeightedTree<ICallStackSymbol>> originalTree = new ArrayList<>();
             Collection<WeightedTree<ICallStackSymbol>> diffTree = new ArrayList<>();
             WeightedTreeSet<ICallStackSymbol, Object> callGraphA = mergeCallGraph(fStartA, fEndA, getTraceListA());
@@ -144,7 +144,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
      *
      */
     public WeightedTreeSet<ICallStackSymbol, Object> mergeCallGraph(ITmfTimestamp start, ITmfTimestamp end, List<String> traceList) {
-        try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "DifferentialSequenceCGA::MergeCallGraph")) { //$NON-NLS-1$
+        try (ScopeLog _ = new ScopeLog(LOGGER, Level.FINE, "DifferentialSequenceCGA::MergeCallGraph")) { //$NON-NLS-1$
             WeightedTreeSet<ICallStackSymbol, Object> newTreeSet = new WeightedTreeSet<>();
             String mainGroup = MERGE;
 
@@ -339,7 +339,7 @@ public class DifferentialSeqCallGraphAnalysis extends TmfAbstractAnalysisModule 
 
         }
         if (!fTraceCallGraphRegistry.isEmpty()) {
-            try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "MakeDiffCallGraph")) { //$NON-NLS-1$
+            try (ScopeLog _ = new ScopeLog(LOGGER, Level.FINE, "MakeDiffCallGraph")) { //$NON-NLS-1$
                 IProgressMonitor monitor = new NullProgressMonitor();
                 executeAnalysis(monitor);
             }

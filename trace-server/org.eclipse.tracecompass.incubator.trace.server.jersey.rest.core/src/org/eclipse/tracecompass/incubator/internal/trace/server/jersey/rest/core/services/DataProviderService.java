@@ -394,7 +394,7 @@ public class DataProviderService {
         if (errorResponse != null) {
             return errorResponse;
         }
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getXY") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getXY") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -496,7 +496,7 @@ public class DataProviderService {
         if (errorResponse != null) {
             return errorResponse;
         }
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#fetchXY") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#fetchXY") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -620,7 +620,7 @@ public class DataProviderService {
         if (errorResponse != null) {
             return errorResponse;
         }
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStates") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStates") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -687,7 +687,7 @@ public class DataProviderService {
         if (errorResponse != null) {
             return errorResponse;
         }
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getArrows") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getArrows") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -730,7 +730,7 @@ public class DataProviderService {
     })
     public Response getMarkerSets(@Parameter(description = EXP_UUID) @PathParam("expUUID") UUID expUUID) {
 
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getMarkerSets").build()) { //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getMarkerSets").build()) { //$NON-NLS-1$
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
                 return ErrorResponseUtil.newErrorResponse(Status.NOT_FOUND, NO_SUCH_TRACE);
@@ -769,7 +769,7 @@ public class DataProviderService {
         if (outputId == null) {
             return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_OUTPUTID);
         }
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getAnnotationCategories") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getAnnotationCategories") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -854,7 +854,7 @@ public class DataProviderService {
         if (errorResponse != null) {
             return errorResponse;
         }
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getAnnotations") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getAnnotations") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -948,7 +948,7 @@ public class DataProviderService {
         if (errorResponse != null) {
             return errorResponse;
         }
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTimeGraphTooltip") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTimeGraphTooltip") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -1021,7 +1021,7 @@ public class DataProviderService {
             return errorResponse;
         }
         Map<String, Object> params = queryParameters.getParameters();
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getColumns") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getColumns") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -1087,7 +1087,7 @@ public class DataProviderService {
         if (errorResponse != null) {
             return errorResponse;
         }
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getLines") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getLines") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -1123,7 +1123,7 @@ public class DataProviderService {
         if (errorMessage != null) {
             return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, errorMessage);
         }
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTree") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getTree") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -1191,7 +1191,7 @@ public class DataProviderService {
             return errorResponse;
         }
         Map<String, Object> params = queryParameters.getParameters();
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStyles") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#getStyles") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -1348,7 +1348,7 @@ public class DataProviderService {
                         @Content(examples = @ExampleObject(DP_CFG_EX), schema = @Schema(implementation = org.eclipse.tracecompass.incubator.internal.trace.server.jersey.rest.core.model.OutputConfigurationQueryParameters.class))
                 }, required = true) OutputConfigurationQueryParameters queryParameters) {
 
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#createDataProvider") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#createDataProvider") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
@@ -1427,7 +1427,7 @@ public class DataProviderService {
             return ErrorResponseUtil.newErrorResponse(Status.BAD_REQUEST, MISSING_OUTPUTID + " (derived)"); //$NON-NLS-1$
         }
 
-        try (FlowScopeLog scope = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#removeDataProvider") //$NON-NLS-1$
+        try (FlowScopeLog _ = new FlowScopeLogBuilder(LOGGER, Level.FINE, "DataProviderService#removeDataProvider") //$NON-NLS-1$
                 .setCategory(outputId).build()) {
             TmfExperiment experiment = ExperimentManagerService.getExperimentByUUID(expUUID);
             if (experiment == null) {
