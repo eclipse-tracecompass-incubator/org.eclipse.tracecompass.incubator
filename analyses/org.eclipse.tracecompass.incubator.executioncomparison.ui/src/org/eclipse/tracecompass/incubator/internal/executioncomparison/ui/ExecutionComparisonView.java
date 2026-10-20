@@ -1048,7 +1048,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
      * Updates the filtering parameters and query and builds flamegraph
      */
     public void updateSelectedRange() {
-        try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "MultiDensityView::SelectionRangeUpdated")) { //$NON-NLS-1$
+        try (ScopeLog _ = new ScopeLog(LOGGER, Level.FINE, "MultiDensityView::SelectionRangeUpdated")) { //$NON-NLS-1$
             TmfComparisonFilteringUpdatedSignal rangUpdateSignal = new TmfComparisonFilteringUpdatedSignal(this, fStartTimeA, fEndTimeA, fStartTimeB, fEndTimeB, null, null, null);
             TmfSignalManager.dispatchSignal(rangUpdateSignal);
             Display.getDefault().syncExec(() -> {
@@ -1115,7 +1115,7 @@ public class ExecutionComparisonView extends DifferentialFlameGraphView implemen
      */
     @TmfSignalHandler
     public void checkBoxUpdated(TmfCheckboxChangedSignal signal) {
-        try (ScopeLog sl = new ScopeLog(LOGGER, Level.FINE, "MultiDensityView::CheckBoxUpdated")) {//$NON-NLS-1$
+        try (ScopeLog _ = new ScopeLog(LOGGER, Level.FINE, "MultiDensityView::CheckBoxUpdated")) {//$NON-NLS-1$
             TmfComparisonFilteringUpdatedSignal rangUpdateSignal = null;
 
             if (signal.getSource() == fChartViewerA) {

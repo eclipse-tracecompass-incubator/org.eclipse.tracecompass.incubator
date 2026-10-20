@@ -9,7 +9,7 @@ Export-Package: org.eclipse.tracecompass.incubator.tsp.client.core,
  org.eclipse.tracecompass.incubator.tsp.client.core.model
 Bundle-Localization: plugin
 Bundle-SymbolicName: org.eclipse.tracecompass.incubator.tsp.client.core
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-25
 Require-Bundle: com.fasterxml.jackson.jaxrs.jackson-jaxrs-base,
  com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider,
  com.fasterxml.jackson.core.jackson-databind,
