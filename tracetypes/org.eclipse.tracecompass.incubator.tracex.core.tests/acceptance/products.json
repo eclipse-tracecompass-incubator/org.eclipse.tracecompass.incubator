@@ -1,0 +1,68 @@
+{
+  "verification_commit": "8271366bd301bf3e4a86c69b1efe830fdf8d2a3a",
+  "documentation_build_commit": "03ca59016aeee2f4913b047dffe96676934b8e86",
+  "build_result": "All six products assembled after documentation-only Help correction; successful complete test verification from the verification commit is reused.",
+  "assembly_log_sha256": "7fb643307fe0977bced38e461fbe43ea5bc88badfef2d73b5ba519d3310301ce",
+  "artifacts": [
+    {
+      "product": "desktop",
+      "file": "trace-compass-0.19.0-20261013-2127-linux.gtk.x86_64.tar.gz",
+      "bytes": 271241339,
+      "sha256": "fad7c1b9fd04165d62728146b5393007f46f9f51329b445c874446f73f386e7f",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610132127.jar",
+        "org.eclipse.tracecompass.incubator.tracex.doc.user_0.19.0.202610132127.jar",
+        "org.eclipse.tracecompass.incubator.tracex.ui_0.1.0.202610132127.jar"
+      ]
+    },
+    {
+      "product": "desktop",
+      "file": "trace-compass-0.19.0-20261013-2127-macosx.cocoa.x86_64.tar.gz",
+      "bytes": 268806799,
+      "sha256": "056da40b96333a369d91943c31be0bd2de789a4df7510443d73627ebdc1b7a90",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610132127.jar",
+        "org.eclipse.tracecompass.incubator.tracex.doc.user_0.19.0.202610132127.jar",
+        "org.eclipse.tracecompass.incubator.tracex.ui_0.1.0.202610132127.jar"
+      ]
+    },
+    {
+      "product": "desktop",
+      "file": "trace-compass-0.19.0-20261013-2127-win32.win32.x86_64.zip",
+      "bytes": 269724575,
+      "sha256": "4fe46f8b1f5fa9926d5227804b554171c189f6d10489c538304342f06b6cfc3b",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610132127.jar",
+        "org.eclipse.tracecompass.incubator.tracex.doc.user_0.19.0.202610132127.jar",
+        "org.eclipse.tracecompass.incubator.tracex.ui_0.1.0.202610132127.jar"
+      ]
+    },
+    {
+      "product": "server",
+      "file": "trace-compass-server0.19.0-20261013-2127-linux.gtk.x86_64.tar.gz",
+      "bytes": 106428473,
+      "sha256": "5fc3b91c062bb990a5eaed4cc8f6362ed811d2ad2ecbf0e0da7b0454f330ec7a",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610132127.jar"
+      ]
+    },
+    {
+      "product": "server",
+      "file": "trace-compass-server0.19.0-20261013-2127-macosx.cocoa.x86_64.tar.gz",
+      "bytes": 103529891,
+      "sha256": "d485666d6c36e3e1fafe9bf5654754957af97465310c529bcf6751f797380528",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610132127.jar"
+      ]
+    },
+    {
+      "product": "server",
+      "file": "trace-compass-server0.19.0-20261013-2127-win32.win32.x86_64.zip",
+      "bytes": 103491817,
+      "sha256": "7de987076ef9385a949b351eb631b2892ba1ab3a92772497dbc2bd4829bbd50d",
+      "tracex_bundles": [
+        "org.eclipse.tracecompass.incubator.tracex.core_0.1.0.202610132127.jar"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright (c) 2026 Eclipse Trace Compass Incubator contributors
+
+   All rights reserved. This program and the accompanying materials
+   are made available under the terms of the Eclipse Public License 2.0
+   which accompanies this distribution, and is available at
+   https://www.eclipse.org/legal/epl-2.0/
+
+   SPDX-License-Identifier: EPL-2.0
+-->
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>org.eclipse.tracecompass.incubator.doc</artifactId>
+    <groupId>org.eclipse.tracecompass.incubator</groupId>
+    <version>0.19.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>org.eclipse.tracecompass.incubator.tracex.doc.user</artifactId>
+  <packaging>eclipse-plugin</packaging>
+
+  <name>Trace Compass Incubator TraceX User Guide</name>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-documentation</id>
+            <phase>generate-sources</phase>
+            <configuration>
+              <target>
+                <property name="compile_classpath" refid="maven.compile.classpath" />
+                <ant target="build" inheritRefs="true" antfile="build.xml" />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>clean-documentation</id>
+            <phase>clean</phase>
+            <configuration>
+              <target>
+                <ant target="clean" antfile="build.xml" />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>deploy-doc</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>deploy</id>
+                <phase>install</phase>
+                  <goals>
+                    <goal>run</goal>
+                  </goals>
+                  <configuration>
+                  <target>
+                    <mkdir dir="${docDestination}/org.eclipse.tracecompass.incubator.tracex.doc.user" />
+                    <delete includeemptydirs="false">
+                      <fileset
+                        dir="${docDestination}/org.eclipse.tracecompass.incubator.tracex.doc.user">
+                        <include name="**" />
+                      </fileset>
+                    </delete>
+                    <copy includeemptydirs="false" todir="${docDestination}/org.eclipse.tracecompass.incubator.tracex.doc.user">
+                      <fileset dir="doc" includes="*.html,images/**"/>
+                    </copy>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

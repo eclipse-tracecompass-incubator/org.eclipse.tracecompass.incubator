@@ -1,0 +1,46 @@
+{
+  "method": "GET",
+  "endpoint": "/config/types",
+  "request": null,
+  "http_status": 200,
+  "response": [
+    {
+      "id": "org.eclipse.tracecompass.tmf.core.config.xmlsourcetype",
+      "name": "XML Data-driven analyses",
+      "description": "Data-driven analyses described in XML",
+      "parameterDescriptors": [
+        {
+          "keyName": "path",
+          "dataType": "STRING",
+          "description": "URI to XML analysis file",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+      "name": "TraceX clock",
+      "description": "Configure an imported TraceX trace while its trace and experiments are closed",
+      "parameterDescriptors": [
+        {
+          "keyName": "trace_uri",
+          "dataType": "STRING",
+          "description": "File path of the imported trace",
+          "required": true
+        },
+        {
+          "keyName": "timer_direction",
+          "dataType": "STRING",
+          "description": "increasing or decreasing",
+          "required": true
+        },
+        {
+          "keyName": "ticks_per_second",
+          "dataType": "STRING",
+          "description": "Positive decimal ticks per second; omit to leave physical time unknown",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

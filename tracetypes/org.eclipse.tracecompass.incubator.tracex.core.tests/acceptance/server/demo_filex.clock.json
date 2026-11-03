@@ -1,0 +1,22 @@
+{
+  "method": "POST",
+  "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs",
+  "request": {
+    "name": "demo_filex clock",
+    "parameters": {
+      "trace_uri": "TRACE_URI/demo_filex.trx",
+      "timer_direction": "increasing"
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "id": "e53802d5-c00c-38eb-9600-889068f450f2",
+    "name": "demo_filex.trx",
+    "description": "",
+    "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+    "parameters": {
+      "trace_uri": "TRACE_URI/demo_filex.trx",
+      "timer_direction": "increasing"
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "model": {
+    "autoExpandLevel": -1,
+    "headers": [
+      {
+        "name": "Exec_Name",
+        "tooltip": "The Exec name of the thread",
+        "dataType": "STRING"
+      },
+      {
+        "name": "TID",
+        "tooltip": "The ID of the thread this event belongs to",
+        "dataType": "STRING"
+      },
+      {
+        "name": "PID",
+        "tooltip": "The ID of the process this event belongs to",
+        "dataType": "STRING"
+      },
+      {
+        "name": "PTID",
+        "tooltip": "The ID of the parent thread this event belongs to",
+        "dataType": "STRING"
+      }
+    ],
+    "entries": [
+      {
+        "id": 6,
+        "parentId": -1,
+        "labels": [
+          "fixtures-high-big-execution.trx",
+          "",
+          "",
+          ""
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true
+      },
+      {
+        "id": 7,
+        "parentId": 6,
+        "labels": [
+          "worker",
+          "1",
+          "1",
+          ""
+        ],
+        "start": 0,
+        "end": 7,
+        "hasData": true,
+        "metadata": {
+          "PTID": [
+            -1
+          ],
+          "PID": [
+            1
+          ],
+          "Exec_Name": [
+            "worker"
+          ],
+          "TID": [
+            1
+          ]
+        }
+      }
+    ]
+  },
+  "statusMessage": "Completed",
+  "status": "COMPLETED"
+}

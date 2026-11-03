@@ -1,0 +1,7 @@
+{
+  "source_commit": "8271366bd301bf3e4a86c69b1efe830fdf8d2a3a",
+  "product": "trace-compass-server0.19.0-20261013-1503-linux.gtk.x86_64.tar.gz",
+  "status": "All six live workflows, known/unknown clocks, active/invalid rejection, reset, persisted decreasing direction, and tooltip boundary queries passed.",
+  "traceX_error_entries": 0,
+  "other_diagnostics": "Binary-ftrace detection logged errors while examining TraceX inputs; requested TraceX workflows completed."
+}

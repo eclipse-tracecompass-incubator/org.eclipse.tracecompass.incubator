@@ -1,0 +1,146 @@
+{
+  "model": {
+    "autoExpandLevel": 1,
+    "headers": [],
+    "entries": [
+      {
+        "id": 32,
+        "parentId": -1,
+        "labels": [
+          "fixtures-high-big-execution.trx"
+        ],
+        "start": 0,
+        "end": 6
+      },
+      {
+        "id": 33,
+        "parentId": 32,
+        "labels": [
+          "CPU 0 Threads"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true,
+        "metadata": {
+          "CPU": [
+            0
+          ]
+        }
+      },
+      {
+        "id": 34,
+        "parentId": 32,
+        "labels": [
+          "CPU 0 States"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true,
+        "metadata": {
+          "CPU": [
+            0
+          ]
+        }
+      },
+      {
+        "id": 35,
+        "parentId": 32,
+        "labels": [
+          ""
+        ],
+        "start": 0,
+        "end": 6
+      },
+      {
+        "id": 37,
+        "parentId": 34,
+        "labels": [
+          "IRQ -2147483648/2147483648"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true
+      },
+      {
+        "id": 36,
+        "parentId": 34,
+        "labels": [
+          "IRQ -1/4294967295"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true
+      },
+      {
+        "id": 38,
+        "parentId": -1,
+        "labels": [
+          "fixtures-high-little-execution.trx"
+        ],
+        "start": 0,
+        "end": 6
+      },
+      {
+        "id": 39,
+        "parentId": 38,
+        "labels": [
+          "CPU 0 Threads"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true,
+        "metadata": {
+          "CPU": [
+            0
+          ]
+        }
+      },
+      {
+        "id": 40,
+        "parentId": 38,
+        "labels": [
+          "CPU 0 States"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true,
+        "metadata": {
+          "CPU": [
+            0
+          ]
+        }
+      },
+      {
+        "id": 41,
+        "parentId": 38,
+        "labels": [
+          ""
+        ],
+        "start": 0,
+        "end": 6
+      },
+      {
+        "id": 43,
+        "parentId": 40,
+        "labels": [
+          "IRQ -2147483648/2147483648"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true
+      },
+      {
+        "id": 42,
+        "parentId": 40,
+        "labels": [
+          "IRQ -1/4294967295"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true
+      }
+    ]
+  },
+  "statusMessage": "Completed",
+  "status": "COMPLETED"
+}

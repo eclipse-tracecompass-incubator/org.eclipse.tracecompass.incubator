@@ -1,0 +1,75 @@
+{
+  "model": {
+    "autoExpandLevel": -1,
+    "headers": [
+      {
+        "name": "Process",
+        "tooltip": "",
+        "dataType": "STRING"
+      },
+      {
+        "name": "TID",
+        "tooltip": "",
+        "dataType": "STRING"
+      },
+      {
+        "name": "%",
+        "tooltip": "",
+        "dataType": "STRING"
+      },
+      {
+        "name": "Time",
+        "tooltip": "",
+        "dataType": "STRING"
+      }
+    ],
+    "entries": [
+      {
+        "id": 44,
+        "parentId": -1,
+        "labels": [
+          "fixtures-high-big-execution.trx",
+          "Total",
+          "33.333 %",
+          "2 ns"
+        ],
+        "hasData": true
+      },
+      {
+        "id": 45,
+        "parentId": 44,
+        "labels": [
+          "worker",
+          "1",
+          "33.333 %",
+          "2 ns"
+        ],
+        "hasData": true
+      },
+      {
+        "id": 46,
+        "parentId": -1,
+        "labels": [
+          "fixtures-high-little-execution.trx",
+          "Total",
+          "33.333 %",
+          "2 ns"
+        ],
+        "hasData": true
+      },
+      {
+        "id": 47,
+        "parentId": 46,
+        "labels": [
+          "worker",
+          "1",
+          "33.333 %",
+          "2 ns"
+        ],
+        "hasData": true
+      }
+    ]
+  },
+  "statusMessage": "Completed",
+  "status": "COMPLETED"
+}

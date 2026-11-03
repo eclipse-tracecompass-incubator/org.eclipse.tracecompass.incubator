@@ -1,0 +1,58 @@
+{
+  "method": "POST",
+  "endpoint": "/experiments",
+  "request": {
+    "parameters": {
+      "name": "demo_netx_udp",
+      "traces": [
+        "6e05555f-a7e9-3e70-bf97-3198f3696336"
+      ]
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "name": "demo_netx_udp",
+    "UUID": "24307b89-7b2c-3b4d-8afb-67da741bf563",
+    "nbEvents": 1,
+    "start": 0,
+    "end": 0,
+    "indexingStatus": "RUNNING",
+    "traces": [
+      {
+        "name": "demo_netx_udp.trx",
+        "path": "TRACE_URI/demo_netx_udp.trx",
+        "UUID": "6e05555f-a7e9-3e70-bf97-3198f3696336",
+        "nbEvents": 950,
+        "start": 0,
+        "end": 949000,
+        "properties": {
+          "byte_order": "LITTLE_ENDIAN",
+          "base_address": "0x00010604",
+          "timer_valid_mask": "0xFFFFFFFF",
+          "registry_capacity": "32",
+          "registry_name_size": "32",
+          "registry_entry_size": "48",
+          "registry_start_offset": "48",
+          "registry_end_offset": "1584",
+          "event_capacity": "950",
+          "event_start_offset": "1584",
+          "event_end_offset": "31984",
+          "event_current_offset": "2032",
+          "event_count": "950",
+          "event_buffer_status": "circular-full",
+          "registry_record_count": "32",
+          "registry_valid_count": "16",
+          "registry_in_use_count": "16",
+          "registry_diagnostic_count": "0",
+          "event_order": "oldest-to-newest",
+          "timer_direction": "increasing",
+          "raw_time_status": "preserved-unsigned-32-bit",
+          "ticks_per_second": "unavailable",
+          "time_unit": "ordering-ticks",
+          "physical_time": "unavailable"
+        },
+        "indexingStatus": "COMPLETED"
+      }
+    ]
+  }
+}

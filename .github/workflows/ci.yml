@@ -32,9 +32,16 @@ jobs:
         maven-version: 3.9.12
     - name: Build with Maven
       uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
+      env:
+        WAYLAND_DISPLAY: ''
+        GDK_BACKEND: x11
+        GDK_SCALE: '1'
+        GDK_DPI_SCALE: '1'
       with:
-       run: >-
-        mvn -B clean install
+        options: '-screen 0 1920x1080x24 -dpi 96'
+        run: >-
+          mvn -B clean install
+          "-Dbase.ui.test.vmargs=-Dorg.eclipse.swt.browser.DefaultType=mozilla -Dswt.autoScale=100"
     - name: Upload logs
       uses: actions/upload-artifact@v4
       if: success() || failure()
@@ -42,6 +49,7 @@ jobs:
         name: Build logs
         path: |
           */*tests/screenshots/*.jpeg
+          */*tests/screenshots/*.png
           */*tests/target/work/data/.metadata/.log
     - name: Upload test results
       uses: actions/upload-artifact@v4

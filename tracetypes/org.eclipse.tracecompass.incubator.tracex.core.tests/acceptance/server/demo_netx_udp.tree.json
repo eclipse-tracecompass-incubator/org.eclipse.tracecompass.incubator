@@ -1,0 +1,163 @@
+{
+  "method": "POST",
+  "endpoint": "/experiments/24307b89-7b2c-3b4d-8afb-67da741bf563/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+  "request": {
+    "parameters": {
+      "requested_times": [
+        0,
+        949000
+      ]
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "model": {
+      "autoExpandLevel": -1,
+      "headers": [
+        {
+          "name": "Context",
+          "tooltip": "",
+          "dataType": "STRING"
+        }
+      ],
+      "entries": [
+        {
+          "id": 38,
+          "parentId": -1,
+          "labels": [
+            "demo_netx_udp.trx"
+          ],
+          "start": 0,
+          "end": 949000
+        },
+        {
+          "id": 39,
+          "parentId": 38,
+          "labels": [
+            "Contexts"
+          ],
+          "start": 0,
+          "end": 949000
+        },
+        {
+          "id": 40,
+          "parentId": 39,
+          "labels": [
+            "Initialization"
+          ],
+          "start": 0,
+          "end": 949000
+        },
+        {
+          "id": 41,
+          "parentId": 40,
+          "labels": [
+            "Initialization"
+          ],
+          "start": 0,
+          "end": 949000,
+          "hasData": true
+        },
+        {
+          "id": 42,
+          "parentId": 39,
+          "labels": [
+            "Idle"
+          ],
+          "start": 0,
+          "end": 949000
+        },
+        {
+          "id": 43,
+          "parentId": 42,
+          "labels": [
+            "Idle"
+          ],
+          "start": 0,
+          "end": 949000,
+          "hasData": true
+        },
+        {
+          "id": 44,
+          "parentId": 39,
+          "labels": [
+            "Thread"
+          ],
+          "start": 0,
+          "end": 949000
+        },
+        {
+          "id": 45,
+          "parentId": 44,
+          "labels": [
+            "System Timer Thread [0x0000FEA4]"
+          ],
+          "start": 0,
+          "end": 949000,
+          "hasData": true
+        },
+        {
+          "id": 46,
+          "parentId": 44,
+          "labels": [
+            "thread 0 [0x0000ED64]"
+          ],
+          "start": 0,
+          "end": 949000,
+          "hasData": true
+        },
+        {
+          "id": 47,
+          "parentId": 44,
+          "labels": [
+            "thread 1 [0x0000EE10]"
+          ],
+          "start": 0,
+          "end": 949000,
+          "hasData": true
+        },
+        {
+          "id": 48,
+          "parentId": 44,
+          "labels": [
+            "NetX IP Instance 0 [0x0000F0B8]"
+          ],
+          "start": 0,
+          "end": 949000,
+          "hasData": true
+        },
+        {
+          "id": 49,
+          "parentId": 44,
+          "labels": [
+            "NetX IP Instance 1 [0x0000F7F0]"
+          ],
+          "start": 0,
+          "end": 949000,
+          "hasData": true
+        },
+        {
+          "id": 50,
+          "parentId": 38,
+          "labels": [
+            "CPU 0"
+          ],
+          "start": 0,
+          "end": 949000
+        },
+        {
+          "id": 51,
+          "parentId": 50,
+          "labels": [
+            "Execution"
+          ],
+          "start": 0,
+          "end": 949000,
+          "hasData": true
+        }
+      ]
+    },
+    "statusMessage": "Completed",
+    "status": "COMPLETED"
+  }
+}

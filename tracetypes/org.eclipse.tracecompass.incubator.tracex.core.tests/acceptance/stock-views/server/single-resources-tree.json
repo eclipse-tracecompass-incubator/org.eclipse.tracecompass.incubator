@@ -1,0 +1,78 @@
+{
+  "model": {
+    "autoExpandLevel": 1,
+    "headers": [],
+    "entries": [
+      {
+        "id": 0,
+        "parentId": -1,
+        "labels": [
+          "fixtures-big-execution.trx"
+        ],
+        "start": 0,
+        "end": 6
+      },
+      {
+        "id": 1,
+        "parentId": 0,
+        "labels": [
+          "CPU 0 Threads"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true,
+        "metadata": {
+          "CPU": [
+            0
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "parentId": 0,
+        "labels": [
+          "CPU 0 States"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true,
+        "metadata": {
+          "CPU": [
+            0
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "parentId": 0,
+        "labels": [
+          ""
+        ],
+        "start": 0,
+        "end": 6
+      },
+      {
+        "id": 4,
+        "parentId": 2,
+        "labels": [
+          "IRQ 7"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true
+      },
+      {
+        "id": 5,
+        "parentId": 2,
+        "labels": [
+          "IRQ 8"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true
+      }
+    ]
+  },
+  "statusMessage": "Completed",
+  "status": "COMPLETED"
+}

@@ -1,0 +1,977 @@
+[
+  {
+    "method": "GET",
+    "endpoint": "/config/types/org.eclipse.tracecompass.incubator.tracex.core.clock/configs/4c1af52e-5d4e-34e0-9428-7c31fcc9175f",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "id": "4c1af52e-5d4e-34e0-9428-7c31fcc9175f",
+      "name": "demo_threadx.trx",
+      "description": "",
+      "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+      "parameters": {
+        "trace_uri": "TRACE_URI/demo_threadx.trx",
+        "timer_direction": "decreasing"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments",
+    "request": {
+      "parameters": {
+        "name": "restart-threadx",
+        "traces": [
+          "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32"
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 1,
+      "start": 0,
+      "end": 0,
+      "indexingStatus": "RUNNING",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 974,
+      "start": 0,
+      "end": 156206,
+      "indexingStatus": "COMPLETED",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          156206
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {
+        "autoExpandLevel": -1,
+        "headers": [
+          {
+            "name": "Context",
+            "tooltip": "",
+            "dataType": "STRING"
+          }
+        ],
+        "entries": [
+          {
+            "id": 124,
+            "parentId": -1,
+            "labels": [
+              "demo_threadx.trx"
+            ],
+            "start": 0,
+            "end": 156206
+          },
+          {
+            "id": 125,
+            "parentId": 124,
+            "labels": [
+              "Contexts"
+            ],
+            "start": 0,
+            "end": 156206
+          },
+          {
+            "id": 126,
+            "parentId": 125,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 156206
+          },
+          {
+            "id": 127,
+            "parentId": 126,
+            "labels": [
+              "Initialization"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 128,
+            "parentId": 125,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 156206
+          },
+          {
+            "id": 129,
+            "parentId": 128,
+            "labels": [
+              "Idle"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 130,
+            "parentId": 125,
+            "labels": [
+              "Thread"
+            ],
+            "start": 0,
+            "end": 156206
+          },
+          {
+            "id": 131,
+            "parentId": 130,
+            "labels": [
+              "System Timer Thread [0x0000EEA4]"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 132,
+            "parentId": 130,
+            "labels": [
+              "thread 0 [0x00006644]"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 133,
+            "parentId": 130,
+            "labels": [
+              "thread 1 [0x000066EC]"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 134,
+            "parentId": 130,
+            "labels": [
+              "thread 2 [0x00006794]"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 135,
+            "parentId": 130,
+            "labels": [
+              "thread 3 [0x0000683C]"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 136,
+            "parentId": 130,
+            "labels": [
+              "thread 4 [0x000068E4]"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 137,
+            "parentId": 130,
+            "labels": [
+              "thread 5 [0x0000698C]"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 138,
+            "parentId": 130,
+            "labels": [
+              "thread 6 [0x00006A34]"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 139,
+            "parentId": 130,
+            "labels": [
+              "thread 7 [0x00006ADC]"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 140,
+            "parentId": 125,
+            "labels": [
+              "ISR"
+            ],
+            "start": 0,
+            "end": 156206
+          },
+          {
+            "id": 141,
+            "parentId": 140,
+            "labels": [
+              "ISR 0"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          },
+          {
+            "id": 142,
+            "parentId": 124,
+            "labels": [
+              "CPU 0"
+            ],
+            "start": 0,
+            "end": 156206
+          },
+          {
+            "id": 143,
+            "parentId": 142,
+            "labels": [
+              "Execution"
+            ],
+            "start": 0,
+            "end": 156206,
+            "hasData": true
+          }
+        ]
+      },
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "POST",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/states",
+    "request": {
+      "parameters": {
+        "requested_times": [
+          0,
+          10000,
+          100000,
+          156206
+        ],
+        "requested_items": [
+          143
+        ]
+      }
+    },
+    "http_status": 200,
+    "response": {
+      "model": {
+        "rows": [
+          {
+            "entryId": 143,
+            "states": [
+              {
+                "start": 0,
+                "end": 3194,
+                "label": "thread 2 [0x00006794]",
+                "style": {
+                  "parentKey": "thread",
+                  "values": {}
+                }
+              },
+              {
+                "start": 3605,
+                "end": 19588,
+                "label": "Idle",
+                "style": {
+                  "parentKey": "idle",
+                  "values": {}
+                }
+              },
+              {
+                "start": 90556,
+                "end": 106942,
+                "label": "Idle",
+                "style": {
+                  "parentKey": "idle",
+                  "values": {}
+                }
+              },
+              {
+                "start": 156206,
+                "end": 156207,
+                "label": "Idle",
+                "style": {
+                  "parentKey": "idle",
+                  "values": {}
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "statusMessage": "Completed",
+      "status": "COMPLETED"
+    }
+  },
+  {
+    "method": "DELETE",
+    "endpoint": "/experiments/50e63274-597f-3a7d-ab02-8fa18f864ecf",
+    "request": null,
+    "http_status": 200,
+    "response": {
+      "name": "restart-threadx",
+      "UUID": "50e63274-597f-3a7d-ab02-8fa18f864ecf",
+      "nbEvents": 974,
+      "start": 0,
+      "end": 156206,
+      "indexingStatus": "COMPLETED",
+      "traces": [
+        {
+          "name": "demo_threadx.trx",
+          "path": "TRACE_URI/demo_threadx.trx",
+          "UUID": "bfff0b4f-b7a8-3690-86a7-2fea7a3d2e32",
+          "nbEvents": 974,
+          "start": 0,
+          "end": 156206,
+          "properties": {
+            "byte_order": "LITTLE_ENDIAN",
+            "base_address": "0x00006CA4",
+            "timer_valid_mask": "0x0000FFFF",
+            "registry_capacity": "32",
+            "registry_name_size": "32",
+            "registry_entry_size": "48",
+            "registry_start_offset": "48",
+            "registry_end_offset": "1584",
+            "event_capacity": "974",
+            "event_start_offset": "1584",
+            "event_end_offset": "32752",
+            "event_current_offset": "30000",
+            "event_count": "974",
+            "event_buffer_status": "circular-full",
+            "registry_record_count": "32",
+            "registry_valid_count": "15",
+            "registry_in_use_count": "15",
+            "registry_diagnostic_count": "0",
+            "event_order": "oldest-to-newest",
+            "timer_direction": "decreasing",
+            "raw_time_status": "preserved-unsigned-32-bit",
+            "ticks_per_second": "unavailable",
+            "time_unit": "ordering-ticks",
+            "physical_time": "unavailable"
+          },
+          "indexingStatus": "COMPLETED"
+        }
+      ]
+    }
+  }
+]

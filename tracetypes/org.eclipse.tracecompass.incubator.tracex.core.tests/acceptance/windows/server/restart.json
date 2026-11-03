@@ -1,0 +1,315 @@
+{
+  "tree": {
+    "status": "COMPLETED",
+    "statusMessage": "Completed",
+    "model": {
+      "entries": [
+        {
+          "id": 0,
+          "parentId": -1,
+          "labels": [
+            "demo_threadx.trx"
+          ],
+          "start": 0,
+          "end": 156206
+        },
+        {
+          "id": 1,
+          "parentId": 0,
+          "labels": [
+            "Contexts"
+          ],
+          "start": 0,
+          "end": 156206
+        },
+        {
+          "id": 2,
+          "parentId": 1,
+          "labels": [
+            "Initialization"
+          ],
+          "start": 0,
+          "end": 156206
+        },
+        {
+          "id": 3,
+          "parentId": 2,
+          "labels": [
+            "Initialization"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 4,
+          "parentId": 1,
+          "labels": [
+            "Idle"
+          ],
+          "start": 0,
+          "end": 156206
+        },
+        {
+          "id": 5,
+          "parentId": 4,
+          "labels": [
+            "Idle"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 6,
+          "parentId": 1,
+          "labels": [
+            "Thread"
+          ],
+          "start": 0,
+          "end": 156206
+        },
+        {
+          "id": 7,
+          "parentId": 6,
+          "labels": [
+            "System Timer Thread [0x0000EEA4]"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 8,
+          "parentId": 6,
+          "labels": [
+            "thread 0 [0x00006644]"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 9,
+          "parentId": 6,
+          "labels": [
+            "thread 1 [0x000066EC]"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 10,
+          "parentId": 6,
+          "labels": [
+            "thread 2 [0x00006794]"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 11,
+          "parentId": 6,
+          "labels": [
+            "thread 3 [0x0000683C]"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 12,
+          "parentId": 6,
+          "labels": [
+            "thread 4 [0x000068E4]"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 13,
+          "parentId": 6,
+          "labels": [
+            "thread 5 [0x0000698C]"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 14,
+          "parentId": 6,
+          "labels": [
+            "thread 6 [0x00006A34]"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 15,
+          "parentId": 6,
+          "labels": [
+            "thread 7 [0x00006ADC]"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 16,
+          "parentId": 1,
+          "labels": [
+            "ISR"
+          ],
+          "start": 0,
+          "end": 156206
+        },
+        {
+          "id": 17,
+          "parentId": 16,
+          "labels": [
+            "ISR 0"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        },
+        {
+          "id": 18,
+          "parentId": 0,
+          "labels": [
+            "CPU 0"
+          ],
+          "start": 0,
+          "end": 156206
+        },
+        {
+          "id": 19,
+          "parentId": 18,
+          "labels": [
+            "Execution"
+          ],
+          "start": 0,
+          "end": 156206,
+          "hasData": true
+        }
+      ],
+      "headers": [
+        {
+          "name": "Context",
+          "tooltip": "",
+          "dataType": "STRING"
+        }
+      ],
+      "autoExpandLevel": -1
+    }
+  },
+  "clock": {
+    "id": "c7ade825-1957-3d5f-af59-3269bad65d1a",
+    "name": "demo_threadx.trx",
+    "description": "",
+    "sourceTypeId": "org.eclipse.tracecompass.incubator.tracex.core.clock",
+    "parameters": {
+      "trace_uri": "TRACE_URI/demo_threadx.trx",
+      "timer_direction": "decreasing"
+    }
+  },
+  "experiment": {
+    "name": "windows-restart",
+    "UUID": "6841aeb1-1189-385b-b6ec-e55ce36dcf55",
+    "nbEvents": 974,
+    "start": 0,
+    "end": 156206,
+    "indexingStatus": "COMPLETED",
+    "traces": [
+      {
+        "name": "demo_threadx.trx",
+        "path": "TRACE_URI/demo_threadx.trx",
+        "UUID": "46d90956-2e59-38a4-b33f-7adbbfa81c80",
+        "nbEvents": 974,
+        "start": 0,
+        "end": 156206,
+        "properties": {
+          "byte_order": "LITTLE_ENDIAN",
+          "base_address": "0x00006CA4",
+          "timer_valid_mask": "0x0000FFFF",
+          "registry_capacity": "32",
+          "registry_name_size": "32",
+          "registry_entry_size": "48",
+          "registry_start_offset": "48",
+          "registry_end_offset": "1584",
+          "event_capacity": "974",
+          "event_start_offset": "1584",
+          "event_end_offset": "32752",
+          "event_current_offset": "30000",
+          "event_count": "974",
+          "event_buffer_status": "circular-full",
+          "registry_record_count": "32",
+          "registry_valid_count": "15",
+          "registry_in_use_count": "15",
+          "registry_diagnostic_count": "0",
+          "event_order": "oldest-to-newest",
+          "timer_direction": "decreasing",
+          "raw_time_status": "preserved-unsigned-32-bit",
+          "ticks_per_second": "unavailable",
+          "time_unit": "ordering-ticks",
+          "physical_time": "unavailable"
+        },
+        "indexingStatus": "COMPLETED"
+      }
+    ]
+  },
+  "states": {
+    "status": "COMPLETED",
+    "statusMessage": "Completed",
+    "model": {
+      "rows": [
+        {
+          "entryId": 19,
+          "states": [
+            {
+              "start": 0,
+              "end": 3194,
+              "label": "thread 2 [0x00006794]",
+              "style": {
+                "parentKey": "thread",
+                "values": {}
+              }
+            },
+            {
+              "start": 3605,
+              "end": 19588,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 90556,
+              "end": 106942,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            },
+            {
+              "start": 156206,
+              "end": 156207,
+              "label": "Idle",
+              "style": {
+                "parentKey": "idle",
+                "values": {}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

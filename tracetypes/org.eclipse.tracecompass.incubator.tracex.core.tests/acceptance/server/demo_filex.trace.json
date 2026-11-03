@@ -1,0 +1,22 @@
+{
+  "method": "POST",
+  "endpoint": "/traces",
+  "request": {
+    "parameters": {
+      "name": "demo_filex.trx",
+      "uri": "TRACE_URI/demo_filex.trx",
+      "typeID": "org.eclipse.tracecompass.incubator.tracex.core.trace"
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "name": "demo_filex.trx",
+    "path": "TRACE_URI/demo_filex.trx",
+    "UUID": "368117dd-6895-30c6-8ee9-04a49b4cc749",
+    "nbEvents": 0,
+    "start": 0,
+    "end": 0,
+    "properties": {},
+    "indexingStatus": "CLOSED"
+  }
+}

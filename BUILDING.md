@@ -2,10 +2,10 @@
 
 ## Compiling manually
 
-The Maven project build requires version 3.9 or later. It can be downloaded from
+The Maven project build requires version 3.9.9 or later. It can be downloaded from
 <http://maven.apache.org> or from the package management system of your distro.
 
-It also requires Java version 17 or later.
+It also requires Java 21. The scripting tests also require Python 3 accessible as `python`.
 
 To build the project manually using Maven, simply run the following command from
 the top-level directory:
@@ -36,6 +36,21 @@ mvn clean package javadoc:aggregate
 ```
 
 The javadoc html files will be under `target/site/apidocs`.
+
+## Target platform
+
+The default target uses Trace Compass 12.1.0 with Java 21. It keeps ordinary
+builds and CI on the verified release baseline.
+
+The rolling target remains available explicitly:
+
+```bash
+mvn -Dtarget-platform=tracecompass-incubator-master clean verify
+```
+
+Trace Compass master currently requires Java 25. Selecting that target also
+requires updating the build's Java execution environment and matching runtime;
+it is not a supported Java 21 configuration.
 
 ## Generate Trace Server Protocol Client (in Java)
 

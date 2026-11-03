@@ -1,0 +1,152 @@
+{
+  "method": "POST",
+  "endpoint": "/experiments/8b34cb26-668f-3b2b-983b-7be585061fcb/outputs/timeGraph/org.eclipse.tracecompass.incubator.tracex.core.dataprovider/tree",
+  "request": {
+    "parameters": {
+      "requested_times": [
+        0,
+        6
+      ]
+    }
+  },
+  "http_status": 200,
+  "response": {
+    "model": {
+      "entries": [
+        {
+          "id": 72,
+          "parentId": -1,
+          "labels": [
+            "little-execution.trx"
+          ],
+          "start": 0,
+          "end": 6
+        },
+        {
+          "id": 73,
+          "parentId": 72,
+          "labels": [
+            "Contexts"
+          ],
+          "start": 0,
+          "end": 6
+        },
+        {
+          "id": 74,
+          "parentId": 73,
+          "labels": [
+            "Initialization"
+          ],
+          "start": 0,
+          "end": 6
+        },
+        {
+          "id": 75,
+          "parentId": 74,
+          "labels": [
+            "Initialization"
+          ],
+          "start": 0,
+          "end": 6,
+          "hasData": true
+        },
+        {
+          "id": 76,
+          "parentId": 73,
+          "labels": [
+            "Idle"
+          ],
+          "start": 0,
+          "end": 6
+        },
+        {
+          "id": 77,
+          "parentId": 76,
+          "labels": [
+            "Idle"
+          ],
+          "start": 0,
+          "end": 6,
+          "hasData": true
+        },
+        {
+          "id": 78,
+          "parentId": 73,
+          "labels": [
+            "Thread"
+          ],
+          "start": 0,
+          "end": 6
+        },
+        {
+          "id": 79,
+          "parentId": 78,
+          "labels": [
+            "worker [0x20001000]"
+          ],
+          "start": 0,
+          "end": 6,
+          "hasData": true
+        },
+        {
+          "id": 80,
+          "parentId": 73,
+          "labels": [
+            "ISR"
+          ],
+          "start": 0,
+          "end": 6
+        },
+        {
+          "id": 81,
+          "parentId": 80,
+          "labels": [
+            "ISR 7"
+          ],
+          "start": 0,
+          "end": 6,
+          "hasData": true
+        },
+        {
+          "id": 82,
+          "parentId": 80,
+          "labels": [
+            "ISR 8"
+          ],
+          "start": 0,
+          "end": 6,
+          "hasData": true
+        },
+        {
+          "id": 83,
+          "parentId": 72,
+          "labels": [
+            "CPU 0"
+          ],
+          "start": 0,
+          "end": 6
+        },
+        {
+          "id": 84,
+          "parentId": 83,
+          "labels": [
+            "Execution"
+          ],
+          "start": 0,
+          "end": 6,
+          "hasData": true
+        }
+      ],
+      "headers": [
+        {
+          "name": "Context",
+          "tooltip": "",
+          "dataType": "STRING"
+        }
+      ],
+      "autoExpandLevel": -1
+    },
+    "statusMessage": "Completed",
+    "status": "COMPLETED"
+  }
+}

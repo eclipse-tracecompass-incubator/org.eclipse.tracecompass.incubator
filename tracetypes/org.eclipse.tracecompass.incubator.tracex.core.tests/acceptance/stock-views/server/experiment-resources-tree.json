@@ -1,0 +1,146 @@
+{
+  "model": {
+    "autoExpandLevel": 1,
+    "headers": [],
+    "entries": [
+      {
+        "id": 8,
+        "parentId": -1,
+        "labels": [
+          "fixtures-big-execution.trx"
+        ],
+        "start": 0,
+        "end": 6
+      },
+      {
+        "id": 9,
+        "parentId": 8,
+        "labels": [
+          "CPU 0 Threads"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true,
+        "metadata": {
+          "CPU": [
+            0
+          ]
+        }
+      },
+      {
+        "id": 10,
+        "parentId": 8,
+        "labels": [
+          "CPU 0 States"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true,
+        "metadata": {
+          "CPU": [
+            0
+          ]
+        }
+      },
+      {
+        "id": 11,
+        "parentId": 8,
+        "labels": [
+          ""
+        ],
+        "start": 0,
+        "end": 6
+      },
+      {
+        "id": 12,
+        "parentId": 10,
+        "labels": [
+          "IRQ 7"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true
+      },
+      {
+        "id": 13,
+        "parentId": 10,
+        "labels": [
+          "IRQ 8"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true
+      },
+      {
+        "id": 14,
+        "parentId": -1,
+        "labels": [
+          "fixtures-little-execution.trx"
+        ],
+        "start": 0,
+        "end": 6
+      },
+      {
+        "id": 15,
+        "parentId": 14,
+        "labels": [
+          "CPU 0 Threads"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true,
+        "metadata": {
+          "CPU": [
+            0
+          ]
+        }
+      },
+      {
+        "id": 16,
+        "parentId": 14,
+        "labels": [
+          "CPU 0 States"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true,
+        "metadata": {
+          "CPU": [
+            0
+          ]
+        }
+      },
+      {
+        "id": 17,
+        "parentId": 14,
+        "labels": [
+          ""
+        ],
+        "start": 0,
+        "end": 6
+      },
+      {
+        "id": 18,
+        "parentId": 16,
+        "labels": [
+          "IRQ 7"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true
+      },
+      {
+        "id": 19,
+        "parentId": 16,
+        "labels": [
+          "IRQ 8"
+        ],
+        "start": 0,
+        "end": 6,
+        "hasData": true
+      }
+    ]
+  },
+  "statusMessage": "Completed",
+  "status": "COMPLETED"
+}

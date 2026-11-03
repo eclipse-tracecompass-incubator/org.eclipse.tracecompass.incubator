@@ -1,0 +1,42 @@
+{
+  "method": "GET",
+  "endpoint": "/experiments/8b34cb26-668f-3b2b-983b-7be585061fcb/outputs",
+  "request": null,
+  "http_status": 200,
+  "response": [
+    {
+      "id": "org.eclipse.tracecompass.internal.provisional.tmf.core.model.events.TmfEventTableDataProvider",
+      "name": "Events Table",
+      "description": "Show the raw events in table form for a given trace",
+      "type": "TABLE"
+    },
+    {
+      "id": "org.eclipse.tracecompass.internal.tmf.core.histogram.HistogramDataProvider",
+      "name": "Histogram",
+      "description": "Show a histogram of number of events to time for a trace",
+      "type": "TREE_TIME_XY"
+    },
+    {
+      "id": "org.eclipse.tracecompass.incubator.inandout.core.analysis.inAndOutdataProviderFactory",
+      "name": "InAndOut Configurator",
+      "description": "Configure custom InAndOut analysis",
+      "type": "NONE",
+      "capabilities": {
+        "canCreate": true,
+        "canDelete": false
+      }
+    },
+    {
+      "id": "org.eclipse.tracecompass.internal.tmf.core.statesystem.provider.StateSystemDataProvider",
+      "name": "State System Explorer",
+      "description": "Displays the states of state system attributes over time",
+      "type": "TIME_GRAPH"
+    },
+    {
+      "id": "org.eclipse.tracecompass.incubator.tracex.core.dataprovider",
+      "name": "TraceX Execution",
+      "description": "Shows TraceX thread, idle, initialization, and interrupt execution",
+      "type": "TIME_GRAPH"
+    }
+  ]
+}

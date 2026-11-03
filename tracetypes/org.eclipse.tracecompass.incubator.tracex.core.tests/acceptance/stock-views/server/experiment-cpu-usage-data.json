@@ -1,0 +1,157 @@
+{
+  "model": {
+    "title": "CPU Usage",
+    "series": [
+      {
+        "seriesId": 20,
+        "seriesName": "total:fixtures-big-execution.trx",
+        "xValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "yValues": [
+          0.0,
+          0.0,
+          100.0,
+          0.0,
+          0.0,
+          0.0,
+          100.0
+        ],
+        "style": {
+          "values": {
+            "series-type": "line"
+          }
+        },
+        "xValuesDescription": {
+          "label": "X Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        },
+        "yValuesDescription": {
+          "label": "Y Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        }
+      },
+      {
+        "seriesId": 21,
+        "seriesName": "fixtures-big-execution.trx:1",
+        "xValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "yValues": [
+          0.0,
+          0.0,
+          100.0,
+          0.0,
+          0.0,
+          0.0,
+          100.0
+        ],
+        "style": {
+          "values": {
+            "series-type": "line"
+          }
+        },
+        "xValuesDescription": {
+          "label": "X Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        },
+        "yValuesDescription": {
+          "label": "Y Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        }
+      },
+      {
+        "seriesId": 22,
+        "seriesName": "total:fixtures-little-execution.trx",
+        "xValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "yValues": [
+          0.0,
+          0.0,
+          100.0,
+          0.0,
+          0.0,
+          0.0,
+          100.0
+        ],
+        "style": {
+          "values": {
+            "series-type": "line"
+          }
+        },
+        "xValuesDescription": {
+          "label": "X Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        },
+        "yValuesDescription": {
+          "label": "Y Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        }
+      },
+      {
+        "seriesId": 23,
+        "seriesName": "fixtures-little-execution.trx:1",
+        "xValues": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "yValues": [
+          0.0,
+          0.0,
+          100.0,
+          0.0,
+          0.0,
+          0.0,
+          100.0
+        ],
+        "style": {
+          "values": {
+            "series-type": "line"
+          }
+        },
+        "xValuesDescription": {
+          "label": "X Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        },
+        "yValuesDescription": {
+          "label": "Y Axis",
+          "unit": "",
+          "dataType": "NUMBER"
+        }
+      }
+    ]
+  },
+  "statusMessage": "Completed",
+  "status": "COMPLETED"
+}

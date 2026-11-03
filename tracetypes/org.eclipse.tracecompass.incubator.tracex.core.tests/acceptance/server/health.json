@@ -1,0 +1,9 @@
+{
+  "method": "GET",
+  "endpoint": "/health",
+  "request": null,
+  "http_status": 200,
+  "response": {
+    "status": "UP"
+  }
+}
