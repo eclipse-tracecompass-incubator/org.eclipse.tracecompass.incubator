@@ -51,12 +51,30 @@ public class OtlpSortingJob extends Job {
     private static final Gson G_SON = new Gson();
 
     /**
-     * Maximum file size (in bytes) for which the whole file is parsed in one
-     * pass as a single JSON {@code ExportTraceServiceRequest}. Larger files are
-     * only read line-by-line as JSONL to avoid loading a very large document
-     * fully into memory.
+     * Maximum size, in bytes, of an OTLP JSON/JSONL file this job will attempt
+     * to read. The sorting job buffers every parsed span in memory before
+     * writing the sorted output, so an unbounded file could exhaust the heap.
+     * The limit can be overridden with the
+     * {@code org.eclipse.tracecompass.incubator.otlp.maxFileSize} system
+     * property (value in bytes). Default: 512 MiB.
      */
-    private static final long MAX_SINGLE_JSON_SIZE = 256L * 1024 * 1024;
+    private static final long MAX_FILE_SIZE_BYTES;
+    static {
+        long defaultLimit = 512L * 1024 * 1024;
+        long limit = defaultLimit;
+        String override = System.getProperty("org.eclipse.tracecompass.incubator.otlp.maxFileSize"); //$NON-NLS-1$
+        if (override != null) {
+            try {
+                long parsed = Long.parseLong(override.trim());
+                if (parsed > 0) {
+                    limit = parsed;
+                }
+            } catch (NumberFormatException e) {
+                // Ignore malformed override and keep the default limit.
+            }
+        }
+        MAX_FILE_SIZE_BYTES = limit;
+    }
 
     private final ITmfTrace fTrace;
     private final String fPath;
@@ -78,16 +96,26 @@ public class OtlpSortingJob extends Job {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
         try {
+            // Guard against reading an arbitrarily large file into memory. The
+            // job buffers every span before sorting, so cap the input size and
+            // fail fast instead of risking an OutOfMemoryError.
+            File inputFile = new File(fPath);
+            long fileSize = inputFile.length();
+            if (fileSize > MAX_FILE_SIZE_BYTES) {
+                return new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+                        "OTLP trace file is too large to sort (" + fileSize + " bytes, limit " + MAX_FILE_SIZE_BYTES //$NON-NLS-1$ //$NON-NLS-2$
+                                + " bytes). Increase the limit with the system property " //$NON-NLS-1$
+                                + "org.eclipse.tracecompass.incubator.otlp.maxFileSize if needed."); //$NON-NLS-1$
+            }
+
             List<JsonObject> allSpans = new ArrayList<>();
 
-            // For very large files, skip the whole-file single-JSON parse to
-            // avoid loading the entire document into memory, and rely on the
-            // streaming JSONL parser instead.
-            boolean singleJsonParsed = false;
-            if (new File(fPath).length() <= MAX_SINGLE_JSON_SIZE) {
-                // Try single JSON parse first
-                singleJsonParsed = tryParseSingleJson(allSpans);
-            }
+            // Try to parse the whole file as a single JSON
+            // ExportTraceServiceRequest first. This uses a streaming JsonReader
+            // over the file, so a large single-JSON request is handled the same
+            // way as a small one and is never misrouted to the JSONL parser
+            // (which would otherwise report "No spans found").
+            boolean singleJsonParsed = tryParseSingleJson(allSpans);
             if (!singleJsonParsed) {
                 // Fall back to JSONL line-by-line parsing
                 allSpans.clear();
@@ -151,7 +179,10 @@ public class OtlpSortingJob extends Job {
                 return false;
             }
             return true;
-        } catch (JsonSyntaxException | IOException e) {
+        } catch (JsonSyntaxException | IllegalStateException | ClassCastException | IOException e) {
+            // Wrong-type JSON members surface as ClassCastException (and
+            // IllegalStateException for Gson stream mismatches). Treat these
+            // like a failed single-JSON parse so the JSONL fallback runs.
             return false;
         }
     }
@@ -167,18 +198,24 @@ public class OtlpSortingJob extends Job {
                 if (line.isEmpty()) {
                     continue;
                 }
+                // Remember how many spans were accumulated before this line so
+                // a malformed line can be rolled back without discarding spans
+                // from previously parsed valid lines.
+                int spansBeforeLine = allSpans.size();
                 try {
                     JsonObject root = G_SON.fromJson(line, JsonObject.class);
-                    if (root == null) {
-                        continue;
-                    }
                     JsonArray resourceSpans = root.getAsJsonArray("resourceSpans"); //$NON-NLS-1$
                     if (resourceSpans == null) {
                         continue;
                     }
                     extractSpansFromResourceSpans(resourceSpans, allSpans);
-                } catch (JsonSyntaxException | IllegalStateException e) {
-                    // Skip malformed lines
+                } catch (JsonSyntaxException | IllegalStateException | ClassCastException e) {
+                    // Skip malformed lines, including wrong-type JSON members
+                    // (ClassCastException). Discard any spans partially
+                    // accumulated from this line before moving on.
+                    if (allSpans.size() > spansBeforeLine) {
+                        allSpans.subList(spansBeforeLine, allSpans.size()).clear();
+                    }
                 }
             }
         }
