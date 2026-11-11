@@ -54,6 +54,14 @@ public class OtlpField {
     private static final Gson G_SON = new Gson();
 
     /**
+     * Fallback OpenTelemetry service name used when a span carries no
+     * {@code service.name} resource attribute. Mirrors the OpenTelemetry
+     * specification default so downstream consumers never see an empty
+     * process name.
+     */
+    private static final String UNKNOWN_SERVICE = "unknown_service"; //$NON-NLS-1$
+
+    /**
      * Holds the common parsed header fields shared by parseJson and
      * parseOtlpSpan.
      */
@@ -141,7 +149,8 @@ public class OtlpField {
     public static @Nullable OpenTracingField parseJson(String jsonString) {
         JsonObject root = G_SON.fromJson(jsonString, JsonObject.class);
         SpanHeader header = parseHeader(root);
-        if (header == null || root == null) {
+        if (header == null) {
+            // parseHeader returns null when root is null or incomplete.
             return null;
         }
 
@@ -149,11 +158,17 @@ public class OtlpField {
         String jaegerJson = toJaegerJson(root, header.name, header.traceId, header.spanId,
                 header.startTimeNanos, header.durationNanos, header.parentSpanId, header.serviceName);
 
-        // Build a process field for OpenTracingField
+        // Build a process field for OpenTracingField. Fall back to a
+        // non-empty service name so the OpenTracing process attribute does not
+        // end in "/", which would make SpanLifeDataProvider mistake the span
+        // name for the log key and the span ID for the error flag.
         JsonObject processObj = new JsonObject();
-        processObj.addProperty("serviceName", header.serviceName); //$NON-NLS-1$
+        processObj.addProperty("serviceName", header.serviceName.isEmpty() ? UNKNOWN_SERVICE : header.serviceName); //$NON-NLS-1$
         String processField = G_SON.toJson(processObj);
-        return OpenTracingField.parseJson(jaegerJson, processField);
+        // OTLP timestamps are nanoseconds; tell OpenTracingField not to apply
+        // the Jaeger microsecond conversion so sub-microsecond precision is
+        // preserved.
+        return OpenTracingField.parseJson(jaegerJson, processField, true);
     }
 
     /**
@@ -167,7 +182,8 @@ public class OtlpField {
     public static @Nullable OtlpSpan parseOtlpSpan(String jsonString) {
         JsonObject root = G_SON.fromJson(jsonString, JsonObject.class);
         SpanHeader header = parseHeader(root);
-        if (header == null || root == null) {
+        if (header == null) {
+            // parseHeader returns null when root is null or incomplete.
             return null;
         }
 
@@ -235,9 +251,13 @@ public class OtlpField {
         jaeger.addProperty(IOpenTracingConstants.OPERATION_NAME, name);
         jaeger.addProperty(IOpenTracingConstants.TRACE_ID, traceId);
         jaeger.addProperty(IOpenTracingConstants.SPAN_ID, spanId);
-        // Jaeger uses microseconds
-        jaeger.addProperty(IOpenTracingConstants.START_TIME, Objects.requireNonNull(startTimeNanos / 1000));
-        jaeger.addProperty(IOpenTracingConstants.DURATION, Objects.requireNonNull(durationNanos / 1000));
+        // OTLP timestamps are nanoseconds. Keep full nanosecond precision and
+        // let OpenTracingField consume them as nanoseconds (see the
+        // nanosecond-aware parseJson overload), instead of truncating to
+        // Jaeger microseconds, which would collapse sub-microsecond spans to
+        // zero length and merge distinct sub-microsecond events.
+        jaeger.addProperty(IOpenTracingConstants.START_TIME, Objects.requireNonNull(Long.valueOf(startTimeNanos)));
+        jaeger.addProperty(IOpenTracingConstants.DURATION, Objects.requireNonNull(Long.valueOf(durationNanos)));
 
         // References
         if (parentSpanId != null && !parentSpanId.isEmpty()) {
@@ -308,7 +328,9 @@ public class OtlpField {
                 JsonObject eventObj = events.get(i).getAsJsonObject();
                 JsonObject log = new JsonObject();
 
-                // Convert timeUnixNano to microseconds for Jaeger
+                // Keep the event timestamp in nanoseconds so sub-microsecond
+                // events are not merged. OpenTracingField consumes it as
+                // nanoseconds via the nanosecond-aware parseJson overload.
                 long timeNano = 0;
                 JsonElement timeEl = eventObj.get("timeUnixNano"); //$NON-NLS-1$
                 if (timeEl != null && !timeEl.isJsonNull()) {
@@ -318,7 +340,7 @@ public class OtlpField {
                         timeNano = 0;
                     }
                 }
-                log.addProperty(IOpenTracingConstants.TIMESTAMP, Objects.requireNonNull(timeNano / 1000));
+                log.addProperty(IOpenTracingConstants.TIMESTAMP, Objects.requireNonNull(Long.valueOf(timeNano)));
 
                 // Build fields array: first field is always "event" -> name
                 JsonArray fields = new JsonArray();
