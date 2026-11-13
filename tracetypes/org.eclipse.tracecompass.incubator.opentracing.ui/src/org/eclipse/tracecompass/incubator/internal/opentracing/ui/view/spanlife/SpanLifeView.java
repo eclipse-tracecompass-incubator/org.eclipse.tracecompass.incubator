@@ -22,7 +22,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGBA;
-import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeAnalysis;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeDataProvider;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel;
 import org.eclipse.tracecompass.incubator.internal.opentracing.core.analysis.spanlife.SpanLifeEntryModel.LogEvent;
@@ -71,7 +70,7 @@ public class SpanLifeView extends BaseDataProviderTimeGraphView {
      * Constructor
      */
     public SpanLifeView() {
-        this(ID, new SpanLifePresentationProvider(), SpanLifeAnalysis.ID + SpanLifeDataProvider.SUFFIX);
+        this(ID, new SpanLifePresentationProvider(), SpanLifeDataProvider.ID);
         setTreeLabelProvider(new SpanTreeLabelProvider());
     }
 

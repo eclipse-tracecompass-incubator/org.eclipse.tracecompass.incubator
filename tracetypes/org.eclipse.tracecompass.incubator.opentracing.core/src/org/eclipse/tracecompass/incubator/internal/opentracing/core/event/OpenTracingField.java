@@ -61,7 +61,8 @@ public class OpenTracingField {
     }
 
     /**
-     * Parse a JSON string
+     * Parse a JSON string whose time fields are expressed in microseconds
+     * (the Jaeger convention).
      *
      * @param fieldsString
      *            the string
@@ -70,6 +71,25 @@ public class OpenTracingField {
      * @return an event field
      */
     public static @Nullable OpenTracingField parseJson(String fieldsString, @Nullable String processField) {
+        return parseJson(fieldsString, processField, false);
+    }
+
+    /**
+     * Parse a JSON string.
+     *
+     * @param fieldsString
+     *            the string
+     * @param processField
+     *            the process name and tags
+     * @param timestampsInNanos
+     *            if {@code true}, the {@code startTime}, {@code duration} and
+     *            log {@code timestamp} fields are already expressed in
+     *            nanoseconds and are used as-is, preserving sub-microsecond
+     *            precision. If {@code false}, they are interpreted as Jaeger
+     *            microseconds and converted to nanoseconds.
+     * @return an event field
+     */
+    public static @Nullable OpenTracingField parseJson(String fieldsString, @Nullable String processField, boolean timestampsInNanos) {
         @Nullable
         JsonObject root = G_SON.fromJson(fieldsString, JsonObject.class);
 
@@ -81,11 +101,11 @@ public class OpenTracingField {
         String spanId = optString(root, IOpenTracingConstants.SPAN_ID);
         Integer flags = optInt(root, IOpenTracingConstants.FLAGS);
         Long startTime = optLong(root, IOpenTracingConstants.START_TIME);
-        if (Double.isFinite(startTime)) {
+        if (!timestampsInNanos && Double.isFinite(startTime)) {
             startTime = TmfTimestamp.fromMicros(startTime).toNanos();
         }
         Long duration = optLong(root, IOpenTracingConstants.DURATION);
-        if (Double.isFinite(duration)) {
+        if (!timestampsInNanos && Double.isFinite(duration)) {
             duration = TmfTimestamp.fromMicros(duration).toNanos();
         }
 
@@ -123,7 +143,7 @@ public class OpenTracingField {
             Map<Long, Map<String, String>> timestampList = new HashMap();
             for (int i = 0; i < logs.size(); i++) {
                 Long timestamp = optLong(logs.get(i).getAsJsonObject(), IOpenTracingConstants.TIMESTAMP);
-                if (Double.isFinite(timestamp)) {
+                if (!timestampsInNanos && Double.isFinite(timestamp)) {
                     timestamp = TmfTimestamp.fromMicros(timestamp).toNanos();
                 }
                 JsonArray fields = Objects.requireNonNull(logs.get(i).getAsJsonObject().get(IOpenTracingConstants.FIELDS).getAsJsonArray());
