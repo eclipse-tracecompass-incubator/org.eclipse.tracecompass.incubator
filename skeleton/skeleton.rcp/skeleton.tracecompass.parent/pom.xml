@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * Copyright (c) 2022, 2026 Contributors to the Eclipse Foundation
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   See git history
+ *******************************************************************************
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -25,14 +39,14 @@
   </licenses>
 
   <properties>
-<required-maven-version>3.6.3</required-maven-version>
+<required-maven-version>3.9.9</required-maven-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <tycho-version>2.7.3</tycho-version>
-    <tycho-extras-version>2.7.3</tycho-extras-version>
+    <tycho-version>5.0.2</tycho-version>
+    <tycho-extras-version>5.0.2</tycho-extras-version>
     <target-platform>skeleton.tracecompass</target-platform>
-    <jdk.version>11</jdk.version>
-    <jdk.release>11</jdk.release>
+    <jdk.version>21</jdk.version>
+    <jdk.release>21</jdk.release>
     <sonar-version>3.9.0.2155</sonar-version>
     <jacoco-version>0.8.7</jacoco-version>
     <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
