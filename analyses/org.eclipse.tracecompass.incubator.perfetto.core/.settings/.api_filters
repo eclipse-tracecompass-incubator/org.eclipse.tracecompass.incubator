@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.tracecompass.incubator.perfetto.core" version="2">
+    <resource path="src/org/eclipse/tracecompass/internal/perfetto/core/event/PerfettoEvent.java" type="org.eclipse.tracecompass.incubator.internal.perfetto.core.event.PerfettoEvent">
+        <filter id="643842064">
+            <message_arguments>
+                <message_argument value="Perfetto"/>
+                <message_argument value="PerfettoEvent"/>
+                <message_argument value="getTrace()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <category
+            id="org.eclipse.linuxtools.perfetto.core.category"
+            name="Protobuf">
+      </category>
+      <type
+            category="org.eclipse.linuxtools.perfetto.core.category"
+            event_type="org.eclipse.tracecompass.incubator.internal.perfetto.core.event.PerfettoEvent"
+            id="org.eclipse.linuxtools.perfetto.ui.type.perfetto"
+            isDirectory="false"
+            name="Perfetto Trace"
+            trace_type="org.eclipse.tracecompass.incubator.internal.perfetto.core.trace.Perfetto">
+      </type>
+   </extension>
+</plugin>
